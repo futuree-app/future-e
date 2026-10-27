@@ -121,13 +121,12 @@ test("C4. priorité « sans voiture » : le souhait est entendu, les raisons tra
 
 test("C5. le compromis « voiture » se dit en pratique domicile-travail comparée, jamais en nécessité", async () => {
   const m = await moteur();
-  // Un projet littoral et naturel, où la voiture n'est qu'une priorité secondaire : le compromis peut la nommer.
+  // FUT-151 (revue) : l'ancien cas de référence (projet littoral et naturel) nommait la voiture pour Andernos-les-Bains,
+  // dont la dépendance à la voiture est FAVORABLE (76/100) : c'était un faux compromis, désormais retiré. Le cas de
+  // référence est une recherche où la voiture est un vrai retrait (Bouches-du-Rhône, feux : Gréasque).
   const o = await m.matchProjects({
-    reformulation: "x", hardConstraints: {},
-    preferences: [
-      { key: "faible_dependance_auto", weight: 2 }, { key: "nature", weight: 3 },
-      { key: "cadre_calme", weight: 3 }, { key: "proximite_mer", weight: 3 },
-    ],
+    reformulation: "x", hardConstraints: { departements: ["13"] },
+    preferences: [{ key: "faible_risque_feu", weight: 3 }],
   });
   const textes: string[] = [...o.results, ...o.pistes].flatMap((r: { compromis?: string | null; tradeoff?: string | null }) =>
     [r.compromis, r.tradeoff].filter((t): t is string => typeof t === "string"));

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ComparaisonComplete, MatchResult } from "@/lib/comparateur-vie";
 import { ComparaisonCompleteView } from "@/app/(public)/ou-vivre/ComparaisonCompleteView";
+import { phraseSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
 
 type Props = {
   data: ComparaisonComplete;
@@ -25,6 +26,10 @@ function forces(r: MatchResult): string[] {
   if (confirmation) out.push(confirmation);
   if (decouverte && decouverte !== confirmation) out.push(decouverte);
   return out.slice(0, 2);
+}
+
+function portee(r: MatchResult) {
+  return porteeSansFavorable({ marque: r.sansPrioriteFavorable, etat: r.couverture?.etat ?? null, nonMesurees: r.couverture?.nonMesurees });
 }
 
 export function PackUnlockedView({ data, trio, pistes, projetLabel, avertissements = [] }: Props) {
@@ -96,6 +101,10 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel, avertissemen
                   {r.nom}
                 </h4>
                 <p className="mt-2 text-[14px] leading-[1.6] text-accent italic">{r.identite}</p>
+                {/* FUT-151 : aucune priorité favorable, dite avec sa portée (une priorité non mesurée n'est pas un défaut). */}
+                {portee(r) && (
+                  <p className="mt-3 text-[12px] leading-[1.5] text-muted">{phraseSansFavorable(portee(r)!)}</p>
+                )}
                 <ul className="mt-4 space-y-2">
                   {forces(r).map((f) => (
                     <li key={f} className="text-[length:var(--text-dense)] leading-[1.55] text-label flex gap-2">

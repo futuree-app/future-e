@@ -1,0 +1,1140 @@
+[
+ {
+  "id": "feu-13",
+  "width": 1440,
+  "n": 3,
+  "entete": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, météo plus souvent propice aux feux.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Châteauneuf-le-Rouge · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · Population en croissance · Compromis : En échange, météo plus souvent propice aux feux. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Fuveau",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Bien reliée par le train"
+    ],
+    "compromis": "Compromis : En échange, peu de lieux de vie et d'animation locale.",
+    "texte": "Pour s'installer dans une commune qui gagne des habitants. · Fuveau · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · Bien reliée par le train · Compromis : En échange, peu de lieux de vie et d'animation locale. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Gréasque",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, zone sous-dotée en médecins.",
+    "texte": "Pour un quotidien au calme, loin de l'agitation. · Gréasque · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, zone sous-dotée en médecins. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Châteauneuf-le-Rouge plutôt que Fuveau ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Fuveau",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Gréasque",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Fuveau",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Gréasque",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": true,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "feu-13",
+  "width": 390,
+  "n": 3,
+  "entete": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, météo plus souvent propice aux feux.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Châteauneuf-le-Rouge · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · Population en croissance · Compromis : En échange, météo plus souvent propice aux feux. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Fuveau",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Bien reliée par le train"
+    ],
+    "compromis": "Compromis : En échange, peu de lieux de vie et d'animation locale.",
+    "texte": "Pour s'installer dans une commune qui gagne des habitants. · Fuveau · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · Bien reliée par le train · Compromis : En échange, peu de lieux de vie et d'animation locale. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Gréasque",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, zone sous-dotée en médecins.",
+    "texte": "Pour un quotidien au calme, loin de l'agitation. · Gréasque · Provence-Alpes-Côte d'Azur · Bouches-du-Rhône · AUCUNE PRIORITÉ FAVORABLE ICI · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, zone sous-dotée en médecins. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Châteauneuf-le-Rouge plutôt que Fuveau ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Fuveau",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Gréasque",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Fuveau",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Gréasque",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": true,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "chaleur-84",
+  "width": 1440,
+  "n": 3,
+  "entete": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+  "cartes": [
+   {
+    "nom": "Bédoin",
+    "palier": "CORRESPONDANCE PARTIELLE",
+    "forces": [
+     "Étés plus frais",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Malaucène.",
+    "texte": "Pour vivre en montagne, dans un climat plus supportable l'été. · Bédoin · Provence-Alpes-Côte d'Azur · Vaucluse · CORRESPONDANCE PARTIELLE · + · Étés plus frais · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, la vie locale est plus discrète qu'à Malaucène. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Malaucène",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Bédoin.",
+    "texte": "Pour une petite ville qui reste vraiment vivante. · Malaucène · Provence-Alpes-Côte d'Azur · Vaucluse · AUCUNE PRIORITÉ FAVORABLE ICI · + · Vie locale animée (commerces, marchés, associations) · Compromis : En échange, la chaleur estivale est plus marquée qu'à Bédoin. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Pertuis",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, la sécheresse est plus présente qu'à Bédoin.",
+    "texte": "Pour s'installer dans une commune qui gagne des habitants. · Pertuis · Provence-Alpes-Côte d'Azur · Vaucluse · AUCUNE PRIORITÉ FAVORABLE ICI · + · Population en croissance · Compromis : En échange, la sécheresse est plus présente qu'à Bédoin. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Bédoin plutôt que Malaucène ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Bédoin",
+    "reasons": [
+     "étés plus frais"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Malaucène",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Pertuis",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bédoin",
+    "raisons": [
+     "étés plus frais"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Malaucène",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Pertuis",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "chaleur-84",
+  "width": 390,
+  "n": 3,
+  "entete": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+  "cartes": [
+   {
+    "nom": "Bédoin",
+    "palier": "CORRESPONDANCE PARTIELLE",
+    "forces": [
+     "Étés plus frais",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Malaucène.",
+    "texte": "Pour vivre en montagne, dans un climat plus supportable l'été. · Bédoin · Provence-Alpes-Côte d'Azur · Vaucluse · CORRESPONDANCE PARTIELLE · + · Étés plus frais · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, la vie locale est plus discrète qu'à Malaucène. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Malaucène",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Bédoin.",
+    "texte": "Pour une petite ville qui reste vraiment vivante. · Malaucène · Provence-Alpes-Côte d'Azur · Vaucluse · AUCUNE PRIORITÉ FAVORABLE ICI · + · Vie locale animée (commerces, marchés, associations) · Compromis : En échange, la chaleur estivale est plus marquée qu'à Bédoin. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Pertuis",
+    "palier": "AUCUNE PRIORITÉ FAVORABLE ICI",
+    "forces": [
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, la sécheresse est plus présente qu'à Bédoin.",
+    "texte": "Pour s'installer dans une commune qui gagne des habitants. · Pertuis · Provence-Alpes-Côte d'Azur · Vaucluse · AUCUNE PRIORITÉ FAVORABLE ICI · + · Population en croissance · Compromis : En échange, la sécheresse est plus présente qu'à Bédoin. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Bédoin plutôt que Malaucène ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Bédoin",
+    "reasons": [
+     "étés plus frais"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Malaucène",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Pertuis",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bédoin",
+    "raisons": [
+     "étés plus frais"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Malaucène",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   },
+   {
+    "nom": "Pertuis",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "feu-29-56",
+  "width": 1440,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Bohars",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "Forte présence étudiante dans l'agglomération de Brest"
+    ],
+    "compromis": "Compromis : En échange, la commune concentre moins de services qu'à Brest.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Bohars · Bretagne · Finistère · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · Forte présence étudiante dans l'agglomération de Brest · Compromis : En échange, la commune concentre moins de services qu'à Brest. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Plouay",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Brest.",
+    "texte": "Pour chercher davantage de fraîcheur et un rythme plus posé. · Plouay · Bretagne · Morbihan · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, on y va plus souvent travailler en voiture qu'à Brest. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Brest",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "Rivage marin à 1,4 km"
+    ],
+    "compromis": "Compromis : En échange, l'air de fond est un peu moins pur qu'à Plouay.",
+    "texte": "Pour la vie au bord de l'eau avec les services d'une vraie ville. · Brest · Bretagne · Finistère · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · Rivage marin à 1,4 km · Compromis : En échange, l'air de fond est un peu moins pur qu'à Plouay. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Bohars plutôt que Plouay ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Bohars",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Plouay",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Brest",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bohars",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Plouay",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Brest",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "feu-29-56",
+  "width": 390,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Bohars",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "Forte présence étudiante dans l'agglomération de Brest"
+    ],
+    "compromis": "Compromis : En échange, la commune concentre moins de services qu'à Brest.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Bohars · Bretagne · Finistère · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · Forte présence étudiante dans l'agglomération de Brest · Compromis : En échange, la commune concentre moins de services qu'à Brest. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Plouay",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Brest.",
+    "texte": "Pour chercher davantage de fraîcheur et un rythme plus posé. · Plouay · Bretagne · Morbihan · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, on y va plus souvent travailler en voiture qu'à Brest. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Brest",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Météo moins propice aux feux",
+     "Rivage marin à 1,4 km"
+    ],
+    "compromis": "Compromis : En échange, l'air de fond est un peu moins pur qu'à Plouay.",
+    "texte": "Pour la vie au bord de l'eau avec les services d'une vraie ville. · Brest · Bretagne · Finistère · FORTE CORRESPONDANCE · + · Météo moins propice aux feux · + · Rivage marin à 1,4 km · Compromis : En échange, l'air de fond est un peu moins pur qu'à Plouay. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Bohars plutôt que Plouay ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Bohars",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Plouay",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Brest",
+    "reasons": [
+     "météo moins propice aux feux"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bohars",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Plouay",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Brest",
+    "raisons": [
+     "météo moins propice aux feux"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "aytre-17",
+  "width": 1440,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "La Rochelle",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Rivage marin à 1 km"
+    ],
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Aytré.",
+    "texte": "Pour la vie au bord de l'eau avec les services d'une vraie ville. · La Rochelle · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Rivage marin à 1 km · Compromis : En échange, les sites industriels sont plus présents qu'à Aytré. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Aytré",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, peu de lieux de vie et d'animation locale.",
+    "texte": "Pour un quotidien tourné vers la mer, à un rythme plus posé. · Aytré · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Population en croissance · Compromis : En échange, peu de lieux de vie et d'animation locale. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Lagord",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Hivers parmi les plus doux"
+    ],
+    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Lagord · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Hivers parmi les plus doux · Compromis : En échange, environnement assez maillé d'infrastructures bruyantes. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi La Rochelle plutôt que Aytré ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "La Rochelle",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Aytré",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Lagord",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "La Rochelle",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Aytré",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Lagord",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "aytre-17",
+  "width": 390,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "La Rochelle",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Rivage marin à 1 km"
+    ],
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Aytré.",
+    "texte": "Pour la vie au bord de l'eau avec les services d'une vraie ville. · La Rochelle · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Rivage marin à 1 km · Compromis : En échange, les sites industriels sont plus présents qu'à Aytré. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Aytré",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Population en croissance"
+    ],
+    "compromis": "Compromis : En échange, peu de lieux de vie et d'animation locale.",
+    "texte": "Pour un quotidien tourné vers la mer, à un rythme plus posé. · Aytré · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Population en croissance · Compromis : En échange, peu de lieux de vie et d'animation locale. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Lagord",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Bien reliée par le train",
+     "Hivers parmi les plus doux"
+    ],
+    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Lagord · Nouvelle-Aquitaine · Charente-Maritime · FORTE CORRESPONDANCE · + · Bien reliée par le train · + · Hivers parmi les plus doux · Compromis : En échange, environnement assez maillé d'infrastructures bruyantes. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi La Rochelle plutôt que Aytré ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "La Rochelle",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Aytré",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Lagord",
+    "reasons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "La Rochelle",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Aytré",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Lagord",
+    "raisons": [
+     "bien reliée par le train",
+     "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
+     "commune qui concentre commerces et services"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "bagneres-fr",
+  "width": 1440,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Lutzelhouse",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Espelette.",
+    "texte": "Pour vivre en montagne, dans un climat plus supportable l'été. · Lutzelhouse · Grand Est · Bas-Rhin · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, la vie locale est plus discrète qu'à Espelette. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Espelette",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "Hivers parmi les plus doux"
+    ],
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Espelette · Nouvelle-Aquitaine · Pyrénées-Atlantiques · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · Hivers parmi les plus doux · Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "Étés plus frais"
+    ],
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse.",
+    "texte": "Pour vivre en montagne dans une commune qui reste animée. · Bagnères-de-Bigorre · Occitanie · Hautes-Pyrénées · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · Étés plus frais · Compromis : En échange, sols exposés à la sécheresse. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Lutzelhouse plutôt que Espelette ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Lutzelhouse",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Espelette",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Lutzelhouse",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Espelette",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "bagneres-fr",
+  "width": 390,
+  "n": 3,
+  "entete": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Lutzelhouse",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "À l'écart des grandes infrastructures bruyantes"
+    ],
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Espelette.",
+    "texte": "Pour vivre en montagne, dans un climat plus supportable l'été. · Lutzelhouse · Grand Est · Bas-Rhin · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · À l'écart des grandes infrastructures bruyantes · Compromis : En échange, la vie locale est plus discrète qu'à Espelette. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Espelette",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "Hivers parmi les plus doux"
+    ],
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Espelette · Nouvelle-Aquitaine · Pyrénées-Atlantiques · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · Hivers parmi les plus doux · Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre. · EXPLORER LE RAPPORT · 14 € · →"
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "palier": "FORTE CORRESPONDANCE",
+    "forces": [
+     "Air de fond plus pur",
+     "Étés plus frais"
+    ],
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse.",
+    "texte": "Pour vivre en montagne dans une commune qui reste animée. · Bagnères-de-Bigorre · Occitanie · Hautes-Pyrénées · FORTE CORRESPONDANCE · + · Air de fond plus pur · + · Étés plus frais · Compromis : En échange, sols exposés à la sécheresse. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Pourquoi Lutzelhouse plutôt que Espelette ?",
+   "Quels risques climatiques les séparent ?",
+   "Qu'est-ce qui a vraiment pesé ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Lutzelhouse",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Espelette",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "reasons": [
+     "air de fond plus pur"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": []
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Lutzelhouse",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Espelette",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "raisons": [
+     "air de fond plus pur"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "paris-calme-chaleur",
+  "width": 1440,
+  "n": 1,
+  "entete": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "PRIORITÉS EN PARTIE MESURÉES",
+    "forces": [
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": "Compromis : En échange, chaleur en hausse.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Paris · Île-de-France · Paris · PRIORITÉS EN PARTIE MESURÉES · Non mesuré ici : un cadre calme. · + · Vie locale animée (commerces, marchés, associations) · Compromis : En échange, chaleur en hausse. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Que montrent les données disponibles sur Paris ?",
+   "Quels risques climatiques pèsent sur Paris ?",
+   "Quelles priorités préciser pour affiner la recherche ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Paris",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": [
+     "un cadre calme"
+    ]
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "paris-calme-chaleur",
+  "width": 390,
+  "n": 1,
+  "entete": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "PRIORITÉS EN PARTIE MESURÉES",
+    "forces": [
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": "Compromis : En échange, chaleur en hausse.",
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Paris · Île-de-France · Paris · PRIORITÉS EN PARTIE MESURÉES · Non mesuré ici : un cadre calme. · + · Vie locale animée (commerces, marchés, associations) · Compromis : En échange, chaleur en hausse. · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Que montrent les données disponibles sur Paris ?",
+   "Quels risques climatiques pèsent sur Paris ?",
+   "Quelles priorités préciser pour affiner la recherche ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Paris",
+    "reasons": [],
+    "sansPrioriteFavorable": true,
+    "prioritesNonMesurees": [
+     "un cadre calme"
+    ]
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "raisons": [],
+    "aucune_priorite_favorable": true
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "calme-culture-75",
+  "width": 1440,
+  "n": 1,
+  "entete": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "PRIORITÉS EN PARTIE MESURÉES",
+    "forces": [
+     "Équipements culturels accessibles autour",
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": null,
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Paris · Île-de-France · Paris · PRIORITÉS EN PARTIE MESURÉES · Non mesuré ici : un cadre calme. · + · Équipements culturels accessibles autour · + · Vie locale animée (commerces, marchés, associations) · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Que montrent les données disponibles sur Paris ?",
+   "Quels risques climatiques pèsent sur Paris ?",
+   "Quelles priorités préciser pour affiner la recherche ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Paris",
+    "reasons": [
+     "équipements culturels accessibles autour"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": [
+     "un cadre calme"
+    ]
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "raisons": [
+     "équipements culturels accessibles autour"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "calme-culture-75",
+  "width": 390,
+  "n": 1,
+  "entete": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "PRIORITÉS EN PARTIE MESURÉES",
+    "forces": [
+     "Équipements culturels accessibles autour",
+     "Vie locale animée (commerces, marchés, associations)"
+    ],
+    "compromis": null,
+    "texte": "Pour vivre aux portes d'une grande ville, sans en habiter le centre. · Paris · Île-de-France · Paris · PRIORITÉS EN PARTIE MESURÉES · Non mesuré ici : un cadre calme. · + · Équipements culturels accessibles autour · + · Vie locale animée (commerces, marchés, associations) · EXPLORER LE RAPPORT · 14 € · →"
+   }
+  ],
+  "chips": [
+   "Que montrent les données disponibles sur Paris ?",
+   "Quels risques climatiques pèsent sur Paris ?",
+   "Quelles priorités préciser pour affiner la recherche ?"
+  ],
+  "synthese": [
+   {
+    "nom": "Paris",
+    "reasons": [
+     "équipements culturels accessibles autour"
+    ],
+    "sansPrioriteFavorable": false,
+    "prioritesNonMesurees": [
+     "un cadre calme"
+    ]
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "raisons": [
+     "équipements culturels accessibles autour"
+    ],
+    "aucune_priorite_favorable": false
+   }
+  ],
+  "repli": null,
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-chateauneuf",
+  "width": 1440,
+  "syntheses": [
+   "Fuveau se distingue par son éloignement des sites industriels et le peu d'agriculture intensive autour."
+  ],
+  "posts": [],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-chateauneuf",
+  "width": 390,
+  "syntheses": [
+   "Fuveau se distingue par son éloignement des sites industriels et le peu d'agriculture intensive autour."
+  ],
+  "posts": [],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-plouay",
+  "width": 1440,
+  "syntheses": [
+   "Sur l'air, Plouay fait mieux que les deux autres, à un niveau intermédiaire."
+  ],
+  "posts": [],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-plouay",
+  "width": 390,
+  "syntheses": [
+   "Sur l'air, Plouay fait mieux que les deux autres, à un niveau intermédiaire."
+  ],
+  "posts": [],
+  "erreurs": []
+ }
+]

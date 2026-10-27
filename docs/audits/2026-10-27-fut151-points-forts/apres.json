@@ -1,0 +1,9554 @@
+{
+ "feu-13": {
+  "parsed": {
+   "reformulation": "feu-13",
+   "hardConstraints": {
+    "departements": [
+     "13"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_feu",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 27,
+   "candidates": 122,
+   "couverture": "complete",
+   "results": [
+    [
+     "13025",
+     27
+    ],
+    [
+     "13040",
+     27
+    ],
+    [
+     "13046",
+     27
+    ],
+    [
+     "13060",
+     27
+    ],
+    [
+     "13062",
+     27
+    ]
+   ],
+   "pistes": [
+    [
+     "13060",
+     27
+    ],
+    [
+     "13062",
+     27
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pollué",
+      "Air pollué",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Peu exposé aux sites industriels à risque",
+      "Présence industrielle modérée"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040"
+      ]
+     },
+     [
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive",
+      "Non concernée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 24 km",
+      "Rivage marin · 21 km",
+      "Rivage marin · 19 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040",
+       "13046"
+      ]
+     },
+     [
+      "Centre de proximité",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Accès limité",
+      "Accès limité",
+      "Accès limité"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre limitée",
+      "Offre limitée",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "13025",
+       "13046"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale intermédiaire",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+   "cartes": [
+    {
+     "insee": "13025",
+     "nom": "Châteauneuf-le-Rouge",
+     "compatibility": 27,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    },
+    {
+     "insee": "13040",
+     "nom": "Fuveau",
+     "compatibility": 27,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, peu de lieux de vie et d'animation locale.",
+     "distinctive": null
+    },
+    {
+     "insee": "13046",
+     "nom": "Gréasque",
+     "compatibility": 27,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, zone sous-dotée en médecins.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "13060",
+     "nom": "Meyreuil",
+     "compatibility": 27,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    },
+    {
+     "insee": "13062",
+     "nom": "Mimet",
+     "compatibility": 27,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Meyreuil.",
+     "distinctive": null
+    }
+   ],
+   "resume": [
+    "Fuveau prend l'avantage sur la santé environnementale (air, bruit, industrie)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Fuveau se distingue par son éloignement des sites industriels et le peu d'agriculture intensive autour."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "feu-chaleur-13": {
+  "parsed": {
+   "reformulation": "feu-chaleur-13",
+   "hardConstraints": {
+    "departements": [
+     "13"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_feu",
+     "weight": 3
+    },
+    {
+     "key": "faible_chaleur",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 24,
+   "candidates": 122,
+   "couverture": "complete",
+   "results": [
+    [
+     "13030",
+     24
+    ],
+    [
+     "13110",
+     24
+    ],
+    [
+     "13201",
+     23
+    ],
+    [
+     "13062",
+     21
+    ],
+    [
+     "13101",
+     21
+    ]
+   ],
+   "pistes": [
+    [
+     "13062",
+     21
+    ],
+    [
+     "13101",
+     21
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Données trop partielles",
+      "Non disponible"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pollué",
+      "Air pollué",
+      "Non concernée"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030",
+       "13110"
+      ]
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Fortement exposé au bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030",
+       "13110"
+      ]
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Présence industrielle modérée"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée",
+      "Non concernée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Non concernée"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030",
+       "13201"
+      ]
+     },
+     [
+      "Rivage marin · 11 km",
+      "Rivage marin · 29 km",
+      "Rivage marin · 900 m"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Non concernée"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "13110",
+       "13201"
+      ]
+     },
+     [
+      "Accès aux soins limité",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030",
+       "13201"
+      ]
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Accès limité",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030",
+       "13201"
+      ]
+     },
+     [
+      "Offre culturelle présente",
+      "Offre limitée",
+      "Offre culturelle présente"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "13110",
+       "13201"
+      ]
+     },
+     [
+      "Bassin de proximité",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Vie locale intermédiaire",
+      "Vie locale discrète",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Présence étudiante intermédiaire",
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Forte présence étudiante"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13030"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Perd des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Petite ville",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+   "cartes": [
+    {
+     "insee": "13030",
+     "nom": "Cuges-les-Pins",
+     "compatibility": 24,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": "la plus petite ville des trois"
+    },
+    {
+     "insee": "13110",
+     "nom": "Trets",
+     "compatibility": 24,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, la vie locale est plus discrète qu'à Marseille.",
+     "distinctive": null
+    },
+    {
+     "insee": "13201",
+     "nom": "Marseille",
+     "compatibility": 23,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "arrêts de métro près du centre de la commune",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Cuges-les-Pins.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "13062",
+     "nom": "Mimet",
+     "compatibility": 21,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": null
+    },
+    {
+     "insee": "13101",
+     "nom": "Saint-Savournin",
+     "compatibility": 21,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Mimet.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    }
+   ],
+   "resume": [
+    "Marseille prend l'avantage sur la mobilité (voiture, train, transports) et la vie locale et les trajectoires (emploi, démographie).",
+    "Cuges-les-Pins se distingue sur la santé environnementale (air, bruit, industrie)."
+   ],
+   "arbitrage": "Si la mobilité compte d'abord pour vous, Marseille prend l'avantage ; si vous regardez surtout la santé environnementale, Cuges-les-Pins reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Cuges-les-Pins se distingue par le peu d'agriculture intensive autour."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Marseille se distingue par ses trajets domicile-travail moins souvent faits en voiture et ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Marseille se distingue par sa vie locale animée, Cuges-les-Pins par sa croissance démographique."
+    ]
+   ]
+  }
+ },
+ "feu-soins-13": {
+  "parsed": {
+   "reformulation": "feu-soins-13",
+   "hardConstraints": {
+    "departements": [
+     "13"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_feu",
+     "weight": 3
+    },
+    {
+     "key": "acces_soins",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 57,
+   "candidates": 122,
+   "couverture": "complete",
+   "results": [
+    [
+     "13015",
+     57
+    ],
+    [
+     "13201",
+     56
+    ],
+    [
+     "13066",
+     56
+    ],
+    [
+     "13025",
+     56
+    ],
+    [
+     "13070",
+     56
+    ]
+   ],
+   "pistes": [
+    [
+     "13025",
+     56
+    ],
+    [
+     "13070",
+     56
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "1 à 2 sinistres pour 1 000 biens par an",
+      "Non disponible",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pollué",
+      "Non concernée",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "13066"
+      ]
+     },
+     [
+      "Exposition sonore modérée",
+      "Fortement exposé au bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13066"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Présence industrielle modérée",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Non concernée",
+      "Agriculture intensive marquée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015"
+      ]
+     },
+     [
+      "Nature présente",
+      "Non concernée",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015",
+       "13201"
+      ]
+     },
+     [
+      "Rivage marin · 12 km",
+      "Rivage marin · 900 m",
+      "Rivage marin · 35 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Non concernée",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015",
+       "13201"
+      ]
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Collèges et lycées accessibles",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13201"
+      ]
+     },
+     [
+      "Offre limitée",
+      "Offre culturelle présente",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015",
+       "13201"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale intermédiaire"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante dans l'agglomération de Marseille",
+      "Forte présence étudiante",
+      "Forte présence étudiante dans l'agglomération d'Avignon"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13015",
+       "13066"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Perd des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+   "cartes": [
+    {
+     "insee": "13015",
+     "nom": "Bouc-Bel-Air",
+     "compatibility": 57,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": "la plus proche de grands espaces naturels des trois"
+    },
+    {
+     "insee": "13201",
+     "nom": "Marseille",
+     "compatibility": 56,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "arrêts de métro près du centre de la commune",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Noves.",
+     "distinctive": "les hivers les plus doux des trois"
+    },
+    {
+     "insee": "13066",
+     "nom": "Noves",
+     "compatibility": 56,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, la vie locale est plus discrète qu'à Marseille.",
+     "distinctive": "le marché immobilier le plus accessible des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "13025",
+     "nom": "Châteauneuf-le-Rouge",
+     "compatibility": 56,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": null
+    },
+    {
+     "insee": "13070",
+     "nom": "La Penne-sur-Huveaune",
+     "compatibility": 56,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Châteauneuf-le-Rouge.",
+     "distinctive": null
+    }
+   ],
+   "resume": [
+    "Marseille prend l'avantage sur la mobilité (voiture, train, transports) et les services (soins, écoles, commerces).",
+    "Noves se distingue sur la santé environnementale (air, bruit, industrie).",
+    "Bouc-Bel-Air se distingue sur la nature et le cadre de vie (espaces naturels, mer)."
+   ],
+   "arbitrage": "Selon votre priorité : Marseille pour les services, Noves pour la santé environnementale, Bouc-Bel-Air pour le cadre de vie.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Noves se distingue par son calme, Bouc-Bel-Air par le peu d'agriculture intensive autour."
+    ],
+    [
+     "cadre",
+     "Sur les espaces naturels, Bouc-Bel-Air fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "mobilite",
+     "Marseille se distingue par ses trajets domicile-travail moins souvent faits en voiture."
+    ],
+    [
+     "services",
+     "Marseille se distingue par son accès aux collèges et lycées et son offre culturelle."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "chaleur-84": {
+  "parsed": {
+   "reformulation": "chaleur-84",
+   "hardConstraints": {
+    "departements": [
+     "84"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_chaleur",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 57,
+   "candidates": 67,
+   "couverture": "complete",
+   "results": [
+    [
+     "84017",
+     57
+    ],
+    [
+     "84069",
+     33
+    ],
+    [
+     "84089",
+     25
+    ],
+    [
+     "84071",
+     25
+    ],
+    [
+     "84001",
+     24
+    ]
+   ],
+   "pistes": [
+    [
+     "84071",
+     25
+    ],
+    [
+     "84001",
+     24
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "avantage",
+      "insees": [
+       "84017"
+      ]
+     },
+     [
+      "Étés tempérés",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "avantage",
+      "insees": [
+       "84017",
+       "84069"
+      ]
+     },
+     [
+      "Exposition modérée",
+      "Exposition modérée",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "84017",
+       "84069"
+      ]
+     },
+     [
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "84017",
+       "84089"
+      ]
+     },
+     [
+      "Agriculture intensive modérée",
+      "Agriculture intensive marquée",
+      "Agriculture intensive modérée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "84017"
+      ]
+     },
+     [
+      "Beaucoup de nature autour",
+      "Nature présente",
+      "Nature présente"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 66 km",
+      "Rivage marin · 70 km",
+      "Rivage marin · 34 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Peu relié par le train",
+      "Peu relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Quelques arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "84069",
+       "84089"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Accès intermédiaire",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "84069",
+       "84089"
+      ]
+     },
+     [
+      "Offre intermédiaire",
+      "Offre culturelle présente",
+      "Offre culturelle présente"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Bassin de vie restreint",
+      "Bassin de proximité",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "84069",
+       "84089"
+      ]
+     },
+     [
+      "Vie locale discrète",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non mesurée",
+      "Non mesurée",
+      "Présence étudiante intermédiaire"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "84089"
+      ]
+     },
+     [
+      "Population stable",
+      "Perd des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Plutôt rural",
+      "Plutôt rural",
+      "Petite ville"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+   "cartes": [
+    {
+     "insee": "84017",
+     "nom": "Bédoin",
+     "compatibility": 57,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Malaucène.",
+     "distinctive": "les étés les plus supportables des trois"
+    },
+    {
+     "insee": "84069",
+     "nom": "Malaucène",
+     "compatibility": 33,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": "chaleur en hausse",
+     "compromis": "En échange, la chaleur estivale est plus marquée qu'à Bédoin.",
+     "distinctive": null
+    },
+    {
+     "insee": "84089",
+     "nom": "Pertuis",
+     "compatibility": 25,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "chaleur en hausse",
+     "compromis": "En échange, la sécheresse est plus présente qu'à Bédoin.",
+     "distinctive": "le bassin d'emploi le plus dynamique des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "84071",
+     "nom": "Maubec",
+     "compatibility": 25,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "chaleur en hausse",
+     "compromis": "En échange, chaleur en hausse.",
+     "distinctive": null
+    },
+    {
+     "insee": "84001",
+     "nom": "Althen-des-Paluds",
+     "compatibility": 24,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "chaleur en hausse",
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Maubec.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    }
+   ],
+   "resume": [
+    "Pertuis prend l'avantage sur la mobilité (voiture, train, transports), les services (soins, écoles, commerces) et la vie locale et les trajectoires (emploi, démographie).",
+    "Bédoin se distingue sur la nature et le cadre de vie (espaces naturels, mer)."
+   ],
+   "arbitrage": "Si la mobilité compte d'abord pour vous, Pertuis prend l'avantage ; si vous regardez surtout le cadre de vie, Bédoin reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Pertuis se distingue par la douceur de ses hivers."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Bédoin se distingue par ses espaces naturels."
+    ],
+    [
+     "mobilite",
+     "Pertuis se distingue par sa desserte ferroviaire."
+    ],
+    [
+     "services",
+     "Pertuis se distingue par son accès aux collèges et lycées et son bassin de vie étendu."
+    ],
+    [
+     "vitalite",
+     "Pertuis se distingue par son bassin d'emploi étendu et sa croissance démographique."
+    ]
+   ]
+  }
+ },
+ "secheresse-83": {
+  "parsed": {
+   "reformulation": "secheresse-83",
+   "hardConstraints": {
+    "departements": [
+     "83"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_secheresse",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 44,
+   "candidates": 108,
+   "couverture": "complete",
+   "results": [
+    [
+     "83120",
+     44
+    ],
+    [
+     "83093",
+     38
+    ],
+    [
+     "83087",
+     37
+    ],
+    [
+     "83096",
+     37
+    ],
+    [
+     "83007",
+     36
+    ]
+   ],
+   "pistes": [
+    [
+     "83096",
+     37
+    ],
+    [
+     "83007",
+     36
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "1 à 2 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "83093",
+       "83087"
+      ]
+     },
+     [
+      "Air pollué",
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 21 km",
+      "Rivage marin · 18 km",
+      "Rivage marin · 24 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "83120",
+       "83087"
+      ]
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "83087"
+      ]
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "83120",
+       "83087"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Accès aux soins limité",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "83120",
+       "83087"
+      ]
+     },
+     [
+      "Pôle de services",
+      "Centre de proximité",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "83093"
+      ]
+     },
+     [
+      "Accès limité",
+      "Collèges et lycées accessibles",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "83093",
+       "83087"
+      ]
+     },
+     [
+      "Offre limitée",
+      "Offre intermédiaire",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "83120"
+      ]
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie restreint",
+      "Bassin de proximité"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "83120",
+       "83093"
+      ]
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi intermédiaire"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "83093"
+      ]
+     },
+     [
+      "Vie locale discrète",
+      "Vie locale animée",
+      "Vie locale intermédiaire"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Non mesurée",
+      "Non mesurée"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Plutôt rural",
+      "Plutôt rural"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+   "cartes": [
+    {
+     "insee": "83120",
+     "nom": "Saint-Zacharie",
+     "compatibility": 44,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "sols exposés à la sécheresse",
+     "compromis": "En échange, sols exposés à la sécheresse.",
+     "distinctive": "la plus grande ville des trois"
+    },
+    {
+     "insee": "83093",
+     "nom": "Plan-d'Aups-Sainte-Baume",
+     "compatibility": 38,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "sols exposés à la sécheresse",
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Nans-les-Pins.",
+     "distinctive": "la plus petite ville des trois"
+    },
+    {
+     "insee": "83087",
+     "nom": "Nans-les-Pins",
+     "compatibility": 37,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "sols exposés à la sécheresse",
+     "compromis": "En échange, la vie locale est plus discrète qu'à Plan-d'Aups-Sainte-Baume.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "83096",
+     "nom": "Pourcieux",
+     "compatibility": 37,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": "sols exposés à la sécheresse",
+     "compromis": "En échange, sols exposés à la sécheresse.",
+     "distinctive": "le bassin d'emploi le plus dynamique des deux"
+    },
+    {
+     "insee": "83007",
+     "nom": "Aups",
+     "compatibility": 36,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "sols exposés à la sécheresse",
+     "compromis": "En échange, zone sous-dotée en médecins.",
+     "distinctive": "le marché immobilier le plus accessible des deux"
+    }
+   ],
+   "resume": [
+    "Nans-les-Pins prend l'avantage sur la mobilité (voiture, train, transports).",
+    "Plan-d'Aups-Sainte-Baume se distingue sur la vie locale et les trajectoires (emploi, démographie)."
+   ],
+   "arbitrage": "Si la mobilité compte d'abord pour vous, Nans-les-Pins prend l'avantage ; si vous regardez surtout la vie locale, Plan-d'Aups-Sainte-Baume reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Nans-les-Pins se distingue par ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Plan-d'Aups-Sainte-Baume se distingue par son accès aux collèges et lycées, Saint-Zacharie par son bassin de vie étendu."
+    ],
+    [
+     "vitalite",
+     "Plan-d'Aups-Sainte-Baume se distingue par sa vie locale animée."
+    ]
+   ]
+  }
+ },
+ "transports-48": {
+  "parsed": {
+   "reformulation": "transports-48",
+   "hardConstraints": {
+    "departements": [
+     "48"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "acces_transports",
+     "weight": 3
+    },
+    {
+     "key": "mobilite_quotidienne",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 12,
+   "candidates": 8,
+   "couverture": "complete",
+   "results": [
+    [
+     "48061",
+     12
+    ],
+    [
+     "48092",
+     12
+    ],
+    [
+     "48095",
+     10
+    ],
+    [
+     "48140",
+     8
+    ],
+    [
+     "48080",
+     8
+    ]
+   ],
+   "pistes": [
+    [
+     "48140",
+     8
+    ],
+    [
+     "48080",
+     8
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés tempérés",
+      "Étés tempérés",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an",
+      "1 à 2 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "avantage",
+      "insees": [
+       "48095"
+      ]
+     },
+     [
+      "Exposition modérée",
+      "Exposition modérée",
+      "Sols peu exposés à la sécheresse"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pur",
+      "Air pur",
+      "Air pur"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 86 km",
+      "Rivage marin · 121 km",
+      "Rivage marin · 112 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu relié par le train",
+      "Peu relié par le train",
+      "Peu relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "48061",
+       "48095"
+      ]
+     },
+     [
+      "Bon accès aux soins",
+      "Accès aux soins limité",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "48092",
+       "48095"
+      ]
+     },
+     [
+      "Accès limité",
+      "Accès intermédiaire",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "48095"
+      ]
+     },
+     [
+      "Offre limitée",
+      "Offre limitée",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "48095"
+      ]
+     },
+     [
+      "Bassin de vie restreint",
+      "Bassin de proximité",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "48095"
+      ]
+     },
+     [
+      "Non mesurée",
+      "Présence étudiante intermédiaire",
+      "Forte présence étudiante"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "48095"
+      ]
+     },
+     [
+      "Population stable",
+      "Perd des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Plutôt rural",
+      "Petite ville",
+      "Petite ville"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+   "cartes": [
+    {
+     "insee": "48061",
+     "nom": "Florac Trois Rivières",
+     "compatibility": 12,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "peu ou pas d'arrêts de transports en commun près du centre",
+     "compromis": "En échange, peu ou pas d'arrêts de transports en commun près du centre.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    },
+    {
+     "insee": "48092",
+     "nom": "Marvejols",
+     "compatibility": 12,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": "desserte ferroviaire limitée",
+     "compromis": "En échange, desserte ferroviaire limitée.",
+     "distinctive": "le marché immobilier le plus accessible des trois"
+    },
+    {
+     "insee": "48095",
+     "nom": "Mende",
+     "compatibility": 10,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "peu ou pas d'arrêts de transports en commun près du centre",
+     "compromis": "En échange, la vie locale est plus discrète qu'à Florac Trois Rivières.",
+     "distinctive": "la plus grande ville des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "48140",
+     "nom": "Saint-Chély-d'Apcher",
+     "compatibility": 8,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": "peu ou pas d'arrêts de transports en commun près du centre",
+     "compromis": "En échange, peu ou pas d'arrêts de transports en commun près du centre.",
+     "distinctive": null
+    },
+    {
+     "insee": "48080",
+     "nom": "Langogne",
+     "compatibility": 8,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": "peu ou pas d'arrêts de transports en commun près du centre",
+     "compromis": "En échange, sols exposés à la sécheresse.",
+     "distinctive": "le marché immobilier le plus accessible des deux"
+    }
+   ],
+   "resume": [
+    "Mende prend l'avantage sur les risques naturels (feu, sécheresse, pluies intenses), les services (soins, écoles, commerces) et la vie locale et les trajectoires (emploi, démographie)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Mende se distingue par ses sols peu exposés à la sécheresse."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Mende se distingue par son bassin de vie étendu."
+    ],
+    [
+     "vitalite",
+     "Mende se distingue par sa vie étudiante et sa croissance démographique."
+    ]
+   ]
+  }
+ },
+ "feu-29-56": {
+  "parsed": {
+   "reformulation": "feu-29-56",
+   "hardConstraints": {
+    "departements": [
+     "29",
+     "56"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_feu",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 96,
+   "candidates": 287,
+   "couverture": "complete",
+   "results": [
+    [
+     "29011",
+     96
+    ],
+    [
+     "56166",
+     80
+    ],
+    [
+     "29019",
+     96
+    ],
+    [
+     "29061",
+     96
+    ],
+    [
+     "29075",
+     96
+    ]
+   ],
+   "pistes": [
+    [
+     "29061",
+     96
+    ],
+    [
+     "29075",
+     96
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés frais",
+      "Étés frais",
+      "Étés frais"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moyennement ensoleillé",
+      "Moyennement ensoleillé",
+      "Moyennement ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Pluies intenses modérées"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Exposition modérée",
+      "Exposition modérée",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "56166"
+      ]
+     },
+     [
+      "Air pollué",
+      "Qualité de l'air moyenne",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "56166"
+      ]
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Présence industrielle modérée"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "56166"
+      ]
+     },
+     [
+      "Peu de nature autour",
+      "Nature présente",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Rivage marin · 3,8 km",
+      "Rivage marin · 17 km",
+      "Rivage marin · 1,4 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "56166"
+      ]
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre intermédiaire"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "29019"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Bien relié par le train",
+      "Gare accessible, desserte limitée",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Quelques arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "56166",
+       "29019"
+      ]
+     },
+     [
+      "Centre de proximité",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre culturelle présente",
+      "Offre culturelle présente",
+      "Offre culturelle présente"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de proximité",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "29011",
+       "29019"
+      ]
+     },
+     [
+      "Forte présence étudiante dans l'agglomération de Brest",
+      "Présence étudiante intermédiaire",
+      "Forte présence étudiante"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Petite ville",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "29011",
+     "nom": "Bohars",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux"
+     ],
+     "decouverte": "forte présence étudiante dans l'agglomération de Brest",
+     "tradeoff": null,
+     "compromis": "En échange, la commune concentre moins de services qu'à Brest.",
+     "distinctive": null
+    },
+    {
+     "insee": "56166",
+     "nom": "Plouay",
+     "compatibility": 80,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Brest.",
+     "distinctive": "la plus petite ville des trois"
+    },
+    {
+     "insee": "29019",
+     "nom": "Brest",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux"
+     ],
+     "decouverte": "rivage marin à 1,4 km",
+     "tradeoff": null,
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Plouay.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "29061",
+     "nom": "Gouesnou",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux"
+     ],
+     "decouverte": "forte présence étudiante dans l'agglomération de Brest",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Guipavas.",
+     "distinctive": null
+    },
+    {
+     "insee": "29075",
+     "nom": "Guipavas",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Gouesnou.",
+     "distinctive": null
+    }
+   ],
+   "resume": [
+    "Plouay prend l'avantage sur la santé environnementale (air, bruit, industrie) et la nature et le cadre de vie (espaces naturels, mer).",
+    "Brest se distingue sur la mobilité (voiture, train, transports)."
+   ],
+   "arbitrage": "Si la santé environnementale compte d'abord pour vous, Plouay prend l'avantage ; si vous regardez surtout la mobilité, Brest reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur l'air, Plouay fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "cadre",
+     "Sur les espaces naturels, Plouay fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "mobilite",
+     "Brest se distingue par ses trajets domicile-travail moins souvent faits en voiture."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "soins-nature-17": {
+  "parsed": {
+   "reformulation": "soins-nature-17",
+   "hardConstraints": {
+    "departements": [
+     "17"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "acces_soins",
+     "weight": 2
+    },
+    {
+     "key": "nature",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 69,
+   "candidates": 96,
+   "couverture": "complete",
+   "results": [
+    [
+     "17058",
+     69
+    ],
+    [
+     "17140",
+     67
+    ],
+    [
+     "17369",
+     66
+    ],
+    [
+     "17219",
+     66
+    ],
+    [
+     "17385",
+     66
+    ]
+   ],
+   "pistes": [
+    [
+     "17219",
+     66
+    ],
+    [
+     "17385",
+     66
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés tempérés",
+      "Étés tempérés",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Sinistres fréquents : plus de 10 pour 1 000 biens par an",
+      "1 à 2 sinistres pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu de pluies intenses",
+      "Peu de pluies intenses",
+      "Peu de pluies intenses"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17058",
+       "17140"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nature présente",
+      "Nature présente",
+      "Nature présente"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 1,3 km",
+      "Rivage marin · 2,6 km",
+      "Rivage marin · 700 m"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17369"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "17140",
+       "17369"
+      ]
+     },
+     [
+      "Peu relié par le train",
+      "Gare accessible, desserte limitée",
+      "Gare accessible, desserte limitée"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "17140"
+      ]
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Quelques arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "17058",
+       "17369"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Accès limité",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17058",
+       "17369"
+      ]
+     },
+     [
+      "Offre intermédiaire",
+      "Offre limitée",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "17058",
+       "17369"
+      ]
+     },
+     [
+      "Bassin de proximité",
+      "Bassin de vie restreint",
+      "Bassin de proximité"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "17369"
+      ]
+     },
+     [
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Présence étudiante intermédiaire dans l'agglomération de Marennes-Hiers-Brouage",
+      "Non mesurée",
+      "Présence étudiante intermédiaire dans l'agglomération de La Flotte"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "17058"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Perd des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Petite ville",
+      "Plutôt rural",
+      "Petite ville"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+   "cartes": [
+    {
+     "insee": "17058",
+     "nom": "Bourcefranc-le-Chapus",
+     "compatibility": 69,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Saint-Martin-de-Ré.",
+     "distinctive": "le marché immobilier le plus accessible des trois"
+    },
+    {
+     "insee": "17140",
+     "nom": "Dolus-d'Oléron",
+     "compatibility": 67,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "rivage marin à 2,6 km",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Saint-Martin-de-Ré.",
+     "distinctive": null
+    },
+    {
+     "insee": "17369",
+     "nom": "Saint-Martin-de-Ré",
+     "compatibility": 66,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "bon accès aux médecins"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": "peu d'espaces naturels à proximité",
+     "compromis": "En échange, peu d'espaces naturels à proximité.",
+     "distinctive": "le bassin d'emploi le plus dynamique des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "17219",
+     "nom": "Marennes-Hiers-Brouage",
+     "compatibility": 66,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Saint-Pierre-d'Oléron.",
+     "distinctive": "le marché immobilier le plus accessible des deux"
+    },
+    {
+     "insee": "17385",
+     "nom": "Saint-Pierre-d'Oléron",
+     "compatibility": 66,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "rivage marin à 3 km",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Marennes-Hiers-Brouage.",
+     "distinctive": null
+    }
+   ],
+   "resume": [
+    "Les trois territoires sont très proches sur l'ensemble des thèmes."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Saint-Martin-de-Ré se distingue par ses trajets domicile-travail moins souvent faits en voiture, Dolus-d'Oléron par ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Saint-Martin-de-Ré se distingue par son bassin d'emploi étendu, Bourcefranc-le-Chapus par sa croissance démographique."
+    ]
+   ]
+  }
+ },
+ "calme-culture-75": {
+  "parsed": {
+   "reformulation": "calme-culture-75",
+   "hardConstraints": {
+    "departements": [
+     "75"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "cadre_calme",
+     "weight": 3
+    },
+    {
+     "key": "acces_culture",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 0,
+   "candidates": 20,
+   "couverture": "partielle",
+   "results": [
+    [
+     "75101",
+     99
+    ]
+   ],
+   "pistes": [],
+   "avantages": []
+  },
+  "textes": {
+   "message": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+   "cartes": [
+    {
+     "insee": "75101",
+     "nom": "Paris",
+     "compatibility": 99,
+     "couverture": "partielle",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "",
+     "distinctive": null
+    }
+   ],
+   "pistes": [],
+   "resume": [],
+   "arbitrage": null,
+   "syntheses": []
+  }
+ },
+ "etudiant-23": {
+  "parsed": {
+   "reformulation": "etudiant-23",
+   "hardConstraints": {
+    "departements": [
+     "23"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "vie_etudiante",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 67,
+   "candidates": 9,
+   "couverture": "partielle",
+   "results": [
+    [
+     "23096",
+     67
+    ],
+    [
+     "23176",
+     50
+    ],
+    [
+     "23008",
+     41
+    ],
+    [
+     "23193",
+     38
+    ],
+    [
+     "23030",
+     38
+    ]
+   ],
+   "pistes": [
+    [
+     "23193",
+     38
+    ],
+    [
+     "23030",
+     38
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés tempérés",
+      "Étés tempérés",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Situation intermédiaire",
+      "Situation intermédiaire",
+      "Situation intermédiaire"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moyennement ensoleillé",
+      "Moyennement ensoleillé",
+      "Moyennement ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Aucun sinistre répertorié",
+      "Aucun sinistre répertorié",
+      "Aucun sinistre répertorié"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Pluies intenses modérées"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "avantage",
+      "insees": [
+       "23096",
+       "23008"
+      ]
+     },
+     [
+      "Exposition modérée",
+      "Sols très exposés",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pur",
+      "Air pur",
+      "Air pur"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 224 km",
+      "Rivage marin · 196 km",
+      "Rivage marin · 243 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu relié par le train",
+      "Peu relié par le train",
+      "Peu relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "23096"
+      ]
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "23176",
+       "23008"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "23096"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Accès limité",
+      "Accès limité"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "23096"
+      ]
+     },
+     [
+      "Offre culturelle présente",
+      "Offre intermédiaire",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "23096"
+      ]
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de proximité",
+      "Bassin de vie restreint"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante",
+      "Non mesurée",
+      "Non mesurée"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Perd des habitants",
+      "Perd des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Petite ville",
+      "Plutôt rural",
+      "Plutôt rural"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+   "cartes": [
+    {
+     "insee": "23096",
+     "nom": "Guéret",
+     "compatibility": 67,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forte présence étudiante"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Aubusson.",
+     "distinctive": "la plus grande ville des trois"
+    },
+    {
+     "insee": "23176",
+     "nom": "La Souterraine",
+     "compatibility": 50,
+     "couverture": "aucune",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Aubusson.",
+     "distinctive": null
+    },
+    {
+     "insee": "23008",
+     "nom": "Aubusson",
+     "compatibility": 41,
+     "couverture": "aucune",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, la commune concentre moins de services qu'à Guéret.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "23193",
+     "nom": "Sainte-Feyre",
+     "compatibility": 38,
+     "couverture": "aucune",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Bourganeuf.",
+     "distinctive": null
+    },
+    {
+     "insee": "23030",
+     "nom": "Bourganeuf",
+     "compatibility": 38,
+     "couverture": "aucune",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, chaleur en hausse.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    }
+   ],
+   "resume": [
+    "Guéret prend l'avantage sur la mobilité (voiture, train, transports) et les services (soins, écoles, commerces)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Guéret se distingue par ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Guéret se distingue par son offre culturelle et son bassin de vie étendu."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "inondation-17": {
+  "parsed": {
+   "reformulation": "inondation-17",
+   "hardConstraints": {
+    "departements": [
+     "17"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_inondation",
+     "weight": 3
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 0,
+   "candidates": 96,
+   "couverture": "sans_priorite",
+   "results": [
+    [
+     "17300",
+     92
+    ],
+    [
+     "17415",
+     73
+    ],
+    [
+     "17299",
+     71
+    ],
+    [
+     "17306",
+     71
+    ],
+    [
+     "17028",
+     92
+    ]
+   ],
+   "pistes": [
+    [
+     "17306",
+     71
+    ],
+    [
+     "17028",
+     92
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17299"
+      ]
+     },
+     [
+      "Étés tempérés",
+      "Étés chauds",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "1 à 2 sinistres pour 1 000 biens par an",
+      "1 à 2 sinistres pour 1 000 biens par an",
+      "1 à 2 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "avantage",
+      "insees": [
+       "17299"
+      ]
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Nombre intermédiaire de jours propices aux feux"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "17299"
+      ]
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Peu de pluies intenses"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "17415",
+       "17299"
+      ]
+     },
+     [
+      "Air pollué",
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Exposition sonore modérée",
+      "Exposition sonore modérée",
+      "Exposition sonore modérée"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "17415",
+       "17299"
+      ]
+     },
+     [
+      "Environnement industriel marqué",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17299"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu de nature autour",
+      "Peu de nature autour",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17299"
+      ]
+     },
+     [
+      "Rivage marin · 1 km",
+      "Rivage marin · 24 km",
+      "Rivage marin · 8 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "avantage",
+      "insees": [
+       "17415",
+       "17299"
+      ]
+     },
+     [
+      "Cadre intermédiaire",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300"
+      ]
+     },
+     [
+      "Bien relié par le train",
+      "Peu relié par le train",
+      "Gare accessible, desserte limitée"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17415"
+      ]
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17415"
+      ]
+     },
+     [
+      "Offre culturelle présente",
+      "Offre culturelle présente",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300"
+      ]
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi intermédiaire",
+      "Bassin d'emploi intermédiaire"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300"
+      ]
+     },
+     [
+      "Forte présence étudiante",
+      "Présence étudiante intermédiaire",
+      "Présence étudiante intermédiaire"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "17300",
+       "17415"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Ville moyenne",
+      "Ville moyenne"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "rivage marin à 1 km",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Saintes.",
+     "distinctive": "le bassin d'emploi le plus dynamique des trois"
+    },
+    {
+     "insee": "17415",
+     "nom": "Saintes",
+     "compatibility": 73,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "arrêts de bus près du centre de la commune",
+     "tradeoff": null,
+     "compromis": "En échange, chaleur en hausse.",
+     "distinctive": "les étés les plus chauds des trois"
+    },
+    {
+     "insee": "17299",
+     "nom": "Rochefort",
+     "compatibility": 71,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à La Rochelle.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "17306",
+     "nom": "Royan",
+     "compatibility": 71,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "rivage marin à 1,5 km",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Aytré.",
+     "distinctive": "la plus petite ville des deux"
+    },
+    {
+     "insee": "17028",
+     "nom": "Aytré",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Royan.",
+     "distinctive": "le bassin d'emploi le plus dynamique des deux"
+    }
+   ],
+   "resume": [
+    "La Rochelle prend l'avantage sur la mobilité (voiture, train, transports) et la vie locale et les trajectoires (emploi, démographie).",
+    "Rochefort se distingue sur les risques naturels (feu, sécheresse, pluies intenses)."
+   ],
+   "arbitrage": "Si la vie locale compte d'abord pour vous, La Rochelle prend l'avantage ; si vous regardez surtout les risques naturels, Rochefort reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Rochefort se distingue par ses pluies intenses rares."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "La Rochelle se distingue par sa desserte ferroviaire."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "La Rochelle se distingue par son bassin d'emploi étendu et sa vie étudiante."
+    ]
+   ]
+  }
+ },
+ "inondation-feu-13": {
+  "parsed": {
+   "reformulation": "inondation-feu-13",
+   "hardConstraints": {
+    "departements": [
+     "13"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "faible_risque_inondation",
+     "weight": 3
+    },
+    {
+     "key": "faible_risque_feu",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 35,
+   "candidates": 122,
+   "couverture": "complete",
+   "results": [
+    [
+     "13025",
+     35
+    ],
+    [
+     "13040",
+     35
+    ],
+    [
+     "13046",
+     35
+    ],
+    [
+     "13060",
+     35
+    ],
+    [
+     "13072",
+     35
+    ]
+   ],
+   "pistes": [
+    [
+     "13060",
+     35
+    ],
+    [
+     "13072",
+     35
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Air pollué",
+      "Air pollué",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Peu exposé aux sites industriels à risque",
+      "Présence industrielle modérée"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040"
+      ]
+     },
+     [
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive",
+      "Non concernée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 24 km",
+      "Rivage marin · 21 km",
+      "Rivage marin · 19 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler",
+      "Plus de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "13040",
+       "13046"
+      ]
+     },
+     [
+      "Centre de proximité",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Accès limité",
+      "Accès limité",
+      "Accès limité"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre limitée",
+      "Offre limitée",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "13025",
+       "13046"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale intermédiaire",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille",
+      "Présence étudiante intermédiaire dans l'agglomération de Marseille"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.",
+   "cartes": [
+    {
+     "insee": "13025",
+     "nom": "Châteauneuf-le-Rouge",
+     "compatibility": 35,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    },
+    {
+     "insee": "13040",
+     "nom": "Fuveau",
+     "compatibility": 35,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, peu de lieux de vie et d'animation locale.",
+     "distinctive": null
+    },
+    {
+     "insee": "13046",
+     "nom": "Gréasque",
+     "compatibility": 35,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, zone sous-dotée en médecins.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "13060",
+     "nom": "Meyreuil",
+     "compatibility": 35,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, météo plus souvent propice aux feux.",
+     "distinctive": null
+    },
+    {
+     "insee": "13072",
+     "nom": "Peynier",
+     "compatibility": 35,
+     "couverture": "complete",
+     "sansPrioriteFavorable": true,
+     "reasons": [],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": "météo plus souvent propice aux feux",
+     "compromis": "En échange, la commune concentre moins de services qu'à Meyreuil.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    }
+   ],
+   "resume": [
+    "Fuveau prend l'avantage sur la santé environnementale (air, bruit, industrie)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Fuveau se distingue par son éloignement des sites industriels et le peu d'agriculture intensive autour."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "sans-priorite-17": {
+  "parsed": {
+   "reformulation": "sans-priorite-17",
+   "hardConstraints": {
+    "departements": [
+     "17"
+    ]
+   },
+   "preferences": []
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 0,
+   "candidates": 96,
+   "couverture": "sans_priorite",
+   "results": [
+    [
+     "17010",
+     92
+    ],
+    [
+     "17028",
+     92
+    ],
+    [
+     "17094",
+     92
+    ],
+    [
+     "17142",
+     92
+    ],
+    [
+     "17190",
+     92
+    ]
+   ],
+   "pistes": [
+    [
+     "17142",
+     92
+    ],
+    [
+     "17190",
+     92
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés tempérés",
+      "Étés tempérés",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Sinistres fréquents : 5 à 10 pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombre intermédiaire de jours propices aux feux",
+      "Nombre intermédiaire de jours propices aux feux",
+      "Nombre intermédiaire de jours propices aux feux"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "17094"
+      ]
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Peu de pluies intenses"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Sols très exposés"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "17094"
+      ]
+     },
+     [
+      "Air pollué",
+      "Air pollué",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "17094"
+      ]
+     },
+     [
+      "Exposition sonore modérée",
+      "Exposition sonore modérée",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "17010",
+       "17094"
+      ]
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Présence industrielle modérée",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17010",
+       "17094"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu de nature autour",
+      "Peu de nature autour",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 700 m",
+      "Rivage marin · 1,1 km",
+      "Rivage marin · 1 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "17010",
+       "17028"
+      ]
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Accès limité"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "17028"
+      ]
+     },
+     [
+      "Offre intermédiaire",
+      "Offre culturelle présente",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante dans l'agglomération de La Rochelle",
+      "Forte présence étudiante dans l'agglomération de La Rochelle",
+      "Forte présence étudiante dans l'agglomération de La Rochelle"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+   "cartes": [
+    {
+     "insee": "17010",
+     "nom": "Angoulins",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "rivage marin à 700 m",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Aytré.",
+     "distinctive": null
+    },
+    {
+     "insee": "17028",
+     "nom": "Aytré",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Châtelaillon-Plage.",
+     "distinctive": null
+    },
+    {
+     "insee": "17094",
+     "nom": "Châtelaillon-Plage",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Aytré.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "17142",
+     "nom": "Dompierre-sur-Mer",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à L'Houmeau.",
+     "distinctive": "le meilleur accès aux médecins des deux"
+    },
+    {
+     "insee": "17190",
+     "nom": "L'Houmeau",
+     "compatibility": 92,
+     "couverture": "sans_priorite",
+     "sansPrioriteFavorable": false,
+     "reasons": [],
+     "decouverte": "rivage marin à 1,2 km",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Dompierre-sur-Mer.",
+     "distinctive": null
+    }
+   ],
+   "resume": [
+    "Châtelaillon-Plage prend l'avantage sur les risques naturels (feu, sécheresse, pluies intenses) et la santé environnementale (air, bruit, industrie).",
+    "Aytré se distingue sur les services (soins, écoles, commerces)."
+   ],
+   "arbitrage": "Si la santé environnementale compte d'abord pour vous, Châtelaillon-Plage prend l'avantage ; si vous regardez surtout les services, Aytré reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Châtelaillon-Plage se distingue par ses pluies intenses rares."
+    ],
+    [
+     "sante_env",
+     "Châtelaillon-Plage se distingue par son calme."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Aytré se distingue par son offre culturelle."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "national-fraicheur": {
+  "parsed": {
+   "reformulation": "national-fraicheur",
+   "hardConstraints": {},
+   "preferences": [
+    {
+     "key": "faible_chaleur",
+     "weight": 3
+    },
+    {
+     "key": "acces_soins",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 96,
+   "candidates": 6966,
+   "couverture": "complete",
+   "results": [
+    [
+     "29235",
+     96
+    ],
+    [
+     "76377",
+     96
+    ],
+    [
+     "73103",
+     94
+    ],
+    [
+     "59401",
+     94
+    ],
+    [
+     "65059",
+     92
+    ]
+   ],
+   "pistes": [
+    [
+     "59401",
+     94
+    ],
+    [
+     "65059",
+     92
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés frais",
+      "Étés frais",
+      "Étés frais"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235"
+      ]
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Situation intermédiaire",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moyennement ensoleillé",
+      "Peu ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Données trop partielles"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235",
+       "76377"
+      ]
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235"
+      ]
+     },
+     [
+      "Qualité de l'air moyenne",
+      "Air pollué",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "76377"
+      ]
+     },
+     [
+      "Exposition sonore modérée",
+      "Très préservé du bruit",
+      "Exposition sonore modérée"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "76377",
+       "73103"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235",
+       "73103"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "73103"
+      ]
+     },
+     [
+      "Nature présente",
+      "Peu de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235"
+      ]
+     },
+     [
+      "Rivage marin · 900 m",
+      "Rivage marin · 46 km",
+      "Rivage marin · 242 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235"
+      ]
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235"
+      ]
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Quelques arrêts près du centre",
+      "Quelques arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235",
+       "76377"
+      ]
+     },
+     [
+      "Offre culturelle présente",
+      "Offre culturelle présente",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "29235",
+       "73103"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale discrète",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante dans l'agglomération de Brest",
+      "Forte présence étudiante dans l'agglomération de Rouen",
+      "Forte présence étudiante dans l'agglomération de Chambéry"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "29235",
+     "nom": "Le Relecq-Kerhuon",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "rivage marin à 900 m",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Isneauville.",
+     "distinctive": "les hivers les plus doux des trois"
+    },
+    {
+     "insee": "76377",
+     "nom": "Isneauville",
+     "compatibility": 96,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Le Relecq-Kerhuon.",
+     "distinctive": "la plus grande ville des trois"
+    },
+    {
+     "insee": "73103",
+     "nom": "Drumettaz-Clarafond",
+     "compatibility": 94,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Le Relecq-Kerhuon.",
+     "distinctive": "la plus proche de la montagne des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "59401",
+     "nom": "Méteren",
+     "compatibility": 94,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": null,
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Bagnères-de-Bigorre.",
+     "distinctive": "la plus grande ville des deux"
+    },
+    {
+     "insee": "65059",
+     "nom": "Bagnères-de-Bigorre",
+     "compatibility": 92,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "étés plus frais",
+      "bon accès aux médecins"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "",
+     "distinctive": "la plus proche de la montagne des deux"
+    }
+   ],
+   "resume": [
+    "Le Relecq-Kerhuon prend l'avantage sur le climat (chaleur, douceur, soleil) et la mobilité (voiture, train, transports)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Le Relecq-Kerhuon se distingue par la douceur de ses hivers."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Isneauville se distingue par son calme."
+    ],
+    [
+     "cadre",
+     "Drumettaz-Clarafond se distingue par ses espaces naturels, Le Relecq-Kerhuon par sa proximité de la mer."
+    ],
+    [
+     "mobilite",
+     "Le Relecq-Kerhuon se distingue par ses trajets domicile-travail moins souvent faits en voiture et ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "national-mer-calme": {
+  "parsed": {
+   "reformulation": "national-mer-calme",
+   "hardConstraints": {},
+   "preferences": [
+    {
+     "key": "proximite_mer",
+     "weight": 3
+    },
+    {
+     "key": "calme_sonore",
+     "weight": 2
+    },
+    {
+     "key": "air_sain",
+     "weight": 1
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 94,
+   "candidates": 6966,
+   "couverture": "complete",
+   "results": [
+    [
+     "40296",
+     94
+    ],
+    [
+     "22325",
+     91
+    ],
+    [
+     "2B043",
+     90
+    ],
+    [
+     "44049",
+     88
+    ],
+    [
+     "76167",
+     88
+    ]
+   ],
+   "pistes": [
+    [
+     "44049",
+     88
+    ],
+    [
+     "76167",
+     88
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Étés tempérés",
+      "Étés frais",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Moyennement ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Sinistres fréquents : 5 à 10 pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Peu de pluies intenses",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296"
+      ]
+     },
+     [
+      "Sols peu exposés à la sécheresse",
+      "Sols très exposés",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Air pur",
+      "Air pur",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "2B043"
+      ]
+     },
+     [
+      "Beaucoup de nature autour",
+      "Peu de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 3,5 km",
+      "Rivage marin · 200 m",
+      "Rivage marin · 1,7 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Peu relié par le train",
+      "Gare accessible, desserte limitée",
+      "Peu relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296"
+      ]
+     },
+     [
+      "Bon accès aux soins",
+      "Accès intermédiaire",
+      "Accès aux soins limité"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Centre de proximité"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Collèges et lycées accessibles",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Offre intermédiaire",
+      "Offre intermédiaire",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi intermédiaire"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "22325",
+       "2B043"
+      ]
+     },
+     [
+      "Présence étudiante limitée dans l'agglomération de Saint-Vincent-de-Tyrosse",
+      "Présence étudiante intermédiaire dans l'agglomération de Binic-Étables-sur-Mer",
+      "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "40296",
+       "22325"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Petite ville",
+      "Petite ville",
+      "Ville moyenne"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "40296",
+     "nom": "Seignosse",
+     "compatibility": 94,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "rivage marin à 3,5 km",
+      "à l'écart des grandes infrastructures bruyantes",
+      "air de fond plus pur"
+     ],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": null,
+     "compromis": "En échange, la chaleur estivale est plus marquée qu'à Saint-Quay-Portrieux.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    },
+    {
+     "insee": "22325",
+     "nom": "Saint-Quay-Portrieux",
+     "compatibility": 91,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "rivage marin à 200 m",
+      "à l'écart des grandes infrastructures bruyantes",
+      "air de fond plus pur"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Seignosse.",
+     "distinctive": null
+    },
+    {
+     "insee": "2B043",
+     "nom": "Brando",
+     "compatibility": 90,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "rivage marin à 1,7 km",
+      "à l'écart des grandes infrastructures bruyantes",
+      "air de fond plus pur"
+     ],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Seignosse.",
+     "distinctive": "la plus proche de grands espaces naturels des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "44049",
+     "nom": "Le Croisic",
+     "compatibility": 88,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "rivage marin à 800 m",
+      "à l'écart des grandes infrastructures bruyantes"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, air plus chargé en particules.",
+     "distinctive": "les étés les plus chauds des deux"
+    },
+    {
+     "insee": "76167",
+     "nom": "Cauville-sur-Mer",
+     "compatibility": 88,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "rivage marin à 1,7 km",
+      "à l'écart des grandes infrastructures bruyantes"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, la vie locale est plus discrète qu'à Le Croisic.",
+     "distinctive": "les étés les plus supportables des deux"
+    }
+   ],
+   "resume": [
+    "Saint-Quay-Portrieux prend l'avantage sur le climat (chaleur, douceur, soleil) et la mobilité (voiture, train, transports)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Saint-Quay-Portrieux se distingue par ses étés frais."
+    ],
+    [
+     "risques",
+     "Saint-Quay-Portrieux se distingue par ses pluies intenses rares, Seignosse par ses sols peu exposés à la sécheresse."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Saint-Quay-Portrieux se distingue par ses trajets domicile-travail moins souvent faits en voiture et ses transports du quotidien."
+    ],
+    [
+     "services",
+     "Seignosse se distingue par son accès aux soins, Saint-Quay-Portrieux par son accès aux collèges et lycées."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "national-culture-transports": {
+  "parsed": {
+   "reformulation": "national-culture-transports",
+   "hardConstraints": {},
+   "preferences": [
+    {
+     "key": "acces_culture",
+     "weight": 3
+    },
+    {
+     "key": "acces_transports",
+     "weight": 2
+    },
+    {
+     "key": "faible_dependance_auto",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 100,
+   "candidates": 6966,
+   "couverture": "complete",
+   "results": [
+    [
+     "75101",
+     100
+    ],
+    [
+     "69266",
+     99
+    ],
+    [
+     "67447",
+     98
+    ],
+    [
+     "31555",
+     97
+    ],
+    [
+     "13201",
+     97
+    ]
+   ],
+   "pistes": [
+    [
+     "31555",
+     97
+    ],
+    [
+     "13201",
+     97
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "avantage",
+      "insees": [
+       "67447"
+      ]
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés tempérés"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "avantage",
+      "insees": [
+       "75101"
+      ]
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Situation intermédiaire",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Peu ensoleillé",
+      "Très ensoleillé",
+      "Peu ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Non disponible",
+      "Données trop partielles",
+      "Données trop partielles"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "avantage",
+      "insees": [
+       "67447"
+      ]
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "75101",
+       "67447"
+      ]
+     },
+     [
+      "Peu de pluies intenses",
+      "Pluies intenses fréquentes",
+      "Peu de pluies intenses"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Exposition modérée",
+      "Exposition modérée",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non concernée",
+      "Air pollué",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Fortement exposé au bruit",
+      "Fortement exposé au bruit",
+      "Fortement exposé au bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "75101",
+       "69266"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Présence industrielle modérée",
+      "Environnement industriel marqué"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non concernée",
+      "Non concernée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non concernée",
+      "Peu de nature autour",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 148 km",
+      "Rivage marin · 241 km",
+      "Rivage marin · 465 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "avantage",
+      "insees": [
+       "67447"
+      ]
+     },
+     [
+      "Non concernée",
+      "Très urbain ou très isolé",
+      "Cadre intermédiaire"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre culturelle présente",
+      "Offre culturelle présente",
+      "Offre culturelle présente"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "75101",
+       "67447"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale intermédiaire",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante",
+      "Forte présence étudiante dans l'agglomération de Lyon",
+      "Forte présence étudiante dans l'agglomération de Strasbourg"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "69266",
+       "67447"
+      ]
+     },
+     [
+      "Perd des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "75101",
+     "nom": "Paris",
+     "compatibility": 100,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour",
+      "bien reliée par le train",
+      "trajets domicile-travail moins souvent faits en voiture qu'ailleurs"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Schiltigheim.",
+     "distinctive": "la plus grande ville des trois"
+    },
+    {
+     "insee": "69266",
+     "nom": "Villeurbanne",
+     "compatibility": 99,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour",
+      "bien reliée par le train",
+      "trajets domicile-travail moins souvent faits en voiture qu'ailleurs"
+     ],
+     "decouverte": "arrêts de métro près du centre de la commune",
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Paris.",
+     "distinctive": "les étés les plus chauds des trois"
+    },
+    {
+     "insee": "67447",
+     "nom": "Schiltigheim",
+     "compatibility": 98,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour",
+      "bien reliée par le train",
+      "trajets domicile-travail moins souvent faits en voiture qu'ailleurs"
+     ],
+     "decouverte": "forte présence étudiante dans l'agglomération de Strasbourg",
+     "tradeoff": null,
+     "compromis": "En échange, la commune concentre moins de services qu'à Paris.",
+     "distinctive": "les étés les plus supportables des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "31555",
+     "nom": "Toulouse",
+     "compatibility": 97,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour",
+      "bien reliée par le train",
+      "trajets domicile-travail moins souvent faits en voiture qu'ailleurs"
+     ],
+     "decouverte": "arrêts de métro près du centre de la commune",
+     "tradeoff": null,
+     "compromis": "En échange, la chaleur estivale est plus marquée qu'à Marseille.",
+     "distinctive": "les étés les plus chauds des deux"
+    },
+    {
+     "insee": "13201",
+     "nom": "Marseille",
+     "compatibility": 97,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "équipements culturels accessibles autour",
+      "bien reliée par le train",
+      "trajets domicile-travail moins souvent faits en voiture qu'ailleurs"
+     ],
+     "decouverte": "hivers parmi les plus doux",
+     "tradeoff": null,
+     "compromis": "En échange, environnement assez maillé d'infrastructures bruyantes.",
+     "distinctive": "les hivers les plus doux des deux"
+    }
+   ],
+   "resume": [
+    "Schiltigheim prend l'avantage sur les risques naturels (feu, sécheresse, pluies intenses) et la nature et le cadre de vie (espaces naturels, mer)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Paris se distingue par la douceur de ses hivers."
+    ],
+    [
+     "risques",
+     "Schiltigheim se distingue par sa météo moins propice aux feux."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Sur le cadre de vie, Schiltigheim fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "national-nature-calme-sec": {
+  "parsed": {
+   "reformulation": "national-nature-calme-sec",
+   "hardConstraints": {},
+   "preferences": [
+    {
+     "key": "nature",
+     "weight": 3
+    },
+    {
+     "key": "cadre_calme",
+     "weight": 2
+    },
+    {
+     "key": "faible_secheresse",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 95,
+   "candidates": 6966,
+   "couverture": "complete",
+   "results": [
+    [
+     "74104",
+     95
+    ],
+    [
+     "25204",
+     94
+    ],
+    [
+     "67448",
+     94
+    ],
+    [
+     "05023",
+     91
+    ],
+    [
+     "19073",
+     89
+    ]
+   ],
+   "pistes": [
+    [
+     "05023",
+     91
+    ],
+    [
+     "19073",
+     89
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés frais",
+      "Étés frais",
+      "Étés frais"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Moyennement ensoleillé",
+      "Peu ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Moins de 1 sinistre pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "67448"
+      ]
+     },
+     [
+      "Air pollué",
+      "Qualité de l'air moyenne",
+      "Air pur"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 243 km",
+      "Rivage marin · 361 km",
+      "Rivage marin · 443 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "67448"
+      ]
+     },
+     [
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "avantage",
+      "insees": [
+       "67448"
+      ]
+     },
+     [
+      "Gare accessible, desserte limitée",
+      "Peu relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "25204",
+       "67448"
+      ]
+     },
+     [
+      "Centre de proximité",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "25204",
+       "67448"
+      ]
+     },
+     [
+      "Accès limité",
+      "Accès intermédiaire",
+      "Accès intermédiaire"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "25204",
+       "67448"
+      ]
+     },
+     [
+      "Offre limitée",
+      "Offre intermédiaire",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "avantage",
+      "insees": [
+       "74104",
+       "25204"
+      ]
+     },
+     [
+      "Présence étudiante intermédiaire dans l'agglomération d'Annecy",
+      "Présence étudiante intermédiaire dans l'agglomération de Pontarlier",
+      "Présence étudiante limitée dans l'agglomération de La Broque"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "25204"
+      ]
+     },
+     [
+      "Population stable",
+      "Gagne des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Petite ville",
+      "Petite ville"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "74104",
+     "nom": "Doussard",
+     "compatibility": 95,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "cadre calme et habitable",
+      "sols peu exposés à la sécheresse"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": null,
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Schirmeck.",
+     "distinctive": "la plus proche de la montagne des trois"
+    },
+    {
+     "insee": "25204",
+     "nom": "Doubs",
+     "compatibility": 94,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "cadre calme et habitable",
+      "sols peu exposés à la sécheresse"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Schirmeck.",
+     "distinctive": "le marché immobilier le plus accessible des trois"
+    },
+    {
+     "insee": "67448",
+     "nom": "Schirmeck",
+     "compatibility": 94,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "cadre calme et habitable",
+      "sols peu exposés à la sécheresse"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Doussard.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "05023",
+     "nom": "Briançon",
+     "compatibility": 91,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "cadre calme et habitable",
+      "sols peu exposés à la sécheresse"
+     ],
+     "decouverte": "étés plus frais",
+     "tradeoff": null,
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Égletons.",
+     "distinctive": "la plus proche de la montagne des deux"
+    },
+    {
+     "insee": "19073",
+     "nom": "Égletons",
+     "compatibility": 89,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "forêts et espaces naturels à proximité",
+      "cadre calme et habitable",
+      "sols peu exposés à la sécheresse"
+     ],
+     "decouverte": "vie locale animée (commerces, marchés, associations)",
+     "tradeoff": null,
+     "compromis": "En échange, la chaleur estivale est plus marquée qu'à Briançon.",
+     "distinctive": "le marché immobilier le plus accessible des deux"
+    }
+   ],
+   "resume": [
+    "Schirmeck prend l'avantage sur la santé environnementale (air, bruit, industrie) et la mobilité (voiture, train, transports).",
+    "Doubs se distingue sur la vie locale et les trajectoires (emploi, démographie)."
+   ],
+   "arbitrage": "Si la mobilité compte d'abord pour vous, Schirmeck prend l'avantage ; si vous regardez surtout la vie locale, Doubs reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Schirmeck se distingue par son air pur."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Schirmeck se distingue par ses trajets domicile-travail moins souvent faits en voiture et sa desserte ferroviaire."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Doubs se distingue par sa croissance démographique."
+    ]
+   ]
+  }
+ },
+ "national-emploi-ecoles": {
+  "parsed": {
+   "reformulation": "national-emploi-ecoles",
+   "hardConstraints": {},
+   "preferences": [
+    {
+     "key": "viabilite_emploi",
+     "weight": 3
+    },
+    {
+     "key": "acces_ecoles",
+     "weight": 2
+    },
+    {
+     "key": "vie_locale",
+     "weight": 1
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 100,
+   "candidates": 6966,
+   "couverture": "complete",
+   "results": [
+    [
+     "69381",
+     100
+    ],
+    [
+     "33522",
+     99
+    ],
+    [
+     "67482",
+     99
+    ],
+    [
+     "44109",
+     98
+    ],
+    [
+     "75101",
+     98
+    ]
+   ],
+   "pistes": [
+    [
+     "44109",
+     98
+    ],
+    [
+     "75101",
+     98
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés chauds",
+      "Étés chauds",
+      "Étés chauds"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "avantage",
+      "insees": [
+       "33522"
+      ]
+     },
+     [
+      "Situation intermédiaire",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Peu ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Non disponible",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "Données trop partielles"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "avantage",
+      "insees": [
+       "67482"
+      ]
+     },
+     [
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Plus de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "avantage",
+      "insees": [
+       "67482"
+      ]
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses modérées",
+      "Peu de pluies intenses"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Exposition modérée",
+      "Exposition modérée",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non concernée",
+      "Air pollué",
+      "Air pollué"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "33522"
+      ]
+     },
+     [
+      "Fortement exposé au bruit",
+      "Exposition sonore modérée",
+      "Fortement exposé au bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "avantage",
+      "insees": [
+       "69381",
+       "33522"
+      ]
+     },
+     [
+      "Présence industrielle modérée",
+      "Présence industrielle modérée",
+      "Environnement industriel marqué"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non concernée",
+      "Non concernée",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "33522"
+      ]
+     },
+     [
+      "Non concernée",
+      "Nature présente",
+      "Peu de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 239 km",
+      "Rivage marin · 36 km",
+      "Rivage marin · 469 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "avantage",
+      "insees": [
+       "67482"
+      ]
+     },
+     [
+      "Non concernée",
+      "Très urbain ou très isolé",
+      "Cadre intermédiaire"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bon accès aux soins",
+      "Bon accès aux soins",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pôle de services",
+      "Pôle de services",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre culturelle présente",
+      "Offre culturelle présente",
+      "Offre culturelle présente"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie étendu"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "egalite"
+     },
+     [
+      "Vie locale animée",
+      "Vie locale animée",
+      "Vie locale animée"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Forte présence étudiante",
+      "Forte présence étudiante dans l'agglomération de Bordeaux",
+      "Forte présence étudiante"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "33522",
+       "67482"
+      ]
+     },
+     [
+      "Perd des habitants",
+      "Gagne des habitants",
+      "Gagne des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Grande agglomération",
+      "Grande agglomération",
+      "Grande agglomération"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "69381",
+     "nom": "Lyon",
+     "compatibility": 100,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "vaste bassin d'emploi diversifié",
+      "collèges et lycées accessibles autour",
+      "vie locale animée (commerces, marchés, associations)"
+     ],
+     "decouverte": "arrêts de métro près du centre de la commune",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Talence.",
+     "distinctive": null
+    },
+    {
+     "insee": "33522",
+     "nom": "Talence",
+     "compatibility": 99,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "vaste bassin d'emploi diversifié",
+      "collèges et lycées accessibles autour",
+      "vie locale animée (commerces, marchés, associations)"
+     ],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Lyon.",
+     "distinctive": "les hivers les plus doux des trois"
+    },
+    {
+     "insee": "67482",
+     "nom": "Strasbourg",
+     "compatibility": 99,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "vaste bassin d'emploi diversifié",
+      "collèges et lycées accessibles autour",
+      "vie locale animée (commerces, marchés, associations)"
+     ],
+     "decouverte": "forte présence étudiante",
+     "tradeoff": null,
+     "compromis": "En échange, les sites industriels sont plus présents qu'à Talence.",
+     "distinctive": "la plus petite ville des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "44109",
+     "nom": "Nantes",
+     "compatibility": 98,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "vaste bassin d'emploi diversifié",
+      "collèges et lycées accessibles autour",
+      "vie locale animée (commerces, marchés, associations)"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": null,
+     "compromis": "En échange, la sécheresse est plus présente qu'à Paris.",
+     "distinctive": "la plus petite ville des deux"
+    },
+    {
+     "insee": "75101",
+     "nom": "Paris",
+     "compatibility": 98,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "vaste bassin d'emploi diversifié",
+      "collèges et lycées accessibles autour",
+      "vie locale animée (commerces, marchés, associations)"
+     ],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": null,
+     "compromis": "En échange, l'environnement est plus bruyant qu'à Nantes.",
+     "distinctive": "la plus grande ville des deux"
+    }
+   ],
+   "resume": [
+    "Talence prend l'avantage sur le climat (chaleur, douceur, soleil) et la santé environnementale (air, bruit, industrie).",
+    "Strasbourg se distingue sur les risques naturels (feu, sécheresse, pluies intenses)."
+   ],
+   "arbitrage": "Si le climat compte d'abord pour vous, Talence prend l'avantage ; si vous regardez surtout les risques naturels, Strasbourg reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Talence se distingue par la douceur de ses hivers."
+    ],
+    [
+     "risques",
+     "Strasbourg se distingue par sa météo moins propice aux feux et ses pluies intenses rares."
+    ],
+    [
+     "sante_env",
+     "Sur le calme sonore, Talence fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "cadre",
+     "Sur les espaces naturels, Talence fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ },
+ "mer-feu-06": {
+  "parsed": {
+   "reformulation": "mer-feu-06",
+   "hardConstraints": {
+    "departements": [
+     "06"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "proximite_mer",
+     "weight": 2
+    },
+    {
+     "key": "faible_risque_feu",
+     "weight": 3
+    },
+    {
+     "key": "air_sain",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": false,
+   "bestCompatibility": 64,
+   "candidates": 63,
+   "couverture": "complete",
+   "results": [
+    [
+     "06083",
+     64
+    ],
+    [
+     "06067",
+     63
+    ],
+    [
+     "06103",
+     60
+    ],
+    [
+     "06023",
+     58
+    ],
+    [
+     "06048",
+     58
+    ]
+   ],
+   "pistes": [
+    [
+     "06023",
+     58
+    ],
+    [
+     "06048",
+     58
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "avantage",
+      "insees": [
+       "06103"
+      ]
+     },
+     [
+      "Étés tempérés",
+      "Étés tempérés",
+      "Étés frais"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06067"
+      ]
+     },
+     [
+      "Hivers parmi les plus doux",
+      "Hivers parmi les plus doux",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Très ensoleillé",
+      "Très ensoleillé",
+      "Très ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "1 à 2 sinistres pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an",
+      "Sinistres fréquents : 5 à 10 pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes",
+      "Pluies intenses fréquentes"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "avantage",
+      "insees": [
+       "06103"
+      ]
+     },
+     [
+      "Sols très exposés",
+      "Sols très exposés",
+      "Exposition modérée"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "avantage",
+      "insees": [
+       "06103"
+      ]
+     },
+     [
+      "Air pollué",
+      "Air pollué",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "avantage",
+      "insees": [
+       "06103"
+      ]
+     },
+     [
+      "Exposition sonore modérée",
+      "Exposition sonore modérée",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "egalite"
+     },
+     [
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour",
+      "Beaucoup de nature autour"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06067"
+      ]
+     },
+     [
+      "Rivage marin · 1,9 km",
+      "Rivage marin · 3,1 km",
+      "Rivage marin · 33 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Moins de voiture qu'ailleurs pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bien relié par le train",
+      "Bien relié par le train",
+      "Bien relié par le train"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06067"
+      ]
+     },
+     [
+      "Nombreux arrêts près du centre",
+      "Nombreux arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06103"
+      ]
+     },
+     [
+      "Bon accès aux soins",
+      "Accès aux soins limité",
+      "Bon accès aux soins"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06103"
+      ]
+     },
+     [
+      "Pôle de services",
+      "Centre de proximité",
+      "Pôle de services"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "avantage",
+      "insees": [
+       "06067"
+      ]
+     },
+     [
+      "Accès intermédiaire",
+      "Collèges et lycées accessibles",
+      "Accès limité"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "avantage",
+      "insees": [
+       "06067"
+      ]
+     },
+     [
+      "Offre limitée",
+      "Offre intermédiaire",
+      "Offre limitée"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06067"
+      ]
+     },
+     [
+      "Bassin de vie étendu",
+      "Bassin de vie étendu",
+      "Bassin de vie restreint"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "avantage",
+      "insees": [
+       "06103"
+      ]
+     },
+     [
+      "Bassin d'emploi resserré",
+      "Bassin d'emploi resserré",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083"
+      ]
+     },
+     [
+      "Vie locale animée",
+      "Vie locale intermédiaire",
+      "Vie locale discrète"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Présence étudiante intermédiaire",
+      "Présence étudiante intermédiaire dans l'agglomération de Menton",
+      "Non mesurée"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "avantage",
+      "insees": [
+       "06083",
+       "06067"
+      ]
+     },
+     [
+      "Gagne des habitants",
+      "Gagne des habitants",
+      "Population stable"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Ville moyenne",
+      "Ville moyenne",
+      "Plutôt rural"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+   "cartes": [
+    {
+     "insee": "06083",
+     "nom": "Menton",
+     "compatibility": 64,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux",
+      "rivage marin à 1,9 km"
+     ],
+     "decouverte": "population en croissance",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Roquebillière.",
+     "distinctive": null
+    },
+    {
+     "insee": "06067",
+     "nom": "Gorbio",
+     "compatibility": 63,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux",
+      "rivage marin à 3,1 km"
+     ],
+     "decouverte": "bien reliée par le train",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Roquebillière.",
+     "distinctive": null
+    },
+    {
+     "insee": "06103",
+     "nom": "Roquebillière",
+     "compatibility": 60,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux",
+      "air de fond plus pur"
+     ],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": "éloignée du littoral",
+     "compromis": "En échange, éloignée du littoral.",
+     "distinctive": "le bassin d'emploi le plus dynamique des trois"
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "06023",
+     "nom": "Breil-sur-Roya",
+     "compatibility": 58,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux",
+      "rivage marin à 17 km"
+     ],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, air plus chargé en particules.",
+     "distinctive": "le marché immobilier le plus accessible des deux"
+    },
+    {
+     "insee": "06048",
+     "nom": "Contes",
+     "compatibility": 58,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "météo moins propice aux feux",
+      "rivage marin à 10 km"
+     ],
+     "decouverte": "à l'écart des grandes infrastructures bruyantes",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, la chaleur estivale est plus marquée qu'à Breil-sur-Roya.",
+     "distinctive": "le bassin d'emploi le plus dynamique des deux"
+    }
+   ],
+   "resume": [
+    "Roquebillière prend l'avantage sur le climat (chaleur, douceur, soleil), les risques naturels (feu, sécheresse, pluies intenses) et la santé environnementale (air, bruit, industrie).",
+    "Gorbio se distingue sur les services (soins, écoles, commerces)."
+   ],
+   "arbitrage": "Si la santé environnementale compte d'abord pour vous, Roquebillière prend l'avantage ; si vous regardez surtout les services, Gorbio reprend la main.",
+   "syntheses": [
+    [
+     "climat",
+     "Roquebillière se distingue par ses étés frais."
+    ],
+    [
+     "risques",
+     "Sur la sécheresse, Roquebillière fait mieux que les deux autres, à un niveau intermédiaire."
+    ],
+    [
+     "sante_env",
+     "Roquebillière se distingue par son calme."
+    ],
+    [
+     "cadre",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "mobilite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "services",
+     "Gorbio se distingue par son accès aux collèges et lycées."
+    ],
+    [
+     "vitalite",
+     "Roquebillière se distingue par son bassin d'emploi étendu, Menton par sa vie locale animée."
+    ]
+   ]
+  }
+ },
+ "calme-industrie-59": {
+  "parsed": {
+   "reformulation": "calme-industrie-59",
+   "hardConstraints": {
+    "departements": [
+     "59"
+    ]
+   },
+   "preferences": [
+    {
+     "key": "calme_sonore",
+     "weight": 3
+    },
+    {
+     "key": "faible_exposition_industrielle",
+     "weight": 3
+    },
+    {
+     "key": "air_sain",
+     "weight": 2
+    }
+   ]
+  },
+  "classement": {
+   "perfectMatch": true,
+   "bestCompatibility": 84,
+   "candidates": 293,
+   "couverture": "complete",
+   "results": [
+    [
+     "59601",
+     84
+    ],
+    [
+     "59572",
+     80
+    ],
+    [
+     "59157",
+     80
+    ],
+    [
+     "59464",
+     77
+    ],
+    [
+     "59012",
+     76
+    ]
+   ],
+   "pistes": [
+    [
+     "59464",
+     77
+    ],
+    [
+     "59012",
+     76
+    ]
+   ],
+   "avantages": [
+    [
+     "etes_frais",
+     {
+      "type": "egalite"
+     },
+     [
+      "Étés frais",
+      "Étés frais",
+      "Étés frais"
+     ]
+    ],
+    [
+     "douceur",
+     {
+      "type": "egalite"
+     },
+     [
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux",
+      "Hivers parmi les moins doux"
+     ]
+    ],
+    [
+     "ensoleillement",
+     {
+      "type": "neutre"
+     },
+     [
+      "Peu ensoleillé",
+      "Peu ensoleillé",
+      "Peu ensoleillé"
+     ]
+    ],
+    [
+     "inondation",
+     {
+      "type": "neutre"
+     },
+     [
+      "Aucun sinistre répertorié",
+      "Moins de 1 sinistre pour 1 000 biens par an",
+      "2 à 5 sinistres pour 1 000 biens par an"
+     ]
+    ],
+    [
+     "feu",
+     {
+      "type": "egalite"
+     },
+     [
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs",
+      "Moins de jours propices aux feux qu'ailleurs"
+     ]
+    ],
+    [
+     "pluies",
+     {
+      "type": "egalite"
+     },
+     [
+      "Pluies intenses modérées",
+      "Pluies intenses modérées",
+      "Pluies intenses modérées"
+     ]
+    ],
+    [
+     "secheresse",
+     {
+      "type": "egalite"
+     },
+     [
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse",
+      "Sols peu exposés à la sécheresse"
+     ]
+    ],
+    [
+     "air",
+     {
+      "type": "egalite"
+     },
+     [
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne",
+      "Qualité de l'air moyenne"
+     ]
+    ],
+    [
+     "calme_sonore",
+     {
+      "type": "egalite"
+     },
+     [
+      "Très préservé du bruit",
+      "Très préservé du bruit",
+      "Très préservé du bruit"
+     ]
+    ],
+    [
+     "industrie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque",
+      "Peu exposé aux sites industriels à risque"
+     ]
+    ],
+    [
+     "agriculture",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601",
+       "59572"
+      ]
+     },
+     [
+      "Peu d'agriculture intensive",
+      "Peu d'agriculture intensive",
+      "Agriculture intensive modérée"
+     ]
+    ],
+    [
+     "nature",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601"
+      ]
+     },
+     [
+      "Beaucoup de nature autour",
+      "Nature présente",
+      "Nature présente"
+     ]
+    ],
+    [
+     "mer",
+     {
+      "type": "egalite"
+     },
+     [
+      "Rivage marin · 160 km",
+      "Rivage marin · 151 km",
+      "Rivage marin · 149 km"
+     ]
+    ],
+    [
+     "cadre_calme",
+     {
+      "type": "egalite"
+     },
+     [
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable",
+      "Cadre paisible et habitable"
+     ]
+    ],
+    [
+     "sans_voiture",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601"
+      ]
+     },
+     [
+      "Moins de voiture qu'ailleurs pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler",
+      "Usage intermédiaire de la voiture pour aller travailler"
+     ]
+    ],
+    [
+     "train",
+     {
+      "type": "egalite"
+     },
+     [
+      "Gare accessible, desserte limitée",
+      "Gare accessible, desserte limitée",
+      "Gare accessible, desserte limitée"
+     ]
+    ],
+    [
+     "tc_quotidien",
+     {
+      "type": "egalite"
+     },
+     [
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre",
+      "Peu ou pas d'arrêts près du centre"
+     ]
+    ],
+    [
+     "soins",
+     {
+      "type": "avantage",
+      "insees": [
+       "59572"
+      ]
+     },
+     [
+      "Accès aux soins limité",
+      "Accès intermédiaire",
+      "Accès aux soins limité"
+     ]
+    ],
+    [
+     "services",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601"
+      ]
+     },
+     [
+      "Pôle de services",
+      "Centre de proximité",
+      "Centre de proximité"
+     ]
+    ],
+    [
+     "ecoles",
+     {
+      "type": "egalite"
+     },
+     [
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles",
+      "Collèges et lycées accessibles"
+     ]
+    ],
+    [
+     "culture",
+     {
+      "type": "egalite"
+     },
+     [
+      "Offre intermédiaire",
+      "Offre intermédiaire",
+      "Offre intermédiaire"
+     ]
+    ],
+    [
+     "isolement",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601"
+      ]
+     },
+     [
+      "Bassin de proximité",
+      "Bassin de vie restreint",
+      "Bassin de vie restreint"
+     ]
+    ],
+    [
+     "emploi",
+     {
+      "type": "egalite"
+     },
+     [
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu",
+      "Bassin d'emploi étendu"
+     ]
+    ],
+    [
+     "vie_locale",
+     {
+      "type": "avantage",
+      "insees": [
+       "59601",
+       "59157"
+      ]
+     },
+     [
+      "Vie locale intermédiaire",
+      "Vie locale discrète",
+      "Vie locale intermédiaire"
+     ]
+    ],
+    [
+     "vie_etudiante",
+     {
+      "type": "egalite"
+     },
+     [
+      "Non mesurée",
+      "Non mesurée",
+      "Non mesurée"
+     ]
+    ],
+    [
+     "demographie",
+     {
+      "type": "egalite"
+     },
+     [
+      "Perd des habitants",
+      "Perd des habitants",
+      "Perd des habitants"
+     ]
+    ],
+    [
+     "taille_ville",
+     {
+      "type": "neutre"
+     },
+     [
+      "Plutôt rural",
+      "Plutôt rural",
+      "Plutôt rural"
+     ]
+    ]
+   ]
+  },
+  "textes": {
+   "message": null,
+   "cartes": [
+    {
+     "insee": "59601",
+     "nom": "Trélon",
+     "compatibility": 84,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "à l'écart des grandes infrastructures bruyantes",
+      "à l'écart des sites industriels à risque",
+      "air de fond plus pur"
+     ],
+     "decouverte": "étés plus frais",
+     "tradeoff": null,
+     "compromis": "En échange, l'offre de soins est plus limitée qu'à Solre-le-Château.",
+     "distinctive": "le marché immobilier le plus accessible des trois"
+    },
+    {
+     "insee": "59572",
+     "nom": "Solre-le-Château",
+     "compatibility": 80,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "à l'écart des grandes infrastructures bruyantes",
+      "à l'écart des sites industriels à risque"
+     ],
+     "decouverte": null,
+     "tradeoff": null,
+     "compromis": "En échange, la vie locale est plus discrète qu'à Trélon.",
+     "distinctive": "le meilleur accès aux médecins des trois"
+    },
+    {
+     "insee": "59157",
+     "nom": "Cousolre",
+     "compatibility": 80,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "à l'écart des grandes infrastructures bruyantes",
+      "à l'écart des sites industriels à risque"
+     ],
+     "decouverte": null,
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, air plus chargé en particules.",
+     "distinctive": null
+    }
+   ],
+   "pistes": [
+    {
+     "insee": "59464",
+     "nom": "Poix-du-Nord",
+     "compatibility": 77,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "à l'écart des grandes infrastructures bruyantes",
+      "à l'écart des sites industriels à risque"
+     ],
+     "decouverte": "étés plus frais",
+     "tradeoff": "air plus chargé en particules",
+     "compromis": "En échange, l'air de fond est un peu moins pur qu'à Anor.",
+     "distinctive": null
+    },
+    {
+     "insee": "59012",
+     "nom": "Anor",
+     "compatibility": 76,
+     "couverture": "complete",
+     "sansPrioriteFavorable": false,
+     "reasons": [
+      "à l'écart des grandes infrastructures bruyantes",
+      "à l'écart des sites industriels à risque",
+      "air de fond plus pur"
+     ],
+     "decouverte": "forêts et espaces naturels à proximité",
+     "tradeoff": null,
+     "compromis": "En échange, zone sous-dotée en médecins.",
+     "distinctive": "la plus proche de grands espaces naturels des deux"
+    }
+   ],
+   "resume": [
+    "Trélon prend l'avantage sur la nature et le cadre de vie (espaces naturels, mer), la mobilité (voiture, train, transports) et les services (soins, écoles, commerces)."
+   ],
+   "arbitrage": null,
+   "syntheses": [
+    [
+     "climat",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "risques",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "sante_env",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ],
+    [
+     "cadre",
+     "Trélon se distingue par ses espaces naturels."
+    ],
+    [
+     "mobilite",
+     "Trélon se distingue par ses trajets domicile-travail moins souvent faits en voiture."
+    ],
+    [
+     "services",
+     "Trélon se distingue par son niveau de services."
+    ],
+    [
+     "vitalite",
+     "Sur ce thème, les trois territoires se ressemblent : rien ne les départage ici."
+    ]
+   ]
+  }
+ }
+}

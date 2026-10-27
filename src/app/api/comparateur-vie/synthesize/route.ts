@@ -22,6 +22,7 @@ import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 import { champInondationSynthese } from "@/lib/comparateur/inondation-historique";
+import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -107,6 +108,13 @@ Si un territoire porte "priorites_non_mesurees", ces priorités n'ont PAS été 
 cette commune : nommez-les une fois comme « non mesurées ici », sans dire qu'elles sont
 satisfaites ou manquantes, sans en faire un compromis, et ne dites pas que la commune
 « correspond » au projet sur ces points.
+Si un territoire porte "aucune_priorite_favorable", aucune des priorités MESURÉES pour lui n'atteint un
+niveau favorable, et ses "raisons" sont vides. "toutes_mesurees" : toutes ses priorités déclarées
+sont mesurées. "parmi_celles_mesurees" : seules certaines le sont ; celles de "priorites_non_mesurees"
+restent inconnues, ni favorables ni défavorables : dites « parmi celles mesurées ici », jamais « aucune
+de vos priorités ». Dans les deux cas, ne dites pas qu'il correspond, répond ou convient au projet, ne
+lui prêtez aucun atout sur ces priorités, et ne présentez jamais un critère demandé comme son point
+fort, même par comparaison avec les autres communes.
 Avant d'écrire, faites la liste mentale de ces critères et vérifiez
 que CHACUN apparaît, NOMMÉ, au moins une fois dans votre récit. L'utilisateur doit pouvoir
 relire la synthèse et reconnaître immédiatement ce qu'il a demandé.
@@ -299,7 +307,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[] }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[]; sansPrioriteFavorable?: boolean }[];
   heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
   outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean; couverture?: string };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
@@ -380,6 +388,13 @@ export async function POST(request: NextRequest) {
       trait_distinctif: r.distinctive ?? null,
       priorites_non_mesurees: Array.isArray(r.prioritesNonMesurees) && r.prioritesNonMesurees.length
         ? r.prioritesNonMesurees.filter((x) => typeof x === "string") : null,
+      // FUT-151 : aucune favorable parmi les priorités mesurées, avec sa portée. Seul `true` le dit ; sans la liste
+      // des non mesurées, la portée reste prudente (« parmi celles mesurées »).
+      aucune_priorite_favorable: porteeSansFavorable({
+        marque: r.sansPrioriteFavorable,
+        etat: Array.isArray(r.prioritesNonMesurees) ? (r.prioritesNonMesurees.length ? "partielle" : "complete") : null,
+        nonMesurees: Array.isArray(r.prioritesNonMesurees) ? r.prioritesNonMesurees : null,
+      }),
     })),
     sante_environnementale: body.enrichment ?? null,
   };

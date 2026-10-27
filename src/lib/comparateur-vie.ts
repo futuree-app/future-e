@@ -217,6 +217,10 @@ export type MatchResult = {
   // à partir des seuls attributs mesurés. cf. buildSignature.
   signature: string[];
   tradeoff: string | null; // le compromis principal, ou null
+  // FUT-151 : des priorités déclarées sont mesurées pour cette commune, et aucune n'atteint le seuil favorable.
+  // `reasons` est alors vide : la carte, la synthèse et AskFuture disent l'absence de correspondance au lieu de
+  // présenter le moins mauvais critère comme un point fort. Absent sinon (y compris sans priorité mesurée).
+  sansPrioriteFavorable?: true;
   // Pression climatique sur l'économie locale (NARRATIF, n'entre PAS dans le score).
   // Note de lecture prudente : dépendance à un secteur sensible, pas un verdict.
   pressionEco: { palier: "moderee" | "marquee"; note: string } | null;
@@ -1169,6 +1173,7 @@ function assignDecouverte(
   shownPicks: MatchResult[],
   byInsee: Map<string, IndexCommune>,
   requestedKeys: Set<PreferenceKey>,
+  compromisKeyByInsee: Map<string, PreferenceKey> = new Map(),
 ): void {
   // Distinct DANS le groupe affiché (comme assignIdentite) : la découverte est la
   // 2e force qui DIFFÉRENCIE les cartes. Si deux communes ont la même meilleure
@@ -1182,6 +1187,8 @@ function assignDecouverte(
     const cands: { key: PreferenceKey; score: number }[] = [];
     for (const k of DECOUVERTE_KEYS) {
       if (requestedKeys.has(k)) continue; // non demandée seulement
+      // FUT-151 : jamais la dimension que le compromis de la carte présente comme un retrait.
+      if (compromisKeyByInsee.get(r.insee) === k) continue;
       const s = subScore(k, c);
       if (s != null && s > 65) cands.push({ key: k, score: s }); // seuil band haute
     }
@@ -1489,7 +1496,7 @@ export const THEME_ORDER: { id: string; titre: string; gp: string; court: string
 // (compréhensibles sans jargon). forte = groupe valencé pour la synthèse. risque = critère
 // dont le pire tier s'affiche en rouge si une autre commune fait mieux. directionnel=false
 // = préférence non universelle (pas de gagnant). Premier jet, à calibrer.
-const DIMENSIONS: ComparaisonDim[] = [
+export const DIMENSIONS: ComparaisonDim[] = [
   { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : l'exposition aux fortes chaleurs, actuelle et future. Les hivers sont notés à part (Hivers doux).", risque: false, directionnel: true },
   { id: "douceur", label: "Hivers doux", themeId: "climat", key: "douceur_climat", paliers: ["Hivers parmi les plus doux", "Situation intermédiaire", "Hivers parmi les moins doux"], gp: "la douceur des hivers", forte: "la douceur de ses hivers", aide: "La douceur des hivers (température moyenne de décembre à février), à l'échelle nationale. Les étés sont notés à part (Étés frais).", risque: false, directionnel: true },
   { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : l'ensoleillement idéal dépend de vos goûts.", risque: false, directionnel: false },
@@ -1765,16 +1772,28 @@ export function buildComparaisonComplete(
   // thèmes : phrase de synthèse honnête (phrases naturelles, groupes nominaux avec article)
   const nomByInsee = new Map(trio.map((r) => [r.insee, r.nom]));
   const forteById = new Map(DIMENSIONS.map((d) => [d.id, d.forte]));
+  const gpById = new Map(DIMENSIONS.map((d) => [d.id, d.gp]));
   const joinFr = (xs: string[]): string =>
     xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} et ${xs[xs.length - 1]}`;
   const themes: ComparaisonTheme[] = THEME_ORDER.map((th) => {
     const lignes = DIMENSIONS.filter((d) => d.themeId === th.id).map((d) => ligneByDim.get(d.id)!);
     const winners = new Map<string, string[]>(); // insee -> groupes nominaux menés
+    // FUT-151 : une avance RELATIVE n'est pas un point fort. La commune qui mène au palier intermédiaire (les
+    // autres sont au pire) n'a ni « son air pur » ni « sa météo moins propice aux feux » : la cellule dit
+    // « Qualité de l'air moyenne ». Ces avances ne nourrissent pas « se distingue par » ; elles sont dites
+    // comme telles, avec le palier de la cellule, et seulement quand aucun point fort ne départage le thème.
+    const relatives: { insee: string; gp: string }[] = [];
     for (const l of lignes) {
       // Seuls les avantages NETS (une seule commune) nourrissent la synthèse ; les
       // avantages partagés (2 communes) sont ambigus et n'y entrent pas.
       if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
         const insee = l.avantage.insees[0];
+        // Celle qui mène est au meilleur palier présent, et une autre fait moins bien : 0 ou 1, jamais 2.
+        const raw = rawByDim.get(l.id)?.[trio.findIndex((r) => r.insee === insee)];
+        if (raw == null || bandIndex(raw) !== 0) {
+          relatives.push({ insee, gp: gpById.get(l.id) ?? l.label.toLowerCase() });
+          continue;
+        }
         const arr = winners.get(insee) ?? [];
         // FUT-135 : hors du pôle, ou sans établissement positivement attesté, « sa vie étudiante » prêterait à la
         // commune la mesure de son agglomération.
@@ -1788,7 +1807,11 @@ export function buildComparaisonComplete(
     }
     const ranked = [...winners.entries()].sort((a, b) => b[1].length - a[1].length);
     let synthese: string;
-    if (ranked.length === 0) {
+    if (ranked.length === 0 && relatives.length > 0) {
+      const { insee, gp } = relatives[0];
+      const autres = trio.length === 2 ? "l'autre" : "les deux autres";
+      synthese = `Sur ${gp}, ${nomByInsee.get(insee)} fait mieux que ${autres}, à un niveau intermédiaire.`;
+    } else if (ranked.length === 0) {
       // Conclure, pas seulement décrire : un thème sans gagnant net ne départage pas (il ne
       // pèsera pas dans le choix). « départage » reste neutre (vaut pour la découverte aussi).
       synthese = `Sur ce thème, les ${nMot} territoires se ressemblent : rien ne les départage ici.`;
@@ -2006,7 +2029,7 @@ const COMPROMIS_KEYS: PreferenceKey[] = [
   "acces_soins", "acces_services", "calme_sonore", "faible_exposition_industrielle",
   "vie_locale", "faible_dependance_auto",
 ];
-const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
+export const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
   faible_chaleur: "la chaleur estivale est plus marquée",
   faible_secheresse: "la sécheresse est plus présente",
   air_sain: "l'air de fond est un peu moins pur",
@@ -2059,19 +2082,21 @@ function buildCompromisCandidates(
 ): CompromisCand[] {
   const out: CompromisCand[] = [];
   const seen = new Set<PreferenceKey>();
-  const add = (key: PreferenceKey, severity: number) => {
+  const add = (key: PreferenceKey, severity: number, relatif = false) => {
     if (seen.has(key)) return;
-    seen.add(key);
     const self = c ? subScore(key, c) : null;
     const leader = compromisLeader(key, r, shownPicks, byInsee);
     const neg = COMPROMIS_NEG[key];
     // Comparatif seulement si la dimension a un sens relatif (COMPROMIS_NEG) ET qu'un
     // leader se détache vraiment (écart ≥ seuil) : « moins accessibles qu'à X ». Sinon
     // formulation absolue télégraphique (REASON_NEG), honnête sans inventer de divergence.
-    const text =
-      neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
-        ? `En échange, ${neg} qu'à ${leader.nom}.`
-        : `En échange, ${raisonNeg(key, c)}.`;
+    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP);
+    // FUT-151 (revue) : un simple retrait relatif ne reçoit la formulation ABSOLUE (« sols exposés à la
+    // sécheresse ») que si la commune est réellement faible sur ce critère. Sinon, sans comparatif possible,
+    // il n'est pas un compromis.
+    if (relatif && !comparatif && (self == null || self >= SEUIL_FAIBLESSE)) return;
+    seen.add(key);
+    const text = comparatif ? `En échange, ${neg} qu'à ${leader!.nom}.` : `En échange, ${raisonNeg(key, c)}.`;
     out.push({ key, severity, text });
   };
 
@@ -2092,19 +2117,24 @@ function buildCompromisCandidates(
       // qui la louerait (« sans faiblesse marquée » = avantage déguisé, proscrit dans
       // un face-à-face neutre). Le tri par delta garde le plus saillant en tête ; le
       // comparatif « qu'à X » reste gardé par COMPROMIS_GAP dans add().
-      if (delta > 0) rel.push({ key: k, delta });
+      // FUT-151 (revue) : un critère favorable dans l'absolu ne devient pas un compromis parce qu'une voisine
+      // fait mieux. Bagnères-de-Bigorre (sécheresse 91/100) lisait « sols exposés à la sécheresse », Aytré (vie
+      // locale 86/100) « peu de lieux de vie et d'animation locale ». Seuil : celui des raisons, inchangé.
+      if (delta > 0 && s < SEUIL_RAISON) rel.push({ key: k, delta });
     }
     rel.sort((a, b) => b.delta - a.delta);
-    for (const x of rel) add(x.key, x.delta);
+    for (const x of rel) add(x.key, x.delta, true);
   }
   return out;
 }
 
+// Rend la clé du compromis retenu par commune : la découverte et le trait distinctif ne la reprennent pas.
 function assignCompromis(
   shownPicks: MatchResult[],
   byInsee: Map<string, IndexCommune>,
   tradeoffKeyByInsee: Map<string, PreferenceKey | null>,
-): void {
+  forceKeysByInsee: Map<string, PreferenceKey[]> = new Map(),
+): Map<string, PreferenceKey> {
   // Scores de groupe par clé (moyenne sur les communes affichées).
   const groupMean = new Map<PreferenceKey, number>();
   for (const k of COMPROMIS_KEYS) {
@@ -2122,22 +2152,31 @@ function assignCompromis(
   // trio. Résultat : trois arbitrages distincts (chaleur / services / industrie…) plutôt
   // que le même compromis répété. Repli si aucune dimension libre ne se détache.
   const used = new Set<PreferenceKey>();
+  const cles = new Map<string, PreferenceKey>();
   for (const r of shownPicks) {
     const c = byInsee.get(r.insee) ?? null;
     const tradeoffKey = tradeoffKeyByInsee.get(r.insee) ?? null;
     const cands = buildCompromisCandidates(r, c, tradeoffKey, groupMean, shownPicks, byInsee);
-    const chosen = cands.find((x) => !used.has(x.key));
+    // FUT-151 : un retrait relatif ne porte jamais sur une priorité que la carte présente comme favorable
+    // (« bon accès aux soins », puis « l'offre de soins est plus limitée qu'à X »).
+    const forces = new Set(forceKeysByInsee.get(r.insee) ?? []);
+    // L'unicité des dimensions ne cache jamais une faiblesse absolue : si aucune autre dimension honnête ne
+    // reste, la commune garde la sienne, même déjà dite par une autre carte du trio.
+    const chosen = cands.find((x) => !used.has(x.key) && !forces.has(x.key))
+      ?? (tradeoffKey ? cands.find((x) => x.key === tradeoffKey) : undefined);
     if (chosen) {
       used.add(chosen.key);
+      cles.set(r.insee, chosen.key);
       r.compromis = chosen.text;
     } else {
-      // Aucun retrait relatif libre : la commune est au niveau ou au-dessus du groupe
-      // sur toutes les dimensions comparées. On n'INVENTE pas de revers, mais on ne la
+      // Aucun retrait relatif libre (ou seulement sur des critères favorables dans l'absolu), et aucune
+      // faiblesse absolue. On n'INVENTE pas de revers, mais on ne la
       // loue pas non plus (« sans faiblesse marquée » donnait un avantage). On n'affiche
       // rien : les cartes gèrent l'absence (rendu conditionnel sur r.compromis).
       r.compromis = "";
     }
   }
+  return cles;
 }
 
 // Calcule les signaux ambiants sur le GROUPE affiché (mutation in place de r.signaux).
@@ -2314,7 +2353,7 @@ export function villeEtudianteLocale(c: IndexCommune): boolean {
 }
 
 // Les compromis absolus : REASON_NEG, sauf la vie étudiante, dite au niveau et à l'échelle mesurés.
-function raisonNeg(key: PreferenceKey, c: IndexCommune | null | undefined): string {
+export function raisonNeg(key: PreferenceKey, c: IndexCommune | null | undefined): string {
   return key === "vie_etudiante" && c ? presenceEtudianteDuScore(c) : REASON_NEG[key];
 }
 
@@ -2480,6 +2519,11 @@ export const MESSAGE_COUVERTURE: Record<Exclude<CouvertureResultats, "complete">
   sans_priorite: "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
 };
 
+// FUT-151 : aucune commune affichée n'atteint un niveau favorable sur une priorité déclarée. L'ordre reste celui
+// du score (elles s'en approchent le plus), mais aucune ne « correspond » ni ne « pourrait convenir ».
+export const MESSAGE_SANS_FAVORABLE =
+  "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.";
+
 // FUT-109 · L'ORDRE DU CLASSEMENT (arbitrage du porteur, 24/10/2026), le même à chaque étape de `matchProjects` :
 // tri, affinage des trajets (à statut de condition encore inconnu : couverture puis score), dédoublonnage des
 // villes (la première rencontrée est gardée), étalement.
@@ -2516,7 +2560,13 @@ export function rangCouverture(etat: CouverturePriorites["etat"]): 0 | 1 | 2 {
   return etat === "complete" || etat === "sans_priorite" ? 0 : etat === "partielle" ? 1 : 2;
 }
 
-function reasonText(key: PreferenceKey, c: IndexCommune): string {
+// Le seuil à partir duquel une priorité déclarée devient une raison de la carte (inchangé par FUT-151, qui l'a
+// seulement nommé). En dessous, la priorité n'est jamais présentée comme satisfaite.
+export const SEUIL_RAISON = 55;
+// Sous ce seuil, une priorité déclarée est une faiblesse absolue (le compromis `tradeoff`). Inchangé, nommé par FUT-151.
+export const SEUIL_FAIBLESSE = 50;
+
+export function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
   return typeof r === "function" ? r(c) : r;
 }
@@ -2782,26 +2832,32 @@ type DistinctiveCand = {
   mode?: "ratio" | "step";
   label: string;
   guard?: (winner: number) => boolean;
+  // La priorité que ce trait loue, quand il en loue une (FUT-151).
+  key?: PreferenceKey;
 };
 const DISTINCTIVE_FLOOR = 0.5;
 
+// `exclure` : par commune, les priorités que sa carte présente déjà comme un compromis (FUT-151). Une avance
+// relative sur l'une d'elles (« les étés les plus supportables des trois » à côté de « En échange, étés
+// chauds ») dirait un point fort et un point faible du même critère : la commune prend son trait suivant.
 function buildDistinctive(
   picks: IndexCommune[],
   littoralIndex: Map<string, LittoralSummary> | null,
+  exclure: Map<string, Set<PreferenceKey>> = new Map(),
 ): Record<string, string> {
   const n = picks.length;
   if (n < 2) return {};
   const suffix = n >= 3 ? " des trois" : " des deux";
   const CANDS: DistinctiveCand[] = [
-    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus proche de grands espaces naturels", guard: (w) => w >= 60 },
-    { tier: 1, value: (c) => c.vivpct?.apl ?? null, dir: "max", scale: 22, label: "le meilleur accès aux médecins", guard: (w) => w >= 50 },
-    { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", guard: (w) => w >= 50 },
-    { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables" },
+    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus proche de grands espaces naturels", key: "nature", guard: (w) => w >= 60 },
+    { tier: 1, value: (c) => c.vivpct?.apl ?? null, dir: "max", scale: 22, label: "le meilleur accès aux médecins", key: "acces_soins", guard: (w) => w >= 50 },
+    { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", key: "viabilite_emploi", guard: (w) => w >= 50 },
+    { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables", key: "faible_chaleur" },
     { tier: 1, value: (c) => erosionSeverity(c.insee, littoralIndex), dir: "min", scale: 1, mode: "step", label: "le littoral le moins exposé" },
     { tier: 1, value: logementNiveau, dir: "min", scale: 1, mode: "step", label: "le marché immobilier le plus accessible" },
     { tier: 1, value: (c) => c.relief_proximite ?? null, dir: "max", scale: 22, label: "la plus proche de la montagne", guard: (w) => w >= 55 },
     { tier: 2, value: (c) => c.clim.NORRR_yr ?? null, dir: "max", scale: 250, label: "la plus pluvieuse", guard: (w) => w >= 850 },
-    { tier: 2, value: (c) => c.clim.NORTMm_seas_DJF ?? null, dir: "max", scale: 4, label: "les hivers les plus doux" },
+    { tier: 2, value: (c) => c.clim.NORTMm_seas_DJF ?? null, dir: "max", scale: 4, label: "les hivers les plus doux", key: "douceur_climat" },
     { tier: 2, value: (c) => c.clim.NORTX30D_yr ?? null, dir: "max", scale: 15, label: "les étés les plus chauds" },
     { tier: 2, value: (c) => tailleVille(c), dir: "min", scale: 1, mode: "ratio", label: "la plus petite ville" },
     { tier: 2, value: (c) => tailleVille(c), dir: "max", scale: 1, mode: "ratio", label: "la plus grande ville" },
@@ -2814,6 +2870,7 @@ function buildDistinctive(
     const ext = cd.dir === "min" ? sorted[0] : sorted[sorted.length - 1];
     const nearest = cd.dir === "min" ? sorted[1] : sorted[sorted.length - 2];
     if (cd.guard && !cd.guard(ext.v)) continue;
+    if (cd.key && exclure.get(ext.insee)?.has(cd.key)) continue;
     let sal: number;
     if (cd.mode === "ratio") {
       // Taille de ville : signal RARE, seulement si l'écart est vraiment structurant
@@ -3092,15 +3149,17 @@ export async function seedComparaison(
   // Narratifs RELATIFS au groupe nommé, comme le path /ou-vivre. Aucune préférence en mode
   // choix : requestedKeys vide, compromis absolu (tradeoffKey) nul partout.
   const requestedKeys = new Set<PreferenceKey>();
+  assignSignaux(picks, byInsee, requestedKeys);
+  assignIdentite(picks, byInsee);
+  const compromisKeys = assignCompromis(picks, byInsee, new Map(picks.map((r) => [r.insee, null])));
+  assignDecouverte(picks, byInsee, requestedKeys, compromisKeys);
+  // FUT-151 : même ordre que matchProjects, le trait distinctif ne reprend pas la dimension du compromis.
   const distinctiveMap = buildDistinctive(
     picks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
     littoralIndex,
+    new Map([...compromisKeys].map(([insee, k]) => [insee, new Set([k])])),
   );
   for (const r of picks) r.distinctive = distinctiveMap[r.insee] ?? null;
-  assignSignaux(picks, byInsee, requestedKeys);
-  assignIdentite(picks, byInsee);
-  assignCompromis(picks, byInsee, new Map(picks.map((r) => [r.insee, null])));
-  assignDecouverte(picks, byInsee, requestedKeys);
 
   const comparaison = buildComparaisonComplete(picks, byInsee);
   return { trio: picks, comparaison, ignores };
@@ -3297,21 +3356,24 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     // lourds, et à poids égal l'ordre où le lecteur les a dits : toutes les cartes d'une recherche ouvrent sur le
     // même critère dès que la commune le remplit (seuil de saillance inchangé).
     const parProjet = visible.map((x, ordre) => ({ ...x, ordre })).sort((a, b) => b.weight - a.weight || a.ordre - b.ordre);
-    let reasons = parProjet.filter((x) => x.s >= 55).slice(0, 3).map((x) => reasonText(x.key, c));
-    // Garantie : une carte ne doit jamais paraître vide ou « pas finie ». Si aucun
-    // aspect ne dépasse le seuil de saillance, on montre quand même les 1 à 2
-    // meilleurs aspects relatifs (ce qui explique pourquoi la commune ressort), sans
-    // le seuil. Le tri reste honnête, on ne fabrique pas une raison qui n'existe pas.
-    const parForce = [...visible].sort((a, b) => b.weight * b.s - a.weight * a.s);
-    if (reasons.length === 0) reasons = parForce.slice(0, 2).map((x) => reasonText(x.key, c));
+    // FUT-151 : une raison est une priorité déclarée qui atteint le seuil favorable, rien d'autre. Le repli
+    // d'avant (« les 1 à 2 meilleurs aspects relatifs » quand aucun n'y arrive) présentait le moins mauvais
+    // critère comme un point fort : à Châteauneuf-le-Rouge, « météo moins propice aux feux » pour un sous-score
+    // de 3/100, sur la même carte que le compromis « météo plus souvent propice aux feux ». Sans priorité
+    // favorable, la carte le dit (`sansPrioriteFavorable`) au lieu d'inventer une correspondance.
+    const favorables = parProjet.filter((x) => x.s >= SEUIL_RAISON);
+    const reasons = favorables.slice(0, 3).map((x) => reasonText(x.key, c));
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
     // FUT-129 : une commune qui recule pour ses inondations indemnisées fréquentes le dit, en premier :
     // c'est une priorité déclarée que les faits contredisent, et la seule raison de son recul.
-    const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < 50 ? worst.key : null;
+    const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < SEUIL_FAIBLESSE ? worst.key : null;
     const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? raisonNeg(tradeoffKey, c) : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
     built.couverture = { etat: couverture.etat, nonMesurees: couverture.nonMesurees.map((k) => PREFERENCE_LABELS[k] ?? k) };
+    // Des priorités déclarées sont mesurées ici, et aucune n'est favorable. Une priorité non mesurée n'est ni
+    // l'un ni l'autre : une commune sans aucune mesure n'est pas marquée (sa couverture le dit déjà).
+    if (visible.length > 0 && favorables.length === 0) built.sansPrioriteFavorable = true;
     if (inondationDeclaree) {
       const h = historiqueInondation(c.historiqueInondation);
       built.inondation = {
@@ -3333,6 +3395,9 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
       // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
       // par dimension dans le trio (assignCompromis). null = pas de faiblesse absolue.
       tradeoffKey,
+      // FUT-151 : les priorités que la carte présente comme favorables. Aucun compromis, aucune découverte ni
+      // aucun trait distinctif ne peut ensuite porter sur l'une d'elles (cf. assignCompromis).
+      forceKeys: favorables.slice(0, 3).map((x) => x.key),
       result: boundary ? { ...built, boundary: true as const } : built,
     };
   });
@@ -3464,9 +3529,12 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
         ? null
         : couvertureResultats !== "complete"
           ? MESSAGE_COUVERTURE[couvertureResultats]
-          : perfect
-            ? null
-            : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
+          : deduped.slice(0, DISPLAY).every((r) => r.sansPrioriteFavorable)
+            ? MESSAGE_SANS_FAVORABLE
+            // FUT-151 : un score élevé ne dit pas « tout est réuni » si une carte affichée n'a aucune priorité favorable.
+            : perfect && !deduped.slice(0, DISPLAY).some((r) => r.sansPrioriteFavorable)
+              ? null
+              : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
 
   // Trait distinctif (narratif, hors score) sur les seules communes AFFICHÉES, relatif
   // au groupe. Le moteur a accès à tous les sous-scores ; on charge l'index littoral ici
@@ -3494,11 +3562,6 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
       if (d?.status === "within" || d?.status === "over") r.travelMinutes = d.minutes;
     }
   }
-  const distinctiveMap = buildDistinctive(
-    shownPicks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
-    liDistinct,
-  );
-  for (const r of shownPicks) r.distinctive = distinctiveMap[r.insee] ?? null;
 
   // Signaux ambiants (narratif, hors score) sur le groupe affiché. requestedKeys = clés
   // EXPLICITEMENT demandées (hors baseline auto) : un critère pesé n'est pas redondé ici,
@@ -3516,26 +3579,32 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   const tradeoffKeyByInsee = new Map<string, PreferenceKey | null>(
     scored.map((s) => [s.result.insee, s.tradeoffKey]),
   );
-  assignSignaux(shownPicks, byInsee, requestedKeys);
-  assignIdentite(shownPicks, byInsee);
-  assignCompromis(shownPicks, byInsee, tradeoffKeyByInsee);
-  assignDecouverte(shownPicks, byInsee, requestedKeys);
+  const forceKeysByInsee = new Map(scored.map((s) => [s.result.insee, s.forceKeys]));
+  // FUT-151 : le compromis d'abord, puis la découverte et le trait distinctif, qui ne reprennent ni sa
+  // dimension ni la faiblesse absolue de la commune (cf. buildDistinctive).
+  const narrer = (picks: MatchResult[]) => {
+    assignSignaux(picks, byInsee, requestedKeys);
+    assignIdentite(picks, byInsee);
+    const compromisKeys = assignCompromis(picks, byInsee, tradeoffKeyByInsee, forceKeysByInsee);
+    assignDecouverte(picks, byInsee, requestedKeys, compromisKeys);
+    const exclure = new Map(picks.map((r) => [
+      r.insee,
+      new Set([tradeoffKeyByInsee.get(r.insee), compromisKeys.get(r.insee)].filter((k): k is PreferenceKey => k != null)),
+    ]));
+    const distinctive = buildDistinctive(
+      picks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
+      liDistinct,
+      exclure,
+    );
+    for (const r of picks) r.distinctive = distinctive[r.insee] ?? null;
+  };
+  narrer(shownPicks);
 
   // Pistes : rangs 4-5-6, narratif calculé comme un groupe de 3 distinct (le trio
   // garde son narratif relatif au groupe de 3 affiché). byInsee couvre déjà tous
   // les candidats. Cartes seulement : pas de comparaison complète sur les pistes.
   const pistesPicks = deduped.slice(3, 6);
-  if (pistesPicks.length) {
-    const pistesDistinctive = buildDistinctive(
-      pistesPicks.map((r) => byInsee.get(r.insee)).filter((c): c is IndexCommune => c != null),
-      liDistinct,
-    );
-    for (const r of pistesPicks) r.distinctive = pistesDistinctive[r.insee] ?? null;
-    assignSignaux(pistesPicks, byInsee, requestedKeys);
-    assignIdentite(pistesPicks, byInsee);
-    assignCompromis(pistesPicks, byInsee, tradeoffKeyByInsee);
-    assignDecouverte(pistesPicks, byInsee, requestedKeys);
-  }
+  if (pistesPicks.length) narrer(pistesPicks);
 
   const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee);
   const resteBoundary = scored.filter((s) => s.boundary).length;
