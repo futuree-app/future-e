@@ -93,7 +93,7 @@ for (const d of DEPTS) for (const p of PROJ) {
       lignes.push({
         recherche, groupe: g, nom: r.nom, compromis: r.compromis, cle: l.key, portee: l.portee,
         demandee: p.some((x: any) => x.key === l.key),
-        self: self == null ? null : Math.round(self), leader: leader ? { nom: leader.nom, s: Math.round(leader.s) } : null,
+        self: self == null ? null : Math.round(self), palier: self == null ? null : band(self), brut: self, insee: r.insee, leader: leader ? { nom: leader.nom, s: Math.round(leader.s) } : null,
         ecart: leader && self != null ? Math.round(leader.s - self) : null,
         memePalier: leader && self != null ? band(self) === band(leader.s) : null,
         matrice: ligne ? { avantage: ligne.avantage, paliers: ligne.cellules.map((x: any) => x.palier) } : null,
@@ -107,4 +107,5 @@ writeFileSync(sortie, JSON.stringify({ classements, lignes, cartes }, null, 1) +
 const t = (f: (x: any) => boolean) => lignes.filter(f).length;
 console.log(`cartes ${cartes.length} · compromis ${lignes.length} · illisibles ${t((x) => x.illisible)}`);
 console.log(`absolue <50 ${t((x) => x.portee === "absolue" && x.self < 50)} · absolue ≥50 ${t((x) => x.portee === "absolue" && x.self >= 50)}`);
+console.log(`absolue par palier : défavorable ${t((x) => x.portee === "absolue" && x.palier === 2)} · intermédiaire ${t((x) => x.portee === "absolue" && x.palier === 1)}`);
 console.log(`comparative <50 ${t((x) => x.portee === "comparative" && x.self < 50)} · comparative 50-54 ${t((x) => x.portee === "comparative" && x.self >= 50 && x.self < 55)} · comparative ≥55 ${t((x) => x.portee === "comparative" && x.self >= 55)}`);

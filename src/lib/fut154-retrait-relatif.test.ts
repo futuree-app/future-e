@@ -8,6 +8,10 @@
 //   - une vraie faiblesse se disait par rapport à une voisine aussi faible, qui passait pour une référence :
 //     Aubagne (chaleur 4) « plus marquée qu'à Marseille » (20), Meylan (air 0) « un peu moins pur qu'à
 //     Niederhausbergen » (15). La matrice donne aux deux communes le même palier défavorable.
+// Et la formulation absolue elle-même traitait tout sous-score sous 50 comme un défaut : Paris (sécheresse 40)
+// lisait « sols exposés à la sécheresse » quand le Pack affiche « Exposition modérée ». Arbitrage du porteur
+// (option 2) : sous 34, le palier défavorable ; de 34 à 49, le palier intermédiaire de la matrice, dit comme une
+// limite ; de 50 à 54, un comparatif justifié ou rien ; à partir de 55, aucun compromis.
 // Ces tests lisent ce que les cartes RACONTENT, sur le vrai moteur et l'index réel. La route AskFuture reçoit un
 // modèle simulé : aucun appel Anthropic.
 import { test, before, beforeEach } from "node:test";
@@ -20,7 +24,7 @@ const racine = pathToFileURL(`${process.cwd()}/`).href;
 const doubles: Record<string, string> = {
   "server-only": "export{}",
   "@anthropic-ai/sdk": "export default class { constructor() { this.messages = { create: (...a) => globalThis.__fut154.modele(...a) }; } }",
-  "ai": "export function streamText() { throw new Error('aucun flux attendu'); }",
+  "ai": "export function streamText(a) { return globalThis.__fut154.stream(a); }",
   "@ai-sdk/anthropic": "export function anthropic(m) { return m; }",
   "@/lib/posthog-server": "export function getPostHogClient() { return { capture() {}, async shutdown() {} }; }",
   "@supabase/supabase-js": "export function createClient() { return { rpc: async () => ({ data: false, error: null }) }; }",
@@ -47,9 +51,14 @@ export async function resolve(spec, ctx, next) {
 type M = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 let V: M;
 let ASK: (r: unknown) => Promise<Response>;
+let SYNTHESE: (r: unknown) => Promise<Response>;
 let NextRequest: new (url: string, init: M) => unknown;
-const etat: { modele: M[] } = { modele: [] };
+const etat: { modele: M[]; synthese: M[] } = { modele: [], synthese: [] };
 (globalThis as M).__fut154 = {
+  stream: (a: M) => {
+    etat.synthese.push(a);
+    return { textStream: (async function* () { yield "Synthèse simulée."; })() };
+  },
   modele: async (req: M) => {
     etat.modele.push(req);
     return { content: [{ type: "tool_use", name: "askfuture_comparateur", input: { answer: "Réponse simulée.", routes_to_report: false, focus_rang: null } }] };
@@ -60,11 +69,17 @@ before(async () => {
   register(`data:text/javascript,${encodeURIComponent(hook)}`);
   V = await import("./comparateur-vie.ts");
   ({ POST: ASK } = await import("../app/api/comparateur-vie/ask/route.ts"));
+  ({ POST: SYNTHESE } = await import("../app/api/comparateur-vie/synthesize/route.ts"));
   ({ NextRequest } = await import("next/server.js" as string));
 });
-beforeEach(() => { etat.modele = []; });
+beforeEach(() => { etat.modele = []; etat.synthese = []; });
 
 const palier = (s: number) => (s >= 66 ? 0 : s < 34 ? 2 : 1); // les paliers de la matrice (bandIndex)
+/** Un texte reprend un palier de la matrice quand il en contient tous les mots (« offre culturelle intermédiaire »). */
+const mots = (t: string) => t.toLowerCase().normalize("NFC").split(/[^\p{L}']+/u).filter(Boolean);
+const reprend = (texte: string, palierMatrice: string) => mots(palierMatrice).every((m) => mots(texte).includes(m));
+const ligneDe = (o: M, id: string) => o.comparaisonComplete.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === id);
+const dimDe = (key: string) => V.DIMENSIONS.find((d: M) => d.key === key);
 const recherche = (departements: string[] | null, preferences: M[]) =>
   V.matchProjects({ reformulation: "FUT-154", hardConstraints: departements ? { departements } : {}, preferences });
 const carte = async (dep: string[] | null, prefs: M[], nom: string, groupe: "trio" | "pistes" = "trio") => {
@@ -89,7 +104,7 @@ function lire(texte: string, c: M): { key: string; leader: string | null } | nul
  * La règle, vérifiée sur un groupe affiché : un comparatif cite une commune du même groupe, à un palier meilleur
  * et à 12 points au moins ; une formulation absolue suppose un sous-score sous 50 ; jamais un critère ≥ 55.
  */
-async function verifierGroupe(groupe: M[], ctx: string, vu: Record<string, Set<string>>) {
+async function verifierGroupe(groupe: M[], ctx: string, vu: Record<string, Set<string>>, o?: M) {
   const entrees = new Map<string, M>();
   for (const r of groupe) entrees.set(r.nom, await V.getCommuneEntry(r.insee));
   for (const r of groupe) {
@@ -109,6 +124,32 @@ async function verifierGroupe(groupe: M[], ctx: string, vu: Record<string, Set<s
     } else {
       assert.ok(self < V.SEUIL_FAIBLESSE, `${ctx} · ${r.nom} : formulation absolue pour ${Math.round(self)}`);
       (vu.absolu ??= new Set()).add(l.key);
+      // De 34 à 49, le palier intermédiaire de la matrice ; sous 34, le palier défavorable.
+      const inter = V.REASON_NEG_INTERMEDIAIRE[l.key];
+      if (inter && palier(self) === 1) {
+        assert.equal(r.compromis, `En échange, ${inter}.`, `${ctx} · ${r.nom} (${self}) : palier intermédiaire dit comme un défaut`);
+        (vu.intermediaire ??= new Set()).add(l.key);
+      } else if (inter) {
+        assert.notEqual(r.compromis, `En échange, ${inter}.`, `${ctx} · ${r.nom} (${self}) : palier défavorable adouci`);
+      }
+      // La carte et le Pack disent le même palier.
+      const dim = dimDe(l.key);
+      const i = o ? o.results.slice(0, 3).findIndex((x: M) => x.insee === r.insee) : -1;
+      const ligne = inter && i >= 0 && dim && dim.id !== "mer" ? ligneDe(o!, dim.id) : null; // une ligne sans donnée n'est pas affichée
+      if (ligne) {
+        const cellule = ligneDe(o!, dim!.id).cellules[i].palier;
+        if (palier(self) === 1) assert.ok(reprend(inter, cellule), `${ctx} · ${r.nom} : « ${inter} » face à « ${cellule} »`);
+        else assert.equal(cellule, dim!.paliers[2], `${ctx} · ${r.nom} : compromis défavorable face à « ${cellule} »`);
+        (vu.matrice ??= new Set()).add(l.key);
+      }
+    }
+    // Le compromis principal transmis aux synthèses (r.tradeoff) suit la même règle.
+    if (r.tradeoff && r.tradeoff !== V.raisonNeg("faible_risque_inondation", null)) {
+      const k = V.PREFERENCE_KEYS.find((x: string) => V.raisonNeg(x, c) === r.tradeoff);
+      assert.ok(k, `${ctx} · ${r.nom} : tradeoff illisible « ${r.tradeoff} »`);
+      const s = V.subScore(k, c);
+      assert.ok(s != null && s < V.SEUIL_FAIBLESSE, `${ctx} · ${r.nom} : tradeoff « ${r.tradeoff} » pour ${s}`);
+      if (V.REASON_NEG_INTERMEDIAIRE[k]) assert.equal(r.tradeoff === V.REASON_NEG_INTERMEDIAIRE[k], palier(s) === 1, `${ctx} · ${r.nom} : tradeoff « ${r.tradeoff} » pour ${s}`);
     }
   }
 }
@@ -149,6 +190,72 @@ test("reproduction · Meylan (air 0) n'a plus « un peu moins pur qu'à Niederha
   assert.equal(r.compromis, "En échange, air plus chargé en particules.");
 });
 
+test("reproduction · Paris (sécheresse 40) : « exposition modérée à la sécheresse », comme le Pack, plus « sols exposés »", async () => {
+  const { o, r } = await carte(null, [{ key: "acces_transports", weight: 3 }, { key: "faible_dependance_auto", weight: 2 }, { key: "acces_services", weight: 2 }], "Paris");
+  const c = await V.getCommuneEntry(r.insee);
+  const s = V.subScore("faible_secheresse", c);
+  assert.ok(s >= 34 && s < 50, `sécheresse ${s}`);
+  // La limite reste dite : Paris est la moins bien placée du trio sur ce critère…
+  assert.equal(r.compromis, "En échange, exposition modérée à la sécheresse.");
+  assert.doesNotMatch(r.compromis, /sols exposés|qu'à Villeurbanne/);
+  // … au palier que la matrice affiche, à égalité avec ses deux voisines.
+  const ligne = ligneDe(o, "secheresse");
+  const i = o.results.slice(0, 3).findIndex((x: M) => x.nom === "Paris");
+  assert.equal(ligne.cellules[i].palier, "Exposition modérée");
+  assert.deepEqual(ligne.avantage, { type: "egalite" });
+});
+
+test("règle · chaque formulation intermédiaire reprend le palier intermédiaire de sa ligne du Pack", () => {
+  const sansLigne = new Set(["eloignement_mer", "eviter_grandes_villes", "prefere_grande_ville", "faible_risque_inondation", "vie_etudiante"]);
+  for (const k of V.PREFERENCE_KEYS) {
+    const inter = V.REASON_NEG_INTERMEDIAIRE[k];
+    const dim = dimDe(k);
+    if (sansLigne.has(k)) { assert.equal(inter, undefined, `${k} : aucune ligne bandée, aucune formulation intermédiaire`); continue; }
+    assert.ok(dim && inter, `${k} : palier intermédiaire sans formulation`);
+    assert.ok(reprend(inter, dim.paliers[1]), `${k} : « ${inter} » ne reprend pas « ${dim.paliers[1]} »`);
+    assert.notEqual(inter, V.raisonNeg(k, null), `${k} : identique au palier défavorable`);
+  }
+});
+
+test("frontières · 33 reste défavorable, 34 et 49 passent au palier intermédiaire, 50 n'a plus de formulation absolue", async () => {
+  // Cuges-les-Pins (chaleur 33), Gargas (air 34), Plomeur (air 49), Montréjeau (soins 51) : sous-scores réels.
+  const cas: [string, string, number][] = [["13030", "faible_chaleur", 33], ["84047", "air_sain", 34], ["29171", "air_sain", 49], ["31390", "acces_soins", 51]];
+  for (const [insee, key, attendu] of cas) {
+    const c = await V.getCommuneEntry(insee);
+    assert.equal(V.subScore(key, c), attendu, `${insee} ${key}`);
+  }
+  const t = async (insee: string, key: string) => V.raisonNeg(key, await V.getCommuneEntry(insee));
+  assert.equal(await t("13030", "faible_chaleur"), V.raisonNeg("faible_chaleur", null));
+  assert.equal(await t("84047", "air_sain"), "qualité de l'air moyenne");
+  assert.equal(await t("29171", "air_sain"), "qualité de l'air moyenne");
+  // À 50 et au-delà, la formulation absolue n'est jamais retenue (seul un comparatif justifié reste possible).
+  const { r } = await carte(["31"], [{ key: "faible_risque_feu", weight: 3 }], "Montréjeau");
+  assert.match(r.compromis, / qu'à Bagnères-de-Luchon\.$/);
+  // Sur la carte, au palier défavorable : Cuges-les-Pins, priorité « étés frais » déclarée.
+  const { o, r: cuges } = await carte(["13"], [{ key: "faible_chaleur", weight: 3 }], "Cuges-les-Pins");
+  assert.equal(cuges.compromis, `En échange, ${V.raisonNeg("faible_chaleur", null)}.`);
+  const i = o.results.slice(0, 3).findIndex((x: M) => x.nom === "Cuges-les-Pins");
+  assert.equal(ligneDe(o, "etes_frais").cellules[i].palier, "Étés chauds");
+});
+
+test("synthèses · /synthesize reçoit le compromis au palier du Pack, jamais l'ancien défaut absolu", async () => {
+  const prefs = [{ key: "acces_soins", weight: 3 }, { key: "calme_sonore", weight: 2 }, { key: "air_sain", weight: 1 }];
+  const o = await recherche(["29"], prefs);
+  const top = o.results.slice(0, 3);
+  assert.ok(top.some((r: M) => r.nom === "Plomeur"));
+  const body = {
+    project: "FUT-154", reformulation: "FUT-154", preferences: prefs,
+    results: top.map((r: M) => ({ nom: r.nom, region: r.region, reasons: r.reasons, tradeoff: r.tradeoff, distinctive: r.distinctive, prioritesNonMesurees: r.couverture?.nonMesurees ?? [], sansPrioriteFavorable: r.sansPrioriteFavorable === true })),
+    outcome: { perfectMatch: o.perfectMatch, message: o.message, exploration: false, couverture: o.couverture },
+  };
+  const res = await SYNTHESE(new NextRequest("http://localhost/api/comparateur-vie/synthesize", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json", "x-forwarded-for": "10.154.1.1" } }));
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), "Synthèse simulée.");
+  const territoires = JSON.parse(etat.synthese[0].prompt.split("DONNÉES :\n")[1]).territoires;
+  assert.equal(territoires.find((t: M) => t.commune === "Plomeur").compromis, "qualité de l'air moyenne");
+  assert.doesNotMatch(etat.synthese[0].prompt, /air plus chargé en particules/);
+});
+
 // ════════════════════════════════════════════════════════════════════════════════════════════════════
 // 2 · Les contre-épreuves du ticket
 // ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -178,13 +285,16 @@ test("contre-épreuve 3 · 52 face à 65, même palier : pas de compromis (Angle
   assert.doesNotMatch(r.compromis, /vie locale|qu'à Bouaye/);
 });
 
-test("contre-épreuve 4 · 49 sur une priorité déclarée : la faiblesse absolue reste dite (Plomeur, air)", async () => {
-  const { r } = await carte(["29"], [{ key: "acces_soins", weight: 3 }, { key: "calme_sonore", weight: 2 }, { key: "air_sain", weight: 1 }], "Plomeur");
+test("contre-épreuve 4 · 49 sur une priorité déclarée : la limite reste dite, au palier du Pack (Plomeur, air)", async () => {
+  const { o, r } = await carte(["29"], [{ key: "acces_soins", weight: 3 }, { key: "calme_sonore", weight: 2 }, { key: "air_sain", weight: 1 }], "Plomeur");
   const c = await V.getCommuneEntry(r.insee);
   const s = V.subScore("air_sain", c);
   assert.ok(s >= 45 && s < 50, `air ${s}`);
-  assert.equal(r.tradeoff, "air plus chargé en particules");
-  assert.equal(r.compromis, "En échange, air plus chargé en particules.");
+  // Sur la base : « air plus chargé en particules », quand la matrice dit « Qualité de l'air moyenne ».
+  assert.equal(r.tradeoff, "qualité de l'air moyenne");
+  assert.equal(r.compromis, "En échange, qualité de l'air moyenne.");
+  const i = o.results.slice(0, 3).findIndex((x: M) => x.nom === "Plomeur");
+  assert.equal(ligneDe(o, "air").cellules[i].palier, "Qualité de l'air moyenne");
 });
 
 test("contre-épreuve 5 · trois communes favorables partout : aucun compromis fabriqué", async () => {
@@ -201,7 +311,7 @@ test("contre-épreuves 6 et 7 · trois communes aux étés chauds : aucune ne se
   assert.ok([...ch.values()].every((s) => s < 34), JSON.stringify([...ch]));
   for (const r of trio) assert.doesNotMatch(r.compromis, /chaleur estivale est plus marquée/, r.nom);
   assert.equal(trio.find((x: M) => x.nom === "Villeurbanne").compromis, "En échange, chaleur en hausse.");
-  await verifierGroupe(trio, "chaleur", {});
+  await verifierGroupe(trio, "chaleur", {}, o);
 });
 
 test("contre-épreuve 8 · donnée manquante : une commune sans mesure n'est ni comparée ni citée", async () => {
@@ -233,7 +343,7 @@ test("contre-épreuve 9 · balayage : chaque comparatif cite une commune à un p
   for (const d of DEPTS) for (const p of PROJETS) {
     const o = await recherche(d ? [d] : null, p);
     const ctx = `${d ?? "France"} ${p.map((x) => x.key).join("+") || "-"}`;
-    for (const g of [o.results.slice(0, 3), o.pistes]) if (g.length) { groupes++; await verifierGroupe(g, ctx, vu); }
+    for (const g of [o.results.slice(0, 3), o.pistes]) if (g.length) { groupes++; await verifierGroupe(g, ctx, vu, o); }
   }
   assert.ok(groupes > 400, `assez de groupes lus (${groupes})`);
   // Les cinq dimensions nommées par le ticket sont exercées dans les deux portées.
@@ -241,6 +351,11 @@ test("contre-épreuve 9 · balayage : chaque comparatif cite une commune à un p
     assert.ok(vu.comparatif?.has(k), `${k} : aucun comparatif dans le balayage`);
     assert.ok(vu.absolu?.has(k), `${k} : aucune formulation absolue dans le balayage`);
   }
+  // Le palier intermédiaire est exercé, et confronté à la matrice, sur les dimensions où il se présente le plus.
+  for (const k of ["faible_chaleur", "faible_secheresse", "air_sain", "calme_sonore", "faible_exposition_industrielle", "vie_locale"]) {
+    assert.ok(vu.intermediaire?.has(k), `${k} : aucun compromis au palier intermédiaire dans le balayage`);
+  }
+  for (const k of ["faible_secheresse", "air_sain", "calme_sonore"]) assert.ok(vu.matrice?.has(k), `${k} : jamais confronté à la matrice`);
 });
 
 test("contre-épreuve 10 · sans compromis : la carte, le Pack et AskFuture n'en affichent ni n'en inventent", async () => {
