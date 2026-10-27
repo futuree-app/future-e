@@ -689,6 +689,7 @@ export default function LogementModule({
                     lecture: result.urbanisme,
                     parcelCode: result.parcel?.parcelCode ?? null,
                   }}
+                  bruitAerien={result.bruitAerien}
                 />
               </div>
             )}
@@ -773,6 +774,7 @@ const NOM_SOURCE: Record<string, string> = {
   urbanisme: "Géoportail de l'urbanisme", urbanisme_prescriptions: "prescriptions du plan d'urbanisme",
   urbanisme_vigueur: "statut des documents d'urbanisme", urbanisme_pieces: "pièces des documents d'urbanisme",
   urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
+  bruit_aerien: "plans de bruit aérien (DGAC)",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

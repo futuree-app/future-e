@@ -24,6 +24,8 @@ import Navbar from "@/components/Navbar";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { SOURCES_VERSION, type AddressDossierRow } from "@/lib/address-dossier-store";
 import type { CarOwnership } from "@/lib/iris-logement";
+import type { LectureBruitAerien } from "@/lib/bruit-aerien";
+import { BruitAerienAutour } from "@/components/report/BruitAerienBlocs";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
@@ -56,10 +58,12 @@ export default function AutourModule({
   defaultCommune,
   dossier,
   initialCarOwnership = null,
+  initialBruitAerien = null,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow;
   initialCarOwnership?: CarOwnership | null;
+  initialBruitAerien?: LectureBruitAerien | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +72,7 @@ export default function AutourModule({
   const [analyzed, setAnalyzed] = useState<AnalyzedAddress | null>(null);
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
   const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
+  const [bruitAerien, setBruitAerien] = useState<LectureBruitAerien | null>(null);
   const autourRetriedRef = useRef(false);
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
@@ -92,12 +97,13 @@ export default function AutourModule({
         body: JSON.stringify({ dossierId: dossier.id, posture: "residence" }),
       });
       const payload = (await res.json()) as {
-        snapshot?: Face3Snapshot; carOwnership?: CarOwnership;
+        snapshot?: Face3Snapshot; carOwnership?: CarOwnership; bruitAerien?: LectureBruitAerien;
         error?: string; code?: string; insee?: string | null;
       };
       if (!res.ok || !payload.snapshot) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setAutour(payload.snapshot);
       setCarOwnership(payload.carOwnership ?? null);
+      setBruitAerien(payload.bruitAerien ?? null);
       setAnalyzed(a);
       posthog?.capture("autour_analyzed", {
         insee: a.citycode,
@@ -150,6 +156,7 @@ export default function AutourModule({
       if (dossier.snapshot) {
         setAutour(dossier.snapshot);
         setCarOwnership(initialCarOwnership);
+        setBruitAerien(initialBruitAerien);
         setAnalyzed(address);
         posthog?.capture("autour_restored", {
           insee: dossier.insee,
@@ -349,6 +356,11 @@ export default function AutourModule({
                 </ReportSection>
               );
             })()}
+
+            {/* FUT-146 : LE BRUIT DES AVIONS, À CÔTÉ DES ABORDS. Les abords disent les routes et les voies
+                ferrées à distance ; ce bloc dit si le secteur est dans un plan de bruit d'aérodrome, ce que
+                le plan permet de conclure, et la visite à faire. Il disparaît loin de tout aérodrome. */}
+            <BruitAerienAutour lecture={bruitAerien} />
 
             {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
                 visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six

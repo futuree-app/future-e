@@ -25,11 +25,20 @@
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
 import type { CarOwnership } from "@/lib/iris-logement";
+import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
+import type { LectureBruitAerien } from "@/lib/bruit-aerien";
 
 export type AutourResponse = {
   snapshot: Face3Snapshot;
   /** Relu au rendu, jamais figé dans le snapshot. Cf. les deux familles ci-dessus. */
   carOwnership: CarOwnership;
+  /**
+   * FUT-146 : les plans de bruit aérien du SECTEUR (au point du dossier), relus au rendu. Ils viennent de la
+   * copie versionnée de la publication DGAC, dont la date d'extraction s'affiche avec eux : c'est un
+   * enrichissement de la seconde famille. Un dossier ancien les reçoit donc par un vrai calcul, à son
+   * ouverture, jamais par une valeur supposée.
+   */
+  bruitAerien: LectureBruitAerien;
 };
 
 /**
@@ -44,8 +53,10 @@ export async function buildAutourResponse(input: {
   lon: number;
   insee: string | null;
 }): Promise<AutourResponse> {
-  const carOwnership = await getCarOwnershipAtPoint(input.lat, input.lon, input.insee).catch(
-    () => ({ kind: "unknown" as const }),
-  );
-  return { snapshot: input.snapshot, carOwnership };
+  const [carOwnership, bruitAerien] = await Promise.all([
+    getCarOwnershipAtPoint(input.lat, input.lon, input.insee).catch(() => ({ kind: "unknown" as const })),
+    // Autour lit le point seul : la parcelle et la précision du géocodage appartiennent au module Logement.
+    lireBruitAerienAdresse({ point: [input.lon, input.lat], geocodage: null, parcelle: null }),
+  ]);
+  return { snapshot: input.snapshot, carOwnership, bruitAerien };
 }

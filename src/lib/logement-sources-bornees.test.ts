@@ -131,7 +131,9 @@ test("Route : toutes les sources partent ensemble ; seules quatre dépendances r
   // FUT-81 : la parcelle se lit avec sa géométrie ; le plan d'urbanisme l'attend, et rien d'autre.
   assert.match(code, /const parcelP = parcelLueP\.then\(/);
   assert.match(code, /const urbanismeP = parcelLueP\.then\(/);
-  assert.equal((code.match(/\.then\(/g) ?? []).length, 6, "parcelle (et sa géométrie), urbanisme, audit voisin, même bâtiment, et le repli sans identifiant BAN");
+  // FUT-146 : les plans de bruit aérien attendent la parcelle (copie locale, aucun appel réseau), et rien d'autre.
+  assert.match(code, /const bruitAerienP = parcelLueP\.then\(/);
+  assert.equal((code.match(/\.then\(/g) ?? []).length, 7, "parcelle (et sa géométrie), urbanisme, bruit aérien, audit voisin, même bâtiment, et le repli sans identifiant BAN");
 });
 
 // ── ZFE : la source filtre au point ─────────────────────────────────────────────────────────────────

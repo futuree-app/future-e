@@ -32,9 +32,11 @@ const nextConfig: NextConfig = {
     "/api/ask/context": ["./data/communes-baignade.json"],
     // Module Logement : la sinistralité ONRN (lib/onrn-sinistralite.ts) lit les
     // deux JSON runtime via fs au runtime de la route.
+    // FUT-146 : les plans de bruit aérien (lib/server/bruit-aerien-jeu.ts), lus à la parcelle.
     "/api/georisques-logement": [
       "./data/onrn-secheresse.json",
       "./data/onrn-inondation.json",
+      "./data/bruit-aerien.json",
     ],
     // La PAGE du module Logement lit l'index pour le compte d'arrêtés inondation, qui réconcilie
     // les trois sources de la carte « Ce que disent les sources sur l'inondation ». Il est lu ICI
@@ -50,10 +52,14 @@ const nextConfig: NextConfig = {
       "./data/comparateur-index.json.gz",
       "./data/gares-bpe.json",
     ],
+    // FUT-146 : les plans de bruit aérien, relus au rendu par l'assembleur de la réponse Autour, que la
+    // route ET la page (réhydratation) appellent.
     "/api/logement-autour": [
       "./data/bpe-points/**",
       "./data/icu.json",
+      "./data/bruit-aerien.json",
     ],
+    "/rapport/autour": ["./data/bruit-aerien.json"],
     // FUT-33 : le dossier mesure la distance d'une ADRESSE au rivage marin (lib/server/rivage-mer.ts). Les
     // trois points d'entrée qui génèrent ou affichent un dossier d'adresse lisent ce fichier.
     // FUT-127 : la règle inondation lit les plans de prévention de la commune (lib/gaspar-pprn-commune.ts).

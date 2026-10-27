@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "fichier": "src/components/report/BruitAerienBlocs.tsx",
+    "marqueur": "kitDeprecie",
+    "nombre": 6,
+    "motif": "FUT-146 : bloc inséré dans le module Autour, écran historique non migré, dont il reprend la section et la carte pour ne pas mêler deux grammaires sur la même page. Le ticket demande de réutiliser la présentation existante en attendant FUT-118 ; à migrer avec AutourModule."
+  }
+]
