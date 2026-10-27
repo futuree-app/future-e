@@ -113,9 +113,12 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel, avertissemen
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[13px] leading-[1.55] text-muted">
-                  {r.compromis}
-                </p>
+                {/* FUT-154 : sans compromis établi, aucun filet vide sous la carte. */}
+                {r.compromis && (
+                  <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[13px] leading-[1.55] text-muted">
+                    {r.compromis}
+                  </p>
+                )}
               </div>
             ))}
           </div>

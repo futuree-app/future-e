@@ -2090,7 +2090,11 @@ function buildCompromisCandidates(
     // Comparatif seulement si la dimension a un sens relatif (COMPROMIS_NEG) ET qu'un
     // leader se détache vraiment (écart ≥ seuil) : « moins accessibles qu'à X ». Sinon
     // formulation absolue télégraphique (REASON_NEG), honnête sans inventer de divergence.
-    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP);
+    // FUT-154 : « se détache » se lit aussi sur les paliers de la matrice. Une voisine au même palier n'est pas
+    // une référence : Anglet (industrie 52) lisait « plus présents qu'à Pau » (65) quand le Pack les met à égalité,
+    // Aubagne (chaleur 4) « plus marquée qu'à Marseille » (20) quand les deux ont des étés chauds.
+    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
+      && bandIndex(leader.score) < bandIndex(self));
     // FUT-151 (revue) : un simple retrait relatif ne reçoit la formulation ABSOLUE (« sols exposés à la
     // sécheresse ») que si la commune est réellement faible sur ce critère. Sinon, sans comparatif possible,
     // il n'est pas un compromis.
