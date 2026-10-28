@@ -46,14 +46,15 @@ qui étaient ces secteurs ; la v7.0 n'en a plus (52 départements : 39 DDT(M), 6
 
 ## 3. Nature juridique
 
-- **Effet** : obligation de débroussailler autour des constructions situées dans les bois classés ou à moins de
-  200 m (code forestier, L134-6), en général sur 50 m, portée à 100 m par le préfet (fiche presse du ministère,
-  06/01/2026). Socle national : arrêté du 29/03/2024 (L131-10), modifié le 01/04/2025 ; les arrêtés préfectoraux
+- **Effet** (code forestier, L134-6) : dans les bois classés et à moins de 200 m, obligation notamment aux abords
+  des constructions, sur 50 m que **le maire** peut porter à 100 m (1°), et, en zone urbaine, sur le **terrain
+  lui-même, bâti ou non** (3°) ; d'autres cas visent ZAC, lotissements, campings et installations classées.
+  **Qui** doit débroussailler dépend de la situation (L134-8, revue du 28/10/2026) : l'écran ne désigne personne
+  d'office. Socle national : arrêté du 29/03/2024 (L131-10), modifié le 01/04/2025 ; les arrêtés préfectoraux
   devaient s'y conformer avant le 30/09/2025.
 - **Information de l'acquéreur et du locataire** : depuis le **01/01/2025**, le vendeur ou le bailleur d'un bien
   en zone soumise en informe l'acquéreur ou le locataire ; l'état des risques porte une fiche OLD (décret
-  n° 2024-405 du 29/04/2024, code de l'environnement R125-23). Sources : fiche presse du ministère (06/01/2026),
-  notaires.fr, Banque des territoires. Le texte consolidé n'a pas pu être relu sur Légifrance pendant cette mission.
+  n° 2024-405 du 29/04/2024, code de l'environnement R125-23), référence vérifiée sur Légifrance par la revue.
 - **Valeur du zonage** : **informatif** (doc. v7.0 § 2.5) : « certains massifs boisés (inférieurs à 4 hectares)
   peuvent ne pas apparaître […] alors que des OLD s'y appliquent ». Les bandes de 200 m ne sont coupées qu'aux
   limites de département : une commune sans massif classé peut être dans la zone d'un massif voisin (§ 2.2).
@@ -149,7 +150,8 @@ le remplacer ».
 | Département sans zonage publié | « non couvert », jamais « pas d'obligation ». |
 | Objet à diffusion ambiguë (Savoie) | « incertain ». |
 | Contradiction avec l'arrêté (3 communes du Vaucluse, cf. 02) | « incertain », motif dit. |
-| Obligation attachée aux constructions | Parcelle à cheval (2-98 %) : « selon l'emplacement des constructions, le logement peut être concerné ou non ». |
+| Obligation aux abords des constructions ou, en zone urbaine, sur le terrain | Parcelle à cheval (2-98 %) : part dite, « selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné », vérification des règles en mairie. |
+| Responsable selon la situation (L134-8) | « Qui doit l'entretenir dépend de la situation (le plus souvent le propriétaire de la construction) ». |
 
 ## Références
 
@@ -157,4 +159,5 @@ le remplacer ».
 - IGN, DÉBROUSSAILLEMENT v7.0, descriptif de contenu et de livraison (mars 2026), suivi des évolutions, notice.
 - Arrêté du 6 février 2024 (JORFTEXT000049111873), modifié les 20/05/2025 et 13/04/2026 ; annexes en PDF (AIDA/INERIS).
 - Ministère de la Transition écologique, fiche presse OLD (06/01/2026) ; ministère de l'Agriculture, fiches techniques de l'arrêté du 29/03/2024 (10/01/2025).
-- Décret n° 2024-405 du 29/04/2024 (sources secondaires : Banque des territoires, notaires.fr, Landot avocats).
+- Décret n° 2024-405 du 29/04/2024 (vérifié sur Légifrance par la revue du 28/10/2026).
+- Code forestier, L134-6 et L134-8 (revue du 28/10/2026).

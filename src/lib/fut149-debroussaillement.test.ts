@@ -271,7 +271,9 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
     assert.equal(l.limite?.cause, "a_cheval");
     assert.ok(l.part! > 0.45 && l.part! < 0.55, `part ${l.part}`);
     assert.match(rendreLogement(l), /Terrain à cheval sur la limite du zonage/);
-    assert.match(rendreLogement(l), /environ 50 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon l'emplacement des constructions, le logement peut être concerné ou non/);
+    assert.match(rendreLogement(l), /environ 50 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné/);
+    assert.match(rendreLogement(l), /l'obligation peut viser les abords des constructions ou, en zone urbaine, le terrain lui-même/);
+    assert.doesNotMatch(rendreLogement(l), /selon l'emplacement des constructions/, "revue du 28/10/2026 : pas seulement les constructions (L134-6, 3°)");
   });
 
   test("parcelle à 99 % dans la zone : le reste de 1 % est l'écart de tracé (FUT-81), en zone", () => {
@@ -480,16 +482,30 @@ describe("5. Ce que les textes disent, et ne disent jamais", () => {
   test("en zone, le Logement dit la vérification concrète : zonage officiel, arrêté du préfet, état des risques du vendeur", () => {
     const t = texteLogement(cas[0][1])!;
     assert.match(t.verifier!, /zonage officiel sur Géorisques/);
-    assert.match(t.verifier!, /l'arrêté du préfet, qui fixe la distance et les travaux/);
+    assert.match(t.verifier!, /les règles qui s'appliquent \(arrêté du préfet, décisions du maire sur la distance\)/);
     assert.match(t.verifier!, /vendeur ou au bailleur l'état des risques/);
     assert.match(t.limite!, /indicatif : seuls l'arrêté du préfet et le code forestier font foi/);
     assert.match(t.limite!, /ne mesure pas le danger d'incendie/);
   });
 
+  test("revue du 28/10/2026 : 100 m par le maire, terrain en zone urbaine, responsable selon la situation, jamais « à la charge du propriétaire »", () => {
+    for (const [, l] of cas) {
+      for (const t of [texteAutour(l)!, texteLogement(l)!]) {
+        const tout = [t.retenir, t.limite, t.verifier, ...t.savoirPlus].join(" ");
+        assert.doesNotMatch(tout, /à la charge du propriétaire/);
+        assert.doesNotMatch(tout, /si le préfet le décide|préfet[^.]*100 m/);
+      }
+    }
+    const regle = texteLogement(cas[0][1])!.savoirPlus.join(" ");
+    assert.match(regle, /en général sur 50 m, que le maire peut porter à 100 m/);
+    assert.match(regle, /dans une zone urbaine, il peut porter sur tout le terrain, bâti ou non/);
+    assert.match(regle, /La personne tenue de le faire dépend de la situation/);
+  });
+
   test("la règle générale (50 m, 200 m) et le décret restent dans « En savoir plus », pas dans le constat", () => {
     const t = texteLogement(cas[0][1])!;
     assert.doesNotMatch([t.titre, t.retenir, t.limite, t.verifier].join(" "), /50 m|100 m|200 m|décret/);
-    assert.ok(t.savoirPlus.some((l) => /en général sur 50 m \(jusqu'à 100 m si le préfet le décide\)/.test(l)));
+    assert.ok(t.savoirPlus.some((l) => /en général sur 50 m, que le maire peut porter à 100 m/.test(l)));
     assert.ok(t.savoirPlus.some((l) => /décret n° 2024-405 du 29 avril 2024/.test(l)));
   });
 
@@ -699,7 +715,7 @@ describe("7. Les adresses réelles (BAN et cadastre du 28/10/2026, tuiles de l'�
   test("La Teste-de-Buch en zone : le Logement dit le fait, la vérification et l'arrêté de Gironde du 17 octobre 2025", () => {
     const t = rendreLogement(lireReel("la-teste-pyla-en-zone"));
     assert.match(t, /Débroussaillement Terrain dans le zonage publié/);
-    assert.match(t, /Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions/);
+    assert.match(t, /Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire\. Qui doit l'entretenir dépend de la situation \(le plus souvent le propriétaire de la construction\)/);
     assert.match(t, /Gironde : zonage de l'IGN corrigé par la préfecture, à partir d'une carte des bois de 2021 ; arrêté préfectoral du 17 octobre 2025 \(date indiquée par la base/);
     sansInterdit(t);
   });

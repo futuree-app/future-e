@@ -40,8 +40,8 @@ synthèse ne voit pas le champ). La méthode, la règle générale (50 m, 200 m)
 
 | État | Quand | Phrase (Logement, parcelle) |
 |---|---|---|
-| `en_zone` | parcelle dans le zonage à plus de 98 % ; point à plus de 50 m d'une limite, dedans | « Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions. » |
-| `en_limite` · à cheval | parcelle dedans pour 2 à 98 % | « …environ 19 % de la parcelle est dans une zone… : selon l'emplacement des constructions, le logement peut être concerné ou non. » |
+| `en_zone` | parcelle dans le zonage à plus de 98 % ; point à plus de 50 m d'une limite, dedans | « Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire. Qui doit l'entretenir dépend de la situation (le plus souvent le propriétaire de la construction)… » |
+| `en_limite` · à cheval | parcelle dedans pour 2 à 98 % | « …environ 19 % de la parcelle est dans une zone… : selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné. » + vérification des règles en mairie |
 | `en_limite` · bordure | moins de 2 %, ou contact | « La parcelle ne touche qu'en bordure une zone… (environ 40 m²) » / « touche la limite » |
 | `en_limite` · proche | sans contact, à moins de 50 m | « La parcelle est à environ 20 m d'une zone… » |
 | `hors_zone` | département couvert, rien à moins de 50 m | « La parcelle n'est pas dans le zonage… publié pour ce département. » + « de petits bois peuvent y manquer » |
@@ -124,14 +124,23 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
   fichiers modifié) ; bruit aérien : seule l'exportation de son corps de bloc (`CorpsZonage`) change. Les tests
   FUT-146 et FUT-147 (92) passent, comme toute la suite.
 
+## Revue du 28/10/2026 : trois corrections de restitution
+
+| Demande | Correction |
+|---|---|
+| Parcelle à cheval : pas seulement l'emplacement des constructions (L134-6, 3° : en zone urbaine, le terrain) | Part gardée ; « selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné » ; vérification : « l'obligation peut viser les abords des constructions ou, en zone urbaine, le terrain lui-même » |
+| 50 → 100 m : le maire (1° de L134-6) | Règle générale : « en général sur 50 m, que le maire peut porter à 100 m » ; vérifications : « arrêté du préfet, décisions du maire sur la distance » |
+| Responsable selon L134-8 | « L'entretien est à la charge du propriétaire » retiré ; « Qui doit l'entretenir dépend de la situation (le plus souvent le propriétaire de la construction) : l'arrêté du préfet et la mairie le précisent » |
+
+Validés par la revue : « en limite » pour les parcelles à cheval, le cas de Gonfaron, le décret n° 2024-405.
+Géométrie, tuiles et états inchangés : seuls les textes et leurs tests changent.
+
 ## Réserves
 
-1. **Décret n° 2024-405** : cité d'après des sources secondaires concordantes ; le texte consolidé n'a pas été relu
-   sur Légifrance pendant la mission (page non accessible au robot). À relire en revue.
+1. **Décret n° 2024-405** : référence vérifiée sur Légifrance par la revue du 28/10/2026.
 2. **Dates d'arrêté** : la base date trois arrêtés de 2011-2013 (Ardèche, Isère, Loire) ; neuf départements n'en ont
    pas. L'écran dit « date indiquée par la base ».
-3. **Parcelle à cheval = en limite** : choix de prudence à arbitrer par le porteur (l'audit FUT-82 proposait « en
-   zone » au-delà de 2 %, comme le bruit aérien).
+3. **Parcelle à cheval = en limite** : validé par la revue du 28/10/2026.
 4. **Banc** : le module Logement complet déborde dans les bancs (défaut antérieur, cf. FUT-146) ; captures faites
    sur la section seule.
 5. **Bloc Autour** : grammaire historique de l'écran qui l'accueille (exception déclarée au cliquet du Relevé,

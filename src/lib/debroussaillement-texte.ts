@@ -9,8 +9,10 @@
 //
 // ── CE QU'AUCUNE PHRASE NE DIT ───────────────────────────────────────────────────────────────
 //  Ni « danger », ni « exposé », ni « boisé » : le zonage est un périmètre d'obligation, pas une mesure du feu
-//  ni de la forêt. Ni un nombre de mètres à débroussailler pour CE propriétaire : l'arrêté du préfet le fixe
-//  selon la construction et le secteur (la règle générale est dans « En savoir plus »). Ni « pas d'obligation »
+//  ni de la forêt. Ni un nombre de mètres à débroussailler pour CE propriétaire : l'arrêté et le maire le fixent
+//  selon la construction et le secteur (la règle générale est dans « En savoir plus »). Ni un responsable désigné
+//  d'office : L134-8 le distingue selon les situations. Ni une obligation réduite aux seules constructions : en
+//  zone urbaine, elle peut porter sur le terrain (L134-6, 3°). Ni « pas d'obligation »
 //  hors zonage ou hors des départements publiés : le zonage est informatif.
 
 import type { LectureDebroussaillement, ProfilZonage } from "./debroussaillement.ts";
@@ -38,7 +40,9 @@ const lignes = (...l: (string | null | undefined)[]) => l.filter(Boolean).join("
 const ZONE = "une zone où le débroussaillement est obligatoire";
 const SELON = "selon le zonage publié par l'État";
 
-const REGLE = "Le débroussaillement est obligatoire dans les bois, forêts, landes, maquis et garrigues classés à risque d'incendie par arrêté, et sur 200 m autour. Le propriétaire d'une construction doit y réduire la végétation autour d'elle, en général sur 50 m (jusqu'à 100 m si le préfet le décide), parfois jusque chez un voisin. Les règles précises varient d'un département à l'autre.";
+// Code forestier, L134-6 et L134-8 (revue du 28/10/2026) : autour des constructions, 50 m que le MAIRE peut porter
+// à 100 m (1°) ; en zone urbaine, le terrain lui-même, bâti ou non (3°) ; la personne tenue dépend de la situation.
+const REGLE = "Le débroussaillement est obligatoire dans les bois, forêts, landes, maquis et garrigues classés à risque d'incendie par arrêté, et sur 200 m autour. Il porte notamment sur les abords des constructions, en général sur 50 m, que le maire peut porter à 100 m ; dans une zone urbaine, il peut porter sur tout le terrain, bâti ou non. La personne tenue de le faire dépend de la situation : le plus souvent le propriétaire de la construction, parfois celui du terrain, et le travail peut s'étendre chez un voisin. Les règles précises varient d'un département à l'autre.";
 const INFORMATION = "Depuis le 1er janvier 2025, le vendeur ou le bailleur d'un bien situé dans une zone soumise doit en informer l'acquéreur ou le locataire ; l'état des risques comporte alors une fiche sur cette obligation (décret n° 2024-405 du 29 avril 2024, code de l'environnement, article R125-23).";
 const INDICATIF = "Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie.";
 const PETITS_BOIS = "Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique.";
@@ -122,9 +126,9 @@ export function texteAutour(l: LectureDebroussaillement | null | undefined): Tex
   switch (l.etat) {
     case "en_zone":
       return {
-        retenir: `Ce secteur est dans ${ZONE} autour des maisons et des constructions, ${SELON}.`,
+        retenir: `Ce secteur est dans ${ZONE}, ${SELON}.`,
         limite: lignes("C'est une obligation d'entretien près des bois et des landes, pas une mesure du danger d'incendie.", ancien(l)),
-        verifier: "Les règles précises (distance, travaux) sont fixées par le préfet : la mairie et le site de la préfecture les donnent.",
+        verifier: "Les règles précises (distance, travaux) sont fixées par l'arrêté du préfet et, pour la distance, par le maire : la mairie les donne.",
         complement: null, savoirPlus: detail, document: documentDe(l),
       };
     case "en_limite": {
@@ -174,8 +178,12 @@ function rattachement(l: LectureDebroussaillement): string | null {
   }
 }
 
-const VERIFIER_ZONE = "Avant de vous engager, consultez le zonage officiel sur Géorisques et l'arrêté du préfet, qui fixe la distance et les travaux. Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait.";
+const VERIFIER_ZONE = "Avant de vous engager, consultez le zonage officiel sur Géorisques et les règles qui s'appliquent (arrêté du préfet, décisions du maire sur la distance). Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait.";
 const VERIFIER_LIMITE = "Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est.";
+/** Une parcelle à cheval : l'obligation peut viser les abords des constructions ou, en zone urbaine, le terrain (L134-6). */
+const VERIFIER_A_CHEVAL = "Demandez à la mairie quelles règles s'appliquent à ce terrain : l'obligation peut viser les abords des constructions ou, en zone urbaine, le terrain lui-même. L'état des risques remis par le vendeur ou le bailleur doit la mentionner si le bien est concerné.";
+/** Qui doit débroussailler : L134-8 distingue selon les situations ; aucune phrase ne l'attribue d'office. */
+const RESPONSABLE = "Qui doit l'entretenir dépend de la situation (le plus souvent le propriétaire de la construction) : l'arrêté du préfet et la mairie le précisent.";
 
 /**
  * LOGEMENT : le bien. `null` : rapport écrit avant FUT-149, ou lecture non activée. Le titre est le fait, la phrase
@@ -203,7 +211,7 @@ export function texteLogement(l: LectureDebroussaillement | null | undefined): (
     case "en_zone":
       return {
         titre: parcelle ? "Terrain dans le zonage publié" : "Adresse dans le zonage publié",
-        retenir: `${SELON.charAt(0).toUpperCase()}${SELON.slice(1)}, ${parcelle ? "la parcelle" : "le point de l'adresse"} est dans ${ZONE} autour des constructions. L'entretien est à la charge du propriétaire.`,
+        retenir: `${SELON.charAt(0).toUpperCase()}${SELON.slice(1)}, ${parcelle ? "la parcelle" : "le point de l'adresse"} est dans ${ZONE}. ${RESPONSABLE}`,
         limite: lignes(INDICATIF, ancien(l), lu),
         verifier: VERIFIER_ZONE, complement: null, savoirPlus, document: documentDe(l),
       };
@@ -213,7 +221,7 @@ export function texteLogement(l: LectureDebroussaillement | null | undefined): (
       let titre = "Terrain en limite du zonage";
       if (c === "a_cheval") {
         titre = "Terrain à cheval sur la limite du zonage";
-        retenir = `${SELON.charAt(0).toUpperCase()}${SELON.slice(1)}, environ ${Math.max(2, Math.min(98, Math.round((l.part ?? 0) * 100)))} % de la parcelle est dans ${ZONE} : selon l'emplacement des constructions, le logement peut être concerné ou non.`;
+        retenir = `${SELON.charAt(0).toUpperCase()}${SELON.slice(1)}, environ ${Math.max(2, Math.min(98, Math.round((l.part ?? 0) * 100)))} % de la parcelle est dans ${ZONE} : selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné.`;
       } else if (c === "bordure") {
         const s = l.surfaceM2 ?? 0;
         retenir = s >= SURFACE_MIN_M2
@@ -229,7 +237,7 @@ export function texteLogement(l: LectureDebroussaillement | null | undefined): (
         retenir = `Le point de l'adresse est dans ${ZONE}, à moins de ${LIMITE_PROCHE_M} m de sa limite : selon l'endroit exact, le logement peut y être ou non.`;
       }
       return {
-        titre, retenir, limite: lignes(c === "a_cheval" ? INDICATIF : null, ancien(l), lu), verifier: VERIFIER_LIMITE, complement: null, savoirPlus, document: documentDe(l),
+        titre, retenir, limite: lignes(c === "a_cheval" ? INDICATIF : null, ancien(l), lu), verifier: c === "a_cheval" ? VERIFIER_A_CHEVAL : VERIFIER_LIMITE, complement: null, savoirPlus, document: documentDe(l),
       };
     }
     case "hors_zone":
