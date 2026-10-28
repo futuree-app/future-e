@@ -57,7 +57,7 @@ async function scenario(ctx, libelle) {
 
   b = await rechercher(p, "sis", "Paris");
   t = await b.innerText();
-  verifier(/\(SIS\) : 37/.test(t) && /8\s?250 fiches/.test(t), `${libelle} SIS Paris : ville et arrondissements (37 SIS, 8 250 CASIAS)`);
+  verifier(/\(SIS\) : 37/.test(t) && /8\s?248 fiches/.test(t), `${libelle} SIS Paris : ville et arrondissements (37 SIS, 8 248 fiches CASIAS distinctes)`);
 
   b = await rechercher(p, "sis", "L'Abergement-Cl", "L'Abergement-Clémenciat");
   t = await b.innerText();

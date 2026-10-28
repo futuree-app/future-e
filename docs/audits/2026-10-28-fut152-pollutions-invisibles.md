@@ -8,7 +8,7 @@
 - **Les quatre recherches sont rétablies** sur des sources officielles vérifiées, avec quatre issues distinctes : résultat, absence dans la source, résultat partiel, source indisponible. Aucune panne ne devient une absence.
 - **IREP** : l'export officiel 2025 sert désormais d'index local reproductible (13 811 établissements, dont 2 786 avec au moins un rejet chiffré publié). À Metz, l'ancien extrait ADEME ne trouvait aucun établissement dans un rayon de 10 km ; l'index en trouve 5 avec rejet chiffré, plus 19 autres.
 - **Dossier payant : NO GO pour IREP ; GO à instruire pour les sites et sols au point d'adresse.** Un SIS sous l'adresse change ce que l'acheteur doit vérifier, et le dossier n'en dit rien aujourd'hui. Le détail est au §6 et dans un ticket séparé.
-- **Incident hors périmètre, à traiter vite** : depuis Node, Géorisques coupe les requêtes qui portent `Accept: application/json`. En production, `https://futur-e.fr/georisques?insee=57463` répond `500 fetch failed`. Les lectures Géorisques du dossier Logement sont probablement touchées (§7).
+- **Incident hors périmètre, traité à part (FUT-158, PR #110)** : depuis Node, Géorisques coupe les requêtes qui portent `Accept: application/json`. En production, `https://futur-e.fr/georisques?insee=57463` répond `500 fetch failed`. Les lectures Géorisques du dossier Logement sont probablement touchées (§7).
 
 ## 1. Diagnostic des quatre recherches (avant la correction)
 
@@ -77,7 +77,7 @@ Conventions arbitrées par le porteur le 28/10/2026 :
 - IREP : lister les établissements avec rejet chiffré, puis compter séparément les autres, avec la formule « sans rejet chiffré publié au-dessus des seuils ».
 - Positions impossibles : écarter et compter.
 - Eau : afficher le dernier prélèvement publié, daté, sans seuil d'ancienneté.
-- CASIAS : compter et renvoyer vers la carte, sans lister. La réponse du porteur ne tranchait pas ce point ; l'option recommandée a été appliquée et reste à confirmer.
+- CASIAS : compter et renvoyer vers la carte, sans lister, ce que le porteur a accepté provisoirement le 28/10/2026. L'expérience visée à terme est d'explorer les fiches proches d'une adresse dans futur•e, et de les réutiliser dans le dossier payant. Le compte est celui des **fiches distinctes** : lues page par page et dédoublonnées par identifiant, elles ne sont jamais tirées du total annoncé. Si le plafond de 10 pages par lot coupe la lecture, l'écran affiche « au moins N fiches ».
 
 Le repère « vigilance » nitrates à 25 mg/L existait déjà. Il est conservé, et désormais présenté au lecteur comme repère futur•e sans valeur réglementaire.
 
@@ -109,9 +109,9 @@ Pour comparaison, l'ancien extrait ADEME ne trouvait aucun établissement autour
 
 Sites et sols, recomptés par appels séparés puis union par identifiant :
 
-| Commune | SIS | Instructions | SUP | CASIAS |
+| Commune | SIS | Instructions | SUP | CASIAS (fiches distinctes) |
 |---|---:|---:|---:|---:|
-| Paris | 37 | 55 | 0 | 8 250 (8 248 identifiants distincts, soit 2 doublons de la source dans le total) |
+| Paris | 37 | 55 | 0 | 8 248 (la source annonce 8 250 lignes, dont 2 doublons) |
 | Metz | 8 | 19 | 2 | 546 |
 | Cherbourg-en-Cotentin | 13 | 16 | 1 | 252 |
 | Annecy | 6 | 27 | 1 | 841 |
@@ -123,7 +123,7 @@ Sites et sols, recomptés par appels séparés puis union par identifiant :
 
 **Coût** :
 - IREP : index lu une fois par instance (19 ms, 13 Mo de mémoire), 2 ms par recherche, aucun appel réseau.
-- Sites et sols : 4 appels par commune (12 pour Paris), mis en cache 24 h.
+- Sites et sols : 4 appels pour une commune ordinaire. CASIAS est lu page par page pour être compté par identifiant distinct : Paris demande 3 lots et 9 pages de 1 000 fiches, soit environ 4 Mo, pour 4,9 s au premier passage, puis 0,07 s en cache (24 h). Pour Lyon : 1,6 s. Pour Metz : 0,3 s.
 - Eau : 6 à 7 appels plus un par réseau supplémentaire, mis en cache 24 h.
 - Aucune lecture ni écriture Supabase. Surcoût Vercel négligeable (+1,4 Mo dans la seule fonction `/api/proxy/irep`).
 - Aucun rapport payant ne change : `georisques-logement` n'est touché qu'en commentaire, et la garde FUT-145 « le dossier n'appelle pas IREP » est conservée.
@@ -156,12 +156,6 @@ Sites et sols, recomptés par appels séparés puis union par identifiant :
 - **Cartofriches** : l'afficher sous la même règle (intersection, pollution qualifiée), ou cesser de le charger. Il ne doit plus rester chargé sans être lu.
 - **Technique** : `getSitesSolsAutour(lat, lon, rayon)` sur la même lib (la normalisation est déjà écrite), un appel de plus dans le fan-out de `georisques-logement` (environ 300 ms en parallèle), un champ versionné dans `LogementReport`, une règle de couverture dans `deriveLogementCoverage`. Tests : intersection, absence lue, panne, PLM, parcelle à cheval.
 
-## 7. Incident Géorisques (hors périmètre, priorité haute)
+## 7. Incident Géorisques (traité à part : FUT-158, PR #110)
 
-Mesuré le 28/10/2026 depuis Node 25 : Géorisques coupe la connexion (`ECONNRESET`, « fetch failed ») sur toute requête qui porte `Accept: application/json`. `curl` reproduit le comportement (`-H "Accept: application/json"` : connexion coupée). Sans cet en-tête, avec un User-Agent nommé, l'API v1 répond 200.
-
-En production, `GET https://futur-e.fr/georisques?insee=57463` répond `500 {"error":"fetch failed"}`.
-
-Or `src/lib/georisques.ts` envoie `accept: application/json` sur ses appels v1 (CatNat, cavités, mouvements de terrain) et v2. Les appels v2 avec jeton échouent depuis Node en local quels que soient les en-têtes, alors que `curl` passe : la cause reste à établir.
-
-**Effet probable** : les lectures Géorisques du dossier Logement tombent en « indisponible » (elles sont protégées par des `.catch`, donc en silence). À vérifier sur un dossier réel, puis corriger dans un ticket dédié. La nouvelle lib `server/sites-sols.ts` évite déjà le piège (test de non-régression).
+Le diagnostic complet est dans `docs/audits/2026-10-28-fut158-incident-georisques.md`. Géorisques coupe une partie des requêtes `fetch` de Node selon leurs en-têtes ; `Accept-Encoding: identity` lève la coupure sur tous les chemins du dossier. La lib de cette PR (`server/sites-sols.ts`) envoie un User-Agent nommé et aucun `Accept` : elle a été vérifiée sous Next.js sur toutes les communes de la recette. Elle adoptera les en-têtes partagés de FUT-158 (`EN_TETES_GEORISQUES`) une fois les deux PR fusionnées.

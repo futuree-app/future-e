@@ -101,9 +101,13 @@ test("A · une seule panne rend la catégorie indisponible : une liste à laquel
   }
   assert.deepEqual(SS.lireCategorie([page([])]), { etat: "absent_dans_source", total: 0, fiches: [] });
   assert.equal(SS.lireCategorie([page([ficheSis("A")])], true).etat, "partiel");
-  assert.deepEqual(SS.lireCasias([page([], 546), page([], 27)]), { etat: "disponible", total: 573 });
+  // CASIAS : le compte est celui des identifiants distincts, jamais le total annoncé (Paris : 8 250 annoncées,
+  // 8 248 distinctes), et la liste ne sort pas.
+  const casias = SS.lireCasias([page([ficheSis("C1"), ficheSis("C2")], 3), page([ficheSis("C2"), ficheSis("C3")], 2)]);
+  assert.deepEqual(casias, { etat: "disponible", total: 3 });
   assert.deepEqual(SS.lireCasias([page([], 0)]), { etat: "absent_dans_source", total: 0 });
-  assert.deepEqual(SS.lireCasias([page([], 5), null]), { etat: "indisponible" });
+  assert.deepEqual(SS.lireCasias([page([ficheSis("C1")]), null]), { etat: "indisponible" });
+  assert.deepEqual(SS.lireCasias([page([ficheSis("C1")], 12000, 12)], true), { etat: "partiel", total: 1 });
 });
 
 test("A · un lien venu de la source n'est rendu que vers un domaine public attendu, en https", () => {
@@ -114,11 +118,18 @@ test("A · un lien venu de la source n'est rendu que vers un domaine public atte
 });
 
 test("A · la vraie route : officielle, sans `Accept: application/json` (coupé par Géorisques), un User-Agent nommé", async () => {
-  const appels = doubler((u) => Response.json(u.pathname.endsWith("/casias") ? page([], 546) : page([ficheSis(`${u.pathname}-1`)])));
+  // CASIAS sur deux pages, avec une fiche répétée d'une page à l'autre : 3 lignes, 2 fiches.
+  const appels = doubler((u) => {
+    if (!u.pathname.endsWith("/casias")) return Response.json(page([ficheSis(`${u.pathname}-1`)]));
+    return Response.json(u.searchParams.get("page") === "1"
+      ? page([ficheSis("C1"), ficheSis("C2")], 3, 2)
+      : page([ficheSis("C2")], 3, 2));
+  });
   const r = await json(await SIS.GET(new Request("http://localhost/api/proxy/sis?insee=57463")));
   assert.equal(r.status, 200);
   assert.match(r.cache!, /s-maxage=86400/);
-  assert.equal(r.corps.casias.total, 546);
+  assert.deepEqual(r.corps.casias, { etat: "disponible", total: 2 }, "compté par identifiant, liste non transmise");
+  assert.deepEqual(appels.filter((a) => a.url.pathname.endsWith("/casias")).map((a) => a.url.searchParams.get("page")).sort(), ["1", "2"]);
   for (const a of appels) {
     assert.equal(a.url.origin, "https://georisques.gouv.fr");
     assert.match(a.url.pathname, /^\/api\/v1\/ssp\/(conclusions_sis|instructions|conclusions_sup|casias)$/);

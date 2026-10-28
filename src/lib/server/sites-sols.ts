@@ -1,6 +1,6 @@
 import "server-only";
 import {
-  CHEMIN, PAGES_MAX, SITES_SOLS_SOURCE, TAILLE_PAGE, lireCasias, lireCategorie, lots, pageLisible, perimetreDe,
+  CHEMIN, PAGES_MAX, PAGES_MAX_CASIAS, SITES_SOLS_SOURCE, TAILLE_PAGE, lireCasias, lireCategorie, lots, pageLisible, perimetreDe,
   type CategorieListee, type PageSsp, type SitesSolsCommune,
 } from "@/lib/sites-sols";
 
@@ -17,7 +17,8 @@ const TIMEOUT_MS = 8000;
 // LES EN-TÊTES COMPTENT (mesuré le 28/10/2026). Géorisques coupe la connexion (ECONNRESET, « fetch failed »)
 // quand la requête porte `Accept: application/json`, ou quand `fetch` côté Node n'envoie pas de User-Agent
 // explicite. La même requête passe avec un User-Agent nommé et l'`Accept` par défaut. Reproduit avec curl
-// (`-H "Accept: application/json"` : connexion coupée). Ne pas « corriger » en ajoutant un Accept JSON.
+// (`-H "Accept: application/json"` : connexion coupée). Ne pas « corriger » en ajoutant un Accept JSON. Diagnostic
+// complet et en-têtes partagés : FUT-158 (`lib/georisques-http.ts`), à adopter ici une fois les deux PR fusionnées.
 const USER_AGENT = "futur-e/pollutions-invisibles (contact: futur-e.app)";
 const UNE_JOURNEE = 86_400;
 
@@ -40,14 +41,14 @@ async function page(chemin: string, codes: string[], numero: number, taille: num
 }
 
 /** Toutes les pages d'un lot, jusqu'au plafond. `incomplet` quand le plafond coupe la liste. */
-async function toutesLesPages(chemin: string, codes: string[]): Promise<{ pages: (PageSsp | null)[]; incomplet: boolean }> {
+async function toutesLesPages(chemin: string, codes: string[], plafond = PAGES_MAX): Promise<{ pages: (PageSsp | null)[]; incomplet: boolean }> {
   const premiere = await page(chemin, codes, 1, TAILLE_PAGE);
   if (!premiere || !pageLisible(premiere)) return { pages: [premiere], incomplet: false };
   const totalPages = typeof premiere.total_pages === "number" && Number.isInteger(premiere.total_pages) ? premiere.total_pages : 1;
   const suivantes = await Promise.all(
-    Array.from({ length: Math.min(totalPages, PAGES_MAX) - 1 }, (_, i) => page(chemin, codes, i + 2, TAILLE_PAGE)),
+    Array.from({ length: Math.min(totalPages, plafond) - 1 }, (_, i) => page(chemin, codes, i + 2, TAILLE_PAGE)),
   );
-  return { pages: [premiere, ...suivantes], incomplet: totalPages > PAGES_MAX };
+  return { pages: [premiere, ...suivantes], incomplet: totalPages > plafond };
 }
 
 async function categorie(cat: CategorieListee, groupes: string[][]) {
@@ -63,8 +64,10 @@ export async function getSitesSolsCommune(insee: string): Promise<SitesSolsCommu
     categorie("sis", groupes),
     categorie("instructions", groupes),
     categorie("sup", groupes),
-    // CASIAS se compte : une page d'une ligne suffit à lire le total.
-    Promise.all(groupes.map((g) => page(CHEMIN.casias, g, 1, 1))).then(lireCasias),
+    // CASIAS se compte par identifiant distinct : toutes ses pages sont lues (Paris : 9 pages de 1 000, environ
+    // 4 Mo, une fois par jour grâce au cache), et seul le nombre est rendu.
+    Promise.all(groupes.map((g) => toutesLesPages(CHEMIN.casias, g, PAGES_MAX_CASIAS)))
+      .then((lus) => lireCasias(lus.flatMap((l) => l.pages), lus.some((l) => l.incomplet))),
   ]);
   return { perimetre, consulteLe: new Date().toISOString(), sis, instructions, sup, casias };
 }

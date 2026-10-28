@@ -33,6 +33,8 @@ export const SITES_SOLS_SOURCE = {
 export const CODES_PAR_APPEL = 10;
 /** Plafond de pagination par catégorie listée : au-delà, la liste est dite partielle, jamais complète. */
 export const PAGES_MAX = 5;
+/** CASIAS compte des milliers de fiches dans une grande ville (Lyon : 4 969 sous le seul code de la ville). */
+export const PAGES_MAX_CASIAS = 10;
 export const TAILLE_PAGE = 1000;
 
 export type CategorieListee = "sis" | "instructions" | "sup";
@@ -98,9 +100,10 @@ export type CategorieLue =
   | { etat: "absent_dans_source"; total: 0; fiches: [] }
   | { etat: "disponible" | "partiel"; total: number; fiches: FicheSsp[] };
 
+/** `partiel` : le plafond de pages a coupé la lecture ; `total` est alors un minimum (« au moins »). */
 export type CasiasLu =
   | { etat: "indisponible" }
-  | { etat: "absent_dans_source" | "disponible"; total: number };
+  | { etat: "absent_dans_source" | "disponible" | "partiel"; total: number };
 
 export type SitesSolsCommune = {
   perimetre: Perimetre;
@@ -170,11 +173,12 @@ export function lireCategorie(pages: (PageSsp | null)[], incomplet = false): Cat
 
 /**
  * CASIAS se compte, il ne se liste pas : des centaines de fiches par ville, dans un ordre sans rapport avec
- * la proximité. Le compte additionne les totaux des lots. Ville et arrondissements y portent des fiches
- * distinctes (aucun recouvrement mesuré à Paris, Lyon, Marseille, le 28/10/2026, à une fiche près à Lyon).
+ * la proximité. Le compte est celui des IDENTIFIANTS DISTINCTS, jamais le total annoncé par la source : Paris
+ * (ville et arrondissements) annonce 8 250 lignes pour 8 248 fiches distinctes (28/10/2026). Il faut donc lire
+ * toutes les pages ; seul le nombre sort d'ici, la liste n'est pas transmise.
  */
-export function lireCasias(pages: (PageSsp | null)[]): CasiasLu {
-  if (pages.length === 0 || pages.some((p) => p === null || !pageLisible(p))) return { etat: "indisponible" };
-  const total = (pages as { results: number }[]).reduce((n, p) => n + p.results, 0);
-  return { etat: total === 0 ? "absent_dans_source" : "disponible", total };
+export function lireCasias(pages: (PageSsp | null)[], incomplet = false): CasiasLu {
+  const lu = lireCategorie(pages, incomplet);
+  if (lu.etat === "indisponible") return lu;
+  return { etat: lu.etat, total: lu.total };
 }

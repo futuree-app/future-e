@@ -258,13 +258,16 @@ function RenduSitesSols({ data, commune }: { data: SitesSolsCommune; commune: Co
       />
       <div className="lookup-section">
         <div className="lookup-section-head">
-          Anciennes activités industrielles et de services (CASIAS){casias.etat === 'disponible' ? ` : ${nombre(casias.total)} ${pluriel(casias.total, 'fiche', 'fiches')}` : ''}
+          Anciennes activités industrielles et de services (CASIAS)
+          {casias.etat === 'disponible' && ` : ${nombre(casias.total)} ${pluriel(casias.total, 'fiche', 'fiches')}`}
+          {casias.etat === 'partiel' && ` : au moins ${nombre(casias.total)} fiches`}
         </div>
         {casias.etat === 'indisponible' ? (
           <div className="lookup-error">Inventaire momentanément indisponible : rien ne peut en être conclu pour cette commune.</div>
         ) : (
           <div className="lookup-section-desc">
             {casias.etat === 'absent_dans_source' ? 'Aucune fiche dans l’inventaire pour cette commune. ' : ''}
+            {casias.etat === 'partiel' ? 'La lecture s’est arrêtée avant la dernière page : le nombre réel est plus élevé. ' : ''}
             Une fiche indique qu’une activité a existé, sans qu’une pollution ait été constatée. L’inventaire est historique
             et incomplet. Pour situer ces activités près d’une adresse : <Lien href={CARTE_GEORISQUES}>carte Géorisques</Lien>.
           </div>
@@ -275,6 +278,7 @@ function RenduSitesSols({ data, commune }: { data: SitesSolsCommune; commune: Co
         <p>
           Géorisques (ministère de la Transition écologique, BRGM), service « sites et sols pollués », interrogé le
           {' '}{dateFr(data.consulteLe)} sur {p.codes.length} {pluriel(p.codes.length, 'code commune', 'codes commune')}.
+          Chaque nombre compte des fiches distinctes : la source répète certaines fiches, qui ne sont comptées qu’une fois.
         </p>
         <p>
           Les fiches sont rattachées à un code commune. Pour Paris, Lyon et Marseille, la recherche couvre la ville et ses
