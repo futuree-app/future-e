@@ -19,6 +19,7 @@ import "server-only";
 // Interroger « un arrondissement représentatif » afficherait donc classe 1 à un habitant du 9e
 // arrondissement de Lyon. Sans adresse, ces trois communes n'ont PAS de valeur : `null`, pas un repli.
 
+import { EN_TETES_GEORISQUES } from "./georisques-http";
 import { codePourSourceParArrondissement } from "./plm";
 
 const BASE = "https://www.georisques.gouv.fr/api/v1/radon";
@@ -57,6 +58,7 @@ export async function getRadonPotentiel(
   if (!code) return null;
   try {
     const res = await fetch(`${BASE}?code_insee=${encodeURIComponent(code)}`, {
+      headers: EN_TETES_GEORISQUES, // FUT-158
       next: { revalidate: 2_592_000 }, // 30 j : une classification géologique ne bouge pas
       signal: AbortSignal.timeout(6000),
     });

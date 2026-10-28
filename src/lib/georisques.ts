@@ -1,5 +1,6 @@
 import "server-only";
 import { agregerLignesCatnat, codeGaspar, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
+import { EN_TETES_GEORISQUES, tracerEchecGeorisques } from "./georisques-http.ts";
 import { avecDetail, buildRegulatoryPlans, detailDuPlan, type PlanDetail, type RawPprnDetail, type RegulatoryPlan } from "./pprn-zonage.ts";
 
 type GasparRiskDetail = {
@@ -147,25 +148,26 @@ async function fetchJson<T>(pathname: string, searchParams: URLSearchParams) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  const url = `${GEORISQUES_BASE_URL}${pathname}?${searchParams.toString()}`;
   try {
-    const response = await fetch(
-      `${GEORISQUES_BASE_URL}${pathname}?${searchParams.toString()}`,
-      {
-        headers: {
-          accept: "application/json",
-        },
-        next: {
-          revalidate: 86400,
-        },
-        signal: controller.signal,
+    // FUT-158 : les en-têtes partagés, sans lesquels Géorisques coupe une partie des connexions.
+    const response = await fetch(url, {
+      headers: EN_TETES_GEORISQUES,
+      next: {
+        revalidate: 86400,
       },
-    );
+      signal: controller.signal,
+    });
 
     if (!response.ok) {
+      tracerEchecGeorisques(url, { statut: response.status });
       throw new Error(`Géorisques request failed with status ${response.status}`);
     }
 
     return (await response.json()) as T;
+  } catch (e) {
+    if (!(e instanceof Error && e.message.startsWith("Géorisques request failed"))) tracerEchecGeorisques(url, { erreur: e });
+    throw e;
   } finally {
     clearTimeout(timeout);
   }
@@ -181,24 +183,23 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams, t
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+  const url = `${GEORISQUES_V2_BASE_URL}${pathname}?${searchParams.toString()}`;
   try {
-    const response = await fetch(
-      `${GEORISQUES_V2_BASE_URL}${pathname}?${searchParams.toString()}`,
-      {
-        headers: {
-          accept: "application/json",
-          authorization: `Bearer ${token}`,
-        },
-        cache: "no-store",
-        signal: controller.signal,
-      },
-    );
+    const response = await fetch(url, {
+      headers: { ...EN_TETES_GEORISQUES, authorization: `Bearer ${token}` },
+      cache: "no-store",
+      signal: controller.signal,
+    });
 
     if (!response.ok) {
+      tracerEchecGeorisques(url, { statut: response.status });
       throw new Error(`Géorisques v2 request failed with status ${response.status}`);
     }
 
     return (await response.json()) as T;
+  } catch (e) {
+    if (!(e instanceof Error && e.message.startsWith("Géorisques v2 request failed"))) tracerEchecGeorisques(url, { erreur: e });
+    throw e;
   } finally {
     clearTimeout(timeout);
   }
