@@ -78,7 +78,7 @@ export function FamilyHeading({ children, color = "var(--fg-4)" }: { children: R
       {colored && (
         <span style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0, boxShadow: `0 0 12px ${color}` }} />
       )}
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color, whiteSpace: "nowrap" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color, whiteSpace: "normal" }}>
         {children}
       </span>
       <span style={{ flex: 1, height: 1, background: "var(--border-1)" }} />
