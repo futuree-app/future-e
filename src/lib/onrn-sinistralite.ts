@@ -33,10 +33,16 @@ type Dataset = Record<string, OnrnRaw>;
 let cacheSech: Dataset | null = null;
 let cacheInon: Dataset | null = null;
 
-async function loadOne(file: string, current: Dataset | null): Promise<Dataset> {
+async function loadOne(file: "onrn-secheresse.json" | "onrn-inondation.json", current: Dataset | null): Promise<Dataset> {
   if (current) return current;
   try {
-    const raw = await fs.readFile(path.join(process.cwd(), "data", file), "utf8");
+    // Deux chemins littéraux pour le traçage Next.js : un nom variable dans
+    // path.join(..., "data", file) faisait embarquer tout data/ (sources et
+    // fichiers de construction compris) dans chaque fonction qui lit l'ONRN.
+    const filePath = file === "onrn-secheresse.json"
+      ? path.join(process.cwd(), "data", "onrn-secheresse.json")
+      : path.join(process.cwd(), "data", "onrn-inondation.json");
+    const raw = await fs.readFile(filePath, "utf8");
     return JSON.parse(raw) as Dataset;
   } catch {
     return {}; // fichier absent (build sans la donnée) : tout tombe en indispo.
