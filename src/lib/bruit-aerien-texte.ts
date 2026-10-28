@@ -50,6 +50,28 @@ function laZone(l: ZoneLue[]): { texte: string; pluriel: boolean } {
 /** « de la zone C », « des zones C et D ». */
 const deZones = (l: ZoneLue[]) => { const z = laZone(l); return z.pluriel ? `des ${z.texte.slice(4)}` : `de ${z.texte}`; };
 
+/** « A et B », « A, B et C ». */
+const et = (l: string[]) => (l.length <= 1 ? l[0] ?? "" : `${l.slice(0, -1).join(", ")} et ${l[l.length - 1]}`);
+
+/**
+ * DES ZONES RANGÉES PAR AÉRODROME (contre-épreuve du 28/10/2026, 10 bis rue Ampère à Gonesse : « en zone C
+ * du plan de Paris-Charles de Gaulle, à moins de 50 m de la zone C » parlait en apparence deux fois de la
+ * même zone ; c'était celle du Bourget). Les zones du plan de `ref` sont dites sans le renommer ; celles d'un
+ * autre aérodrome portent toujours le nom de leur plan. `forme` : « la zone C » ou « de la zone C ».
+ */
+function zonesNommees(l: ZoneLue[], ref: ZoneLue | null, nom: string, forme: "la" | "de"): { texte: string; pluriel: boolean } {
+  const groupes = new Map<string, ZoneLue[]>();
+  for (const z of l) groupes.set(z.aerodrome.oaci, [...(groupes.get(z.aerodrome.oaci) ?? []), z]);
+  const textes = [...groupes.values()].map((g) => {
+    const t = forme === "la" ? laZone(g).texte : deZones(g);
+    return ref && g[0].aerodrome.oaci === ref.aerodrome.oaci ? t : `${t} du ${nom} de ${aerodrome(g[0])}`;
+  });
+  return { texte: et(textes), pluriel: new Set(l.map((z) => `${z.aerodrome.oaci}|${z.zone}`)).size > 1 };
+}
+
+/** « en zone III du plan de gêne sonore de l'aérodrome de X, et en zone III du plan … de Y ». */
+const enZones = (l: ZoneLue[], nom: string) => l.map((z) => `en zone ${z.zone} du ${nom} de ${aerodrome(z)}`).join(", et ");
+
 /** Les zones voisines d'une limite, sans la zone retenue elle-même. */
 function voisines(p: LecturePlan): ZoneLue[] {
   return p.enLimite.filter((z) => !p.retenue || z.zone !== p.retenue.zone || z.aerodrome.oaci !== p.retenue.aerodrome.oaci);
@@ -62,8 +84,7 @@ const autresAerodromes = (p: LecturePlan) => p.autresAerodromes ?? [];
 function phraseAutresAerodromes(sujet: string, nom: string, p: LecturePlan): string | null {
   const a = autresAerodromes(p);
   if (a.length === 0) return null;
-  const liste = a.map((z) => `en zone ${z.zone} du ${nom} de ${aerodrome(z)}`).join(", et ");
-  return `${sujet} est aussi ${liste} : les plans de chaque aérodrome s'appliquent.`;
+  return `${sujet} est aussi ${enZones(a, nom)} : les plans de chaque aérodrome s'appliquent.`;
 }
 
 /**
@@ -99,7 +120,17 @@ export type TexteBruit = {
 
 const LIMITE_PEB = "Ce plan encadre la construction autour de l'aérodrome à partir du trafic prévu : il ne mesure pas le bruit que l'on entend dans un logement.";
 const LIMITE_PGS = "Ce plan délimite les zones où une aide à l'insonorisation peut être accordée : il ne mesure pas le bruit que l'on entend dans un logement.";
+const LIMITE_PGS_PLURIEL = "Ces plans délimitent les zones où une aide à l'insonorisation peut être accordée : ils ne mesurent pas le bruit que l'on entend dans un logement.";
 const LIMITE_HORS = "Être hors de ces zones ne veut pas dire ne pas entendre d'avions : un survol reste possible.";
+/**
+ * UNE ZONE NON ÉTABLIE (contre-épreuve du 28/10/2026, Ouges : la lecture est incertaine parce que l'adresse
+ * est dans l'EMPRISE de la zone A de Dijon, dont le tracé publié ne se mesure pas, alors que ce tracé passe
+ * à 700 m). La prudence est gardée, mais aucune phrase ne situe ce tracé : ni « à moins de 50 m », ni
+ * « tout près ». L'écran dit l'effet, le dépliable dit la cause.
+ */
+const INCERTAIN_CAUSE = "le tracé publié par la DGAC ne permet pas de conclure de façon fiable";
+const INCERTAIN_DETAIL = "Dans ce secteur, le tracé publié d'une zone du plan a une forme que le calcul ne sait pas mesurer (par exemple un contour qui se recoupe) : on ne peut pas dire de façon fiable si l'adresse est dedans ou dehors. Plutôt que de risquer une erreur, aucune zone n'est annoncée.";
+
 const SENS_PGS_TEXTE = "Le plan de gêne sonore délimite les zones où les riverains peuvent bénéficier d'une aide à l'insonorisation de leur logement, à des conditions propres (date du logement, aide déjà reçue). L'exploitant de l'aéroport instruit les demandes.";
 
 function source(l: LectureBruitAerien): string {
@@ -114,6 +145,11 @@ function documentDe(z: ZoneLue | null, nom: string): TexteBruit["document"] {
 }
 
 const pgsEnZone = (p: LecturePlan) => (p.etat === "en_zone" || p.etat === "en_limite") && !!p.retenue;
+/**
+ * Toutes les zones de plan de gêne sonore qui couvrent le bien, une par aérodrome (contre-épreuve du
+ * 28/10/2026, rue Ampère à Gonesse : Roissy et Le Bourget, seul Le Bourget était dit).
+ */
+const pgsTous = (p: LecturePlan) => (p.retenue ? [p.retenue, ...autresAerodromes(p)] : []);
 const lignes = (...l: (string | null)[]) => l.filter(Boolean).join(" ") || null;
 
 /**
@@ -140,26 +176,29 @@ export function texteAutour(l: LectureBruitAerien | null | undefined): TexteBrui
   ];
   // Le PGS : une ligne d'appoint, sauf quand il est seul à parler (revue du 27/10/2026 : à Orly et à
   // Toulouse, il déborde du PEB ; on lisait « hors des zones du PEB » suivi de « aussi en zone III »).
+  const pebEnZone = p.etat === "en_zone" || p.etat === "en_limite";
+  const pgs = pgsTous(g);
+  const adverbe = p.retenue ? "aussi " : p.etat === "incertain" ? "" : "en revanche ";
   const pgsLigne = pgsEnZone(g)
-    ? `Le secteur est ${p.retenue ? "aussi" : "en revanche"} en zone ${g.retenue!.zone} du ${NOM_PGS} de ${aerodrome(g.retenue!)}${p.etat === "en_zone" || p.etat === "en_limite" ? "" : " : ce plan délimite les zones où une aide à l'insonorisation peut être accordée"}.`
+    ? `Le secteur est ${adverbe}${enZones(pgs, NOM_PGS)}${pebEnZone ? "" : pgs.length > 1 ? " : ces plans délimitent les zones où une aide à l'insonorisation peut être accordée" : " : ce plan délimite les zones où une aide à l'insonorisation peut être accordée"}.`
     : null;
   if (p.etat === "incertain") {
     return {
-      retenir: `La zone du ${NOM_PEB} n'a pas pu être établie pour ce secteur : un tracé publié à moins de ${LIMITE_PROCHE_M} m de l'adresse n'est pas mesurable.`,
+      retenir: `La zone du ${NOM_PEB} n'a pas pu être établie pour ce secteur : ${INCERTAIN_CAUSE}.`,
       limite: "Rien n'en est conclu, ni dans un sens ni dans l'autre.",
       verifier: "Le plan se consulte en mairie et sur le Géoportail.",
-      complement: pgsLigne, savoirPlus, document: null,
+      complement: pgsLigne, savoirPlus: [INCERTAIN_DETAIL, ...savoirPlus], document: null,
     };
   }
   if (p.etat === "absent") {
     if (!pgsEnZone(g)) return null;
     const z = g.retenue!;
     return {
-      retenir: `${secteur} est en zone ${z.zone} du ${NOM_PGS} de ${aerodrome(z)}.`,
-      limite: LIMITE_PGS,
+      retenir: `${secteur} est ${enZones(pgs, NOM_PGS)}.`,
+      limite: pgs.length > 1 ? LIMITE_PGS_PLURIEL : LIMITE_PGS,
       verifier: "Passez sur place aux heures de décollage et d'atterrissage.",
       complement: null,
-      savoirPlus: [SENS_PGS_TEXTE, ...savoirPlus.slice(1), phraseArrete(z)],
+      savoirPlus: [SENS_PGS_TEXTE, ...savoirPlus.slice(1), ...pgs.map(phraseArrete)],
       document: documentDe(z, NOM_PGS),
     };
   }
@@ -180,10 +219,10 @@ export function texteAutour(l: LectureBruitAerien | null | undefined): TexteBrui
   if (r) {
     const base = `${secteur} est en zone ${r.zone} du ${NOM_PEB} de ${aerodrome(r)}, ${SENS_PEB[r.zone] ?? "selon le plan"}`;
     retenir = p.etat === "en_limite"
-      ? `${base}, à moins de ${LIMITE_PROCHE_M} m ${v.length ? deZones(v) : "de la limite de cette zone"}.`
+      ? `${base}, à moins de ${LIMITE_PROCHE_M} m ${v.length ? zonesNommees(v, r, NOM_PEB, "de").texte : "de la limite de cette zone"}.`
       : `${base}.`;
   } else {
-    retenir = `${secteur} est à moins de ${LIMITE_PROCHE_M} m ${deZones(p.enLimite)} du ${NOM_PEB} de ${aerodrome(p.enLimite[0])}.`;
+    retenir = `${secteur} est à moins de ${LIMITE_PROCHE_M} m ${zonesNommees(p.enLimite, null, NOM_PEB, "de").texte}.`;
   }
   const ref = r ?? p.enLimite[0];
   return {
@@ -261,22 +300,25 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
   if (p.etat === "incertain") {
     return {
       titre: "Bruit aérien : zone non établie",
-      retenir: `La zone du ${NOM_PEB} n'a pas pu être établie pour ce logement : un tracé publié tout près de l'adresse n'est pas mesurable.`,
+      retenir: `La zone du ${NOM_PEB} n'a pas pu être établie pour ce logement : ${INCERTAIN_CAUSE}.`,
       limite: lu,
       verifier: "Demandez au vendeur ou au bailleur l'état des nuisances sonores aériennes, ou consultez le plan en mairie.",
-      complement: pgsEtAide, savoirPlus: commun, document: null,
+      complement: pgsEtAide, savoirPlus: [INCERTAIN_DETAIL, ...commun], document: null,
     };
   }
   if (p.etat === "absent") {
     if (!pgsEnZone(l.pgs)) return null;
     const z = l.pgs.retenue!;
+    const pgs = pgsTous(l.pgs);
     return {
-      titre: `Zone ${z.zone} du ${NOM_PGS} de ${aerodrome(z)}`,
+      titre: pgs.length > 1
+        ? `Plans de gêne sonore des aérodromes ${et(pgs.map((x) => deCommune(x.aerodrome.nom)))}`
+        : `Zone ${z.zone} du ${NOM_PGS} de ${aerodrome(z)}`,
       retenir: pgsEtAide!,
-      limite: lignes(LIMITE_PGS, lu),
+      limite: lignes(pgs.length > 1 ? LIMITE_PGS_PLURIEL : LIMITE_PGS, lu),
       verifier: "Renseignez-vous auprès de l'exploitant de l'aéroport sur les conditions de l'aide, avec la date de construction du logement.",
       complement: null,
-      savoirPlus: [SENS_PGS_TEXTE, methode, source(l), phraseArrete(z)],
+      savoirPlus: [SENS_PGS_TEXTE, methode, source(l), ...pgs.map(phraseArrete)],
       document: documentDe(z, NOM_PGS),
     };
   }
@@ -318,14 +360,13 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
     retenir = `${fait}${autres} ${ensa}`;
   } else {
     titre = `En limite du ${NOM_PEB} de ${aerodrome(ref)}`;
-    const z = laZone(p.enLimite);
     retenir = l.grain === "parcelle"
-      ? `La parcelle ne touche ${z.texte} qu'en bordure (${Math.round(p.enLimite[0].surfaceM2 ?? 0)} m²) : la zone qui s'applique se vérifie sur le plan.`
-      : `Le point de l'adresse est à moins de ${LIMITE_PROCHE_M} m ${deZones(p.enLimite)} : la zone du logement se vérifie sur le plan.`;
+      ? `La parcelle ne touche ${zonesNommees(p.enLimite, ref, NOM_PEB, "la").texte} qu'en bordure (${Math.round(p.enLimite[0].surfaceM2 ?? 0)} m²) : la zone qui s'applique se vérifie sur le plan.`
+      : `Le point de l'adresse est à moins de ${LIMITE_PROCHE_M} m ${zonesNommees(p.enLimite, ref, NOM_PEB, "de").texte} : la zone du logement se vérifie sur le plan.`;
   }
   let bordure: string | null = null;
   if (r && v.length) {
-    const z = laZone(v);
+    const z = zonesNommees(v, r, NOM_PEB, "la");
     bordure = l.grain === "parcelle"
       ? `La parcelle touche aussi ${z.texte} en bordure (${Math.round(v[0].surfaceM2 ?? 0)} m²) : à vérifier sur le plan.`
       : `${z.texte.charAt(0).toUpperCase()}${z.texte.slice(1)} ${z.pluriel ? "passent" : "passe"} à moins de ${LIMITE_PROCHE_M} m du point de l'adresse : la zone du logement se vérifie sur le plan.`;
@@ -356,11 +397,13 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
 function textePgsLogement(l: LectureBruitAerien, aussi: boolean): string | null {
   const p = l.pgs;
   if (!(p.etat === "en_zone" || p.etat === "en_limite")) return null;
-  const z = p.retenue ?? p.enLimite[0];
-  if (!z) return null;
+  if (!p.retenue && p.enLimite.length === 0) return null;
   const sujet = sujetLogement(l);
+  const tous = pgsTous(p);
   const ou = p.retenue
-    ? `${sujet} est ${aussi ? "aussi " : ""}en zone ${z.zone} du ${NOM_PGS} de ${aerodrome(z)}`
-    : `${sujet} est en limite de la zone ${z.zone} du ${NOM_PGS} de ${aerodrome(z)}`;
-  return `${ou} : une aide à l'insonorisation peut exister. Elle dépend de la date du logement et des aides déjà reçues ; l'exploitant de l'aéroport instruit les demandes.`;
+    ? `${sujet} est ${aussi ? "aussi " : ""}${enZones(tous, NOM_PGS)}`
+    : `${sujet} est en limite ${zonesNommees(p.enLimite, null, NOM_PGS, "de").texte}`;
+  // Plusieurs plans : chacun peut ouvrir une aide, aucun ne la garantit.
+  const exploitant = tous.length > 1 ? "l'exploitant de chaque aéroport instruit les demandes" : "l'exploitant de l'aéroport instruit les demandes";
+  return `${ou} : une aide à l'insonorisation peut exister. Elle dépend de la date du logement et des aides déjà reçues ; ${exploitant}.`;
 }

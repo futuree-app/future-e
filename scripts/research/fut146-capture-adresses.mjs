@@ -36,6 +36,12 @@ export const CAS = {
   // Orly et Roissy : plusieurs zones et un PGS.
   "villeneuve-le-roi": "12 Avenue de la République 94290 Villeneuve-le-Roi",
   "goussainville": "1 Rue de la Gare 95190 Goussainville",
+  // Contre-épreuve du 28/10/2026 : Roissy et Le Bourget se superposent (PEB et PGS), et une zone C de chacun.
+  "gonesse-4-ampere": "4 Rue Ampère 95500 Gonesse",
+  "gonesse-10bis-ampere": "10bis Rue Ampère 95500 Gonesse",
+  "gonesse-14-ampere": "14 Rue Ampère 95500 Gonesse",
+  // Dijon-Longvic : dans l'emprise d'une zone au tracé non mesurable, loin de ce tracé.
+  "ouges-charles-de-gaulle": "36 Rue Charles de Gaulle 21600 Ouges",
   // Géocodage à la rue : la lecture décrit un secteur.
   "marignane-rue-seule": "Rue Henri Guillaumet 13700 Marignane",
   // Loin de tout aérodrome.

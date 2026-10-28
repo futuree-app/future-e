@@ -8,7 +8,7 @@ import {
   type EntreeBruitAerien, type JeuBruitAerien, type LectureBruitAerien, type ZonePubliee,
 } from "./bruit-aerien.ts";
 import { texteAutour, texteLogement } from "./bruit-aerien-texte.ts";
-import { projectionAutour } from "./geometrie-parcelle.ts";
+import { distanceLignes, lignesDe, pointsDe, projectionAutour } from "./geometrie-parcelle.ts";
 import { sourcesAbsentes, issueActualisation, type VersionLogement } from "./logement-report-version.ts";
 import type { LogementReport } from "./logement-report-types.ts";
 
@@ -178,6 +178,8 @@ describe("2. Les adresses réelles, contre l'oracle tiré du fichier officiel", 
       for (const plan of ["peb", "pgs"] as const) {
         const attendu = oracle(plan, p);
         const lu = l[plan];
+        // Ouges : dans l'emprise de la zone A non mesurable de Dijon, l'incertitude est voulue (section 6).
+        if (lu.etat === "incertain" && c === "ouges-charles-de-gaulle" && plan === "peb") continue;
         if (lu.etat === "incertain") assert.fail(`${c} ${plan} incertain`);
         if (attendu.length === 0) assert.equal(lu.retenue, null, `${c} ${plan} : aucune zone ne contient le point`);
         else assert.equal(lu.retenue?.zone, attendu[0], `${c} ${plan}`);
@@ -621,5 +623,116 @@ describe("5. Ce que les textes disent, et ne disent jamais", () => {
     const l = lire("villeneuve-le-roi");
     assert.match(texteLogement(l)!.complement!, /peut exister/);
     assert.doesNotMatch(texteAutour(l)!.complement ?? "", /aide/);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// Contre-épreuve du 28/10/2026 sur 350cc394 : trois défauts de RESTITUTION, sur les adresses exactes de la
+// revue. Le calcul est juste ; c'est ce que le texte en dit qui est vérifié. Chaque test échoue sur 350cc394.
+describe("6. Contre-épreuve du 28/10/2026 : ce que l'écran dit des lectures justes", () => {
+  /** L'entrée telle que la route de production la construit : précision relue dans l'identifiant BAN. */
+  const production = (c: string): EntreeBruitAerien => {
+    const x = fixture(c) as Fixture & { ban: { id: string } };
+    return { ...entree(c), geocodage: precisionDepuisBanId(x.ban.id) };
+  };
+  const autour = (c: string) => lireBruitAerien(jeu, { point: [fixture(c).ban.lon, fixture(c).ban.lat], geocodage: null, parcelle: null });
+  const logement = (c: string) => lireBruitAerien(jeu, production(c));
+  const resume = (p: LectureBruitAerien["peb"]) => ({
+    etat: p.etat,
+    zones: [p.retenue, ...(p.autresAerodromes ?? [])].map((z) => `${z?.aerodrome.oaci} ${z?.zone} ${z?.part ?? "-"}`),
+    enLimite: p.enLimite.map((z) => `${z.aerodrome.oaci} ${z.zone}`),
+  });
+  const GONESSE = ["gonesse-4-ampere", "gonesse-10bis-ampere", "gonesse-14-ampere"];
+
+  test("le calcul n'a pas changé : zones, aérodromes, parts, grain et statut de la revue", () => {
+    const vu = Object.fromEntries([...GONESSE, "ouges-charles-de-gaulle"].map((c) => {
+      const a = autour(c);
+      const g = logement(c);
+      return [c, { autour: [a.statut, a.grain, resume(a.peb), resume(a.pgs)], logement: [g.statut, g.grain, g.parcelleEcartee, resume(g.peb), resume(g.pgs)] }];
+    }));
+    assert.deepEqual(vu, {
+      "gonesse-4-ampere": {
+        autour: ["lu", "point", { etat: "en_zone", zones: ["LFPG C -", "LFPB D -"], enLimite: [] }, { etat: "en_limite", zones: ["LFPB III -", "LFPG III -"], enLimite: ["LFPB III"] }],
+        logement: ["lu", "parcelle", null, { etat: "en_zone", zones: ["LFPG C 1", "LFPB D 1"], enLimite: [] }, { etat: "en_zone", zones: ["LFPB III 0.808", "LFPG III 1"], enLimite: [] }],
+      },
+      "gonesse-10bis-ampere": {
+        autour: ["lu", "point", { etat: "en_limite", zones: ["LFPG C -", "LFPB D -"], enLimite: ["LFPB C"] }, { etat: "en_zone", zones: ["LFPB III -", "LFPG III -"], enLimite: [] }],
+        logement: ["lu", "parcelle", null, { etat: "en_zone", zones: ["LFPG C 1", "LFPB D 1"], enLimite: [] }, { etat: "en_zone", zones: ["LFPB III 1", "LFPG III 1"], enLimite: [] }],
+      },
+      "gonesse-14-ampere": {
+        autour: ["lu", "point", { etat: "en_zone", zones: ["LFPG C -", "LFPB D -"], enLimite: [] }, { etat: "en_limite", zones: ["LFPB III -", "LFPG III -"], enLimite: ["LFPB III"] }],
+        logement: ["lu", "point", "repli", { etat: "en_zone", zones: ["LFPG C -", "LFPB D -"], enLimite: [] }, { etat: "en_limite", zones: ["LFPB III -", "LFPG III -"], enLimite: ["LFPB III"] }],
+      },
+      "ouges-charles-de-gaulle": {
+        autour: ["lu", "point", { etat: "incertain", zones: ["undefined undefined -"], enLimite: [] }, { etat: "absent", zones: ["undefined undefined -"], enLimite: [] }],
+        logement: ["lu", "point", "repli", { etat: "incertain", zones: ["undefined undefined -"], enLimite: [] }, { etat: "absent", zones: ["undefined undefined -"], enLimite: [] }],
+      },
+    });
+    for (const c of GONESSE) assert.equal(logement(c).source?.licence, "Licence Ouverte Etalab");
+  });
+
+  test("A : rue Ampère à Gonesse, les plans de gêne sonore de Roissy ET du Bourget sont cités, l'aide reste une possibilité", () => {
+    for (const c of GONESSE) {
+      for (const t of [rendreAutour(autour(c)), rendreLogement(logement(c))]) {
+        assert.match(t, /plan de gêne sonore de l'aérodrome de Paris-Le Bourget/, `${c} : ${t}`);
+        assert.match(t, /plan de gêne sonore de l'aérodrome de Paris-Charles de Gaulle/, `${c} : ${t}`);
+        sansInterdit(t);
+      }
+      const g = texteLogement(logement(c))!.complement!;
+      assert.match(g, /une aide à l'insonorisation peut exister/);
+      assert.match(g, /l'exploitant de chaque aéroport instruit les demandes/);
+      assert.doesNotMatch(texteAutour(autour(c))!.complement!, /aide/);
+    }
+    // Sans PEB au même endroit, les deux plans de gêne sonore parlent seuls, et tous deux sont nommés.
+    const seul = { ...logement("gonesse-4-ampere"), peb: { etat: "absent" as const, retenue: null, autres: [], enLimite: [], plusProche: null } };
+    const t = texteLogement(seul)!;
+    assert.equal(t.titre, "Plans de gêne sonore des aérodromes de Paris-Le Bourget et de Paris-Charles de Gaulle");
+    assert.match(t.limite!, /^Ces plans délimitent/);
+    const a = texteAutour({ ...seul, portee: "non_precisee", grain: "point" })!;
+    assert.match(a.retenir, /zone III du plan de gêne sonore de l'aérodrome de Paris-Le Bourget, et en zone III du plan de gêne sonore de l'aérodrome de Paris-Charles de Gaulle/);
+    sansInterdit(rendreLogement(seul));
+  });
+
+  test("B : 10 bis rue Ampère, la zone C voisine est nommée avec son aérodrome (Le Bourget), au point seulement", () => {
+    const a = rendreAutour(autour("gonesse-10bis-ampere"));
+    assert.match(a, /en zone C du plan d'exposition au bruit de l'aérodrome de Paris-Charles de Gaulle, une zone de bruit modéré selon le plan, à moins de 50 m de la zone C du plan d'exposition au bruit de l'aérodrome de Paris-Le Bourget\./);
+    assert.doesNotMatch(a, /à moins de 50 m de la zone C\./);
+    // Au point (parcelle écartée) : la phrase de bordure nomme aussi l'aérodrome.
+    const auPoint = rendreLogement(lireBruitAerien(jeu, { ...production("gonesse-10bis-ampere"), parcelle: null }));
+    assert.match(auPoint, /La zone C du plan d'exposition au bruit de l'aérodrome de Paris-Le Bourget passe à moins de 50 m du point de l'adresse/);
+    // À la parcelle, la proximité du point ne compte plus : la parcelle est entière en zone C de Roissy.
+    const parcelle = rendreLogement(logement("gonesse-10bis-ampere"));
+    assert.doesNotMatch(parcelle, /à moins de 50 m/);
+    assert.match(parcelle, /Le logement est en zone C/);
+    // Une zone voisine du MÊME plan reste dite sans répéter l'aérodrome (Bastia, revue B2).
+    assert.match(rendreLogement(lireBruitAerien(jeu, { point: [9.48818, 42.563732], geocodage: "housenumber", parcelle: null })), /La zone D passe à moins de 50 m du point/);
+  });
+
+  test("C : Ouges, la prudence reste, mais aucune phrase ne situe le tracé non mesurable « à moins de 50 m » ni « tout près »", () => {
+    const c = "ouges-charles-de-gaulle";
+    // Le tracé publié est réellement loin : l'ancienne phrase était fausse.
+    const x = fixture(c);
+    const z = jeu.peb.find((v) => !v.valide)!;
+    const proj = projectionAutour(x.ban.lon, x.ban.lat);
+    const polys = (z.geometry as { coordinates: number[][][][] }).coordinates;
+    const d = distanceLignes(pointsDe({ type: "Point", coordinates: [x.ban.lon, x.ban.lat] }, proj)![0], lignesDe({ type: "MultiLineString", coordinates: polys.flat(1) }, proj)!);
+    assert.ok(d > 600, `tracé à ${Math.round(d)} m`);
+    for (const t of [texteAutour(autour(c))!, texteLogement(logement(c))!]) {
+      const ecran = [t.retenir, t.limite, t.verifier, t.complement].join(" ");
+      assert.match(t.retenir, /n'a pas pu être établie/);
+      assert.match(t.retenir, /le tracé publié par la DGAC ne permet pas de conclure de façon fiable/);
+      assert.doesNotMatch(ecran, /50 m|tout près|à moins de|proche/);
+      assert.match(t.savoirPlus[0], /^Dans ce secteur, le tracé publié d'une zone du plan a une forme que le calcul ne sait pas mesurer/);
+      assert.doesNotMatch(t.savoirPlus[0], /\d+ m\b|tout près/);
+    }
+    assert.doesNotMatch(rendreAutour(autour(c)), /hors des zones/);
+  });
+
+  test("les validations antérieures tiennent : Marignane et Albi", () => {
+    assert.match(rendreLogement(lire("marignane-zone-c")), /zone C/);
+    assert.match(rendreLogement(lire("marignane-hors-zone")), /Hors des zones/);
+    assert.match(rendreLogement(lire("albi-zone-d")), /zone D/);
+    assert.match(rendreLogement(lire("albi-hors-zone")), /Hors des zones/);
+    // Fumel et Vendays-Montalivet : section 2, « jamais présentés comme opposables sans réserve ».
   });
 });
