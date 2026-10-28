@@ -22,6 +22,7 @@ import { EnergieSection } from "@/components/report/logement/EnergieSection";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { InondationLectureBlock } from "@/components/report/logement/InondationSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
+import { FibreAdresseSection } from "@/components/report/logement/FibreAdresseSection";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
@@ -643,6 +644,10 @@ export default function LogementModule({
               dpeNonVerifiable={dpeNonVerifiable}
             />
 
+            {/* FUT-156 : la fibre au bâtiment de l'adresse (Arcep). Un fait du bâtiment, lu une fois et figé
+                dans le rapport ; absent d'un rapport antérieur, il ne s'affiche pas. */}
+            <FibreAdresseSection lecture={result.fibre} />
+
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
 
             {/* Risques du bâti — registre sobre (dé-dramatisé). Sismicité/RGA en gradé (couleur de
@@ -777,6 +782,7 @@ const NOM_SOURCE: Record<string, string> = {
   urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
   bruit_aerien: "plans de bruit aérien (DGAC)",
   debroussaillement: "zonage du débroussaillement obligatoire (IGN)",
+  fibre: "fibre à l'adresse (Arcep)",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

@@ -115,6 +115,8 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // FUT-149 : mêmes règles. « Hors zone » et « département sans zonage publié » sont des réponses ; une lecture
   // non activée n'écrit aucun champ, et ne s'invente donc pas de panne.
   if (r.debroussaillement?.statut === "indisponible") absentes.push("debroussaillement");
+  // FUT-156 : mêmes règles. « À vérifier » est une réponse (l'adresse n'est pas rattachable), pas une panne.
+  if (r.fibre?.statut === "indisponible") absentes.push("fibre");
   return absentes;
 }
 
@@ -192,6 +194,8 @@ export function issueActualisation(
   const debAvant = ancienne.report.debroussaillement;
   if (debAvant?.statut === "lu" && !nouveau.debroussaillement) return "refusee";
   if (debAvant?.grain === "parcelle" && debAvant.statut === "lu" && nouveau.debroussaillement?.grain !== "parcelle") return "refusee";
+  // FUT-156 : une lecture de la fibre ne disparaît pas d'une version à l'autre (lecture désactivée entre-temps).
+  if (ancienne.report.fibre && ancienne.report.fibre.statut !== "indisponible" && !nouveau.fibre) return "refusee";
   return "nouvelle_version";
 }
 

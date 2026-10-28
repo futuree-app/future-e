@@ -1,0 +1,43 @@
+{
+  "module": "LogementModule",
+  "presentationsHorsFibreDoublees": true,
+  "visuelNavigateur": false,
+  "appelsReseau": [],
+  "cas": [
+    {
+      "cas": "deploye",
+      "blocPresent": true,
+      "attendu": "5 opérateurs"
+    },
+    {
+      "cas": "sur_demande",
+      "blocPresent": true,
+      "attendu": "Aucun opérateur"
+    },
+    {
+      "cas": "libelle_corse",
+      "blocPresent": true,
+      "attendu": "5 opérateurs"
+    },
+    {
+      "cas": "plage",
+      "blocPresent": true,
+      "attendu": "4 à 5 opérateurs"
+    },
+    {
+      "cas": "eloigne",
+      "blocPresent": true,
+      "attendu": "Raccordement à vérifier"
+    },
+    {
+      "cas": "panne",
+      "blocPresent": true,
+      "attendu": "Fibre non vérifiée"
+    },
+    {
+      "cas": "ancien",
+      "blocPresent": false,
+      "attendu": null
+    }
+  ]
+}

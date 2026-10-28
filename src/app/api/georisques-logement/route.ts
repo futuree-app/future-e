@@ -15,6 +15,7 @@ import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
 import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
 import { precisionDepuisBanId } from "@/lib/bruit-aerien";
 import { lireDebroussaillementAdresse } from "@/lib/server/debroussaillement-tuiles";
+import { lireFibreAdresse } from "@/lib/server/fibre-adresse-index";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
 import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
@@ -94,6 +95,9 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
           : null,
       }),
     );
+    // FUT-156 : LA FIBRE À L'ADRESSE. Une lecture de l'index trimestriel (un lot de quelques dizaines de Ko),
+    // en parallèle de tout le reste, par l'identifiant BAN seul : jamais par la proximité. Ne lève jamais.
+    const fibreP = lireFibreAdresse(address.id);
 
     // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
     // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
@@ -140,7 +144,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, debroussaillement] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, debroussaillement, fibre] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -165,7 +169,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, debroussaillementP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, debroussaillementP, fibreP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -225,6 +229,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       bruitAerien,
       // FUT-149 : posé seulement quand la lecture est activée ; un rapport sans le champ n'affiche rien.
       ...(debroussaillement ? { debroussaillement } : {}),
+      // FUT-156 : posée seulement quand la lecture est activée (`FIBRE_ADRESSE_BUCKET`).
+      ...(fibre ? { fibre } : {}),
       pointHazards,
       // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
       // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en
