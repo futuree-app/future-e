@@ -192,9 +192,27 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 
 test("IA : les prompts, contrats et routes de synthèse sont identiques à main, octet pour octet", () => {
   for (const f of [
-    "src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts", "src/lib/territoire/facts.ts",
+    "src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts",
     "src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts",
   ]) {
     assert.equal(readFileSync(f, "utf8"), execFileSync("git", ["show", `4d75603f:${f}`], { encoding: "utf8", maxBuffer: 1 << 26 }), f);
   }
+});
+
+// FUT-160 (28/10/2026) a dû toucher `facts.ts` : une panne Géorisques s'y enregistre `source_unavailable`. Ce
+// statut n'atteint ni l'écran ni la synthèse (`valueOf` et `synthesisFacts` ne lisent que `ok`, cf.
+// `territoire/fut160-statut-source.test.ts`). Le registre reste figé pour tout le reste : aucune ligne retirée,
+// et seules ces lignes ajoutées.
+test("IA : le registre des faits Territoire n'a changé que du statut de panne Géorisques (FUT-160)", () => {
+  const f = "src/lib/territoire/facts.ts";
+  const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
+  const admises = [
+    /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
+    /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
+    /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
+  ];
+  for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
 });

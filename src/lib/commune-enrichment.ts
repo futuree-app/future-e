@@ -39,6 +39,11 @@ export type EnrichmentResult = {
   catnat: GasparCatnatSummary | null;
   littoral: LittoralSummary | null;
   baignade: BaignadeSummary;
+  /**
+   * FUT-160 · LES LECTURES GÉORISQUES QUI ONT ÉCHOUÉ. Leur `null` ci-dessus est celui d'une panne, et le
+   * dire ici évite qu'un lecteur en aval le confonde avec une donnée non collectée.
+   */
+  indisponibles: { georisques: boolean; catnat: boolean };
 };
 
 export async function gatherCommuneEnrichment(
@@ -65,5 +70,6 @@ export async function gatherCommuneEnrichment(
     catnat: catnatRes.status === "fulfilled" ? catnatRes.value : null,
     littoral: littoralRes.status === "fulfilled" ? littoralRes.value : null,
     baignade: baignadeRes.status === "fulfilled" ? baignadeRes.value : null,
+    indisponibles: { georisques: georisquesRes.status === "rejected", catnat: catnatRes.status === "rejected" },
   };
 }
