@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-28T14:25:31.031Z",
+  "applicationCommit": "2447b198",
+  "pass": true,
+  "checks": [
+    {
+      "path": "/comparateur?communes=29016,29162,29103",
+      "status": 200,
+      "location": null,
+      "bytes": 74575,
+      "fireLine": true
+    },
+    {
+      "path": "/ou-vivre",
+      "status": 200,
+      "location": null,
+      "bytes": 27139
+    },
+    {
+      "path": "/dev/fut147",
+      "status": 404,
+      "location": null,
+      "bytes": 11035
+    },
+    {
+      "path": "/dev/fut148",
+      "status": 404,
+      "location": null,
+      "bytes": 10950
+    },
+    {
+      "path": "/rapport",
+      "status": 200,
+      "location": null,
+      "bytes": 27650
+    },
+    {
+      "path": "/rapport/quartier",
+      "status": 200,
+      "location": null,
+      "bytes": 32699
+    },
+    {
+      "path": "/rapport/logement",
+      "status": 200,
+      "location": null,
+      "bytes": 32901
+    },
+    {
+      "path": "/api/comparateur-vie/match",
+      "status": 200,
+      "trio": [
+        {
+          "insee": "29042",
+          "fibre": "Fibre : 94 % des locaux de la commune raccordables (Arcep, juin 2026), à vérifier à l'adresse."
+        },
+        {
+          "insee": "29075",
+          "fibre": "Fibre : 96 % des locaux de la commune raccordables (Arcep, juin 2026), à vérifier à l'adresse."
+        },
+        {
+          "insee": "29022",
+          "fibre": "Fibre : 98 % des locaux de la commune raccordables (Arcep, juin 2026), à vérifier à l'adresse."
+        }
+      ],
+      "sameScoresAndOrder": true,
+      "noPaidPayload": true
+    }
+  ],
+  "scope": "Build de production local : route match réelle, aperçus publics, gardes authentification et bancs dev404 ; aucun paiement/session réelle ni appel modèle."
+}

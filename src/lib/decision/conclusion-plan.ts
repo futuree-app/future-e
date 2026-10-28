@@ -263,6 +263,12 @@ export function phrasesNonMesurees(items: DemandeNonMesuree[]): string[] {
   if (budget.length > 0) {
     out.push(`futur•e ne sait pas encore confronter un lieu à un budget : ${listeTermes(budget)} ${budget.length > 1 ? "restent" : "reste"} sans réponse dans ce dossier.`);
   }
+  // FUT-148 : la connexion n'est pas un critère du dossier, mais elle n'est plus sans réponse : le module
+  // Territoire donne la part des locaux de la commune raccordables à la fibre. Jamais une promesse à l'adresse.
+  const connexion = de("manque_produit", "connexion");
+  if (connexion.length > 0) {
+    out.push(`${listeTermes(connexion)} : futur•e n'en fait pas un critère de ce dossier. Le module Territoire donne la part des locaux de la commune raccordables à la fibre ; elle ne garantit rien pour une adresse précise.`);
+  }
   // Les autres manques du produit : une question concrète que des faits solides pourraient éclairer. Aucun score
   // promis : « commerces de qualité » pourra se lire un jour par des faits (diversité, proximité), pas par une note.
   const manques = de("manque_produit", null);

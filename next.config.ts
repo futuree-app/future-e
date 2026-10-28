@@ -10,10 +10,18 @@ const nextConfig: NextConfig = {
   // match. On force son inclusion dans la trace serverless (sinon : marche en
   // local, fichier introuvable en prod).
   outputFileTracingIncludes: {
+    // FUT-147 : les incendies enregistrés (BDIFF), lus après le classement par la ligne de carte et le
+    // Dossier comparatif (lib/bdiff-incendies-commune.ts). Toutes les routes qui assemblent un comparatif.
     "/api/comparateur-vie/match": [
       "./data/comparateur-index.json.gz",
       "./data/ze-emploi-na38.json",
+      "./data/bdiff-incendies.json",
+      // FUT-148 : la fibre des communes proposées, seulement si le projet en parle (lib/fibre-commune.ts).
+      "./data/arcep-fibre.json",
     ],
+    "/api/comparateur-vie/apercu": ["./data/bdiff-incendies.json"],
+    "/comparateur": ["./data/bdiff-incendies.json"],
+    "/comparateur/pack-decision": ["./data/bdiff-incendies.json"],
     // Module Territoire : la page et la synthèse lisent l'index (carte d'identité,
     // trait distinctif, démographie, couvert naturel) et la saisonnalité.
     "/rapport/quartier": [
@@ -21,6 +29,10 @@ const nextConfig: NextConfig = {
       "./data/residences-secondaires.json",
       "./data/communes-baignade.json",
       "./data/gaspar-pprn-inondation.json",
+      // FUT-147 : la carte feu lit les incendies enregistrés, hors du snapshot (lib/bdiff-incendies-commune.ts).
+      "./data/bdiff-incendies.json",
+      // FUT-148 : la carte « Fibre optique », lue hors du snapshot (lib/fibre-commune.ts).
+      "./data/arcep-fibre.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json.gz",

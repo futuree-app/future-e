@@ -1,0 +1,88 @@
+{
+  "applicationCommit": "2447b198",
+  "onrnConsumers": [
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "dataFiles": 3,
+      "dataBytes": 20537198,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "dataFiles": 8,
+      "dataBytes": 25271164,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "dataFiles": 11,
+      "dataBytes": 92518175,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "dataFiles": 2231,
+      "dataBytes": 132483839,
+      "onrn": [
+        "onrn-inondation.json",
+        "onrn-secheresse.json"
+      ]
+    }
+  ],
+  "onrnDataBytesAcrossTraces": 733401251,
+  "unit": "raw traced data bytes, repeated per route; not Vercel billable function storage"
+}

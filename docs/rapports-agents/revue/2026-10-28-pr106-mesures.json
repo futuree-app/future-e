@@ -1,0 +1,206 @@
+{
+  "before": "4d75603f0839c73962cce4ba1a169a31bc827531",
+  "after": "60409a97cb630b0cb43fcb819dd16f6c5b14a76c",
+  "traceCounts": {
+    "before": 163,
+    "after": 163
+  },
+  "changed": [
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 2230,
+      "beforeBytes": 300701408,
+      "afterBytes": 131141583
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    },
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 3,
+      "beforeBytes": 300701408,
+      "afterBytes": 20537198
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 7,
+      "beforeBytes": 300701408,
+      "afterBytes": 23928908
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 10,
+      "beforeBytes": 300701408,
+      "afterBytes": 91175919
+    }
+  ],
+  "beforeCompiledFactory": ".next/server/chunks/ssr/src_lib_0-qal89._.js",
+  "afterCompiledFactory": ".next/server/chunks/ssr/src_lib_0-qal89._.js",
+  "communeRouteComparisons": 313560,
+  "cases": [
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    }
+  ],
+  "allEqual": true,
+  "negativeControl": "missing drought file yields drought indispo but available flooding remains lecture (pre-existing fallback)"
+}

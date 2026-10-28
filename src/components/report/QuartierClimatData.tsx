@@ -15,6 +15,9 @@ import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 import type { Era5Trend } from "@/lib/era5-trend";
+import type { MemoireIncendies } from "@/lib/data/bdiff-incendies";
+import { texteTerritoire } from "@/lib/incendies-observes";
+import { LIEN_VERIFICATION, type TexteFibre } from "@/lib/fibre-texte";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -112,6 +115,15 @@ type SharedProps = {
   // projection » dans le drawer Températures. Le passé ne porte pas la face
   // avant (ce serait saboter le moat projection), il sert de preuve.
   era5?: Era5Trend | null;
+  // FUT-147 : la mémoire des incendies enregistrés (BDIFF), lue HORS du snapshot Territoire : elle n'entre
+  // pas dans la synthèse rédigée, donc pas dans l'empreinte qui valide son cache (arbitrage C6 du 28/10/2026).
+  incendies?: MemoireIncendies | null;
+  /**
+   * FUT-148 : la part des locaux raccordables à la fibre (Arcep), déjà rédigée par `texteFibre` côté
+   * serveur. Absente (`undefined`) = la page ne la fournit pas, aucune carte. `pourLeProjet` : le lecteur
+   * a parlé de connexion ou de télétravail ; la carte passe en tête du groupe « Le territoire ».
+   */
+  fibre?: { texte: TexteFibre; pourLeProjet: boolean };
   // FUT-116 : plus d'archétype (`climatType`). Il choisissait le récit des volets climat sur un
   // classement administratif (Littoral, Montagne…), sans rapport avec la donnée affichée.
 };
@@ -134,6 +146,7 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Résidences secondaires": "territoire",
   "Espaces naturels": "territoire",
   "Taux de boisement": "territoire",
+  "Fibre optique": "territoire",
   "Températures moyennes": "climat",
   "Chaleurs estivales": "climat",
   "Nuits tropicales": "climat",
@@ -150,7 +163,7 @@ function themeOf(label: string): ThemeKey {
 }
 // Ordre de lecture au sein de chaque thème (le décor avant l'aléa, le légible avant le pointu).
 const CARD_ORDER: string[] = [
-  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
+  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires", "Fibre optique",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
   "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Nuits tropicales", "Jours de pluie intense",
   "Mémoire des catastrophes", "Inondation fluviale", "Submersion marine", "Conditions favorables au feu", "Érosion du littoral",
@@ -380,6 +393,7 @@ export function buildFactors(
   eloignementServicesPct?: number | null,
   era5?: Era5Trend | null,
   catnatVille?: string | null,
+  incendies?: MemoireIncendies | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -398,6 +412,30 @@ export function buildFactors(
   const boisementPct = territoire?.taux_boisement != null
     ? Math.round(territoire.taux_boisement)
     : null;
+
+  // ── Carte « Conditions favorables au feu » → drawer en deux temps (FUT-147) ───────────
+  // D'abord ce que projette la météo (la face), puis les incendies ENREGISTRÉS depuis 2006, dans une
+  // section à part : deux grandeurs de nature différente, que le volet juxtapose sans les relier. Les
+  // phrases de la seconde viennent toutes de `incendies-observes.ts` (quatre états, aucune ne rassure).
+  const incendiesTexte = incendies ? texteTerritoire(incendies, communeName) : null;
+  const fireDetail: CardDetail | undefined = fireDays != null || incendiesTexte
+    ? {
+        eyebrow: "L'indice forêt-météo",
+        title: "Conditions favorables au feu",
+        headline: fireDays != null
+          ? `${fireDays} jour${fireDays > 1 ? "s" : ""} par an en ${meta.year}`
+          : "Projection météo indisponible",
+        subhead: "Combien de jours par an la météo favoriserait-elle les feux de forêt ?",
+        whyLabel: "Ce que projette la météo",
+        why: fireDays != null
+          ? `Vers ${meta.year}, la météo réunirait ${fireDays} jour${fireDays > 1 ? "s" : ""} par an les conditions qui favorisent le départ et la propagation d'un feu de forêt. Cette projection décrit la météo seule : la végétation, l'entretien des abords et l'accès des secours n'y entrent pas.`
+          : `Les projections météo ne sont pas disponibles pour ${communeName}.`,
+        sections: incendiesTexte
+          ? [{ label: incendiesTexte.titre, paragraphs: incendiesTexte.phrases, link: incendiesTexte.fiche ? { label: incendiesTexte.fiche.libelle, href: incendiesTexte.fiche.href } : null, more: incendiesTexte.details }]
+          : undefined,
+        sources: `Projection : DRIAS / Météo-France, jours où l'indice forêt-météo (IFM) dépasse 40, France ${meta.france}. Incendies enregistrés : Base de données des incendies de forêt en France (BDIFF), ministère de l'Agriculture et IGN, campagnes 2006 à 2025 (bdiff.agriculture.gouv.fr). Chaque feu y est rattaché à sa commune de départ, avec la surface totale qu'il a parcourue.`,
+      }
+    : undefined;
 
   // ── Carte « Jours chauds » → drawer : la chaleur qui s'installe ───────────────
   // On lit les trois horizons et on les rend comme une montée VISIBLE (barres),
@@ -581,13 +619,15 @@ export function buildFactors(
         : "Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. La carte en donne le nombre moyen par an, selon les projections.",
     },
     {
-      // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.
+      // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu. FUT-147 : la face reste la
+      // projection météo ; le volet ajoute, dans une section DISTINCTE, les incendies enregistrés (passé).
       label: "Conditions favorables au feu",
       targets: ["risk.wildfire"],
       val: fireDays != null ? `${fireDays} jours/an en ${meta.year}` : "—",
       col: "var(--orange)",
       src: "DRIAS · IFM > 40 · indice météo, pas risque réel",
       missing: fireDays == null,
+      detail: fireDetail,
       tip: "Indice météo (pas le risque réel à l'adresse) : plus ces journées se multiplient, plus le risque qu'un feu démarre et se propage augmente, surtout près des espaces naturels.",
     },
     {
@@ -1182,10 +1222,43 @@ const REGISTER_TONE: Record<RegisterKey, string> = {
   verifications: "var(--reg-controle)",
 };
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5 }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+// ── Carte « Fibre optique » (Arcep, FUT-148) ──────────────────────────────────────────────
+// Un fait territorial, pas une note : le chiffre, sa date, ce qu'il ne garantit pas, où vérifier. Les
+// phrases viennent de `fibre-texte.ts` (pur, testé) ; la carte ne fait que les poser. Hors de
+// `buildFactors` : la donnée n'est pas dans le snapshot Territoire (cf. `fibre-commune.ts`).
+function facteurFibre(t: TexteFibre): Factor {
+  return {
+    label: "Fibre optique",
+    val: t.valeur,
+    sub: t.sousTitre,
+    col: "var(--green)",
+    src: t.source,
+    missing: t.manquant,
+    detail: {
+      eyebrow: "Le raccordement à la fibre",
+      title: "Fibre optique",
+      headline: t.titreVolet,
+      subhead: t.manquant ? undefined : t.phrase,
+      accent: "var(--green)",
+      facts: t.faits.length > 0 ? t.faits : undefined,
+      why: t.manquant ? t.phrase : t.limite,
+      whyLabel: t.manquant ? "Ce que l'on sait" : "Ce que ce taux ne dit pas",
+      note: t.verification,
+      noteLabel: "À vérifier",
+      lien: { ...LIEN_VERIFICATION },
+      sources: t.methode,
+    },
+  };
+}
+
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null);
+  if (fibre) factors.push(facteurFibre(fibre.texte));
+  // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
+  // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.
+  const rangPourLeProjet = (label: string) => (fibre?.pourLeProjet && label === "Fibre optique" ? -1 : cardRank(label));
 
   // FUT-69 : ARRIVÉE PAR LA PASTILLE DU DOSSIER. Une carte qui porte son chiffre dans le volet
   // (`arrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte
@@ -1205,7 +1278,7 @@ export function QuartierAside({ registres, communeName, scenarios, georisques, t
   const groups = THEME_ORDER
     .map((t) => ({
       t,
-      items: factors.filter((f) => themeOf(f.label) === t).sort((a, b) => cardRank(a.label) - cardRank(b.label)),
+      items: factors.filter((f) => themeOf(f.label) === t).sort((a, b) => rangPourLeProjet(a.label) - rangPourLeProjet(b.label)),
     }))
     .filter((g) => g.items.length > 0);
 

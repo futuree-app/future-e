@@ -1,0 +1,374 @@
+{
+  "before": "4d75603f0839c73962cce4ba1a169a31bc827531",
+  "after": "2447b198 (application integration)",
+  "traceCounts": {
+    "before": 163,
+    "after": 165
+  },
+  "changed": [
+    {
+      "route": "app/(account)/rapport/logement/page.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 2231,
+      "beforeBytes": 300701408,
+      "afterBytes": 132483839
+    },
+    {
+      "route": "app/(account)/rapport/quartier/page.js.nft.json",
+      "beforeFiles": 9,
+      "afterFiles": 11,
+      "beforeBytes": 81085085,
+      "afterBytes": 83328621
+    },
+    {
+      "route": "app/(public)/comparateur/pack-decision/page.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/(public)/comparateur/page.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/accueil/commune/route.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/api/accueil/lecture/route.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/api/comparateur-vie/anchor/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/comparateur-vie/apercu/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/comparateur-vie/ask/route.js.nft.json",
+      "beforeFiles": 0,
+      "afterFiles": 1,
+      "beforeBytes": 0,
+      "afterBytes": 1342256
+    },
+    {
+      "route": "app/api/comparateur-vie/match/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 6,
+      "beforeBytes": 12403297,
+      "afterBytes": 14646833
+    },
+    {
+      "route": "app/api/comparateur-vie/parse/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/comparateur-vie/synthesize/route.js.nft.json",
+      "beforeFiles": 0,
+      "afterFiles": 1,
+      "beforeBytes": 0,
+      "afterBytes": 1342256
+    },
+    {
+      "route": "app/api/comparateur-vie/synthesize-choix/route.js.nft.json",
+      "beforeFiles": 0,
+      "afterFiles": 1,
+      "beforeBytes": 0,
+      "afterBytes": 1342256
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 3,
+      "beforeBytes": 300701408,
+      "afterBytes": 20537198
+    },
+    {
+      "route": "app/api/landing-signals/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/project/from-search/route.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/api/synthesize-quartier/route.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 76044344,
+      "afterBytes": 77386600
+    },
+    {
+      "route": "app/dev/dossier/page.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 8,
+      "beforeBytes": 300701408,
+      "afterBytes": 25271164
+    },
+    {
+      "route": "app/dev/fut129/page.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/dev/fut154/page.js.nft.json",
+      "beforeFiles": 4,
+      "afterFiles": 5,
+      "beforeBytes": 12403297,
+      "afterBytes": 13745553
+    },
+    {
+      "route": "app/dev/fut20/page.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/dev/fut50/api/commune/route.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/dev/fut50/api/lecture/route.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/dev/fut87/avant/decision/page.js.nft.json",
+      "beforeFiles": 7,
+      "afterFiles": 8,
+      "beforeBytes": 80439917,
+      "afterBytes": 81782173
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "beforeFiles": 2313,
+      "afterFiles": 11,
+      "beforeBytes": 300701408,
+      "afterBytes": 92518175
+    },
+    {
+      "route": "app/qna/route.js.nft.json",
+      "beforeFiles": 6,
+      "afterFiles": 7,
+      "beforeBytes": 75673611,
+      "afterBytes": 77015867
+    }
+  ],
+  "beforeCompiledFactory": ".next/server/chunks/ssr/src_lib_0-qal89._.js",
+  "afterCompiledFactory": ".next/server/chunks/ssr/src_lib_0-qal89._.js",
+  "communeRouteComparisons": 313560,
+  "cases": [
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "communes": 34840,
+      "kinds": {
+        "aucun": 41554,
+        "faible_repr": 3578,
+        "lecture": 24546,
+        "indispo": 2
+      },
+      "reads": [
+        "data/onrn-inondation.json",
+        "data/onrn-secheresse.json"
+      ]
+    }
+  ],
+  "allEqual": true,
+  "negativeControl": "missing drought file yields drought indispo but available flooding remains lecture (pre-existing fallback)"
+}

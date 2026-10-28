@@ -11,6 +11,18 @@
 
 import { useEffect } from "react";
 
+/**
+ * FUT-147 : une SECTION DISTINCTE du récit, pour une grandeur d'une autre nature que la face (le passé
+ * observé sous une projection). Ses phrases sont visibles ; le détail chiffré se replie dans « En savoir
+ * plus », pour que le volet se lise en trente secondes.
+ */
+export type DrawerSection = {
+  label: string;
+  paragraphs: string[];
+  link?: { label: string; href: string } | null;
+  more?: string[];
+};
+
 export type CardDetail = {
   eyebrow: string;
   title: string;
@@ -46,6 +58,10 @@ export type CardDetail = {
   note?: string;
   /** Intitulé de l'encart (défaut « À savoir »). */
   noteLabel?: string;
+  /** Sections distinctes, affichées après le récit (cf. `DrawerSection`). */
+  sections?: DrawerSection[];
+  /** Un lien vers une vérification officielle, sous l'encart (FUT-148 : la carte fibre de l'Arcep). */
+  lien?: { href: string; label: string };
 };
 
 export function MetricDrawer({
@@ -160,11 +176,39 @@ export function MetricDrawer({
           <p className="metric-drawer-why">{detail.why}</p>
         </div>
 
+        {detail.sections?.map((sec) => (
+          <div key={sec.label} className="metric-drawer-section">
+            <p className="metric-drawer-label">{sec.label}</p>
+            {sec.paragraphs.map((t) => (
+              <p key={t} className="metric-drawer-why metric-drawer-para">{t}</p>
+            ))}
+            {sec.link && (
+              <a className="metric-drawer-link" href={sec.link.href} target="_blank" rel="noopener noreferrer">
+                {sec.link.label} <span aria-hidden>↗</span>
+              </a>
+            )}
+            {sec.more && sec.more.length > 0 && (
+              <details className="metric-drawer-sources metric-drawer-more">
+                <summary>En savoir plus</summary>
+                {sec.more.map((t) => (
+                  <p key={t}>{t}</p>
+                ))}
+              </details>
+            )}
+          </div>
+        ))}
+
         {detail.note && (
           <div className="metric-drawer-note">
             <p className="metric-drawer-note-label">{detail.noteLabel ?? "À savoir"}</p>
             <p className="metric-drawer-note-text">{detail.note}</p>
           </div>
+        )}
+
+        {detail.lien && (
+          <a className="metric-drawer-lien" href={detail.lien.href} target="_blank" rel="noopener noreferrer">
+            {detail.lien.label} <span aria-hidden>↗</span>
+          </a>
         )}
 
         {detail.sources && (
@@ -287,6 +331,15 @@ export function MetricDrawer({
         }
         .metric-drawer-fact .metric-drawer-val { font-size: 16px; }
         .metric-drawer-why { font-size: 15px; line-height: 1.7; color: #9ba3b4; margin: 0; }
+        .metric-drawer-para + .metric-drawer-para { margin-top: 10px; }
+        .metric-drawer-link {
+          display: inline-flex; gap: 6px; margin-top: 12px;
+          font-size: 13px; color: #c8b89a; text-decoration: underline; text-underline-offset: 3px;
+        }
+        .metric-drawer-sources.metric-drawer-more { margin: 14px 0 0; }
+        .metric-drawer-sources.metric-drawer-more > p {
+          font-family: inherit; font-size: 13px; letter-spacing: 0; line-height: 1.6; color: #9ba3b4;
+        }
         .metric-drawer-note {
           margin: 0 0 22px; padding: 14px 16px; border-radius: 10px;
           background: var(--bg-elev); border: 1px solid var(--border-1);
@@ -296,6 +349,11 @@ export function MetricDrawer({
           letter-spacing: 0.14em; text-transform: uppercase; color: #6b7388; margin: 0 0 7px;
         }
         .metric-drawer-note-text { font-size: 13px; line-height: 1.6; color: #9ba3b4; margin: 0; }
+        .metric-drawer-lien {
+          display: inline-flex; align-items: center; gap: 6px; margin: 0 0 22px;
+          font-size: 14px; color: var(--blue); text-decoration: underline; text-underline-offset: 3px;
+        }
+        .metric-drawer-lien:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
         .metric-drawer-ask {
           margin-top: 8px; width: 100%;
           display: inline-flex; align-items: center; justify-content: center; gap: 8px;
