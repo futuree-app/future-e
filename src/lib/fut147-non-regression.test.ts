@@ -191,11 +191,48 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 });
 
 test("IA : les prompts, contrats et routes de synthèse sont identiques à main, octet pour octet", () => {
-  for (const f of [
-    "src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts",
-    "src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts",
-  ]) {
+  for (const f of ["src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts"]) {
     assert.equal(readFileSync(f, "utf8"), execFileSync("git", ["show", `4d75603f:${f}`], { encoding: "utf8", maxBuffer: 1 << 26 }), f);
+  }
+});
+
+// FUT-155 (29/10/2026) a dû toucher les deux routes du comparateur et leur contrat : une couverture absente ou
+// contredite y vaut « inconnue », et une carte marquée sans priorité favorable n'y transmet aucune raison
+// (cf. `fut155-frontiere-confiance.test.ts`). Rien d'autre n'a changé : seules ces lignes, et aucune ne parle des feux.
+test("IA : les routes du comparateur n'ont changé que de la frontière de confiance (FUT-155)", () => {
+  const admises = new Set([
+    `-import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";`,
+    `+import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";`,
+    `+import { couvertureGlobaleLue, MAX_TERRITOIRES_ASK } from "@/lib/comparateur/lecture-ask";`,
+    `-    raisons: t.raisons ?? [],`,
+    `+    raisons: raisonsSousReserve(t.raisons, t.aucune_priorite_favorable), // FUT-155 : jamais à côté de la réserve`,
+    `-      raisons: r.reasons ?? [],`,
+    `+      raisons: raisonsSousReserve(r.reasons, r.sansPrioriteFavorable), // FUT-155 : jamais à côté de la réserve`,
+    `-"partielle", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.`,
+    `+"partielle" ou "inconnue", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.`,
+    `+  // FUT-155 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom (même contrat que /ask).`,
+    `+  if (results.length > MAX_TERRITOIRES_ASK || results.some((r) => !r || typeof r.nom !== "string" || !r.nom.trim())) {`,
+    `+    return new Response("Résultats invalides.", { status: 400 });`,
+    `+  }`,
+    `-    couverture_des_priorites: ["complete", "partielle", "aucune", "sans_priorite"].includes(body.outcome?.couverture ?? "") ? body.outcome!.couverture : "complete",`,
+    `+    // FUT-155 : un état absent, illisible ou contredit par une carte vaut « inconnue », jamais « complete ».`,
+    `+    couverture_des_priorites: couvertureGlobaleLue(body.outcome?.couverture, results.map((r) => r.prioritesNonMesurees)),`,
+    `+/**`,
+    `+ * FUT-155 : la couverture globale que /synthesize peut redire, avec la règle de /ask. Absente ou illisible, elle est`,
+    `+ * « inconnue ». « complete » ne se croit pas si une carte déclare des priorités non mesurées, ou ne dit pas lesquelles.`,
+    `+ */`,
+    `+export function couvertureGlobaleLue(globale: unknown, nonMesureesParCarte: readonly unknown[]): EtatLu {`,
+    `+  const e = etat(globale);`,
+    `+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;`,
+    `+}`,
+    `+`,
+  ]);
+  for (const f of ["src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts"]) {
+    const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+    for (const l of diff.split("\n").filter((x) => /^[+-]/.test(x) && !/^(\+\+\+|---) /.test(x))) {
+      assert.ok(admises.has(l), `ligne non admise dans ${f} : ${l}`);
+    }
+    assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i, f);
   }
 });
 

@@ -22,7 +22,8 @@ import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 import { champInondationSynthese } from "@/lib/comparateur/inondation-historique";
-import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
+import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
+import { couvertureGlobaleLue, MAX_TERRITOIRES_ASK } from "@/lib/comparateur/lecture-ask";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -103,7 +104,7 @@ Si "couverture_des_priorites" vaut "aucune" ou "sans_priorite", aucune priorité
 mesurée pour ces communes : ne dites jamais qu'elles « correspondent », « répondent »,
 « conviennent » ni qu'elles impliquent « le moins de compromis » ; présentez-les comme des
 communes à explorer, sans leur prêter ni qualité ni défaut sur la demande. Si elle vaut
-"partielle", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.
+"partielle" ou "inconnue", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.
 Si un territoire porte "priorites_non_mesurees", ces priorités n'ont PAS été mesurées pour
 cette commune : nommez-les une fois comme « non mesurées ici », sans dire qu'elles sont
 satisfaites ou manquantes, sans en faire un compromis, et ne dites pas que la commune
@@ -332,6 +333,10 @@ export async function POST(request: NextRequest) {
   if (results.length === 0) {
     return new Response("Aucun résultat à interpréter.", { status: 400 });
   }
+  // FUT-155 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom (même contrat que /ask).
+  if (results.length > MAX_TERRITOIRES_ASK || results.some((r) => !r || typeof r.nom !== "string" || !r.nom.trim())) {
+    return new Response("Résultats invalides.", { status: 400 });
+  }
 
   const prefs = (body.preferences ?? [])
     .map((p) => PREF_LABELS[p.key])
@@ -368,13 +373,14 @@ export async function POST(request: NextRequest) {
     message_moteur: body.outcome?.message ?? null,
     exploration_sans_classement: inondationDemandee && body.outcome?.exploration === true,
     // FUT-109 : « complete » seulement si toutes les priorités déclarées sont mesurées pour chaque commune affichée.
-    couverture_des_priorites: ["complete", "partielle", "aucune", "sans_priorite"].includes(body.outcome?.couverture ?? "") ? body.outcome!.couverture : "complete",
+    // FUT-155 : un état absent, illisible ou contredit par une carte vaut « inconnue », jamais « complete ».
+    couverture_des_priorites: couvertureGlobaleLue(body.outcome?.couverture, results.map((r) => r.prioritesNonMesurees)),
     role_inondation: inondationDemandee ? "recul documenté uniquement, jamais favorable" : null,
     reference_prix_logement: results.some((r) => r.logement) ? "France" : null,
     territoires: results.map((r) => ({
       commune: r.nom,
       region: r.region ?? null,
-      raisons: r.reasons ?? [],
+      raisons: raisonsSousReserve(r.reasons, r.sansPrioriteFavorable), // FUT-155 : jamais à côté de la réserve
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
       pression_climatique_inondation: inondationDemandee ? (r.climatInondation ?? null) : null,

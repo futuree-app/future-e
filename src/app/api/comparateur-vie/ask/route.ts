@@ -36,7 +36,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
-import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
+import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
 
 export const runtime = "nodejs";
 
@@ -305,7 +305,7 @@ function buildContextBlock(
     region: t.region ?? null,
     couverture_priorites: lecture.communes[i]?.couverture ?? "inconnue",
     priorites_non_mesurees: lecture.communes[i]?.nonMesurees ?? [],
-    raisons: t.raisons ?? [],
+    raisons: raisonsSousReserve(t.raisons, t.aucune_priorite_favorable), // FUT-155 : jamais à côté de la réserve
     // FUT-151 : seul un `true` transmis le dit, avec la portée que fixe la couverture LUE (jamais « toutes »
     // quand elle est partielle ou inconnue ; rien quand aucune priorité n'est mesurée).
     aucune_priorite_favorable: porteeSansFavorable({

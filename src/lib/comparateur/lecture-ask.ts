@@ -148,6 +148,15 @@ export function lectureDuContexte(ctx: ContexteAsk): LectureAsk {
   return { mode, exploration, couverture, ordre: texte(l?.ordre), transparence: texte(l?.transparence_inondation), communes };
 }
 
+/**
+ * FUT-155 : la couverture globale que /synthesize peut redire, avec la règle de /ask. Absente ou illisible, elle est
+ * « inconnue ». « complete » ne se croit pas si une carte déclare des priorités non mesurées, ou ne dit pas lesquelles.
+ */
+export function couvertureGlobaleLue(globale: unknown, nonMesureesParCarte: readonly unknown[]): EtatLu {
+  const e = etat(globale);
+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;
+}
+
 /** Le contexte est-il recevable avant tout appel payant ? `null` si oui, sinon le motif du refus. */
 export function contexteIrrecevable(ctx: unknown): string | null {
   const c = ctx && typeof ctx === "object" ? (ctx as ContexteAsk) : null;
