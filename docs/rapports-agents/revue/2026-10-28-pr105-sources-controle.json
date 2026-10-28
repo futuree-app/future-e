@@ -1,0 +1,202 @@
+{
+  "sha256": {
+    "communes.zip": "267604f9684d2cd04eba1f2b038ce2bda8c6077daed37f2a176e383d099eb468",
+    "observatoire.xlsx": "507a94371f535d711fe96f8e1beb5cd4d1e7a5dd27ac6762f31867b35303c806"
+  },
+  "dbf_records": 34919,
+  "published_rows": 34918,
+  "row_mismatches": [],
+  "class_mismatches": [],
+  "insee_count_raw": 4199,
+  "insee_count_published": 4199,
+  "national": {
+    "locaux": 45178019,
+    "raccordables": 43063602
+  },
+  "discrepancies": [
+    {
+      "code": "54254",
+      "commune": [
+        1577.2693,
+        0
+      ],
+      "classeur": {
+        "locaux": 1686.0,
+        "ftth": 0.0,
+        "source": "IPE"
+      }
+    },
+    {
+      "code": "54524",
+      "commune": [
+        472.0,
+        49
+      ],
+      "classeur": {
+        "locaux": 52.0,
+        "ftth": 49.0,
+        "source": "IPE"
+      }
+    }
+  ],
+  "selection": {
+    "63072": {
+      "nom": "Chabreloche",
+      "commune": [
+        742.10112,
+        0
+      ],
+      "classeur": {
+        "locaux": 742.10112,
+        "ftth": 0.0,
+        "source": "INSEE"
+      }
+    },
+    "63163": {
+      "nom": "Gelles",
+      "commune": [
+        828.0,
+        0
+      ],
+      "classeur": {
+        "locaux": 828.0,
+        "ftth": 0.0,
+        "source": "IPE"
+      }
+    },
+    "63179": {
+      "nom": "Job",
+      "commune": [
+        765.06062,
+        22
+      ],
+      "classeur": {
+        "locaux": 765.06062,
+        "ftth": 22.0,
+        "source": "INSEE"
+      }
+    },
+    "26274": {
+      "nom": "Rochefourchat",
+      "commune": [
+        7.66667,
+        7
+      ],
+      "classeur": {
+        "locaux": 7.66667,
+        "ftth": 7.0,
+        "source": "INSEE"
+      }
+    },
+    "15138": {
+      "nom": "Murat",
+      "commune": [
+        1650.0,
+        1579
+      ],
+      "classeur": {
+        "locaux": 1650.0,
+        "ftth": 1579.0,
+        "source": "IPE"
+      }
+    },
+    "29016": {
+      "nom": "Brasparts",
+      "commune": [
+        904.0,
+        878
+      ],
+      "classeur": {
+        "locaux": 904.0,
+        "ftth": 878.0,
+        "source": "IPE"
+      }
+    },
+    "54524": {
+      "nom": "Thumeréville",
+      "commune": [
+        472.0,
+        49
+      ],
+      "classeur": {
+        "locaux": 52.0,
+        "ftth": 49.0,
+        "source": "IPE"
+      }
+    },
+    "54254": {
+      "nom": "Haucourt-Moulaine",
+      "commune": [
+        1577.2693,
+        0
+      ],
+      "classeur": {
+        "locaux": 1686.0,
+        "ftth": 0.0,
+        "source": "IPE"
+      }
+    },
+    "55039": {
+      "nom": "Beaumont-en-Verdunois",
+      "commune": [
+        0.0,
+        0
+      ],
+      "classeur": {
+        "locaux": 0.0,
+        "ftth": 0.0,
+        "source": "INSEE"
+      }
+    },
+    "75101": {
+      "nom": "Paris 1er Arrondissement",
+      "commune": [
+        24814.0,
+        22660
+      ],
+      "classeur": {
+        "locaux": 24814.0,
+        "ftth": 22660.0,
+        "source": "IPE"
+      }
+    },
+    "69389": {
+      "nom": "Lyon 9e Arrondissement",
+      "commune": [
+        36786.0,
+        34817
+      ],
+      "classeur": {
+        "locaux": 36786.0,
+        "ftth": 34817.0,
+        "source": "IPE"
+      }
+    },
+    "13216": {
+      "nom": "Marseille 16e Arrondissement",
+      "commune": [
+        11261.0,
+        9601
+      ],
+      "classeur": {
+        "locaux": 11261.0,
+        "ftth": 9601.0,
+        "source": "IPE"
+      }
+    }
+  },
+  "PLM": {
+    "75056": [
+      1811579.0,
+      1744131
+    ],
+    "69123": [
+      389332.0,
+      381720
+    ],
+    "13055": [
+      544863.0,
+      489661
+    ]
+  }
+}

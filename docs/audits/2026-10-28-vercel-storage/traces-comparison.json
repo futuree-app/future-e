@@ -1,0 +1,320 @@
+{
+  "base": "4d75603f0839c73962cce4ba1a169a31bc827531",
+  "traceCount": {
+    "before": 163,
+    "after": 163
+  },
+  "changed": [
+    {
+      "route": "app/api/georisques-logement/route.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 302923826
+      },
+      "after": {
+        "dataFiles": 3,
+        "dataBytes": 20537198,
+        "totalBytes": 22759728,
+        "runtimeData": {
+          "data/bruit-aerien.json": 11761993,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913
+        }
+      },
+      "removedFiles": 2310,
+      "added": []
+    },
+    {
+      "route": "app/api/stripe/webhook/route.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 308217299
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 98691922,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/api/dossier/actualiser/route.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 303425649
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 93900272,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/dev/fut92/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304682245
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 95156868,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/dev/fut127/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304496898
+      },
+      "after": {
+        "dataFiles": 7,
+        "dataBytes": 23928908,
+        "totalBytes": 27724510,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2306,
+      "added": []
+    },
+    {
+      "route": "app/dev/fut93/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304629254
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 95103877,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/dev/fut91/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304599212
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 95073835,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/dev/fut87/decision/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304569050
+      },
+      "after": {
+        "dataFiles": 10,
+        "dataBytes": 91175919,
+        "totalBytes": 95043673,
+        "runtimeData": {
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/ze-emploi-na38.json": 111934
+        }
+      },
+      "removedFiles": 2303,
+      "added": []
+    },
+    {
+      "route": "app/(account)/rapport/page.js.nft.json",
+      "before": {
+        "dataFiles": 2313,
+        "dataBytes": 300701408,
+        "totalBytes": 304884304
+      },
+      "after": {
+        "dataFiles": 2230,
+        "dataBytes": 131141583,
+        "totalBytes": 135324591,
+        "runtimeData": {
+          "data/communes-baignade.json": 212196,
+          "data/comparateur-index.json.gz": 12050562,
+          "data/data_climat.json": 62995879,
+          "data/gaspar-pprn-inondation.json": 2750406,
+          "data/icu.json": 27373,
+          "data/iris-logement.json": 1960797,
+          "data/littoral-erosion.json": 149703,
+          "data/littoral-trait-de-cote.json": 91098,
+          "data/mer/rivage-5m.f32.gz": 2290335,
+          "data/onrn-inondation.json": 4187292,
+          "data/onrn-secheresse.json": 4587913,
+          "data/residences-secondaires.json": 432972,
+          "data/ze-emploi-na38.json": 111934,
+          "data/bpe-points/**": {
+            "files": 2217,
+            "bytes": 39293123
+          }
+        }
+      },
+      "removedFiles": 83,
+      "added": []
+    }
+  ],
+  "removedDistinct": {
+    "files": 2311,
+    "bytes": 291926203,
+    "largest": [
+      [
+        "data/data_climat.json",
+        62995879
+      ],
+      [
+        "data/era5/era5_metro.nc",
+        18916872
+      ],
+      [
+        "data/comparateur-index.json.gz",
+        12050562
+      ],
+      [
+        "data/era5/era5_ssrd_metro.nc",
+        11929733
+      ],
+      [
+        "data/bruit-aerien.json",
+        11761993
+      ],
+      [
+        "data/era5/era5_ocean_indien.nc",
+        7425674
+      ],
+      [
+        "data/source/onrn/onrn_secheresse_consolide.json",
+        6574472
+      ],
+      [
+        "data/source/onrn/onrn_inondation_consolide.json",
+        6104171
+      ],
+      [
+        "data/communes-emploi.json",
+        3031348
+      ],
+      [
+        "data/drias_data_final.parquet",
+        2855422
+      ],
+      [
+        "data/gaspar-pprn-inondation.json",
+        2750406
+      ],
+      [
+        "data/mer/rivage-5m.f32.gz",
+        2290335
+      ],
+      [
+        "data/iris-logement.json",
+        1960797
+      ],
+      [
+        "data/bpe-points/g_271_13.json",
+        1943393
+      ],
+      [
+        "data/source/onrn/ONRN_CoutMoyen_SECH_9521.xlsx",
+        1793414
+      ]
+    ],
+    "meaning": "Files absent from at least one changed route, not necessarily absent from all functions. BPE/DRIAS/rivage remain on routes that need them."
+  },
+  "dataBytesAcrossChangedTraces": {
+    "before": 2706312672,
+    "after": 722663203
+  }
+}

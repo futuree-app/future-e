@@ -9,6 +9,8 @@
 // Source de vérité du vocabulaire : alignée sur la route synthesize. Si une clé
 // PREFERENCE_KEYS est ajoutée au moteur, l'ajouter ici.
 
+import { termeDeConnexion } from "./fibre-texte.ts";
+
 export const PREFERENCE_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
   douceur_climat: "des hivers doux",
@@ -142,6 +144,13 @@ const HORS_MESURE_PHRASES: Record<string, string> = {
     "futur•e ne mesure pas ce sujet : il n'entre dans aucun critère et n'a pas pesé dans le classement.",
 };
 
+// FUT-148 : LA FIBRE N'EST PLUS « NON MESURÉE ». Un terme de connexion (« fibre », « télétravail »…) reçoit la
+// part des locaux raccordables de chaque commune proposée (route `match`). Lui dire « futur•e ne mesure pas ce
+// sujet » sous une carte qui affiche ce taux serait se contredire. Ce n'est pas pour autant un critère : rien
+// n'a été classé sur ce point, et la phrase le dit.
+const PHRASE_CONNEXION =
+  "futur•e n'en fait pas un critère et n'a pas classé les communes sur ce point ; la part des locaux raccordables à la fibre est indiquée pour chaque commune proposée.";
+
 /** Borne d'affichage du terme repris à l'utilisateur, coupure comprise. */
 const TERME_MAX = 60;
 
@@ -172,9 +181,10 @@ export function horsMesureToLignes(
   const termesVus = new Set<string>();
   const out: HorsMesureLigne[] = [];
   for (const it of items) {
-    const phrase = HORS_MESURE_PHRASES[it.kind];
+    // Un terme de connexion porte sa propre phrase, quelle que soit la famille que le parseur lui a donnée.
+    const phrase = termeDeConnexion(it.term) ? PHRASE_CONNEXION : HORS_MESURE_PHRASES[it.kind];
     if (!phrase) continue;
-    if (it.kind !== "autre") {
+    if (it.kind !== "autre" && phrase !== PHRASE_CONNEXION) {
       if (phrasesVues.has(phrase)) continue;
       phrasesVues.add(phrase);
       out.push({ terme: null, phrase });

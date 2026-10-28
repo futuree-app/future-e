@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-28T14:13:43.934Z",
+  "checks": [
+    "Territoire : deux cartes réelles présentes simultanément, fibre Brasparts97%",
+    "Volet réel ouvert en mémoire : Conditions favorables au feu",
+    "Volet réel ouvert en mémoire : Fibre optique",
+    "Logement : deux périls ONRN Toulouse rendus par le bloc réel sans indisponible"
+  ],
+  "pass": true,
+  "scope": "SSR et interactions React des vrais composants, pas une recette navigateur/pixels ni une session de production"
+}
