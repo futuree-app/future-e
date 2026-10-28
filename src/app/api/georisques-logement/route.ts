@@ -12,6 +12,8 @@ import {
 import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/lib/point-hazards";
 import { getAltitude } from "@/lib/ign";
 import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
+import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
+import { precisionDepuisBanId } from "@/lib/bruit-aerien";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
 import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
@@ -64,6 +66,20 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       ),
     );
 
+    // FUT-146 : LES PLANS DE BRUIT AÉRIEN, À LA PARCELLE. Lus dans la copie versionnée de la publication
+    // DGAC (aucun appel réseau) : ils n'attendent que la parcelle. La précision du géocodage décide de la
+    // portée : sans numéro, la lecture décrit le secteur et n'utilise pas la parcelle.
+    const bruitAerienP = parcelLueP.then((lu) =>
+      lireBruitAerienAdresse({
+        point: [address.longitude, address.latitude],
+        // Le client ne transmet pas le type BAN (`type: null`) : l'identifiant de l'adresse le porte.
+        geocodage: banFeatureType ?? precisionDepuisBanId(address.id),
+        parcelle: lu
+          ? { geometry: lu.geometry, rattachement: lu.parcel.rattachement ?? "point", candidatsAuPoint: lu.parcel.candidatsAuPoint }
+          : null,
+      }),
+    );
+
     // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
     // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
     const dpeLookupP = address.id
@@ -109,7 +125,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -134,7 +150,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -191,6 +207,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       },
       heritage,
       urbanisme,
+      bruitAerien,
       pointHazards,
       // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
       // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en

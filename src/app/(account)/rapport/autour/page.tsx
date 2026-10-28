@@ -73,17 +73,17 @@ export default async function RapportAutourPage({
   // versionné (INSEE RP) régénéré à chaque millésime, que figer ferait cohabiter des dossiers
   // annonçant des millésimes différents sans le dire. La rehydratation doit donc le RELIRE, sinon
   // toute adresse déjà analysée rouvre sans lui.
-  const initialCarOwnership =
-    dossier.snapshot
-      ? (
-          await buildAutourResponse({
-            snapshot: dossier.snapshot,
-            lat: dossier.latitude,
-            lon: dossier.longitude,
-            insee: dossier.insee,
-          })
-        ).carOwnership
-      : null;
+  // FUT-146 : les plans de bruit aérien du secteur suivent la même règle (copie versionnée de la DGAC).
+  const relu = dossier.snapshot
+    ? await buildAutourResponse({
+        snapshot: dossier.snapshot,
+        lat: dossier.latitude,
+        lon: dossier.longitude,
+        insee: dossier.insee,
+      })
+    : null;
+  const initialCarOwnership = relu?.carOwnership ?? null;
+  const initialBruitAerien = relu?.bruitAerien ?? null;
 
   // LE CONTEXTE AFFICHÉ VIENT DU DOSSIER, PAS DU PROFIL (revue du 11/08/2026). Le profil porte le
   // dernier bien PERSISTÉ : sur une ouverture directe, les traceurs enregistraient l'ancienne
@@ -106,6 +106,7 @@ export default async function RapportAutourPage({
         defaultCommune={contexte.communeName}
         dossier={dossier}
         initialCarOwnership={initialCarOwnership}
+        initialBruitAerien={initialBruitAerien}
       />
     </>
   );

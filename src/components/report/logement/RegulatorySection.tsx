@@ -6,6 +6,8 @@ import type { LogementReport } from "@/lib/logement-report-types";
 import type { HeritageProtection, HeritageStatus } from "@/lib/gpu-servitudes";
 import type { UrbanismeParcelle } from "@/lib/urbanisme-parcelle";
 import { UrbanismeBlock } from "./UrbanismeBlock";
+import { BruitAerienLogement } from "@/components/report/BruitAerienBlocs";
+import type { LectureBruitAerien } from "@/lib/bruit-aerien";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Disclosure } from "./kit";
 
@@ -149,6 +151,7 @@ export function RegulatoryStatusBlock({
   georisques,
   heritage,
   urbanisme,
+  bruitAerien,
 }: {
   georisques: LogementReport["georisques"];
   heritage: HeritageStatus | null;
@@ -158,6 +161,11 @@ export function RegulatoryStatusBlock({
    * Le rattachement de la parcelle voyage DANS la lecture (`rattachement`), pas à côté.
    */
   urbanisme?: { lecture: UrbanismeParcelle | undefined; parcelCode: string | null };
+  /**
+   * FUT-146 : les plans de bruit aérien du bien. Absent (rapport antérieur, ou banc qui ne le passe pas) :
+   * rien ne s'affiche, ni « hors zone » ni une panne.
+   */
+  bruitAerien?: LectureBruitAerien;
 }) {
   const g = georisques?.parcel ?? georisques?.address;
   const grainLu: "parcelle" | "point" = georisques?.parcel ? "parcelle" : "point";
@@ -255,6 +263,7 @@ export function RegulatoryStatusBlock({
               withDivider
             />
           )}
+          <BruitAerienLogement lecture={bruitAerien} withDivider />
         </div>
       </GlassCard>
     </ReportSection>

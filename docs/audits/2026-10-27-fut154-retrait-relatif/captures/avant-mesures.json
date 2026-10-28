@@ -1,0 +1,1148 @@
+[
+ {
+  "id": "aubagne-13",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Marseille",
+    "compromis": "Compromis : En échange, l'environnement est plus bruyant qu'à Aix-en-Provence."
+   },
+   {
+    "nom": "Aix-en-Provence",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Marseille."
+   },
+   {
+    "nom": "Aubagne",
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Marseille."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Marseille",
+    "compromis": null
+   },
+   {
+    "nom": "Aix-en-Provence",
+    "compromis": null
+   },
+   {
+    "nom": "Aubagne",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "aubagne-13",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Marseille",
+    "compromis": "Compromis : En échange, l'environnement est plus bruyant qu'à Aix-en-Provence."
+   },
+   {
+    "nom": "Aix-en-Provence",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Marseille."
+   },
+   {
+    "nom": "Aubagne",
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Marseille."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Marseille",
+    "compromis": null
+   },
+   {
+    "nom": "Aix-en-Provence",
+    "compromis": null
+   },
+   {
+    "nom": "Aubagne",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "villes-fr",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Paris",
+    "compromis": "Compromis : En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   },
+   {
+    "nom": "Villeurbanne",
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Paris."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "compromis": null
+   },
+   {
+    "nom": "Villeurbanne",
+    "compromis": null
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "villes-fr",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Paris",
+    "compromis": "Compromis : En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   },
+   {
+    "nom": "Villeurbanne",
+    "compromis": "Compromis : En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Paris."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Paris",
+    "compromis": null
+   },
+   {
+    "nom": "Villeurbanne",
+    "compromis": null
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "plomeur-29",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "air plus chargé en particules"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "plomeur-29",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "air plus chargé en particules"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "montrejeau-31",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Bagnères-de-Luchon",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Montréjeau."
+   },
+   {
+    "nom": "Villeneuve-de-Rivière",
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Luchon."
+   },
+   {
+    "nom": "Montréjeau",
+    "compromis": "Compromis : En échange, l'offre de soins est plus limitée qu'à Bagnères-de-Luchon."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bagnères-de-Luchon",
+    "compromis": null
+   },
+   {
+    "nom": "Villeneuve-de-Rivière",
+    "compromis": null
+   },
+   {
+    "nom": "Montréjeau",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "montrejeau-31",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Bagnères-de-Luchon",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Montréjeau."
+   },
+   {
+    "nom": "Villeneuve-de-Rivière",
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Luchon."
+   },
+   {
+    "nom": "Montréjeau",
+    "compromis": "Compromis : En échange, l'offre de soins est plus limitée qu'à Bagnères-de-Luchon."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bagnères-de-Luchon",
+    "compromis": null
+   },
+   {
+    "nom": "Villeneuve-de-Rivière",
+    "compromis": null
+   },
+   {
+    "nom": "Montréjeau",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "feu-13",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "Compromis : En échange, météo plus souvent propice aux feux."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "Compromis : En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "météo plus souvent propice aux feux"
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "météo plus souvent propice aux feux"
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "météo plus souvent propice aux feux"
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "feu-13",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "Compromis : En échange, météo plus souvent propice aux feux."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "Compromis : En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "météo plus souvent propice aux feux"
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "météo plus souvent propice aux feux"
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "météo plus souvent propice aux feux"
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "bagneres-fr",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Lutzelhouse",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Espelette."
+   },
+   {
+    "nom": "Espelette",
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre."
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "compromis": null
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Lutzelhouse",
+    "compromis": null
+   },
+   {
+    "nom": "Espelette",
+    "compromis": null
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "bagneres-fr",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Lutzelhouse",
+    "compromis": "Compromis : En échange, la vie locale est plus discrète qu'à Espelette."
+   },
+   {
+    "nom": "Espelette",
+    "compromis": "Compromis : En échange, on y va plus souvent travailler en voiture qu'à Bagnères-de-Bigorre."
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "compromis": null
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Lutzelhouse",
+    "compromis": null
+   },
+   {
+    "nom": "Espelette",
+    "compromis": null
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "aytre-17",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "La Rochelle",
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Aytré."
+   },
+   {
+    "nom": "Aytré",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   },
+   {
+    "nom": "Lagord",
+    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "La Rochelle",
+    "compromis": null
+   },
+   {
+    "nom": "Aytré",
+    "compromis": null
+   },
+   {
+    "nom": "Lagord",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "aytre-17",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "La Rochelle",
+    "compromis": "Compromis : En échange, les sites industriels sont plus présents qu'à Aytré."
+   },
+   {
+    "nom": "Aytré",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   },
+   {
+    "nom": "Lagord",
+    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "La Rochelle",
+    "compromis": null
+   },
+   {
+    "nom": "Aytré",
+    "compromis": null
+   },
+   {
+    "nom": "Lagord",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "breil-06",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Roquebillière",
+    "compromis": null
+   },
+   {
+    "nom": "Breil-sur-Roya",
+    "compromis": null
+   },
+   {
+    "nom": "Vence",
+    "compromis": "Compromis : En échange, l'air de fond est un peu moins pur qu'à Roquebillière."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Roquebillière",
+    "compromis": null
+   },
+   {
+    "nom": "Breil-sur-Roya",
+    "compromis": null
+   },
+   {
+    "nom": "Vence",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "breil-06",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Roquebillière",
+    "compromis": null
+   },
+   {
+    "nom": "Breil-sur-Roya",
+    "compromis": null
+   },
+   {
+    "nom": "Vence",
+    "compromis": "Compromis : En échange, l'air de fond est un peu moins pur qu'à Roquebillière."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Roquebillière",
+    "compromis": null
+   },
+   {
+    "nom": "Breil-sur-Roya",
+    "compromis": null
+   },
+   {
+    "nom": "Vence",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-anglet",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Pau",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Bayonne."
+   },
+   {
+    "nom": "Bayonne",
+    "compromis": "En échange, l'environnement est plus bruyant qu'à Pau."
+   },
+   {
+    "nom": "Anglet",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Pau."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Pau",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Bayonne."
+   },
+   {
+    "nom": "Bayonne",
+    "compromis": "En échange, l'environnement est plus bruyant qu'à Pau."
+   },
+   {
+    "nom": "Anglet",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Pau."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-anglet",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Pau",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Bayonne."
+   },
+   {
+    "nom": "Bayonne",
+    "compromis": "En échange, l'environnement est plus bruyant qu'à Pau."
+   },
+   {
+    "nom": "Anglet",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Pau."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Pau",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Bayonne."
+   },
+   {
+    "nom": "Bayonne",
+    "compromis": "En échange, l'environnement est plus bruyant qu'à Pau."
+   },
+   {
+    "nom": "Anglet",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Pau."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-villes",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Villeurbanne",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Paris."
+   },
+   {
+    "nom": "Paris",
+    "compromis": "En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Villeurbanne",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Paris."
+   },
+   {
+    "nom": "Paris",
+    "compromis": "En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-villes",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Villeurbanne",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Paris."
+   },
+   {
+    "nom": "Paris",
+    "compromis": "En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Villeurbanne",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Strasbourg."
+   },
+   {
+    "nom": "Strasbourg",
+    "compromis": "En échange, les sites industriels sont plus présents qu'à Paris."
+   },
+   {
+    "nom": "Paris",
+    "compromis": "En échange, la sécheresse est plus présente qu'à Villeurbanne."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-calme-95",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Francheleins",
+    "compromis": "En échange, la commune concentre moins de services qu'à Ambérieux-en-Dombes."
+   },
+   {
+    "nom": "Ambérieux-en-Dombes",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Jujurieux."
+   },
+   {
+    "nom": "Jujurieux",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Ambérieux-en-Dombes."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Francheleins",
+    "compromis": "En échange, la commune concentre moins de services qu'à Ambérieux-en-Dombes."
+   },
+   {
+    "nom": "Ambérieux-en-Dombes",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Jujurieux."
+   },
+   {
+    "nom": "Jujurieux",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Ambérieux-en-Dombes."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-calme-95",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Francheleins",
+    "compromis": "En échange, la commune concentre moins de services qu'à Ambérieux-en-Dombes."
+   },
+   {
+    "nom": "Ambérieux-en-Dombes",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Jujurieux."
+   },
+   {
+    "nom": "Jujurieux",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Ambérieux-en-Dombes."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Francheleins",
+    "compromis": "En échange, la commune concentre moins de services qu'à Ambérieux-en-Dombes."
+   },
+   {
+    "nom": "Ambérieux-en-Dombes",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Jujurieux."
+   },
+   {
+    "nom": "Jujurieux",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Ambérieux-en-Dombes."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-poligny",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Poligny",
+    "compromis": null
+   },
+   {
+    "nom": "Lons-le-Saunier",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Poligny."
+   },
+   {
+    "nom": "Arbois",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Lons-le-Saunier."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Poligny",
+    "compromis": ""
+   },
+   {
+    "nom": "Lons-le-Saunier",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Poligny."
+   },
+   {
+    "nom": "Arbois",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Lons-le-Saunier."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-poligny",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Poligny",
+    "compromis": null
+   },
+   {
+    "nom": "Lons-le-Saunier",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Poligny."
+   },
+   {
+    "nom": "Arbois",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Lons-le-Saunier."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Poligny",
+    "compromis": ""
+   },
+   {
+    "nom": "Lons-le-Saunier",
+    "compromis": "En échange, la chaleur estivale est plus marquée qu'à Poligny."
+   },
+   {
+    "nom": "Arbois",
+    "compromis": "En échange, la vie locale est plus discrète qu'à Lons-le-Saunier."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-plouay",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Bohars",
+    "compromis": "En échange, la commune concentre moins de services qu'à Brest."
+   },
+   {
+    "nom": "Plouay",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Brest."
+   },
+   {
+    "nom": "Brest",
+    "compromis": "En échange, l'air de fond est un peu moins pur qu'à Plouay."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bohars",
+    "compromis": "En échange, la commune concentre moins de services qu'à Brest."
+   },
+   {
+    "nom": "Plouay",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Brest."
+   },
+   {
+    "nom": "Brest",
+    "compromis": "En échange, l'air de fond est un peu moins pur qu'à Plouay."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-plouay",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Bohars",
+    "compromis": "En échange, la commune concentre moins de services qu'à Brest."
+   },
+   {
+    "nom": "Plouay",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Brest."
+   },
+   {
+    "nom": "Brest",
+    "compromis": "En échange, l'air de fond est un peu moins pur qu'à Plouay."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Bohars",
+    "compromis": "En échange, la commune concentre moins de services qu'à Brest."
+   },
+   {
+    "nom": "Plouay",
+    "compromis": "En échange, on y va plus souvent travailler en voiture qu'à Brest."
+   },
+   {
+    "nom": "Brest",
+    "compromis": "En échange, l'air de fond est un peu moins pur qu'à Plouay."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-chateauneuf",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "En échange, la commune concentre moins de services qu'à Fuveau."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "En échange, la commune concentre moins de services qu'à Fuveau."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "comparateur-chateauneuf",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "En échange, la commune concentre moins de services qu'à Fuveau."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Châteauneuf-le-Rouge",
+    "compromis": "En échange, la commune concentre moins de services qu'à Fuveau."
+   },
+   {
+    "nom": "Fuveau",
+    "compromis": "En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Gréasque",
+    "compromis": "En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs."
+   }
+  ],
+  "posts": [
+   "/api/comparateur-vie/ask"
+  ],
+  "erreurs": []
+ },
+ {
+  "id": "pack-pays-basque",
+  "width": 1440,
+  "pistes": [
+   {
+    "nom": "Biarritz",
+    "filets": [
+     "En échange, chaleur en hausse."
+    ],
+    "hauteurFilets": [
+     33.140625
+    ]
+   },
+   {
+    "nom": "Hendaye",
+    "filets": [
+     ""
+    ],
+    "hauteurFilets": [
+     13
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-pays-basque",
+  "width": 390,
+  "pistes": [
+   {
+    "nom": "Biarritz",
+    "filets": [
+     "En échange, chaleur en hausse."
+    ],
+    "hauteurFilets": [
+     33.140625
+    ]
+   },
+   {
+    "nom": "Hendaye",
+    "filets": [
+     ""
+    ],
+    "hauteurFilets": [
+     13
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-fraicheur",
+  "width": 1440,
+  "pistes": [
+   {
+    "nom": "Méteren",
+    "filets": [
+     "En échange, l'air de fond est un peu moins pur qu'à Bagnères-de-Bigorre."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "filets": [
+     ""
+    ],
+    "hauteurFilets": [
+     13
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-fraicheur",
+  "width": 390,
+  "pistes": [
+   {
+    "nom": "Méteren",
+    "filets": [
+     "En échange, l'air de fond est un peu moins pur qu'à Bagnères-de-Bigorre."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Bagnères-de-Bigorre",
+    "filets": [
+     ""
+    ],
+    "hauteurFilets": [
+     13
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-villes",
+  "width": 1440,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
+ },
+ {
+  "id": "pack-villes",
+  "width": 390,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
+ }
+]
