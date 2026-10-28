@@ -15,3 +15,27 @@ export function phraseReconnaissancesCatnat(n: number, communeName: string, vill
     : communeName;
   return `${sujet} a déjà été reconnue ${n}\u00a0fois en état de catastrophe naturelle`;
 }
+
+/**
+ * FUT-159 · TROIS ÉTATS POUR CHAQUE BLOC GASPAR, jamais deux. La page reçoit `null` quand la lecture a ÉCHOUÉ
+ * (la lib lève, la page attrape), et un résumé quand GASPAR a répondu, même vide. Jusqu'ici les deux cas
+ * retiraient le bloc : pendant l'incident du 28/10/2026, une commune exposée se lisait comme une commune
+ * sans risque ni historique.
+ *
+ *   - `indisponible` : la source n'a pas répondu ; la page le dit, à la place du bloc ;
+ *   - `vide`         : la source a répondu, sans fait pour ce bloc ; le bloc reste absent, comme avant ;
+ *   - `disponible`   : le bloc s'affiche.
+ */
+export type EtatBlocGaspar = "indisponible" | "vide" | "disponible";
+
+export function etatBlocGaspar(lecture: unknown, nombre: number): EtatBlocGaspar {
+  if (lecture == null) return "indisponible";
+  return nombre > 0 ? "disponible" : "vide";
+}
+
+/** Le libellé et la phrase de l'état `indisponible`. Ils ne disent rien du risque, ni dans un sens ni dans l'autre. */
+export const GASPAR_INDISPONIBLE = {
+  libelle: "Donnée temporairement indisponible",
+  phrase: (objet: string) =>
+    `La base GASPAR (Géorisques) n'a pas répondu au chargement de cette page : ${objet} n'ont pas pu être lus. Rien n'en est déduit ici. Vous pouvez les consulter sur georisques.gouv.fr.`,
+} as const;

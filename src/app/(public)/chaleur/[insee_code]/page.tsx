@@ -7,7 +7,8 @@ import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { codeGaspar, villeGaspar } from '@/lib/georisques-flags';
-import { phraseReconnaissancesCatnat } from '@/lib/gaspar-pages-publiques';
+import { etatBlocGaspar, phraseReconnaissancesCatnat } from '@/lib/gaspar-pages-publiques';
+import GasparIndisponible from '@/components/GasparIndisponible';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getEra5Trend } from '@/lib/era5-trend';
 import { createClient } from '@supabase/supabase-js';
@@ -298,6 +299,9 @@ export default async function ChaleurCommune({
   };
 
   const heatRisks = (georisques?.riskLabels ?? []).filter((l) => HEAT_RISK_LABELS.has(l));
+  // FUT-159 : une lecture GASPAR en panne arrive ici à `null`. Elle se DIT, au lieu de retirer le bloc.
+  const etatRisques = etatBlocGaspar(georisques, heatRisks.length);
+  const etatCatnat = etatBlocGaspar(catnat, catnatSecheresse);
 
   return (
     <>
@@ -430,7 +434,10 @@ export default async function ChaleurCommune({
         </div>
 
         {/* Géorisques — risques aggravés par la chaleur uniquement */}
-        {heatRisks.length > 0 && (
+        {etatRisques === 'indisponible' && (
+          <GasparIndisponible titre="Ce que la chaleur extrême aggrave ici" source="Risques officiels GASPAR · base nationale de l'État · données à l'échelle de la commune, pas de l'adresse exacte" objet="les risques aggravés par la chaleur recensés pour la commune" accent={ACCENT} />
+        )}
+        {etatRisques === 'disponible' && (
           <>
             <div style={{ margin: '48px 0 10px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>
@@ -458,7 +465,10 @@ export default async function ChaleurCommune({
         )}
 
         {/* Mémoire CatNat — sécheresse des sols (fait brut) */}
-        {catnatSecheresse > 0 && (
+        {etatCatnat === 'indisponible' && (
+          <GasparIndisponible titre="Ce que la commune a déjà vécu" source="Reconnaissances de catastrophe naturelle · base GASPAR (Géorisques)" objet="les arrêtés de catastrophe naturelle pour sécheresse des sols" accent={ACCENT} />
+        )}
+        {etatCatnat === 'disponible' && (
           <>
             <div style={{ margin: '48px 0 10px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACCENT, marginBottom: 4 }}>

@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { phraseReconnaissancesCatnat } from "./gaspar-pages-publiques.ts";
+import { etatBlocGaspar, GASPAR_INDISPONIBLE, phraseReconnaissancesCatnat } from "./gaspar-pages-publiques.ts";
 
 const PAGES = [
   "src/app/(public)/inondation/[insee_code]/page.tsx",
@@ -24,5 +24,31 @@ test("FUT-161 · aucune des deux pages ne compose plus la phrase en JSX, là où
     const source = readFileSync(page, "utf8");
     assert.doesNotMatch(source, /\} fois en état/, page);
     assert.match(source, /phraseReconnaissancesCatnat\(/, page);
+  }
+});
+
+test("FUT-159 · trois états par bloc : panne, source lue sans fait, contenu", () => {
+  assert.equal(etatBlocGaspar(null, 0), "indisponible");
+  assert.equal(etatBlocGaspar(null, 3), "indisponible");
+  assert.equal(etatBlocGaspar({ riskLabels: [] }, 0), "vide");
+  assert.equal(etatBlocGaspar({ total: 0 }, 0), "vide");
+  assert.equal(etatBlocGaspar({ total: 17 }, 17), "disponible");
+});
+
+test("FUT-159 · la phrase de panne nomme la source et ne dit rien du risque", () => {
+  const p = GASPAR_INDISPONIBLE.phrase("les arrêtés de catastrophe naturelle pour inondation");
+  assert.equal(GASPAR_INDISPONIBLE.libelle, "Donnée temporairement indisponible");
+  assert.match(p, /GASPAR \(Géorisques\) n'a pas répondu/);
+  assert.match(p, /les arrêtés de catastrophe naturelle pour inondation n'ont pas pu être lus/);
+  assert.doesNotMatch(p, /aucun|pas de risque|0 /i);
+});
+
+test("FUT-159 · chaque page affiche les deux blocs selon leur état, jamais selon le seul compte", () => {
+  for (const page of PAGES) {
+    const source = readFileSync(page, "utf8");
+    assert.equal((source.match(/=== 'indisponible' && \(\s*<GasparIndisponible/g) ?? []).length, 2, page);
+    assert.equal((source.match(/etat(Risques|Catnat) === 'disponible' && \(/g) ?? []).length, 2, page);
+    assert.doesNotMatch(source, /\{(floodRisks|heatRisks)\.length > 0 && \(/, page);
+    assert.doesNotMatch(source, /\{(catnatInond|catnatSecheresse) > 0 && \(/, page);
   }
 });
