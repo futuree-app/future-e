@@ -97,7 +97,7 @@ Autour : le point seul.
 | **13** Chemin Boudet, Saint-Denis-d'Oléron | numéro · point (proximité) | en limite | en limite (dedans) | Adresse en limite du zonage |
 | **855** Chemin Boudet, Saint-Denis-d'Oléron | numéro · parcelle | hors zone | hors zone | Hors du zonage publié |
 | Chemin Boudet (rue seule) | rue · point (secteur) | en limite | en limite | Adresse en limite du zonage |
-| 1 Place de la Bourse, Bordeaux | numéro · parcelle | hors zone (Gironde couverte) | hors zone | Hors du zonage publié |
+| 1 Place de la Bourse, Bordeaux | numéro · point (point à 8 mm du tracé de la parcelle : « sur la limite », revue du 29/10/2026) | hors zone (Gironde couverte) | hors zone | Hors du zonage publié |
 | 20 Place Bellecour, Lyon | numéro · point | non couvert (Rhône) | non couvert | Aucun zonage publié pour ce département |
 | 1 Cours Napoléon, Ajaccio | numéro · parcelle | hors zone (2A couvert) | hors zone | Hors du zonage publié |
 
@@ -112,3 +112,13 @@ pas en dehors : la carte des bois du Var date de 2008, et l'écran le dit.
 Le contrôle a été refait par le **vrai chemin serveur** (`lireDebroussaillementAdresse` : `fetch`, empreintes
 SHA-256, cache) contre une imitation locale de l'API Storage servant l'**édition complète** (2 453 tuiles) :
 48 lectures sur 48 identiques à la lib pure (`scripts/research/fut149-storage-local.mjs`).
+
+## 5. Revue du 29/10/2026
+
+- **Vraies limites alignées sur la grille**, mesurées sur l'édition nationale construite (sans la reconstruire) :
+  64 220 km d'arêtes posées sur un bord de cellule ; là où la cellule voisine n'a pas de zone juste de l'autre côté,
+  il reste 3 segments de 1 à 3 cm (artefacts d'arrondi au croisement d'une limite et de la grille). La correction
+  ne change donc aucune lecture réelle de cette édition ; elle rend la règle juste pour toute édition.
+- **Avant/après sur les 24 adresses** : états, parts et causes identiques, sauf Bordeaux (lecture au point : le
+  point est à 8 mm du tracé de la parcelle).
+- **Publication** : `scripts/debroussaillement/publier.test.mjs` (8 scénarios, Storage simulé), voir le README.

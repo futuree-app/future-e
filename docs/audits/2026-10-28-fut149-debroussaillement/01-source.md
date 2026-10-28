@@ -46,11 +46,19 @@ qui étaient ces secteurs ; la v7.0 n'en a plus (52 départements : 39 DDT(M), 6
 
 ## 3. Nature juridique
 
-- **Effet** (code forestier, L134-6) : dans les bois classés et à moins de 200 m, obligation notamment aux abords
-  des constructions, sur 50 m que **le maire** peut porter à 100 m (1°), et, en zone urbaine, sur le **terrain
-  lui-même, bâti ou non** (3°) ; d'autres cas visent ZAC, lotissements, campings et installations classées.
-  **Qui** doit débroussailler dépend de la situation (L134-8, revue du 28/10/2026) : l'écran ne désigne personne
-  d'office. Socle national : arrêté du 29/03/2024 (L131-10), modifié le 01/04/2025 ; les arrêtés préfectoraux
+- **Effet** (code forestier, L134-6 et L134-8, relus le 29/10/2026 dans l'édition consolidée du 13/10/2026 de
+  codes.droit.org, reprise de Légifrance, Légifrance refusant les accès automatisés ; copie dans
+  `~/Documents/futuree-debroussaillement/analyses/`). Pour les terrains à moins de 200 m des bois classés, **deux
+  obligations distinctes** parmi huit cas :
+  - **1°** aux abords des constructions, chantiers et installations, sur **50 m, que le maire peut porter à
+    100 m** ; à la charge du **propriétaire des constructions** (L134-8, 1°) ;
+  - **3°** sur les **terrains situés dans les zones urbaines** d'un plan local d'urbanisme (ou document en tenant
+    lieu), sur le terrain entier, sans condition de distance ni décision du maire ; à la charge du **propriétaire
+    du terrain** (L134-8, 2°).
+  Les autres cas : voies privées (2°, profondeur fixée par le préfet, 10 m au plus), zones urbaines des communes
+  sans PLU (4°, le préfet peut porter le 1° jusqu'à 200 m), ZAC, AFU et lotissements (5°), terrains de l'article
+  L444-1 du code de l'urbanisme (6°), campings (7°, 50 m portés à 100 m par le maire, à la charge du gestionnaire),
+  installations de l'article L515-32 du code de l'environnement (8°, à la charge de l'exploitant). Socle national : arrêté du 29/03/2024 (L131-10), modifié le 01/04/2025 ; les arrêtés préfectoraux
   devaient s'y conformer avant le 30/09/2025.
 - **Information de l'acquéreur et du locataire** : depuis le **01/01/2025**, le vendeur ou le bailleur d'un bien
   en zone soumise en informe l'acquéreur ou le locataire ; l'état des risques porte une fiche OLD (décret
@@ -151,7 +159,7 @@ le remplacer ».
 | Objet à diffusion ambiguë (Savoie) | « incertain ». |
 | Contradiction avec l'arrêté (3 communes du Vaucluse, cf. 02) | « incertain », motif dit. |
 | Obligation aux abords des constructions ou, en zone urbaine, sur le terrain | Parcelle à cheval (2-98 %) : part dite, « selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné », vérification des règles en mairie. |
-| Responsable selon la situation (L134-8) | « Qui doit l'entretenir dépend de la situation (le plus souvent le propriétaire de la construction) ». |
+| Responsable selon la situation (L134-8) | « Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine d'un plan local d'urbanisme. » |
 
 ## Références
 
@@ -160,4 +168,4 @@ le remplacer ».
 - Arrêté du 6 février 2024 (JORFTEXT000049111873), modifié les 20/05/2025 et 13/04/2026 ; annexes en PDF (AIDA/INERIS).
 - Ministère de la Transition écologique, fiche presse OLD (06/01/2026) ; ministère de l'Agriculture, fiches techniques de l'arrêté du 29/03/2024 (10/01/2025).
 - Décret n° 2024-405 du 29/04/2024 (vérifié sur Légifrance par la revue du 28/10/2026).
-- Code forestier, L134-6 et L134-8 (revue du 28/10/2026).
+- Code forestier, L134-6 et L134-8 : édition consolidée du 13/10/2026 (codes.droit.org, d'après Légifrance), relue le 29/10/2026.

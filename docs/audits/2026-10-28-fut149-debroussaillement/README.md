@@ -111,11 +111,13 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 
 ## Recette
 
-- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 71 tests (géométrie synthétique : contact, 1 cm, liseré,
-  coupe de tuile, cellule pleine, parcelle invalide, voisine, rue, immense ; départements ; pannes et versions ;
-  textes rendus et interdits ; lecteur Storage ; 24 adresses réelles contre un oracle en entiers). Suite complète,
-  seule, `--test-concurrency=1` : après réintégration de `main` (#110), `main` 3 754 → tête 3 825 (+71), 0 échec. `tsc` propre ; ESLint identique à `main`
-  (6 erreurs et 8 avertissements préexistants ; 0 erreur dans les fichiers de la PR).
+- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 80 tests (géométrie synthétique : contact, 1 cm, liseré,
+  coupe de tuile, vraie limite alignée sur la grille, cellule pleine, parcelle invalide, voisine, point hors de la
+  parcelle, rue, immense ; départements ; pannes et versions ; textes rendus et interdits ; lecteur Storage ; 24
+  adresses réelles contre deux oracles) et `scripts/debroussaillement/publier.test.mjs`, 8 scénarios de
+  publication sur Storage simulé. Suite complète, seule, `--test-concurrency=1`, après réintégration de `main`
+  (#108, #110, #112) : `main` 3 826 → tête 3 914 (+88), 0 échec. `tsc` propre ; ESLint identique à `main` (6 erreurs
+  et 8 avertissements préexistants ; 0 erreur dans les fichiers de la PR).
 - **Rendu** : banc `/dev/fut149?vue=section|autour|logement&cas=…` capturé par Chrome sans interface
   (`scripts/research/fut149-captures.mjs`) : 16 cas × 2 largeurs, **aucun défilement horizontal**, bloc à 814 px
   (bureau) et 300 px (mobile) dans la section Logement, 1 044 / 350 px dans Autour ; un rapport antérieur n'affiche
@@ -135,6 +137,18 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 Validés par la revue : « en limite » pour les parcelles à cheval, le cas de Gonfaron, le décret n° 2024-405.
 Géométrie, tuiles et états inchangés : seuls les textes et leurs tests changent.
 
+## Revue indépendante du 29/10/2026 (NO GO sur `4f27d07d`) : corrections
+
+| Point | Défaut | Correction | Preuve |
+|---|---|---|---|
+| 1. Frontières alignées sur la grille (bloquant) | Toute arête posée sur le bord d'une cellule était écartée comme coupe de tuile, y compris une vraie limite : un point à 10 m pouvait être « en zone » ou « hors zone » | L'arête n'est écartée que là où la cellule voisine est couverte juste de l'autre côté (examen tous les ~5 m ; cellule absente = vraie limite ; cellule non chargée = vraie limite, par prudence) | 5 tests (vraie limite à 10 m des deux côtés, coupe contre une cellule pleine, couverture partielle de l'autre côté, autre objet de l'autre côté, parcelle contre la limite) : **échouent sur `4f27d07d`**, passent sur la tête. Édition nationale : 64 220 km d'arêtes alignées, **vraies limites alignées : 3 segments de 1 à 3 cm** (`scripts/research/fut149/limites-alignees.mjs`) : aucune lecture réelle ne change |
+| 2. Publication atomique (bloquant) | `envoyer` pouvait remplacer le manifeste d'une édition active (dépôt `x-upsert: true`) | Aucun remplacement hors `courant.json` (le client le refuse) ; manifeste et tuiles déjà en ligne : identiques à l'octet, sinon refus **avant toute écriture** ; reprise idempotente ; contenu nouveau sous une révision `AAAA-MM-JJ.N` (`construire.py --revision`) ; bascule après vérification de toutes les empreintes | `publier.test.mjs`, 8 scénarios avec le vrai publieur et le vrai lecteur : republication différente (manifeste seul, ou tuile) sous l'édition active refusée, zéro écriture, lecteurs inchangés ; reprise identique sans dépôt ; envoi coupé après une tuile : lecteurs inchangés, bascule refusée, reprise aboutie ; tuile corrompue : bascule refusée. Rejoué sur `4f27d07d` : **6 échecs sur 7**, dont « Missing expected rejection » pour le manifeste seul (l'ancien code le remplaçait) |
+| 3. Attribution des parcelles | `rattachement: "point"` suffisait | Le point doit être **dans** la parcelle (`classer`, tolérance nommée `TOLERANCE_POINT_PARCELLE_M` = 1 cm, celle de FUT-81) ; dehors : `hors_point` ; sur le trait : `limite` ; lecture au point, dite | Tests : parcelle voisine marquée « point » (zonage de la voisine jamais attribué), point sur le trait, oracle indépendant sur les 24 adresses réelles (aucune parcelle attribuée sans contenir le point). Seul changement réel : **Bordeaux, place de la Bourse**, point à **8 mm** du tracé, un seul candidat transmis : lu au point (reste « hors zone ») |
+| 4. Précision juridique | Les deux obligations étaient fondues dans une phrase | « deux obligations distinctes » : abords des constructions (50 m, que le maire peut porter à 100 m, propriétaire des constructions) ; terrains en zone urbaine d'un PLU (terrain entier, quelle que soit cette distance, propriétaire du terrain) ; « selon le zonage **informatif** publié par l'État » | Texte relu dans l'édition consolidée du code forestier (13/10/2026) ; tests éditoriaux dédiés |
+
+Cas réels rejoués avant/après (Gonfaron, Fréjus, Cazaux, Nîmes, Saint-Denis-d'Oléron et les 19 autres) : états et
+parts identiques, sauf Bordeaux (grain parcelle → point, même état). Aucune attribution voisine dans Logement.
+
 ## Réserves
 
 1. **Décret n° 2024-405** : référence vérifiée sur Légifrance par la revue du 28/10/2026.
@@ -145,9 +159,7 @@ Géométrie, tuiles et états inchangés : seuls les textes et leurs tests chang
    sur la section seule.
 5. **Bloc Autour** : grammaire historique de l'écran qui l'accueille (exception déclarée au cliquet du Relevé,
    comme FUT-146), à migrer avec FUT-118.
-6. **PR #108 (FUT-156)** : fusion d'essai faite le 28/10/2026 (tête 56e3369e). Quatre fichiers en conflit, tous
-   additifs (une source de chaque côté) : `route.ts` (import, promesse, déstructuration `…, bruitAerien,
-   debroussaillement, fibre]`, champ du rapport), `LogementModule.tsx` (libellé de source),
-   `logement-report-types.ts` (deux champs : garder le `/**` qui ouvre le commentaire de la fibre),
-   `logement-report-version.ts` (deux sources absentes, deux règles d'actualisation). Garder les deux côtés :
-   `tsc` propre, suite complète 3 882 / 3 882.
+6. **PR #108 (FUT-156)** : fusionnée sur `main` le 28/10/2026, réintégrée ici. Quatre conflits, tous additifs,
+   résolus en gardant les deux côtés (`route.ts`, `LogementModule.tsx`, `logement-report-types.ts`,
+   `logement-report-version.ts`) ; contre `main`, seules les deux lignes de déstructuration de la route sont
+   réécrites (`…, bruitAerien, debroussaillement, fibre]`) ; les fichiers de la fibre sont identiques à `main`.
