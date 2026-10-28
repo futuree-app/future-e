@@ -12,6 +12,7 @@ import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { LectureBruitAerien } from "./bruit-aerien.ts";
+import type { LectureFibre } from "./fibre-adresse.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
@@ -121,6 +122,12 @@ export type LogementReport = {
    * alors RIEN, ni « hors zone » ni une panne.
    */
   bruitAerien?: LectureBruitAerien;
+  /**
+   * FUT-156 : LA FIBRE À L'ADRESSE (Arcep : état de déploiement du bâtiment et nombre d'opérateurs qui y
+   * déclarent une offre, cf. `fibre-adresse.ts`), lue une fois dans l'index trimestriel et figée ici avec son
+   * millésime. `undefined` : rapport écrit avant FUT-156, ou lecture non activée ; l'écran n'affiche RIEN.
+   */
+  fibre?: LectureFibre;
   sinistralite?: OnrnSinistralite | null;
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.
