@@ -7,6 +7,7 @@ import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { codeGaspar, villeGaspar } from '@/lib/georisques-flags';
+import { phraseReconnaissancesCatnat } from '@/lib/gaspar-pages-publiques';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getEra5Trend } from '@/lib/era5-trend';
 import { createClient } from '@supabase/supabase-js';
@@ -473,7 +474,7 @@ export default async function ChaleurCommune({
                 {catnatSecheresse}<span className="data-card-unit"> reconnaissance{catnatSecheresse > 1 ? 's' : ''}</span>
               </div>
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
-                {villeCatnat ? `À l'échelle de ${villeCatnat} (GASPAR ne publie pas les arrondissements), la ville` : communeName} a déjà été reconnue {catnatSecheresse} fois en état de catastrophe naturelle
+                {phraseReconnaissancesCatnat(catnatSecheresse, communeName, villeCatnat)}{' '}
                 pour sécheresse des sols. Ce phénomène de retrait-gonflement des argiles fissure les
                 fondations, et des étés plus secs l&apos;aggravent directement.
               </div>

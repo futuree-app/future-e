@@ -7,6 +7,7 @@ import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
 import { codeGaspar, villeGaspar } from '@/lib/georisques-flags';
+import { phraseReconnaissancesCatnat } from '@/lib/gaspar-pages-publiques';
 import { createClient } from '@supabase/supabase-js';
 
 export const revalidate = 86400;
@@ -455,7 +456,7 @@ export default async function InondationCommune({
                 {catnatInond}<span className="data-card-unit"> reconnaissance{catnatInond > 1 ? 's' : ''}</span>
               </div>
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
-                {villeCatnat ? `À l'échelle de ${villeCatnat} (GASPAR ne publie pas les arrondissements), la ville` : communeName} a déjà été reconnue {catnatInond} fois en état de catastrophe naturelle
+                {phraseReconnaissancesCatnat(catnatInond, communeName, villeCatnat)}{' '}
                 pour inondation ou submersion marine. C&apos;est l&apos;histoire vécue du territoire :
                 des événements qui ont réellement marqué la commune.
               </div>
