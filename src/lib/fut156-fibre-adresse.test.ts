@@ -216,6 +216,8 @@ describe("2. Le code et sa lecture", () => {
     assert.equal(communeDeCle("17351_491iak_00013"), "17351");
     assert.equal(communeDeCle("17299_0810_00049_bis"), "17299");
     assert.equal(communeDeCle("2A004_0123_00001"), "2A004");
+    // La BAN écrit les communes corses en minuscules : la commune reste le code INSEE.
+    assert.equal(communeDeCle("2a001_cjjuix_00068"), "2A001");
     assert.equal(communeDeCle("x"), null);
     assert.deepEqual(["17300", "2A004", "97411", "75101"].map(departementDe), ["17", "2A", "974", "75"]);
   });
@@ -251,6 +253,7 @@ describe("3. Les adresses réelles (T2 2026, Charente-Maritime)", () => {
     assert.equal(l.motif, "batiment_eloigne");
     assert.equal(l.operateurs, undefined);
     assert.match(rendre(l), /Raccordement à vérifier/);
+    assert.match(rendre(l), /L'un des 2 bâtiments que l'Arcep associe à cette adresse se trouve à plus de 150 mètres/);
     assert.doesNotMatch(rendre(l), /déployée|études réalisées/);
   });
 
@@ -393,7 +396,7 @@ describe("5. La lecture de l'index publié (bucket privé, une lecture par analy
     globalThis.fetch = (async (u: string | URL, init?: RequestInit) => {
       const url = String(u);
       appels.push({ url, auth: new Headers(init?.headers).get("authorization") });
-      const chemin = url.split("/storage/v1/object/fibre-adresse/")[1];
+      const chemin = url.split("/storage/v1/object/fibre-adresse/")[1].split("?")[0];
       const r = reponses[chemin];
       return r ? r() : new Response("introuvable", { status: 404 });
     }) as typeof fetch;

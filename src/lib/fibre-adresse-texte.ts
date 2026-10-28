@@ -65,7 +65,9 @@ const LIMITE_BATIMENT = "C'est l'état du bâtiment, pas celui d'un logement pr�
 
 const LIMITE_MOTIF: Record<NonNullable<LectureFibre["motif"]>, (l: LectureFibre) => string> = {
   etats_divergents: (l) => `Plusieurs bâtiments sont associés à cette adresse et leurs états diffèrent${l.etatsDivergents?.length ? ` (${l.etatsDivergents.join(", ")})` : ""}.`,
-  batiment_eloigne: () => `Le bâtiment que l'Arcep associe à cette adresse se trouve à plus de ${ECART_DOUTEUX_M} mètres de son emplacement : son état n'est pas repris.`,
+  batiment_eloigne: (l) => (l.batiments ?? 1) > 1
+    ? `L'un des ${l.batiments} bâtiments que l'Arcep associe à cette adresse se trouve à plus de ${ECART_DOUTEUX_M} mètres de son emplacement : aucun état n'est repris.`
+    : `Le bâtiment que l'Arcep associe à cette adresse se trouve à plus de ${ECART_DOUTEUX_M} mètres de son emplacement : son état n'est pas repris.`,
   sans_donnee_fibre: () => "L'adresse figure dans les fichiers de l'Arcep, mais aucun bâtiment n'y est recensé pour la fibre.",
   non_rattachee: () => "Aucun bâtiment des fichiers de l'Arcep n'est associé à cette adresse. C'est fréquent pour une adresse récente, ou un numéro avec indice (bis, ter).",
   etat_non_publie: () => "Le bâtiment associé à cette adresse n'a pas d'état de déploiement publié.",

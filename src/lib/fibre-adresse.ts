@@ -116,10 +116,14 @@ export function departementDe(insee: string): string {
   return insee.startsWith("97") || insee.startsWith("98") ? insee.slice(0, 3) : insee.slice(0, 2);
 }
 
-/** La commune d'un identifiant BAN : son premier segment (`17333_0270_00017` -> `17333`). */
+/**
+ * La commune d'un identifiant BAN : son premier segment (`17333_0270_00017` -> `17333`). La BAN écrit les
+ * communes corses en minuscules (`2a001_cjjuix_00068`) ; la commune rendue est toujours le code INSEE
+ * (`2A001`), le même à l'écriture de l'index et à sa lecture.
+ */
 export function communeDeCle(cleBan: string): string | null {
   const c = cleBan.split("_")[0];
-  return /^(?:\d{5}|2[AB]\d{3})$/.test(c) ? c : null;
+  return /^(?:\d{5}|2[ABab]\d{3})$/.test(c) ? c.toUpperCase() : null;
 }
 
 /** FNV-1a 32 bits : déterministe, identique au pipeline et à la lecture. */

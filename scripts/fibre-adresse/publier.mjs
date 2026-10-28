@@ -57,11 +57,15 @@ function client(url, cle) {
   }
   return {
     async deposer(chemin, octets, type, remplacer = false) {
-      const res = await appel("POST", `/object/${BUCKET}/${chemin}`, octets, { "Content-Type": type, "x-upsert": remplacer ? "true" : "false", "Cache-Control": "max-age=60" });
+      // Un lot est immuable : il peut rester en cache. Le pointeur et un manifeste remplaçable, jamais :
+      // une bascule doit être vue à la lecture suivante, pas une minute plus tard.
+      const cache = remplacer ? "no-cache" : "max-age=3600";
+      const res = await appel("POST", `/object/${BUCKET}/${chemin}`, octets, { "Content-Type": type, "x-upsert": remplacer ? "true" : "false", "Cache-Control": cache });
       if (!res.ok) throw new Error(`${chemin} : HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
     },
     async lire(chemin) {
-      const res = await appel("GET", `/object/${BUCKET}/${chemin}`);
+      // Un paramètre unique contourne le cache du CDN : le pointeur relu est celui qui vient d'être écrit.
+      const res = await appel("GET", `/object/${BUCKET}/${chemin}?cacheNonce=${Date.now()}`);
       if (res.status === 404 || res.status === 400) return null;
       if (!res.ok) throw new Error(`${chemin} : HTTP ${res.status}`);
       return Buffer.from(await res.arrayBuffer());

@@ -31,8 +31,14 @@ export function configFibre(env: NodeJS.ProcessEnv = process.env): Config | null
   return bucket && url && cle ? { url: url.replace(/\/$/, ""), cle, bucket } : null;
 }
 
-async function lireObjet(c: Config, chemin: string): Promise<Buffer> {
-  const res = await fetch(`${c.url}/storage/v1/object/${encodeURIComponent(c.bucket)}/${chemin}`, {
+/**
+ * `frais` : le pointeur et le manifeste sont réécrits en place lors d'une bascule ; le CDN de Supabase peut
+ * servir l'ancienne version jusqu'à son expiration. Un paramètre unique force la lecture à l'origine (doc
+ * Supabase, « Bypassing cache »). Les lots, immuables, gardent le cache.
+ */
+async function lireObjet(c: Config, chemin: string, frais = false): Promise<Buffer> {
+  const nonce = frais ? `?cacheNonce=${Date.now()}` : "";
+  const res = await fetch(`${c.url}/storage/v1/object/${encodeURIComponent(c.bucket)}/${chemin}${nonce}`, {
     headers: { Authorization: `Bearer ${c.cle}`, apikey: c.cle },
     signal: AbortSignal.timeout(DELAI_MS),
     cache: "no-store",
@@ -45,9 +51,9 @@ let courant: { manifeste: ManifesteFibre; jusqua: number } | null = null;
 
 async function manifesteCourant(c: Config): Promise<ManifesteFibre> {
   if (courant && courant.jusqua > Date.now()) return courant.manifeste;
-  const pointeur = JSON.parse((await lireObjet(c, "courant.json")).toString("utf8")) as PointeurFibre;
+  const pointeur = JSON.parse((await lireObjet(c, "courant.json", true)).toString("utf8")) as PointeurFibre;
   if (pointeur?.format !== FORMAT_INDEX_FIBRE || !/^\d{4}T[1-4]$/.test(pointeur.millesime ?? "")) throw new Error("pointeur illisible");
-  const m: unknown = JSON.parse((await lireObjet(c, `${pointeur.millesime}/manifest.json`)).toString("utf8"));
+  const m: unknown = JSON.parse((await lireObjet(c, `${pointeur.millesime}/manifest.json`, true)).toString("utf8"));
   if (!manifesteValide(m) || m.millesime !== pointeur.millesime) throw new Error("manifeste illisible");
   courant = { manifeste: m, jusqua: Date.now() + DUREE_POINTEUR_MS };
   return m;
