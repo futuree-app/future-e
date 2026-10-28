@@ -6,6 +6,7 @@
 // réponse valide : seule une réponse valide peut être mise en cache (`cache-accueil.ts`). Une panne ne devient
 // jamais « aucun risque » : la lecture dit « Donnée indisponible ».
 import { codeGaspar } from "../georisques-flags.ts";
+import { EN_TETES_GEORISQUES } from "../georisques-http.ts";
 import { interpreterReponseGaspar, type RisqueGaspar } from "./pastilles.ts";
 
 /** Le délai accordé à GASPAR avant de dire la donnée indisponible (FUT-50 : 8 s → 3 s ; mesures dans le compte rendu). */
@@ -19,7 +20,7 @@ export async function risquesGaspar(insee: string, opts: { delaiMs?: number; bas
   const delai = setTimeout(() => controle.abort(), opts.delaiMs ?? DELAI_GASPAR_MS);
   try {
     const r = await (opts.fetchImpl ?? fetch)(`${opts.base ?? "https://georisques.gouv.fr"}/api/v1/gaspar/risques?code_insee=${encodeURIComponent(codeGaspar(insee))}`, {
-      headers: { accept: "application/json" }, signal: controle.signal, cache: "no-store",
+      headers: EN_TETES_GEORISQUES, signal: controle.signal, cache: "no-store",
     });
     if (!r.ok) return { risques: null, panne: true, ms: Date.now() - debut };
     const risques = interpreterReponseGaspar(await r.json());
