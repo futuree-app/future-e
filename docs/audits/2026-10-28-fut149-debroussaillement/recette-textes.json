@@ -1,0 +1,290 @@
+[
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "la-teste-pyla-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain dans le zonage publié CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions. L'entretien est à la charge du propriétaire. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. CE QUE VOUS POUVEZ VÉRIFIER Avant de vous engager, consultez le zonage officiel sur Géorisques et l'arrêté du préfet, qui fixe la distance et les travaux. Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "la-teste-centre-hors-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Hors du zonage publié CE QU’IL FAUT RETENIR Le point de l'adresse n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département (aucune zone à moins de 50 m). Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. La parcelle rattachée à l'adresse l'a été par proximité et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "gonfaron-foch-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain à cheval sur la limite du zonage CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, environ 10 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon l'emplacement des constructions, le logement peut être concerné ou non. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "la-teste-daugey-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain en limite du zonage CE QU’IL FAUT RETENIR La parcelle ne touche qu'en bordure une zone où le débroussaillement est obligatoire (environ 40 m²) : selon le tracé exact, le terrain peut être concerné ou non. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "oleron-boudet-13",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Adresse en limite du zonage CE QU’IL FAUT RETENIR Le point de l'adresse est dans une zone où le débroussaillement est obligatoire, à moins de 50 m de sa limite : selon l'endroit exact, le logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. La parcelle rattachée à l'adresse l'a été par proximité et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "lyon-bellecour",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Aucun zonage publié pour ce département CE QU’IL FAUT RETENIR La base nationale du débroussaillement ne contient aucune zone pour ce département : rien n'en est conclu pour ce logement. Cela ne prouve pas qu'aucune obligation ne s'applique : la mairie peut le confirmer. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "panne",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Zonage non lu CE QU’IL FAUT RETENIR Le zonage de débroussaillement n'a pas pu être lu pour ce logement. Rien n'en est conclu, ni dans un sens ni dans l'autre. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "gonfaron-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain dans le zonage publié CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions. L'entretien est à la charge du propriétaire. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Avant de vous engager, consultez le zonage officiel sur Géorisques et l'arrêté du préfet, qui fixe la distance et les travaux. Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "nimes-hors-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 864,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Hors du zonage publié CE QU’IL FAUT RETENIR La parcelle n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département. Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. Dans ce département, le zonage s'appuie sur une carte des bois de 2015 : un bois a pu apparaître ou disparaître depuis. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "section",
+  "cas": "ancien",
+  "debordementPx": 0,
+  "blocAffiche": false,
+  "largeurBloc": null,
+  "texte": ""
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "oleron-boudet-13",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est en bordure d'une zone où le débroussaillement est obligatoire : la limite passe à moins de 50 m, et selon l'endroit exact, un logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques ; la mairie le confirme. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "oleron-boudet-855",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département. Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "landiras-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est dans une zone où le débroussaillement est obligatoire autour des maisons et des constructions, selon le zonage publié par l'État. C'est une obligation d'entretien près des bois et des landes, pas une mesure du danger d'incendie. CE QUE VOUS POUVEZ VÉRIFIER Les règles précises (distance, travaux) sont fixées par le préfet : la mairie et le site de la préfecture les donnent. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "frejus-sakharov-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est en bordure d'une zone où le débroussaillement est obligatoire : la limite passe à moins de 50 m, et selon l'endroit exact, un logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques ; la mairie le confirme. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "lyon-bellecour",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Aucun zonage de débroussaillement n'est publié pour ce département. Cela ne prouve pas qu'aucune obligation ne s'applique : la mairie peut le confirmer. ▸ En savoir plus"
+ },
+ {
+  "ecran": "bureau",
+  "vue": "autour",
+  "cas": "panne",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 1044,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Le zonage de débroussaillement n'a pas pu être lu pour ce secteur. Rien n'en est conclu, ni dans un sens ni dans l'autre. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "la-teste-pyla-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain dans le zonage publié CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions. L'entretien est à la charge du propriétaire. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. CE QUE VOUS POUVEZ VÉRIFIER Avant de vous engager, consultez le zonage officiel sur Géorisques et l'arrêté du préfet, qui fixe la distance et les travaux. Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "la-teste-centre-hors-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Hors du zonage publié CE QU’IL FAUT RETENIR Le point de l'adresse n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département (aucune zone à moins de 50 m). Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. La parcelle rattachée à l'adresse l'a été par proximité et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "gonfaron-foch-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain à cheval sur la limite du zonage CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, environ 10 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon l'emplacement des constructions, le logement peut être concerné ou non. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "la-teste-daugey-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain en limite du zonage CE QU’IL FAUT RETENIR La parcelle ne touche qu'en bordure une zone où le débroussaillement est obligatoire (environ 40 m²) : selon le tracé exact, le terrain peut être concerné ou non. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "oleron-boudet-13",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Adresse en limite du zonage CE QU’IL FAUT RETENIR Le point de l'adresse est dans une zone où le débroussaillement est obligatoire, à moins de 50 m de sa limite : selon l'endroit exact, le logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. La parcelle rattachée à l'adresse l'a été par proximité et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse. CE QUE VOUS POUVEZ VÉRIFIER Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "lyon-bellecour",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Aucun zonage publié pour ce département CE QU’IL FAUT RETENIR La base nationale du débroussaillement ne contient aucune zone pour ce département : rien n'en est conclu pour ce logement. Cela ne prouve pas qu'aucune obligation ne s'applique : la mairie peut le confirmer. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "panne",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Zonage non lu CE QU’IL FAUT RETENIR Le zonage de débroussaillement n'a pas pu être lu pour ce logement. Rien n'en est conclu, ni dans un sens ni dans l'autre. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "gonfaron-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Terrain dans le zonage publié CE QU’IL FAUT RETENIR Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire autour des constructions. L'entretien est à la charge du propriétaire. Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Avant de vous engager, consultez le zonage officiel sur Géorisques et l'arrêté du préfet, qui fixe la distance et les travaux. Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "nimes-hors-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "STATUT RÉGLEMENTAIRE À CETTE ADRESSE Ni plan de prévention des risques ni périmètre patrimonial à cette adresse La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse. DÉBROUSSAILLEMENT Hors du zonage publié CE QU’IL FAUT RETENIR La parcelle n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département. Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. Dans ce département, le zonage s'appuie sur une carte des bois de 2015 : un bois a pu apparaître ou disparaître depuis. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "section",
+  "cas": "ancien",
+  "debordementPx": 0,
+  "blocAffiche": false,
+  "largeurBloc": null,
+  "texte": ""
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "oleron-boudet-13",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est en bordure d'une zone où le débroussaillement est obligatoire : la limite passe à moins de 50 m, et selon l'endroit exact, un logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques ; la mairie le confirme. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "oleron-boudet-855",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur n'est pas dans le zonage de débroussaillement obligatoire publié pour ce département. Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique. Dans ce département, le zonage s'appuie sur une carte des bois de 2014 : un bois a pu apparaître ou disparaître depuis. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "landiras-en-zone",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est dans une zone où le débroussaillement est obligatoire autour des maisons et des constructions, selon le zonage publié par l'État. C'est une obligation d'entretien près des bois et des landes, pas une mesure du danger d'incendie. CE QUE VOUS POUVEZ VÉRIFIER Les règles précises (distance, travaux) sont fixées par le préfet : la mairie et le site de la préfecture les donnent. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "frejus-sakharov-limite",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Ce secteur est en bordure d'une zone où le débroussaillement est obligatoire : la limite passe à moins de 50 m, et selon l'endroit exact, un logement peut y être ou non. Dans ce département, le zonage s'appuie sur une carte des bois de 2008 : un bois a pu apparaître ou disparaître depuis. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques ; la mairie le confirme. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "lyon-bellecour",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Aucun zonage de débroussaillement n'est publié pour ce département. Cela ne prouve pas qu'aucune obligation ne s'applique : la mairie peut le confirmer. ▸ En savoir plus"
+ },
+ {
+  "ecran": "mobile",
+  "vue": "autour",
+  "cas": "panne",
+  "debordementPx": 0,
+  "blocAffiche": true,
+  "largeurBloc": 350,
+  "texte": "DÉBROUSSAILLEMENT OBLIGATOIRE : LE ZONAGE DU SECTEUR CE QU’IL FAUT RETENIR Le zonage de débroussaillement n'a pas pu être lu pour ce secteur. Rien n'en est conclu, ni dans un sens ni dans l'autre. CE QUE VOUS POUVEZ VÉRIFIER Le zonage officiel se consulte sur Géorisques. ▸ En savoir plus"
+ }
+]

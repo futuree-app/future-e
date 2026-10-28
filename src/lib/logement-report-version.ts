@@ -112,6 +112,9 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // FUT-146 : mêmes règles. Un rapport antérieur (champ absent) ne s'invente pas de panne ; « hors zone »
   // et « aucun plan à proximité » sont des réponses, pas des sources muettes.
   if (r.bruitAerien?.statut === "indisponible") absentes.push("bruit_aerien");
+  // FUT-149 : mêmes règles. « Hors zone » et « département sans zonage publié » sont des réponses ; une lecture
+  // non activée n'écrit aucun champ, et ne s'invente donc pas de panne.
+  if (r.debroussaillement?.statut === "indisponible") absentes.push("debroussaillement");
   return absentes;
 }
 
@@ -184,6 +187,11 @@ export function issueActualisation(
   // FUT-146 : même règle que le plan d'urbanisme. Une lecture des plans de bruit faite à la parcelle ne cède
   // pas la place à une lecture au point : ce n'est pas une panne, mais une lecture moins sûre.
   if (ancienne.report.bruitAerien?.grain === "parcelle" && nouveau.bruitAerien?.grain !== "parcelle") return "refusee";
+  // FUT-149 : même règle pour le zonage du débroussaillement ; et une version qui l'avait lu ne le perd pas parce
+  // que la lecture a été désactivée entre-temps (champ absent dans N+1).
+  const debAvant = ancienne.report.debroussaillement;
+  if (debAvant?.statut === "lu" && !nouveau.debroussaillement) return "refusee";
+  if (debAvant?.grain === "parcelle" && debAvant.statut === "lu" && nouveau.debroussaillement?.grain !== "parcelle") return "refusee";
   return "nouvelle_version";
 }
 

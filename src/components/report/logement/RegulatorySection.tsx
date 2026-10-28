@@ -8,6 +8,8 @@ import type { UrbanismeParcelle } from "@/lib/urbanisme-parcelle";
 import { UrbanismeBlock } from "./UrbanismeBlock";
 import { BruitAerienLogement } from "@/components/report/BruitAerienBlocs";
 import type { LectureBruitAerien } from "@/lib/bruit-aerien";
+import { DebroussaillementLogement } from "@/components/report/DebroussaillementBlocs";
+import type { LectureDebroussaillement } from "@/lib/debroussaillement";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Disclosure } from "./kit";
 
@@ -152,6 +154,7 @@ export function RegulatoryStatusBlock({
   heritage,
   urbanisme,
   bruitAerien,
+  debroussaillement,
 }: {
   georisques: LogementReport["georisques"];
   heritage: HeritageStatus | null;
@@ -166,6 +169,11 @@ export function RegulatoryStatusBlock({
    * rien ne s'affiche, ni « hors zone » ni une panne.
    */
   bruitAerien?: LectureBruitAerien;
+  /**
+   * FUT-149 : le zonage du débroussaillement obligatoire du bien. Absent (rapport antérieur, lecture non activée) :
+   * rien ne s'affiche.
+   */
+  debroussaillement?: LectureDebroussaillement;
 }) {
   const g = georisques?.parcel ?? georisques?.address;
   const grainLu: "parcelle" | "point" = georisques?.parcel ? "parcelle" : "point";
@@ -264,6 +272,7 @@ export function RegulatoryStatusBlock({
             />
           )}
           <BruitAerienLogement lecture={bruitAerien} withDivider />
+          <DebroussaillementLogement lecture={debroussaillement} withDivider />
         </div>
       </GlassCard>
     </ReportSection>

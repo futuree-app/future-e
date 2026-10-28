@@ -12,6 +12,7 @@ import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { LectureBruitAerien } from "./bruit-aerien.ts";
+import type { LectureDebroussaillement } from "./debroussaillement.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
@@ -121,6 +122,12 @@ export type LogementReport = {
    * alors RIEN, ni « hors zone » ni une panne.
    */
   bruitAerien?: LectureBruitAerien;
+  /**
+   * FUT-149 : LE ZONAGE DU DÉBROUSSAILLEMENT OBLIGATOIRE (base DÉBROUSSAILLEMENT de l'IGN) lu à la parcelle ou au
+   * point (cf. `debroussaillement.ts`). `undefined` : rapport écrit avant FUT-149, ou lecture non activée ; rien
+   * n'a été calculé, et l'écran n'affiche RIEN, ni « hors zone » ni une panne.
+   */
+  debroussaillement?: LectureDebroussaillement;
   sinistralite?: OnrnSinistralite | null;
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.

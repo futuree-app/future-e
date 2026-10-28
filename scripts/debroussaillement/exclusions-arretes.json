@@ -1,0 +1,10 @@
+{
+  "motif": "Communes où l'arrêté de classement exclut l'ensemble des massifs forestiers (code forestier, L133-1), mais où la base DÉBROUSSAILLEMENT publie des zones à plus de 200 m de toute limite communale (donc pas une bande débordant d'une commune voisine). L'application n'y conclut rien : « incertain », jamais « dans la zone ». Relevé le 28/10/2026 par la contre-épreuve docs/audits/2026-10-28-fut149-debroussaillement/02-contre-epreuve-arretes.md ; à refaire à chaque édition.",
+  "texte": "annexe 2 de l'arrêté du 6 février 2024, dans ses versions du 20 mai 2025 et du 13 avril 2026",
+  "editionVerifiee": "2026-03-01",
+  "communes": {
+    "84097": { "commune": "Richerenches", "zoneHaAPlusDe200m": 100.5 },
+    "84064": { "commune": "Lapalud", "zoneHaAPlusDe200m": 53.8 },
+    "84056": { "commune": "Jonquières", "zoneHaAPlusDe200m": 4.1 }
+  }
+}
