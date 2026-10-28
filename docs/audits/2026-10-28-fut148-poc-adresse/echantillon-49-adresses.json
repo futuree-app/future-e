@@ -1,0 +1,1766 @@
+[
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17333_0270_00017",
+  "label": "17 Rue du Chemin Vert 17110 Saint-Georges-de-Didonne",
+  "lon": -0.99467,
+  "lat": 45.606083,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17333_0270_00017",
+   "label": "17 Rue du Chemin Vert 17110 Saint-Georges-de-Didonne",
+   "score": 0.96,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17333/X/03MB",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "2",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2019-12-27"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17041_0015_00001",
+  "label": "1 Rue des Amourettes 17170 Benon",
+  "lon": -0.813259,
+  "lat": 46.202139,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17041_0015_00001",
+   "label": "1 Rue des Amourettes 17170 Benon",
+   "score": 0.95,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17041/X/0075",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2021-06-16"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17333_0670_00084",
+  "label": "84 Avenue du Général de Gaulle 17110 Saint-Georges-de-Didonne",
+  "lon": -0.998325,
+  "lat": 45.609697,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17333_0670_00084",
+   "label": "84 Avenue du Général de Gaulle 17110 Saint-Georges-de-Didonne",
+   "score": 0.965,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17333/X/03PN",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2019-12-27"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17300_7250_00026",
+  "label": "26 Chemin des Sablons 17000 La Rochelle",
+  "lon": -1.206638,
+  "lat": 46.166441,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17300_7250_00026",
+   "label": "26 Chemin des Sablons 17000 La Rochelle",
+   "score": 0.973,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "ID-173000000BPW",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2016-08-23"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17283_0060_00004",
+  "label": "4 Rue d’Archiac 17800 Pons",
+  "lon": -0.539334,
+  "lat": 45.579982,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17283_0060_00004",
+   "label": "4 Rue d’Archiac 17800 Pons",
+   "score": 0.961,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17283/X/03QU",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2019-12-26"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17273_0076_00027",
+  "label": "27 Rue de l'Eglise 17800 Pérignac",
+  "lon": -0.463268,
+  "lat": 45.62284,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17273_0076_00027",
+   "label": "27 Rue de l'Eglise 17800 Pérignac",
+   "score": 0.949,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17273/X/00BM",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-24"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17113_0023_00001",
+  "label": "1 Route du Stade 17360 La Clotte",
+  "lon": -0.148617,
+  "lat": 45.118259,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17113_0023_00001",
+   "label": "1 Route du Stade 17360 La Clotte",
+   "score": 0.948,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17113/X/004F",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2022-08-29"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "deploye_PA",
+  "ban_id": "17200_0056_00016",
+  "label": "16 Rue des Bergonneaux 17140 Lagord",
+  "lon": -1.141911,
+  "lat": 46.187992,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17200_0056_00016",
+   "label": "16 Rue des Bergonneaux 17140 Lagord",
+   "score": 0.957,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "ID-1720000000JC",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2016-02-17"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17414_0003_00003",
+  "label": "3 Rue Aimé Bonpland 17138 Saint-Xandre",
+  "lon": -1.093705,
+  "lat": 46.203509,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17414_0003_00003",
+   "label": "3 Rue Aimé Bonpland 17138 Saint-Xandre",
+   "score": 0.958,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "ID-17414000039C",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2021-02-02"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17142_0426_00017",
+  "label": "17 Rue Jean Gabin 17139 Dompierre-sur-Mer",
+  "lon": -1.070033,
+  "lat": 46.183822,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17142_0426_00017",
+   "label": "17 Rue Jean Gabin 17139 Dompierre-sur-Mer",
+   "score": 0.96,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "ID-1714200002JQ",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2017-01-03"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17299_0810_00060",
+  "label": "60 Avenue Leon Gambetta 17300 Rochefort",
+  "lon": -0.969738,
+  "lat": 45.939335,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17299_0810_00060",
+   "label": "60 Avenue Leon Gambetta 17300 Rochefort",
+   "score": 0.974,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17299/X/02Q9",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "4",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2018-10-24"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17415_4ir3kx_00026",
+  "label": "26 Cours National Michel BARON 17100 Saintes",
+  "lon": -0.631866,
+  "lat": 45.747181,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_4ir3kx_00026",
+   "label": "26 Cours National Michel BARON 17100 Saintes",
+   "score": 0.971,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/05JD",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "3",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2019-11-19"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17479_a051_00003",
+  "label": "3 Hameau de la Gare 17260 Virollet",
+  "lon": -0.71078,
+  "lat": 45.534494,
+  "type_position": "logement",
+  "nom_ld": "la Gare de Virollet",
+  "geocodeur": {
+   "id": "17479_a051_00003",
+   "label": "3 Hameau de la Gare 17260 Virollet",
+   "score": 0.94,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17479/X/002J",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-26"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "deploye_IM",
+  "ban_id": "17283_0780_00001",
+  "label": "1 Rue du Moulin Conteau 17800 Pons",
+  "lon": -0.543818,
+  "lat": 45.580748,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17283_0780_00001",
+   "label": "1 Rue du Moulin Conteau 17800 Pons",
+   "score": 0.962,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17283/X/01EG",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "4",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2019-12-24"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "multi_meme_statut",
+  "ban_id": "17240_1060_00009_b",
+  "label": "9 b Rue du Stade 17130 Montendre",
+  "lon": -0.397399,
+  "lat": 45.2842,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17240_1060_00009_b",
+   "label": "9b Rue du Stade 17130 Montendre",
+   "score": 0.787,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17240/X/00IB",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-12-22"
+    },
+    {
+     "imb_code": "IMB/17240/X/00ID",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "6",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-12-22"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 3
+ },
+ {
+  "strate": "multi_meme_statut",
+  "ban_id": "17201_0002_00099",
+  "label": "99 Rue de l'Aunis 17170 La Laigne",
+  "lon": -0.764198,
+  "lat": 46.215774,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17201_0002_00099",
+   "label": "99 Rue de l'Aunis 17170 La Laigne",
+   "score": 0.952,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17201/X/000B",
+     "type": "IM",
+     "num": "M1",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-20"
+    },
+    {
+     "imb_code": "IMB/17201/X/000C",
+     "type": "PA",
+     "num": "M2",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-20"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 3
+ },
+ {
+  "strate": "multi_meme_statut",
+  "ban_id": "17232_a010_00001",
+  "label": "1 Bras de Chien 17120 Meursac",
+  "lon": -0.779149,
+  "lat": 45.648686,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17232_a010_00001",
+   "label": "1 Bras de Chien 17120 Meursac",
+   "score": 0.943,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17232/X/01N9",
+     "type": "PA",
+     "num": "M1",
+     "statut": "deploye",
+     "logloc": "0",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK"
+     ],
+     "pm": "deploye",
+     "date_mad": "2022-10-20"
+    },
+    {
+     "imb_code": "IMB/17232/X/01NA",
+     "type": "PA",
+     "num": "M2",
+     "statut": "deploye",
+     "logloc": "2",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK"
+     ],
+     "pm": "deploye",
+     "date_mad": "2022-10-20"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 4
+ },
+ {
+  "strate": "statut_cible",
+  "ban_id": "17022_0011_00020",
+  "label": "20 Chemin de l'Abbaye 17400 Asnières-la-Giraud",
+  "lon": -0.500703,
+  "lat": 45.896022,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17022_0011_00020",
+   "label": "20 Chemin de l'Abbaye 17400 Asnières-la-Giraud",
+   "score": 0.944,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "cible",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17022/X/00XY",
+     "type": "PA",
+     "num": "",
+     "statut": "cible",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2019-06-27"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "statut_cible",
+  "ban_id": "17333_2o42iu_00019",
+  "label": "19 Rue Jean Pierre Coulon 17110 Saint-Georges-de-Didonne",
+  "lon": -0.995282,
+  "lat": 45.602455,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17333_2o42iu_00019",
+   "label": "19 Rue Jean Pierre Coulon 17110 Saint-Georges-de-Didonne",
+   "score": 0.959,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "cible",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17333/X/00J3",
+     "type": "IM",
+     "num": "",
+     "statut": "cible",
+     "logloc": "7",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2019-11-29"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "statut_signe",
+  "ban_id": "17306_0052_00014",
+  "label": "14 Rue de la Petite Hermine 17200 Royan",
+  "lon": -1.020627,
+  "lat": 45.633338,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17306_0052_00014",
+   "label": "14 Rue de la Petite Hermine 17200 Royan",
+   "score": 0.968,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "signe",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17306/X/0AER",
+     "type": "PA",
+     "num": "C",
+     "statut": "signe",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-02-25"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "statut_signe",
+  "ban_id": "17461_0034_00009",
+  "label": "9 Rue Myrtils 17640 Vaux-sur-Mer",
+  "lon": -1.051808,
+  "lat": 45.642777,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17461_0034_00009",
+   "label": "9 Rue Myrtils 17640 Vaux-sur-Mer",
+   "score": 0.955,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "signe",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17461/X/07SV",
+     "type": "IM",
+     "num": "1",
+     "statut": "signe",
+     "logloc": "16",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2023-05-25"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "statut_en cours de deploiement",
+  "ban_id": "17300_4105_00020",
+  "label": "20 Rue Henri Rochefort 17000 La Rochelle",
+  "lon": -1.132366,
+  "lat": 46.155416,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17300_4105_00020",
+   "label": "20 Rue Henri Rochefort 17000 La Rochelle",
+   "score": 0.973,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "en cours de deploiement",
+   "immeubles": [
+    {
+     "imb_code": "ID-173000000MXG",
+     "type": "PA",
+     "num": "",
+     "statut": "en cours de deploiement",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2014-11-24"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "statut_en cours de deploiement",
+  "ban_id": "17174_0275_00007",
+  "label": "7 Route du Marais 17430 Genouillé",
+  "lon": -0.819077,
+  "lat": 46.019673,
+  "type_position": "entrée",
+  "nom_ld": "Porcheresse",
+  "geocodeur": {
+   "id": "17174_0275_00007",
+   "label": "7 Route du Marais 17430 Genouillé",
+   "score": 0.946,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "en cours de deploiement",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17174/X/00OI",
+     "type": "PA",
+     "num": "",
+     "statut": "en cours de deploiement",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2019-07-29"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 5
+ },
+ {
+  "strate": "statut_raccordable demande",
+  "ban_id": "17308_0305_00010",
+  "label": "10 Rue du Moulin des Chaumes 17620 Saint-Agnant",
+  "lon": -0.949614,
+  "lat": 45.874019,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17308_0305_00010",
+   "label": "10 Rue du Moulin des Chaumes 17620 Saint-Agnant",
+   "score": 0.957,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "raccordable demande",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17308/X/016M",
+     "type": "PA",
+     "num": "",
+     "statut": "raccordable demande",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2017-11-02"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "statut_raccordable demande",
+  "ban_id": "17168_0260_00002_b",
+  "label": "2 b Boulevard de Chaterny 17450 Fouras",
+  "lon": -1.086713,
+  "lat": 45.992965,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17168_0260_00002_b",
+   "label": "2b Boulevard de Chaterny 17450 Fouras",
+   "score": 0.799,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "raccordable demande",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17168/X/03EO",
+     "type": "PA",
+     "num": "",
+     "statut": "raccordable demande",
+     "logloc": "2",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2021-04-16"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 11
+ },
+ {
+  "strate": "statut_raccordable demande",
+  "ban_id": "17415_0510_00010",
+  "label": "10 Place Blair 17100 Saintes",
+  "lon": -0.635587,
+  "lat": 45.743171,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_0510_00010",
+   "label": "10 Place Blair 17100 Saintes",
+   "score": 0.965,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "raccordable demande",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/02RL",
+     "type": "IM",
+     "num": "",
+     "statut": "raccordable demande",
+     "logloc": "4",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-05-11"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "statut_rad en cours de deploiement",
+  "ban_id": "17415_1052_00035",
+  "label": "35 Rue de Courbiac 17100 Saintes",
+  "lon": -0.628948,
+  "lat": 45.755187,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_1052_00035",
+   "label": "35 Rue de Courbiac 17100 Saintes",
+   "score": 0.968,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "rad en cours de deploiement",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/03EI",
+     "type": "PA",
+     "num": "",
+     "statut": "rad en cours de deploiement",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2018-06-29"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "statut_rad en cours de deploiement",
+  "ban_id": "17415_1623_00026",
+  "label": "26 Route des Gonds 17100 Saintes",
+  "lon": -0.631105,
+  "lat": 45.719026,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_1623_00026",
+   "label": "26 Route des Gonds 17100 Saintes",
+   "score": 0.966,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "cle BAN",
+   "statut": "rad en cours de deploiement",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/09DJ",
+     "type": "PA",
+     "num": "",
+     "statut": "rad en cours de deploiement",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2019-11-04"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "ambigu",
+  "ban_id": "17415_3692_00001",
+  "label": "1 Rue des Vacherons 17100 Saintes",
+  "lon": -0.662029,
+  "lat": 45.757126,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_3692_00001",
+   "label": "1 Rue des Vacherons 17100 Saintes",
+   "score": 0.965,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "ambigu",
+   "rung": "cle BAN",
+   "statut": [
+    "cible",
+    "deploye"
+   ],
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/07CA",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2018-05-31"
+    },
+    {
+     "imb_code": "IMB/17415/X/09MP",
+     "type": "IM",
+     "num": "1",
+     "statut": "cible",
+     "logloc": "3",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2018-05-31"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "ambigu",
+  "ban_id": "17208_0070_00017",
+  "label": "17 Rue du Moulin 17230 Longèves",
+  "lon": -0.998521,
+  "lat": 46.232485,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17208_0070_00017",
+   "label": "17 Rue du Moulin 17230 Longèves",
+   "score": 0.949,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "ambigu",
+   "rung": "cle BAN",
+   "statut": [
+    "cible",
+    "deploye"
+   ],
+   "immeubles": [
+    {
+     "imb_code": "IMB/17208/X/00RX",
+     "type": "PA",
+     "num": "AD 86",
+     "statut": "cible",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2021-06-04"
+    },
+    {
+     "imb_code": "IMB/17208/X/00RO",
+     "type": "PA",
+     "num": "AD 0119",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2021-06-04"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "ambigu",
+  "ban_id": "17385_9eyuk6_00003",
+  "label": "3 Allée de l’Albatros 17310 Saint-Pierre-d'Oléron",
+  "lon": -1.29263,
+  "lat": 45.918775,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17385_9eyuk6_00003",
+   "label": "3 Allée de l’Albatros 17310 Saint-Pierre-d'Oléron",
+   "score": 0.959,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "ambigu",
+   "rung": "cle BAN",
+   "statut": [
+    "cible",
+    "deploye"
+   ],
+   "immeubles": [
+    {
+     "imb_code": "IMB/17385/X/0214",
+     "type": "PA",
+     "num": "",
+     "statut": "cible",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-02-25"
+    },
+    {
+     "imb_code": "IMB/17385/X/020D",
+     "type": "PA",
+     "num": "M1",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-25"
+    }
+   ],
+   "n_immeubles": 2
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "ambigu",
+  "ban_id": "17091_0062_00004",
+  "label": "4 Impasse des Maurines 17230 Charron",
+  "lon": -1.099684,
+  "lat": 46.302688,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17091_0062_00004",
+   "label": "4 Impasse des Maurines 17230 Charron",
+   "score": 0.95,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "ambigu",
+   "rung": "cle BAN",
+   "statut": [
+    "deploye",
+    "signe"
+   ],
+   "immeubles": [
+    {
+     "imb_code": "IMB/17091/X/003F",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2020-02-26"
+    },
+    {
+     "imb_code": "IMB/17091/X/01VC",
+     "type": "PA",
+     "num": "LOT 13",
+     "statut": "signe",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-02-26"
+    },
+    {
+     "imb_code": "IMB/17091/X/01VS",
+     "type": "PA",
+     "num": "LOT 29",
+     "statut": "signe",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-02-26"
+    },
+    {
+     "imb_code": "IMB/17091/X/01VT",
+     "type": "PA",
+     "num": "LOT 30",
+     "statut": "signe",
+     "logloc": "1",
+     "operateurs": [],
+     "pm": "deploye",
+     "date_mad": "2020-02-26"
+    }
+   ],
+   "n_immeubles": 4
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "indisponible",
+  "ban_id": "17159_0346_00004",
+  "label": "4 Route de Pons-Gagnadou 17800 Fléac-sur-Seugne",
+  "lon": -0.533831,
+  "lat": 45.545492,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17159_0346_00004",
+   "label": "4 Route de Pons-Gagnadou 17800 Fléac-sur-Seugne",
+   "score": 0.936,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "indisponible",
+   "rung": "cle BAN",
+   "motif": "aucun immeuble fibre recense"
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "indisponible",
+  "ban_id": "17140_0998_00098",
+  "label": "98 Allee des Sternes 17550 Dolus-d'Oléron",
+  "lon": -1.286916,
+  "lat": 45.910584,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17140_0998_00098",
+   "label": "98 Allee des Sternes 17550 Dolus-d'Oléron",
+   "score": 0.951,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "indisponible",
+   "rung": "cle BAN",
+   "motif": "aucun immeuble fibre recense"
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "indisponible",
+  "ban_id": "17244_0260_00011",
+  "label": "11 Rue des 3 Moulins 17260 Montpellier-de-Médillan",
+  "lon": -0.774732,
+  "lat": 45.634162,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17244_0260_00011",
+   "label": "11 Rue des 3 Moulins 17260 Montpellier-de-Médillan",
+   "score": 0.942,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "indisponible",
+   "rung": "cle BAN",
+   "motif": "aucun immeuble fibre recense"
+  },
+  "rnb": 5
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17351_0397_00019",
+  "label": "19 Route de la Puisade 17320 Saint-Just-Luzac",
+  "lon": -1.015452,
+  "lat": 45.775123,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17351_0397_00019",
+   "label": "19 Route de la Puisade 17320 Saint-Just-Luzac",
+   "score": 0.952,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17485_0316_00003",
+  "label": "3 Rue du Calvaire 17370 Le Grand-Village-Plage",
+  "lon": -1.250846,
+  "lat": 45.879069,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17485_0316_00003",
+   "label": "3 Rue du Calvaire 17370 Le Grand-Village-Plage",
+   "score": 0.949,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17385_0159_00041",
+  "label": "41 Avenue de Bonnemie 17310 Saint-Pierre-d'Oléron",
+  "lon": -1.318077,
+  "lat": 45.943695,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17385_0159_00041",
+   "label": "41 Avenue de Bonnemie 17310 Saint-Pierre-d'Oléron",
+   "score": 0.963,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 6
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17142_0218_00011",
+  "label": "11 Rue des Fontaines 17139 Dompierre-sur-Mer",
+  "lon": -1.064243,
+  "lat": 46.190117,
+  "type_position": "bâtiment",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17142_0218_00011",
+   "label": "11 Rue des Fontaines 17139 Dompierre-sur-Mer",
+   "score": 0.962,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17333_0825_00068",
+  "label": "68 Avenue du Lieutenant Colonel Tourtet 17110 Saint-Georges-de-Didonne",
+  "lon": -0.989146,
+  "lat": 45.606046,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17333_0825_00068",
+   "label": "68 Avenue du Lieutenant Colonel Tourtet 17110 Saint-Georges-de-Didonne",
+   "score": 0.967,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 2
+ },
+ {
+  "strate": "impossible",
+  "ban_id": "17409_0031_00015",
+  "label": "15 Rue de l'Océan 17200 Saint-Sulpice-de-Royan",
+  "lon": -1.007585,
+  "lat": 45.67002,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17409_0031_00015",
+   "label": "15 Rue de l'Océan 17200 Saint-Sulpice-de-Royan",
+   "score": 0.954,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "impossible_bis",
+  "ban_id": "17303_0092_00022_c",
+  "label": "22 c Rue de l'Oreau 17170 La Ronde",
+  "lon": -0.806163,
+  "lat": 46.294137,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17303_0092_00022_c",
+   "label": "22c Rue de l'Oreau 17170 La Ronde",
+   "score": 0.79,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "impossible_bis",
+  "ban_id": "17421_0700_00007_ter",
+  "label": "7 ter Rue Eugène Mousnier 17600 Saujon",
+  "lon": -0.925255,
+  "lat": 45.672712,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17421_0700_00007_ter",
+   "label": "7ter Rue Eugène Mousnier 17600 Saujon",
+   "score": 0.808,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "impossible_bis",
+  "ban_id": "17299_0810_00049_bis",
+  "label": "49 bis Avenue Leon Gambetta 17300 Rochefort",
+  "lon": -0.969254,
+  "lat": 45.939381,
+  "type_position": "segment",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17299_0810_00049_bis",
+   "label": "49bis Avenue Leon Gambetta 17300 Rochefort",
+   "score": 0.826,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "impossible_nouveau",
+  "ban_id": "17003_npth3o_00030",
+  "label": "30 Fief des Dames 17290 Aigrefeuille-d'Aunis",
+  "lon": -0.927765,
+  "lat": 46.120279,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17003_npth3o_00030",
+   "label": "30 Fief des Dames 17290 Aigrefeuille-d'Aunis",
+   "score": 0.96,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "impossible_nouveau",
+  "ban_id": "17362_a017_00004",
+  "label": "4 Lieu Dit l’Entre Deux 17150 Saint-Martial-de-Mirambeau",
+  "lon": -0.580386,
+  "lat": 45.375629,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17362_a017_00004",
+   "label": "4 Lieu Dit l’Entre Deux 17150 Saint-Martial-de-Mirambeau",
+   "score": 0.937,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "impossible_nouveau",
+  "ban_id": "17449_p8b1gj_00005",
+  "label": "5 le Seguin 17430 Tonnay-Charente",
+  "lon": -0.859804,
+  "lat": 45.958082,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17449_p8b1gj_00005",
+   "label": "5 le Seguin 17430 Tonnay-Charente",
+   "score": 0.95,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "impossible",
+   "rung": null
+  },
+  "rnb": 1
+ },
+ {
+  "strate": "libelle",
+  "ban_id": "17415_2722_00028_c",
+  "label": "28 c Rue du Petit Coudret 17100 Saintes",
+  "lon": -0.610323,
+  "lat": 45.739327,
+  "type_position": "segment",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17415_2722_00028_c",
+   "label": "28c Rue du Petit Coudret 17100 Saintes",
+   "score": 0.81,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "libelle identique",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "IMB/17415/X/09ZN",
+     "type": "PA",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "1",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2016-10-20"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 0
+ },
+ {
+  "strate": "libelle",
+  "ban_id": "17300_1120_00001",
+  "label": "1 Rue du Bourbonnais 17000 La Rochelle",
+  "lon": -1.184788,
+  "lat": 46.157916,
+  "type_position": "entrée",
+  "nom_ld": "",
+  "geocodeur": {
+   "id": "17300_1120_00001",
+   "label": "1 Rue du Bourbonnais 17000 La Rochelle",
+   "score": 0.965,
+   "type": "housenumber"
+  },
+  "meme_cle": true,
+  "poc": {
+   "rattachement": "fiable",
+   "rung": "libelle identique",
+   "statut": "deploye",
+   "immeubles": [
+    {
+     "imb_code": "ID-1730000000C9",
+     "type": "IM",
+     "num": "",
+     "statut": "deploye",
+     "logloc": "8",
+     "operateurs": [
+      "BOUY",
+      "FREE",
+      "FRTE",
+      "MILK",
+      "SFR0"
+     ],
+     "pm": "deploye",
+     "date_mad": "2016-10-31"
+    }
+   ],
+   "n_immeubles": 1
+  },
+  "rnb": 1
+ }
+]
