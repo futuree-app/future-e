@@ -111,10 +111,10 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 
 ## Recette
 
-- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 70 tests (géométrie synthétique : contact, 1 cm, liseré,
+- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 71 tests (géométrie synthétique : contact, 1 cm, liseré,
   coupe de tuile, cellule pleine, parcelle invalide, voisine, rue, immense ; départements ; pannes et versions ;
   textes rendus et interdits ; lecteur Storage ; 24 adresses réelles contre un oracle en entiers). Suite complète,
-  seule, `--test-concurrency=1` : `main` 3 746 → tête 3 816 (+70), 0 échec. `tsc` propre ; ESLint identique à `main`
+  seule, `--test-concurrency=1` : après réintégration de `main` (#110), `main` 3 754 → tête 3 825 (+71), 0 échec. `tsc` propre ; ESLint identique à `main`
   (6 erreurs et 8 avertissements préexistants ; 0 erreur dans les fichiers de la PR).
 - **Rendu** : banc `/dev/fut149?vue=section|autour|logement&cas=…` capturé par Chrome sans interface
   (`scripts/research/fut149-captures.mjs`) : 16 cas × 2 largeurs, **aucun défilement horizontal**, bloc à 814 px
@@ -145,6 +145,9 @@ Géométrie, tuiles et états inchangés : seuls les textes et leurs tests chang
    sur la section seule.
 5. **Bloc Autour** : grammaire historique de l'écran qui l'accueille (exception déclarée au cliquet du Relevé,
    comme FUT-146), à migrer avec FUT-118.
-6. **PR #108 (FUT-156)** touche aussi `route.ts`, `LogementModule.tsx`, `logement-report-types.ts` et
-   `logement-report-version.ts` : conflits additifs attendus (une ligne par source), à résoudre à la fusion de la
-   seconde.
+6. **PR #108 (FUT-156)** : fusion d'essai faite le 28/10/2026 (tête 56e3369e). Quatre fichiers en conflit, tous
+   additifs (une source de chaque côté) : `route.ts` (import, promesse, déstructuration `…, bruitAerien,
+   debroussaillement, fibre]`, champ du rapport), `LogementModule.tsx` (libellé de source),
+   `logement-report-types.ts` (deux champs : garder le `/**` qui ouvre le commentaire de la fibre),
+   `logement-report-version.ts` (deux sources absentes, deux règles d'actualisation). Garder les deux côtés :
+   `tsc` propre, suite complète 3 882 / 3 882.
