@@ -87,7 +87,7 @@ exactement la règle des 150 m).
 |---|---|---|
 | Objets par millésime | 1 306 | 34 577 |
 | Taille totale | 74,2 Mo | 75,6 Mo |
-| Envoi d'un millésime | 31 s (mesuré, France) | ≈ 16 min (12,7 s pour les 462 communes du 17) |
+| Envoi d'un millésime | 31 s mesurées avant ajout des relectures SHA-256 (durée complète à remesurer) | ≈ 16 min (12,7 s pour les 462 communes du 17) |
 | Lu par analyse | médiane 51 Ko, p95 111 Ko, max 310 Ko (77 Ko en moyenne sur les 55 cas) | ≈ 2 Ko |
 | Latence d'une lecture (Paris → eu-west-2) | médiane 81 ms, p90 253 ms ; 692 ms à froid (pointeur + manifeste + lot) | médiane 197 ms |
 | Commune absente | réponse (« non rattachée ») | indistinguable d'un fichier manquant |
@@ -138,9 +138,19 @@ Il n'existe pas de collecte plus légère : aucune API documentée, et `Immeuble
 4. **Envoyer**, sans effet sur l'application : `publier.mjs envoyer --cible production --confirmer-production --source <sortie>/<millésime>`
    (variables `FIBRE_SUPABASE_URL`, `FIBRE_SUPABASE_CLE`, jamais dans le dépôt).
 5. **Basculer** : `publier.mjs basculer --cible production --confirmer-production --millesime <nouveau>`
-   (vérifie chaque lot du manifeste avant d'écrire le pointeur ; l'application le lit sous dix minutes).
+   (relit chaque lot et vérifie sa taille ET son SHA-256 avant d'écrire le pointeur ; l'application le lit sous dix minutes).
 6. **Retour arrière** : `basculer --millesime <précédent>`. **Purge** : `purger --garder 2`.
 7. Les dossiers déjà écrits gardent leur millésime ; une actualisation demandée par le lecteur prend le nouveau.
+
+**Intégrité (revue indépendante)** : le manifeste porte désormais les tailles et SHA-256 des lots calculés à
+la construction. `envoyer` compare chaque fichier local à ces empreintes, puis relit et vérifie les objets
+distants, y compris ceux de même taille lors d'une reprise. Une discordance bloque la publication du
+manifeste ; aucun lot existant n'est écrasé. `basculer` refuse un manifeste sans empreintes et ne touche pas
+au pointeur si un seul lot est absent ou altéré. Pour l'index T2 déjà construit, `envoyer` récupère les
+empreintes des bilans `_departements/*.json` existants : **aucun recalcul des 26 millions d'adresses**.
+Les relectures ajoutent environ 74,2 Mo à l'envoi et 74,2 Mo à la bascule ; ce coût ponctuel et leur durée
+s'ajoutent aux mesures du pilote initial. Contre-épreuve : objet altéré de même taille, refus en reprise
+et en bascule (`scripts/fibre-adresse/publication.test.mjs`).
 
 ## Ce qui n'est pas couvert
 

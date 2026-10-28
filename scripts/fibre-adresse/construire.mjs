@@ -144,6 +144,7 @@ async function main() {
     bilans[b.departement] = b;
   }
   const manifeste = { format: FORMAT_INDEX_FIBRE, millesime, donneesAu, lots: Object.fromEntries(Object.entries(bilans).sort().map(([d, b]) => [d, b.lots.length])) };
+  manifeste.empreintes = Object.fromEntries(Object.values(bilans).flatMap((b) => b.lots.map((l) => [l.chemin, { octets: l.octets, sha256: l.sha256 }])));
   await fsp.writeFile(path.join(sortie, "manifest.json"), JSON.stringify(manifeste));
   const rapport = {
     millesime, donneesAu, construitLe: new Date().toISOString(), secondes: Math.round((Date.now() - t0) / 1000),

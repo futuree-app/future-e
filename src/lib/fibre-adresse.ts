@@ -164,6 +164,8 @@ export type ManifesteFibre = {
   donneesAu: string;
   /** Nombre de lots par département. Un département absent n'est pas couvert par ce millésime. */
   lots: Record<string, number>;
+  /** Empreintes des octets compressés ; obligatoires pour publier/basculer, facultatives pour lire un ancien index. */
+  empreintes?: Record<string, { octets: number; sha256: string }>;
 };
 
 export type PointeurFibre = { format: typeof FORMAT_INDEX_FIBRE; millesime: string };

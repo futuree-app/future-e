@@ -40,6 +40,20 @@ async function construire({ immeubles, actuel, adresses, etats, referentiel = ne
 }
 
 describe("construireDepartement", () => {
+  test("Corse : BAN en minuscules, commune normalisée et repli strict par libellé en 2A et 2B", async () => {
+    for (const insee of ["2A001", "2B002"]) {
+      const cle = `${insee.toLowerCase()}_voie_00003_bis`;
+      const { communes, stats } = await construire({
+        immeubles: [imb({ id: "1", num: "3", rep: "BIS", voie: "Rue X" }).replaceAll("17300", insee)],
+        actuel: [elig("1", "A"), elig("1", "A"), elig("1", "B")],
+        adresses: [ban(cle, { num: "3", rep: "bis" }).replaceAll("17300", insee)],
+        etats: { 1: "deploye" },
+      });
+      assert.equal(communes[insee].voie_00003_bis, "~D2");
+      assert.equal(stats.parRattachement.libelle, 1);
+      assert.equal(stats.parRattachement.cle_ban, 0);
+    }
+  });
   test("les lignes FO d'un même opérateur (débits, offres) ne comptent qu'une fois", async () => {
     const { communes, stats } = await construire({
       immeubles: [imb({ id: "1", cle: "17300_0001_00001" })],

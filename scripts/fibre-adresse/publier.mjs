@@ -10,7 +10,7 @@
  *
  * ── LA PUBLICATION EST ATOMIQUE ──────────────────────────────────────────────────────────────────────
  *  1. `envoyer` dépose les lots puis le manifeste sous un préfixe NEUF : l'application ne les voit pas.
- *  2. `basculer` vérifie que chaque lot du manifeste est en ligne, à la taille attendue, puis réécrit le
+ *  2. `basculer` vérifie que chaque lot du manifeste est en ligne, avec la taille et le SHA-256 attendus, puis réécrit le
  *     pointeur. C'est la seule écriture que l'application voit ; elle la lit dans les dix minutes.
  *  3. `basculer --millesime <ancien>` est le retour arrière : l'ancien préfixe est toujours là.
  *  4. `purger` efface les millésimes ni courants ni parmi les `--garder` plus récents (2 par défaut).
@@ -29,6 +29,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { FORMAT_INDEX_FIBRE, manifesteValide, cheminLot } from "../../src/lib/fibre-adresse.ts";
 
 export const PROJETS = { test: "atvknbgahcuovcyqapfx", production: "xkewgsccadjmondzmjxj" };
@@ -95,34 +96,68 @@ async function parallele(elements, f) {
   await Promise.all(Array.from({ length: PARALLELE }, async () => { while (i < elements.length) await f(elements[i++]); }));
 }
 
-async function envoyer(c, source) {
-  const manifeste = JSON.parse(await fs.readFile(path.join(source, "manifest.json"), "utf8"));
+const sha256 = (b) => createHash("sha256").update(b).digest("hex");
+const cheminsLots = (m) => Object.entries(m.lots).flatMap(([dep, n]) => Array.from({ length: n }, (_, l) => cheminLot(m.millesime, dep, l)));
+
+/** Les empreintes viennent de la construction, pas des objets distants à vérifier. */
+function verifierEmpreintes(m) {
+  const lots = cheminsLots(m);
+  if (!m.empreintes || Object.keys(m.empreintes).length !== lots.length || lots.some((ch) => {
+    const e = m.empreintes[ch];
+    return !e || !Number.isSafeInteger(e.octets) || e.octets <= 0 || !/^[a-f0-9]{64}$/.test(e.sha256 ?? "");
+  })) throw new Error("intégrité : empreintes absentes ou incomplètes ; republier depuis les bilans de construction");
+  return lots;
+}
+
+function verifierOctets(b, attendu, chemin) {
+  if (!b || b.length !== attendu.octets || sha256(b) !== attendu.sha256) {
+    throw new Error(`intégrité : ${chemin}, taille ou SHA-256 différent de la construction`);
+  }
+}
+
+/** Compatibilité des index déjà construits : récupère leurs SHA-256 existants, sans recalcul des adresses. */
+async function avecEmpreintes(m, source) {
+  if (m.empreintes) return m;
+  const empreintes = {};
+  for (const dep of Object.keys(m.lots)) {
+    if (!/^(?:[0-9]{2,3}|2[AB])$/.test(dep)) throw new Error("département invalide");
+    const b = JSON.parse(await fs.readFile(path.join(source, "_departements", `${dep}.json`), "utf8"));
+    if (b.millesime !== m.millesime || b.departement !== dep) throw new Error(`intégrité : bilan ${dep} incompatible`);
+    for (const l of b.lots) empreintes[l.chemin] = { octets: l.octets, sha256: l.sha256 };
+  }
+  return { ...m, empreintes };
+}
+
+export async function envoyer(c, source) {
+  let manifeste = JSON.parse(await fs.readFile(path.join(source, "manifest.json"), "utf8"));
   if (!manifesteValide(manifeste)) throw new Error("manifeste local illisible");
-  const deja = new Map((await c.lister(`${manifeste.millesime}/`)).map((o) => [o.nom, o.octets]));
-  const lots = Object.entries(manifeste.lots).flatMap(([dep, n]) => Array.from({ length: n }, (_, l) => cheminLot(manifeste.millesime, dep, l)));
+  manifeste = await avecEmpreintes(manifeste, source);
+  const lots = verifierEmpreintes(manifeste);
+  const deja = new Set((await c.lister(`${manifeste.millesime}/`)).map((o) => o.nom));
   let envoyes = 0, octets = 0;
   const t0 = Date.now();
   await parallele(lots, async (chemin) => {
     const b = await fs.readFile(path.join(source, "..", chemin));
+    verifierOctets(b, manifeste.empreintes[chemin], chemin);
     octets += b.length;
-    // Reprise : un lot déjà en ligne à la même taille n'est pas renvoyé (les lots sont immuables).
-    if (deja.get(path.basename(chemin)) === b.length) return;
-    await c.deposer(chemin, b, "application/gzip");
-    envoyes++;
+    if (!deja.has(path.basename(chemin))) {
+      await c.deposer(chemin, b, "application/gzip");
+      envoyes++;
+    }
+    // Reprise ET nouvel envoi : relire les octets, jamais se fier au nom ou à la taille seule.
+    verifierOctets(await c.lire(chemin), manifeste.empreintes[chemin], chemin);
   });
   await c.deposer(`${manifeste.millesime}/manifest.json`, Buffer.from(JSON.stringify(manifeste)), "application/json", true);
   console.log(JSON.stringify({ millesime: manifeste.millesime, lots: lots.length, envoyes, octets, secondes: Math.round((Date.now() - t0) / 1000) }));
 }
 
-async function basculer(c, millesime) {
+export async function basculer(c, millesime) {
   const brut = await c.lire(`${millesime}/manifest.json`);
   if (!brut) throw new Error(`${millesime} : aucun manifeste en ligne`);
   const m = JSON.parse(brut.toString("utf8"));
   if (!manifesteValide(m) || m.millesime !== millesime) throw new Error(`${millesime} : manifeste invalide`);
-  const enLigne = new Set((await c.lister(`${millesime}/`)).map((o) => o.nom));
-  const manquants = Object.entries(m.lots).flatMap(([dep, n]) => Array.from({ length: n }, (_, l) => cheminLot(millesime, dep, l)))
-    .filter((ch) => !enLigne.has(path.basename(ch)));
-  if (manquants.length) throw new Error(`${millesime} : ${manquants.length} lot(s) manquant(s), ex. ${manquants.slice(0, 3).join(", ")}`);
+  const lots = verifierEmpreintes(m);
+  await parallele(lots, async (chemin) => verifierOctets(await c.lire(chemin), m.empreintes[chemin], chemin));
   const avant = await c.lire("courant.json");
   await c.deposer("courant.json", Buffer.from(JSON.stringify({ format: FORMAT_INDEX_FIBRE, millesime })), "application/json", true);
   console.log(`pointeur : ${avant ? JSON.parse(avant.toString("utf8")).millesime : "(aucun)"} -> ${millesime}`);
