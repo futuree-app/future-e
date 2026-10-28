@@ -2090,7 +2090,11 @@ function buildCompromisCandidates(
     // Comparatif seulement si la dimension a un sens relatif (COMPROMIS_NEG) ET qu'un
     // leader se détache vraiment (écart ≥ seuil) : « moins accessibles qu'à X ». Sinon
     // formulation absolue télégraphique (REASON_NEG), honnête sans inventer de divergence.
-    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP);
+    // FUT-154 : « se détache » se lit aussi sur les paliers de la matrice. Une voisine au même palier n'est pas
+    // une référence : Anglet (industrie 52) lisait « plus présents qu'à Pau » (65) quand le Pack les met à égalité,
+    // Aubagne (chaleur 4) « plus marquée qu'à Marseille » (20) quand les deux ont des étés chauds.
+    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
+      && bandIndex(leader.score) < bandIndex(self));
     // FUT-151 (revue) : un simple retrait relatif ne reçoit la formulation ABSOLUE (« sols exposés à la
     // sécheresse ») que si la commune est réellement faible sur ce critère. Sinon, sans comparatif possible,
     // il n'est pas un compromis.
@@ -2353,8 +2357,14 @@ export function villeEtudianteLocale(c: IndexCommune): boolean {
 }
 
 // Les compromis absolus : REASON_NEG, sauf la vie étudiante, dite au niveau et à l'échelle mesurés.
+// FUT-154 : au palier intermédiaire de la matrice (34 à 49), le critère est en deçà du projet sans être mauvais. Le
+// compromis reprend alors le palier que le Pack affiche (REASON_NEG_INTERMEDIAIRE) : Paris, sécheresse 40, lisait
+// « sols exposés à la sécheresse » quand la matrice dit « Exposition modérée ». REASON_NEG reste le palier défavorable.
 export function raisonNeg(key: PreferenceKey, c: IndexCommune | null | undefined): string {
-  return key === "vie_etudiante" && c ? presenceEtudianteDuScore(c) : REASON_NEG[key];
+  if (key === "vie_etudiante" && c) return presenceEtudianteDuScore(c);
+  const s = c ? subScore(key, c) : null;
+  const intermediaire = REASON_NEG_INTERMEDIAIRE[key];
+  return intermediaire && s != null && bandIndex(s) === 1 ? intermediaire : REASON_NEG[key];
 }
 
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
@@ -2422,8 +2432,11 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
       ? "vaste bassin d'emploi diversifié"
       : "bassin d'emploi diversifié",
 };
+// FUT-154 : sous 34, la formulation défavorable ne dit que ce que la donnée établit. « chaleur en hausse » annonçait une
+// tendance que le sous-score (un rang de chaleur estivale) ne mesure pas ; « zone sous-dotée en médecins » empruntait le
+// zonage officiel des ARS quand la donnée est un rang d'accessibilité (APL). Les deux reprennent le palier du Pack.
 const REASON_NEG: Record<PreferenceKey, string> = {
-  faible_chaleur: "chaleur en hausse",
+  faible_chaleur: "étés chauds",
   douceur_climat: "hivers parmi les moins doux",
   ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
@@ -2434,7 +2447,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   cadre_calme: "plus dense que recherché",
   eviter_isolement: "bassin de vie réduit, plus isolé",
   air_sain: "air plus chargé en particules",
-  acces_soins: "zone sous-dotée en médecins",
+  acces_soins: "accès aux soins limité",
   acces_services: "commune hors pôle de services",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
@@ -2452,6 +2465,36 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   croissance_demographique: "population en baisse",
   calme_sonore: "environnement assez maillé d'infrastructures bruyantes",
   faible_exposition_industrielle: "à proximité de sites industriels à risque",
+};
+// FUT-154 : le palier intermédiaire de chaque dimension de la matrice (DIMENSIONS.paliers[1]), rendu lisible hors de
+// sa ligne (« Exposition modérée » devient « exposition modérée à la sécheresse ») et, quand il sonne comme un avantage,
+// complété de ce qui manque (« étés tempérés, plutôt que frais »). `fut154-retrait-relatif.test.ts`
+// vérifie qu'il reprend le palier du Pack. Sans dimension bandée (taille, éloignement de la mer, inondation) : aucun.
+export const REASON_NEG_INTERMEDIAIRE: Partial<Record<PreferenceKey, string>> = {
+  faible_chaleur: "étés tempérés, plutôt que frais",
+  douceur_climat: "hivers en situation intermédiaire",
+  ensoleillement_recherche: "moyennement ensoleillé",
+  faible_risque_feu: "nombre intermédiaire de jours propices aux feux",
+  faible_precip_extremes: "pluies intenses modérées",
+  faible_secheresse: "exposition modérée à la sécheresse",
+  air_sain: "qualité de l'air moyenne",
+  calme_sonore: "exposition sonore modérée",
+  faible_exposition_industrielle: "présence industrielle modérée",
+  faible_pression_agricole: "agriculture intensive modérée",
+  nature: "nature présente, sans abonder",
+  proximite_mer: "rivage marin à distance",
+  cadre_calme: "cadre intermédiaire",
+  faible_dependance_auto: "usage intermédiaire de la voiture pour aller travailler",
+  acces_transports: "gare accessible, desserte limitée",
+  mobilite_quotidienne: "quelques arrêts près du centre",
+  acces_soins: "accès intermédiaire aux soins",
+  acces_services: "centre de proximité, hors des pôles de services",
+  acces_ecoles: "accès intermédiaire aux collèges et lycées",
+  acces_culture: "offre culturelle intermédiaire",
+  eviter_isolement: "bassin de proximité, plutôt qu'étendu",
+  viabilite_emploi: "bassin d'emploi intermédiaire",
+  vie_locale: "vie locale intermédiaire",
+  croissance_demographique: "population stable, sans gagner d'habitants",
 };
 // ── LE SCORE DE PRÉFÉRENCES D'UNE COMMUNE (FUT-129) ─────────────────────────────────────────────
 // La priorité « un faible risque d'inondation » n'a plus de sous-score : aucune donnée communale ne permet

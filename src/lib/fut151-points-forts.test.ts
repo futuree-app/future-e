@@ -278,9 +278,9 @@ test("découverte : Breil-sur-Roya ne loue plus le calme que son compromis lui r
   assert.doesNotMatch(r.compromis, /bruyant/, "calme 95/100 : pas un compromis");
 });
 
-test("trait distinctif : Vaison-la-Romaine n'a plus « les étés les plus supportables » à côté de « chaleur en hausse »", async () => {
+test("trait distinctif : Vaison-la-Romaine n'a plus « les étés les plus supportables » à côté de « étés chauds »", async () => {
   const r = await carte(["84"], [{ key: "acces_soins", weight: 3 }, { key: "calme_sonore", weight: 2 }, { key: "air_sain", weight: 1 }], "Vaison-la-Romaine");
-  assert.equal(r.compromis, "En échange, chaleur en hausse.");
+  assert.equal(r.compromis, "En échange, étés chauds."); // FUT-154 : « chaleur en hausse » jusque-là
   assert.doesNotMatch(r.distinctive ?? "", /étés/);
 });
 
