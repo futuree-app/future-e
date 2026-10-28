@@ -201,6 +201,10 @@ export type MatchResult = {
   // FUT-129 : les faits d'inondation de la commune, quand le lecteur a déclaré cette priorité. Une ligne
   // pour la carte, et les phrases complètes pour la synthèse. Jamais un niveau de risque.
   inondation?: { ligne: string; historique: string; plans: string | null; sinistresFrequents: boolean };
+  // FUT-148 : la part des locaux raccordables à la fibre (Arcep), quand le lecteur a parlé de connexion ou de
+  // télétravail. Posée par la route `match` APRÈS le classement : aucun score, palier ni ordre ne la lit, et la
+  // synthèse rédigée ne la reçoit pas.
+  fibre?: { ligne: string };
   // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
   // géométrie (l'isochrone), et l'itinéraire n'a pas tranché pour elle. Elle est proposée (l'exclure
   // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais

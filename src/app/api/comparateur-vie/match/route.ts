@@ -8,6 +8,8 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { matchProjects, type ParsedProject } from "@/lib/comparateur-vie";
+import { getFibreCommunes } from "@/lib/fibre-commune";
+import { ligneComparateur, projetEvoqueLaConnexion } from "@/lib/fibre-texte";
 
 export const runtime = "nodejs";
 
@@ -33,7 +35,14 @@ export async function POST(request: NextRequest) {
     // au top 3 (la CompareView gratuite n'affiche que le trio).
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { comparaisonComplete: _cc, pistes: _p, ...safe } = outcome;
-    return NextResponse.json({ ...safe, results: outcome.results.slice(0, 3) });
+    const results = outcome.results.slice(0, 3);
+    // FUT-148 : LA FIBRE, UN FAIT POSÉ APRÈS LE CLASSEMENT. Seulement pour un lecteur qui en a parlé, en ses
+    // mots (`horsMesure`). Un fichier embarqué, aucun appel externe : la route reste instantanée.
+    if (projetEvoqueLaConnexion(parsed)) {
+      const fibre = await getFibreCommunes(results.map((r) => r.insee));
+      return NextResponse.json({ ...safe, results: results.map((r) => ({ ...r, fibre: { ligne: ligneComparateur(fibre[r.insee] ?? null) } })) });
+    }
+    return NextResponse.json({ ...safe, results });
   } catch (error) {
     console.error("[comparateur-vie/match]", error);
     return NextResponse.json({ error: "Erreur lors du calcul des territoires." }, { status: 500 });

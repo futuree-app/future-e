@@ -46,6 +46,8 @@ export type CardDetail = {
   note?: string;
   /** Intitulé de l'encart (défaut « À savoir »). */
   noteLabel?: string;
+  /** Un lien vers une vérification officielle, sous l'encart (FUT-148 : la carte fibre de l'Arcep). */
+  lien?: { href: string; label: string };
 };
 
 export function MetricDrawer({
@@ -165,6 +167,12 @@ export function MetricDrawer({
             <p className="metric-drawer-note-label">{detail.noteLabel ?? "À savoir"}</p>
             <p className="metric-drawer-note-text">{detail.note}</p>
           </div>
+        )}
+
+        {detail.lien && (
+          <a className="metric-drawer-lien" href={detail.lien.href} target="_blank" rel="noopener noreferrer">
+            {detail.lien.label} <span aria-hidden>↗</span>
+          </a>
         )}
 
         {detail.sources && (
@@ -296,6 +304,11 @@ export function MetricDrawer({
           letter-spacing: 0.14em; text-transform: uppercase; color: #6b7388; margin: 0 0 7px;
         }
         .metric-drawer-note-text { font-size: 13px; line-height: 1.6; color: #9ba3b4; margin: 0; }
+        .metric-drawer-lien {
+          display: inline-flex; align-items: center; gap: 6px; margin: 0 0 22px;
+          font-size: 14px; color: var(--blue); text-decoration: underline; text-underline-offset: 3px;
+        }
+        .metric-drawer-lien:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
         .metric-drawer-ask {
           margin-top: 8px; width: 100%;
           display: inline-flex; align-items: center; justify-content: center; gap: 8px;

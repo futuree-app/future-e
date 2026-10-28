@@ -13,6 +13,7 @@ import type { MaterialityTier, RunResult, RuleEvaluation, UncoveredConstraint } 
 import type { UserProject, CriterionRef } from "../user-project.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, hardConstraintLabel } from "./project-view.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
+import { termeDeConnexion } from "../fibre-texte.ts";
 import { hcRestreint, instancesDe } from "./effective-value.ts";
 import { isConfirmed } from "./conditions.ts";
 import { criterionCapability, type Capability, type CapabilityReason, type EvaluationGrain } from "./capability.ts";
@@ -287,10 +288,10 @@ export function buildCriteriaRegistry(
 //                    quartier sûr, mairie dynamique, mentalité prêtée aux habitants) ;
 //   non_classee      FILET TECHNIQUE : aucune raison valide n'a été donnée ; la lecture ne l'invente pas.
 // La raison vient du PARSEUR (le `kind` décrit la formulation, pas la raison : « pas trop de touristes » et « bonne
-// mentalité » sont tous deux « affectif »). Trois règles FIXES l'emportent toujours sur le modèle, pour que ces
-// doctrines ne varient pas avec lui : un montant ou un budget, la sécurité, la réputation des écoles.
+// mentalité » sont tous deux « affectif »). Quatre règles FIXES l'emportent toujours sur le modèle, pour que ces
+// doctrines ne varient pas avec lui : un montant ou un budget, la connexion (FUT-148), la sécurité, la réputation des écoles.
 export type RaisonNonMesuree = "manque_produit" | "ressenti" | "choix_editorial" | "non_classee";
-export type DemandeNonMesuree = { terme: string; raison: RaisonNonMesuree; theme: "budget" | "ecoles" | "securite" | null };
+export type DemandeNonMesuree = { terme: string; raison: RaisonNonMesuree; theme: "budget" | "ecoles" | "securite" | "connexion" | null };
 
 const ARGENT = /budget|€|euros?\b|\bprix\b|\bk€|\bloyer/i;
 // « sûr » exige son accent (« sur » est une préposition).
@@ -303,6 +304,9 @@ export function classerNonMesuree(
   kind: string | undefined, terme: string, raisonModele?: string,
 ): Omit<DemandeNonMesuree, "terme"> {
   if (ARGENT.test(terme)) return { raison: "manque_produit", theme: "budget" };
+  // FUT-148 : la fibre, Internet, le télétravail. Ni critère ni score, mais plus « sans réponse » : le module
+  // Territoire donne la part des locaux raccordables de la commune (Arcep). La phrase le dit (conclusion-plan).
+  if (termeDeConnexion(terme)) return { raison: "manque_produit", theme: "connexion" };
   if (SECURITE.test(terme) && !SECURITE_AMENAGEMENT.test(terme)) return { raison: "choix_editorial", theme: "securite" };
   // Seulement si le terme parle d'école : le modèle range parfois autre chose en « écoles » (vu le 03/10).
   if (kind === "ecoles" && ECOLE.test(terme)) return { raison: "choix_editorial", theme: "ecoles" };

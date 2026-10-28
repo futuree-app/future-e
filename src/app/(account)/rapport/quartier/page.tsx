@@ -36,6 +36,8 @@ import { communeParent } from "@/lib/plm";
 import { registersByTarget } from "@/lib/decision/evidence-registers";
 import { EchelleVisual } from "@/components/report/EchelleVisual";
 import { bindOrphans } from "@/lib/typography";
+import { getFibreCommune } from "@/lib/fibre-commune";
+import { projetEvoqueLaConnexion, texteFibre } from "@/lib/fibre-texte";
 
 export default async function RapportQuartierPage(
   { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
@@ -183,6 +185,13 @@ export default async function RapportQuartierPage(
     : null;
   const registres = registersByTarget(communeDossier?.dossier ?? null);
 
+  // FUT-148 : LA FIBRE, LUE À CÔTÉ DU SNAPSHOT, JAMAIS DEDANS. Elle n'entre pas dans l'empreinte qui indexe
+  // les synthèses rédigées : aucune synthèse n'est régénérée pour elle. Fichier embarqué, lu une fois par
+  // process ; `null` (table illisible) s'affiche « donnée indisponible », jamais 0 %.
+  const fibreLue = inseeCode ? await getFibreCommune(inseeCode) : null;
+  const pourLeProjet = projetEvoqueLaConnexion(userProject?.parsed);
+  const fibre = inseeCode ? { texte: texteFibre(fibreLue, { pourLeProjet }), pourLeProjet } : undefined;
+
   // Sources mobilisées par horizon, lues dans le MÊME snapshot que le texte. Ligne discrète sous la
   // synthèse : elle porte des affirmations chiffrées, elle garde un renvoi de provenance.
   const sourcesByHorizon = Object.fromEntries(
@@ -306,7 +315,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} fibre={fibre} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

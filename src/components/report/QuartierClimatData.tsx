@@ -15,6 +15,7 @@ import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 import type { Era5Trend } from "@/lib/era5-trend";
+import { LIEN_VERIFICATION, type TexteFibre } from "@/lib/fibre-texte";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -112,6 +113,12 @@ type SharedProps = {
   // projection » dans le drawer Températures. Le passé ne porte pas la face
   // avant (ce serait saboter le moat projection), il sert de preuve.
   era5?: Era5Trend | null;
+  /**
+   * FUT-148 : la part des locaux raccordables à la fibre (Arcep), déjà rédigée par `texteFibre` côté
+   * serveur. Absente (`undefined`) = la page ne la fournit pas, aucune carte. `pourLeProjet` : le lecteur
+   * a parlé de connexion ou de télétravail ; la carte passe en tête du groupe « Le territoire ».
+   */
+  fibre?: { texte: TexteFibre; pourLeProjet: boolean };
   // FUT-116 : plus d'archétype (`climatType`). Il choisissait le récit des volets climat sur un
   // classement administratif (Littoral, Montagne…), sans rapport avec la donnée affichée.
 };
@@ -134,6 +141,7 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Résidences secondaires": "territoire",
   "Espaces naturels": "territoire",
   "Taux de boisement": "territoire",
+  "Fibre optique": "territoire",
   "Températures moyennes": "climat",
   "Chaleurs estivales": "climat",
   "Nuits tropicales": "climat",
@@ -150,7 +158,7 @@ function themeOf(label: string): ThemeKey {
 }
 // Ordre de lecture au sein de chaque thème (le décor avant l'aléa, le légible avant le pointu).
 const CARD_ORDER: string[] = [
-  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires",
+  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires", "Fibre optique",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
   "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Nuits tropicales", "Jours de pluie intense",
   "Mémoire des catastrophes", "Inondation fluviale", "Submersion marine", "Conditions favorables au feu", "Érosion du littoral",
@@ -1182,10 +1190,43 @@ const REGISTER_TONE: Record<RegisterKey, string> = {
   verifications: "var(--reg-controle)",
 };
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5 }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+// ── Carte « Fibre optique » (Arcep, FUT-148) ──────────────────────────────────────────────
+// Un fait territorial, pas une note : le chiffre, sa date, ce qu'il ne garantit pas, où vérifier. Les
+// phrases viennent de `fibre-texte.ts` (pur, testé) ; la carte ne fait que les poser. Hors de
+// `buildFactors` : la donnée n'est pas dans le snapshot Territoire (cf. `fibre-commune.ts`).
+function facteurFibre(t: TexteFibre): Factor {
+  return {
+    label: "Fibre optique",
+    val: t.valeur,
+    sub: t.sousTitre,
+    col: "var(--green)",
+    src: t.source,
+    missing: t.manquant,
+    detail: {
+      eyebrow: "Le raccordement à la fibre",
+      title: "Fibre optique",
+      headline: t.titreVolet,
+      subhead: t.manquant ? undefined : t.phrase,
+      accent: "var(--green)",
+      facts: t.faits.length > 0 ? t.faits : undefined,
+      why: t.manquant ? t.phrase : t.limite,
+      whyLabel: t.manquant ? "Ce que l'on sait" : "Ce que ce taux ne dit pas",
+      note: t.verification,
+      noteLabel: "À vérifier",
+      lien: { ...LIEN_VERIFICATION },
+      sources: t.methode,
+    },
+  };
+}
+
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, fibre }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
   const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null);
+  if (fibre) factors.push(facteurFibre(fibre.texte));
+  // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
+  // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.
+  const rangPourLeProjet = (label: string) => (fibre?.pourLeProjet && label === "Fibre optique" ? -1 : cardRank(label));
 
   // FUT-69 : ARRIVÉE PAR LA PASTILLE DU DOSSIER. Une carte qui porte son chiffre dans le volet
   // (`arrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte
@@ -1205,7 +1246,7 @@ export function QuartierAside({ registres, communeName, scenarios, georisques, t
   const groups = THEME_ORDER
     .map((t) => ({
       t,
-      items: factors.filter((f) => themeOf(f.label) === t).sort((a, b) => cardRank(a.label) - cardRank(b.label)),
+      items: factors.filter((f) => themeOf(f.label) === t).sort((a, b) => rangPourLeProjet(a.label) - rangPourLeProjet(b.label)),
     }))
     .filter((g) => g.items.length > 0);
 

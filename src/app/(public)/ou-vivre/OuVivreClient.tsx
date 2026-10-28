@@ -1265,6 +1265,12 @@ export function OuVivreClient() {
                     </p>
                   )}
 
+                  {/* FUT-148 : la fibre de la commune, quand le lecteur a parlé de connexion ou de télétravail.
+                      Un fait communal daté, jamais un classement ni une promesse à l'adresse. */}
+                  {r.fibre && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-label/75">{bindOrphans(r.fibre.ligne)}</p>
+                  )}
+
                   {/* Compromis : la tension assumée, ce qui distingue le territoire et donne
                       envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)

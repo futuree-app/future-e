@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
     "/api/comparateur-vie/match": [
       "./data/comparateur-index.json.gz",
       "./data/ze-emploi-na38.json",
+      // FUT-148 : la fibre des communes proposées, seulement si le projet en parle (lib/fibre-commune.ts).
+      "./data/arcep-fibre.json",
     ],
     // Module Territoire : la page et la synthèse lisent l'index (carte d'identité,
     // trait distinctif, démographie, couvert naturel) et la saisonnalité.
@@ -21,6 +23,8 @@ const nextConfig: NextConfig = {
       "./data/residences-secondaires.json",
       "./data/communes-baignade.json",
       "./data/gaspar-pprn-inondation.json",
+      // FUT-148 : la carte « Fibre optique », lue hors du snapshot (lib/fibre-commune.ts).
+      "./data/arcep-fibre.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json.gz",
