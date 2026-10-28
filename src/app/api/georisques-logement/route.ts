@@ -192,11 +192,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       // aucune règle. Un appel réseau par dossier, une dépendance qui peut tomber, et surtout
       // l'impression que la dimension est couverte alors qu'elle ne s'affiche nulle part.
       //
-      // `src/lib/irep.ts` reste en place (`/api/proxy/irep` s'en sert), mais NE PAS LE REBRANCHER TEL
-      // QUEL (FUT-145, 27/10/2026) : c'est un extrait ADEME de 2019, une petite partie du registre
-      // national, que l'écran public /agir/pollutions-invisibles n'interroge plus pour cette raison.
-      // Un vide n'y prouve aucune absence, une liste n'y est jamais complète. Un fait IREP au
-      // dossier suppose de lire le registre officiel (Géorisques), pas cet extrait.
+      // L'extrait ADEME de 2019 a été retiré (FUT-152, 28/10/2026). Le registre officiel est désormais un
+      // index local (`data/irep-registre.json`, `lib/server/irep-registre.ts`), lu par la page publique
+      // /agir/pollutions-invisibles. Son retour au dossier est une décision distincte (FUT-152 phase 2,
+      // cf. docs/audits/2026-10-28-fut152-pollutions-invisibles.md) : ne pas le rebrancher sans elle.
       cartofriches,
       communeData,
       sinistralite,

@@ -2,8 +2,8 @@
 //
 // A. /agir/pollutions-invisibles concluait « Aucune installation industrielle classée ICPE recensée dans un
 //    rayon de 10 km » sur un extrait ADEME IREP de 2019 (Metz : 25 établissements déclarants au registre 2024).
-//    Une panne de la source rendait la même liste vide. → le bloc renvoie au registre officiel ; la lib lève
-//    sur une panne et dit quand sa liste est coupée.
+//    Une panne de la source rendait la même liste vide. → le bloc renvoyait au registre officiel ; FUT-152 l'a
+//    remplacé par l'export officiel du registre (cf. fut152-pollutions-invisibles.test.ts).
 // B. AskFuture recevait « Incendies récents (nombre) », champ ADEME sans période ni source primaire. → retiré
 //    du `system` ; capturé ici sur la VRAIE route /api/ask, devant un modèle simulé.
 // C. Le comparateur appelait « Risque de feu faible / modéré / élevé » un rang national de jours d'indice
@@ -71,12 +71,10 @@ g.__fut145 = {
   },
 };
 
-let IREP: M, PROXY: M, ASK: M, V: M, LABELS: M;
+let ASK: M, V: M, LABELS: M;
 let NextRequest: new (url: string, init?: M) => unknown;
 before(async () => {
   register(`data:text/javascript,${encodeURIComponent(hook)}`);
-  IREP = await import("./irep.ts");
-  PROXY = await import("../app/api/proxy/irep/route.ts");
   ASK = await import("../app/api/ask/route.ts");
   V = await import("./comparateur-vie.ts");
   LABELS = await import("./comparateur-labels.ts");
@@ -93,126 +91,14 @@ beforeEach(() => {
 // A · IREP : un extrait ne prouve aucune absence
 // ════════════════════════════════════════════════════════════════════════════════════════════════
 
-const METZ = { lat: 49.1081, lon: 6.1955 };
-const ligne = (i: number, dLat = 0) => ({ identifiant: i, nom_etablissement: `Établissement ${i}`, latitude: METZ.lat + dLat, longitude: METZ.lon, nombre_polluants: 2, milieu_emission: "Air" });
-const servir = (fabrique: () => Response | Promise<Response>) => { globalThis.fetch = (async () => fabrique()) as typeof fetch; };
-const proxy = async () => {
-  const res: Response = await PROXY.GET(new Request(`http://localhost/api/proxy/irep?lat=${METZ.lat}&lon=${METZ.lon}`));
-  return { status: res.status, json: await res.json() };
-};
-
-test("A · résultats présents : la liste est servie avec sa source, son millésime et sans prétention d'exhaustivité", async () => {
-  servir(() => Response.json({ total: 2, results: [ligne(1, 0.01), ligne(2, 0.002)] }));
-  const r = await proxy();
-  assert.equal(r.status, 200);
-  assert.equal(r.json.count, 2);
-  assert.deepEqual(r.json.installations.map((x: M) => x.id), [2, 1]); // du plus proche au plus loin
-  assert.equal(r.json.tronque, false);
-  assert.deepEqual(r.json.source, { producteur: "ADEME", jeu: "data_risk_IREP", millesime: 2019, exhaustif: false });
-});
-
-test("A · réponse vide de l'extrait : un vide servi tel quel, jamais présenté comme exhaustif", async () => {
-  servir(() => Response.json({ total: 0, results: [] }));
-  const r = await proxy();
-  assert.equal(r.status, 200);
-  assert.equal(r.json.count, 0);
-  assert.equal(r.json.source.exhaustif, false);
-});
-
-test("A · source en 500 ou 502 : la route répond 502 (indisponible), jamais une liste vide", async () => {
-  for (const status of [500, 502]) {
-    servir(() => new Response("panne", { status }));
-    const r = await proxy();
-    assert.equal(r.status, 502, `amont ${status}`);
-    assert.equal(r.json.count, undefined);
-    assert.equal(r.json.installations, undefined);
-  }
-});
-
-test("A · HTTP 200 sans tableau de résultats : erreur déguisée, traitée comme une panne", async () => {
-  servir(() => Response.json({ error: "quota dépassé" }));
-  const r = await proxy();
-  assert.equal(r.status, 502);
-});
-
-test("A · réseau coupé : 502 avec un message, jamais une liste vide", async () => {
-  globalThis.fetch = (async () => { throw new TypeError("fetch failed"); }) as typeof fetch;
-  const r = await proxy();
-  assert.equal(r.status, 502);
-  assert.equal(typeof r.json.error, "string");
-});
-
-test("A · page de 20 sur 45 lignes : la réponse se dit tronquée", async () => {
-  servir(() => Response.json({ total: 45, results: Array.from({ length: 20 }, (_, i) => ligne(i, i * 1e-3)) }));
-  const r = await proxy();
-  assert.equal(r.json.count, 20);
-  assert.equal(r.json.tronque, true);
-  // Sans `total`, une page pleine est présumée coupée.
-  servir(() => Response.json({ results: Array.from({ length: 20 }, (_, i) => ligne(i)) }));
-  assert.equal((await IREP.getIrepNearPoint(METZ.lat, METZ.lon, 10000)).tronque, true);
-});
-
-test("A · un `total` amont n'est cru que s'il est plausible (vraie route /api/proxy/irep)", async () => {
-  // Revue de la PR #97 : `total: -1` sur 20 lignes rendait `tronque: false`, une exhaustivité que rien ne prouve.
-  const vingt = Array.from({ length: 20 }, (_, i) => ligne(i, i * 1e-3));
-  const cas: [string, M | string, number, boolean][] = [
-    ["20 lignes sans total", { results: vingt }, 20, true],
-    ["20 lignes, total -1", { total: -1, results: vingt }, 20, true],
-    ["20 lignes, total fractionnaire", { total: 20.5, results: vingt }, 20, true],
-    ["20 lignes, total contradictoire (5)", { total: 5, results: vingt }, 20, true],
-    ["20 lignes, total en chaîne", { total: "45", results: vingt }, 20, true],
-    ["20 lignes, total null", { total: null, results: vingt }, 20, true],
-    ["20 lignes, total infini (1e400 dans le JSON brut)", `{"total":1e400,"results":${JSON.stringify(vingt)}}`, 20, true],
-    ["20 lignes, total 20 (égal)", { total: 20, results: vingt }, 20, false],
-    ["3 lignes, total 3 (égal)", { total: 3, results: vingt.slice(0, 3) }, 3, false],
-    ["20 lignes, total 45 (supérieur)", { total: 45, results: vingt }, 20, true],
-    ["vide, total 0", { total: 0, results: [] }, 0, false],
-    ["vide, total -1", { total: -1, results: [] }, 0, true],
-  ];
-  for (const [nom, corps, count, tronque] of cas) {
-    servir(() => (typeof corps === "string" ? new Response(corps, { headers: { "content-type": "application/json" } }) : Response.json(corps)));
-    const r = await proxy();
-    assert.equal(r.status, 200, nom);
-    assert.equal(r.json.count, count, nom);
-    assert.equal(r.json.tronque, tronque, nom);
-    assert.equal(r.json.source.exhaustif, false, nom);
-  }
-});
-
-test("A · erreur HTTP et réponses malformées : 502, jamais une liste", async () => {
-  const cas: [string, () => Response][] = [
-    ["HTTP 503", () => new Response("indisponible", { status: 503 })],
-    ["JSON invalide sous HTTP 200", () => new Response("<html>", { status: 200, headers: { "content-type": "application/json" } })],
-    ["results qui n'est pas un tableau", () => Response.json({ total: 3, results: { a: 1 } })],
-    ["results absent, total présent", () => Response.json({ total: 12 })],
-  ];
-  for (const [nom, fabrique] of cas) {
-    servir(fabrique);
-    const r = await proxy();
-    assert.equal(r.status, 502, nom);
-    assert.equal(r.json.installations, undefined, nom);
-    assert.equal(typeof r.json.error, "string", nom);
-  }
-});
-
-test("A · la page publique n'interroge plus l'extrait et ne peut plus conclure à une absence", () => {
-  const src = readFileSync(new URL("../components/PollutionLookup.tsx", import.meta.url), "utf8");
-  const code = src.replace(/^\s*\/\/.*$/gm, ""); // commentaires de ligne seulement : les URL gardent leur « // »
-  assert.doesNotMatch(code, /api\/(proxy\/)?irep/, "le composant n'appelle plus l'extrait");
-  assert.doesNotMatch(code, /Aucune installation industrielle/);
-  assert.doesNotMatch(code, /blockId="irep"/);
-  // Ce que le bloc dit à la place : la nature du registre, ses limites, et où le consulter.
-  assert.match(code, /https:\/\/www\.georisques\.gouv\.fr\/risques\/registre-des-emissions-polluantes\/accueil/);
-  assert.match(code, /ne recense donc pas toutes les installations classées \(ICPE\)/);
-  assert.match(code, /extrait de 2019/);
-  assert.match(code, /n&apos;indique pas à lui seul une exposition de votre logement/);
-  // Les trois autres recherches restent.
-  for (const id of ["sis", "atmo", "eau"]) assert.match(code, new RegExp(`blockId="${id}"`));
-});
+// FUT-152 (28/10/2026) a remplacé l'extrait ADEME par l'export officiel du registre, en index local, et rendu
+// la recherche à la page. Les tests de l'extrait (troncature, `total` plausible, pannes) n'ont plus d'objet :
+// le contrat du registre est verrouillé par `fut152-pollutions-invisibles.test.ts`. Seule reste ici la garde
+// du dossier payant, dont le retour d'IREP est une décision distincte.
 
 test("A · le dossier payé n'appelle toujours pas IREP", () => {
   const code = readFileSync(new URL("../app/api/georisques-logement/route.ts", import.meta.url), "utf8").replace(/\/\/.*$/gm, "");
-  assert.doesNotMatch(code, /getIrepNearPoint|@\/lib\/irep/);
+  assert.doesNotMatch(code, /getIrepNearPoint|getIrepAutour|irep-registre|@\/lib\/irep/);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════

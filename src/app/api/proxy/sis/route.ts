@@ -1,31 +1,24 @@
 import { NextResponse } from 'next/server';
+import { estCodeInsee } from '@/lib/sites-sols';
+import { getSitesSolsCommune } from '@/lib/server/sites-sols';
 
-const UPSTREAM = 'https://data.georisques.gouv.fr/api/v1/sis';
-
+// Les quatre inventaires « sites et sols » d'une commune (FUT-152). Chaque catégorie porte son état
+// (`disponible`, `partiel`, `absent_dans_source`, `indisponible`) : la route répond 200 même quand une
+// catégorie est en panne, et 502 seulement quand AUCUNE n'a pu être lue. Une réponse en panne n'est pas
+// mise en cache.
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const insee = searchParams.get('insee');
-  if (!insee) {
-    return NextResponse.json({ error: 'Missing insee parameter.' }, { status: 400 });
+  const insee = new URL(request.url).searchParams.get('insee') ?? '';
+  if (!estCodeInsee(insee)) {
+    return NextResponse.json({ error: 'Code INSEE invalide.' }, { status: 400 });
   }
 
-  const url = `${UPSTREAM}?code_insee=${encodeURIComponent(insee)}&page=1&page_size=20`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      return NextResponse.json({ error: `Upstream error ${res.status}` }, { status: res.status });
-    }
-    const data = await res.json();
-    return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800' },
-    });
-  } catch (err) {
-    clearTimeout(timeout);
-    const message = err instanceof Error ? err.message : 'SIS proxy failed.';
-    return NextResponse.json({ error: message }, { status: 502 });
+  const data = await getSitesSolsCommune(insee);
+  const etats = [data.sis.etat, data.instructions.etat, data.sup.etat, data.casias.etat];
+  if (etats.every((e) => e === 'indisponible')) {
+    return NextResponse.json({ error: 'Géorisques indisponible.' }, { status: 502 });
   }
+  const complet = !etats.includes('indisponible');
+  return NextResponse.json(data, {
+    headers: { 'Cache-Control': complet ? 'public, s-maxage=86400, stale-while-revalidate=604800' : 'no-store' },
+  });
 }

@@ -12,6 +12,7 @@ type AtmoRawRecord = {
   code_pm10?: string | number | null;
   code_no2?: string | number | null;
   code_o3?: string | number | null;
+  source?: string | null;
 };
 
 // ── Public types ─────────────────────────────────────────────────────────────
@@ -24,6 +25,8 @@ export type AtmoLevel = {
 export type AtmoAirQuality = {
   inseeCode: string;
   date: string;
+  /** L'association agréée qui publie l'indice (« Atmo Grand Est », « Airparif »). */
+  source: string | null;
   index: AtmoLevel;
   pollutants: {
     pm25: AtmoLevel | null;
@@ -130,6 +133,7 @@ function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | nu
   return {
     inseeCode,
     date: raw.date_ech ?? "",
+    source: typeof raw.source === "string" && raw.source.trim() ? raw.source.trim() : null,
     index,
     pollutants: {
       pm25: toLevel(raw.code_pm25),
@@ -141,6 +145,9 @@ function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | nu
 }
 
 // ── Load (with yesterday fallback — ATMO updates at 13h Paris) ───────────────
+// FUT-152 : une panne LÈVE, une absence d'indice rend `null`. L'API couvre toutes les communes testées le
+// 28/10/2026 (village de l'Ain, Corse, Réunion, Martinique) : un indice manquant n'est pas un « trou de
+// couverture régional », et une panne ne doit jamais être présentée comme tel.
 async function load(inseeCode: string): Promise<AtmoAirQuality | null> {
   const today = new Date().toISOString().split("T")[0];
   const records = await fetchRecords(inseeCode, today);
@@ -152,16 +159,41 @@ async function load(inseeCode: string): Promise<AtmoAirQuality | null> {
   return fallback.length ? parseRecord(fallback[0], inseeCode) : null;
 }
 
+export type LectureAtmo =
+  | { etat: "disponible"; indice: AtmoAirQuality }
+  | { etat: "absent_dans_source" }
+  | { etat: "indisponible" };
+
 // ── Public API (with in-memory dedup cache keyed on insee+date) ──────────────
+// Seule une lecture RÉUSSIE est gardée : une panne se retente à l'appel suivant (avant FUT-152, un échec
+// était mémorisé pour la journée entière par instance).
 const cache = new Map<string, Promise<AtmoAirQuality | null>>();
 
-export async function getAtmoForCommune(inseeCode: string): Promise<AtmoAirQuality | null> {
+function lire(inseeCode: string): Promise<AtmoAirQuality | null> {
   const today = new Date().toISOString().split("T")[0];
   const key = `${inseeCode.trim()}:${today}`;
 
   if (!cache.has(key)) {
-    cache.set(key, load(inseeCode.trim()).catch(() => null));
+    cache.set(key, load(inseeCode.trim()).catch((e) => {
+      cache.delete(key);
+      throw e;
+    }));
   }
 
   return cache.get(key)!;
+}
+
+/** La lecture à trois états. Ne lève jamais. */
+export async function lireAtmoCommune(inseeCode: string): Promise<LectureAtmo> {
+  try {
+    const indice = await lire(inseeCode);
+    return indice ? { etat: "disponible", indice } : { etat: "absent_dans_source" };
+  } catch {
+    return { etat: "indisponible" };
+  }
+}
+
+/** Contrat historique (page chaleur, aperçu du wizard) : `null` pour une absence comme pour une panne. */
+export async function getAtmoForCommune(inseeCode: string): Promise<AtmoAirQuality | null> {
+  return lire(inseeCode).catch(() => null);
 }
