@@ -15,7 +15,7 @@ import {
   type CampagneAConstruire, type MemoireIncendies, type MouvementCog, type TableIncendies,
 } from "./data/bdiff-incendies.ts";
 import {
-  texteTerritoire, ligneCarteIncendies, celluleIncendies, ligneIncendiesUtile, PHRASES_INTERDITES, LIMITE_SURFACE, hectares,
+  texteTerritoire, ligneCarteIncendies, celluleIncendies, ligneIncendiesUtile, PHRASES_INTERDITES, LIMITE_SURFACE, hectares, feuNotable, AIDE_INCENDIES_OBSERVES,
 } from "./incendies-observes.ts";
 
 const TABLE = JSON.parse(readFileSync(path.join(process.cwd(), "data", "bdiff-incendies.json"), "utf8")) as TableIncendies;
@@ -205,8 +205,71 @@ test("Dossier comparatif : la ligne n'apparaît qu'avec un feu notable dans le t
   assert.equal(ligneIncendiesUtile([lire("69383"), lire("83063")]), false);
   assert.equal(ligneIncendiesUtile([lire("69383"), lire("29016")]), true);
   assert.equal(celluleIncendies(lire("29016")).palier, "Un feu de 1 917 ha au total en 2022");
-  assert.equal(celluleIncendies(lire("69383")).qualifier, "base moins complète avant 2020");
+  assert.equal(celluleIncendies(lire("69383")).palier, "Pas de feu de 10 ha ou plus enregistré au départ de Lyon (toute la ville)");
+  assert.equal(celluleIncendies(lire("69383")).qualifier, "feux partis d'une commune voisine non comptés, base moins complète avant 2020");
   assert.equal(celluleIncendies(lire("75111")).palier, "Base incomplète pour ce département");
+  assert.equal(celluleIncendies(lire("75111")).qualifier, "aucune fiche de 2006 à 2025");
+  assert.equal(celluleIncendies(lire("94028")).qualifier, "nombre d'incendies inconnu en 2024 et 2025");
+});
+
+// Revue indépendante du 28/10/2026 : une cellule vide juxtaposée à un grand feu se lisait comme une sécurité.
+test("Dossier comparatif : une cellule sans feu notable porte TOUJOURS ses limites (contre-exemples de la revue)", () => {
+  // Gentilly : un départ recensé, aucun de 10 ha, 2024 et 2025 déclarées inconnues par la source.
+  const gentilly = celluleIncendies(lire("94044"));
+  assert.equal(gentilly.palier, "Pas de feu de 10 ha ou plus enregistré au départ de la commune");
+  assert.equal(gentilly.qualifier, "nombre d'incendies inconnu en 2024 et 2025, feux partis d'une commune voisine non comptés, base moins complète avant 2020");
+  // Martinique : 2025 inconnue.
+  assert.match(celluleIncendies(lire("97202")).qualifier!, /nombre d'incendies inconnu en 2025/);
+  // Les Maures : le feu de Gonfaron (2021) a aussi parcouru La Garde-Freinet, dont la cellule est vide.
+  assert.equal(ligneIncendiesUtile([lire("83067"), lire("83063")]), true);
+  assert.equal(celluleIncendies(lire("83063")).qualifier, "feux partis d'une commune voisine non comptés");
+  assert.match(AIDE_INCENDIES_OBSERVES, /un feu venu d'une voisine n'est pas compté/);
+  // Toutes les cellules disponibles sans feu notable, sur toute la table : la réserve « voisine » est là.
+  for (const insee of Object.keys(TABLE.communes)) {
+    const m = lire(insee);
+    if (feuNotable(m) || m.etat === "incomplet") continue;
+    assert.match(celluleIncendies(m).qualifier ?? "", /feux partis d'une commune voisine non comptés/, insee);
+    if (m.etat === "recense" && m.campagnesNonRenseignees.length > 0) assert.match(celluleIncendies(m).qualifier!, /nombre d'incendies inconnu en/, insee);
+  }
+});
+
+test("Territoire : les années déclarées inconnues sont dans les phrases VISIBLES, pas seulement dans « En savoir plus »", () => {
+  const t = texteTerritoire(lire("97202"), "Basse-Pointe");
+  assert.ok(t.phrases.includes("La base signale un nombre d'incendies inconnu pour ce département en 2025 : ce relevé peut donc être incomplet."), t.phrases.join(" | "));
+  assert.ok(!t.details.some((d) => /inconnu/.test(d)));
+  const gentilly = texteTerritoire(lire("94044"), "Gentilly");
+  assert.ok(gentilly.phrases.some((p) => /inconnu pour ce département en 2024 et 2025/.test(p)));
+});
+
+test("Territoire : un résultat vide en aire méditerranéenne dit aussi qu'il ne permet pas de conclure", () => {
+  const t = texteTerritoire({ etat: "aucun", echelle: { type: "commune", code: "83999" }, periode: "2006-2025", mediterranee: true } as MemoireIncendies, "Commune");
+  assert.match(t.phrases.join(" "), /ne permet pas de conclure/);
+});
+
+test("rattachement : un changement de chef-lieu sous le même nom n'est pas une « ancienne commune » (Conques-en-Rouergue)", () => {
+  const f = lire("12218");
+  assert.ok(f.etat === "recense" && f.entree.feux.every((x) => x.ancienneCommune === undefined));
+  // À la construction : même nom (aux accents et à la casse près) = pas d'ancienne commune ; nom différent = ancienne commune.
+  const communes = new Set(["12218", "34144"]);
+  const mvt: MouvementCog[] = [
+    { MOD: "50", DATE_EFF: "2016-01-01", TYPECOM_AV: "COM", COM_AV: "12076", TYPECOM_AP: "COM", COM_AP: "12218" },
+    ...MVT,
+  ];
+  const t = construireTableIncendies({
+    campagnes: [camp(2018, exportDe(2018, [ligne(2018, 8, "12076", "CONQUES EN ROUERGUE", 120_000), ligne(2018, 9, "34093", "Dio-et-Valquières", 120_000)]))],
+    resoudre: resolveurCog(communes, mvt),
+    nomActuel: (insee) => ({ "12218": "Conques-en-Rouergue", "34144": "Bédarieux" })[insee],
+    meta: META,
+  });
+  assert.equal(t.communes["12218"]!.feux[0]!.ancienneCommune, undefined);
+  assert.equal(t.communes["34144"]!.feux[0]!.ancienneCommune, "Dio-et-Valquières");
+});
+
+test("phrases : l'incise de l'ancienne commune est fermée par une virgule", () => {
+  const insee = Object.keys(TABLE.communes).find((c) => TABLE.communes[c]!.feux[0]?.ancienneCommune);
+  assert.ok(insee);
+  const t = texteTerritoire(lire(insee), "Actuelle");
+  assert.match(t.phrases[0]!, /aujourd'hui rattachée à Actuelle, a parcouru/);
 });
 
 test("aucune phrase, dans aucun état, ne rassure ni ne dit « brûlé dans la commune » (9 510 communes + vides + PLM)", () => {

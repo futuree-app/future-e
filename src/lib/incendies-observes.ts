@@ -25,7 +25,7 @@ import { lienFiche, type FeuRecense, type MemoireIncendies } from "./data/bdiff-
 export const SEUIL_COMPARATEUR_HA = 10;
 
 /** Ce qu'aucune phrase de ce module ne doit contenir. Testé sur tous les états. */
-export const PHRASES_INTERDITES = /aucun incendie|épargn|à l'abri|sans risque|risque faible|faible risque|peu expos|ont brûlé dans|brûlés? dans la commune|confirm|dément|contredi|assur|santé/i;
+export const PHRASES_INTERDITES = /aucun incendie|épargn|à l'abri|sans risque|risque faible|faible risque|peu expos|ont brûlé dans|brûlés? dans la commune|confirm|dément|contredi|assur|santé|a brûlé|brûlés|protég|préserv|\bsûr|sécurit/i;
 
 const NOMS_VILLE: Record<string, string> = { "13055": "Marseille", "75056": "Paris", "69123": "Lyon" };
 
@@ -41,12 +41,16 @@ const plusGrand = (m: MemoireIncendies): FeuRecense | null =>
 /** Où le départ est enregistré, en clair. Marseille : la ville entière, jamais l'arrondissement. */
 function lieuDuDepart(m: Extract<MemoireIncendies, { etat: "recense" }>, f: FeuRecense, communeName: string): string {
   if (m.echelle.type === "ville") return `à ${NOMS_VILLE[m.echelle.code] ?? "la ville"}`;
-  if (f.ancienneCommune) return `sur l'ancienne commune de ${f.ancienneCommune}, aujourd'hui rattachée à ${communeName}`;
+  if (f.ancienneCommune) return `sur l'ancienne commune de ${f.ancienneCommune}, aujourd'hui rattachée à ${communeName},`;
   return "sur la commune";
 }
 
 const listeAnnees = (as: number[]): string =>
   as.length <= 1 ? String(as[0] ?? "") : `${as.slice(0, -1).join(", ")} et ${as[as.length - 1]}`;
+
+/** Les campagnes que la source déclare inconnues : une limite VISIBLE, jamais repliée dans le détail. */
+const phraseNonRenseignees = (as: number[]): string =>
+  `La base signale un nombre d'incendies inconnu pour ce département en ${listeAnnees(as)} : ce relevé peut donc être incomplet.`;
 
 const PRUDENCE_2020 =
   "Hors du pourtour méditerranéen, le producteur de la base signale une couverture moins complète avant 2020.";
@@ -87,13 +91,13 @@ export function texteTerritoire(m: MemoireIncendies, communeName: string): Texte
       phrases.push(`Les départs de feu de forêt enregistrés ${ville ? `à ${ville}` : "sur la commune"} dans la base nationale, de ${de} à ${a}, ont tous parcouru moins d'un hectare.`);
       phrases.push("Un feu parti d'une commune voisine n'est pas compté ici.");
     }
+    if (nonRenseignees.length > 0) phrases.push(phraseNonRenseignees(nonRenseignees));
     if (ville) phrases.push(`Ces faits concernent l'ensemble de ${ville} : la base ne situe pas les feux par arrondissement.`);
     const e = m.entree;
     details.push(`Départs de feu de forêt recensés dans la base, ${de}-${a} : ${e.nombre}, dont ${e.nombre1ha} d'au moins un hectare. Ce sont les fiches de la base, pas le nombre réel d'incendies.`);
     for (const g of e.feux) {
-      details.push(`${cap(dateLongue(g.date) ?? String(g.annee))} : ${hectares(g.hectares)} ha parcourus au total, surface ${g.mesuree ? "mesurée" : "estimée"}${g.fichePartielle ? ", fiche signalée incomplète par la source" : ""}.`);
+      details.push(`${cap(dateLongue(g.date) ?? String(g.annee))} : ${hectares(g.hectares)} ha parcouru${g.hectares >= 2 ? "s" : ""} au total, surface ${g.mesuree ? "mesurée" : "estimée"}${g.fichePartielle ? ", fiche signalée incomplète par la source" : ""}.`);
     }
-    if (nonRenseignees.length > 0) details.push(`La base signale un nombre d'incendies inconnu pour ce département en ${listeAnnees(nonRenseignees)}.`);
     if (!m.mediterranee) details.push(PRUDENCE_2020);
     return { titre, phrases, details, fiche: f ? { libelle: `Fiche officielle de l'incendie ${f.annee}-${f.numero}`, href: lienFiche(f) } : null };
   }
@@ -122,7 +126,7 @@ export function texteTerritoire(m: MemoireIncendies, communeName: string): Texte
   return {
     titre,
     phrases: m.mediterranee
-      ? [vide, "Les feux partis d'une commune voisine n'y sont pas comptés."]
+      ? [vide, "Ce résultat ne permet pas de conclure, et les feux partis d'une commune voisine n'y sont pas comptés."]
       : [vide, `${PRUDENCE_2020} Ce résultat ne permet donc pas de conclure, et les feux partis d'une commune voisine n'y sont pas comptés.`],
     details: [],
     fiche: null,
@@ -151,13 +155,15 @@ export function ligneCarteIncendies(m: MemoireIncendies, communeName: string, fe
 
 /** L'aide de la ligne « Incendies observés » du Dossier comparatif (doctrine des aides : bref, sans source). */
 export const AIDE_INCENDIES_OBSERVES =
-  "Le plus grand feu de forêt parti de la commune depuis 2006, avec la surface de tout le feu. Ces faits passés n'entrent pas dans la ligne « Météo propice aux feux ».";
+  "Le plus grand feu parti de la commune depuis 2006, surface de tout le feu ; un feu venu d'une voisine n'est pas compté. Il n'entre pas dans la ligne « Météo propice aux feux ».";
 
 export const LIBELLE_INCENDIES_OBSERVES = "Incendies observés";
 
 /**
  * La cellule « Incendies observés » du Dossier comparatif (C4). La ligne n'apparaît que si une commune du
  * trio porte un feu notable (`ligneIncendiesUtile`) ; les autres cellules disent leur état sans rassurer.
+ * Juxtaposée à un grand feu, une cellule vide se lirait comme une sécurité : elle porte donc TOUJOURS
+ * ses limites (années déclarées inconnues, feux venus d'une voisine non comptés, couverture avant 2020).
  */
 export function celluleIncendies(m: MemoireIncendies): { palier: string; qualifier: string | null; disponible: boolean; alerte: false } {
   if (m.etat === "indisponible") return { palier: "Non disponible", qualifier: null, disponible: false, alerte: false };
@@ -171,10 +177,24 @@ export function celluleIncendies(m: MemoireIncendies): { palier: string; qualifi
       alerte: false,
     };
   }
-  if (m.etat === "incomplet") return { palier: "Base incomplète pour ce département", qualifier: null, disponible: true, alerte: false };
+  if (m.etat === "incomplet") {
+    return {
+      palier: "Base incomplète pour ce département",
+      qualifier: m.departementSansFiche
+        ? `aucune fiche de ${m.periode.replace("-", " à ")}`
+        : `nombre d'incendies inconnu en ${listeAnnees(m.campagnesNonRenseignees)}`,
+      disponible: true,
+      alerte: false,
+    };
+  }
+  const limites = [
+    ...(m.etat === "recense" && m.campagnesNonRenseignees.length > 0 ? [`nombre d'incendies inconnu en ${listeAnnees(m.campagnesNonRenseignees)}`] : []),
+    "feux partis d'une commune voisine non comptés",
+    ...(m.mediterranee ? [] : ["base moins complète avant 2020"]),
+  ];
   return {
-    palier: "Pas de feu de 10 ha ou plus enregistré au départ de la commune",
-    qualifier: m.mediterranee ? null : "base moins complète avant 2020",
+    palier: `Pas de feu de 10 ha ou plus enregistré au départ de ${ville ? `${ville} (toute la ville)` : "la commune"}`,
+    qualifier: limites.join(", "),
     disponible: true,
     alerte: false,
   };

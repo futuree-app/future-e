@@ -173,7 +173,8 @@ export type MouvementCog = { MOD: string; DATE_EFF: string; TYPECOM_AV: string; 
 // Fusions (31 simple, 32 commune nouvelle, 33 association, 34 association devenue simple) et changements
 // de code (41 changement de département, 50 transfert de chef-lieu). Les rétablissements (21) ne
 // déplacent rien : la commune rétablie retrouve son propre code, et ses feux d'avant restent sous le
-// code de la commune qui les portait alors (25 fiches dans 2 communes sur 2006-2025, mesuré le 28/10/2026).
+// code de la commune qui les portait alors. Ordre de grandeur : une dizaine de fiches au plus sur
+// 2006-2025 (23 ou 24 rétablissements ; 7 à 10 fiches selon la méthode de comptage, recompté le 28/10/2026).
 const MOUVEMENTS_RATTACHANTS = new Set(["31", "32", "33", "34", "41", "50"]);
 
 /**
@@ -199,6 +200,10 @@ export function resolveurCog(communes: ReadonlySet<string>, mouvements: Mouvemen
   };
 }
 
+const cle = (n: string): string => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+/** `false` seulement quand les deux noms sont connus et diffèrent ; sans libellé actuel, on garde le nom de la fiche. */
+const memeNom = (fiche: string, actuel: string | undefined): boolean => (fiche !== "" && actuel !== undefined && cle(fiche) === cle(actuel));
+
 // ── LA CONSTRUCTION ─────────────────────────────────────────────────────────────────────────
 
 export type CampagneAConstruire = { annee: number; texte: string; departementsInconnus: string[]; sha256: string; luLe: string };
@@ -211,6 +216,9 @@ export type CampagneAConstruire = { annee: number; texte: string; departementsIn
 export function construireTableIncendies(o: {
   campagnes: CampagneAConstruire[];
   resoudre: (code: string) => string | null;
+  /** Le libellé ACTUEL d'une commune (COG). Un code rattaché sous le même nom (changement de chef-lieu,
+   *  de département) n'est pas une « ancienne commune » : le lecteur lirait « X, aujourd'hui rattachée à X ». */
+  nomActuel?: (insee: string) => string | undefined;
   meta: Pick<TableIncendies["meta"], "source" | "cog" | "licence">;
 }): TableIncendies {
   const fiches = new Map<string, string>();
@@ -266,7 +274,7 @@ export function construireTableIncendies(o: {
           hectares: m2 / 10_000,
           mesuree: l[COLONNES.precisionSurfaces] === "Mesurées",
           fichePartielle: l[COLONNES.precisionDonnee]!.trim() !== "",
-          ...(actuel !== code ? { ancienneCommune: nom || code } : {}),
+          ...(actuel !== code && !memeNom(nom, o.nomActuel?.(actuel)) ? { ancienneCommune: nom || code } : {}),
         });
       }
       parCommune.set(actuel, e);

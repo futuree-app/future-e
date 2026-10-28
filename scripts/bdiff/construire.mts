@@ -61,7 +61,9 @@ for (let annee = DE; annee <= A; annee++) {
 const fichierCommunes = path.join(CACHE, "cog", "v_commune_2025.csv");
 const fichierMouvements = path.join(CACHE, "cog", "v_mvt_commune_2025.csv");
 if (!existsSync(fichierCommunes) || !existsSync(fichierMouvements)) die("référentiel Insee absent (voir l'en-tête du script)");
-const communes = new Set(lireCsvInsee(fichierCommunes).filter((r) => r.TYPECOM === "COM").map((r) => r.COM!));
+const lignesCommunes = lireCsvInsee(fichierCommunes).filter((r) => r.TYPECOM === "COM");
+const communes = new Set(lignesCommunes.map((r) => r.COM!));
+const libelles = new Map(lignesCommunes.map((r) => [r.COM!, r.LIBELLE!]));
 if (communes.size < 34_000) die(`référentiel Insee incomplet : ${communes.size} communes`);
 const mouvements = lireCsvInsee(fichierMouvements) as unknown as MouvementCog[];
 
@@ -70,6 +72,7 @@ try {
   table = construireTableIncendies({
     campagnes,
     resoudre: resolveurCog(communes, mouvements),
+    nomActuel: (insee) => libelles.get(insee),
     meta: {
       source: manifeste.source,
       cog: { millesime: "COG 2025", mouvementsSha256: sha256(readFileSync(fichierMouvements)) },
