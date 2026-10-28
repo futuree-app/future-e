@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import {
-  cleTuile, debroussaillementIndisponible, lireDebroussaillement, manifesteValide, tuileValide, tuilesALire,
+  cleTuile, debroussaillementIndisponible, EDITION, lireDebroussaillement, manifesteValide, tuileValide, tuilesALire,
   FORMAT_TUILES_DEBROUSSAILLEMENT,
   type EntreeDebroussaillement, type LectureDebroussaillement, type ManifesteDebroussaillement, type TuileDebroussaillement,
 } from "@/lib/debroussaillement";
@@ -65,7 +65,7 @@ const tuiles = new Map<string, TuileDebroussaillement>();
 async function manifesteCourant(lire: Lecteur): Promise<ManifesteDebroussaillement> {
   if (courant && courant.jusqua > Date.now()) return courant.manifeste;
   const pointeur = JSON.parse((await lire("courant.json", true)).toString("utf8")) as { format?: string; edition?: string };
-  if (pointeur?.format !== FORMAT_TUILES_DEBROUSSAILLEMENT || !/^\d{4}-\d{2}-\d{2}$/.test(pointeur.edition ?? "")) throw new Error("pointeur illisible");
+  if (pointeur?.format !== FORMAT_TUILES_DEBROUSSAILLEMENT || !EDITION.test(pointeur.edition ?? "")) throw new Error("pointeur illisible");
   const m: unknown = JSON.parse((await lire(`${pointeur.edition}/manifest.json`, true)).toString("utf8"));
   if (!manifesteValide(m) || m.edition !== pointeur.edition) throw new Error("manifeste illisible");
   courant = { manifeste: m, jusqua: Date.now() + DUREE_POINTEUR_MS };

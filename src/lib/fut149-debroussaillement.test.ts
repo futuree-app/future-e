@@ -127,6 +127,14 @@ const TUILES = new Map<string, TuileDebroussaillement>([
   ])],
   ["51_434", tuile(51, 434, [{ p: 0, o: "B", r: [rect(5.1, 43.42, 5.12, 43.46)] }])],
   ["50_435", tuile(50, 435, [{ p: 0, o: "X", a: 1, r: [rect(5.02, 43.52, 5.04, 43.54)] }])],
+  // Revue du 29/10/2026 : la zone C occupe toute la largeur de la cellule 53_434 (5,3-5,4) sur 43,42-43,46. Son bord
+  // est (5,4) est une VRAIE limite exactement alignée sur la grille : la cellule 54_434 n'a aucune zone. Son bord
+  // ouest (5,3) touche la cellule pleine 52_434 : coupe de tuile entre 43,42 et 43,46, vraie limite de P ailleurs.
+  ["53_434", tuile(53, 434, [{ p: 0, o: "C", r: [rect(5.3, 43.42, 5.4, 43.46)] }])],
+  // La zone E (5,6-5,7, cellule 56_434) s'arrête sur la grille en 5,7 ; de l'autre côté, la cellule 57_434 porte une
+  // zone d'un AUTRE objet (F, 5,7-5,72) : le zonage continue, l'arête n'est pas une limite.
+  ["56_434", tuile(56, 434, [{ p: 0, o: "E", r: [rect(5.6, 43.42, 5.7, 43.46)] }])],
+  ["57_434", tuile(57, 434, [{ p: 1, o: "F", r: [rect(5.7, 43.42, 5.72, 43.46)] }])],
 ]);
 function empreinte(t: TuileDebroussaillement) {
   const o = gzipSync(Buffer.from(JSON.stringify(t)));
@@ -197,6 +205,41 @@ describe("1. Au point : dedans, en limite, dehors, et les coupes de tuile", () =
       const l = lireSynth(entree([lon, LAT]));
       assert.equal(l.etat, "en_zone", `lon ${lon}`);
     }
+  });
+
+  test("revue du 29/10/2026 : une VRAIE limite alignée sur la grille reste une limite, des deux côtés, à 10 m", () => {
+    const dedans = lireSynth(entree([est(5.4, LAT, -10), LAT]));
+    assert.equal(dedans.etat, "en_limite", "à 10 m à l'intérieur, la zone s'arrête sur la grille : jamais « en zone »");
+    assert.deepEqual(dedans.limite, { cause: "point_proche", distanceM: null });
+    const dehors = lireSynth(entree([est(5.4, LAT, 10), LAT]));
+    assert.equal(dehors.etat, "en_limite", "à 10 m à l'extérieur : jamais « hors zone »");
+    assert.equal(dehors.limite?.distanceM, 10);
+    assert.equal(lireSynth(entree([est(5.4, LAT, 80), LAT])).etat, "hors_zone", "au-delà de 50 m, hors zone");
+    assert.equal(lireSynth(entree([est(5.4, LAT, -80), LAT])).etat, "en_zone", "au-delà de 50 m, en zone");
+  });
+
+  test("revue du 29/10/2026 : une coupe de tuile n'est pas une limite, même au contact d'une cellule pleine", () => {
+    for (const dx of [-10, 10]) assert.equal(lireSynth(entree([est(5.3, LAT, dx), LAT])).etat, "en_zone", `à ${dx} m de 5,3`);
+  });
+
+  test("revue du 29/10/2026 : de l'autre côté d'une même droite, couvert ici, découvert là (cellule pleine bordée en partie)", () => {
+    // Le bord est de la cellule pleine P (5,3) n'est couvert par C qu'entre 43,42 et 43,46 : en 43,48, c'est une limite.
+    assert.equal(lireSynth(entree([est(5.3, 43.48, -10), 43.48])).etat, "en_limite");
+    assert.equal(lireSynth(entree([est(5.3, 43.48, 10), 43.48])).limite?.distanceM, 10);
+  });
+
+  test("revue du 29/10/2026 : un autre objet de l'autre côté de la grille prolonge le zonage, l'arête n'est pas une limite", () => {
+    for (const dx of [-10, 10]) assert.equal(lireSynth(entree([est(5.7, LAT, dx), LAT])).etat, "en_zone", `à ${dx} m de 5,7`);
+  });
+
+  test("revue du 29/10/2026 : une parcelle contre une vraie limite alignée sur la grille la touche ; contre une coupe, non", () => {
+    const g = (lon: number) => parcelleCarree(lon, LAT, 30);
+    const contre = lireSynth(entree([est(5.4, LAT, 15), nord(LAT, 15)], { parcelle: { geometry: g(5.4) as never, rattachement: "point" } }));
+    assert.equal(contre.etat, "en_limite");
+    assert.equal(contre.limite?.cause, "bordure");
+    const coupe = lireSynth(entree([est(5.3, LAT, -45), nord(LAT, 15)], { parcelle: { geometry: g(est(5.3, LAT, -60)) as never, rattachement: "point" } }));
+    assert.equal(coupe.etat, "en_zone");
+    assert.equal(coupe.part, 1);
   });
 
   test("une cellule pleine : en zone, sans fichier à lire", () => {
@@ -272,7 +315,7 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
     assert.ok(l.part! > 0.45 && l.part! < 0.55, `part ${l.part}`);
     assert.match(rendreLogement(l), /Terrain à cheval sur la limite du zonage/);
     assert.match(rendreLogement(l), /environ 50 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné/);
-    assert.match(rendreLogement(l), /l'obligation peut viser les abords des constructions ou, en zone urbaine, le terrain lui-même/);
+    assert.match(rendreLogement(l), /le débroussaillement autour des constructions, et, si le terrain est en zone urbaine d'un plan local d'urbanisme, l'obligation sur tout le terrain/);
     assert.doesNotMatch(rendreLogement(l), /selon l'emplacement des constructions/, "revue du 28/10/2026 : pas seulement les constructions (L134-6, 3°)");
   });
 
@@ -323,7 +366,7 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
 
   test("la parcelle prime sur le point : point à 10 m de la limite, parcelle entièrement dedans", () => {
     const [lon, lat] = sw(-60);
-    const l = avecParcelle(parcelleCarree(lon, lat, 50), [est(5.06, lat, -10), nord(lat, 20)]);
+    const l = avecParcelle(parcelleCarree(lon, lat, 55), [est(5.06, lat, -10), nord(lat, 20)]);
     assert.equal(l.etat, "en_zone");
     assert.equal(l.part, 1);
   });
@@ -354,6 +397,31 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
     const limite = avecParcelle(parcelleCarree(lon, lat, 40), point, { candidatsAuPoint: 2 });
     assert.equal(limite.parcelleEcartee, "limite");
     assert.equal(limite.etat, "hors_zone");
+  });
+
+  test("revue du 29/10/2026 : une parcelle voisine marquée « point » mais qui ne contient pas le point n'est jamais attribuée", () => {
+    // La parcelle est entièrement dans la zone ; le point de l'adresse est à 200 m, hors zone.
+    const [lon, lat] = sw(-200);
+    const point: [number, number] = [est(5.06, lat, 200), nord(lat, 20)];
+    const l = avecParcelle(parcelleCarree(lon, lat, 40), point, { rattachement: "point", candidatsAuPoint: 1 });
+    assert.equal(l.grain, "point");
+    assert.equal(l.parcelleEcartee, "hors_point");
+    assert.equal(l.etat, "hors_zone", "le zonage de la parcelle voisine n'est pas attribué au logement");
+    assert.equal(l.part, null);
+    assert.match(rendreLogement(l), /La parcelle transmise ne contient pas le point de l'adresse et pourrait être celle d'un voisin/);
+    // Et la parcelle voisine à cheval, point en zone : la lecture au point, jamais la part de la voisine.
+    const [lon2, lat2] = sw(-20);
+    const voisine = avecParcelle(parcelleCarree(lon2, lat2, 40), [est(5.06, lat2, -300), nord(lat2, 20)]);
+    assert.equal(voisine.parcelleEcartee, "hors_point");
+    assert.equal(voisine.etat, "en_zone");
+    assert.equal(voisine.limite, null);
+  });
+
+  test("revue du 29/10/2026 : un point posé sur la limite de la parcelle (un seul candidat transmis) se lit au point", () => {
+    const [lon, lat] = sw(-200);
+    const l = avecParcelle(parcelleCarree(lon, lat, 40), [lon, nord(lat, 20)], { candidatsAuPoint: 1 });
+    assert.equal(l.grain, "point");
+    assert.equal(l.parcelleEcartee, "limite");
   });
 
   test("géocodage à la rue : secteur, parcelle ignorée, et dit", () => {
@@ -390,7 +458,7 @@ describe("4. Panne, données absentes, dossiers antérieurs", () => {
   });
 
   test("une cellule absente du manifeste est une absence établie (aucune tuile à lire)", () => {
-    const e = entree([5.75, LAT]);
+    const e = entree([5.95, LAT]);
     assert.deepEqual(tuilesALire(MANIFESTE, e), []);
     assert.equal(lireDebroussaillement(MANIFESTE, new Map(), e).etat, "hors_zone");
   });
@@ -496,16 +564,31 @@ describe("5. Ce que les textes disent, et ne disent jamais", () => {
         assert.doesNotMatch(tout, /si le préfet le décide|préfet[^.]*100 m/);
       }
     }
+    // Revue du 29/10/2026 : deux obligations DISTINCTES, chacune avec son responsable (L134-6 1° et 3°, L134-8).
     const regle = texteLogement(cas[0][1])!.savoirPlus.join(" ");
-    assert.match(regle, /en général sur 50 m, que le maire peut porter à 100 m/);
-    assert.match(regle, /dans une zone urbaine, il peut porter sur tout le terrain, bâti ou non/);
-    assert.match(regle, /La personne tenue de le faire dépend de la situation/);
+    assert.match(regle, /deux obligations distinctes/);
+    assert.match(regle, /Autour des constructions, sur 50 m, que le maire peut porter à 100 m : elle incombe au propriétaire des constructions/);
+    assert.match(regle, /Sur les terrains situés dans une zone urbaine d'un plan local d'urbanisme, sur la totalité du terrain, bâti ou non, quelle que soit cette distance : elle incombe au propriétaire du terrain/);
+    assert.match(regle, /articles L134-6 et L134-8/);
+    assert.doesNotMatch(regle, /dans une zone urbaine, il peut porter/, "l'ancienne formulation confondait les deux obligations");
+  });
+
+  test("revue du 29/10/2026 : le constat dit toujours que le zonage est informatif, jamais une décision définitive", () => {
+    for (const [nom, l] of cas.filter(([n]) => n.startsWith("en zone") || n.startsWith("en limite"))) {
+      const tl = texteLogement(l)!;
+      const ta = texteAutour(l)!;
+      if (nom === "en zone (point)") {
+        assert.match(tl.retenir, /^Selon le zonage informatif publié par l'État/);
+        assert.match(ta.retenir, /selon le zonage informatif publié par l'État/);
+      }
+      assert.match([tl.limite, tl.verifier].join(" "), /indicatif|zonage officiel/, nom);
+    }
   });
 
   test("la règle générale (50 m, 200 m) et le décret restent dans « En savoir plus », pas dans le constat", () => {
     const t = texteLogement(cas[0][1])!;
     assert.doesNotMatch([t.titre, t.retenir, t.limite, t.verifier].join(" "), /50 m|100 m|200 m|décret/);
-    assert.ok(t.savoirPlus.some((l) => /en général sur 50 m, que le maire peut porter à 100 m/.test(l)));
+    assert.ok(t.savoirPlus.some((l) => /sur 50 m, que le maire peut porter à 100 m/.test(l)));
     assert.ok(t.savoirPlus.some((l) => /décret n° 2024-405 du 29 avril 2024/.test(l)));
   });
 
@@ -699,6 +782,29 @@ describe("7. Les adresses réelles (BAN et cadastre du 28/10/2026, tuiles de l'�
     for (const c of CAS.filter((x) => /limite/.test(x))) assert.equal(lireReel(c, { sansParcelle: true }).etat, "en_limite", c);
   });
 
+  test("revue du 29/10/2026 : aucune attribution voisine — la parcelle ne sert que si l'oracle confirme qu'elle contient le point", () => {
+    // Oracle indépendant : point dans polygone en degrés, sans projection.
+    const contient = (p: number[], g: { type: string; coordinates: unknown }) => {
+      const polys = (g.type === "Polygon" ? [g.coordinates] : g.coordinates) as number[][][][];
+      const dans = (a: number[][]) => {
+        let d = false;
+        for (let i = 0, j = a.length - 1; i < a.length; j = i++) if ((a[i][1] > p[1]) !== (a[j][1] > p[1]) && p[0] < ((a[j][0] - a[i][0]) * (p[1] - a[i][1])) / (a[j][1] - a[i][1]) + a[i][0]) d = !d;
+        return d;
+      };
+      return polys.some((poly) => dans(poly[0]) && !poly.slice(1).some(dans));
+    };
+    let parcelles = 0;
+    for (const c of CAS) {
+      const x = fixture(c);
+      const l = lireReel(c);
+      if (l.grain === "parcelle") {
+        parcelles++;
+        assert.ok(x.parcelle && contient([x.ban.lon, x.ban.lat], x.parcelle.geometry as never), `${c} : parcelle attribuée sans contenir le point`);
+      }
+    }
+    assert.ok(parcelles >= 15, `${parcelles} lectures à la parcelle`);
+  });
+
   test("Corse-du-Sud : le code 2A est reconnu comme département couvert", () => {
     const l = lireReel("ajaccio-napoleon", { sansParcelle: true });
     assert.equal(l.departement, "2A");
@@ -715,7 +821,7 @@ describe("7. Les adresses réelles (BAN et cadastre du 28/10/2026, tuiles de l'�
   test("La Teste-de-Buch en zone : le Logement dit le fait, la vérification et l'arrêté de Gironde du 17 octobre 2025", () => {
     const t = rendreLogement(lireReel("la-teste-pyla-en-zone"));
     assert.match(t, /Débroussaillement Terrain dans le zonage publié/);
-    assert.match(t, /Selon le zonage publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire\. Qui doit l'entretenir dépend de la situation \(le plus souvent le propriétaire de la construction\)/);
+    assert.match(t, /Selon le zonage informatif publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire\. Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine d'un plan local d'urbanisme/);
     assert.match(t, /Gironde : zonage de l'IGN corrigé par la préfecture, à partir d'une carte des bois de 2021 ; arrêté préfectoral du 17 octobre 2025 \(date indiquée par la base/);
     sansInterdit(t);
   });

@@ -9,11 +9,19 @@
  *   <édition>/manifest.json            le manifeste de l'édition (couverture, profils, tuiles et empreintes)
  *   courant.json                       LE POINTEUR : l'édition que lit l'application
  *
- * ── LA PUBLICATION EST ATOMIQUE ──────────────────────────────────────────────────────────────────────
- *  1. `envoyer` dépose les tuiles puis le manifeste sous un préfixe NEUF : l'application ne les voit pas.
+ * ── LA PUBLICATION EST ATOMIQUE, ET UNE ÉDITION PUBLIÉE EST IMMUABLE (revue indépendante du 29/10/2026) ─────
+ *  1. `envoyer` dépose les tuiles puis le manifeste sous le préfixe de l'édition. Il ne REMPLACE JAMAIS rien :
+ *     - un manifeste déjà en ligne pour cette édition doit être identique à l'octet, sinon l'envoi est refusé
+ *       avant toute écriture (c'est le cas d'une édition active qu'on tenterait de modifier) ;
+ *     - une tuile déjà en ligne doit être identique (taille et SHA-256), sinon refus avant toute écriture ;
+ *     - les dépôts se font sans écrasement (`x-upsert: false`) : même une course entre deux envois ne réécrit rien.
+ *     Une reprise après interruption est donc idempotente : elle ne dépose que ce qui manque, et relit tout.
+ *     Un contenu différent pour le même millésime IGN se publie sous une RÉVISION (`2026-03-01.2`, construite par
+ *     `construire.py --revision 2`), c'est-à-dire sous un préfixe neuf.
  *  2. `basculer` vérifie que chaque tuile du manifeste est en ligne, avec la taille et le SHA-256 attendus, puis
- *     réécrit le pointeur. C'est la seule écriture que l'application voit ; elle la lit dans les dix minutes.
- *  3. `basculer --edition <ancienne>` est le retour arrière : l'ancien préfixe est toujours là.
+ *     réécrit le pointeur `courant.json`. C'est la SEULE écriture qui remplace un objet, et la seule que
+ *     l'application voit ; elle la lit dans les dix minutes.
+ *  3. `basculer --edition <ancienne>` est le retour arrière : l'ancien préfixe est toujours là, inchangé.
  *  4. `purger` efface les éditions ni courantes ni parmi les `--garder` plus récentes (2 par défaut).
  *
  * ── LA GARDE DE PRODUCTION ───────────────────────────────────────────────────────────────────────────
@@ -31,7 +39,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { FORMAT_TUILES_DEBROUSSAILLEMENT, manifesteValide } from "../../src/lib/debroussaillement.ts";
+import { EDITION, FORMAT_TUILES_DEBROUSSAILLEMENT, manifesteValide } from "../../src/lib/debroussaillement.ts";
 
 export const PROJETS = { test: "atvknbgahcuovcyqapfx", production: "xkewgsccadjmondzmjxj" };
 export const BUCKET = "debroussaillement";
@@ -59,7 +67,9 @@ export function client(url, cle, f = fetch) {
   }
   return {
     async deposer(chemin, octets, type, remplacer = false) {
-      // Une tuile est immuable : elle peut rester en cache. Le pointeur et le manifeste, jamais.
+      // Seul le pointeur se remplace : toute autre écriture se fait sans écrasement (édition immuable).
+      if (remplacer && chemin !== "courant.json") throw new Error(`${chemin} : seul courant.json peut être remplacé`);
+      // Tuiles et manifestes sont immuables : ils peuvent rester en cache. Le pointeur, seul objet remplacé, jamais.
       const cache = remplacer ? "no-cache" : "max-age=86400";
       const res = await appel("POST", `/object/${BUCKET}/${chemin}`, octets, { "Content-Type": type, "x-upsert": remplacer ? "true" : "false", "Cache-Control": cache });
       if (!res.ok) throw new Error(`${chemin} : HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
@@ -111,29 +121,48 @@ function verifierOctets(b, attendu, chemin) {
   if (!b || b.length !== attendu.octets || sha256(b) !== attendu.sha256) throw new Error(`intégrité : ${chemin}, taille ou SHA-256 différent de la construction`);
 }
 
+/** Erreur de publication : l'envoi est refusé, rien n'a été écrit (ou seulement des tuiles absentes et vérifiées). */
+export class RefusPublication extends Error {}
+
 export async function envoyer(c, source) {
-  const m = JSON.parse(await fs.readFile(path.join(source, "manifest.json"), "utf8"));
+  const brutLocal = await fs.readFile(path.join(source, "manifest.json"));
+  const m = JSON.parse(brutLocal.toString("utf8"));
   if (!manifesteValide(m)) throw new Error("manifeste local illisible");
   const fichiers = fichiersDuManifeste(m);
+  // 1. Le manifeste en ligne, s'il existe, doit être celui-ci, à l'octet. Sinon : refus, AVANT toute écriture.
+  const pointeur = await c.lire("courant.json");
+  const active = pointeur ? JSON.parse(pointeur.toString("utf8")).edition : null;
+  const distant = await c.lire(`${m.edition}/manifest.json`);
+  if (distant && !distant.equals(brutLocal)) {
+    throw new RefusPublication(`${m.edition} : déjà publiée avec un autre manifeste${active === m.edition ? " (c'est l'édition ACTIVE)" : ""} ; une édition publiée ne se modifie pas : reconstruire sous une révision (construire.py --revision N)`);
+  }
+  // 2. Les tuiles déjà en ligne doivent être identiques. Toutes sont vérifiées avant le premier dépôt.
   const deja = new Set((await c.lister(`${m.edition}/t/`)).map((o) => o.nom));
+  for (const { chemin, attendu } of fichiers) verifierOctets(await fs.readFile(path.join(source, "t", path.basename(chemin))), attendu, chemin);
+  await parallele(fichiers.filter(({ chemin }) => deja.has(path.basename(chemin))), async ({ chemin, attendu }) => {
+    const b = await c.lire(chemin);
+    if (!b || b.length !== attendu.octets || sha256(b) !== attendu.sha256) throw new RefusPublication(`${chemin} : déjà en ligne avec un autre contenu ; une édition publiée ne se modifie pas : reconstruire sous une révision`);
+  });
+  // 3. Dépôt de ce qui manque, sans écrasement, puis relecture de chaque octet.
   let envoyes = 0, octets = 0;
   const t0 = Date.now();
-  await parallele(fichiers, async ({ chemin, attendu }) => {
+  await parallele(fichiers.filter(({ chemin }) => !deja.has(path.basename(chemin))), async ({ chemin, attendu }) => {
     const b = await fs.readFile(path.join(source, "t", path.basename(chemin)));
-    verifierOctets(b, attendu, chemin);
+    await c.deposer(chemin, b, "application/gzip");
+    envoyes++;
     octets += b.length;
-    if (!deja.has(path.basename(chemin))) {
-      await c.deposer(chemin, b, "application/gzip");
-      envoyes++;
-    }
-    // Reprise ET nouvel envoi : relire les octets, jamais se fier au nom ou à la taille seule.
     verifierOctets(await c.lire(chemin), attendu, chemin);
   });
-  await c.deposer(`${m.edition}/manifest.json`, Buffer.from(JSON.stringify(m)), "application/json", true);
-  console.log(JSON.stringify({ edition: m.edition, tuiles: fichiers.length, envoyes, octets, secondes: Math.round((Date.now() - t0) / 1000) }));
+  // 4. Le manifeste en dernier, sans écrasement : son absence signale un envoi inachevé, que la reprise complète.
+  if (!distant) await c.deposer(`${m.edition}/manifest.json`, brutLocal, "application/json");
+  const relu = await c.lire(`${m.edition}/manifest.json`);
+  if (!relu || !relu.equals(brutLocal)) throw new Error(`${m.edition} : manifeste relu différent de celui envoyé`);
+  console.log(JSON.stringify({ edition: m.edition, tuiles: fichiers.length, envoyes, octets, deja: deja.size, secondes: Math.round((Date.now() - t0) / 1000) }));
+  return { envoyes, deja: deja.size };
 }
 
 export async function basculer(c, edition) {
+  if (!EDITION.test(edition)) throw new Error(`édition invalide : ${edition}`);
   const brut = await c.lire(`${edition}/manifest.json`);
   if (!brut) throw new Error(`${edition} : aucun manifeste en ligne`);
   const m = JSON.parse(brut.toString("utf8"));
@@ -144,9 +173,9 @@ export async function basculer(c, edition) {
   console.log(`pointeur : ${avant ? JSON.parse(avant.toString("utf8")).edition : "(aucun)"} -> ${edition}`);
 }
 
-async function etat(c) {
+export async function etat(c) {
   const pointeur = await c.lire("courant.json");
-  const editions = (await c.lister("")).filter((o) => /^\d{4}-\d{2}-\d{2}$/.test(o.nom)).map((o) => o.nom).sort();
+  const editions = (await c.lister("")).filter((o) => EDITION.test(o.nom)).map((o) => o.nom).sort();
   const detail = {};
   for (const v of editions) {
     const objets = await c.lister(`${v}/t/`);
