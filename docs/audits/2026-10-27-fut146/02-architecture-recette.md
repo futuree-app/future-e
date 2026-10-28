@@ -159,6 +159,17 @@ Logement à 814 px sur bureau dans le conteneur de page.
 | M5 | Assertion du cas « à 80 m » rendue complète | |
 | M6, M7 | Documentation corrigée ; « le certificat d'urbanisme signale la zone de bruit » (L112-13), sans « et ses règles » | |
 
+### Contre-épreuve du 28/10/2026 (sur 350cc394) : trois défauts de restitution
+
+Le calcul était validé ; seul le texte change (`bruit-aerien-texte.ts`). Les lectures des adresses de la revue
+(zones, aérodromes, parts, grain, statut, source) sont figées par un test et n'ont pas bougé.
+
+| Constat | Correction | Test (section 6, échoue sur 350cc394) |
+|---|---|---|
+| A. 4, 10 bis et 14 rue Ampère à Gonesse : PGS de Roissy et du Bourget calculés, seul Le Bourget dit | Autour et Logement citent chaque aérodrome dont le PGS couvre l'adresse ou la parcelle ; « l'exploitant de chaque aéroport instruit les demandes » ; l'aide reste « peut exister ». Sans PEB, titre « Plans de gêne sonore des aérodromes de … et de … » | « A : rue Ampère » |
+| B. 10 bis rue Ampère : « en zone C de Roissy, à moins de 50 m de la zone C » | Une zone voisine d'un autre aérodrome porte le nom de son plan (« de la zone C du plan d'exposition au bruit de l'aérodrome de Paris-Le Bourget ») ; une voisine du même plan reste dite sans répétition. À la parcelle, la proximité du point n'est pas dite | « B : 10 bis rue Ampère », Bastia |
+| C. Ouges (36 rue Charles de Gaulle) : « incertain » par l'emprise de la zone A de Dijon, texte « à moins de 50 m » / « tout près » alors que le tracé est à ~700 m | `incertain` conservé. L'écran : « le tracé publié par la DGAC ne permet pas de conclure de façon fiable ». La cause (forme que le calcul ne sait pas mesurer) passe dans « En savoir plus », sans distance | « C : Ouges » (distance réelle au tracé vérifiée > 600 m) |
+
 ## 4. Réserves
 
 1. **Licence** : aucune déclarée par la DGAC ; la Licence Ouverte s'applique par défaut selon les CGU de
