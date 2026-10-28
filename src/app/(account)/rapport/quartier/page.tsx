@@ -36,6 +36,7 @@ import { communeParent } from "@/lib/plm";
 import { registersByTarget } from "@/lib/decision/evidence-registers";
 import { EchelleVisual } from "@/components/report/EchelleVisual";
 import { bindOrphans } from "@/lib/typography";
+import { getMemoireIncendies } from "@/lib/bdiff-incendies-commune";
 
 export default async function RapportQuartierPage(
   { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
@@ -78,7 +79,14 @@ export default async function RapportQuartierPage(
   // du lecteur (`snapshotFige`, plus bas). C'est une preuve du dossier de décision, propre à un
   // compte ; le snapshot Territoire, lui, est le même pour tous les lecteurs de la commune.
   const displayName = communeName ?? "votre commune";
-  const snapshot = inseeCode ? await loadTerritoireSnapshot(inseeCode, displayName) : null;
+  // FUT-147 · LA MÉMOIRE DES INCENDIES ENREGISTRÉS EST LUE À CÔTÉ DU SNAPSHOT, JAMAIS DEDANS. Le snapshot
+  // sert d'empreinte au cache de la synthèse rédigée (`synthesisCacheKey`) ; ce fait n'est pas envoyé au
+  // modèle (arbitrage C6 du 28/10/2026), il ne doit donc pas invalider une synthèse encore valide. Il ne
+  // vit que dans la carte feu, avec ses phrases déterministes (`incendies-observes.ts`).
+  const [snapshot, incendies] = await Promise.all([
+    inseeCode ? loadTerritoireSnapshot(inseeCode, displayName) : Promise.resolve(null),
+    inseeCode ? getMemoireIncendies(inseeCode) : Promise.resolve(null),
+  ]);
   const store = territoireStore();
   // PANNE DE PERSISTANCE = PAS DE LECTURE ENRICHIE, JAMAIS UN ÉCRAN CASSÉ : la synthèse
   // déterministe, calculée ici depuis le même snapshot, reste affichée.
@@ -306,7 +314,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

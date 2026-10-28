@@ -127,3 +127,6 @@ Futur.e Design System.zip
 # Dossier de preuve « activité conservée » (France Travail) : journal commercial, chronologie et
 # pièces. Document administratif personnel, tenu sur le drive du porteur, hors du dépôt de code.
 docs/france-travail-activite-conservee/
+
+# FUT-147 : exports BDIFF bruts (reproduits par scripts/bdiff/telecharger.mjs, manifeste versionné à part)
+/data/source/bdiff/

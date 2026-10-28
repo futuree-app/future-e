@@ -1265,6 +1265,12 @@ export function OuVivreClient() {
                     </p>
                   )}
 
+                  {/* FUT-147 : un incendie d'au moins 10 ha parti de la commune (BDIFF), quand la priorité feu est
+                      dans le projet. Un fait passé, jamais un niveau ; absent pour les autres communes. */}
+                  {r.incendiesObserves && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-label/75">{bindOrphans(r.incendiesObserves)}</p>
+                  )}
+
                   {/* Compromis : la tension assumée, ce qui distingue le territoire et donne
                       envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)

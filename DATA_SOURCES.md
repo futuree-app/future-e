@@ -20,6 +20,15 @@ Les données externes sont consommées côté serveur uniquement (`"use server"`
 - **Données :** 28 indicateurs (chaleur, précipitations, sécheresse, gel) sur 3 scénarios (GWL+1.5°C / +2°C / +3°C)
 - **Cache :** Statique (build)
 
+### BDIFF : incendies de forêt enregistrés (FUT-147)
+- **Source :** Base de données des incendies de forêt en France (ministère de l'Agriculture, IGN), bdiff.agriculture.gouv.fr, campagnes 2006-2025, feux de forêt (type F)
+- **Format :** table versionnée `data/bdiff-incendies.json`, construite hors ligne (`scripts/bdiff/telecharger.mjs` puis `scripts/bdiff/construire.mts`)
+- **Lib :** `src/lib/data/bdiff-incendies.ts` (pur), `src/lib/bdiff-incendies-commune.ts` (serveur), phrases dans `src/lib/incendies-observes.ts`
+- **Grain :** commune de DÉPART du feu, surface totale du feu ; jamais une surface brûlée dans la commune, jamais une absence de feu
+- **Affichage :** volet « Conditions favorables au feu » (Territoire), ligne de carte et ligne « Incendies observés » (comparateur). Aucun score ne la lit ; hors IA
+- **Licence :** contradiction documentée (data.gouv.fr : Licence Ouverte 2.0 ; mentions de l'export : usage commercial exclu) ; décision du porteur du 28/10/2026, cf. `docs/audits/2026-10-28-fut147-bdiff.md`
+- **Mise à jour :** annuelle, après validation de la campagne par le producteur
+
 ### Géorisques — Risques naturels et technologiques
 - **Source :** API Géorisques v1 (GASPAR) + v2 (point/parcelle)
 - **URL :** `https://georisques.gouv.fr/api/v1/`

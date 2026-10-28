@@ -50,6 +50,11 @@ import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, villeDeArrondissement, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
 import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
+import { chargerTableIncendies } from "@/lib/bdiff-incendies-commune";
+import { memoireIncendiesDeLaCommune, type TableIncendies } from "@/lib/data/bdiff-incendies";
+import {
+  ligneCarteIncendies, celluleIncendies, ligneIncendiesUtile, AIDE_INCENDIES_OBSERVES, LIBELLE_INCENDIES_OBSERVES,
+} from "@/lib/incendies-observes";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -201,6 +206,10 @@ export type MatchResult = {
   // FUT-129 : les faits d'inondation de la commune, quand le lecteur a déclaré cette priorité. Une ligne
   // pour la carte, et les phrases complètes pour la synthèse. Jamais un niveau de risque.
   inondation?: { ligne: string; historique: string; plans: string | null; sinistresFrequents: boolean };
+  // FUT-147 : un incendie d'au moins 10 ha dont le départ est enregistré sur la commune (BDIFF), quand la
+  // priorité feu est dans le projet. Un fait passé, hors score, hors tri ; absent pour toutes les autres
+  // communes (aucun signal rassurant). Jamais transmis à la synthèse rédigée ni à AskFuture.
+  incendiesObserves?: string;
   // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
   // géométrie (l'isochrone), et l'itinéraire n'a pas tranché pour elle. Elle est proposée (l'exclure
   // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais
@@ -1640,6 +1649,7 @@ function buildSpatialContext(cols: (IndexCommune | null)[]): string | null {
 export function buildComparaisonComplete(
   picks: MatchResult[],
   byInsee: Map<string, IndexCommune>,
+  incendies?: TableIncendies | null,
 ): ComparaisonComplete {
   const trio = picks.slice(0, 3);
   // FUT-32 : UNE COMMUNE NE SE COMPARE À RIEN. Avec un seul résultat, cette fonction écrivait « Les deux
@@ -1931,6 +1941,24 @@ export function buildComparaisonComplete(
 
   const spatialContext = buildSpatialContext(cols);
 
+  // FUT-147 (C4) : « INCENDIES OBSERVÉS », UNE LIGNE DISTINCTE, juste après « Météo propice aux feux ».
+  // Insérée APRÈS que tout le reste est calculé : sans gagnant (`neutre`), elle ne peut nourrir ni la
+  // synthèse d'un thème, ni le résumé, ni la ligne de fracture, et elle ne justifie pas le palier météo,
+  // qui ne la lit pas. Elle n'existe que si une commune du trio porte un feu d'au moins 10 ha.
+  if (incendies) {
+    const memoires = trio.map((r) => memoireIncendiesDeLaCommune(incendies, r.insee));
+    const risques = themes.find((t) => t.id === "risques");
+    const iFeu = risques?.lignes.findIndex((l) => l.id === "feu") ?? -1;
+    if (risques && iFeu >= 0 && ligneIncendiesUtile(memoires)) {
+      risques.lignes.splice(iFeu + 1, 0, {
+        id: "incendies_observes",
+        label: LIBELLE_INCENDIES_OBSERVES,
+        aide: AIDE_INCENDIES_OBSERVES,
+        avantage: { type: "neutre" },
+        cellules: trio.map((r, i) => ({ insee: r.insee, ...celluleIncendies(memoires[i]!) })),
+      });
+    }
+  }
   return { resume, arbitrage, spatialContext, divergence, themes };
 }
 
@@ -3204,7 +3232,7 @@ export async function seedComparaison(
   );
   for (const r of picks) r.distinctive = distinctiveMap[r.insee] ?? null;
 
-  const comparaison = buildComparaisonComplete(picks, byInsee);
+  const comparaison = buildComparaisonComplete(picks, byInsee, await chargerTableIncendies());
   return { trio: picks, comparaison, ignores };
 }
 
@@ -3232,6 +3260,9 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   const parsed = await avecDerivesDAncre(parsedDuLecteur);
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
+  // FUT-147 : les incendies enregistrés (BDIFF), AFFICHÉS seulement. Aucun score ne les lit : ils n'entrent
+  // qu'après le classement, dans la ligne de carte et le Dossier comparatif. `null` si la table manque.
+  const tableIncendies = await chargerTableIncendies();
 
   const hc = parsed.hardConstraints ?? {};
 
@@ -3346,6 +3377,8 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   // se mesure sur au moins une candidate, ou si une orientation géographique souple incline le classement.
   // Un périmètre DUR (une zone, la montagne en filtre) borne l'exploration sans la classer.
   const inondationDeclaree = prefs.some((p) => p.key === "faible_risque_inondation");
+  // FUT-147 (C3) : la priorité feu fait partie du projet (déclarée, jamais un critère de base).
+  const feuDeclare = prefs.some((p) => p.key === "faible_risque_feu" && !p.baseline);
   const orientationSouple = zone.soft.length > 0
     || (montagne != null && montagne.strength !== "hard")
     || (reliefProche != null && reliefProche.strength !== "hard");
@@ -3417,6 +3450,10 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     // Des priorités déclarées sont mesurées ici, et aucune n'est favorable. Une priorité non mesurée n'est ni
     // l'un ni l'autre : une commune sans aucune mesure n'est pas marquée (sa couverture le dit déjà).
     if (visible.length > 0 && favorables.length === 0) built.sansPrioriteFavorable = true;
+    if (feuDeclare && tableIncendies) {
+      const ligne = ligneCarteIncendies(memoireIncendiesDeLaCommune(tableIncendies, c.insee), c.nom, true);
+      if (ligne) built.incendiesObserves = ligne;
+    }
     if (inondationDeclaree) {
       const h = historiqueInondation(c.historiqueInondation);
       built.inondation = {
@@ -3649,7 +3686,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   const pistesPicks = deduped.slice(3, 6);
   if (pistesPicks.length) narrer(pistesPicks);
 
-  const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee);
+  const comparaisonComplete = buildComparaisonComplete(shownPicks, byInsee, tableIncendies);
   const resteBoundary = scored.filter((s) => s.boundary).length;
 
   return {
