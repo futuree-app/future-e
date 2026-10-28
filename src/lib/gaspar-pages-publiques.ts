@@ -33,9 +33,13 @@ export function etatBlocGaspar(lecture: unknown, nombre: number): EtatBlocGaspar
   return nombre > 0 ? "disponible" : "vide";
 }
 
-/** Le libellé et la phrase de l'état `indisponible`. Ils ne disent rien du risque, ni dans un sens ni dans l'autre. */
+/**
+ * Le libellé et la phrase de l'état `indisponible`. Ils ne disent rien du risque, ni dans un sens ni dans l'autre.
+ * La phrase date la panne de la dernière génération de la page : le rendu est gardé 24 h (ISR), elle peut
+ * donc s'afficher bien après le moment où GASPAR n'a pas répondu.
+ */
 export const GASPAR_INDISPONIBLE = {
   libelle: "Donnée temporairement indisponible",
   phrase: (objet: string) =>
-    `La base GASPAR (Géorisques) n'a pas répondu au chargement de cette page : ${objet} n'ont pas pu être lus. Rien n'en est déduit ici. Vous pouvez les consulter sur georisques.gouv.fr.`,
+    `Lors de la dernière mise à jour de cette page, la base GASPAR (Géorisques) n'a pas répondu : ${objet} n'ont pas pu être lus. Rien n'en est déduit ici. Vous pouvez les consulter sur georisques.gouv.fr.`,
 } as const;

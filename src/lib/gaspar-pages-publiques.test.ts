@@ -38,9 +38,21 @@ test("FUT-159 · trois états par bloc : panne, source lue sans fait, contenu", 
 test("FUT-159 · la phrase de panne nomme la source et ne dit rien du risque", () => {
   const p = GASPAR_INDISPONIBLE.phrase("les arrêtés de catastrophe naturelle pour inondation");
   assert.equal(GASPAR_INDISPONIBLE.libelle, "Donnée temporairement indisponible");
-  assert.match(p, /GASPAR \(Géorisques\) n'a pas répondu/);
+  assert.equal(
+    p,
+    "Lors de la dernière mise à jour de cette page, la base GASPAR (Géorisques) n'a pas répondu : les arrêtés de catastrophe naturelle pour inondation n'ont pas pu être lus. Rien n'en est déduit ici. Vous pouvez les consulter sur georisques.gouv.fr.",
+  );
   assert.match(p, /les arrêtés de catastrophe naturelle pour inondation n'ont pas pu être lus/);
   assert.doesNotMatch(p, /aucun|pas de risque|0 /i);
+});
+
+test("FUT-159 · la phrase date la panne de la dernière génération de la page, gardée 24 h, jamais de la visite", () => {
+  const p = GASPAR_INDISPONIBLE.phrase("les risques officiels");
+  assert.match(p, /^Lors de la dernière mise à jour de cette page, /);
+  assert.doesNotMatch(p, /chargement|à l'instant|en ce moment|actuellement/i);
+  for (const page of PAGES) {
+    assert.match(readFileSync(page, "utf8"), /export const revalidate = 86400/, `${page} : si le cache change, revoir la phrase`);
+  }
 });
 
 test("FUT-159 · chaque page affiche les deux blocs selon leur état, jamais selon le seul compte", () => {
