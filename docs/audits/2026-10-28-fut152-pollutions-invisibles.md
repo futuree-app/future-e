@@ -169,7 +169,7 @@ Le diagnostic complet est dans `docs/audits/2026-10-28-fut158-incident-georisque
    - Eau : un réseau, un repli communal ou un paramètre qui annonce `count > 0` sans ligne exploitable rend la lecture `partiel`. Le réseau est dit « résultat indisponible », jamais « aucun prélèvement publié ».
    - Écran : un partiel sans fiche n'affiche ni la phrase d'absence ni « 0 ». Il dit : « La source annonce des fiches qui n'ont pas pu être lues : rien ne peut en être conclu. » Avec des fiches, le compte devient « au moins N ».
 2. **Eau, au-delà de 50 réseaux.** Toutes les pages de `communes_udi` sont lues (50 par page, 20 pages au plus). Si une page échoue, si le plafond coupe la lecture ou si une ligne annoncée n'a pas de réseau, la liste lue est montrée et la lecture est dite partielle, sans mise en cache.
-3. **ATMO, JSON inattendu.** `enregistrementsAtmo` n'accepte que les deux formes documentées : un tableau, ou un GeoJSON dont chaque élément porte ses `properties`. Toute autre forme lève une erreur, et un `code_qual` hors de 1 à 6 aussi, sauf 0 qui signifie « indice absent » dans la nomenclature ATMO. La réponse est alors 502, jamais 404. Le cache de données Next est retiré : il gardait une heure une réponse 200 au contenu inattendu. Seule une lecture réussie est gardée.
+3. **ATMO, JSON inattendu.** `enregistrementsAtmo` n'accepte que les deux formes documentées : un tableau, ou un GeoJSON dont chaque élément porte ses `properties`. Toute autre forme lève une erreur, et un `code_qual` hors de 1 à 6 aussi, sauf 0 qui signifie « indice absent » dans la nomenclature ATMO. La réponse est alors 502, jamais 404. Le cache de données Next est retiré : il gardait une heure une réponse 200 au contenu inattendu. (Contre-revue : la mémorisation des lectures réussies est aussi retirée, voir la section 7.)
 4. **Géorisques, transport commun.** `server/sites-sols.ts` envoie `EN_TETES_GEORISQUES` (dont `Accept-Encoding: identity`) et trace `georisques_echec`, comme les autres appels. Le garde-fou FUT-158 reconnaît désormais un appel par `SITES_SOLS_SOURCE.api`, et son exclusion du proxy SIS est retirée.
 
 **Contre-épreuves.**
@@ -193,3 +193,32 @@ Le diagnostic complet est dans `docs/audits/2026-10-28-fut158-incident-georisque
 - un seul établissement est proche de la limite, à 9,92 km.
 
 Gramat avait le même écart de point, sans effet sur le compte (1 / 3). Les deux points sont corrigés dans le test.
+
+## 7. Contre-revue du 29/10/2026 : ATMO ne garde plus aucun résultat
+
+**Défaut** (sur `11009c34`) : `lire()` gardait toute la journée la promesse résolue. Une absence restait 404 après la publication d'ATMO, et l'indice de la veille restait servi après celui du jour.
+
+**Correction** (`src/lib/atmo.ts`, `src/app/api/atmo/[insee]/route.ts`) :
+
+- **Plus aucune mémorisation des résultats.** Il reste seulement la déduplication des lectures simultanées : la clé est la commune, et l'entrée est retirée dès que l'appel aboutit ou échoue. Le jeton d'authentification n'a pas été modifié.
+- **Durée de conservation HTTP** : `public, s-maxage=900, stale-while-revalidate=300`, soit 20 minutes au plus. ATMO publie une fois par jour, en début d'après-midi, l'indice du jour et celui du lendemain. Il peut aussi le corriger dans la journée. L'ancien `stale-while-revalidate=86400` pouvait servir l'indice de la veille jusqu'à 25 h. Le 404 et le 502 sont en `no-store` ; le 502 n'avait aucun en-tête.
+- **Date effective.** Le jour demandé est le jour civil de Paris (`jourParis`), et non plus le jour UTC, qui retardait d'un jour entre minuit et 1 h (2 h en été). La date affichée est la `date_ech` de l'indice. Un indice daté d'un autre jour que celui demandé est une réponse inattendue, donc 502. Relevé réel du 29/10 : l'indice du 29 était publié dès le 28 à 15 h 44.
+
+**Contre-épreuves** (6 tests, horloge simulée, même instance, vraies fonctions et vraie route). Les six échouent sur `11009c34` :
+
+| Test | Résultat sur `11009c34` |
+|---|---|
+| Absence, puis publication 2 h plus tard → 200 et nouvel appel | 404 maintenu |
+| Indice de la veille, puis celui du jour 2 h plus tard → bonne date, un seul nouvel appel | indice du 28 servi |
+| Réponse inattendue (502, `no-store`), puis source rétablie → 200 | 502 sans `no-store` |
+| Deux lectures simultanées → 1 appel ; lecture suivante → nouvel appel | aucun nouvel appel |
+| `getAtmoForCommune` (page chaleur, aperçu de l'accueil) : indice, puis `null` en absence et en panne | indice gardé pendant l'absence |
+| Expiration ≤ 20 min, jour de Paris à 0 h 30 et en heure d'été, indice d'un autre jour refusé | 404 (jour UTC) |
+
+**Réel, même serveur.** Une réponse inattendue injectée donne 502 avec `no-store`. Le service rétabli donne aussitôt 200 : indice du 29/10 à Metz, « Bon », Atmo Grand Est, en-tête `s-maxage=900, stale-while-revalidate=300`.
+
+**Recette navigateur** : 58 vérifications sur 58, sur ordinateur et sur mobile, dont l'indisponibilité ATMO puis son retour.
+
+**Contrôles** : `tsc` et `eslint` : 0 erreur. FUT-152 et FUT-158 : 48 tests sur 48. `npm test` : 3 857 tests, 0 échec.
+
+**Hors périmètre, signalé.** La page `/chaleur/[insee_code]` reste générée pour 24 h (ISR, maintenu par décision du 28/10). Son encart ATMO peut donc dater de la veille, mais il affiche la date de l'indice.

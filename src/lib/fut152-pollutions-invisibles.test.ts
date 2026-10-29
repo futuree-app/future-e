@@ -10,7 +10,7 @@
 // E. Le composant : plus aucune insertion de HTML, et les formulations arbitrées.
 //
 // Aucun appel réseau : `fetch` est un double. Les fixtures citent des lignes réelles des exports (28/10/2026).
-import { test, before, beforeEach } from "node:test";
+import { test, before, beforeEach, mock } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { register } from "node:module";
@@ -411,7 +411,7 @@ test("C · une panne ATMO répond 502, une absence 404, et la panne n'est pas m�
   doubler((u) => {
     if (enPanne) throw new TypeError("fetch failed");
     if (u.pathname.endsWith("/login")) return Response.json({ token: "t" });
-    return Response.json({ features: [{ properties: { date_ech: "2026-10-28", code_qual: 2, source: "Atmo Grand Est" } }] });
+    return Response.json({ features: [{ properties: { date_ech: ATMO.jourParis(), code_qual: 2, source: "Atmo Grand Est" } }] });
   });
   const appel = () => ATMOR.GET(new Request("http://localhost/api/atmo/57463"), { params: Promise.resolve({ insee: "57463" }) });
   assert.equal((await appel()).status, 502);
@@ -429,7 +429,7 @@ test("C · une panne ATMO répond 502, une absence 404, et la panne n'est pas m�
 test("C · revue 3 · un JSON inattendu est une panne (502), jamais une absence, et n'est pas mémorisé", async () => {
   process.env.ATMO_USERNAME = "u";
   process.env.ATMO_PASSWORD = "p";
-  const bon = { features: [{ properties: { date_ech: "2026-10-29", code_qual: 3, source: "Airparif" } }] };
+  const bon = { features: [{ properties: { date_ech: ATMO.jourParis(), code_qual: 3, source: "Airparif" } }] };
   const inattendus: unknown[] = [
     { error: "quota dépassé" }, {}, { features: "x" }, { features: [null] }, { features: [{ geometry: {} }] },
     [1, 2], "texte", null, { features: [{ properties: { code_qual: 9 } }] }, { features: [{ properties: { code_qual: null } }] },
@@ -461,6 +461,137 @@ test("C · revue 3 · aucune réponse ATMO n'entre dans le cache de données Nex
   const src = readFileSync(new URL("./atmo.ts", import.meta.url), "utf8").replace(/^\s*(\/\/|\*).*$/gm, "");
   assert.doesNotMatch(src, /revalidate/);
   assert.match(src, /cache: "no-store"/);
+});
+
+// CONTRE-ÉPREUVES DE LA CONTRE-REVUE DU 29/10/2026 : AUCUN RÉSULTAT ATMO N'EST GARDÉ PAR L'INSTANCE.
+// Sur le SHA refusé (`11009c34`), la promesse résolue restait en mémoire toute la journée : les deux premières
+// échouent. Horloge simulée (`mock.timers`, Date seulement), même instance, `fetch` doublé.
+
+/** Un ATMO simulé : `publie[jour]` est l'enregistrement publié pour ce jour (absent : rien). Note chaque lecture. */
+function atmoSimule(publie: Record<string, M | M[] | undefined>) {
+  const lectures: string[] = [];
+  doubler((u) => {
+    if (u.pathname.endsWith("/login")) return Response.json({ token: "t" });
+    const filtre = JSON.parse(decodeURIComponent(u.pathname.split("/").pop()!)) as M;
+    const jour = filtre.date_ech.value as string;
+    lectures.push(jour);
+    const r = publie[jour];
+    return Response.json(Array.isArray(r) ? r : { features: r ? [{ properties: r }] : [] });
+  });
+  return lectures;
+}
+const atmoRoute = (insee: string) => ATMOR.GET(new Request(`http://localhost/api/atmo/${insee}`), { params: Promise.resolve({ insee }) });
+const DEUX_HEURES = 2 * 3600 * 1000;
+
+function horloge(iso: string) {
+  mock.timers.enable({ apis: ["Date"], now: new Date(iso).getTime() });
+  return { avancer: (ms: number) => mock.timers.tick(ms), fin: () => mock.timers.reset() };
+}
+
+test("C · contre-revue 1 · absence (404), puis publication deux heures plus tard : 200 et nouvel appel à la source", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-10-29T09:00:00+01:00");
+  try {
+    const publie: Record<string, M | undefined> = {};
+    const lectures = atmoSimule(publie);
+    const r1 = await atmoRoute("57201");
+    assert.equal(r1.status, 404);
+    assert.equal(r1.headers.get("cache-control"), "no-store");
+    const avant = lectures.length;
+    h.avancer(DEUX_HEURES);
+    publie["2026-10-29"] = { date_ech: "2026-10-29", code_qual: 2, source: "Atmo Grand Est" };
+    const r2 = await json(await atmoRoute("57201"));
+    assert.equal(r2.status, 200);
+    assert.equal(r2.corps.date, "2026-10-29");
+    assert.ok(lectures.length > avant, "la source a été relue");
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 2 · indice de la veille, puis celui du jour deux heures plus tard : nouvel appel, bonne date", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-10-29T10:00:00+01:00");
+  try {
+    const publie: Record<string, M | undefined> = { "2026-10-28": { date_ech: "2026-10-28", code_qual: 3, source: "Atmo Grand Est" } };
+    const lectures = atmoSimule(publie);
+    const r1 = await json(await atmoRoute("57202"));
+    assert.equal(r1.corps.date, "2026-10-28", "repli sur la veille, daté de la veille");
+    assert.deepEqual(lectures, ["2026-10-29", "2026-10-28"]);
+    h.avancer(DEUX_HEURES);
+    publie["2026-10-29"] = { date_ech: "2026-10-29", code_qual: 1, source: "Atmo Grand Est" };
+    const r2 = await json(await atmoRoute("57202"));
+    assert.equal(r2.corps.date, "2026-10-29");
+    assert.equal(r2.corps.index.label, "Bon");
+    assert.deepEqual(lectures, ["2026-10-29", "2026-10-28", "2026-10-29"], "un seul nouvel appel, au jour courant");
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 3 · réponse inattendue (502, rien gardé), puis source rétablie : 200 sur la même commune", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-10-29T14:00:00+01:00");
+  try {
+    let casse = true;
+    doubler((u) => {
+      if (u.pathname.endsWith("/login")) return Response.json({ token: "t" });
+      return Response.json(casse ? { error: "quota" } : { features: [{ properties: { date_ech: "2026-10-29", code_qual: 2 } }] });
+    });
+    const r1 = await atmoRoute("57203");
+    assert.equal(r1.status, 502);
+    assert.equal(r1.headers.get("cache-control"), "no-store");
+    casse = false;
+    assert.equal((await atmoRoute("57203")).status, 200);
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 4 · deux lectures simultanées partagent un seul appel ; la suivante relit la source", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-10-29T15:00:00+01:00");
+  try {
+    const lectures = atmoSimule({ "2026-10-29": { date_ech: "2026-10-29", code_qual: 2 } });
+    const [a, b] = await Promise.all([ATMO.lireAtmoCommune("57204"), ATMO.lireAtmoCommune("57204")]);
+    assert.equal(a.etat, "disponible");
+    assert.deepEqual(a, b);
+    assert.equal(lectures.length, 1, "un seul appel pour deux lectures simultanées");
+    await ATMO.lireAtmoCommune("57204");
+    assert.equal(lectures.length, 2, "rien n'est gardé après la fin de l'appel");
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 5 · `getAtmoForCommune` (page chaleur, aperçu de l'accueil) : indice ou `null`, jamais d'exception", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-10-29T15:00:00+01:00");
+  try {
+    atmoSimule({ "2026-10-29": { date_ech: "2026-10-29", code_qual: 4, source: "AtmoSud" } });
+    const ok = await ATMO.getAtmoForCommune("13039");
+    assert.equal(ok.index.label, "Mauvais");
+    assert.equal(ok.date, "2026-10-29");
+    assert.equal(ok.inseeCode, "13039");
+    atmoSimule({});
+    assert.equal(await ATMO.getAtmoForCommune("13039"), null, "absence");
+    doubler(() => { throw new TypeError("fetch failed"); });
+    assert.equal(await ATMO.getAtmoForCommune("13039"), null, "panne");
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 6 · expiration HTTP bornée ; jour de Paris ; un indice d'un autre jour n'est jamais servi", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  // 0 h 30 à Paris le 29/10 (23 h 30 UTC le 28) : le jour demandé est le 29, plus le 28 de l'UTC.
+  const h = horloge("2026-10-28T23:30:00Z");
+  try {
+    assert.equal(ATMO.jourParis(), "2026-10-29");
+    const lectures = atmoSimule({ "2026-10-29": { date_ech: "2026-10-29", code_qual: 2 } });
+    const r = await atmoRoute("57205");
+    assert.equal(r.status, 200);
+    assert.equal(lectures[0], "2026-10-29");
+    const cc = r.headers.get("cache-control")!;
+    const s = Number(/s-maxage=(\d+)/.exec(cc)?.[1]), swr = Number(/stale-while-revalidate=(\d+)/.exec(cc)?.[1]);
+    assert.ok(s > 0 && s <= 900 && swr <= 300, cc);
+    assert.ok(s + swr <= 1200, "un indice n'est jamais servi plus de 20 minutes après sa lecture");
+    // L'API rend un indice daté d'un autre jour que celui demandé : réponse inattendue, 502.
+    atmoSimule({ "2026-10-29": { date_ech: "2026-10-28", code_qual: 2 } });
+    assert.equal((await atmoRoute("57206")).status, 502);
+  } finally { h.fin(); }
+  // Heure d'été : 1 h 30 à Paris le 15/07 = 23 h 30 UTC le 14.
+  assert.equal(ATMO.jourParis(Date.parse("2026-07-14T23:30:00Z")), "2026-07-15");
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════

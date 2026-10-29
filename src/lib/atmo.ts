@@ -149,14 +149,18 @@ export function enregistrementsAtmo(json: unknown): AtmoRawRecord[] {
  * Un enregistrement → l'indice. `null` pour `code_qual` 0, que la nomenclature ATMO réserve à un indice
  * absent ; toute autre valeur hors de l'échelle 1 à 6 est une réponse inattendue, et LÈVE.
  */
-export function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | null {
+export function parseRecord(raw: AtmoRawRecord, inseeCode: string, jourDemande?: string): AtmoAirQuality | null {
   if (raw.code_qual === 0 || raw.code_qual === "0") return null;
   const index = toLevel(raw.code_qual);
   if (!index) throw new ReponseAtmoInattendue(`ATMO : code_qual inattendu (${String(raw.code_qual)})`);
+  // La date affichée est celle de l'indice. Un indice d'un autre jour que celui demandé est une réponse
+  // inattendue : il ne doit jamais être présenté sous la date du jour.
+  const date = typeof raw.date_ech === "string" ? raw.date_ech.slice(0, 10) : "";
+  if (jourDemande && date !== jourDemande) throw new ReponseAtmoInattendue(`ATMO : indice du ${date || "?"} pour le ${jourDemande}`);
 
   return {
     inseeCode,
-    date: raw.date_ech ?? "",
+    date,
     source: typeof raw.source === "string" && raw.source.trim() ? raw.source.trim() : null,
     index,
     pollutants: {
@@ -168,19 +172,30 @@ export function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuali
   };
 }
 
-// ── Load (with yesterday fallback — ATMO updates at 13h Paris) ───────────────
+// ── Load (with yesterday fallback) ─────────────────────────────────────────────
 // FUT-152 : une panne LÈVE, une absence d'indice rend `null`. L'API couvre toutes les communes testées le
 // 28/10/2026 (village de l'Ain, Corse, Réunion, Martinique) : un indice manquant n'est pas un « trou de
 // couverture régional », et une panne ne doit jamais être présentée comme tel.
+//
+// LE JOUR EST CELUI DE PARIS (revue du 29/10/2026). `date_ech` est une date civile française (« 2026-10-29 ») ;
+// le jour UTC retardait d'un jour entre minuit et 1 h (2 h en été), et servait alors l'indice de la veille.
+// Relevé le 29/10/2026 : l'indice du 29 était publié dès le 28 à 15 h 44, celui du 30 pas encore.
+
+/** La date civile à Paris, au format `AAAA-MM-JJ`. */
+export function jourParis(t: number = Date.now()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(t);
+}
+
 async function load(inseeCode: string): Promise<AtmoAirQuality | null> {
-  const today = new Date().toISOString().split("T")[0];
+  const maintenant = Date.now();
+  const today = jourParis(maintenant);
   const records = await fetchRecords(inseeCode, today);
-  const indice = records.length ? parseRecord(records[0], inseeCode) : null;
+  const indice = records.length ? parseRecord(records[0], inseeCode, today) : null;
   if (indice) return indice;
 
-  const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+  const yesterday = jourParis(maintenant - 86_400_000);
   const fallback = await fetchRecords(inseeCode, yesterday);
-  return fallback.length ? parseRecord(fallback[0], inseeCode) : null;
+  return fallback.length ? parseRecord(fallback[0], inseeCode, yesterday) : null;
 }
 
 export type LectureAtmo =
@@ -188,23 +203,21 @@ export type LectureAtmo =
   | { etat: "absent_dans_source" }
   | { etat: "indisponible" };
 
-// ── Public API (with in-memory dedup cache keyed on insee+date) ──────────────
-// Seule une lecture RÉUSSIE est gardée : une panne se retente à l'appel suivant (avant FUT-152, un échec
-// était mémorisé pour la journée entière par instance).
-const cache = new Map<string, Promise<AtmoAirQuality | null>>();
+// ── Public API ─────────────────────────────────────────────────────────────────
+// AUCUN RÉSULTAT N'EST MÉMORISÉ (revue du 29/10/2026). L'ancien cache gardait toute la journée la promesse
+// résolue : une absence restait 404 après la publication d'ATMO, un indice de la veille restait servi après
+// celui du jour. Seule reste la DÉDUPLICATION des lectures simultanées : une même commune demandée deux fois
+// en même temps partage un seul appel, et l'entrée disparaît dès que cet appel aboutit ou échoue. La durée
+// de conservation est celle, courte et bornée, de la route (`/api/atmo/[insee]`).
+const enCours = new Map<string, Promise<AtmoAirQuality | null>>();
 
 function lire(inseeCode: string): Promise<AtmoAirQuality | null> {
-  const today = new Date().toISOString().split("T")[0];
-  const key = `${inseeCode.trim()}:${today}`;
-
-  if (!cache.has(key)) {
-    cache.set(key, load(inseeCode.trim()).catch((e) => {
-      cache.delete(key);
-      throw e;
-    }));
-  }
-
-  return cache.get(key)!;
+  const insee = inseeCode.trim();
+  const deja = enCours.get(insee);
+  if (deja) return deja;
+  const lecture = load(insee).finally(() => enCours.delete(insee));
+  enCours.set(insee, lecture);
+  return lecture;
 }
 
 /** La lecture à trois états. Ne lève jamais. */
