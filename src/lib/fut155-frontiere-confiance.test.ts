@@ -49,6 +49,7 @@ type M = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 let V: M;
 let SYNTHESE: (r: unknown) => Promise<Response>;
 let ASK: (r: unknown) => Promise<Response>;
+let CHOIX: (r: unknown) => Promise<Response>;
 let NextRequest: new (url: string, init: M) => unknown;
 const etat: { synthese: M[]; modele: M[] } = { synthese: [], modele: [] };
 (globalThis as M).__fut155 = {
@@ -72,6 +73,7 @@ before(async () => {
   V = await import("./comparateur-vie.ts");
   ({ POST: SYNTHESE } = await import("../app/api/comparateur-vie/synthesize/route.ts"));
   ({ POST: ASK } = await import("../app/api/comparateur-vie/ask/route.ts"));
+  ({ POST: CHOIX } = await import("../app/api/comparateur-vie/synthesize-choix/route.ts"));
   ({ NextRequest } = await import("next/server.js" as string));
   const cherche = async (departements: string[] | null, prefs: M[]) =>
     ({ prefs, o: await V.matchProjects({ reformulation: "FUT-155", hardConstraints: departements ? { departements } : {}, preferences: prefs }) });
@@ -206,8 +208,8 @@ function auxOctets(base: M, champ: (b: M, pad: string) => M, cible: number): str
   assert.equal(octets(s), cible);
   return s;
 }
-const brut = async (route: "synthesize" | "ask", corps: BodyInit, entetes: Record<string, string> = {}) => {
-  const POST = route === "synthesize" ? SYNTHESE : ASK;
+const brut = async (route: "synthesize" | "ask" | "synthesize-choix", corps: BodyInit, entetes: Record<string, string> = {}) => {
+  const POST = route === "synthesize" ? SYNTHESE : route === "ask" ? ASK : CHOIX;
   const init: M = { method: "POST", body: corps, headers: { "content-type": "application/json", "x-forwarded-for": `10.155.2.${++ip}`, ...entetes } };
   if (corps instanceof ReadableStream) init.duplex = "half";
   return POST(new NextRequest(`http://localhost/api/comparateur-vie/${route}`, init)) as Promise<Response>;
@@ -378,4 +380,81 @@ test("page · plus aucun repli « complete » ni « false » sur un état absent
   assert.match(client, /exploration: matchOutcome\.inondation\?\.exploration,\n\s+couverture: matchOutcome\.couverture,/);
   assert.match(client, /exploration: outcomeMeta\.exploration, couverture: outcomeMeta\.couverture \}/);
   assert.match(client, /\(outcome\?\.couverture !== "complete" \|\| top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) \? \(\n\s+outcome\?\.message \? <>\{outcome\.message\}<\/> : null/);
+});
+
+// ── Passe 3 · la question AskFuture bornée à 1 000 caractères, côté route ──────────────────────────────────────────
+
+test("question · 1 000 caractères passent, 1 001 sont refusés (400 question_trop_longue) sans appel ni troncature", async () => {
+  const ctx = contexteDeLaPage("mer");
+  const ok = await brut("ask", JSON.stringify(corpsAsk(ctx, { question: "q".repeat(1000) })));
+  assert.equal(ok.status, 200);
+  assert.match(etat.modele[0].messages.at(-1).content, new RegExp(`QUESTION : q{1000}$`), "la question part entière");
+  const emoji = await brut("ask", JSON.stringify(corpsAsk(ctx, { question: "😀".repeat(1000) })));
+  assert.equal(emoji.status, 200, "un emoji compte pour un caractère");
+  const bords = await brut("ask", JSON.stringify(corpsAsk(ctx, { question: `   ${"q".repeat(1000)}   ` })));
+  assert.equal(bords.status, 200, "les espaces de bord ne comptent pas");
+  assert.equal(etat.modele.length, 3);
+  const trop = await brut("ask", JSON.stringify(corpsAsk(ctx, { question: "q".repeat(1001) })));
+  assert.equal(trop.status, 400);
+  assert.deepEqual(await trop.json(), { error: "Votre question dépasse 1 000 caractères.", code: "question_trop_longue" });
+  assert.equal(etat.modele.length, 3, "aucun appel de plus");
+});
+
+test("question · un ancien historique (questions d'avant la limite) reste accepté s'il tient dans le corps", async () => {
+  const ctx = contexteDeLaPage("mer");
+  const history = [{ role: "user", content: "h".repeat(3000) }, { role: "assistant", content: "Réponse d'avant." }];
+  const r = await brut("ask", JSON.stringify(corpsAsk(ctx, { history })));
+  assert.equal(r.status, 200);
+  assert.equal(etat.modele[0].messages[0].content, "h".repeat(3000), "l'historique part intact");
+});
+
+// ── Passe 3 · /synthesize-choix : corps borné, deux ou trois communes nommées, sortie bornée ───────────────────────
+
+const choix = (n = 3, extra: M = {}) => ({
+  communes: ["Quimper", "Vannes", "Lorient", "Brest"].slice(0, n).map((nom) => ({ nom, region: "Bretagne", identite: "identité", compromis: "compromis", distinctive: null })),
+  divergence: { domine: false, dominatorInsee: null },
+  ...extra,
+});
+
+test("choix · 32 768 octets passent, 32 769 sont refusés en 413, en un bloc comme par morceaux, sans appel", async () => {
+  const avec = (b: M, pad: string) => ({ ...b, communes: b.communes.map((c: M, i: number) => (i ? c : { ...c, identite: pad })) });
+  const pile = auxOctets(choix(), avec, MAX);
+  const trop = auxOctets(choix(), avec, MAX + 1);
+  const ok = await brut("synthesize-choix", pile);
+  assert.equal(ok.status, 200);
+  assert.equal(await ok.text(), "Synthèse simulée.");
+  assert.equal((await brut("synthesize-choix", flux(pile, 333))).status, 200);
+  assert.equal(etat.synthese.length, 2);
+  assert.equal((await brut("synthesize-choix", trop)).status, 413);
+  assert.equal((await brut("synthesize-choix", flux(trop, 333))).status, 413, "par morceaux, sans Content-Length");
+  assert.equal((await brut("synthesize-choix", flux(trop), { "content-length": "50" })).status, 413, "en-tête qui sous-déclare");
+  assert.equal(etat.synthese.length, 2, "aucun appel de plus");
+});
+
+test("choix · exactement deux ou trois communes valides et nommées, sinon 400 sans appel", async () => {
+  assert.equal((await brut("synthesize-choix", JSON.stringify(choix(2)))).status, 200);
+  assert.equal((await brut("synthesize-choix", JSON.stringify(choix(3)))).status, 200);
+  assert.equal(etat.synthese.length, 2);
+  const invalides: M[] = [
+    choix(1), choix(4), { ...choix(), communes: Array.from({ length: 40 }, (_, i) => ({ nom: `C${i}` })) },
+    { communes: [{ nom: "Quimper" }, { region: "Bretagne" }] },
+    { communes: [{ nom: "Quimper" }, { nom: "   " }] },
+    { communes: [{ nom: "Quimper" }, { nom: 42 }] },
+    { communes: [{ nom: "Quimper" }, null] },
+    { communes: [{ nom: "Quimper" }, { nom: "Vannes", identite: { forge: true } }] },
+    { communes: [{ nom: "Quimper" }, { nom: "Vannes", compromis: ["x"] }] },
+    { communes: [{ nom: "Quimper" }, { nom: "Vannes" }], divergence: "oui" },
+    { communes: "Quimper, Vannes" }, {},
+  ];
+  for (const b of invalides) assert.equal((await brut("synthesize-choix", JSON.stringify(b))).status, 400, JSON.stringify(b).slice(0, 80));
+  for (const corps of ["null", "42", "pas du JSON"]) assert.equal((await brut("synthesize-choix", corps)).status, 400, corps);
+  assert.equal(etat.synthese.length, 2, "aucune requête refusée n'a sollicité le modèle");
+});
+
+test("choix · la génération est bornée et le corps valide part tel quel", async () => {
+  await brut("synthesize-choix", JSON.stringify(choix(2)));
+  const appel = etat.synthese[0];
+  assert.equal(appel.maxOutputTokens, 1000);
+  const donnees = JSON.parse(appel.prompt.split("DONNÉES :\n")[1]);
+  assert.deepEqual(donnees.communes.map((c: M) => c.commune), ["Quimper", "Vannes"]);
 });

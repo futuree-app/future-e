@@ -18,7 +18,8 @@ import { AnchorAmorce } from "./AnchorAmorce";
 import { repliSynthese } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
 import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
-import { contexteAsk } from "@/lib/comparateur/lecture-ask";
+import { avisRefusAsk, contexteAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
+import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
 import { libelleCarteSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -470,6 +471,7 @@ export function OuVivreClient() {
   const [askLimit, setAskLimit] = useState(false);
   const [routesNudge, setRoutesNudge] = useState(false);
   const [askTyped, setAskTyped] = useState("");
+  const [askAvis, setAskAvis] = useState<string | null>(null); // FUT-155 : refus de taille, sous le champ
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
 
@@ -774,6 +776,8 @@ export function OuVivreClient() {
   const sendAsk = useCallback(async (preset?: string) => {
     const question = (preset ?? askInput).trim();
     if (question.length < 3 || askLoading || askLimit || !parsed) return;
+    if (longueurQuestion(question) > MAX_QUESTION_ASK) return; // FUT-155 : la ligne sous le champ le dit
+    setAskAvis(null);
 
     const userMsg: AskMessage = { role: "user", content: question };
     const history = askMessages.slice(-6);
@@ -810,7 +814,15 @@ export function OuVivreClient() {
         return;
       }
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      // FUT-155 : un refus de taille rend la question, intacte, et dit pourquoi.
+      const avis = avisRefusAsk(res.status, data.code);
+      if (avis) {
+        setAskAvis(avis);
+        setAskMessages((m) => m.slice(0, -1));
+        setAskInput(question);
+        return;
+      }
       if (!res.ok || typeof data.answer !== "string") {
         throw new Error(data.error ?? "ask");
       }
@@ -1500,10 +1512,11 @@ export function OuVivreClient() {
                 </p>
               </div>
             ) : (
+              <div>
               <div className="flex items-end gap-2.5">
                 <textarea
                   value={askInput}
-                  onChange={(e) => setAskInput(e.target.value)}
+                  onChange={(e) => { setAskInput(e.target.value); setAskAvis(null); }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -1517,11 +1530,13 @@ export function OuVivreClient() {
                 />
                 <button
                   onClick={() => sendAsk()}
-                  disabled={askLoading || askInput.trim().length < 3}
+                  disabled={askLoading || askInput.trim().length < 3 || longueurQuestion(askInput) > MAX_QUESTION_ASK}
                   className="shrink-0 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Demander
                 </button>
+              </div>
+              <LigneQuestionAsk texte={askInput} avis={askAvis} />
               </div>
             )}
           </section>

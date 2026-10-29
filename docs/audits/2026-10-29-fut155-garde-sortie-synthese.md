@@ -26,7 +26,9 @@
 
 **D tout de suite, B si le taux mesuré n'est pas nul.** D ne coûte ni latence ni refonte. Il dit si le problème existe en production avec le prompt actuel, qui interdit déjà ces formulations. B est le seul choix qui protège sans afficher de texte fautif et sans perdre l'écriture progressive. C'est toutefois une refonte de la diffusion (route et page), à traiter dans un ticket séparé, avec la famille de motifs de la synthèse. A est un repli acceptable si l'écriture progressive n'est pas jugée essentielle.
 
-## Réserves de la passe 2 (hors de ce PR)
+## Réserves de la passe 2 : traitées en passe 3 (29/10/2026)
 
-- **Longueur d'une question AskFuture.** La page ne la borne pas. Mesures de cette passe (corps légitimes, borne de 32 768 octets) : parcours gratuit 13 968 o ; historique plein après effacement du cookie 22 010 o ; le même entièrement en caractères accentués 37 822 o, refusé en 413. Le lecteur voit alors « Cette réponse n'a pas pu être générée ». Proposition : `maxLength` de 1 000 caractères sur le champ de question, comme le champ du projet (2 000).
-- **`/api/comparateur-vie/synthesize-choix`** (gardée en place, réversible) n'a pas reçu la borne : hors du périmètre demandé.
+- **Question AskFuture** : 1 000 caractères au plus (validé par le porteur). La limite se lit sous le champ dès la saisie, l'envoi est bloqué au-delà, et la route refuse en 400 `question_trop_longue`, sans dépendre de la page. Aucune troncature : pas de `maxLength`, puisque le navigateur couperait en silence un texte collé. Un 413 (historique trop lourd) rend la question intacte avec une phrase qui dit pourquoi.
+- **`/api/comparateur-vie/synthesize-choix`** : même borne de 32 Kio, deux ou trois communes nommées aux champs textuels, `maxOutputTokens: 1000`.
+
+Le garde de sortie reste une décision séparée : le streaming n'est pas modifié dans la PR #114.

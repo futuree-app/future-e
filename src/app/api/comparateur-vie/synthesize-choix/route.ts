@@ -11,6 +11,7 @@ import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
+import { lireCorpsBorne } from "@/lib/server/corps-borne";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -82,22 +83,38 @@ type Body = {
   divergence?: { domine?: boolean; dominatorInsee?: string | null } | null;
 };
 
+const texteOuRien = (x: unknown) => x == null || typeof x === "string";
+function communeRecevable(c: unknown): boolean {
+  if (!c || typeof c !== "object") return false;
+  const x = c as Record<string, unknown>;
+  return typeof x.nom === "string" && x.nom.trim() !== ""
+    && texteOuRien(x.region) && texteOuRien(x.identite) && texteOuRien(x.compromis) && texteOuRien(x.distinctive);
+}
+
 export async function POST(request: NextRequest) {
   // LA LIMITE PAR ADRESSE, EN TÊTE : elle ne consomme aucun budget, elle refuse un débit
   // anormal avant tout travail. Le budget, lui, se réserve juste avant l'appel payant.
   const tropVite = limiteParAdresse(request);
   if (tropVite) return tropVite;
 
+  // FUT-155 : les octets réellement reçus, bornés avant tout budget et tout appel au modèle.
+  const corps = await lireCorpsBorne(request);
+  if ("tropGros" in corps) return new Response("Corps trop volumineux.", { status: 413 });
   let body: Body;
   try {
-    body = await request.json();
+    body = JSON.parse(corps.texte);
   } catch {
     return new Response("Corps invalide.", { status: 400 });
   }
+  if (!body || typeof body !== "object") return new Response("Corps invalide.", { status: 400 });
 
+  // FUT-155 : deux ou trois communes nommées, aux champs textuels (ou absents). Rien d'autre ne part au modèle.
   const communes = Array.isArray(body.communes) ? body.communes : [];
-  if (communes.length < 2) {
-    return new Response("Au moins deux communes sont nécessaires.", { status: 400 });
+  if (communes.length < 2 || communes.length > 3) {
+    return new Response("Deux ou trois communes sont nécessaires.", { status: 400 });
+  }
+  if (!communes.every(communeRecevable) || (body.divergence != null && typeof body.divergence !== "object")) {
+    return new Response("Communes invalides.", { status: 400 });
   }
 
   // Payload sobre, sans chiffre. Les communes arrivent déjà nommées (pas d'INSEE ici).
@@ -125,6 +142,7 @@ ${JSON.stringify(payload, null, 2)}`;
   const result = streamText({
     // Parcours gratuit : modèle léger. Sonnet 4.6 effort low, thinking off.
     model: anthropic("claude-sonnet-4-6"),
+    maxOutputTokens: 1000, // FUT-155 : 110 à 170 mots attendus ; sans borne, celle du modèle (128 000 jetons)
     providerOptions: {
       anthropic: {
         effort: "low",

@@ -34,7 +34,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
-import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
+import { contexteIrrecevable, lectureDuContexte, longueurQuestion, MAX_QUESTION_ASK, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
 import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
 import { lireCorpsBorne } from "@/lib/server/corps-borne";
@@ -374,6 +374,10 @@ export async function POST(request: NextRequest) {
   const question = typeof body.question === "string" ? body.question.trim() : "";
   if (question.length < 3) {
     return NextResponse.json({ error: "Posez une question en quelques mots." }, { status: 400 });
+  }
+  // FUT-155 : refusée, jamais tronquée. La page bloque l'envoi au-delà ; ce contrôle ne dépend pas d'elle.
+  if (longueurQuestion(question) > MAX_QUESTION_ASK) {
+    return NextResponse.json({ error: "Votre question dépasse 1 000 caractères.", code: "question_trop_longue" }, { status: 400 });
   }
   const ctx = body.context;
   // FUT-142 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom. Refusé avant tout appel payant.

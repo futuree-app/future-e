@@ -199,9 +199,12 @@ test("IA : les prompts, contrats et routes de synthèse sont identiques à main,
 // FUT-155 (29/10/2026) a dû toucher les deux routes du comparateur et leur contrat : une couverture absente ou
 // contredite y vaut « inconnue », et une carte marquée sans priorité favorable n'y transmet aucune raison
 // (cf. `fut155-frontiere-confiance.test.ts`). Passe 2 : corps borné à 32 Kio (413) et sortie de la synthèse bornée.
+// Passe 3 : question AskFuture bornée à 1 000 caractères (400 question_trop_longue).
 // Rien d'autre n'a changé : seules ces lignes, et aucune ne parle des feux.
 test("IA : les routes du comparateur n'ont changé que de la frontière de confiance (FUT-155)", () => {
   const admises = new Set([
+    `-import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";`,
+    `+import { contexteIrrecevable, lectureDuContexte, longueurQuestion, MAX_QUESTION_ASK, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";`,
     `-import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";`,
     `+import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";`,
     `+import { lireCorpsBorne } from "@/lib/server/corps-borne";`,
@@ -212,6 +215,10 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
     `+  if ("tropGros" in corps) return NextResponse.json({ error: "Corps trop volumineux." }, { status: 413 });`,
     `-    body = (await request.json()) as Body;`,
     `+    body = JSON.parse(corps.texte) as Body;`,
+    `+  // FUT-155 : refusée, jamais tronquée. La page bloque l'envoi au-delà ; ce contrôle ne dépend pas d'elle.`,
+    `+  if (longueurQuestion(question) > MAX_QUESTION_ASK) {`,
+    `+    return NextResponse.json({ error: "Votre question dépasse 1 000 caractères.", code: "question_trop_longue" }, { status: 400 });`,
+    `+  }`,
     `+import { couvertureGlobaleLue, MAX_TERRITOIRES_ASK } from "@/lib/comparateur/lecture-ask";`,
     `-"partielle", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.`,
     `+"partielle" ou "inconnue", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.`,
@@ -221,7 +228,6 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
     `+  // FUT-155 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom (même contrat que /ask).`,
     `+  if (results.length > MAX_TERRITOIRES_ASK || results.some((r) => !r || typeof r.nom !== "string" || !r.nom.trim())) {`,
     `+    return new Response("Résultats invalides.", { status: 400 });`,
-    `+  }`,
     `-    couverture_des_priorites: ["complete", "partielle", "aucune", "sans_priorite"].includes(body.outcome?.couverture ?? "") ? body.outcome!.couverture : "complete",`,
     `+    // FUT-155 : un état absent, illisible ou contredit par une carte vaut « inconnue », jamais « complete ».`,
     `+    // Inondation déclarée sans mode lisible : comme /ask, l'ordre n'est pas établi.`,
@@ -231,15 +237,27 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
     `+      raisons: raisonsSousReserve(r.reasons, r.sansPrioriteFavorable), // FUT-155 : jamais à côté de la réserve`,
     `+    // FUT-155 : 110 à 170 mots attendus. Sans borne, le fournisseur appliquait celle du modèle (128 000 jetons).`,
     `+    maxOutputTokens: 1000,`,
+    `+/** FUT-155 : une question AskFuture, 1 000 caractères au plus (validé par le porteur le 29/10/2026). */`,
+    `+export const MAX_QUESTION_ASK = 1000;`,
+    `+/** Les caractères tels que le lecteur les voit (un emoji compte pour un), espaces de bord retirés. Page et route. */`,
+    `+export const longueurQuestion = (q: string) => [...q.trim()].length;`,
+    `+`,
     `+/**`,
+    `+ * FUT-155 : ce que la page dit d'un refus de taille, ou null. 413 : le corps entier (question et historique) dépasse`,
+    `+ * 32 Kio. 400 \`question_trop_longue\` : la question seule dépasse la limite. La question n'est jamais tronquée.`,
+    `+ */`,
+    `+export function avisRefusAsk(status: number, code?: unknown): string | null {`,
+    `+  if (status === 413) {`,
+    `+    return "Votre question n'a pas pu être envoyée : avec les échanges précédents, l'ensemble dépasse la taille acceptée. Raccourcissez-la, ou relancez une recherche pour repartir d'une conversation vide.";`,
+    `+  if (status === 400 && code === "question_trop_longue") {`,
+    `+    return "Votre question dépasse 1 000 caractères. Raccourcissez-la pour l'envoyer.";`,
+    `+  return null;`,
+    `+}`,
     `+ * FUT-155 : la couverture globale que /synthesize peut redire, avec la règle de /ask. Absente ou illisible, elle est`,
     `+ * « inconnue ». « complete » ne se croit pas si une carte déclare des priorités non mesurées, ou ne dit pas lesquelles.`,
-    `+ */`,
     `+export function couvertureGlobaleLue(globale: unknown, nonMesureesParCarte: readonly unknown[]): EtatLu {`,
     `+  const e = etat(globale);`,
     `+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;`,
-    `+}`,
-    `+`,
   ]);
   for (const f of ["src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts"]) {
     const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });

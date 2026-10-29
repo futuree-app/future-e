@@ -3,6 +3,8 @@
 import { useCallback, useState } from "react";
 import posthog from "posthog-js";
 import { bindOrphans } from "@/lib/typography";
+import { avisRefusAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
+import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
 
 // AskFuture en MODE CHOIX : réutilise l'endpoint borné de /ou-vivre
 // (`/api/comparateur-vie/ask`, 2 questions gratuites via cookie serveur partagé). Le contexte
@@ -40,6 +42,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
   const [loading, setLoading] = useState(false);
   const [remaining, setRemaining] = useState(FREE_ASK);
   const [limit, setLimit] = useState(false);
+  const [avis, setAvis] = useState<string | null>(null); // FUT-155 : refus de taille, sous le champ
 
   const noms = trio.map((t) => t.nom);
   const c1 = noms[1];
@@ -59,6 +62,8 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
     async (preset?: string) => {
       const question = (preset ?? input).trim();
       if (question.length < 3 || loading || limit) return;
+      if (longueurQuestion(question) > MAX_QUESTION_ASK) return; // FUT-155 : la ligne sous le champ le dit
+      setAvis(null);
 
       const userMsg: AskMessage = { role: "user", content: question };
       const history = messages.slice(-6);
@@ -109,7 +114,15 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
           return;
         }
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
+        // FUT-155 : un refus de taille rend la question, intacte, et dit pourquoi.
+        const refus = avisRefusAsk(res.status, data.code);
+        if (refus) {
+          setAvis(refus);
+          setMessages((m) => m.slice(0, -1));
+          setInput(question);
+          return;
+        }
         if (!res.ok || typeof data.answer !== "string") throw new Error(data.error ?? "ask");
 
         setMessages((m) => [...m, { role: "assistant", content: data.answer }]);
@@ -188,10 +201,11 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
           </p>
         </div>
       ) : (
+        <div>
         <div className="flex items-end gap-2.5">
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); setAvis(null); }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -205,11 +219,13 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
           />
           <button
             onClick={() => sendAsk()}
-            disabled={loading || input.trim().length < 3}
+            disabled={loading || input.trim().length < 3 || longueurQuestion(input) > MAX_QUESTION_ASK}
             className="shrink-0 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[length:var(--text-dense)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Demander
           </button>
+        </div>
+        <LigneQuestionAsk texte={input} avis={avis} />
         </div>
       )}
     </section>
