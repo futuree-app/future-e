@@ -1,0 +1,138 @@
+{
+ "ecarts": 12,
+ "horsVieEtudiante": 0,
+ "detail": [
+  {
+   "chemin": "projets[feu 3 + nature 2 + cadre calme 2].comparaisonComplete.themes[vitalite].lignes[vie_etudiante].cellules[1].palier",
+   "avant": "Présence étudiante limitée dans l'agglomération de La Broque",
+   "apres": "Aucun étudiant inscrit dans l'agglomération de La Broque",
+   "etudiant": true
+  },
+  {
+   "chemin": "projets[feu 2 + soins 2 + étés frais 1].results[3].signaux",
+   "avant": {
+    "mobilite_quotidienne": "peu ou pas d'arrêts de transports en commun autour du centre",
+    "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
+    "air": "air généralement plus sain",
+    "vie_locale": "vie locale animée",
+    "vie_etudiante": "présence étudiante limitée dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+    "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+   },
+   "apres": {
+    "mobilite_quotidienne": "peu ou pas d'arrêts de transports en commun autour du centre",
+    "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
+    "air": "air généralement plus sain",
+    "vie_locale": "vie locale animée",
+    "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+    "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+   },
+   "etudiant": true
+  },
+  {
+   "chemin": "projets[feu 2 + soins 2 + étés frais 1].pistes[0].signaux",
+   "avant": {
+    "mobilite_quotidienne": "peu ou pas d'arrêts de transports en commun autour du centre",
+    "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
+    "air": "air généralement plus sain",
+    "vie_locale": "vie locale animée",
+    "vie_etudiante": "présence étudiante limitée dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+    "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+   },
+   "apres": {
+    "mobilite_quotidienne": "peu ou pas d'arrêts de transports en commun autour du centre",
+    "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
+    "air": "air généralement plus sain",
+    "vie_locale": "vie locale animée",
+    "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+    "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+   },
+   "etudiant": true
+  },
+  {
+   "chemin": "projets[mer 3 + feu 1].comparaisonComplete.themes[vitalite].lignes[vie_etudiante].cellules[1].palier",
+   "avant": "Forte présence étudiante dans l'agglomération de Bayonne",
+   "apres": "Présence étudiante intermédiaire dans l'agglomération de Bayonne",
+   "etudiant": true
+  },
+  {
+   "chemin": "projets[mer 3 + feu 1].comparaisonComplete.themes[vitalite].lignes[vie_etudiante].cellules[1].qualifier",
+   "avant": null,
+   "apres": "au moins un établissement supérieur recensé à moins de 10 km",
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Maures].trio[0].signaux",
+   "avant": {
+    "soins": "accès aux soins plus limité",
+    "ecoles": "accès aux écoles plus limité",
+    "vie_locale": "vie locale animée",
+    "culture": "offre culturelle plus limitée",
+    "vie_etudiante": "présence étudiante limitée dans l'agglomération de Pignans, aucun établissement supérieur recensé à moins de 25 km",
+    "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque",
+    "climat_inondation": "Les pluies extrêmes tendent à s'intensifier dans ce secteur."
+   },
+   "apres": {
+    "soins": "accès aux soins plus limité",
+    "ecoles": "accès aux écoles plus limité",
+    "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de Pignans, aucun établissement supérieur recensé à moins de 25 km",
+    "vie_locale": "vie locale animée",
+    "culture": "offre culturelle plus limitée",
+    "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque",
+    "climat_inondation": "Les pluies extrêmes tendent à s'intensifier dans ce secteur."
+   },
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Maures].trio[2].signaux",
+   "avant": {
+    "croissance_demographique": "gagne des habitants",
+    "vie_locale": "vie locale intermédiaire",
+    "soins": "accès aux soins intermédiaire",
+    "ecoles": "accès aux écoles plus facile",
+    "culture": "offre culturelle intermédiaire",
+    "inondation": "inondations indemnisées fréquentes de 1995 à 2021 (5 à 10 sinistres pour 1 000 biens assurés chaque année)",
+    "climat_inondation": "Inondations indemnisées fréquentes de 1995 à 2021 ; les pluies extrêmes tendent à s'intensifier."
+   },
+   "apres": {
+    "croissance_demographique": "gagne des habitants",
+    "vie_locale": "vie locale intermédiaire",
+    "soins": "accès aux soins intermédiaire",
+    "ecoles": "accès aux écoles plus facile",
+    "vie_etudiante": "aucun étudiant inscrit dans la commune, au moins un établissement supérieur recensé à moins de 25 km",
+    "inondation": "inondations indemnisées fréquentes de 1995 à 2021 (5 à 10 sinistres pour 1 000 biens assurés chaque année)",
+    "climat_inondation": "Inondations indemnisées fréquentes de 1995 à 2021 ; les pluies extrêmes tendent à s'intensifier."
+   },
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Maures].comparaison.themes[vitalite].lignes[vie_etudiante].cellules[0].palier",
+   "avant": "Présence étudiante limitée dans l'agglomération de Pignans",
+   "apres": "Aucun étudiant inscrit dans l'agglomération de Pignans",
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Maures].comparaison.themes[vitalite].lignes[vie_etudiante].cellules[2].palier",
+   "avant": "Présence étudiante intermédiaire",
+   "apres": "Aucun étudiant inscrit dans la commune",
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Maures].comparaison.themes[vitalite].lignes[vie_etudiante].cellules[2].qualifier",
+   "avant": null,
+   "apres": "au moins un établissement supérieur recensé à moins de 25 km",
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Marseille, Aix, Toulon].comparaison.themes[vitalite].lignes[vie_etudiante].cellules[2].palier",
+   "avant": "Forte présence étudiante",
+   "apres": "Présence étudiante intermédiaire",
+   "etudiant": true
+  },
+  {
+   "chemin": "trios[Marseille, Aix, Toulon].comparaison.themes[vitalite].lignes[vie_etudiante].cellules[2].qualifier",
+   "avant": null,
+   "apres": "au moins un établissement supérieur recensé à moins de 5 km",
+   "etudiant": true
+  }
+ ]
+}

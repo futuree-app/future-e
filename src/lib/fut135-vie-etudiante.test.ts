@@ -200,14 +200,12 @@ const IDENTITE_ETUDIANTE = "Pour une ville étudiante à taille humaine.";
 
 test("revue 1. Pont-Salomon : raison au palier intermédiaire, à l'échelle de l'agglomération, rayon dit", async () => {
   const o = await V.matchProjects({ reformulation: "Recherche de recette auvergne", hardConstraints: { departements: ["03", "15", "43", "63"] }, preferences: [{ key: "vie_etudiante", weight: 2 }, { key: "nature", weight: 2 }] });
-  assert.deepEqual(o.results.slice(0, 3).map((r: M) => r.insee), ["63308", "15014", PONT_SALOMON], "trio inchangé");
-  const ps = o.results[2];
-  assert.equal(vie(commune(PONT_SALOMON)), 63);
-  assert.deepEqual(ps.reasons, [
-    "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km",
-    "forêts et espaces naturels à proximité",
-  ]);
-  assert.deepEqual(ps.couverture, { etat: "complete", nonMesurees: [] });
+  // FUT-141 : l'accès de Pont-Salomon (aucun établissement à moins de 10 km) passe de 40 à 20, son score de 63 à
+  // 55 ; Le Puy-en-Velay, qui a des établissements, prend sa place dans le trio.
+  assert.deepEqual(o.results.slice(0, 3).map((r: M) => r.insee), ["63308", "15014", "43157"]);
+  assert.equal(vie(commune(PONT_SALOMON)), 55);
+  assert.equal(V.raisonNeg("vie_etudiante", commune(PONT_SALOMON)),
+    "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km");
   for (const r of [...o.results, ...o.pistes]) {
     for (const t of r.reasons) if (/^forte présence étudiante/.test(t)) assert.ok(vie(commune(r.insee)) >= PALIER_FORTE, `${r.nom} : ${t}`);
   }
@@ -218,19 +216,22 @@ test("revue 2. Thurins : palier, qualificatif, aide, avantage et synthèse à l'
   const l = ligneEtudiante(r.comparaison);
   assert.equal(l.aide, "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.");
   const par = Object.fromEntries(l.cellules.map((x: M) => [x.insee, x]));
-  assert.equal(par[THURINS].palier, "Forte présence étudiante dans l'agglomération de Lyon");
+  // FUT-141 : sans établissement dans ses 5 km, Thurins tombe à 63, palier intermédiaire.
+  assert.equal(par[THURINS].palier, "Présence étudiante intermédiaire dans l'agglomération de Lyon");
   assert.equal(par[THURINS].qualifier, "aucun établissement supérieur recensé à moins de 5 km");
   assert.equal(par[PONT_SALOMON].palier, "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne");
   assert.equal(par[PONT_SALOMON].qualifier, "aucun établissement supérieur recensé à moins de 10 km");
   assert.equal(par["86194"].palier, "Forte présence étudiante");
   assert.equal(par["86194"].qualifier, null);
-  // L'avantage reste celui des paliers numériques ; il se lit désormais sur des paliers qui disent leur échelle.
-  assert.deepEqual(l.avantage, { type: "avantage", insees: [THURINS, "86194"] });
+  // L'avantage reste celui des paliers numériques ; depuis FUT-141, Poitiers mène seule.
+  assert.deepEqual(l.avantage, { type: "avantage", insees: ["86194"] });
   for (const t of [...r.comparaison.resume, r.comparaison.arbitrage ?? ""]) assert.doesNotMatch(t, /tudiant/);
-  // Seule à mener : la synthèse du thème nomme l'agglomération, pas « sa vie étudiante ».
-  const duo = await V.seedComparaison([THURINS, PONT_SALOMON]);
+  // Seule à mener : la synthèse du thème nomme l'agglomération, pas « sa vie étudiante ». Depuis FUT-141, Thurins
+  // ne mène plus face à Pont-Salomon (deux paliers intermédiaires) : Melesse (68, agglomération de Rennes, aucun
+  // établissement à moins de 10 km), l'une des 11 restées au palier fort, porte le cas.
+  const duo = await V.seedComparaison(["35173", PONT_SALOMON]);
   const vitalite = duo.comparaison.themes.find((t: M) => t.id === "vitalite").synthese;
-  assert.match(vitalite, /^Thurins se distingue par la présence étudiante de son agglomération/);
+  assert.match(vitalite, /^Melesse se distingue par la présence étudiante de son agglomération/);
   assert.doesNotMatch(vitalite, /sa vie étudiante/);
 });
 
@@ -288,8 +289,10 @@ test("revue : les 487 communes sans établissement recensé et notées ≥ 55 ne
   const parUU = new Map<string, number>();
   for (const c of INDEX.communes) if (c.uu) parUU.set(c.uu, (parUU.get(c.uu) ?? 0) + 1);
   const set = INDEX.communes.filter((c) => (vie(c) ?? 0) >= SEUIL_RAISON && c.etudesSup?.weightedAccess === 0);
-  assert.equal(set.length, 487);
-  assert.equal(set.filter((c) => vie(c) >= PALIER_FORTE).length, 255);
+  // FUT-141 : 487 et 255 avant la correction du plateau de l'accès (40 → 20) ; le contrôle des 487 d'origine est
+  // dans fut141-vie-etudiante.test.ts.
+  assert.equal(set.length, 360);
+  assert.equal(set.filter((c) => vie(c) >= PALIER_FORTE).length, 11);
   for (const c of set) {
     assert.equal(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), false, c.insee);
     const phrase = V.presenceEtudiante(c, vie(c) >= PALIER_FORTE ? 0 : 1);

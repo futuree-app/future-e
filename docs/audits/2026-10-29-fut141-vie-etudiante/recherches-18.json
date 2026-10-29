@@ -1,0 +1,971 @@
+{
+ "index": {
+  "avant": "4f33d78282742aad657dc952f6fae9be7b487e516ce0de961812b8e5ac309df6",
+  "apres": "2cca58315dc4d3f6cf33035d2fd023ca4c970909846ae3cc25e724c7e006c972"
+ },
+ "recherches": {
+  "etudiante-seule": {
+   "trioAvant": [
+    "Betton",
+    "Angers",
+    "Corenc"
+   ],
+   "trioApres": [
+    "Betton",
+    "Angers",
+    "Corenc"
+   ],
+   "pistesAvant": [
+    "Achenheim",
+    "Castelnau-le-Lez"
+   ],
+   "pistesApres": [
+    "Achenheim",
+    "Castelnau-le-Lez"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "35024",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "49007",
+      "Forte présence étudiante"
+     ],
+     [
+      "38126",
+      "Forte présence étudiante dans l'agglomération de Grenoble"
+     ]
+    ],
+    "apres": [
+     [
+      "35024",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "49007",
+      "Forte présence étudiante"
+     ],
+     [
+      "38126",
+      "Forte présence étudiante dans l'agglomération de Grenoble"
+     ]
+    ]
+   }
+  },
+  "etudiante-taille-humaine": {
+   "trioAvant": [
+    "Arradon",
+    "La Roche-sur-Yon",
+    "Corte"
+   ],
+   "trioApres": [
+    "Arradon",
+    "La Roche-sur-Yon",
+    "Corte"
+   ],
+   "pistesAvant": [
+    "Cluny",
+    "Mauguio"
+   ],
+   "pistesApres": [
+    "Cluny",
+    "Mauguio"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "56003",
+      "Forte présence étudiante"
+     ],
+     [
+      "85191",
+      "Forte présence étudiante"
+     ],
+     [
+      "2B096",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "56003",
+      "Forte présence étudiante"
+     ],
+     [
+      "85191",
+      "Forte présence étudiante"
+     ],
+     [
+      "2B096",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "etudiante-transports-vie-locale": {
+   "trioAvant": [
+    "Lyon",
+    "Strasbourg",
+    "Noyal-Châtillon-sur-Seiche"
+   ],
+   "trioApres": [
+    "Lyon",
+    "Strasbourg",
+    "Noyal-Châtillon-sur-Seiche"
+   ],
+   "pistesAvant": [
+    "La Madeleine",
+    "Ramonville-Saint-Agne"
+   ],
+   "pistesApres": [
+    "La Madeleine",
+    "Ramonville-Saint-Agne"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "69381",
+      "Forte présence étudiante"
+     ],
+     [
+      "67482",
+      "Forte présence étudiante"
+     ],
+     [
+      "35206",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ]
+    ],
+    "apres": [
+     [
+      "69381",
+      "Forte présence étudiante"
+     ],
+     [
+      "67482",
+      "Forte présence étudiante"
+     ],
+     [
+      "35206",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ]
+    ]
+   }
+  },
+  "etudiante-bretagne": {
+   "trioAvant": [
+    "Betton",
+    "Bohars",
+    "Séné"
+   ],
+   "trioApres": [
+    "Betton",
+    "Bohars",
+    "Séné"
+   ],
+   "pistesAvant": [
+    "Langueux",
+    "Cesson-Sévigné"
+   ],
+   "pistesApres": [
+    "Langueux",
+    "Cesson-Sévigné"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "35024",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "29011",
+      "Forte présence étudiante dans l'agglomération de Brest"
+     ],
+     [
+      "56243",
+      "Forte présence étudiante dans l'agglomération de Vannes"
+     ]
+    ],
+    "apres": [
+     [
+      "35024",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "29011",
+      "Forte présence étudiante dans l'agglomération de Brest"
+     ],
+     [
+      "56243",
+      "Forte présence étudiante dans l'agglomération de Vannes"
+     ]
+    ]
+   }
+  },
+  "etudiante-nature-auvergne": {
+   "trioAvant": [
+    "Royat",
+    "Aurillac",
+    "Pont-Salomon"
+   ],
+   "trioApres": [
+    "Royat",
+    "Aurillac",
+    "Le Puy-en-Velay"
+   ],
+   "pistesAvant": [
+    "Montluçon",
+    "Durtol"
+   ],
+   "pistesApres": [
+    "Montluçon",
+    "Durtol"
+   ],
+   "cartesChangees": [
+    "Royat",
+    "Aurillac",
+    "Le Puy-en-Velay"
+   ],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "63308",
+      "Forte présence étudiante dans l'agglomération de Clermont-Ferrand"
+     ],
+     [
+      "15014",
+      "Forte présence étudiante"
+     ],
+     [
+      "43153",
+      "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne"
+     ]
+    ],
+    "apres": [
+     [
+      "63308",
+      "Forte présence étudiante dans l'agglomération de Clermont-Ferrand"
+     ],
+     [
+      "15014",
+      "Forte présence étudiante"
+     ],
+     [
+      "43157",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "etudiante-retraite-calme": {
+   "trioAvant": [
+    "Niederhausbergen",
+    "Saint-Grégoire",
+    "Verson"
+   ],
+   "trioApres": [
+    "Niederhausbergen",
+    "Saint-Grégoire",
+    "Verson"
+   ],
+   "pistesAvant": [
+    "Camon",
+    "Lavérune"
+   ],
+   "pistesApres": [
+    "Camon",
+    "Lavérune"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "67326",
+      "Forte présence étudiante dans l'agglomération de Strasbourg"
+     ],
+     [
+      "35278",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "14738",
+      "Forte présence étudiante dans l'agglomération de Caen"
+     ]
+    ],
+    "apres": [
+     [
+      "67326",
+      "Forte présence étudiante dans l'agglomération de Strasbourg"
+     ],
+     [
+      "35278",
+      "Forte présence étudiante dans l'agglomération de Rennes"
+     ],
+     [
+      "14738",
+      "Forte présence étudiante dans l'agglomération de Caen"
+     ]
+    ]
+   }
+  },
+  "nature-calme": {
+   "trioAvant": [
+    "Doussard",
+    "Bagnères-de-Bigorre",
+    "Brando"
+   ],
+   "trioApres": [
+    "Doussard",
+    "Bagnères-de-Bigorre",
+    "Brando"
+   ],
+   "pistesAvant": [
+    "La Broque",
+    "Roquebillière"
+   ],
+   "pistesApres": [
+    "La Broque",
+    "Roquebillière"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "74104",
+      "Présence étudiante intermédiaire dans l'agglomération d'Annecy"
+     ],
+     [
+      "65059",
+      "Présence étudiante limitée"
+     ],
+     [
+      "2B043",
+      "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+     ]
+    ],
+    "apres": [
+     [
+      "74104",
+      "Présence étudiante intermédiaire dans l'agglomération d'Annecy"
+     ],
+     [
+      "65059",
+      "Présence étudiante limitée"
+     ],
+     [
+      "2B043",
+      "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+     ]
+    ]
+   }
+  },
+  "mer-soins": {
+   "trioAvant": [
+    "Le Relecq-Kerhuon",
+    "Bidart",
+    "Marseille"
+   ],
+   "trioApres": [
+    "Le Relecq-Kerhuon",
+    "Bidart",
+    "Marseille"
+   ],
+   "pistesAvant": [
+    "Lattes",
+    "Trignac"
+   ],
+   "pistesApres": [
+    "Lattes",
+    "Trignac"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "29235",
+      "Forte présence étudiante dans l'agglomération de Brest"
+     ],
+     [
+      "64125",
+      "Forte présence étudiante dans l'agglomération de Bayonne"
+     ],
+     [
+      "13201",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "29235",
+      "Forte présence étudiante dans l'agglomération de Brest"
+     ],
+     [
+      "64125",
+      "Présence étudiante intermédiaire dans l'agglomération de Bayonne"
+     ],
+     [
+      "13201",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "vie-locale-petite-17": {
+   "trioAvant": [
+    "La Flotte",
+    "Saint-Martin-de-Ré",
+    "Jonzac"
+   ],
+   "trioApres": [
+    "La Flotte",
+    "Saint-Martin-de-Ré",
+    "Jonzac"
+   ],
+   "pistesAvant": [
+    "Rivedoux-Plage",
+    "Bourcefranc-le-Chapus"
+   ],
+   "pistesApres": [
+    "Rivedoux-Plage",
+    "Bourcefranc-le-Chapus"
+   ],
+   "cartesChangees": [
+    "La Flotte",
+    "Saint-Martin-de-Ré"
+   ],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "17161",
+      "Présence étudiante intermédiaire"
+     ],
+     [
+      "17369",
+      "Présence étudiante intermédiaire dans l'agglomération de La Flotte"
+     ],
+     [
+      "17197",
+      "Présence étudiante intermédiaire"
+     ]
+    ],
+    "apres": [
+     [
+      "17161",
+      "Aucun étudiant inscrit dans son agglomération"
+     ],
+     [
+      "17369",
+      "Aucun étudiant inscrit dans l'agglomération de La Flotte"
+     ],
+     [
+      "17197",
+      "Présence étudiante limitée"
+     ]
+    ]
+   }
+  },
+  "fraicheur-train": {
+   "trioAvant": [
+    "Isneauville",
+    "La Chapelle-d'Armentières",
+    "Drumettaz-Clarafond"
+   ],
+   "trioApres": [
+    "Isneauville",
+    "La Chapelle-d'Armentières",
+    "Drumettaz-Clarafond"
+   ],
+   "pistesAvant": [
+    "Melesse",
+    "Barr"
+   ],
+   "pistesApres": [
+    "Melesse",
+    "Barr"
+   ],
+   "cartesChangees": [
+    "La Chapelle-d'Armentières"
+   ],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "76377",
+      "Forte présence étudiante dans l'agglomération de Rouen"
+     ],
+     [
+      "59143",
+      "Forte présence étudiante dans l'agglomération d'Armentières"
+     ],
+     [
+      "73103",
+      "Forte présence étudiante dans l'agglomération de Chambéry"
+     ]
+    ],
+    "apres": [
+     [
+      "76377",
+      "Forte présence étudiante dans l'agglomération de Rouen"
+     ],
+     [
+      "59143",
+      "Présence étudiante intermédiaire dans l'agglomération d'Armentières"
+     ],
+     [
+      "73103",
+      "Forte présence étudiante dans l'agglomération de Chambéry"
+     ]
+    ]
+   }
+  },
+  "comme-Brest": {
+   "trioAvant": [
+    "Brest",
+    "Sainte-Adresse",
+    "Jacou"
+   ],
+   "trioApres": [
+    "Brest",
+    "Sainte-Adresse",
+    "Jacou"
+   ],
+   "pistesAvant": [
+    "Saint-Mandrier-sur-Mer",
+    "La Rochelle"
+   ],
+   "pistesApres": [
+    "Saint-Mandrier-sur-Mer",
+    "La Rochelle"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "29019",
+      "Forte présence étudiante"
+     ],
+     [
+      "76552",
+      "Forte présence étudiante dans l'agglomération du Havre"
+     ],
+     [
+      "34120",
+      "Forte présence étudiante dans l'agglomération de Montpellier"
+     ]
+    ],
+    "apres": [
+     [
+      "29019",
+      "Forte présence étudiante"
+     ],
+     [
+      "76552",
+      "Forte présence étudiante dans l'agglomération du Havre"
+     ],
+     [
+      "34120",
+      "Forte présence étudiante dans l'agglomération de Montpellier"
+     ]
+    ]
+   }
+  },
+  "comme-Poitiers": {
+   "trioAvant": [
+    "Ramonville-Saint-Agne",
+    "Rennes",
+    "Beaucouzé"
+   ],
+   "trioApres": [
+    "Ramonville-Saint-Agne",
+    "Rennes",
+    "Beaucouzé"
+   ],
+   "pistesAvant": [
+    "Strasbourg",
+    "Lyon"
+   ],
+   "pistesApres": [
+    "Strasbourg",
+    "Lyon"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "31446",
+      "Forte présence étudiante dans l'agglomération de Toulouse"
+     ],
+     [
+      "35238",
+      "Forte présence étudiante"
+     ],
+     [
+      "49020",
+      "Forte présence étudiante dans l'agglomération d'Angers"
+     ]
+    ],
+    "apres": [
+     [
+      "31446",
+      "Forte présence étudiante dans l'agglomération de Toulouse"
+     ],
+     [
+      "35238",
+      "Forte présence étudiante"
+     ],
+     [
+      "49020",
+      "Forte présence étudiante dans l'agglomération d'Angers"
+     ]
+    ]
+   }
+  },
+  "comme-Rennes": {
+   "trioAvant": [
+    "Lingolsheim",
+    "Rennes",
+    "Lyon"
+   ],
+   "trioApres": [
+    "Lingolsheim",
+    "Rennes",
+    "Lyon"
+   ],
+   "pistesAvant": [
+    "Toulouse",
+    "Bègles"
+   ],
+   "pistesApres": [
+    "Toulouse",
+    "Bègles"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "67267",
+      "Forte présence étudiante dans l'agglomération de Strasbourg"
+     ],
+     [
+      "35238",
+      "Forte présence étudiante"
+     ],
+     [
+      "69389",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "67267",
+      "Forte présence étudiante dans l'agglomération de Strasbourg"
+     ],
+     [
+      "35238",
+      "Forte présence étudiante"
+     ],
+     [
+      "69389",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "comme-Albi": {
+   "trioAvant": [
+    "Chamalières",
+    "Pérols",
+    "Longueau"
+   ],
+   "trioApres": [
+    "Chamalières",
+    "Pérols",
+    "Longueau"
+   ],
+   "pistesAvant": [
+    "Mareil-Marly",
+    "Nancy"
+   ],
+   "pistesApres": [
+    "Mareil-Marly",
+    "Nancy"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "63075",
+      "Forte présence étudiante dans l'agglomération de Clermont-Ferrand"
+     ],
+     [
+      "34198",
+      "Forte présence étudiante dans l'agglomération de Montpellier"
+     ],
+     [
+      "80489",
+      "Forte présence étudiante dans l'agglomération d'Amiens"
+     ]
+    ],
+    "apres": [
+     [
+      "63075",
+      "Forte présence étudiante dans l'agglomération de Clermont-Ferrand"
+     ],
+     [
+      "34198",
+      "Forte présence étudiante dans l'agglomération de Montpellier"
+     ],
+     [
+      "80489",
+      "Forte présence étudiante dans l'agglomération d'Amiens"
+     ]
+    ]
+   }
+  },
+  "comme-Annecy": {
+   "trioAvant": [
+    "Échirolles",
+    "Besançon",
+    "Montpellier"
+   ],
+   "trioApres": [
+    "Échirolles",
+    "Besançon",
+    "Montpellier"
+   ],
+   "pistesAvant": [
+    "Avrillé",
+    "Aubagne"
+   ],
+   "pistesApres": [
+    "Avrillé",
+    "Aubagne"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "38151",
+      "Forte présence étudiante dans l'agglomération de Grenoble"
+     ],
+     [
+      "25056",
+      "Forte présence étudiante"
+     ],
+     [
+      "34172",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "38151",
+      "Forte présence étudiante dans l'agglomération de Grenoble"
+     ],
+     [
+      "25056",
+      "Forte présence étudiante"
+     ],
+     [
+      "34172",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "comme-Leménil-Mitry": {
+   "trioAvant": [
+    "Sadirac",
+    "Thurins",
+    "Marseille"
+   ],
+   "trioApres": [
+    "Sadirac",
+    "Thurins",
+    "Marseille"
+   ],
+   "pistesAvant": [
+    "Montberon",
+    "Nesles-la-Vallée"
+   ],
+   "pistesApres": [
+    "Montberon",
+    "Nesles-la-Vallée"
+   ],
+   "cartesChangees": [
+    "Thurins",
+    "Marseille"
+   ],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "33363",
+      "Forte présence étudiante dans l'agglomération de Bordeaux"
+     ],
+     [
+      "69249",
+      "Forte présence étudiante dans l'agglomération de Lyon"
+     ],
+     [
+      "13208",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "33363",
+      "Présence étudiante intermédiaire dans l'agglomération de Bordeaux"
+     ],
+     [
+      "69249",
+      "Présence étudiante intermédiaire dans l'agglomération de Lyon"
+     ],
+     [
+      "13208",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  },
+  "comme-Rochefourchat": {
+   "trioAvant": [
+    "Bagnères-de-Bigorre",
+    "Doussard",
+    "Santa-Maria-di-Lota"
+   ],
+   "trioApres": [
+    "Bagnères-de-Bigorre",
+    "Doussard",
+    "Santa-Maria-di-Lota"
+   ],
+   "pistesAvant": [
+    "Seillans",
+    "Plainfaing"
+   ],
+   "pistesApres": [
+    "Seillans",
+    "Plainfaing"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "65059",
+      "Présence étudiante limitée"
+     ],
+     [
+      "74104",
+      "Présence étudiante intermédiaire dans l'agglomération d'Annecy"
+     ],
+     [
+      "2B309",
+      "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+     ]
+    ],
+    "apres": [
+     [
+      "65059",
+      "Présence étudiante limitée"
+     ],
+     [
+      "74104",
+      "Présence étudiante intermédiaire dans l'agglomération d'Annecy"
+     ],
+     [
+      "2B309",
+      "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+     ]
+    ]
+   }
+  },
+  "comme-La Rochelle": {
+   "trioAvant": [
+    "La Rochelle",
+    "Montpellier",
+    "Vannes"
+   ],
+   "trioApres": [
+    "La Rochelle",
+    "Montpellier",
+    "Vannes"
+   ],
+   "pistesAvant": [
+    "Marseille",
+    "Caen"
+   ],
+   "pistesApres": [
+    "Marseille",
+    "Caen"
+   ],
+   "cartesChangees": [],
+   "paliersComparaison": {
+    "avant": [
+     [
+      "17300",
+      "Forte présence étudiante"
+     ],
+     [
+      "34172",
+      "Forte présence étudiante"
+     ],
+     [
+      "56260",
+      "Forte présence étudiante"
+     ]
+    ],
+    "apres": [
+     [
+      "17300",
+      "Forte présence étudiante"
+     ],
+     [
+      "34172",
+      "Forte présence étudiante"
+     ],
+     [
+      "56260",
+      "Forte présence étudiante"
+     ]
+    ]
+   }
+  }
+ },
+ "vieModifies": 1666,
+ "paliers": {
+  "avant": {
+   "forte": 1985
+  },
+  "apres": {
+   "forte": 1741
+  },
+  "transitions": {
+   "non mesuré -> non mesuré": 29233,
+   "forte -> forte": 1741,
+   "intermédiaire -> limitée": 308,
+   "limitée -> limitée": 709,
+   "intermédiaire -> intermédiaire": 2553,
+   "forte -> intermédiaire": 244
+  }
+ },
+ "raison": {
+  "perdus": 127,
+  "gagnes": 0
+ },
+ "identite": {
+  "perdus": 0,
+  "gagnes": 0
+ },
+ "decouverte": {
+  "perdus": 244,
+  "gagnes": 0
+ },
+ "signature": {
+  "perdus": 96,
+  "gagnes": 0
+ }
+}
