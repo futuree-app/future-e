@@ -186,14 +186,24 @@ export function jourParis(t: number = Date.now()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(t);
 }
 
+// LA VEILLE EST LE JOUR CIVIL PRÉCÉDENT (contre-revue du 29/10/2026). Retirer 24 h à l'instant se trompait les
+// soirs de changement d'heure, où deux jours français sont séparés de 23 ou 25 heures : le 30/03/2026 entre 0 h
+// et 1 h, la « veille » tombait le 28 ; le 25/10/2026 entre 23 h et minuit, elle restait le 25. Le calcul se fait
+// sur la date elle-même, sans durée.
+
+/** Le jour civil qui précède `jour` (`AAAA-MM-JJ`), quelle que soit la durée de ce jour à Paris. */
+export function veilleCivile(jour: string): string {
+  const [a, m, j] = jour.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, j - 1)).toISOString().slice(0, 10);
+}
+
 async function load(inseeCode: string): Promise<AtmoAirQuality | null> {
-  const maintenant = Date.now();
-  const today = jourParis(maintenant);
+  const today = jourParis();
   const records = await fetchRecords(inseeCode, today);
   const indice = records.length ? parseRecord(records[0], inseeCode, today) : null;
   if (indice) return indice;
 
-  const yesterday = jourParis(maintenant - 86_400_000);
+  const yesterday = veilleCivile(today);
   const fallback = await fetchRecords(inseeCode, yesterday);
   return fallback.length ? parseRecord(fallback[0], inseeCode, yesterday) : null;
 }

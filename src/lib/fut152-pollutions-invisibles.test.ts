@@ -594,6 +594,107 @@ test("C · contre-revue 6 · expiration HTTP bornée ; jour de Paris ; un indice
   assert.equal(ATMO.jourParis(Date.parse("2026-07-14T23:30:00Z")), "2026-07-15");
 });
 
+// CONTRE-ÉPREUVES DE LA CONTRE-REVUE DU 29/10/2026 (bis) : LA VEILLE EST LE JOUR CIVIL PRÉCÉDENT À PARIS.
+// Sur le SHA refusé (`23f110d0`), la veille valait « maintenant moins 24 h » : fausse les soirs de changement
+// d'heure, où deux jours français sont séparés de 23 ou 25 heures. Les tests 7 à 10 y échouent.
+
+/** Le jour civil précédent, trouvé en reculant d'heure en heure jusqu'à changer de jour à Paris. */
+function veilleObservee(t: number): string {
+  const jour = ATMO.jourParis(t);
+  let u = t;
+  while (ATMO.jourParis(u) === jour) u -= 3600 * 1000;
+  return ATMO.jourParis(u);
+}
+
+test("C · contre-revue 7 · passage à l'heure d'été (29/03/2026) : à 0 h 30 le 30, la veille est le 29", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  // Le 29/03 ne dure que 23 h : 0 h 30 le 30 (heure d'été) moins 24 h tombe le 28 à 23 h 30.
+  const h = horloge("2026-03-30T00:30:00+02:00");
+  try {
+    const lectures = atmoSimule({ "2026-03-29": { date_ech: "2026-03-29", code_qual: 2, source: "Airparif" } });
+    const r = await json(await atmoRoute("75107"));
+    assert.equal(r.status, 200, "absence aujourd'hui, indice publié hier : récupéré");
+    assert.equal(r.corps.date, "2026-03-29");
+    assert.deepEqual(lectures, ["2026-03-30", "2026-03-29"]);
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 8 · passage à l'heure d'hiver (25/10/2026) : à 23 h 30 le 25, la veille est le 24, puis le jour suivant remplace", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  // Le 25/10 dure 25 h : 23 h 30 le 25 (heure d'hiver) moins 24 h tombe encore le 25, à 0 h 30.
+  const h = horloge("2026-10-25T23:30:00+01:00");
+  try {
+    const publie: Record<string, M | undefined> = { "2026-10-24": { date_ech: "2026-10-24", code_qual: 3, source: "Atmo Grand Est" } };
+    const lectures = atmoSimule(publie);
+    const r1 = await json(await atmoRoute("57210"));
+    assert.equal(r1.status, 200, "absence aujourd'hui, indice publié hier : récupéré");
+    assert.equal(r1.corps.date, "2026-10-24");
+    assert.deepEqual(lectures, ["2026-10-25", "2026-10-24"]);
+    // Deux heures plus tard, le 26 à 1 h 30 : l'indice du 26 est publié et remplace celui du 24.
+    h.avancer(DEUX_HEURES);
+    publie["2026-10-26"] = { date_ech: "2026-10-26", code_qual: 1, source: "Atmo Grand Est" };
+    const r2 = await json(await atmoRoute("57210"));
+    assert.equal(r2.corps.date, "2026-10-26");
+    assert.equal(r2.corps.index.label, "Bon");
+    assert.deepEqual(lectures, ["2026-10-25", "2026-10-24", "2026-10-26"]);
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 9 · nuit du changement d'heure : absence, puis publication du jour, sans résultat périmé ; panne puis retour ; appels simultanés", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const h = horloge("2026-03-30T00:15:00+02:00");
+  try {
+    const publie: Record<string, M | undefined> = {};
+    const lectures = atmoSimule(publie);
+    const r1 = await atmoRoute("75108");
+    assert.equal(r1.status, 404);
+    assert.equal(r1.headers.get("cache-control"), "no-store");
+    assert.deepEqual(lectures, ["2026-03-30", "2026-03-29"], "la veille lue est le 29, jamais le 28");
+    h.avancer(DEUX_HEURES);
+    publie["2026-03-30"] = { date_ech: "2026-03-30", code_qual: 2, source: "Airparif" };
+    const r2 = await json(await atmoRoute("75108"));
+    assert.equal(r2.status, 200);
+    assert.equal(r2.corps.date, "2026-03-30");
+    // Panne, puis retour du service, sur la même instance.
+    doubler(() => { throw new TypeError("fetch failed"); });
+    const r3 = await atmoRoute("75108");
+    assert.equal(r3.status, 502);
+    assert.equal(r3.headers.get("cache-control"), "no-store");
+    const apres = atmoSimule(publie);
+    const [a, b] = await Promise.all([ATMO.lireAtmoCommune("75108"), ATMO.lireAtmoCommune("75108")]);
+    assert.equal(a.etat, "disponible");
+    assert.deepEqual(a, b);
+    assert.deepEqual(apres, ["2026-03-30"], "un seul appel pour deux lectures simultanées");
+  } finally { h.fin(); }
+});
+
+test("C · contre-revue 10 · « hier » est toujours le jour civil précédent : minuits, changements d'heure, fins de mois et d'année", async () => {
+  process.env.ATMO_USERNAME = "u"; process.env.ATMO_PASSWORD = "p";
+  const instants: number[] = [];
+  // Quart d'heure par quart d'heure autour des deux changements d'heure de 2026.
+  for (const [debut, fin] of [["2026-03-28T00:00:00Z", "2026-03-31T00:00:00Z"], ["2026-10-24T00:00:00Z", "2026-10-27T00:00:00Z"]]) {
+    for (let t = Date.parse(debut); t < Date.parse(fin); t += 15 * 60 * 1000) instants.push(t);
+  }
+  // Juste avant et juste après minuit à Paris, en hiver et en été, et aux bornes de mois et d'année.
+  for (const iso of [
+    "2026-01-01T00:00:01+01:00", "2025-12-31T23:59:59+01:00", "2026-03-01T00:00:01+01:00",
+    "2026-07-15T00:00:01+02:00", "2026-07-14T23:59:59+02:00", "2026-11-01T00:00:01+01:00", "2028-03-01T00:30:00+01:00",
+  ]) instants.push(Date.parse(iso));
+  const fautes: string[] = [];
+  for (const t of instants) {
+    const h = horloge(new Date(t).toISOString());
+    try {
+      const lectures = atmoSimule({});
+      await ATMO.lireAtmoCommune("75109");
+      const attendu = [ATMO.jourParis(t), veilleObservee(t)];
+      if (lectures.join() !== attendu.join()) fautes.push(`${new Date(t).toISOString()} : ${lectures.join(" → ")} au lieu de ${attendu.join(" → ")}`);
+    } finally { h.fin(); }
+  }
+  assert.deepEqual(fautes, []);
+  assert.equal(veilleObservee(Date.parse("2026-01-01T00:00:01+01:00")), "2025-12-31");
+  assert.equal(veilleObservee(Date.parse("2028-03-01T00:30:00+01:00")), "2028-02-29");
+});
+
 // ════════════════════════════════════════════════════════════════════════════════════════════════
 // D · IREP
 // ════════════════════════════════════════════════════════════════════════════════════════════════

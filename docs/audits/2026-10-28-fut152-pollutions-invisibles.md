@@ -222,3 +222,26 @@ Gramat avait le même écart de point, sans effet sur le compte (1 / 3). Les deu
 **Contrôles** : `tsc` et `eslint` : 0 erreur. FUT-152 et FUT-158 : 48 tests sur 48. `npm test` : 3 857 tests, 0 échec.
 
 **Hors périmètre, signalé.** La page `/chaleur/[insee_code]` reste générée pour 24 h (ISR, maintenu par décision du 28/10). Son encart ATMO peut donc dater de la veille, mais il affiche la date de l'indice.
+
+## 8. Contre-revue ciblée du 29/10/2026 : la veille est le jour civil précédent à Paris
+
+**Défaut** (sur `23f110d0`) : la veille se calculait comme « maintenant moins 24 h ». Or deux jours civils français sont séparés de 23 h au passage à l'heure d'été et de 25 h au passage à l'heure d'hiver. Le 30/03/2026 entre 0 h et 1 h, la veille lue était le 28. Le 25/10/2026 entre 23 h et minuit, elle restait le 25 et l'indice publié la veille n'était jamais lu.
+
+**Correction** (`src/lib/atmo.ts` seul) : `veilleCivile(jour)` recule d'un jour sur la date `AAAA-MM-JJ` elle-même, sans aucune durée (fins de mois, d'année et 29 février compris). `load` demande d'abord le jour de Paris, comme avant, puis `veilleCivile` de ce jour. La lecture du jour, les trois états (`disponible`, `absent_dans_source`, `indisponible`), la déduplication, le cache HTTP et le contrat de `getAtmoForCommune` ne changent pas.
+
+**Contre-épreuves** (4 tests, horloge simulée, même instance, vraie route). Les quatre échouent sur `23f110d0` :
+
+| Test | Résultat sur `23f110d0` |
+|---|---|
+| 30/03/2026 à 0 h 30 : absence du jour, indice publié le 29 → 200, daté du 29 | 404 (le 28 est lu) |
+| 25/10/2026 à 23 h 30 : absence du jour, indice publié le 24 → 200 ; 2 h plus tard l'indice du 26 le remplace | 404 (le 25 est relu) |
+| Nuit du 30/03 : absence (404, `no-store`), publication du jour 2 h plus tard (200, sans résultat périmé), panne (502, `no-store`), retour du service et deux lectures simultanées (un seul appel) | le 28 est lu au lieu du 29 |
+| Tous les quarts d'heure du 28 au 30/03 et du 24 au 26/10, plus des instants à une seconde de minuit (hiver, été, 1er janvier, 1er mars, 29/02/2028) : la veille lue est celle trouvée en reculant d'heure en heure jusqu'au changement de jour à Paris | 8 instants faux : 0 h à 1 h le 30/03, 23 h à minuit le 25/10 |
+
+Les contre-épreuves précédentes (section 7) passent toujours.
+
+**Consommateurs historiques**, vérifiés sur le serveur local : la route `/api/atmo/57463` rend l'indice de Metz du 29/10 (« Bon », Atmo Grand Est, `s-maxage=900, stale-while-revalidate=300`) ; l'aperçu de l'accueil (`/api/wizard-preview`) et la page `/chaleur/57463` rendent ce même indice.
+
+**Recette navigateur** : 58 vérifications sur 58, sur ordinateur et sur mobile, dont la réponse ATMO inattendue puis le retour réel du service. Aucune trace `georisques_echec`.
+
+**Contrôles** : `tsc` : 0 erreur. `eslint` sur les 22 fichiers de la PR : 0 erreur. FUT-152 et FUT-158 : 52 tests sur 52. `npm test` : 3 861 tests, 0 échec.
