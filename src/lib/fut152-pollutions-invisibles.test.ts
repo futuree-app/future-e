@@ -117,7 +117,7 @@ test("A · un lien venu de la source n'est rendu que vers un domaine public atte
   }
 });
 
-test("A · la vraie route : officielle, sans `Accept: application/json` (coupé par Géorisques), un User-Agent nommé", async () => {
+test("A · la vraie route : officielle, avec le transport commun de FUT-158 (`Accept-Encoding: identity`)", async () => {
   // CASIAS sur deux pages, avec une fiche répétée d'une page à l'autre : 3 lignes, 2 fiches.
   const appels = doubler((u) => {
     if (!u.pathname.endsWith("/casias")) return Response.json(page([ficheSis(`${u.pathname}-1`)]));
@@ -133,8 +133,7 @@ test("A · la vraie route : officielle, sans `Accept: application/json` (coupé 
   for (const a of appels) {
     assert.equal(a.url.origin, "https://georisques.gouv.fr");
     assert.match(a.url.pathname, /^\/api\/v1\/ssp\/(conclusions_sis|instructions|conclusions_sup|casias)$/);
-    assert.equal(a.headers.accept, undefined, "Géorisques coupe la connexion sur Accept: application/json");
-    assert.match(a.headers["user-agent"] ?? "", /^futur-e\//);
+    assert.deepEqual(a.headers, { accept: "application/json", "accept-encoding": "identity" }, "les en-têtes de `EN_TETES_GEORISQUES`, rien d'autre");
   }
   assert.ok(!appels.some((a) => a.url.hostname === "data.georisques.gouv.fr"), "l'ancien hôte n'existe pas");
 });
@@ -152,6 +151,72 @@ test("A · pannes : tout en panne → 502 ; une catégorie en panne → 200, la 
 
   for (const insee of ["ABC", "", "7510", "751041"]) {
     assert.equal((await SIS.GET(new Request(`http://localhost/api/proxy/sis?insee=${insee}`))).status, 400, insee);
+  }
+});
+
+// CONTRE-ÉPREUVES DE LA REVUE DU 29/10/2026 (défauts 1 et 4) : un total annoncé positif n'est jamais une absence.
+
+test("A · revue 1 · la source annonce des lignes sans fiche exploitable : `partiel`, jamais `absent_dans_source`", () => {
+  // 3 lignes annoncées, aucune rendue.
+  assert.deepEqual(SS.lireCategorie([page([], 3)]), { etat: "partiel", total: 0, fiches: [] });
+  // 2 lignes annoncées et rendues, mais sans identifiant : rien n'en est tiré, rien n'en est conclu.
+  const sansId = { nom: "Site sans identifiant", adresse: "2 rue Y" };
+  assert.deepEqual(SS.lireCategorie([page([sansId, sansId])]), { etat: "partiel", total: 0, fiches: [] });
+  // Une fiche lisible et une ligne inexploitable : la fiche est montrée, la liste dite incomplète.
+  const mixte = SS.lireCategorie([page([ficheSis("A"), sansId, "pas un objet" as unknown as M])]);
+  assert.equal(mixte.etat, "partiel");
+  assert.deepEqual(mixte.fiches.map((f: M) => f.id), ["A"]);
+  assert.deepEqual(SS.lireCasias([page([sansId], 1)]), { etat: "partiel", total: 0 });
+  // Le seul vrai vide : la source répond, n'annonce rien et ne rend rien.
+  assert.deepEqual(SS.lireCategorie([page([], 0)]), { etat: "absent_dans_source", total: 0, fiches: [] });
+});
+
+test("A · revue 1 · un lot dont les pages rendent moins de lignes qu'annoncé est incomplet", () => {
+  assert.equal(SS.lotIncomplet([page([ficheSis("A")], 1500, undefined as unknown as number)], 5), true, "`total_pages` absent, 1 ligne sur 1 500");
+  assert.equal(SS.lotIncomplet([page([ficheSis("A")], 2, 1)], 5), true, "`total_pages` faux");
+  assert.equal(SS.lotIncomplet([page([ficheSis("A")], 12000, 12)], 10), true, "plafond");
+  assert.equal(SS.lotIncomplet([page([ficheSis("A"), ficheSis("A")], 2, 1)], 5), false, "lignes répétées, toutes lues");
+  assert.equal(SS.lotIncomplet([page([], 0)], 5), false);
+});
+
+test("A · revue 1 · la vraie route : un total annoncé non entièrement lu ne s'affiche jamais en absence", async () => {
+  // SIS annonce 2 lignes sur 1 page, n'en rend aucune ; CASIAS annonce 1 500 lignes sans `total_pages`.
+  doubler((u) => {
+    const cat = u.pathname.split("/").pop();
+    if (cat === "conclusions_sis") return Response.json(page([], 2));
+    if (cat === "casias") return Response.json({ results: 1500, page: 1, data: [ficheSis("C1")] });
+    return Response.json(page([]));
+  });
+  const r = await json(await SIS.GET(new Request("http://localhost/api/proxy/sis?insee=57463")));
+  assert.deepEqual(r.corps.sis, { etat: "partiel", total: 0, fiches: [] });
+  assert.deepEqual(r.corps.casias, { etat: "partiel", total: 1 });
+  assert.equal(r.corps.instructions.etat, "absent_dans_source");
+});
+
+test("A · revue 1 · l'écran : un partiel sans fiche n'affiche ni la phrase d'absence ni un compte", () => {
+  const src = readFileSync(new URL("../components/PollutionLookup.tsx", import.meta.url), "utf8");
+  assert.match(src, /lu\.etat === 'absent_dans_source' && <div className="lookup-empty">\{vide\}<\/div>/, "la phrase d'absence n'a qu'un état");
+  assert.match(src, /lu\.etat === 'partiel' && lu\.total > 0 && ` : au moins/);
+  assert.match(src, /casias\.etat === 'partiel' && casias\.total > 0 && ` : au moins/);
+  assert.match(src, /La source annonce des fiches qui n’ont pas pu être lues : rien ne peut en être conclu/);
+});
+
+test("A · revue 4 · une panne de transport est tracée `georisques_echec`, comme les autres appels Géorisques", async () => {
+  const traces: string[] = [];
+  const erreur = console.error;
+  console.error = (m: string) => { traces.push(m); };
+  try {
+    doubler(() => { throw Object.assign(new TypeError("fetch failed"), { cause: { code: "ECONNRESET" } }); });
+    await SSR.getSitesSolsCommune("57463");
+  } finally {
+    console.error = erreur;
+  }
+  const lignes = traces.map((t) => JSON.parse(t));
+  assert.ok(lignes.length >= 4);
+  for (const l of lignes) {
+    assert.equal(l.evenement, "georisques_echec");
+    assert.equal(l.erreur, "ECONNRESET");
+    assert.match(l.chemin, /^\/api\/v1\/ssp\//);
   }
 });
 
@@ -196,12 +261,18 @@ const prelevement = (date: string, conclusion: string, refPc = "C") => ({
 });
 
 /** Un Hub'Eau simulé : réseaux de la commune, dernier prélèvement par réseau, une valeur par paramètre. */
-function hubeau(o: { udi: M[]; parReseau: Record<string, M | null>; panneReseau?: string; panne?: boolean }) {
+function hubeau(o: { udi: M[]; parReseau: Record<string, M | null>; panneReseau?: string; panne?: boolean; panneUdiPage?: number; udiAnnonce?: number; parReseauBrut?: Record<string, M> }) {
   return doubler((u) => {
     if (o.panne) throw new TypeError("fetch failed");
-    if (u.pathname.endsWith("/communes_udi")) return Response.json({ count: o.udi.length, data: o.udi });
+    if (u.pathname.endsWith("/communes_udi")) {
+      const n = Number(u.searchParams.get("size") ?? 50), k = Number(u.searchParams.get("page") ?? 1);
+      if (o.panneUdiPage === k) return new Response("panne", { status: 500 });
+      const data = o.udi.slice((k - 1) * n, k * n);
+      return Response.json({ count: o.udiAnnonce ?? o.udi.length, data }, { status: k * n < o.udi.length ? 206 : 200 });
+    }
     const reseau = u.searchParams.get("code_reseau");
     if (reseau && reseau === o.panneReseau) return new Response("panne", { status: 500 });
+    if (reseau && o.parReseauBrut?.[reseau]) return Response.json(o.parReseauBrut[reseau]);
     if (reseau) { const p = o.parReseau[reseau]; return Response.json({ count: p ? 1 : 0, data: p ? [p] : [] }); }
     if (u.searchParams.get("code_parametre") === "1340") {
       return Response.json({ count: 1, data: [{ date_prelevement: "2026-02-05T11:50:00Z", resultat_alphanumerique: "18", libelle_unite: "mg/L", reseaux: [{ nom: "BDS" }] }] });
@@ -262,6 +333,67 @@ test("B · pannes : tout en panne → 502 ; un réseau en panne → partiel, non
   assert.equal(vide.corps.etat, "absent_dans_source");
 });
 
+// CONTRE-ÉPREUVES DE LA REVUE DU 29/10/2026 (défauts 1 et 2).
+
+const udi = (n: number) => Array.from({ length: n }, (_, i) => ({ code_reseau: `R${String(i + 1).padStart(3, "0")}`, nom_reseau: `Réseau ${i + 1}` }));
+
+test("B · revue 2 · au-delà de 50 réseaux, toutes les pages sont lues", async () => {
+  const appels = hubeau({ udi: udi(120), parReseau: {} });
+  const r = await json(await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=57463")));
+  assert.equal(r.corps.reseaux.length, 120);
+  assert.equal(r.corps.etat, "disponible");
+  assert.deepEqual(appels.filter((a) => a.url.pathname.endsWith("/communes_udi")).map((a) => a.url.searchParams.get("page")), ["1", "2", "3"]);
+});
+
+test("B · revue 2 · une page de réseaux en échec : la liste lue est montrée, la lecture dite partielle et non mise en cache", async () => {
+  hubeau({ udi: udi(120), parReseau: {}, panneUdiPage: 2 });
+  const r = await json(await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=57463")));
+  assert.equal(r.corps.etat, "partiel");
+  assert.equal(r.corps.reseaux.length, 50);
+  assert.equal(r.cache, "no-store");
+});
+
+test("B · revue 2 · la source annonce plus de réseaux qu'elle n'en rend : partiel", async () => {
+  hubeau({ udi: udi(3), udiAnnonce: 70, parReseau: {} });
+  const r = await json(await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=57463")));
+  assert.equal(r.corps.etat, "partiel");
+  assert.equal(r.corps.reseaux.length, 3);
+});
+
+test("B · revue 1 · un prélèvement annoncé mais illisible n'est jamais « aucun prélèvement publié »", () => {
+  const def = EAU.PARAMETRES_EAU.map(() => ({ count: 0, data: [] }));
+  // Le réseau annonce 4 prélèvements, la ligne rendue n'a pas de date.
+  const reseau = EAU.lireEauPotable({
+    consulteLe: "2026-10-29", repliCommune: null, parametres: def,
+    reseaux: [{ code: "A", nom: "A", zone: null, reponse: { count: 1, data: [{ date_prelevement: "2026-08-28T10:00:00Z" }] } },
+      { code: "B", nom: "B", zone: null, reponse: { count: 4, data: [{ conclusion_conformite_prelevement: "x" }] } }],
+  });
+  assert.equal(reseau.etat, "partiel");
+  assert.equal(reseau.reseaux[1].dernier, "indisponible");
+  // Repli sur la commune : 2 prélèvements annoncés, aucune ligne rendue.
+  const repli = EAU.lireEauPotable({ consulteLe: "2026-10-29", reseaux: [], repliCommune: { count: 2, data: [] }, parametres: def });
+  assert.equal(repli.etat, "partiel");
+  // Un paramètre annoncé sans valeur lisible.
+  const param = EAU.lireEauPotable({
+    consulteLe: "2026-10-29", reseaux: [], repliCommune: { count: 0, data: [] },
+    parametres: def.map((d: M, i: number) => (i === 0 ? { count: 5, data: [{ date_prelevement: "2026-08-28" }] } : d)),
+  });
+  assert.equal(param.etat, "partiel");
+  // Le seul vrai vide : rien d'annoncé, rien de rendu.
+  assert.equal(EAU.lireEauPotable({ consulteLe: "2026-10-29", reseaux: [], repliCommune: { count: 0, data: [] }, parametres: def }).etat, "absent_dans_source");
+});
+
+test("B · revue 1 · la vraie route : un réseau qui annonce des prélèvements illisibles est dit indisponible", async () => {
+  hubeau({ udi: udi(1), parReseau: {}, parReseauBrut: { R001: { count: 3, data: [{ reseaux: [] }] } } });
+  const r = await json(await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=57463")));
+  assert.equal(r.status, 502, "le seul réseau est illisible : rien ne peut être conclu");
+  hubeau({ udi: udi(2), parReseau: { R002: prelevement("2026-08-28", "ok") }, parReseauBrut: { R001: { count: 3, data: [{ reseaux: [] }] } } });
+  const p = await json(await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=57463")));
+  assert.equal(p.corps.etat, "partiel");
+  assert.equal(p.corps.reseaux[0].dernier, "indisponible");
+  assert.equal(p.cache, "no-store");
+});
+
 test("B · un arrondissement est lu sous le code de sa ville (Hub'Eau publie Paris sous 75056)", async () => {
   const appels = hubeau({ udi: [], parReseau: {} });
   await EAUR.GET(new Request("http://localhost/api/proxy/eau?insee=75104"));
@@ -292,6 +424,43 @@ test("C · une panne ATMO répond 502, une absence 404, et la panne n'est pas m�
   const absent = await ATMOR.GET(new Request("http://localhost/api/atmo/01001"), { params: Promise.resolve({ insee: "01001" }) });
   assert.equal(absent.status, 404);
   assert.equal((await ATMOR.GET(new Request("http://localhost/api/atmo/x"), { params: Promise.resolve({ insee: "x" }) })).status, 400);
+});
+
+test("C · revue 3 · un JSON inattendu est une panne (502), jamais une absence, et n'est pas mémorisé", async () => {
+  process.env.ATMO_USERNAME = "u";
+  process.env.ATMO_PASSWORD = "p";
+  const bon = { features: [{ properties: { date_ech: "2026-10-29", code_qual: 3, source: "Airparif" } }] };
+  const inattendus: unknown[] = [
+    { error: "quota dépassé" }, {}, { features: "x" }, { features: [null] }, { features: [{ geometry: {} }] },
+    [1, 2], "texte", null, { features: [{ properties: { code_qual: 9 } }] }, { features: [{ properties: { code_qual: null } }] },
+  ];
+  // Chaque forme sur une commune différente : le cache par commune et par jour ne peut rien masquer.
+  for (const [i, corps] of inattendus.entries()) {
+    const insee = `570${String(10 + i).padStart(2, "0")}`;
+    let reponse: unknown = corps;
+    doubler((u) => (u.pathname.endsWith("/login") ? Response.json({ token: "t" }) : Response.json(reponse)));
+    const appel = () => ATMOR.GET(new Request(`http://localhost/api/atmo/${insee}`), { params: Promise.resolve({ insee }) });
+    assert.equal((await appel()).status, 502, JSON.stringify(corps));
+    reponse = bon; // même instance, même journée : l'erreur n'a pas été gardée comme un résultat
+    const ok = await json(await appel());
+    assert.equal(ok.status, 200, JSON.stringify(corps));
+    assert.equal(ok.corps.index.label, "Dégradé");
+  }
+  assert.throws(() => ATMO.enregistrementsAtmo({ ok: true }), ATMO.ReponseAtmoInattendue);
+  assert.deepEqual(ATMO.enregistrementsAtmo([]), []);
+  assert.deepEqual(ATMO.enregistrementsAtmo({ features: [] }), []);
+});
+
+test("C · revue 3 · `code_qual` 0 (indice absent dans la nomenclature ATMO) reste une absence : 404", async () => {
+  doubler((u) => (u.pathname.endsWith("/login") ? Response.json({ token: "t" }) : Response.json({ features: [{ properties: { code_qual: 0 } }] })));
+  const r = await ATMOR.GET(new Request("http://localhost/api/atmo/57099"), { params: Promise.resolve({ insee: "57099" }) });
+  assert.equal(r.status, 404);
+});
+
+test("C · revue 3 · aucune réponse ATMO n'entre dans le cache de données Next", () => {
+  const src = readFileSync(new URL("./atmo.ts", import.meta.url), "utf8").replace(/^\s*(\/\/|\*).*$/gm, "");
+  assert.doesNotMatch(src, /revalidate/);
+  assert.match(src, /cache: "no-store"/);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════
@@ -397,13 +566,15 @@ test("D · l'index livré : convention, millésime 2025, empreinte de l'archive,
 
 test("D · contre-épreuve : Metz, Paris, Fos, Gramat, comptés indépendamment depuis l'export (script Python, 28/10/2026)", () => {
   // Comptes obtenus en lisant l'export 2025 sans passer par la table, autour du centre geo.api de la commune,
-  // rayon 10 km (cf. docs/audits/2026-10-28-fut152-pollutions-invisibles.md).
+  // rayon 10 km (cf. docs/audits/2026-10-28-fut152-pollutions-invisibles.md). Les points sont EXACTEMENT ceux
+  // que l'écran envoie (`centre` de geo.api.gouv.fr, relevé le 29/10/2026). Revue du 29/10 : Fos et Gramat
+  // portaient un autre point ; à Fos, 26 / 40 au lieu des 17 / 32 que le lecteur voit.
   const idx = JSON.parse(readFileSync("data/irep-registre.json", "utf8")) as M;
   const cas: [string, number, number, number, number][] = [
     ["Metz", 49.1048, 6.1962, 5, 19],
     ["Paris", 48.8589, 2.347, 33, 86],
-    ["Fos-sur-Mer", 43.4378, 4.9447, 26, 40],
-    ["Gramat", 44.7808, 1.7256, 1, 3],
+    ["Fos-sur-Mer", 43.4545, 4.8979, 17, 32],
+    ["Gramat", 44.7643, 1.7125, 1, 3],
   ];
   for (const [nom, lat, lon, avec, sans] of cas) {
     const r = IREP.irepAutour(idx, lat, lon, IREP.IREP_RAYON_PAGE_M);

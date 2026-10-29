@@ -146,18 +146,27 @@ export function parametre(def: (typeof PARAMETRES_EAU)[number], r: Record<string
   };
 }
 
+/** Une réponse lisible qui annonce des lignes (`count > 0`) : on ne peut plus en conclure une absence. */
+const annonce = (r: ReponseHubeau | null): boolean => reponseLisible(r) && r.count > 0;
+
 /**
  * Assemble la lecture. `reseaux` : la liste des UDI de la commune et, pour chacune, la réponse de son dernier
- * prélèvement (`null` = appel en échec). `repliCommune` : le dernier prélèvement de la commune, lu quand la
- * source ne liste aucun réseau. `parametres` : une réponse par paramètre (`null` = échec).
+ * prélèvement (`null` = appel en échec). `reseauxIncomplets` : la liste des UDI n'a pas pu être lue en entier
+ * (pagination interrompue, lignes annoncées sans réseau exploitable). `repliCommune` : le dernier prélèvement
+ * de la commune, lu quand la source ne liste aucun réseau. `parametres` : une réponse par paramètre (`null` = échec).
+ *
+ * JAMAIS D'ABSENCE QUAND LA SOURCE ANNONCE DES LIGNES (revue du 29/10/2026). Une réponse qui annonce `count > 0`
+ * mais dont la ligne n'est pas exploitable (sans date, sans valeur) rend la lecture `partiel` : le réseau est dit
+ * « résultat indisponible », jamais « aucun prélèvement publié ».
  */
 export function lireEauPotable(o: {
   consulteLe: string;
   reseaux: { code: string; nom: string; zone: string | null; reponse: ReponseHubeau | null }[] | null;
+  reseauxIncomplets?: boolean;
   repliCommune: ReponseHubeau | null;
   parametres: (ReponseHubeau | null)[];
 }): EauPotableCommune {
-  let partiel = o.parametres.some((p) => !reponseLisible(p));
+  let partiel = o.parametres.some((p) => !reponseLisible(p)) || o.reseauxIncomplets === true;
   let reseaux: ReseauLu[] = [];
 
   if (o.reseaux && o.reseaux.length > 0) {
@@ -166,7 +175,12 @@ export function lireEauPotable(o: {
         partiel = true;
         return { code: r.code, nom: r.nom, zone: r.zone, dernier: "indisponible" as const };
       }
-      return { code: r.code, nom: r.nom, zone: r.zone, dernier: prelevement(r.reponse.data[0]) };
+      const dernier = prelevement(r.reponse.data[0]);
+      if (!dernier && annonce(r.reponse)) {
+        partiel = true;
+        return { code: r.code, nom: r.nom, zone: r.zone, dernier: "indisponible" as const };
+      }
+      return { code: r.code, nom: r.nom, zone: r.zone, dernier };
     });
     if (reseaux.every((r) => r.dernier === "indisponible")) return { etat: "indisponible" };
   } else {
@@ -176,11 +190,13 @@ export function lireEauPotable(o: {
     const r0 = o.repliCommune.data[0];
     const p = prelevement(r0);
     if (p && r0) reseaux = [{ code: "", nom: nomReseau(r0) ?? "Réseau non nommé", zone: null, dernier: p }];
+    else if (annonce(o.repliCommune)) partiel = true;
   }
 
   const parametres = o.parametres.flatMap((rep, i) => {
     if (!reponseLisible(rep)) return [];
     const lu = parametre(PARAMETRES_EAU[i]!, rep.data[0]);
+    if (!lu && rep.count > 0) partiel = true;
     return lu ? [lu] : [];
   });
 

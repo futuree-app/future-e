@@ -213,7 +213,9 @@ function Inventaire({ titre, sens, lu, vide }: { titre: string; sens: string; lu
   return (
     <div className="lookup-section">
       <div className="lookup-section-head">
-        {titre}{lu.etat === 'disponible' || lu.etat === 'partiel' ? ` : ${nombre(lu.total)}` : ''}
+        {titre}
+        {lu.etat === 'disponible' && ` : ${nombre(lu.total)}`}
+        {lu.etat === 'partiel' && lu.total > 0 && ` : au moins ${nombre(lu.total)}`}
       </div>
       <div className="lookup-section-desc">{sens}</div>
       {lu.etat === 'indisponible' && (
@@ -221,9 +223,11 @@ function Inventaire({ titre, sens, lu, vide }: { titre: string; sens: string; lu
       )}
       {lu.etat === 'absent_dans_source' && <div className="lookup-empty">{vide}</div>}
       {lu.etat === 'partiel' && (
-        <div className="lookup-note">Liste incomplète : la source annonce davantage de fiches que celles lues ici.</div>
+        <div className="lookup-note">{lu.total > 0
+          ? 'Liste incomplète : la source annonce davantage de fiches que celles lues ici.'
+          : 'La source annonce des fiches qui n’ont pas pu être lues : rien ne peut en être conclu pour cette commune.'}</div>
       )}
-      {(lu.etat === 'disponible' || lu.etat === 'partiel') && (
+      {(lu.etat === 'disponible' || lu.etat === 'partiel') && lu.fiches.length > 0 && (
         <ListeDepliable items={lu.fiches} cle={(f) => f.id} premiers={5} rendre={(f) => <Fiche f={f} />} />
       )}
     </div>
@@ -260,14 +264,16 @@ function RenduSitesSols({ data, commune }: { data: SitesSolsCommune; commune: Co
         <div className="lookup-section-head">
           Anciennes activités industrielles et de services (CASIAS)
           {casias.etat === 'disponible' && ` : ${nombre(casias.total)} ${pluriel(casias.total, 'fiche', 'fiches')}`}
-          {casias.etat === 'partiel' && ` : au moins ${nombre(casias.total)} fiches`}
+          {casias.etat === 'partiel' && casias.total > 0 && ` : au moins ${nombre(casias.total)} ${pluriel(casias.total, 'fiche', 'fiches')}`}
         </div>
         {casias.etat === 'indisponible' ? (
           <div className="lookup-error">Inventaire momentanément indisponible : rien ne peut en être conclu pour cette commune.</div>
         ) : (
           <div className="lookup-section-desc">
             {casias.etat === 'absent_dans_source' ? 'Aucune fiche dans l’inventaire pour cette commune. ' : ''}
-            {casias.etat === 'partiel' ? 'La lecture s’est arrêtée avant la dernière page : le nombre réel est plus élevé. ' : ''}
+            {casias.etat === 'partiel' ? (casias.total > 0
+              ? 'Une partie des lignes annoncées par la source n’a pas pu être lue : le nombre réel est plus élevé. '
+              : 'La source annonce des fiches qui n’ont pas pu être lues : rien ne peut en être conclu pour cette commune. ') : ''}
             Une fiche indique qu’une activité a existé, sans qu’une pollution ait été constatée. L’inventaire est historique
             et incomplet. Pour situer ces activités près d’une adresse : <Lien href={CARTE_GEORISQUES}>carte Géorisques</Lien>.
           </div>
@@ -391,7 +397,9 @@ function RenduEau({ data, commune }: { data: EauLu; commune: Commune }) {
           : `Contrôle sanitaire de ${commune.nom} · consulté le ${dateFr(data.consulteLe)}`}
       </div>
       {data.etat === 'partiel' && (
-        <div className="lookup-note">Lecture incomplète : une partie des résultats n’a pas pu être obtenue.</div>
+        <div className="lookup-note">{n > 0 || data.parametres.length > 0
+          ? 'Lecture incomplète : une partie des résultats n’a pas pu être obtenue.'
+          : 'La source annonce des résultats qui n’ont pas pu être lus : rien ne peut en être conclu pour cette commune.'}</div>
       )}
       <ListeDepliable items={data.reseaux} cle={(r) => r.code || r.nom} rendre={(r) => <Reseau r={r} />} />
       {data.parametres.length > 0 && (

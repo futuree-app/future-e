@@ -100,7 +100,7 @@ export type CategorieLue =
   | { etat: "absent_dans_source"; total: 0; fiches: [] }
   | { etat: "disponible" | "partiel"; total: number; fiches: FicheSsp[] };
 
-/** `partiel` : le plafond de pages a coupé la lecture ; `total` est alors un minimum (« au moins »). */
+/** `partiel` : des lignes annoncées n'ont pas été lues ou exploitées ; `total` est alors un minimum (« au moins »). */
 export type CasiasLu =
   | { etat: "indisponible" }
   | { etat: "absent_dans_source" | "disponible" | "partiel"; total: number };
@@ -152,23 +152,47 @@ export function pageLisible(p: PageSsp): p is { results: number; total_pages: un
 }
 
 /**
+ * UN LOT EST-IL LU EN ENTIER ? Ses pages (la première porte `results`, le nombre de lignes annoncé, et
+ * `total_pages`) → `true` quand des lignes annoncées n'ont pas été lues : le plafond de pages a coupé la
+ * lecture, ou les pages rendues contiennent moins de lignes que le total annoncé (`total_pages` absent ou
+ * faux, page tronquée). Un lot en panne n'est pas « incomplet » : `lireCategorie` le rend indisponible.
+ */
+export function lotIncomplet(pages: (PageSsp | null)[], plafond: number): boolean {
+  const premiere = pages[0];
+  if (!premiere || !pageLisible(premiere) || pages.some((p) => p === null || !pageLisible(p))) return false;
+  const totalPages = entier(premiere.total_pages);
+  if (totalPages !== null && totalPages > plafond) return true;
+  const lues = (pages as { data: unknown[] }[]).reduce((n, p) => n + p.data.length, 0);
+  return lues < premiere.results;
+}
+
+/**
  * Les pages d'une catégorie listée (tous lots de codes confondus) → l'état de la catégorie.
  * `null` dans `pages` : un appel a échoué. Une seule panne rend la catégorie indisponible : une liste à
  * laquelle manque un lot ressemblerait à une liste complète.
- * `incomplet` : un lot avait plus de pages que le plafond `PAGES_MAX`.
+ * `incomplet` : des lignes annoncées n'ont pas été lues (`lotIncomplet`).
+ *
+ * JAMAIS D'ABSENCE QUAND LA SOURCE ANNONCE DES LIGNES (revue du 29/10/2026). Une ligne sans identifiant ne
+ * devient pas une fiche, mais elle n'est pas oubliée : la catégorie est alors `partiel`. Et une page qui
+ * annonce `results > 0` interdit `absent_dans_source`, même si aucune fiche n'a pu en être tirée.
  */
 export function lireCategorie(pages: (PageSsp | null)[], incomplet = false): CategorieLue {
   if (pages.length === 0 || pages.some((p) => p === null || !pageLisible(p))) return { etat: "indisponible" };
+  const lisibles = pages as { results: number; data: Record<string, unknown>[] }[];
   const parId = new Map<string, FicheSsp>();
-  for (const p of pages as { data: Record<string, unknown>[] }[]) {
+  let nonExploitees = 0;
+  for (const p of lisibles) {
     for (const r of p.data) {
-      const f = fiche(r);
-      if (f && !parId.has(f.id)) parId.set(f.id, f);
+      const f = r && typeof r === "object" ? fiche(r) : null;
+      if (!f) nonExploitees++;
+      else if (!parId.has(f.id)) parId.set(f.id, f);
     }
   }
   const fiches = [...parId.values()].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
-  if (fiches.length === 0 && !incomplet) return { etat: "absent_dans_source", total: 0, fiches: [] };
-  return { etat: incomplet ? "partiel" : "disponible", total: fiches.length, fiches };
+  const annonce = lisibles.some((p) => p.results > 0);
+  const partiel = incomplet || nonExploitees > 0 || (fiches.length === 0 && annonce);
+  if (fiches.length === 0 && !partiel) return { etat: "absent_dans_source", total: 0, fiches: [] };
+  return { etat: partiel ? "partiel" : "disponible", total: fiches.length, fiches };
 }
 
 /**

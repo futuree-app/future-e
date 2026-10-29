@@ -113,22 +113,46 @@ async function fetchRecords(inseeCode: string, date: string): Promise<AtmoRawRec
           authorization: `Bearer ${token}`,
         },
         signal: controller.signal,
-        next: { revalidate: 3600 },
+        // Pas de cache de données Next : il garderait une heure une réponse 200 au contenu inattendu, que
+        // `enregistrementsAtmo` refuse. Seule une lecture réussie est gardée, par `lire` puis par la route.
+        cache: "no-store",
       },
     );
 
     if (!res.ok) throw new Error(`ATMO data failed: ${res.status}`);
-    const json = await res.json() as { features?: { properties: AtmoRawRecord }[] } | AtmoRawRecord[];
-    if (Array.isArray(json)) return json;
-    return (json.features ?? []).map((f) => f.properties);
+    return enregistrementsAtmo(await res.json());
   } finally {
     clearTimeout(timeout);
   }
 }
 
-function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | null {
+/** Une réponse ATMO dont la forme n'est pas celle documentée : une panne, jamais une absence d'indice. */
+export class ReponseAtmoInattendue extends Error {}
+
+const estObjet = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * LES ENREGISTREMENTS D'UNE RÉPONSE ATMO, OU UNE ERREUR (revue du 29/10/2026). Deux formes sont documentées : un
+ * tableau d'enregistrements, ou un GeoJSON dont chaque `feature` porte ses `properties`. Tout le reste (objet
+ * d'erreur, `features` absent, élément qui n'est pas un objet) LÈVE : avant, `json.features ?? []` en faisait
+ * une liste vide, donc « aucun indice publié », gardée en cache comme un résultat valide.
+ */
+export function enregistrementsAtmo(json: unknown): AtmoRawRecord[] {
+  if (Array.isArray(json) && json.every(estObjet)) return json as AtmoRawRecord[];
+  if (estObjet(json) && Array.isArray(json.features) && json.features.every((f) => estObjet(f) && estObjet(f.properties))) {
+    return (json.features as { properties: AtmoRawRecord }[]).map((f) => f.properties);
+  }
+  throw new ReponseAtmoInattendue("ATMO : réponse de forme inattendue");
+}
+
+/**
+ * Un enregistrement → l'indice. `null` pour `code_qual` 0, que la nomenclature ATMO réserve à un indice
+ * absent ; toute autre valeur hors de l'échelle 1 à 6 est une réponse inattendue, et LÈVE.
+ */
+export function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | null {
+  if (raw.code_qual === 0 || raw.code_qual === "0") return null;
   const index = toLevel(raw.code_qual);
-  if (!index) return null;
+  if (!index) throw new ReponseAtmoInattendue(`ATMO : code_qual inattendu (${String(raw.code_qual)})`);
 
   return {
     inseeCode,
@@ -151,8 +175,8 @@ function parseRecord(raw: AtmoRawRecord, inseeCode: string): AtmoAirQuality | nu
 async function load(inseeCode: string): Promise<AtmoAirQuality | null> {
   const today = new Date().toISOString().split("T")[0];
   const records = await fetchRecords(inseeCode, today);
-
-  if (records.length) return parseRecord(records[0], inseeCode);
+  const indice = records.length ? parseRecord(records[0], inseeCode) : null;
+  if (indice) return indice;
 
   const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
   const fallback = await fetchRecords(inseeCode, yesterday);

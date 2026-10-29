@@ -95,13 +95,13 @@ node scripts/fut152/anciens-codes.mts --cog /tmp/cog
 
 ## 5. Contre-épreuves et recette
 
-**Indépendantes de la table** : un script Python lit directement les CSV de l'export, sans passer par l'index, autour du centre geo.api de chaque commune, dans un rayon de 10 km.
+**Indépendantes de la table** : un script Python lit directement les CSV de l'export, sans passer par l'index, autour du centre geo.api de chaque commune, dans un rayon de 10 km. Les points sont exactement ceux que l'écran envoie (revue du 29/10 : Fos et Gramat portaient auparavant un autre point, voir plus bas).
 
 | Point | Tous | Avec rejet chiffré | Index (avec / autres) |
 |---|---:|---:|---|
 | Metz | 24 | 5 | 5 / 19 |
 | Paris (centre) | 119 | 33 | 33 / 86 |
-| Fos-sur-Mer | 66 | 26 | 26 / 40 |
+| Fos-sur-Mer | 49 | 17 | 17 / 32 |
 | Gramat (rural) | 4 | 1 | 1 / 3 |
 | En mer (46 N, 6 O) | 0 | 0 | absent dans la source |
 
@@ -159,3 +159,37 @@ Sites et sols, recomptés par appels séparés puis union par identifiant :
 ## 7. Incident Géorisques (traité à part : FUT-158, PR #110)
 
 Le diagnostic complet est dans `docs/audits/2026-10-28-fut158-incident-georisques.md`. Géorisques coupe une partie des requêtes `fetch` de Node selon leurs en-têtes ; `Accept-Encoding: identity` lève la coupure sur tous les chemins du dossier. La lib de cette PR (`server/sites-sols.ts`) envoie un User-Agent nommé et aucun `Accept` : elle a été vérifiée sous Next.js sur toutes les communes de la recette. Elle adoptera les en-têtes partagés de FUT-158 (`EN_TETES_GEORISQUES`) une fois les deux PR fusionnées.
+
+## 6. Revue du 29/10/2026 : les quatre NO GO levés
+
+Branche rebasée sur `main` (`76095598`, avec #108, #110 et #112), sans conflit.
+
+1. **Total annoncé jamais lu comme une absence (SIS et eau).**
+   - Sites et sols : une ligne sans identifiant n'est plus ignorée en silence, et une page qui annonce `results > 0` interdit `absent_dans_source`. La catégorie est alors `partiel`. `lotIncomplet` compare les lignes lues au total annoncé, ce qui couvre aussi un `total_pages` absent ou faux.
+   - Eau : un réseau, un repli communal ou un paramètre qui annonce `count > 0` sans ligne exploitable rend la lecture `partiel`. Le réseau est dit « résultat indisponible », jamais « aucun prélèvement publié ».
+   - Écran : un partiel sans fiche n'affiche ni la phrase d'absence ni « 0 ». Il dit : « La source annonce des fiches qui n'ont pas pu être lues : rien ne peut en être conclu. » Avec des fiches, le compte devient « au moins N ».
+2. **Eau, au-delà de 50 réseaux.** Toutes les pages de `communes_udi` sont lues (50 par page, 20 pages au plus). Si une page échoue, si le plafond coupe la lecture ou si une ligne annoncée n'a pas de réseau, la liste lue est montrée et la lecture est dite partielle, sans mise en cache.
+3. **ATMO, JSON inattendu.** `enregistrementsAtmo` n'accepte que les deux formes documentées : un tableau, ou un GeoJSON dont chaque élément porte ses `properties`. Toute autre forme lève une erreur, et un `code_qual` hors de 1 à 6 aussi, sauf 0 qui signifie « indice absent » dans la nomenclature ATMO. La réponse est alors 502, jamais 404. Le cache de données Next est retiré : il gardait une heure une réponse 200 au contenu inattendu. Seule une lecture réussie est gardée.
+4. **Géorisques, transport commun.** `server/sites-sols.ts` envoie `EN_TETES_GEORISQUES` (dont `Accept-Encoding: identity`) et trace `georisques_echec`, comme les autres appels. Le garde-fou FUT-158 reconnaît désormais un appel par `SITES_SOLS_SOURCE.api`, et son exclusion du proxy SIS est retirée.
+
+**Contre-épreuves.**
+- 13 tests ajoutés.
+- Mutations : chaque correctif retiré fait échouer au moins un test (6 sur 6).
+- `npm test` : 3 851 tests, 0 échec. `tsc` et `eslint` : 0 erreur.
+
+**Réel, le 29/10.**
+- Sites et sols, avec les nouveaux en-têtes : Paris 37 SIS et 8 248 CASIAS, Metz 8 et 546, Cherbourg 13 et 252, Marseille 56 et 4 326. Valeurs identiques à la revue précédente, aucune trace `georisques_echec`.
+- Eau : Marseille 16 réseaux, tous lus. Un premier passage était `partiel` parce qu'un des 22 appels parallèles n'avait pas répondu à temps, ce qui est l'état attendu.
+- ATMO : indice servi à Metz, Paris, Fos et L'Abergement-Clémenciat.
+
+**Recette navigateur** (1440 px et 390 px tactile) : 58 vérifications, 0 échec.
+- Partiels sites et sols et eau.
+- JSON ATMO inattendu injecté côté serveur (`scripts/fut152/atmo-inattendu.mjs`), puis retour réel du service sur le même serveur, à Nancy et à Épinal.
+- IREP à Fos-sur-Mer.
+
+**IREP à Fos, au point exact de l'écran.** L'écran cherche autour du `centre` de geo.api.gouv.fr, soit 43,4545 N et 4,8979 E. La contre-épreuve précédente utilisait 43,4378 N et 4,9447 E, soit 26 / 40. Au vrai point :
+- l'export recompté en Python sans l'index (archive de même empreinte `eb965b9c…`) donne 49 établissements, dont 17 avec un rejet chiffré et 32 autres ;
+- l'index, la route `/api/proxy/irep` et l'écran donnent 17 / 32 ;
+- un seul établissement est proche de la limite, à 9,92 km.
+
+Gramat avait le même écart de point, sans effet sur le compte (1 / 3). Les deux points sont corrigés dans le test.

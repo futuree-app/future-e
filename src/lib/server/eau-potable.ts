@@ -2,7 +2,7 @@ import "server-only";
 import { EAU_SOURCE, PARAMETRES_EAU, lireEauPotable, reponseLisible, type EauPotableCommune, type ReponseHubeau } from "@/lib/eau-potable";
 
 // L'APPEL À HUB'EAU « Qualité de l'eau potable » (FUT-152). Service public documenté, sans clé. Ne lève jamais.
-// Un appel par réseau de la commune, un par paramètre mis en avant : 2 réseaux → 1 + 2 + 5 appels, mis en
+// La liste des réseaux (une page par tranche de 50), un appel par réseau, un par paramètre mis en avant : 2 réseaux → 1 + 2 + 5 appels, mis en
 // cache une journée (les ARS publient avec quelques semaines de délai).
 
 const TIMEOUT_MS = 8000;
@@ -26,27 +26,50 @@ async function hubeau(chemin: string, params: Record<string, string>): Promise<R
   }
 }
 
-/** Les réseaux (UDI) de la commune pour l'année en cours, sinon l'année précédente. `null` : liste en panne. */
-async function reseauxDe(insee: string, maintenant: Date) {
+type Reseau = { code: string; nom: string; zone: string | null };
+/** 50 lignes par page, 20 pages au plus : 1 000 lignes, bien au-delà des 16 réseaux de Marseille (29/10/2026). */
+const TAILLE_PAGE_UDI = 50;
+const PAGES_MAX_UDI = 20;
+
+/**
+ * Les réseaux (UDI) de la commune pour l'année en cours, sinon l'année précédente, TOUTES PAGES LUES (revue du
+ * 29/10/2026 : seuls les 50 premiers étaient lus). Hub'Eau pagine par `page` et `size` et répond 206 tant
+ * que la page ne contient pas tout. `null` : la première page est en panne. `incomplet` : une page suivante a
+ * échoué, le plafond a coupé la lecture, ou des lignes annoncées n'ont pas de réseau exploitable ; la liste
+ * rendue est alors un minimum, et la lecture sera dite partielle.
+ */
+async function reseauxDe(insee: string, maintenant: Date): Promise<{ reseaux: Reseau[]; incomplet: boolean } | null> {
   for (const annee of [maintenant.getFullYear(), maintenant.getFullYear() - 1]) {
-    const r = await hubeau("communes_udi", { code_commune: insee, annee: String(annee), size: "50" });
-    if (!reponseLisible(r)) return null;
-    if (r.count > 0) {
-      const vus = new Map<string, { code: string; nom: string; zone: string | null }>();
-      for (const x of r.data) {
-        const code = typeof x.code_reseau === "string" ? x.code_reseau : "";
-        if (!code || vus.has(code)) continue;
-        vus.set(code, {
-          code,
-          nom: typeof x.nom_reseau === "string" ? x.nom_reseau : code,
-          // « - » : la source ne nomme pas de zone (Metz).
-          zone: typeof x.nom_quartier === "string" && !/^[\s-]*$/.test(x.nom_quartier) ? x.nom_quartier.trim() : null,
-        });
-      }
-      return [...vus.values()];
+    const lire = (page: number) =>
+      hubeau("communes_udi", { code_commune: insee, annee: String(annee), size: String(TAILLE_PAGE_UDI), page: String(page) });
+    const premiere = await lire(1);
+    if (!reponseLisible(premiere)) return null;
+    if (premiere.count === 0) continue;
+
+    const lignes = [...premiere.data];
+    let incomplet = false;
+    for (let page = 2; lignes.length < premiere.count; page++) {
+      if (page > PAGES_MAX_UDI) { incomplet = true; break; }
+      const suite = await lire(page);
+      if (!reponseLisible(suite) || suite.data.length === 0) { incomplet = true; break; }
+      lignes.push(...suite.data);
     }
+
+    const vus = new Map<string, Reseau>();
+    for (const x of lignes) {
+      const code = typeof x.code_reseau === "string" ? x.code_reseau : "";
+      if (!code) { incomplet = true; continue; }
+      if (vus.has(code)) continue;
+      vus.set(code, {
+        code,
+        nom: typeof x.nom_reseau === "string" ? x.nom_reseau : code,
+        // « - » : la source ne nomme pas de zone (Metz).
+        zone: typeof x.nom_quartier === "string" && !/^[\s-]*$/.test(x.nom_quartier) ? x.nom_quartier.trim() : null,
+      });
+    }
+    return { reseaux: [...vus.values()], incomplet };
   }
-  return [];
+  return { reseaux: [], incomplet: false };
 }
 
 export async function getEauPotableCommune(insee: string, maintenant = new Date()): Promise<EauPotableCommune> {
@@ -60,8 +83,8 @@ export async function getEauPotableCommune(insee: string, maintenant = new Date(
   ]);
   const reseaux = liste === null
     ? null
-    : await Promise.all(liste.map(async (r) => ({ ...r, reponse: await dernier({ code_reseau: r.code }) })));
+    : await Promise.all(liste.reseaux.map(async (r) => ({ ...r, reponse: await dernier({ code_reseau: r.code }) })));
   const repliCommune = reseaux && reseaux.length > 0 ? null : await dernier({});
 
-  return lireEauPotable({ consulteLe: maintenant.toISOString(), reseaux, repliCommune, parametres });
+  return lireEauPotable({ consulteLe: maintenant.toISOString(), reseaux, reseauxIncomplets: liste?.incomplet ?? false, repliCommune, parametres });
 }

@@ -120,8 +120,8 @@ test("1 · sous la règle du 28/10, toutes les lectures du dossier aboutissent (
 });
 
 test("1 · aucun appel Géorisques du code de production ne contourne les en-têtes partagés", () => {
-  // Chaque fichier qui appelle l'API Géorisques importe EN_TETES_GEORISQUES. Exclus : la page de démonstration
-  // des liens (aucun appel), et le proxy SIS, remplacé par FUT-152 (#109).
+  // Chaque fichier qui appelle l'API Géorisques importe EN_TETES_GEORISQUES. Un appelant peut viser l'API par
+  // une constante d'un autre module (`SITES_SOLS_SOURCE.api`, FUT-152) : elle compte comme une mention.
   const fichiers: string[] = [];
   const parcourir = (d: string) => {
     for (const n of readdirSync(d)) {
@@ -133,10 +133,10 @@ test("1 · aucun appel Géorisques du code de production ne contourne les en-tê
   parcourir("src");
   // Un appelant mentionne l'API hors commentaire ET appelle `fetch`.
   const code = (f: string) => readFileSync(f, "utf8").replace(/^\s*(\/\/|\*|\/\*).*$/gm, "");
-  const appelants = fichiers.filter((f) => /georisques\.gouv\.fr\/api|GEORISQUES_(V2_)?BASE_URL\s*=/.test(code(f)) && /\bfetch\b/.test(code(f)));
-  const exclus = new Set([path.join("src", "app", "api", "proxy", "sis", "route.ts")]);
-  const sansEntetes = appelants.filter((f) => !exclus.has(f) && !readFileSync(f, "utf8").includes("EN_TETES_GEORISQUES"));
+  const appelants = fichiers.filter((f) => /georisques\.gouv\.fr\/api|GEORISQUES_(V2_)?BASE_URL\s*=|SITES_SOLS_SOURCE\.api/.test(code(f)) && /\bfetch\b/.test(code(f)));
+  const sansEntetes = appelants.filter((f) => !readFileSync(f, "utf8").includes("EN_TETES_GEORISQUES"));
   assert.deepEqual(sansEntetes, []);
+  assert.ok(appelants.includes(path.join("src", "lib", "server", "sites-sols.ts")), "FUT-152 : sites et sols est un appelant");
   assert.ok(appelants.length >= 4, `appelants trouvés : ${appelants.join(", ")}`);
 });
 

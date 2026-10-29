@@ -1,8 +1,9 @@
 import "server-only";
 import {
-  CHEMIN, PAGES_MAX, PAGES_MAX_CASIAS, SITES_SOLS_SOURCE, TAILLE_PAGE, lireCasias, lireCategorie, lots, pageLisible, perimetreDe,
+  CHEMIN, PAGES_MAX, PAGES_MAX_CASIAS, SITES_SOLS_SOURCE, TAILLE_PAGE, lireCasias, lireCategorie, lotIncomplet, lots, pageLisible, perimetreDe,
   type CategorieListee, type PageSsp, type SitesSolsCommune,
 } from "@/lib/sites-sols";
+import { EN_TETES_GEORISQUES, tracerEchecGeorisques } from "@/lib/georisques-http";
 
 // L'APPEL À L'API GÉORISQUES « sites et sols » (FUT-152). Service officiel documenté (spécification OpenAPI
 // v1, `/api/v1/ssp/*`), sans jeton. L'ancien proxy visait `data.georisques.gouv.fr/api/v1/sis` : hôte
@@ -14,12 +15,9 @@ import {
 // Ne lève jamais : chaque catégorie porte son propre état. Une panne n'est jamais une liste vide.
 
 const TIMEOUT_MS = 8000;
-// LES EN-TÊTES COMPTENT (mesuré le 28/10/2026). Géorisques coupe la connexion (ECONNRESET, « fetch failed »)
-// quand la requête porte `Accept: application/json`, ou quand `fetch` côté Node n'envoie pas de User-Agent
-// explicite. La même requête passe avec un User-Agent nommé et l'`Accept` par défaut. Reproduit avec curl
-// (`-H "Accept: application/json"` : connexion coupée). Ne pas « corriger » en ajoutant un Accept JSON. Diagnostic
-// complet et en-têtes partagés : FUT-158 (`lib/georisques-http.ts`), à adopter ici une fois les deux PR fusionnées.
-const USER_AGENT = "futur-e/pollutions-invisibles (contact: futur-e.app)";
+// LE TRANSPORT COMMUN DE FUT-158 (`lib/georisques-http.ts`) : les mêmes en-têtes que tous les appels Géorisques
+// (`Accept-Encoding: identity`, sans lequel Géorisques coupe une partie des connexions), et la même trace
+// `georisques_echec` dans les journaux quand un appel n'aboutit pas.
 const UNE_JOURNEE = 86_400;
 
 async function page(chemin: string, codes: string[], numero: number, taille: number): Promise<PageSsp | null> {
@@ -29,18 +27,22 @@ async function page(chemin: string, codes: string[], numero: number, taille: num
   url.searchParams.set("page_size", String(taille));
   try {
     const res = await fetch(url, {
-      headers: { "user-agent": USER_AGENT },
+      headers: EN_TETES_GEORISQUES,
       next: { revalidate: UNE_JOURNEE },
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      tracerEchecGeorisques(url.toString(), { statut: res.status });
+      return null;
+    }
     return (await res.json()) as PageSsp;
-  } catch {
+  } catch (e) {
+    tracerEchecGeorisques(url.toString(), { erreur: e });
     return null;
   }
 }
 
-/** Toutes les pages d'un lot, jusqu'au plafond. `incomplet` quand le plafond coupe la liste. */
+/** Toutes les pages d'un lot, jusqu'au plafond. `incomplet` quand des lignes annoncées n'ont pas été lues. */
 async function toutesLesPages(chemin: string, codes: string[], plafond = PAGES_MAX): Promise<{ pages: (PageSsp | null)[]; incomplet: boolean }> {
   const premiere = await page(chemin, codes, 1, TAILLE_PAGE);
   if (!premiere || !pageLisible(premiere)) return { pages: [premiere], incomplet: false };
@@ -48,7 +50,8 @@ async function toutesLesPages(chemin: string, codes: string[], plafond = PAGES_M
   const suivantes = await Promise.all(
     Array.from({ length: Math.min(totalPages, plafond) - 1 }, (_, i) => page(chemin, codes, i + 2, TAILLE_PAGE)),
   );
-  return { pages: [premiere, ...suivantes], incomplet: totalPages > plafond };
+  const pages = [premiere, ...suivantes];
+  return { pages, incomplet: lotIncomplet(pages, plafond) };
 }
 
 async function categorie(cat: CategorieListee, groupes: string[][]) {

@@ -1,12 +1,17 @@
 // FUT-152 · Recette en vrai navigateur des quatre recherches de /agir/pollutions-invisibles.
 // Bureau (1440 px, souris) et mobile (390 px, toucher). Sources réelles, puis pannes simulées (route coupée)
 // et une réponse piégée (HTML et lien `javascript:` dans les données) pour vérifier qu'aucun ne s'exécute.
-// Usage : BASE=http://localhost:3152 SORTIE=<dossier de captures> node scripts/fut152/recette.mjs
+// Revue du 29/10/2026 : réponses partielles (total annoncé non lu) et réponse ATMO inattendue côté serveur, puis
+// retour réel du service ATMO sur le même serveur (`atmo-inattendu.mjs`, interrupteur `ATMO_FICHIER`).
+// Usage : BASE=http://localhost:3152 SORTIE=<dossier de captures> ATMO_FICHIER=<même chemin que le serveur>
+//         node scripts/fut152/recette.mjs
 import { chromium } from "playwright-core";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3152";
 const SORTIE = process.env.SORTIE ?? "docs/audits/2026-10-28-fut152-pollutions-invisibles";
+const ATMO_FICHIER = process.env.ATMO_FICHIER;
+if (!ATMO_FICHIER) throw new Error("ATMO_FICHIER requis (le même que celui du serveur).");
 mkdirSync(SORTIE, { recursive: true });
 const nav = await chromium.launch({ channel: "chrome" });
 let echecs = 0;
@@ -47,6 +52,12 @@ async function scenario(ctx, libelle) {
   b = await rechercher(p, "irep", "Paris");
   t = await b.innerText();
   verifier(/33 établissements/.test(t) && /Afficher les 25 autres/.test(t), `${libelle} IREP Paris : 33 listés, 8 visibles, le reste dépliable`);
+
+  // Revue du 29/10/2026 : Fos au point que l'écran envoie lui-même (centre geo.api), recompté depuis l'export.
+  b = await rechercher(p, "irep", "Fos-sur-Mer");
+  t = await b.innerText();
+  verifier(/17 établissements avec au moins un rejet chiffré publié/.test(t) && /32 autres établissements du registre/.test(t), `${libelle} IREP Fos-sur-Mer : 17 avec rejet, 32 autres, comme le recomptage de l'export`);
+  await b.screenshot({ path: `${SORTIE}/${libelle}-irep-fos.png` });
 
   b = await rechercher(p, "sis", "Metz");
   t = await b.innerText();
@@ -89,6 +100,42 @@ async function scenario(ctx, libelle) {
     verifier(/indisponible/i.test(t) && !/Aucun/.test(t), `${libelle} panne ${nom} : dite indisponible, jamais « aucun »`);
     await p.unroute(motif);
   }
+
+  // ── Revue 1 et 2 : une réponse partielle n'est jamais une absence ──
+  await p.route("**/api/proxy/sis*", (r) => r.fulfill({ json: {
+    perimetre: { demande: "57463", commune: "57463", codes: ["57463"], elargiALaVille: false }, consulteLe: "2026-10-29T12:00:00Z",
+    sis: { etat: "partiel", total: 0, fiches: [] },
+    instructions: { etat: "partiel", total: 1, fiches: [{ id: "I1", nom: "Site lu", adresse: null, commune: "METZ", statut: null, fiche: null, miseAJour: null }] },
+    sup: { etat: "absent_dans_source", total: 0, fiches: [] }, casias: { etat: "partiel", total: 0 },
+  } }));
+  b = await rechercher(p, "sis", "Metz");
+  t = await b.innerText();
+  verifier(!/Aucun secteur/.test(t) && !/Aucune fiche dans l’inventaire/.test(t) && !/\(SIS\) : 0/.test(t), `${libelle} partiel sans fiche : ni « aucun », ni « 0 »`);
+  verifier((t.match(/La source annonce des fiches qui n’ont pas pu être lues : rien ne peut en être conclu/g) ?? []).length === 2, `${libelle} partiel sans fiche : SIS et CASIAS disent que rien n'est conclu`);
+  verifier(/\(ex-BASOL\) : au moins 1/.test(t) && /Liste incomplète/.test(t), `${libelle} partiel avec fiche : « au moins 1 », liste dite incomplète`);
+  verifier(/Aucune servitude de ce type/.test(t), `${libelle} partiel : le vrai vide voisin reste dit`);
+  await b.screenshot({ path: `${SORTIE}/${libelle}-sites-sols-partiel.png` });
+  await p.unroute("**/api/proxy/sis*");
+
+  await p.route("**/api/proxy/eau*", (r) => r.fulfill({ json: { etat: "partiel", consulteLe: "2026-10-29T12:00:00Z", reseaux: [], parametres: [] } }));
+  b = await rechercher(p, "eau", "Metz");
+  t = await b.innerText();
+  verifier(!/Aucun prélèvement/.test(t) && /La source annonce des résultats qui n’ont pas pu être lus : rien ne peut en être conclu/.test(t), `${libelle} eau partielle sans résultat : jamais « aucun prélèvement »`);
+  await p.unroute("**/api/proxy/eau*");
+
+  // ── Revue 3 : ATMO répond un JSON inattendu (côté serveur), puis le service revient ──
+  // Une commune par contexte, jamais lue avant : le cache du jour (par commune) ne peut rien masquer.
+  const villeAtmo = libelle === "bureau" ? "Nancy" : "Épinal";
+  writeFileSync(ATMO_FICHIER, "inattendu");
+  b = await rechercher(p, "atmo", villeAtmo);
+  t = await b.innerText();
+  verifier(/indisponible/i.test(t) && !/Aucun indice/.test(t), `${libelle} ATMO JSON inattendu : dit indisponible, jamais « aucun indice »`);
+  await b.screenshot({ path: `${SORTIE}/${libelle}-atmo-inattendu.png` });
+  writeFileSync(ATMO_FICHIER, "");
+  b = await rechercher(p, "atmo", villeAtmo);
+  t = await b.innerText();
+  verifier(/Indice ATMO du \d\d\/\d\d\/2026/.test(t) && /Atmo Grand Est/.test(t), `${libelle} ATMO retour réel du service : indice servi, l'erreur n'a pas été gardée`);
+  await b.screenshot({ path: `${SORTIE}/${libelle}-atmo-retour.png` });
 
   // ── Données piégées : rien ne s'exécute, aucun lien hors domaine ──
   await p.route("**/api/proxy/sis*", (r) => r.fulfill({ json: {
