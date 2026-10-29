@@ -89,7 +89,21 @@ const css = `
   .lookup-btn:hover{background:#6ee7b7;}
   .lookup-btn:disabled{background:var(--bg-elev);color:var(--fg-4);cursor:not-allowed;border:1px solid var(--border-1);}
 
-  .lookup-results{min-height:0;max-height:320px;overflow-y:auto;border-top:1px solid var(--border-1);}
+  .lookup-results{min-height:0;border-top:1px solid var(--border-1);}
+  .lookup-scope{padding:12px 20px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--fg-3);border-bottom:1px solid var(--border-1);background:var(--bg-elev-2);}
+  .lookup-section{border-bottom:1px solid var(--border-1);}
+  .lookup-section-head{padding:14px 20px 4px;font-size:13px;font-weight:500;color:var(--fg-1);}
+  .lookup-section-desc{padding:0 20px 12px;font-size:12px;color:var(--fg-3);line-height:1.55;}
+  .lookup-section .lookup-empty,.lookup-section .lookup-error{padding:10px 20px 14px;text-align:left;}
+  .lookup-note{padding:12px 20px;font-size:12px;color:var(--fg-3);line-height:1.55;border-bottom:1px solid var(--border-1);}
+  .lookup-more{display:block;width:100%;padding:10px 20px;background:none;border:none;border-bottom:1px solid var(--border-1);color:var(--accent);font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-align:left;cursor:pointer;}
+  .lookup-link{color:var(--accent);}
+  .lookup-details{padding:12px 20px;font-size:12px;color:var(--fg-3);}
+  .lookup-details summary{cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;color:var(--fg-4);}
+  .lookup-details-body p{margin:10px 0 0;line-height:1.6;}
+  .result-quote{margin:6px 0;color:var(--fg-2);font-size:13px;font-family:var(--font-serif);font-style:italic;}
+  .result-value{color:var(--fg-1);font-weight:500;}
+  .result-date{color:var(--fg-4);}
   .lookup-results.visible{display:block;}
   .lookup-result-item{padding:14px 20px;border-bottom:1px solid var(--border-1);font-size:13px;line-height:1.55;}
   .lookup-result-item:last-child{border-bottom:none;}
@@ -200,7 +214,7 @@ export default function AgirPollutionsInvisiblesPage() {
         </div>
 
         <p>
-          Avant d&apos;agir, savoir. Plusieurs bases publiques permettent de vérifier ce qui concerne votre commune. Trois se consultent directement ici ; le registre des rejets industriels se consulte sur Géorisques.
+          Avant d&apos;agir, savoir. Plusieurs bases publiques permettent de vérifier ce qui concerne votre commune. Quatre se consultent directement ici.
         </p>
 
         <>

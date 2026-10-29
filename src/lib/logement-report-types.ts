@@ -77,7 +77,7 @@ export type LogementReport = {
   autresAuditsIncomplets?: boolean;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   // `irep` retiré du contrat le 29/07/2026 : il n'était lu par aucun composant ni aucune règle.
-  // La source vit toujours (`src/lib/irep.ts`, `/api/proxy/irep`, page /agir/pollutions-invisibles).
+  // Le registre vit toujours, en index local depuis FUT-152 (`lib/server/irep-registre.ts`, page publique).
   // Friches recensées AUTOUR DE L'ADRESSE (rayon `CARTOFRICHES_RAYON_RECHERCHE_M`), triées de la plus
   // proche. `distanceM` est la distance au POINT DE RÉFÉRENCE du site, jamais à sa limite : une
   // friche étendue peut commencer bien avant. `tronque` dit que le tri n'a peut-être pas vu tous les

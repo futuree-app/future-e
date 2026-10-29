@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
       "./data/arcep-fibre.json",
     ],
     "/api/comparateur-vie/apercu": ["./data/bdiff-incendies.json"],
+    // FUT-152 : le registre IREP des émissions polluantes, lu par la page /agir/pollutions-invisibles.
+    "/api/proxy/irep": ["./data/irep-registre.json"],
     "/comparateur": ["./data/bdiff-incendies.json"],
     "/comparateur/pack-decision": ["./data/bdiff-incendies.json"],
     // Module Territoire : la page et la synthèse lisent l'index (carte d'identité,
