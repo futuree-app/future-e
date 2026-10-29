@@ -34,9 +34,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
-import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
+import { contexteIrrecevable, lectureDuContexte, longueurQuestion, MAX_QUESTION_ASK, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
-import { porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
+import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
+import { lireCorpsBorne } from "@/lib/server/corps-borne";
 
 export const runtime = "nodejs";
 
@@ -305,7 +306,7 @@ function buildContextBlock(
     region: t.region ?? null,
     couverture_priorites: lecture.communes[i]?.couverture ?? "inconnue",
     priorites_non_mesurees: lecture.communes[i]?.nonMesurees ?? [],
-    raisons: t.raisons ?? [],
+    raisons: raisonsSousReserve(t.raisons, t.aucune_priorite_favorable), // FUT-155 : jamais à côté de la réserve
     // FUT-151 : seul un `true` transmis le dit, avec la portée que fixe la couverture LUE (jamais « toutes »
     // quand elle est partielle ou inconnue ; rien quand aucune priorité n'est mesurée).
     aucune_priorite_favorable: porteeSansFavorable({
@@ -360,9 +361,12 @@ export async function POST(request: NextRequest) {
   const tropVite = limiteParAdresse(request);
   if (tropVite) return tropVite;
 
+  // FUT-155 : les octets réellement reçus, bornés avant tout budget et tout appel au modèle.
+  const corps = await lireCorpsBorne(request);
+  if ("tropGros" in corps) return NextResponse.json({ error: "Corps trop volumineux." }, { status: 413 });
   let body: Body;
   try {
-    body = (await request.json()) as Body;
+    body = JSON.parse(corps.texte) as Body;
   } catch {
     return NextResponse.json({ error: "Corps invalide." }, { status: 400 });
   }
@@ -370,6 +374,10 @@ export async function POST(request: NextRequest) {
   const question = typeof body.question === "string" ? body.question.trim() : "";
   if (question.length < 3) {
     return NextResponse.json({ error: "Posez une question en quelques mots." }, { status: 400 });
+  }
+  // FUT-155 : refusée, jamais tronquée. La page bloque l'envoi au-delà ; ce contrôle ne dépend pas d'elle.
+  if (longueurQuestion(question) > MAX_QUESTION_ASK) {
+    return NextResponse.json({ error: "Votre question dépasse 1 000 caractères.", code: "question_trop_longue" }, { status: 400 });
   }
   const ctx = body.context;
   // FUT-142 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom. Refusé avant tout appel payant.

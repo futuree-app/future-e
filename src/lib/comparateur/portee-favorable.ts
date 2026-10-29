@@ -28,6 +28,15 @@ export function porteeSansFavorable(a: {
   return a.etat === "complete" && !manque ? "toutes_mesurees" : "parmi_celles_mesurees";
 }
 
+/**
+ * FUT-155 : les raisons qu'une sortie peut redire. Le moteur ne marque une commune que si aucune priorité mesurée
+ * n'y est favorable, et ses raisons sont alors vides. Un corps qui porte les deux se contredit : la réserve gagne.
+ */
+export function raisonsSousReserve(raisons: unknown, marque: unknown): string[] {
+  if (marque === true || !Array.isArray(raisons)) return [];
+  return raisons.filter((x): x is string => typeof x === "string");
+}
+
 /** Libellé court de la carte (palier). `autres` : l'inondation est déclarée, elle ne contribue jamais favorablement. */
 export function libelleCarteSansFavorable(p: PorteeSansFavorable, autres = false): string {
   if (p === "toutes_mesurees") return autres ? "Aucune autre priorité favorable ici" : "Aucune priorité favorable ici";

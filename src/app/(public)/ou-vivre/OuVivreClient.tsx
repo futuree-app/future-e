@@ -15,10 +15,11 @@ import { ChipTooltip } from "@/components/ChipTooltip";
 import { departmentName } from "@/lib/regions-fr";
 import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
-import { repliInondation } from "@/lib/comparateur/synthese-repli";
+import { repliSynthese } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
 import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
-import { contexteAsk } from "@/lib/comparateur/lecture-ask";
+import { avisRefusAsk, contexteAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
+import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
 import { libelleCarteSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -200,11 +201,12 @@ function matchTier(compatibility: number): string {
 // partielle : elle le dit, avec sa portée (toutes mesurées, ou seulement certaines : la ligne « Non mesuré ici »
 // nomme les autres). `inondation` : l'inondation ne contribue jamais favorablement, ce sont les autres priorités.
 function palierCarte(r: MatchResult, inondation = false): { libelle: string; classe: string } {
-  const etat = r.couverture?.etat ?? "complete";
+  // FUT-155 : une carte sans couverture n'a pas de palier (jamais « complete » par défaut).
+  const etat = r.couverture?.etat ?? null;
   const portee = porteeSansFavorable({ marque: r.sansPrioriteFavorable, etat, nonMesurees: r.couverture?.nonMesurees });
   if (portee) return { libelle: libelleCarteSansFavorable(portee, inondation), classe: "text-muted" };
   if (etat === "partielle") return { libelle: "Priorités en partie mesurées", classe: "text-muted" };
-  if (etat === "aucune" || etat === "sans_priorite") return { libelle: "À explorer", classe: "text-muted" };
+  if (!etat || etat === "aucune" || etat === "sans_priorite") return { libelle: "À explorer", classe: "text-muted" };
   return { libelle: matchTier(r.compatibility), classe: matchTierClass(r.compatibility) };
 }
 
@@ -240,24 +242,6 @@ function distinctId(): string {
   } catch {
     return "anon";
   }
-}
-
-// Fallback déterministe si la synthèse IA est indisponible (502). On reste
-// qualitatif, on s'appuie sur ce que le moteur a déjà produit.
-function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean, couverture?: { etat: string; message: string | null }): string {
-  const inondation = repliInondation(parsed.preferences, results, exploration);
-  if (inondation) return inondation;
-  // FUT-109 : sans priorité mesurée partout, le repli ne raconte ni arbitrage ni correspondance : il dit l'exploration.
-  if (couverture && couverture.etat !== "complete" && couverture.message) return `${parsed.reformulation} ${couverture.message}`;
-  // FUT-151 : sans priorité favorable sur aucune carte, pas d'« arbitrage » à raconter : le message du moteur le dit.
-  if (couverture?.message && results.length > 0 && results.every((r) => r.sansPrioriteFavorable)) return `${parsed.reformulation} ${couverture.message}`;
-  const reasons = Array.from(
-    new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
-  ).slice(0, 3);
-  const reasonPart = reasons.length
-    ? ` Les territoires qui ressortent se distinguent notamment par ${reasons.join(", ")}.`
-    : "";
-  return `${parsed.reformulation}${reasonPart} Aucun ne réunit tout, chacun représente un arbitrage différent. Ouvrez celui qui vous parle pour comprendre ce qu'il implique vraiment.`;
 }
 
 // ── Panneau d'interprétation (« ce produit m'a compris ») ─────────────────────
@@ -487,6 +471,7 @@ export function OuVivreClient() {
   const [askLimit, setAskLimit] = useState(false);
   const [routesNudge, setRoutesNudge] = useState(false);
   const [askTyped, setAskTyped] = useState("");
+  const [askAvis, setAskAvis] = useState<string | null>(null); // FUT-155 : refus de taille, sous le champ
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
 
@@ -573,7 +558,8 @@ export function OuVivreClient() {
               prioritesNonMesurees: r.couverture?.nonMesurees ?? [], // FUT-109 : jamais présentées comme satisfaites
               sansPrioriteFavorable: r.sansPrioriteFavorable === true, // FUT-151 : mesurées, aucune favorable
             })),
-            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false, couverture: outcomeMeta.couverture ?? "complete" },
+            // FUT-155 : un état absent part absent ; la route le lit « inconnu », jamais « complet ».
+            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration, couverture: outcomeMeta.couverture },
             perimetre: outcomeMeta.perimetre ?? [],
             orientation: outcomeMeta.orientation ?? [],
           }),
@@ -594,7 +580,7 @@ export function OuVivreClient() {
         if (seq === runSeq.current) capture("life_synthesis_shown");
       } catch {
         if (seq !== runSeq.current) return;
-        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false, { etat: outcomeMeta.couverture ?? "complete", message: outcomeMeta.message }));
+        setSynthesis(repliSynthese(p, top, outcomeMeta.exploration, { etat: outcomeMeta.couverture, message: outcomeMeta.message }));
         capture("life_synthesis_fallback");
       } finally {
         if (seq === runSeq.current) setSynthesizing(false);
@@ -656,8 +642,8 @@ export function OuVivreClient() {
       message: matchOutcome.message,
       perimetre: matchOutcome.perimetreDur ?? matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
       orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
-      exploration: matchOutcome.inondation?.exploration ?? false,
-      couverture: matchOutcome.couverture ?? "complete",
+      exploration: matchOutcome.inondation?.exploration,
+      couverture: matchOutcome.couverture,
     });
   }, [parsed, submittedText, streamSynthesis]);
 
@@ -790,6 +776,8 @@ export function OuVivreClient() {
   const sendAsk = useCallback(async (preset?: string) => {
     const question = (preset ?? askInput).trim();
     if (question.length < 3 || askLoading || askLimit || !parsed) return;
+    if (longueurQuestion(question) > MAX_QUESTION_ASK) return; // FUT-155 : la ligne sous le champ le dit
+    setAskAvis(null);
 
     const userMsg: AskMessage = { role: "user", content: question };
     const history = askMessages.slice(-6);
@@ -826,7 +814,15 @@ export function OuVivreClient() {
         return;
       }
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      // FUT-155 : un refus de taille rend la question, intacte, et dit pourquoi.
+      const avis = avisRefusAsk(res.status, data.code);
+      if (avis) {
+        setAskAvis(avis);
+        setAskMessages((m) => m.slice(0, -1));
+        setAskInput(question);
+        return;
+      }
       if (!res.ok || typeof data.answer !== "string") {
         throw new Error(data.error ?? "ask");
       }
@@ -1179,8 +1175,9 @@ export function OuVivreClient() {
                 <>{outcome.inondation.ordre}</>
               ) : /* FUT-109 : une couverture incomplète ne promet ni correspondance ni compromis établi.
                      FUT-151 : une carte sans priorité favorable non plus : aucune ne « pourrait convenir ». */
-              ((outcome?.couverture && outcome.couverture !== "complete") || top.some((r) => r.sansPrioriteFavorable)) && outcome?.message ? (
-                <>{outcome.message}</>
+              // FUT-155 : une couverture absente n'est pas complète. Sans message du moteur, l'en-tête ne promet rien.
+              (outcome?.couverture !== "complete" || top.some((r) => r.sansPrioriteFavorable)) ? (
+                outcome?.message ? <>{outcome.message}</> : null
               ) : /* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */
               motCardinal(top.length) ? (
                 <>
@@ -1515,10 +1512,11 @@ export function OuVivreClient() {
                 </p>
               </div>
             ) : (
+              <div>
               <div className="flex items-end gap-2.5">
                 <textarea
                   value={askInput}
-                  onChange={(e) => setAskInput(e.target.value)}
+                  onChange={(e) => { setAskInput(e.target.value); setAskAvis(null); }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -1532,11 +1530,13 @@ export function OuVivreClient() {
                 />
                 <button
                   onClick={() => sendAsk()}
-                  disabled={askLoading || askInput.trim().length < 3}
+                  disabled={askLoading || askInput.trim().length < 3 || longueurQuestion(askInput) > MAX_QUESTION_ASK}
                   className="shrink-0 px-5 py-3 rounded-lg bg-accent text-canvas font-semibold text-[13px] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Demander
                 </button>
+              </div>
+              <LigneQuestionAsk texte={askInput} avis={askAvis} />
               </div>
             )}
           </section>

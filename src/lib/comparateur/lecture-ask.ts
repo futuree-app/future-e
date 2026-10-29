@@ -18,6 +18,25 @@ const ETATS = new Set<string>(["complete", "partielle", "aucune", "sans_priorite
 /** Au-delà, ce n'est pas la page : elle n'affiche jamais plus de trois cartes. */
 export const MAX_TERRITOIRES_ASK = 3;
 
+/** FUT-155 : une question AskFuture, 1 000 caractères au plus (validé par le porteur le 29/10/2026). */
+export const MAX_QUESTION_ASK = 1000;
+/** Les caractères tels que le lecteur les voit (un emoji compte pour un), espaces de bord retirés. Page et route. */
+export const longueurQuestion = (q: string) => [...q.trim()].length;
+
+/**
+ * FUT-155 : ce que la page dit d'un refus de taille, ou null. 413 : le corps entier (question et historique) dépasse
+ * 32 Kio. 400 `question_trop_longue` : la question seule dépasse la limite. La question n'est jamais tronquée.
+ */
+export function avisRefusAsk(status: number, code?: unknown): string | null {
+  if (status === 413) {
+    return "Votre question n'a pas pu être envoyée : avec les échanges précédents, l'ensemble dépasse la taille acceptée. Raccourcissez-la, ou relancez une recherche pour repartir d'une conversation vide.";
+  }
+  if (status === 400 && code === "question_trop_longue") {
+    return "Votre question dépasse 1 000 caractères. Raccourcissez-la pour l'envoyer.";
+  }
+  return null;
+}
+
 export type TerritoireAsk = {
   rang: number; // position d'affichage (1 à 3), pas un rang de mérite hors mode classé
   nom: string;
@@ -146,6 +165,15 @@ export function lectureDuContexte(ctx: ContexteAsk): LectureAsk {
         communes.map((c) => ({ nom: c.nom, couverture: c.couverture === "inconnue" ? null : { etat: c.couverture } })),
       );
   return { mode, exploration, couverture, ordre: texte(l?.ordre), transparence: texte(l?.transparence_inondation), communes };
+}
+
+/**
+ * FUT-155 : la couverture globale que /synthesize peut redire, avec la règle de /ask. Absente ou illisible, elle est
+ * « inconnue ». « complete » ne se croit pas si une carte déclare des priorités non mesurées, ou ne dit pas lesquelles.
+ */
+export function couvertureGlobaleLue(globale: unknown, nonMesureesParCarte: readonly unknown[]): EtatLu {
+  const e = etat(globale);
+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;
 }
 
 /** Le contexte est-il recevable avant tout appel payant ? `null` si oui, sinon le motif du refus. */
