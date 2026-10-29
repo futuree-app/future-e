@@ -162,7 +162,7 @@ Le diagnostic complet est dans `docs/audits/2026-10-28-fut158-incident-georisque
 
 ## 6. Revue du 29/10/2026 : les quatre NO GO levés
 
-Branche rebasée sur `main` (`76095598`, avec #108, #110 et #112), sans conflit.
+`main` intégré par fusion (`76095598`, avec #108, #110 et #112), sans conflit et sans réécrire l’historique de la PR.
 
 1. **Total annoncé jamais lu comme une absence (SIS et eau).**
    - Sites et sols : une ligne sans identifiant n'est plus ignorée en silence, et une page qui annonce `results > 0` interdit `absent_dans_source`. La catégorie est alors `partiel`. `lotIncomplet` compare les lignes lues au total annoncé, ce qui couvre aussi un `total_pages` absent ou faux.
