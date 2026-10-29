@@ -1,0 +1,702 @@
+[
+  {
+    "name": "deploye",
+    "width": 320,
+    "viewport": 320,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "fibre": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 245,
+        "right": 287
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "ambigu",
+    "width": 320,
+    "viewport": 320,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "fibre": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 245,
+        "right": 287
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "plage",
+    "width": 320,
+    "viewport": 320,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "fibre": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 245,
+        "right": 287
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "non-rattache",
+    "width": 320,
+    "viewport": 320,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "fibre": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 245,
+        "right": 287
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "indisponible",
+    "width": 320,
+    "viewport": 320,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "fibre": {
+      "x": 20,
+      "width": 280,
+      "right": 300
+    },
+    "detailsOpen": null,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 245,
+        "right": 287
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "deploye",
+    "width": 360,
+    "viewport": 360,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "fibre": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 285,
+        "right": 327
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "ambigu",
+    "width": 360,
+    "viewport": 360,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "fibre": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 285,
+        "right": 327
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "plage",
+    "width": 360,
+    "viewport": 360,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "fibre": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 285,
+        "right": 327
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "non-rattache",
+    "width": 360,
+    "viewport": 360,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "fibre": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 285,
+        "right": 327
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "indisponible",
+    "width": 360,
+    "viewport": 360,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "fibre": {
+      "x": 20,
+      "width": 320,
+      "right": 340
+    },
+    "detailsOpen": null,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 285,
+        "right": 327
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "deploye",
+    "width": 390,
+    "viewport": 390,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "fibre": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 315,
+        "right": 357
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "ambigu",
+    "width": 390,
+    "viewport": 390,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "fibre": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 315,
+        "right": 357
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "plage",
+    "width": 390,
+    "viewport": 390,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "fibre": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 315,
+        "right": 357
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "non-rattache",
+    "width": 390,
+    "viewport": 390,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "fibre": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 315,
+        "right": 357
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "indisponible",
+    "width": 390,
+    "viewport": 390,
+    "dpr": 1,
+    "root": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "fibre": {
+      "x": 20,
+      "width": 350,
+      "right": 370
+    },
+    "detailsOpen": null,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 188,
+        "right": 230
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 42,
+        "width": 315,
+        "right": 357
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "deploye",
+    "width": 1440,
+    "viewport": 1440,
+    "dpr": 1,
+    "root": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "fibre": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 188,
+        "right": 408
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 329,
+        "right": 549
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "ambigu",
+    "width": 1440,
+    "viewport": 1440,
+    "dpr": 1,
+    "root": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "fibre": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 188,
+        "right": 408
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 329,
+        "right": 549
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "plage",
+    "width": 1440,
+    "viewport": 1440,
+    "dpr": 1,
+    "root": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "fibre": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 188,
+        "right": 408
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 329,
+        "right": 549
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "non-rattache",
+    "width": 1440,
+    "viewport": 1440,
+    "dpr": 1,
+    "root": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "fibre": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "detailsOpen": true,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 188,
+        "right": 408
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 329,
+        "right": 549
+      }
+    ],
+    "overflows": []
+  },
+  {
+    "name": "indisponible",
+    "width": 1440,
+    "viewport": 1440,
+    "dpr": 1,
+    "root": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "fibre": {
+      "x": 198,
+      "width": 1044,
+      "right": 1242
+    },
+    "detailsOpen": null,
+    "linkFocused": true,
+    "headers": [
+      {
+        "text": "Le logement lui-même",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 188,
+        "right": 408
+      },
+      {
+        "text": "Ce à quoi cette adresse est exposée",
+        "whiteSpace": "normal",
+        "x": 220,
+        "width": 329,
+        "right": 549
+      }
+    ],
+    "overflows": []
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "phase": "apres",
+    "largeur": 320,
+    "cas": "deploye",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 280,
+      "droite": 300
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 320,
+    "cas": "ambigu",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 280,
+      "droite": 300
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 320,
+    "cas": "plage",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 280,
+      "droite": 300
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 320,
+    "cas": "non-rattache",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 280,
+      "droite": 300
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 320,
+    "cas": "indisponible",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 280,
+      "droite": 300
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 360,
+    "cas": "deploye",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 320,
+      "droite": 340
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 360,
+    "cas": "ambigu",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 320,
+      "droite": 340
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 360,
+    "cas": "plage",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 320,
+      "droite": 340
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 360,
+    "cas": "non-rattache",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 320,
+      "droite": 340
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 360,
+    "cas": "indisponible",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 320,
+      "droite": 340
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 390,
+    "cas": "deploye",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 350,
+      "droite": 370
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 390,
+    "cas": "ambigu",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 350,
+      "droite": 370
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 390,
+    "cas": "plage",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 350,
+      "droite": 370
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 390,
+    "cas": "non-rattache",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 350,
+      "droite": 370
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 390,
+    "cas": "indisponible",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 350,
+      "droite": 370
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 1440,
+    "cas": "deploye",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 1440,
+    "cas": "ambigu",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 1440,
+    "cas": "plage",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 1440,
+    "cas": "non-rattache",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "apres",
+    "largeur": 1440,
+    "cas": "indisponible",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  }
+]

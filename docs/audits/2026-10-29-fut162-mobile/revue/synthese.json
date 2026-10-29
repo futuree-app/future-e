@@ -1,0 +1,22 @@
+{
+  "sha": "3d33638ac868e3d91dde539fdeaae7d308948b85",
+  "chromium": "153.0.8010.0",
+  "script": "scripts/fut162/responsive.mjs non modifié",
+  "scenarios": 20,
+  "coupes_fibre_apres": 0,
+  "scenarios_autres_sections": 20,
+  "coupes_autres_sections": 0,
+  "liens_focus_clavier": 20,
+  "depliables_ouverts": 16,
+  "indisponible_sans_depliable": 4,
+  "desktop_comparaison_pixels": {
+    "zone": [
+      0,
+      0,
+      1440,
+      800
+    ],
+    "pixels_differents": 0,
+    "note": "bandeau de consentement et outils DEV du bas hors de la zone comparée"
+  }
+}

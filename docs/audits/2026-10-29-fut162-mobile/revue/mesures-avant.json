@@ -1,0 +1,319 @@
+[
+  {
+    "phase": "avant",
+    "largeur": 320,
+    "cas": "deploye",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "Selon l'Arcep, la fibre est indiquée comme déployée pour le bâtiment associé à cette adresse, au 30 juin 2026.",
+      "C'est l'état du bâtiment, pas celui d'un logement précis : le raccordement d'un appartement ou d'une maison reste à véri",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch",
+      "Sources : Arcep, carte des déploiements de la fibre (état de chaque bâtiment) et Ma connexion internet (offres déclarées",
+      "Rattachement : par l'identifiant de l'adresse dans la Base adresse nationale, tel que l'Arcep l'associe au bâtiment.",
+      "Aucune information n'est reprise d'un bâtiment voisin.",
+      "Opérateurs comptés : ceux qui déclarent à l'Arcep une offre fibre pour ce bâtiment, chacun une seule fois, quels que soi",
+      "Déployé : la fibre arrive jusqu'au bâtiment ; un opérateur peut y proposer un abonnement.",
+      "Raccordable sur demande : le bâtiment n'est raccordé qu'à la demande d'un opérateur, dans un délai de six mois au plus.",
+      "En cours de déploiement : les travaux sont engagés ; le bâtiment n'est pas encore raccordable.",
+      "Études réalisées : le bâtiment fait partie d'un projet de déploiement ; aucun délai n'est publié.",
+      "données au 30 juin 2026"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 320,
+    "cas": "ambigu",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "Raccordement à vérifier : les données disponibles ne permettent pas de déterminer avec certitude le statut de cette adre",
+      "L'un des 2 bâtiments que l'Arcep associe à cette adresse se trouve à plus de 150 mètres de son emplacement : aucun état ",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch",
+      "Sources : Arcep, carte des déploiements de la fibre (état de chaque bâtiment) et Ma connexion internet (offres déclarées",
+      "Rattachement : par l'identifiant de l'adresse dans la Base adresse nationale, tel que l'Arcep l'associe au bâtiment.",
+      "Aucune information n'est reprise d'un bâtiment voisin.",
+      "Un bâtiment situé à plus de 150 mètres du point de l'adresse, ou plusieurs bâtiments d'états différents, suffisent à ne ",
+      "données au 30 juin 2026"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 320,
+    "cas": "plage",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "Selon l'Arcep, la fibre est indiquée comme déployée pour les 2 bâtiments associés à cette adresse, au 30 juin 2026.",
+      "C'est l'état du bâtiment, pas celui d'un logement précis : le raccordement d'un appartement ou d'une maison reste à véri",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch",
+      "Sources : Arcep, carte des déploiements de la fibre (état de chaque bâtiment) et Ma connexion internet (offres déclarées",
+      "Rattachement : par l'identifiant de l'adresse dans la Base adresse nationale, tel que l'Arcep l'associe au bâtiment.",
+      "Aucune information n'est reprise d'un bâtiment voisin.",
+      "Opérateurs comptés : ceux qui déclarent à l'Arcep une offre fibre pour ce bâtiment, chacun une seule fois, quels que soi",
+      "Déployé : la fibre arrive jusqu'au bâtiment ; un opérateur peut y proposer un abonnement.",
+      "Raccordable sur demande : le bâtiment n'est raccordé qu'à la demande d'un opérateur, dans un délai de six mois au plus.",
+      "En cours de déploiement : les travaux sont engagés ; le bâtiment n'est pas encore raccordable.",
+      "Études réalisées : le bâtiment fait partie d'un projet de déploiement ; aucun délai n'est publié.",
+      "données au 30 juin 2026"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 320,
+    "cas": "non-rattache",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "Raccordement à vérifier : les données disponibles ne permettent pas de déterminer avec certitude le statut de cette adre",
+      "Aucun bâtiment des fichiers de l'Arcep n'est associé à cette adresse. C'est fréquent pour une adresse récente, ou un num",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch",
+      "Sources : Arcep, carte des déploiements de la fibre (état de chaque bâtiment) et Ma connexion internet (offres déclarées",
+      "Aucune information n'est reprise d'un bâtiment voisin.",
+      "Un bâtiment situé à plus de 150 mètres du point de l'adresse, ou plusieurs bâtiments d'états différents, suffisent à ne ",
+      "données au 30 juin 2026"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 320,
+    "cas": "indisponible",
+    "viewport": 320,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": [
+      "Fibre non vérifiée : les données de l'Arcep n'ont pas pu être lues lors de la collecte de ce dossier.",
+      "Ce n'est pas une absence de fibre. Actualiser les données relancera la lecture.",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 360,
+    "cas": "deploye",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 360,
+    "cas": "ambigu",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "L'un des 2 bâtiments que l'Arcep associe à cette adresse se trouve à plus de 150 mètres de son emplacement : aucun état ",
+      "Un bâtiment situé à plus de 150 mètres du point de l'adresse, ou plusieurs bâtiments d'états différents, suffisent à ne "
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 360,
+    "cas": "plage",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 360,
+    "cas": "non-rattache",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 0,
+      "largeur": 364,
+      "droite": 364
+    },
+    "coupes": [
+      "Aucun bâtiment des fichiers de l'Arcep n'est associé à cette adresse. C'est fréquent pour une adresse récente, ou un num",
+      "Un bâtiment situé à plus de 150 mètres du point de l'adresse, ou plusieurs bâtiments d'états différents, suffisent à ne "
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 360,
+    "cas": "indisponible",
+    "viewport": 360,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": [
+      "Fibre non vérifiée : les données de l'Arcep n'ont pas pu être lues lors de la collecte de ce dossier.",
+      "Ce n'est pas une absence de fibre. Actualiser les données relancera la lecture.",
+      "Avant de vous engager, vérifiez l'adresse exacte sur Ma connexion internet (Arcep), puis faites un test d'éligibilité ch"
+    ]
+  },
+  {
+    "phase": "avant",
+    "largeur": 390,
+    "cas": "deploye",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 390,
+    "cas": "ambigu",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 390,
+    "cas": "plage",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 390,
+    "cas": "non-rattache",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 390,
+    "cas": "indisponible",
+    "viewport": 390,
+    "dpr": 1,
+    "section": {
+      "x": 20,
+      "largeur": 364,
+      "droite": 384
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 1440,
+    "cas": "deploye",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 1440,
+    "cas": "ambigu",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 1440,
+    "cas": "plage",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 1440,
+    "cas": "non-rattache",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  },
+  {
+    "phase": "avant",
+    "largeur": 1440,
+    "cas": "indisponible",
+    "viewport": 1440,
+    "dpr": 1,
+    "section": {
+      "x": 198,
+      "largeur": 1044,
+      "droite": 1242
+    },
+    "coupes": []
+  }
+]
