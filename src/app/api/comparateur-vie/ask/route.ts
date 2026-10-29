@@ -37,6 +37,7 @@ import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appel
 import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
 import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
+import { lireCorpsBorne } from "@/lib/server/corps-borne";
 
 export const runtime = "nodejs";
 
@@ -360,9 +361,12 @@ export async function POST(request: NextRequest) {
   const tropVite = limiteParAdresse(request);
   if (tropVite) return tropVite;
 
+  // FUT-155 : les octets réellement reçus, bornés avant tout budget et tout appel au modèle.
+  const corps = await lireCorpsBorne(request);
+  if ("tropGros" in corps) return NextResponse.json({ error: "Corps trop volumineux." }, { status: 413 });
   let body: Body;
   try {
-    body = (await request.json()) as Body;
+    body = JSON.parse(corps.texte) as Body;
   } catch {
     return NextResponse.json({ error: "Corps invalide." }, { status: 400 });
   }

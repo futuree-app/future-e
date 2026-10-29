@@ -222,9 +222,10 @@ test("la page et la synthèse suivent la couverture du résultat (sans appel Ant
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
   // L'en-tête « Les trois pourraient convenir » n'est atteint que pour une couverture complète (FUT-151 : et des
   // cartes qui ont toutes au moins une priorité favorable).
-  assert.match(client, /\(\(outcome\?\.couverture && outcome\.couverture !== "complete"\) \|\| top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) && outcome\?\.message \?/);
-  assert.match(client, /couverture: outcomeMeta\.couverture \?\? "complete"/);
-  assert.match(client, /couverture\.etat !== "complete" && couverture\.message\) return/);
+  // FUT-155 : une couverture absente n'est plus lue « complete » (ni en-tête, ni corps envoyé, ni repli).
+  assert.match(client, /\(outcome\?\.couverture !== "complete" \|\| top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) \? \(/);
+  assert.match(client, /couverture: outcomeMeta\.couverture \}/);
+  assert.match(readFileSync("src/lib/comparateur/synthese-repli.ts", "utf8"), /if \(couverture\.etat !== "complete"\) return/);
   const route = readFileSync("src/app/api/comparateur-vie/synthesize/route.ts", "utf8");
   assert.match(route, /couverture_des_priorites:/);
   assert.match(route, /ne dites jamais qu'elles « correspondent », « répondent »/);

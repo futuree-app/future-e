@@ -24,6 +24,7 @@ import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appel
 import { champInondationSynthese } from "@/lib/comparateur/inondation-historique";
 import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
 import { couvertureGlobaleLue, MAX_TERRITOIRES_ASK } from "@/lib/comparateur/lecture-ask";
+import { lireCorpsBorne } from "@/lib/server/corps-borne";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -322,9 +323,12 @@ export async function POST(request: NextRequest) {
   const tropVite = limiteParAdresse(request);
   if (tropVite) return tropVite;
 
+  // FUT-155 : les octets réellement reçus, bornés avant tout budget et tout appel au modèle.
+  const corps = await lireCorpsBorne(request);
+  if ("tropGros" in corps) return new Response("Corps trop volumineux.", { status: 413 });
   let body: Body;
   try {
-    body = await request.json();
+    body = JSON.parse(corps.texte);
   } catch {
     return new Response("Corps invalide.", { status: 400 });
   }
@@ -374,7 +378,9 @@ export async function POST(request: NextRequest) {
     exploration_sans_classement: inondationDemandee && body.outcome?.exploration === true,
     // FUT-109 : « complete » seulement si toutes les priorités déclarées sont mesurées pour chaque commune affichée.
     // FUT-155 : un état absent, illisible ou contredit par une carte vaut « inconnue », jamais « complete ».
-    couverture_des_priorites: couvertureGlobaleLue(body.outcome?.couverture, results.map((r) => r.prioritesNonMesurees)),
+    // Inondation déclarée sans mode lisible : comme /ask, l'ordre n'est pas établi.
+    couverture_des_priorites: inondationDemandee && typeof body.outcome?.exploration !== "boolean"
+      ? "inconnue" : couvertureGlobaleLue(body.outcome?.couverture, results.map((r) => r.prioritesNonMesurees)),
     role_inondation: inondationDemandee ? "recul documenté uniquement, jamais favorable" : null,
     reference_prix_logement: results.some((r) => r.logement) ? "France" : null,
     territoires: results.map((r) => ({
@@ -419,6 +425,8 @@ ${JSON.stringify(payload, null, 2)}`;
     // Synthèse payante (comparateur / Pack Décision) : Sonnet 4.6 pour la
     // qualité. Effort et thinking via providerOptions.anthropic côté AI SDK.
     model: anthropic("claude-sonnet-4-6"),
+    // FUT-155 : 110 à 170 mots attendus. Sans borne, le fournisseur appliquait celle du modèle (128 000 jetons).
+    maxOutputTokens: 1000,
     providerOptions: {
       anthropic: {
         effort: "medium",

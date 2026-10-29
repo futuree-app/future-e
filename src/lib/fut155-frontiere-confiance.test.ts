@@ -11,6 +11,7 @@
 // Vrai moteur sur l'index réel ; les routes reçoivent un modèle simulé, aucun appel Anthropic.
 import { test, before, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { contexteAsk } from "./comparateur/lecture-ask.ts";
@@ -189,4 +190,192 @@ test("synthèse · plus de trois communes, ou une commune sans nom : refusé ava
     assert.equal((await synthese({ ...b, results: [r] })).status, 400, JSON.stringify(r));
   }
   assert.equal(etat.synthese.length, 0, "aucun appel au modèle");
+});
+
+// ── Passe 2 · le corps borné à 32 Kio, sur les octets réellement reçus ──────────────────────────────────────────
+
+const MAX = 32 * 1024;
+const octets = (s: string) => Buffer.byteLength(s, "utf8");
+/** Le JSON de `base`, rembourré dans `champ` jusqu'à `cible` octets exactement (accents compris : 2 octets). */
+function auxOctets(base: M, champ: (b: M, pad: string) => M, cible: number): string {
+  const vide = JSON.stringify(champ(base, ""));
+  const manque = cible - octets(vide);
+  assert.ok(manque >= 0, `base déjà à ${octets(vide)} octets`);
+  const pad = "é".repeat(Math.floor(manque / 2)) + "a".repeat(manque % 2);
+  const s = JSON.stringify(champ(base, pad));
+  assert.equal(octets(s), cible);
+  return s;
+}
+const brut = async (route: "synthesize" | "ask", corps: BodyInit, entetes: Record<string, string> = {}) => {
+  const POST = route === "synthesize" ? SYNTHESE : ASK;
+  const init: M = { method: "POST", body: corps, headers: { "content-type": "application/json", "x-forwarded-for": `10.155.2.${++ip}`, ...entetes } };
+  if (corps instanceof ReadableStream) init.duplex = "half";
+  return POST(new NextRequest(`http://localhost/api/comparateur-vie/${route}`, init)) as Promise<Response>;
+};
+const flux = (s: string, morceau = 1000) => new ReadableStream({
+  start(c) { const b = Buffer.from(s, "utf8"); for (let i = 0; i < b.length; i += morceau) c.enqueue(new Uint8Array(b.subarray(i, i + morceau))); c.close(); },
+});
+const corpsAsk = (ctx: M, extra: M = {}) => ({ question: "Laquelle regarder ?", context: ctx, focus: null, history: [], distinctId: "fut155", ...extra });
+
+test("borne · /synthesize : 32 768 octets passent, 32 769 sont refusés en 413 sans appel ni budget", async () => {
+  const pile = auxOctets(corpsDeLaPage("mer"), (b, pad) => ({ ...b, reformulation: `FUT-155 ${pad}` }), MAX);
+  const ok = await brut("synthesize", pile);
+  assert.equal(ok.status, 200);
+  assert.equal(await ok.text(), "Synthèse simulée.");
+  assert.equal(etat.synthese.length, 1);
+  const trop = auxOctets(corpsDeLaPage("mer"), (b, pad) => ({ ...b, reformulation: `FUT-155 ${pad}` }), MAX + 1);
+  const r = await brut("synthesize", trop);
+  assert.equal(r.status, 413);
+  assert.equal(etat.synthese.length, 1, "aucun appel de plus");
+});
+
+test("borne · /ask : 32 768 octets passent, 32 769 sont refusés en 413 sans appel", async () => {
+  const ctx = contexteDeLaPage("mer");
+  const avec = (b: M, pad: string) => ({ ...b, history: [{ role: "user", content: "Question ?" }, { role: "assistant", content: pad }] });
+  const ok = await brut("ask", auxOctets(corpsAsk(ctx), avec, MAX));
+  assert.equal(ok.status, 200);
+  assert.equal((await ok.json()).answer, "Réponse simulée.");
+  assert.equal(etat.modele.length, 1);
+  const r = await brut("ask", auxOctets(corpsAsk(ctx), avec, MAX + 1));
+  assert.equal(r.status, 413);
+  assert.deepEqual(await r.json(), { error: "Corps trop volumineux." });
+  assert.equal(etat.modele.length, 1, "aucun appel de plus");
+});
+
+test("borne · corps forgés : longues raisons, reformulation, historique, synthèse affichée → 413", async () => {
+  const s = corpsDeLaPage("mer");
+  const long = "raison forgée ".repeat(3000);
+  for (const forge of [
+    { ...s, results: s.results.map((r: M) => ({ ...r, reasons: [long] })) },
+    { ...s, reformulation: long },
+    { ...s, project: long },
+  ]) assert.equal((await brut("synthesize", JSON.stringify(forge))).status, 413);
+  const ctx = contexteDeLaPage("mer");
+  for (const forge of [
+    corpsAsk({ ...ctx, reformulation: long }),
+    corpsAsk({ ...ctx, synthese: long }),
+    corpsAsk(ctx, { history: Array.from({ length: 6 }, (_, i) => ({ role: i % 2 ? "assistant" : "user", content: long.slice(0, 7000) })) }),
+    corpsAsk(ctx, { question: long }),
+  ]) assert.equal((await brut("ask", JSON.stringify(forge))).status, 413);
+  assert.equal(etat.synthese.length + etat.modele.length, 0);
+});
+
+test("borne · les octets comptent, pas Content-Length : flux sans en-tête, ou en-tête qui ment", async () => {
+  const trop = auxOctets(corpsDeLaPage("mer"), (b, pad) => ({ ...b, reformulation: pad }), MAX + 1);
+  assert.equal((await brut("synthesize", flux(trop))).status, 413, "flux sans Content-Length");
+  assert.equal((await brut("synthesize", flux(trop), { "content-length": "100" })).status, 413, "en-tête qui sous-déclare");
+  const pile = auxOctets(corpsDeLaPage("mer"), (b, pad) => ({ ...b, reformulation: pad }), MAX);
+  assert.equal((await brut("synthesize", flux(pile, 777))).status, 200, "à la borne, en morceaux");
+  // Annoncé trop gros : refusé sans lire.
+  assert.equal((await brut("ask", JSON.stringify(corpsAsk(contexteDeLaPage("mer"))), { "content-length": String(MAX + 1) })).status, 413);
+  assert.equal(etat.synthese.length, 1);
+  assert.equal(etat.modele.length, 0);
+});
+
+test("borne · les corps légitimes les plus lourds passent ; seul un pire cas pathologique est refusé", async () => {
+  // Tous les récits activés (inondation, démographie, calme, sites industriels, héritage, littoral, logement) et
+  // un projet au maximum de la page (2 000 caractères, tous accentués).
+  const prefs = [
+    { key: "faible_risque_inondation", weight: 3 }, { key: "croissance_demographique", weight: 2 }, { key: "calme_sonore", weight: 2 },
+    { key: "faible_exposition_industrielle", weight: 2 }, { key: "proximite_mer", weight: 2 }, { key: "acces_soins", weight: 1 },
+  ];
+  const o = await V.matchProjects({ reformulation: "R".repeat(400), hardConstraints: {}, preferences: prefs, heritageIntent: true });
+  const top = o.results.slice(0, 3);
+  const synth = {
+    project: "é".repeat(2000), reformulation: "é".repeat(400), preferences: prefs, heritageIntent: true,
+    results: top.map((r: M) => ({
+      nom: r.nom, region: r.region, reasons: r.reasons, tradeoff: r.tradeoff, pressionEco: r.pressionEco?.note ?? null,
+      logement: r.logement, littoral: r.littoral, distinctive: r.distinctive, climatInondation: r.climatInondation,
+      demographie: r.demographie, calmeSonore: r.calmeSonore, expoIndustrielle: r.expoIndustrielle, heritageIndustriel: r.heritageIndustriel,
+      inondation: r.inondation ?? null, prioritesNonMesurees: r.couverture?.nonMesurees ?? [], sansPrioriteFavorable: r.sansPrioriteFavorable === true,
+    })),
+    outcome: { perfectMatch: o.perfectMatch, message: o.message, exploration: o.inondation?.exploration, couverture: o.couverture },
+    perimetre: [], orientation: [],
+  };
+  const tailleSynth = octets(JSON.stringify(synth));
+  // /ask : une synthèse au plafond de sortie (1 000 jetons, ~4 500 caractères), des questions de 1 000 caractères
+  // (la page n'en borne pas la longueur) et des réponses au plafond de /ask (600 jetons, ~2 700 caractères).
+  const fr = (n: number) => "Une phrase française ordinaire, où les accents pèsent deux octets à côté des autres. ".repeat(60).slice(0, n);
+  const echange = (t: (n: number) => string, tours: number) =>
+    Array.from({ length: tours }, () => [{ role: "user", content: t(1000) }, { role: "assistant", content: t(2700) }]).flat();
+  const corpsDe = (t: (n: number) => string, tours: number) => corpsAsk(
+    contexteAsk({ reformulation: t(400), criteres: preferencesToLabels(prefs), inondationDeclaree: true, outcome: o as never, synthese: t(4500), top: top as never }),
+    { question: t(1000), history: echange(t, tours) },
+  );
+  // Parcours gratuit : la deuxième et dernière question porte une question et une réponse d'historique.
+  const gratuit = octets(JSON.stringify(corpsDe(fr, 1)));
+  // Cookie effacé : l'historique plein que la page envoie (six messages).
+  const plein = octets(JSON.stringify(corpsDe(fr, 3)));
+  // Le même, tout en caractères accentués (deux octets chacun) : le pire cas mesurable.
+  const corps = corpsDe((n) => "é".repeat(n), 3);
+  const tailleExtreme = octets(JSON.stringify(corps));
+  console.log(`FUT-155 · corps légitimes : /synthesize ${tailleSynth} o ; /ask parcours gratuit ${gratuit} o, historique plein ${plein} o, tout accentué ${tailleExtreme} o (borne ${MAX})`);
+  assert.ok(tailleSynth < MAX / 2, `synthèse : ${tailleSynth}`);
+  assert.ok(gratuit < MAX / 2, `ask gratuit : ${gratuit}`);
+  assert.ok(plein < MAX * 0.75, `ask plein : ${plein}`);
+  // Ce pire cas dépasse : la page ne borne pas la longueur d'une question. Il reçoit un refus propre (réserve au PR).
+  assert.ok(tailleExtreme > MAX, `ask extrême : ${tailleExtreme}`);
+  assert.equal((await brut("ask", JSON.stringify(corps))).status, 413);
+  const r1 = await brut("synthesize", JSON.stringify(synth));
+  assert.equal(r1.status, 200);
+  assert.equal(await r1.text(), "Synthèse simulée.");
+  const r2 = await brut("ask", JSON.stringify(corpsDe(fr, 3)));
+  assert.equal(r2.status, 200);
+  assert.equal((await r2.json()).answer, "Réponse simulée.");
+});
+
+test("sortie · la synthèse borne sa génération (le fournisseur appliquait 128 000 jetons)", async () => {
+  await synthese(corpsDeLaPage("mer"));
+  assert.equal(etat.synthese[0].maxOutputTokens, 1000);
+});
+
+// ── Passe 2 · aucun repli favorable côté page, ni côté route, sur un état absent ────────────────────────────────
+
+test("route · inondation déclarée sans mode lisible : couverture inconnue, jamais un classement", async () => {
+  const prefs = [{ key: "faible_risque_inondation", weight: 3 }, { key: "faible_chaleur", weight: 3 }];
+  const o = await V.matchProjects({ reformulation: "FUT-155", hardConstraints: {}, preferences: prefs });
+  assert.equal(o.inondation.exploration, false, "le moteur donne toujours le mode");
+  resultats.inond = { prefs, o };
+  const b = corpsDeLaPage("inond");
+  const normal = await synthese(b);
+  assert.equal(normal.donnees.couverture_des_priorites, o.couverture);
+  assert.equal(normal.donnees.exploration_sans_classement, false);
+  for (const exploration of [undefined, null, "false"]) {
+    const { donnees } = await synthese({ ...b, outcome: { ...b.outcome, exploration } });
+    assert.equal(donnees.couverture_des_priorites, "inconnue", String(exploration));
+    assert.equal(donnees.exploration_sans_classement, false);
+  }
+  // Sans inondation déclarée, le mode n'a pas à être transmis.
+  const m = corpsDeLaPage("mer");
+  assert.equal((await synthese({ ...m, outcome: { ...m.outcome, exploration: undefined } })).donnees.couverture_des_priorites, "complete");
+});
+
+test("page · le repli de synthèse : parcours normal inchangé, état absent sans arbitrage ni classement", async () => {
+  const { repliSynthese, REPLI_ETAT_INCONNU } = await import("./comparateur/synthese-repli.ts");
+  const p = { reformulation: "Projet.", preferences: MER };
+  const top = resultats.mer.o.results.slice(0, 3);
+  const complet = repliSynthese(p, top, false, { etat: "complete", message: null });
+  assert.match(complet, /Les territoires qui ressortent se distinguent notamment par .* Aucun ne réunit tout/);
+  const pa = resultats.paris.o;
+  assert.equal(repliSynthese({ reformulation: "Projet.", preferences: PARIS }, pa.results, false, { etat: pa.couverture, message: pa.message }), `Projet. ${pa.message}`);
+  for (const etatAbsent of [undefined, null]) {
+    const r = repliSynthese(p, top, undefined, { etat: etatAbsent, message: null });
+    assert.equal(r, `Projet. ${REPLI_ETAT_INCONNU}`);
+    assert.doesNotMatch(r, /ressortent|arbitrage|réunit/);
+  }
+  // Inondation déclarée : exploration inconnue ne s'annonce pas comme une exploration, et ne classe rien.
+  const pi = { reformulation: "Projet.", preferences: [{ key: "faible_risque_inondation" }] };
+  const inconnu = repliSynthese(pi, top, undefined, { etat: undefined, message: null });
+  assert.match(inconnu, /L'inondation ne favorise aucune commune/);
+  assert.doesNotMatch(inconnu, /communes à explorer, sans classement favorable/);
+  assert.match(repliSynthese(pi, top, true, { etat: "sans_priorite", message: null }), /communes à explorer, sans classement favorable/);
+});
+
+test("page · plus aucun repli « complete » ni « false » sur un état absent", () => {
+  const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
+  assert.doesNotMatch(client, /\?\? "complete"/);
+  assert.doesNotMatch(client, /exploration \?\? false/);
+  assert.match(client, /exploration: matchOutcome\.inondation\?\.exploration,\n\s+couverture: matchOutcome\.couverture,/);
+  assert.match(client, /exploration: outcomeMeta\.exploration, couverture: outcomeMeta\.couverture \}/);
+  assert.match(client, /\(outcome\?\.couverture !== "complete" \|\| top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) \? \(\n\s+outcome\?\.message \? <>\{outcome\.message\}<\/> : null/);
 });

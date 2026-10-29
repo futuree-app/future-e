@@ -400,7 +400,7 @@ test("AskFuture : le contexte construit par la page porte le marqueur, la route 
 test("page « Où vivre » : libellé de carte, en-tête et repli disent l'absence de priorité favorable ; le corps l'envoie", () => {
   const code = readFileSync(new URL("../app/(public)/ou-vivre/OuVivreClient.tsx", import.meta.url), "utf8");
   assert.match(code, /const portee = porteeSansFavorable\(\{ marque: r\.sansPrioriteFavorable, etat, nonMesurees: r\.couverture\?\.nonMesurees \}\);\s*if \(portee\) return \{ libelle: libelleCarteSansFavorable\(portee, inondation\)/);
-  assert.match(code, /top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) && outcome\?\.message/);
+  assert.match(code, /top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) \? \(\n\s+outcome\?\.message \? <>\{outcome\.message\}<\/>/); // forme FUT-155
   assert.match(code, /sansPrioriteFavorable: r\.sansPrioriteFavorable === true/);
   const pack = readFileSync(new URL("../app/(public)/comparateur/pack-decision/PackUnlockedView.tsx", import.meta.url), "utf8");
   assert.match(pack, /\{portee\(r\) && \(/);
