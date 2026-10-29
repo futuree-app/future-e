@@ -211,3 +211,28 @@ test("hors pôle : Balan, agglomération sans étudiant inscrit, et Belleu qui m
   const vitalite = r.comparaison.themes.find((t: M) => t.id === "vitalite").synthese;
   assert.match(vitalite, /Belleu par l'enseignement supérieur à sa portée\.$/);
 });
+
+// Contre-revue (29/10/2026), réserve 1 : l'identité « ville étudiante » exige la part étudiante du bassin au palier
+// fort (etudes_dyn ≥ 66, borne existante), en plus du score ≥ 55 et d'un établissement positivement attesté dans le
+// rayon du pôle. 259 → 134 candidates ; les scores ne bougent pas.
+test("identité « ville étudiante » : part étudiante du bassin au palier fort, établissement attesté, score inchangé", async () => {
+  const regle = (c: M) => (vie(c) ?? 0) >= SEUIL_RAISON && c.etudes_dyn != null && c.etudes_dyn >= PALIER_FORTE && V.villeEtudianteLocale(c);
+  const candidates = INDEX.communes.filter((c) => V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE));
+  assert.equal(candidates.length, 134);
+  for (const c of candidates) assert.ok(regle(c) && V.etatEtablissementSup(c.etudesSup) === "presence", c.insee);
+  assert.equal(INDEX.communes.filter(regle).length, 134); // la règle et l'identité coïncident exactement
+  // Pôles à part étudiante intermédiaire : plus d'identité, même score.
+  const sortis: Record<string, [number, number]> = { "03185": [63, 70], "05061": [60, 68], "03310": [62, 72], "83137": [62, 75] };
+  for (const [insee, [dyn, score]] of Object.entries(sortis)) {
+    const c = commune(insee);
+    assert.deepEqual([c.etudes_dyn, vie(c)], [dyn, score], insee);
+    assert.equal(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), false, insee);
+  }
+  assert.equal(V.buildIdentiteCandidates(commune("03185"))[0], "Pour un quotidien au calme, loin de l'agitation.");
+  const r = await V.seedComparaison(["03185", "43153"]);
+  assert.notEqual(r.trio.find((x: M) => x.insee === "03185").identite, IDENTITE_ETUDIANTE);
+  // À la borne : Le Puy-en-Velay et Aurillac (part 66) la gardent, comme les grandes villes universitaires.
+  for (const insee of ["43157", "15014", "86194", "35238", "49007", "2B096", "34172", "67482", "31555", "63113", "14118"]) {
+    assert.equal(V.buildIdentiteCandidates(commune(insee)).includes(IDENTITE_ETUDIANTE), true, insee);
+  }
+});

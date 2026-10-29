@@ -1146,7 +1146,11 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // Traits de caractère (départagent deux communes de même géographie).
   // FUT-135 : seulement si la commune porte elle-même la mesure (pôle de son bassin, établissement positivement
   // attesté dans son rayon) ; sinon la preuve est celle de l'agglomération, dite par la raison, pas par l'identité.
-  if (etudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
+  // FUT-141 (contre-revue) : « ville étudiante » dit une présence étudiante forte. Le score combiné ne suffit plus :
+  // il faut aussi la part étudiante du bassin au palier fort (`etudes_dyn` ≥ 66, la borne existante des paliers).
+  // Montluçon (part 63), Gap, Vichy, Toulon ne la portent plus ; le score et son palier ne changent pas.
+  const partEtudianteForte = c.etudes_dyn != null && bandIndex(c.etudes_dyn) === 0;
+  if (etudianteForte && partEtudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
   // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
   // phrase dit le fait observé, sans lui prêter de cause.
   if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");

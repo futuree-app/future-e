@@ -1,0 +1,1409 @@
+{
+ "source": {
+  "fichier": "BPE25.parquet",
+  "sha256": "d3815ac7a91997adf9b907d38708e14440065e33b11f429ebecbafa139969f0e",
+  "millesime": [
+   "2025"
+  ],
+  "lignes": 2921770,
+  "etablissementsSuperieur": 2298,
+  "geolocalises": 2295,
+  "parType": {
+   "C501": 699,
+   "C502": 394,
+   "C503": 329,
+   "C504": 276,
+   "C505": 21,
+   "C509": 576
+  },
+  "sansCoordonnees": [
+   {
+    "typequ": "C509",
+    "depcom": "97607",
+    "libcom": "DEMBENI",
+    "nom": "UNIVERSITE DE MAYOTTE MAYOTTE",
+    "qualiteXY": "_Z",
+    "communeVraiZero": null
+   },
+   {
+    "typequ": "C509",
+    "depcom": "97611",
+    "libcom": "MAMOUDZOU",
+    "nom": "CNAM MAYOTTE",
+    "qualiteXY": "_Z",
+    "communeVraiZero": null
+   },
+   {
+    "typequ": "C504",
+    "depcom": "75105",
+    "libcom": "PARIS 5E ARRONDISSEMENT",
+    "nom": "ETABLISSEMENT ENSEIGNEMENT SUPERIEUR PRIVE PANTHEON ARCHITECTURE",
+    "qualiteXY": "_U",
+    "communeVraiZero": false
+   }
+  ]
+ },
+ "index": {
+  "main": "4f33d78282742aad657dc952f6fae9be7b487e516ce0de961812b8e5ac309df6",
+  "branche": "2cca58315dc4d3f6cf33035d2fd023ca4c970909846ae3cc25e724c7e006c972",
+  "communes": 34788
+ },
+ "rayons": {
+  "recalculesParRayon": {
+   "5": 1001,
+   "10": 1084,
+   "15": 1008,
+   "25": 31695
+  },
+  "ecartsAvecIndex": 0
+ },
+ "acces": {
+  "ecartsAvecPublie": 0,
+  "ecartMaxAbsolu": 0.0
+ },
+ "vraisZeros": {
+  "communes": 14029,
+  "parRayon": {
+   "5": 435,
+   "10": 231,
+   "15": 288,
+   "25": 13075
+  },
+  "margeMinKm": 0.003,
+  "margeMedianeKm": 7.65,
+  "sousUnKm": 1095,
+  "sousCentMetres": 107,
+  "plusFaiblesMarges": [
+   {
+    "insee": "15228",
+    "nom": "Siran",
+    "rayonKm": 25,
+    "plusProcheKm": 25.003
+   },
+   {
+    "insee": "62570",
+    "nom": "Méricourt",
+    "rayonKm": 5,
+    "plusProcheKm": 5.003
+   },
+   {
+    "insee": "65060",
+    "nom": "Banios",
+    "rayonKm": 25,
+    "plusProcheKm": 25.003
+   },
+   {
+    "insee": "55089",
+    "nom": "Burey-la-Côte",
+    "rayonKm": 25,
+    "plusProcheKm": 25.005
+   },
+   {
+    "insee": "24504",
+    "nom": "Saint-Sulpice-de-Roumagnac",
+    "rayonKm": 25,
+    "plusProcheKm": 25.006
+   },
+   {
+    "insee": "59484",
+    "nom": "Quiévrechain",
+    "rayonKm": 10,
+    "plusProcheKm": 10.007
+   },
+   {
+    "insee": "52321",
+    "nom": "Mertrud",
+    "rayonKm": 25,
+    "plusProcheKm": 25.007
+   },
+   {
+    "insee": "02173",
+    "nom": "Chauny",
+    "rayonKm": 25,
+    "plusProcheKm": 25.01
+   },
+   {
+    "insee": "16379",
+    "nom": "Taponnat-Fleurignac",
+    "rayonKm": 25,
+    "plusProcheKm": 25.012
+   },
+   {
+    "insee": "28193",
+    "nom": "Havelu",
+    "rayonKm": 25,
+    "plusProcheKm": 25.013
+   }
+  ]
+ },
+ "arrondisAZero": {
+  "communes": 94,
+  "accesMax": 0.00498,
+  "parCompte": {
+   "1": 79,
+   "2": 13,
+   "3": 2
+  },
+  "plusProcheKm": [
+   24.876,
+   24.999
+  ],
+  "rangs": {
+   "40": 60,
+   "41": 34
+  },
+  "inchangesSurLaBranche": true,
+  "liste": [
+   {
+    "insee": "01047",
+    "nom": "Blyes",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00298,
+    "plusProcheKm": 24.926,
+    "rang": 40
+   },
+   {
+    "insee": "01319",
+    "nom": "Relevant",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00375,
+    "plusProcheKm": 24.906,
+    "rang": 41
+   },
+   {
+    "insee": "02091",
+    "nom": "Blanzy-lès-Fismes",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00086,
+    "plusProcheKm": 24.979,
+    "rang": 40
+   },
+   {
+    "insee": "02507",
+    "nom": "Montgru-Saint-Hilaire",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00308,
+    "plusProcheKm": 24.923,
+    "rang": 40
+   },
+   {
+    "insee": "03284",
+    "nom": "Thionne",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00115,
+    "plusProcheKm": 24.971,
+    "rang": 40
+   },
+   {
+    "insee": "07174",
+    "nom": "Peyraud",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00239,
+    "plusProcheKm": 24.94,
+    "rang": 40
+   },
+   {
+    "insee": "07303",
+    "nom": "Saint-Vincent-de-Durfort",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00236,
+    "plusProcheKm": 24.941,
+    "rang": 40
+   },
+   {
+    "insee": "08169",
+    "nom": "Flaignes-Havys",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00138,
+    "plusProcheKm": 24.965,
+    "rang": 40
+   },
+   {
+    "insee": "08433",
+    "nom": "Suzanne",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00065,
+    "plusProcheKm": 24.984,
+    "rang": 40
+   },
+   {
+    "insee": "11311",
+    "nom": "Ribaute",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00201,
+    "plusProcheKm": 24.975,
+    "rang": 40
+   },
+   {
+    "insee": "11393",
+    "nom": "Tourouzelle",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0012,
+    "plusProcheKm": 24.97,
+    "rang": 40
+   },
+   {
+    "insee": "11409",
+    "nom": "Vignevieille",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00034,
+    "plusProcheKm": 24.991,
+    "rang": 40
+   },
+   {
+    "insee": "14132",
+    "nom": "Canchy",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00479,
+    "plusProcheKm": 24.88,
+    "rang": 41
+   },
+   {
+    "insee": "14401",
+    "nom": "Manvieux",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00026,
+    "plusProcheKm": 24.993,
+    "rang": 40
+   },
+   {
+    "insee": "14579",
+    "nom": "Seulline",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00328,
+    "plusProcheKm": 24.918,
+    "rang": 41
+   },
+   {
+    "insee": "14656",
+    "nom": "Saint-Rémy",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00332,
+    "plusProcheKm": 24.917,
+    "rang": 41
+   },
+   {
+    "insee": "17366",
+    "nom": "Saint-Martin-de-Coux",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00168,
+    "plusProcheKm": 24.958,
+    "rang": 40
+   },
+   {
+    "insee": "18027",
+    "nom": "Bengy-sur-Craon",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00462,
+    "plusProcheKm": 24.884,
+    "rang": 41
+   },
+   {
+    "insee": "19044",
+    "nom": "La Chapelle-aux-Saints",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00231,
+    "plusProcheKm": 24.942,
+    "rang": 40
+   },
+   {
+    "insee": "24502",
+    "nom": "Saint-Séverin-d'Estissac",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00135,
+    "plusProcheKm": 24.966,
+    "rang": 40
+   },
+   {
+    "insee": "25221",
+    "nom": "Esnans",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00152,
+    "plusProcheKm": 24.962,
+    "rang": 40
+   },
+   {
+    "insee": "25476",
+    "nom": "Rahon",
+    "rayonKm": 25,
+    "compte": 3,
+    "acces": 0.00465,
+    "plusProcheKm": 24.961,
+    "rang": 41
+   },
+   {
+    "insee": "25546",
+    "nom": "Silley-Bléfond",
+    "rayonKm": 25,
+    "compte": 3,
+    "acces": 0.00406,
+    "plusProcheKm": 24.92,
+    "rang": 41
+   },
+   {
+    "insee": "26276",
+    "nom": "Roche-Saint-Secret-Béconne",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0022,
+    "plusProcheKm": 24.945,
+    "rang": 40
+   },
+   {
+    "insee": "27267",
+    "nom": "Freneuse-sur-Risle",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00491,
+    "plusProcheKm": 24.877,
+    "rang": 41
+   },
+   {
+    "insee": "27286",
+    "nom": "Giverville",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0045,
+    "plusProcheKm": 24.887,
+    "rang": 41
+   },
+   {
+    "insee": "27435",
+    "nom": "La Noë-Poulain",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00028,
+    "plusProcheKm": 24.993,
+    "rang": 40
+   },
+   {
+    "insee": "29277",
+    "nom": "Sizun",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00011,
+    "plusProcheKm": 24.997,
+    "rang": 40
+   },
+   {
+    "insee": "2A100",
+    "nom": "Cristinacce",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00046,
+    "plusProcheKm": 24.988,
+    "rang": 40
+   },
+   {
+    "insee": "31288",
+    "nom": "Layrac-sur-Tarn",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00134,
+    "plusProcheKm": 24.967,
+    "rang": 40
+   },
+   {
+    "insee": "32321",
+    "nom": "Polastron",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00442,
+    "plusProcheKm": 24.945,
+    "rang": 41
+   },
+   {
+    "insee": "34189",
+    "nom": "Olonzac",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00078,
+    "plusProcheKm": 24.98,
+    "rang": 40
+   },
+   {
+    "insee": "37086",
+    "nom": "Courcelles-de-Touraine",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00038,
+    "plusProcheKm": 24.991,
+    "rang": 40
+   },
+   {
+    "insee": "40267",
+    "nom": "Saint-Justin",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00082,
+    "plusProcheKm": 24.98,
+    "rang": 40
+   },
+   {
+    "insee": "44202",
+    "nom": "Teillé",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00448,
+    "plusProcheKm": 24.888,
+    "rang": 41
+   },
+   {
+    "insee": "45074",
+    "nom": "La Chapelle-Onzerain",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00493,
+    "plusProcheKm": 24.877,
+    "rang": 41
+   },
+   {
+    "insee": "48152",
+    "nom": "Ventalon en Cévennes",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00332,
+    "plusProcheKm": 24.917,
+    "rang": 41
+   },
+   {
+    "insee": "49218",
+    "nom": "Montrevault-sur-Èvre",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00158,
+    "plusProcheKm": 24.96,
+    "rang": 40
+   },
+   {
+    "insee": "50421",
+    "nom": "Quinéville",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00355,
+    "plusProcheKm": 24.911,
+    "rang": 41
+   },
+   {
+    "insee": "50484",
+    "nom": "Saint-Hilaire-du-Harcouët",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.003,
+    "plusProcheKm": 24.925,
+    "rang": 40
+   },
+   {
+    "insee": "51608",
+    "nom": "Vernancourt",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00024,
+    "plusProcheKm": 24.994,
+    "rang": 40
+   },
+   {
+    "insee": "53242",
+    "nom": "Saint-Michel-de-la-Roë",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00066,
+    "plusProcheKm": 24.983,
+    "rang": 40
+   },
+   {
+    "insee": "55174",
+    "nom": "Épinonville",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0015,
+    "plusProcheKm": 24.962,
+    "rang": 40
+   },
+   {
+    "insee": "55197",
+    "nom": "Fresnes-au-Mont",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00437,
+    "plusProcheKm": 24.891,
+    "rang": 41
+   },
+   {
+    "insee": "55516",
+    "nom": "Tréveray",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00434,
+    "plusProcheKm": 24.891,
+    "rang": 41
+   },
+   {
+    "insee": "56019",
+    "nom": "Billio",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00477,
+    "plusProcheKm": 24.881,
+    "rang": 41
+   },
+   {
+    "insee": "56031",
+    "nom": "Camors",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00349,
+    "plusProcheKm": 24.913,
+    "rang": 41
+   },
+   {
+    "insee": "56039",
+    "nom": "La Chapelle-Neuve",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00183,
+    "plusProcheKm": 24.954,
+    "rang": 40
+   },
+   {
+    "insee": "56058",
+    "nom": "Férel",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00115,
+    "plusProcheKm": 24.971,
+    "rang": 40
+   },
+   {
+    "insee": "57090",
+    "nom": "Blanche-Église",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00052,
+    "plusProcheKm": 24.987,
+    "rang": 40
+   },
+   {
+    "insee": "57259",
+    "nom": "Grindorff-Bizing",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00498,
+    "plusProcheKm": 24.876,
+    "rang": 41
+   },
+   {
+    "insee": "57641",
+    "nom": "Schweyen",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00298,
+    "plusProcheKm": 24.926,
+    "rang": 40
+   },
+   {
+    "insee": "57658",
+    "nom": "Soucht",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.0035,
+    "plusProcheKm": 24.932,
+    "rang": 41
+   },
+   {
+    "insee": "58144",
+    "nom": "Livry",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00125,
+    "plusProcheKm": 24.969,
+    "rang": 40
+   },
+   {
+    "insee": "60174",
+    "nom": "Crapeaumesnil",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 3e-05,
+    "plusProcheKm": 24.999,
+    "rang": 40
+   },
+   {
+    "insee": "60380",
+    "nom": "Mareuil-sur-Ourcq",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00338,
+    "plusProcheKm": 24.916,
+    "rang": 41
+   },
+   {
+    "insee": "60472",
+    "nom": "Offoy",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00478,
+    "plusProcheKm": 24.88,
+    "rang": 41
+   },
+   {
+    "insee": "60526",
+    "nom": "Ravenel",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00121,
+    "plusProcheKm": 24.97,
+    "rang": 40
+   },
+   {
+    "insee": "61508",
+    "nom": "Vimoutiers",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0016,
+    "plusProcheKm": 24.96,
+    "rang": 40
+   },
+   {
+    "insee": "62171",
+    "nom": "Boyaval",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00388,
+    "plusProcheKm": 24.903,
+    "rang": 41
+   },
+   {
+    "insee": "62519",
+    "nom": "Lisbourg",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00107,
+    "plusProcheKm": 24.973,
+    "rang": 40
+   },
+   {
+    "insee": "63349",
+    "nom": "Saint-Georges-de-Mons",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00165,
+    "plusProcheKm": 24.959,
+    "rang": 40
+   },
+   {
+    "insee": "64331",
+    "nom": "Lembeye",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00027,
+    "plusProcheKm": 24.993,
+    "rang": 40
+   },
+   {
+    "insee": "64490",
+    "nom": "Saint-Martin-d'Arrossa",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00049,
+    "plusProcheKm": 24.988,
+    "rang": 40
+   },
+   {
+    "insee": "67066",
+    "nom": "La Broque",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00415,
+    "plusProcheKm": 24.922,
+    "rang": 41
+   },
+   {
+    "insee": "67346",
+    "nom": "Oberlauterbach",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0017,
+    "plusProcheKm": 24.957,
+    "rang": 40
+   },
+   {
+    "insee": "68188",
+    "nom": "Linthal",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00022,
+    "plusProcheKm": 24.994,
+    "rang": 40
+   },
+   {
+    "insee": "68199",
+    "nom": "Malmerspach",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00036,
+    "plusProcheKm": 24.991,
+    "rang": 40
+   },
+   {
+    "insee": "68212",
+    "nom": "Mœrnach",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0021,
+    "plusProcheKm": 24.948,
+    "rang": 40
+   },
+   {
+    "insee": "69099",
+    "nom": "Haute-Rivoire",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00154,
+    "plusProcheKm": 24.962,
+    "rang": 40
+   },
+   {
+    "insee": "69218",
+    "nom": "Saint-Lager",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00064,
+    "plusProcheKm": 24.992,
+    "rang": 40
+   },
+   {
+    "insee": "69240",
+    "nom": "Saint-Vincent-de-Reins",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00447,
+    "plusProcheKm": 24.944,
+    "rang": 41
+   },
+   {
+    "insee": "70007",
+    "nom": "Ailloncourt",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.0046,
+    "plusProcheKm": 24.942,
+    "rang": 41
+   },
+   {
+    "insee": "70533",
+    "nom": "Vellefrey-et-Vellefrange",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00054,
+    "plusProcheKm": 24.987,
+    "rang": 40
+   },
+   {
+    "insee": "71578",
+    "nom": "Clux-Villeneuve",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0001,
+    "plusProcheKm": 24.997,
+    "rang": 40
+   },
+   {
+    "insee": "76171",
+    "nom": "La Chapelle-Saint-Ouen",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00028,
+    "plusProcheKm": 24.993,
+    "rang": 40
+   },
+   {
+    "insee": "76449",
+    "nom": "Montreuil-en-Caux",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00235,
+    "plusProcheKm": 24.952,
+    "rang": 40
+   },
+   {
+    "insee": "76726",
+    "nom": "Vattetot-sur-Mer",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00487,
+    "plusProcheKm": 24.878,
+    "rang": 41
+   },
+   {
+    "insee": "77365",
+    "nom": "Le Plessis-Feu-Aussoux",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00055,
+    "plusProcheKm": 24.986,
+    "rang": 40
+   },
+   {
+    "insee": "79345",
+    "nom": "Verruyes",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00302,
+    "plusProcheKm": 24.925,
+    "rang": 40
+   },
+   {
+    "insee": "80003",
+    "nom": "Acheux-en-Amiénois",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00248,
+    "plusProcheKm": 24.938,
+    "rang": 40
+   },
+   {
+    "insee": "81015",
+    "nom": "Appelle",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00237,
+    "plusProcheKm": 24.963,
+    "rang": 40
+   },
+   {
+    "insee": "81303",
+    "nom": "Trébas",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 3e-05,
+    "plusProcheKm": 24.999,
+    "rang": 40
+   },
+   {
+    "insee": "82177",
+    "nom": "Sauveterre",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00479,
+    "plusProcheKm": 24.94,
+    "rang": 41
+   },
+   {
+    "insee": "84110",
+    "nom": "Saint-Léger-du-Ventoux",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00338,
+    "plusProcheKm": 24.915,
+    "rang": 41
+   },
+   {
+    "insee": "85042",
+    "nom": "Chaillé-les-Marais",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00446,
+    "plusProcheKm": 24.888,
+    "rang": 41
+   },
+   {
+    "insee": "85102",
+    "nom": "Grand'Landes",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00286,
+    "plusProcheKm": 24.929,
+    "rang": 40
+   },
+   {
+    "insee": "86239",
+    "nom": "Sainte-Radégonde",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00342,
+    "plusProcheKm": 24.956,
+    "rang": 41
+   },
+   {
+    "insee": "88229",
+    "nom": "Harchéchamp",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00052,
+    "plusProcheKm": 24.987,
+    "rang": 40
+   },
+   {
+    "insee": "88449",
+    "nom": "Savigny",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00072,
+    "plusProcheKm": 24.991,
+    "rang": 40
+   },
+   {
+    "insee": "89059",
+    "nom": "Bussy-en-Othe",
+    "rayonKm": 25,
+    "compte": 2,
+    "acces": 0.00435,
+    "plusProcheKm": 24.946,
+    "rang": 41
+   },
+   {
+    "insee": "89253",
+    "nom": "Merry-sur-Yonne",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00449,
+    "plusProcheKm": 24.888,
+    "rang": 41
+   },
+   {
+    "insee": "91069",
+    "nom": "Boigneville",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.0015,
+    "plusProcheKm": 24.963,
+    "rang": 40
+   },
+   {
+    "insee": "91507",
+    "nom": "Prunay-sur-Essonne",
+    "rayonKm": 25,
+    "compte": 1,
+    "acces": 0.00388,
+    "plusProcheKm": 24.903,
+    "rang": 41
+   }
+  ]
+ },
+ "sensibiliteEllipsoide": {
+  "communesAMoinsDe500mDuRayon": 1145,
+  "bascules": 43,
+  "zeroDevientPresence": 0,
+  "presenceDevientZero": 43,
+  "detail": [
+   {
+    "insee": "03284",
+    "nom": "Thionne",
+    "rayonKm": 25,
+    "sphereKm": 24.9712,
+    "ellipsoideKm": 25.0077,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "08169",
+    "nom": "Flaignes-Havys",
+    "rayonKm": 25,
+    "sphereKm": 24.9655,
+    "ellipsoideKm": 25.0319,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "11311",
+    "nom": "Ribaute",
+    "rayonKm": 25,
+    "sphereKm": 24.9748,
+    "ellipsoideKm": 25.0232,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "11393",
+    "nom": "Tourouzelle",
+    "rayonKm": 25,
+    "sphereKm": 24.9701,
+    "ellipsoideKm": 25.0306,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "11409",
+    "nom": "Vignevieille",
+    "rayonKm": 25,
+    "sphereKm": 24.9914,
+    "ellipsoideKm": 25.0039,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "14401",
+    "nom": "Manvieux",
+    "rayonKm": 25,
+    "sphereKm": 24.9934,
+    "ellipsoideKm": 25.0495,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "24502",
+    "nom": "Saint-Séverin-d'Estissac",
+    "rayonKm": 25,
+    "sphereKm": 24.9662,
+    "ellipsoideKm": 25.0043,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "25221",
+    "nom": "Esnans",
+    "rayonKm": 25,
+    "sphereKm": 24.9621,
+    "ellipsoideKm": 25.0223,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "26276",
+    "nom": "Roche-Saint-Secret-Béconne",
+    "rayonKm": 25,
+    "sphereKm": 24.9451,
+    "ellipsoideKm": 25.0049,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "27435",
+    "nom": "La Noë-Poulain",
+    "rayonKm": 25,
+    "sphereKm": 24.9929,
+    "ellipsoideKm": 25.0479,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "29277",
+    "nom": "Sizun",
+    "rayonKm": 25,
+    "sphereKm": 24.9973,
+    "ellipsoideKm": 25.0219,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "2A100",
+    "nom": "Cristinacce",
+    "rayonKm": 25,
+    "sphereKm": 24.9884,
+    "ellipsoideKm": 25.0491,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "34189",
+    "nom": "Olonzac",
+    "rayonKm": 25,
+    "sphereKm": 24.9804,
+    "ellipsoideKm": 25.0306,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "37086",
+    "nom": "Courcelles-de-Touraine",
+    "rayonKm": 25,
+    "sphereKm": 24.9905,
+    "ellipsoideKm": 25.05,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "40267",
+    "nom": "Saint-Justin",
+    "rayonKm": 25,
+    "sphereKm": 24.9796,
+    "ellipsoideKm": 25.0314,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "51608",
+    "nom": "Vernancourt",
+    "rayonKm": 25,
+    "sphereKm": 24.9939,
+    "ellipsoideKm": 25.0614,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "53242",
+    "nom": "Saint-Michel-de-la-Roë",
+    "rayonKm": 25,
+    "sphereKm": 24.9834,
+    "ellipsoideKm": 25.0218,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "55174",
+    "nom": "Épinonville",
+    "rayonKm": 25,
+    "sphereKm": 24.9624,
+    "ellipsoideKm": 25.022,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "57090",
+    "nom": "Blanche-Église",
+    "rayonKm": 25,
+    "sphereKm": 24.987,
+    "ellipsoideKm": 25.0092,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "59275",
+    "nom": "Gruson",
+    "rayonKm": 5,
+    "sphereKm": 4.9907,
+    "ellipsoideKm": 5.004,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "60174",
+    "nom": "Crapeaumesnil",
+    "rayonKm": 25,
+    "sphereKm": 24.9993,
+    "ellipsoideKm": 25.0049,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "60526",
+    "nom": "Ravenel",
+    "rayonKm": 25,
+    "sphereKm": 24.9698,
+    "ellipsoideKm": 25.0286,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "60653",
+    "nom": "Valescourt",
+    "rayonKm": 25,
+    "sphereKm": 24.9679,
+    "ellipsoideKm": 25.0404,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "64317",
+    "nom": "Larressore",
+    "rayonKm": 10,
+    "sphereKm": 9.9824,
+    "ellipsoideKm": 10.0091,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "64331",
+    "nom": "Lembeye",
+    "rayonKm": 25,
+    "sphereKm": 24.9932,
+    "ellipsoideKm": 25.0309,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "64490",
+    "nom": "Saint-Martin-d'Arrossa",
+    "rayonKm": 25,
+    "sphereKm": 24.9877,
+    "ellipsoideKm": 25.0258,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "64540",
+    "nom": "Urcuit",
+    "rayonKm": 10,
+    "sphereKm": 9.9892,
+    "ellipsoideKm": 10.0162,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "67346",
+    "nom": "Oberlauterbach",
+    "rayonKm": 25,
+    "sphereKm": 24.9574,
+    "ellipsoideKm": 25.0089,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "68188",
+    "nom": "Linthal",
+    "rayonKm": 25,
+    "sphereKm": 24.9944,
+    "ellipsoideKm": 25.0471,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "68199",
+    "nom": "Malmerspach",
+    "rayonKm": 25,
+    "sphereKm": 24.991,
+    "ellipsoideKm": 25.0402,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "69099",
+    "nom": "Haute-Rivoire",
+    "rayonKm": 25,
+    "sphereKm": 24.9616,
+    "ellipsoideKm": 25.0309,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "69218",
+    "nom": "Saint-Lager",
+    "rayonKm": 25,
+    "sphereKm": 24.9919,
+    "ellipsoideKm": 25.0027,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "69240",
+    "nom": "Saint-Vincent-de-Reins",
+    "rayonKm": 25,
+    "sphereKm": 24.9441,
+    "ellipsoideKm": 25.0144,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "70533",
+    "nom": "Vellefrey-et-Vellefrange",
+    "rayonKm": 25,
+    "sphereKm": 24.9866,
+    "ellipsoideKm": 25.0039,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "71578",
+    "nom": "Clux-Villeneuve",
+    "rayonKm": 25,
+    "sphereKm": 24.9974,
+    "ellipsoideKm": 25.0504,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "76171",
+    "nom": "La Chapelle-Saint-Ouen",
+    "rayonKm": 25,
+    "sphereKm": 24.9931,
+    "ellipsoideKm": 25.0603,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "77365",
+    "nom": "Le Plessis-Feu-Aussoux",
+    "rayonKm": 25,
+    "sphereKm": 24.9862,
+    "ellipsoideKm": 25.0327,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "81015",
+    "nom": "Appelle",
+    "rayonKm": 25,
+    "sphereKm": 24.9629,
+    "ellipsoideKm": 25.0279,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "81303",
+    "nom": "Trébas",
+    "rayonKm": 25,
+    "sphereKm": 24.9993,
+    "ellipsoideKm": 25.0657,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "86239",
+    "nom": "Sainte-Radégonde",
+    "rayonKm": 25,
+    "sphereKm": 24.9555,
+    "ellipsoideKm": 25.0237,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "88229",
+    "nom": "Harchéchamp",
+    "rayonKm": 25,
+    "sphereKm": 24.9871,
+    "ellipsoideKm": 25.0007,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "88449",
+    "nom": "Savigny",
+    "rayonKm": 25,
+    "sphereKm": 24.991,
+    "ellipsoideKm": 25.0294,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   },
+   {
+    "insee": "91069",
+    "nom": "Boigneville",
+    "rayonKm": 25,
+    "sphereKm": 24.9626,
+    "ellipsoideKm": 25.0299,
+    "zeroSphere": false,
+    "zeroEllipsoide": true
+   }
+  ]
+ },
+ "rangs": {
+  "n": 34788,
+  "plateauZeroAvant": 40,
+  "plateauZeroApres": 20,
+  "communesModifiees": 14029,
+  "mainRejoue": true,
+  "brancheConforme": true
+ },
+ "fautes": []
+}

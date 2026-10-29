@@ -383,9 +383,10 @@ test("revue 2. synthèse déterministe : sans preuve locale, Angers n'est pas di
   }
 });
 
-test("revue 2. index réel : les 259 identités candidates reposent toutes sur une présence attestée", () => {
+// FUT-141 (contre-revue) : l'identité exige en plus la part étudiante du bassin au palier fort ; 259 → 134.
+test("revue 2. index réel : les 134 identités candidates reposent toutes sur une présence attestée", () => {
   const candidats = INDEX.communes.filter((c) => V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE));
-  assert.equal(candidats.length, 259);
+  assert.equal(candidats.length, 134);
   for (const c of candidats) assert.equal(V.etatEtablissementSup(c.etudesSup), "presence", c.insee);
   // Couverture de l'attestation réelle : mesurée partout, sans compte d'établissements ; l'accès pondéré la porte.
   assert.equal(INDEX.communes.filter((c) => V.etatEtablissementSup(c.etudesSup) === "incertain").length, 0);

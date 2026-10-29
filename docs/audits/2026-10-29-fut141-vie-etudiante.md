@@ -130,7 +130,7 @@ Les deux serveurs (`main` et branche) ont été lancés en local, avec l'index v
 
 1. **Cellule et avantage.** L'avantage suit toujours le score : rien n'est changé dans le classement. Une commune plafonnée peut donc mener, ou être à égalité, avec une cellule qui dit un niveau plus bas. Par exemple, Montluçon et Poitiers sont à égalité, avec « Présence étudiante intermédiaire / au moins un établissement… » face à « Forte présence étudiante ». C'est une sous-estimation, jamais une conclusion favorable. La lecture en deux lignes (présence du bassin, accès local) relève de **FUT-118**.
 2. **Sous-estimation de l'agglomération.** 704 phrases disent un niveau **plus bas** que la part de leur bassin, parce qu'elles suivent le palier du score (règle FUT-135), par exemple Thurins « intermédiaire dans l'agglomération de Lyon ». Il y en avait 237 sur `main`. C'est prudent, mais inexact sur Lyon. Ce point aussi relève de FUT-118.
-3. **Identité « Pour une ville étudiante à taille humaine. »** Règle FUT-135 inchangée : un pôle, avec un établissement attesté et un score ≥ 55. 125 communes qui la portent ont une part étudiante sous le palier fort, dont 6 au palier limité ; Montluçon, Gap, Vichy et Toulon la gardent. Ce n'est pas une identité tirée de la seule agglomération (point 5 du ticket), mais c'est à arbitrer si l'on veut aligner l'identité sur la part du bassin.
+3. **Identité « Pour une ville étudiante à taille humaine. »** ~~Règle FUT-135 inchangée~~ **Levé par la contre-revue (§9.1)** : l'identité exige désormais la part étudiante du bassin au palier fort. Au premier passage, 125 communes la portaient avec une part sous ce palier (6 au palier limité), dont Montluçon, Gap, Vichy et Toulon.
 4. **Combinaison 40/60.** 360 des 487 gardent une raison favorable par la seule part de leur agglomération. La phrase le dit (« … dans l'agglomération de X, aucun établissement supérieur recensé à moins de N km »). Aller plus loin demande une décision sur les pondérations.
 5. **Rentrée 2025** (FUT-135 §3) : toujours non appliquée.
 6. **Compte d'établissements.** L'index ne porte pas `establishmentCount` : la phrase dit « au moins un ».
@@ -166,3 +166,106 @@ node scripts/fut141/maj-reference-fut147.mjs                           # 0 écar
 ```
 
 Ne pas relancer `populate-bpe.py --write-index` ni `populate-mismatch-rank.mts` pour ce ticket.
+
+## 9. Contre-revue du 29/10/2026 : les deux réserves
+
+La contre-revue indépendante a refusé `01a781cd` sur deux réserves. Les corrections, scores et classements du premier passage sont inchangés.
+
+### 9.1 Identité « Pour une ville étudiante à taille humaine. »
+
+**Arbitrage porteur : palier existant 66.** L'identité exige désormais, en plus des conditions FUT-135 (score `vie_etudiante` ≥ 55, pôle de son bassin, établissement du supérieur positivement attesté dans son rayon), une part étudiante du bassin au palier fort : `etudes_dyn` ≥ 66, la borne de `bandIndex`. Un score combiné favorable ne suffit plus. Le code ne change qu'à un endroit : `buildIdentiteCandidates` (`src/lib/comparateur-vie.ts`). `villeEtudianteLocale` (grain, synthèses) reste tel quel.
+
+Photographie de toutes les communes avant et après (`scripts/fut141/identite-etudiante.mjs`, preuve : `identite-etudiante.json`) :
+
+| | avant | après |
+|---|---|---|
+| communes candidates à l'identité | 259 | **134** |
+| retirées | | 125 (119 au palier intermédiaire de part étudiante, 6 au palier limité) |
+| ajoutées | | 0 |
+| premiers libellés changés | | **53** |
+| autres candidats d'identité modifiés | | 0 |
+| candidates hors de la règle / règle satisfaite sans l'identité | | 0 / 0 |
+
+Les chiffres concordent exactement avec la simulation indépendante (259 → 134, 53 libellés). Les 53 nouveaux premiers libellés : « Pour s'installer dans une commune qui gagne des habitants. » 24, « Pour une petite ville qui reste vraiment vivante. » 19, « Pour un cadre rural préservé, loin de l'agitation. » 6, « Pour un quotidien au calme, loin de l'agitation. » 4.
+
+| Commune | part du bassin | score | identité candidate | premier libellé après |
+|---|---|---|---|---|
+| Montluçon | 63 | 70 | oui → **non** | « Pour un quotidien au calme, loin de l'agitation. » (était l'identité étudiante) |
+| Vichy | 62 | 72 | oui → **non** | « Pour s'installer dans une commune qui gagne des habitants. » (était l'identité étudiante) |
+| Gap | 60 | 68 | oui → **non** | inchangé : « Pour vivre en montagne dans une commune qui reste animée. » |
+| Toulon | 62 | 75 | oui → **non** | inchangé : « Pour un quotidien méditerranéen, les pieds près de l'eau. » |
+| Le Puy-en-Velay, Aurillac | 66 (à la borne) | 70, 72 | oui → oui | inchangé |
+
+Les grandes villes universitaires gardent toutes l'identité (Poitiers, Rennes, Angers, Corte, Montpellier, Strasbourg, Toulouse, Lyon 1er, Nantes, Bordeaux, Lille, Dijon, Besançon, Limoges, Amiens, Reims, Nancy, Metz, Clermont-Ferrand, Pau, Tours, Orléans, Caen, Rouen, Brest, Le Mans, Saint-Étienne, Grenoble, Nice). Les communes de campus hors pôle (Talence, Villeurbanne, Pessac…) ne l'avaient pas et ne l'ont toujours pas (règle FUT-135). Exemples de retraits parmi les grandes villes : Avignon, Dunkerque, Béziers, Cherbourg-en-Cotentin, Saint-Nazaire, Colmar, Montauban, Meaux, Saint-Quentin, Bayonne, Arles, Bastia, Saint-Malo, Brive, Charleville-Mézières, Carcassonne, Chalon-sur-Saône.
+
+L'identité affichée sur une carte vient d'une passe de groupe (`assignIdentite`) parmi ces candidats : les 18 recherches de contrôle et la référence FUT-147 n'en affichent aucune différence (§9.3).
+
+### 9.2 Les vrais zéros, prouvés dans la BPE brute
+
+**Source.** Base permanente des équipements (BPE) 2025 de l'INSEE, fichier « BPE25.parquet », page https://www.insee.fr/fr/statistiques/8217525 (mention « Paru le 05/10/2026 » à la date de la vérification). Millésime lu dans la donnée : colonne `AN` = 2025 sur les 2 921 770 lignes.
+
+- Fichier utilisé pour l'index (`data/bpe25.parquet`, hors dépôt, téléchargé le 16/08/2026) : sha256 `cdf81640…0051388`.
+- Fichier officiel téléchargé le 29/10/2026 à 09:50 UTC : sha256 `d3815ac7…69f0e`.
+- Les deux fichiers ont le même schéma (95 colonnes) et le même nombre de lignes. Les **2 298 enregistrements du supérieur** (C501, C502, C503, C504, C505, C509) sont **identiques champ pour champ** : type, commune, SIRET, nom, latitude, longitude, qualité de géolocalisation. Les 6 596 lignes qui diffèrent sont toutes d'autres types (A303 à A507, E101…) et ne diffèrent que par leurs coordonnées et leur nom, ce qui ressemble à une anonymisation républiée (exemples en Guadeloupe). Aucune ne touche le supérieur.
+- La preuve a été rejouée sur les deux fichiers : résultats identiques, à l'empreinte près. `preuve-zeros-bpe.json` est la sortie sur le fichier officiel.
+
+**Méthode de reproduction indépendante** (`scripts/fut141/preuve-zeros-bpe.py`) : aucune fonction du producteur n'est importée. Seules ses conventions sont reprises, écrites en clair et vérifiées contre l'index :
+
+1. équipements : C501 à C505 et C509 dont les coordonnées WGS84 sont renseignées (2 295 sur 2 298) ;
+2. centre de commune : lat/lon de l'index (le producteur lit les mêmes) ;
+3. rayon recalculé depuis la population de l'unité urbaine (somme des populations communales), sinon de la commune : 5, 10, 15 ou 25 km ;
+4. distance de grand cercle (R = 6 371 km), calculée par **force brute**, chaque commune contre chaque établissement, sans la grille spatiale du producteur ;
+5. accès pondéré = Σ (1 − d/25) sur les établissements à d ≤ rayon ;
+6. rang de `main` : `bisect_right`, arrondi ; plateau zéro après correction : par le milieu.
+
+**Résultats (0 faute) :**
+
+| Contrôle | Résultat |
+|---|---|
+| rayons recalculés = `etudesSup.radiusKm` | 34 788 / 34 788 (5 km : 1 001, 10 km : 1 084, 15 km : 1 008, 25 km : 31 695) |
+| accès recalculé, arrondi à 2 décimales = `etudesSup.weightedAccess` | 34 788 / 34 788, écart maximal 0 |
+| accès nul ⇔ compte nul ⇔ plus proche établissement au-delà du rayon | vrai pour toutes les communes |
+| vrais zéros | **14 029** (rayon 5 km : 435, 10 km : 231, 15 km : 288, 25 km : 13 075) |
+| rang de `main` rejoué | 34 788 / 34 788 ; plateau à 40 |
+| index de la branche | exactement les 14 029 vrais zéros passent à 20, aucune autre valeur ne bouge |
+
+**Les 94 arrondis, contrôlés à part.** Leur accès publié vaut 0,00 après arrondi, mais la source y atteste bien au moins un établissement : 79 en ont 1, 13 en ont 2, 2 en ont 3. Leur plus proche établissement est entre 24,876 et 24,999 km, toujours dans un rayon de 25 km. Leur accès réel ne dépasse pas 0,00498. Ils gardent leur rang (40 pour 60 d'entre eux, 41 pour 34) et ne sont pas touchés par la correction. Liste nominative dans `preuve-zeros-bpe.json` (`arrondisAZero.liste`).
+
+**Écarts relevés, sans effet sur la correction :**
+
+1. **Trois établissements sans coordonnées** ne peuvent pas être comptés : l'université de Mayotte (Dembeni) et le CNAM de Mayotte (Mamoudzou), dont les communes ne sont pas dans l'index, et une école d'architecture privée à Paris 5ᵉ, qui n'est pas un vrai zéro. Aucun vrai zéro n'est donc dû à une coordonnée manquante.
+2. **Sensibilité à la sphère.** La marge entre le plus proche établissement et le rayon est médiane à 7,65 km, mais elle est inférieure à 1 km pour 1 095 vrais zéros, et à 100 m pour 107 d'entre eux (minimum 3 m : Siran, Méricourt, Banios). Recomptées sur l'ellipsoïde WGS84 (Vincenty), les 1 145 communes situées à moins de 500 m du rayon donnent **0 vrai zéro qui deviendrait une présence**. Dans l'autre sens, 43 communes créditées d'un établissement à ~24,97 km sur la sphère seraient à zéro sur l'ellipsoïde (Thionne, Sizun, Cristinacce…). Elles gardent leur rang. La convention sphérique du producteur est donc conservée : elle ne fait entrer aucune commune à tort dans le plateau corrigé, et elle n'en fait sortir que des communes dont l'accès vaut quelques millièmes.
+3. Le centre de commune est celui de l'index (une coordonnée par commune), comme chez le producteur. La preuve ne valide pas ces centres ; elle établit que, pour ces centres et pour la BPE 2025, les 14 029 communes n'ont aucun établissement du supérieur dans leur rayon.
+
+### 9.3 Non-régression
+
+| Contrôle | Résultat |
+|---|---|
+| les 487 de référence (`audit-fut141.mjs`) | identiques au premier passage : forte 255 → 11, raison 487 → 360, trait d'ancre 96 → 0, identité 0 → 0 |
+| 1 666 scores corrigés (`audit-vie-etudiante.mjs`, `main` → branche) | inchangés : forte → intermédiaire 244, intermédiaire → limitée 308 ; raisons −127 ; identités −125, 0 gagnée |
+| 18 recherches de contrôle | identiques au premier passage, trios, pistes et cartes compris (17/18 trios identiques à `main`, comme avant) |
+| 17 villes universitaires témoins | identiques à `main`, identité comprise |
+| pôles Montluçon, Gap, Vichy, Toulon, Vidauban | scores et phrases inchangés ; seule l'identité candidate change (Vidauban ne l'avait pas) |
+| grain des phrases | identique au premier passage (1 457 → 0 au-dessus du bassin, 704 en dessous, non modifiées : FUT-118) |
+| référence figée FUT-147 (`maj-reference-fut147.mjs`) | 0 écart |
+| contrôles FUT-135 | `controle-487.mjs` 0 faute ; preuve positive et bornes compte/accès : tests au vert |
+| dossiers historiques, `engine-7`, bandes de rang, règles FUT-136 | non touchés (aucun fichier de ces domaines dans le diff) |
+| suite complète, `--test-concurrency=1` | **3 834 / 3 834** (+1 test) ; sur l'arbre fusionné avec le `main` actuel (`55c9ade0`, FUT-155 et FUT-162 inclus) : **3 862 / 3 862**, fusion sans conflit |
+| `tsc --noEmit` | 0 erreur |
+| `eslint` sur les fichiers touchés | 0 erreur, 1 avertissement antérieur (`tailleVilleFrom`) ; les 6 erreurs du dépôt entier sont dans des fichiers que la PR ne touche pas |
+| `index:verify` | OK (index inchangé depuis le premier passage, `2cca5831…`) |
+| build | OK |
+
+`scripts/fut135/reproductions-revue.mjs` ne se lance plus : il cherche Pont-Salomon dans le trio Auvergne, dont il est sorti dès le premier passage (§4.4). C'est un script de reproduction historique, pas un contrôle ; il n'a pas été modifié.
+
+### 9.4 Rejouer
+
+```bash
+node scripts/fut141/identite-etudiante.mjs --photo <avant.json>      # sur 01a781cd
+node scripts/fut141/identite-etudiante.mjs --photo <apres.json>      # sur la branche
+node scripts/fut141/identite-etudiante.mjs --comparer <avant.json> <apres.json>
+curl -L -o <dossier>/BPE25.parquet https://www.insee.fr/fr/statistiques/fichier/8217525/BPE25.parquet
+git show 76095598:data/comparateur-index.json.gz > <index-main.json.gz>   # main avant FUT-141
+.venv-bpe/bin/python -I scripts/fut141/preuve-zeros-bpe.py --parquet <dossier>/BPE25.parquet \
+  --index-main <index-main.json.gz> --index data/comparateur-index.json.gz --sortie <preuve.json>
+```
