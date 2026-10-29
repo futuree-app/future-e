@@ -95,6 +95,9 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     scenarios: enrichment?.drias?.commune.s ?? null,
     georisques: enrichment?.georisques ?? null,
     catnat: enrichment?.catnat ?? null,
+    // FUT-160 : un enrichissement tombé en entier ne sait rien de ses sources ; Géorisques est alors compté en panne.
+    georisquesIndisponible: !enrichment || enrichment.indisponibles.georisques,
+    catnatIndisponible: !enrichment || enrichment.indisponibles.catnat,
     catnatInondationIndex: catnatInondationDepuisIndex(entreeCatnat),
     vigieau: enrichment?.vigieau ?? null,
     drought: enrichment?.eau?.drought ?? null,

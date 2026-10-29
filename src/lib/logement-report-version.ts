@@ -112,6 +112,8 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // FUT-146 : mêmes règles. Un rapport antérieur (champ absent) ne s'invente pas de panne ; « hors zone »
   // et « aucun plan à proximité » sont des réponses, pas des sources muettes.
   if (r.bruitAerien?.statut === "indisponible") absentes.push("bruit_aerien");
+  // FUT-156 : mêmes règles. « À vérifier » est une réponse (l'adresse n'est pas rattachable), pas une panne.
+  if (r.fibre?.statut === "indisponible") absentes.push("fibre");
   return absentes;
 }
 
@@ -184,6 +186,8 @@ export function issueActualisation(
   // FUT-146 : même règle que le plan d'urbanisme. Une lecture des plans de bruit faite à la parcelle ne cède
   // pas la place à une lecture au point : ce n'est pas une panne, mais une lecture moins sûre.
   if (ancienne.report.bruitAerien?.grain === "parcelle" && nouveau.bruitAerien?.grain !== "parcelle") return "refusee";
+  // FUT-156 : une lecture de la fibre ne disparaît pas d'une version à l'autre (lecture désactivée entre-temps).
+  if (ancienne.report.fibre && ancienne.report.fibre.statut !== "indisponible" && !nouveau.fibre) return "refusee";
   return "nouvelle_version";
 }
 

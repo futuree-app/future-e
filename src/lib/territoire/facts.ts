@@ -68,6 +68,12 @@ export type TerritoireInputs = {
   scenarios: GwlScenarios | null;
   georisques: GeorisquesSummary | null;
   catnat: GasparCatnatSummary | null;
+  /**
+   * FUT-160 · VRAI QUAND LA LECTURE A ÉCHOUÉ (Géorisques en panne). Le fait passe alors `source_unavailable`,
+   * comme VigiEau, et plus `missing`. Absent ou faux : `null` reste `missing`, une donnée non collectée.
+   */
+  georisquesIndisponible?: boolean;
+  catnatIndisponible?: boolean;
   catnatInondationIndex: CatnatInondation | null;
   vigieau: VigieauSummary | null;
   drought: NonNullable<EaufranceSummary["drought"]> | null;
@@ -352,12 +358,14 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       key: "risk.georisques",
       value: i.georisques ? { flood: i.georisques.flags.flood, marineSubmersion: i.georisques.flags.marineSubmersion } : null,
       scale: "commune",
+      status: i.georisques ? "ok" : i.georisquesIndisponible ? "source_unavailable" : "missing",
       source: { producer: "Géorisques", dataset: "Risques recensés sur la commune", field: "flags" },
       limits: "Échelle communale : un risque recensé ne dit pas quelle adresse est touchée.",
       card: card("risk.flooding"), synthesis: INCLUDE,
     }),
     fact({
       key: "risk.catnat", value: i.catnat, scale: "commune",
+      status: i.catnat ? "ok" : i.catnatIndisponible ? "source_unavailable" : "missing",
       source: { producer: "Géorisques", dataset: "Base GASPAR (arrêtés CatNat)", field: "catnat" },
       card: card("risk.catnat"), synthesis: INCLUDE,
     }),

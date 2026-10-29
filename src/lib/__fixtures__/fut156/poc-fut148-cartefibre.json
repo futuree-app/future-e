@@ -1,0 +1,317 @@
+[
+ {
+  "ban_id": "17333_0270_00017",
+  "label": "17 Rue du Chemin Vert 17110 Saint-Georges-de-Didonne",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17333/X/03MB"
+  ]
+ },
+ {
+  "ban_id": "17041_0015_00001",
+  "label": "1 Rue des Amourettes 17170 Benon",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17041/X/0075"
+  ]
+ },
+ {
+  "ban_id": "17333_0670_00084",
+  "label": "84 Avenue du Général de Gaulle 17110 Saint-Georges-de-Didonne",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17333/X/03PN"
+  ]
+ },
+ {
+  "ban_id": "17300_7250_00026",
+  "label": "26 Chemin des Sablons 17000 La Rochelle",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "ID-173000000BPW"
+  ]
+ },
+ {
+  "ban_id": "17283_0060_00004",
+  "label": "4 Rue d’Archiac 17800 Pons",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17283/X/03QU"
+  ]
+ },
+ {
+  "ban_id": "17273_0076_00027",
+  "label": "27 Rue de l'Eglise 17800 Pérignac",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17273/X/00BM"
+  ]
+ },
+ {
+  "ban_id": "17113_0023_00001",
+  "label": "1 Route du Stade 17360 La Clotte",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17113/X/004F"
+  ]
+ },
+ {
+  "ban_id": "17200_0056_00016",
+  "label": "16 Rue des Bergonneaux 17140 Lagord",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "ID-1720000000JC"
+  ]
+ },
+ {
+  "ban_id": "17414_0003_00003",
+  "label": "3 Rue Aimé Bonpland 17138 Saint-Xandre",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "ID-17414000039C"
+  ]
+ },
+ {
+  "ban_id": "17142_0426_00017",
+  "label": "17 Rue Jean Gabin 17139 Dompierre-sur-Mer",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "ID-1714200002JQ"
+  ]
+ },
+ {
+  "ban_id": "17299_0810_00060",
+  "label": "60 Avenue Leon Gambetta 17300 Rochefort",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17299/X/02Q9"
+  ]
+ },
+ {
+  "ban_id": "17415_4ir3kx_00026",
+  "label": "26 Cours National Michel BARON 17100 Saintes",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17415/X/05JD"
+  ]
+ },
+ {
+  "ban_id": "17479_a051_00003",
+  "label": "3 Hameau de la Gare 17260 Virollet",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17479/X/002J"
+  ]
+ },
+ {
+  "ban_id": "17283_0780_00001",
+  "label": "1 Rue du Moulin Conteau 17800 Pons",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17283/X/01EG"
+  ]
+ },
+ {
+  "ban_id": "17240_1060_00009_b",
+  "label": "9 b Rue du Stade 17130 Montendre",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17240/X/00IB",
+   "IMB/17240/X/00ID"
+  ]
+ },
+ {
+  "ban_id": "17201_0002_00099",
+  "label": "99 Rue de l'Aunis 17170 La Laigne",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17201/X/000B",
+   "IMB/17201/X/000C"
+  ]
+ },
+ {
+  "ban_id": "17232_a010_00001",
+  "label": "1 Bras de Chien 17120 Meursac",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17232/X/01N9",
+   "IMB/17232/X/01NA"
+  ]
+ },
+ {
+  "ban_id": "17022_0011_00020",
+  "label": "20 Chemin de l'Abbaye 17400 Asnières-la-Giraud",
+  "rattachement": "fiable",
+  "statut": "cible",
+  "immeubles_verifies": [
+   "IMB/17022/X/00XY"
+  ]
+ },
+ {
+  "ban_id": "17333_2o42iu_00019",
+  "label": "19 Rue Jean Pierre Coulon 17110 Saint-Georges-de-Didonne",
+  "rattachement": "fiable",
+  "statut": "cible",
+  "immeubles_verifies": [
+   "IMB/17333/X/00J3"
+  ]
+ },
+ {
+  "ban_id": "17306_0052_00014",
+  "label": "14 Rue de la Petite Hermine 17200 Royan",
+  "rattachement": "fiable",
+  "statut": "signe",
+  "immeubles_verifies": [
+   "IMB/17306/X/0AER"
+  ]
+ },
+ {
+  "ban_id": "17461_0034_00009",
+  "label": "9 Rue Myrtils 17640 Vaux-sur-Mer",
+  "rattachement": "fiable",
+  "statut": "signe",
+  "immeubles_verifies": [
+   "IMB/17461/X/07SV"
+  ]
+ },
+ {
+  "ban_id": "17300_4105_00020",
+  "label": "20 Rue Henri Rochefort 17000 La Rochelle",
+  "rattachement": "fiable",
+  "statut": "en cours de deploiement",
+  "immeubles_verifies": [
+   "ID-173000000MXG"
+  ]
+ },
+ {
+  "ban_id": "17174_0275_00007",
+  "label": "7 Route du Marais 17430 Genouillé",
+  "rattachement": "fiable",
+  "statut": "en cours de deploiement",
+  "immeubles_verifies": [
+   "IMB/17174/X/00OI"
+  ]
+ },
+ {
+  "ban_id": "17308_0305_00010",
+  "label": "10 Rue du Moulin des Chaumes 17620 Saint-Agnant",
+  "rattachement": "fiable",
+  "statut": "raccordable demande",
+  "immeubles_verifies": [
+   "IMB/17308/X/016M"
+  ]
+ },
+ {
+  "ban_id": "17168_0260_00002_b",
+  "label": "2 b Boulevard de Chaterny 17450 Fouras",
+  "rattachement": "fiable",
+  "statut": "raccordable demande",
+  "immeubles_verifies": [
+   "IMB/17168/X/03EO"
+  ]
+ },
+ {
+  "ban_id": "17415_0510_00010",
+  "label": "10 Place Blair 17100 Saintes",
+  "rattachement": "fiable",
+  "statut": "raccordable demande",
+  "immeubles_verifies": [
+   "IMB/17415/X/02RL"
+  ]
+ },
+ {
+  "ban_id": "17415_1052_00035",
+  "label": "35 Rue de Courbiac 17100 Saintes",
+  "rattachement": "fiable",
+  "statut": "rad en cours de deploiement",
+  "immeubles_verifies": [
+   "IMB/17415/X/03EI"
+  ]
+ },
+ {
+  "ban_id": "17415_1623_00026",
+  "label": "26 Route des Gonds 17100 Saintes",
+  "rattachement": "fiable",
+  "statut": "rad en cours de deploiement",
+  "immeubles_verifies": [
+   "IMB/17415/X/09DJ"
+  ]
+ },
+ {
+  "ban_id": "17415_3692_00001",
+  "label": "1 Rue des Vacherons 17100 Saintes",
+  "rattachement": "ambigu",
+  "statut": "cible / deploye",
+  "immeubles_verifies": [
+   "IMB/17415/X/07CA",
+   "IMB/17415/X/09MP"
+  ]
+ },
+ {
+  "ban_id": "17208_0070_00017",
+  "label": "17 Rue du Moulin 17230 Longèves",
+  "rattachement": "ambigu",
+  "statut": "cible / deploye",
+  "immeubles_verifies": [
+   "IMB/17208/X/00RX",
+   "IMB/17208/X/00RO"
+  ]
+ },
+ {
+  "ban_id": "17385_9eyuk6_00003",
+  "label": "3 Allée de l’Albatros 17310 Saint-Pierre-d'Oléron",
+  "rattachement": "ambigu",
+  "statut": "cible / deploye",
+  "immeubles_verifies": [
+   "IMB/17385/X/0214",
+   "IMB/17385/X/020D"
+  ]
+ },
+ {
+  "ban_id": "17091_0062_00004",
+  "label": "4 Impasse des Maurines 17230 Charron",
+  "rattachement": "ambigu",
+  "statut": "deploye / signe",
+  "immeubles_verifies": [
+   "IMB/17091/X/003F",
+   "IMB/17091/X/01VC",
+   "IMB/17091/X/01VS",
+   "IMB/17091/X/01VT"
+  ]
+ },
+ {
+  "ban_id": "17415_2722_00028_c",
+  "label": "28 c Rue du Petit Coudret 17100 Saintes",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "IMB/17415/X/09ZN"
+  ]
+ },
+ {
+  "ban_id": "17300_1120_00001",
+  "label": "1 Rue du Bourbonnais 17000 La Rochelle",
+  "rattachement": "fiable",
+  "statut": "deploye",
+  "immeubles_verifies": [
+   "ID-1730000000C9"
+  ]
+ }
+]
