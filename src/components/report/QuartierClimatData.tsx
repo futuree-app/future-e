@@ -10,6 +10,7 @@ import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
 import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
+import { lireEcoulement } from "@/lib/eaufrance-ecoulement";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
@@ -85,6 +86,8 @@ type SharedProps = {
   scenarios: GwlScenarios | null;
   georisques: GeorisquesSummary | null;
   drought: Drought | null;
+  /** FUT-165 : l'écoulement n'a pas pu être lu ; dit « indisponible », jamais « pas de cours d'eau à sec ». */
+  droughtIndisponible?: boolean;
   territoire: Territoire | null;
   vigieau: VigieauSummary | null;
   catnat?: GasparCatnatSummary | null;
@@ -394,6 +397,7 @@ export function buildFactors(
   era5?: Era5Trend | null,
   catnatVille?: string | null,
   incendies?: MemoireIncendies | null,
+  droughtIndisponible?: boolean,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -546,11 +550,16 @@ export function buildFactors(
     // restriction en cours.
     ...(drought
       // FUT-116 : un relevé ponctuel porte sa date, comme la consultation VigiEau ci-dessus.
+      // FUT-165 : la valeur est l'état que la source a relevé (assec, écoulement interrompu, visible,
+      // observation impossible). « Pas de cours d'eau à sec » se disait quand l'état n'était jamais lu ; un
+      // relevé daté sans état (dossiers enregistrés avant le correctif) est dit « non vérifiable ».
       ? [{
           label: drought.lastObservationDate ? `Relevé de terrain du ${formatFrDate(drought.lastObservationDate)}` : "Sur le terrain",
-          value: drought.isDry ? "Cours d'eau à sec par endroits" : "Pas de cours d'eau à sec",
+          value: `${lireEcoulement(drought).texte}${drought.riverName ? ` : ${drought.riverName}` : ""}`,
         }]
-      : []),
+      : droughtIndisponible
+        ? [{ label: "Relevé de terrain", value: "Source indisponible lors de la consultation" }]
+        : []),
     ...(drySoilDays != null
       ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours de sols secs par an` }]
       : []),
@@ -576,7 +585,7 @@ export function buildFactors(
               // FUT-116 : l'observation ne se dit QUE si ONDE l'a relevée. Elle était la branche par
               // défaut : toute ouverture du volet sans sols secs ni restriction l'aurait affirmée.
               : drought?.isDry
-                ? "Cours d'eau à sec observé"
+                ? (lireEcoulement(drought).etat === "assec" ? "Cours d'eau à sec observé" : "Écoulement interrompu observé")
                 : restrictions.texte,
         subhead: "Restrictions d'eau, cours d'eau et sols : trois lectures à ne pas confondre.",
         accent: "var(--orange)",
@@ -638,7 +647,7 @@ export function buildFactors(
           : vigieau?.maxLevel
             ? levelLabel(vigieau.maxLevel)
             : drought?.isDry
-              ? "Cours d'eau à sec"
+              ? (lireEcoulement(drought).etat === "assec" ? "Cours d'eau à sec" : "Écoulement interrompu")
               : "—",
       col: "var(--orange)",
       src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
@@ -1185,8 +1194,11 @@ function buildParagraphs(
     const lead = droughtSentences.length === 0
       ? `${cours.charAt(0).toUpperCase()}${cours.slice(1)} a été observé`
       : `Localement, ${cours} a été observé`;
+    // FUT-165 : « écoulement non visible » n'est pas un assec ; la phrase dit l'état relevé, et sa date.
+    const etat = lireEcoulement(drought).etat === "assec" ? "à sec" : "sans écoulement visible";
+    const quand = drought.lastObservationDate ? ` le ${formatFrDate(drought.lastObservationDate)}` : "";
     droughtSentences.push(
-      `${lead} à sec dans une observation récente du réseau ONDE (Hub'Eau, OFB).`,
+      `${lead} ${etat}${quand} par le réseau ONDE (Hub'Eau, OFB).`,
     );
   }
 
@@ -1251,10 +1263,10 @@ function facteurFibre(t: TexteFibre): Factor {
   };
 }
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null, droughtIndisponible ?? false);
   if (fibre) factors.push(facteurFibre(fibre.texte));
   // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
   // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.

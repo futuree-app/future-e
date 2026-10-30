@@ -21,3 +21,40 @@ export function estACec(libelle: string | null | undefined): boolean {
   const obs = (libelle ?? "").toLowerCase();
   return obs.includes("assec") || obs.includes("non visible");
 }
+
+// ── FUT-165 (30/10/2026) : LE CHAMP ÉTAIT LU, JAMAIS DEMANDÉ ─────────────────────────────────────
+//
+// Le correctif du 25/07 a changé la LECTURE (`libelle_ecoulement`) sans changer la REQUÊTE : `fields`
+// demandait toujours `libelle_observation`. Hub'Eau ne renvoie que les champs demandés, donc l'état
+// n'arrivait jamais : `status` valait `null`, `isDry` faux, et la carte disait « Pas de cours d'eau à
+// sec ». Commune 16016, 28/10/2026 : la source disait « Assec ». Le test d'alors vérifiait la lecture
+// d'une réponse fabriquée, jamais la requête. La liste des champs vit donc ICI, à côté de la lecture, et
+// un test fait tourner la vraie requête contre un Hub'Eau simulé qui ne rend que les champs demandés.
+export const CHAMPS_ECOULEMENT = ["date_observation", "libelle_ecoulement", "libelle_cours_eau"] as const;
+
+export type EcoulementLu = {
+  lastObservationDate: string | null;
+  riverName: string | null;
+  status: string | null;
+  isDry: boolean;
+};
+
+export type EtatEcoulement =
+  | "assec"
+  | "ecoulement_interrompu"
+  | "ecoulement"
+  | "observation_impossible"
+  /** Un relevé daté SANS état : la signature exacte du défaut, dans les dossiers enregistrés avant FUT-165. */
+  | "non_verifiable";
+
+/** L'état à dire, et sa phrase. L'état brut de la source reste la référence ; rien n'est déduit au-delà. */
+export function lireEcoulement(d: EcoulementLu): { etat: EtatEcoulement; texte: string } {
+  const s = (d.status ?? "").trim().toLowerCase();
+  if (!s) return { etat: "non_verifiable", texte: "État du cours d'eau non vérifiable à la date de ce dossier" };
+  if (s.includes("assec")) return { etat: "assec", texte: "Cours d'eau à sec (assec)" };
+  if (s.includes("non visible")) return { etat: "ecoulement_interrompu", texte: "Écoulement interrompu, plus visible" };
+  if (s.includes("impossible")) return { etat: "observation_impossible", texte: "Observation impossible ce jour-là" };
+  if (s.includes("visible")) return { etat: "ecoulement", texte: "Écoulement visible au point observé" };
+  // Une valeur que la source n'avait pas en juillet : on la rend telle quelle, sans l'interpréter.
+  return { etat: "ecoulement", texte: d.status!.trim() };
+}

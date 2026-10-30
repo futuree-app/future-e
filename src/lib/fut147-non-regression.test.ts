@@ -272,7 +272,9 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // statut n'atteint ni l'écran ni la synthèse (`valueOf` et `synthesisFacts` ne lisent que `ok`, cf.
 // `territoire/fut160-statut-source.test.ts`). Le registre reste figé pour tout le reste : aucune ligne retirée,
 // et seules ces lignes ajoutées.
-test("IA : le registre des faits Territoire n'a changé que du statut de panne Géorisques (FUT-160)", () => {
+// FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
+// `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
+test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165)", () => {
   const f = "src/lib/territoire/facts.ts";
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
   const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
@@ -282,6 +284,9 @@ test("IA : le registre des faits Territoire n'a changé que du statut de panne G
     /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
     /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
     /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
+    /^\+ {2}droughtIndisponible\?: boolean;$/,
+    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
   ];
   for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
 });
