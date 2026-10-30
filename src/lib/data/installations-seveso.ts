@@ -183,3 +183,12 @@ export function plusProcheParSeuil(sites: SiteProche[]): Record<SeuilSeveso, Sit
     seveso_bas: sites.find((s) => s.seuil === "seveso_bas") ?? null,
   };
 }
+
+/**
+ * UN EXPLOITANT PERSONNE PHYSIQUE N'EST PAS NOMMÉ (30/10/2026 : « Monsieur … », chais de cognac en Charente). La
+ * donnée est publique, mais un dossier n'a pas à afficher le nom d'un particulier : la phrase dit ce qu'il est, et
+ * la fiche officielle reste à un lien.
+ */
+export function nomAffichable(nom: string): string {
+  return /^(m\.|mme|mlle|monsieur|madame|mademoiselle)\s/i.test(nom.trim()) ? "Exploitation au nom d'un particulier" : nom;
+}

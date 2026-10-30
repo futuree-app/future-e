@@ -35,7 +35,7 @@ import {
 } from "./decision/sante-facts.ts";
 import { RADON_CLASSE_SIGNALEE } from "./decision/radon-facts.ts";
 import type { RadonClasse } from "./radon.ts";
-import { SEVESO_RAYON_KM, type SiteProche } from "./data/installations-seveso.ts";
+import { SEVESO_RAYON_KM, nomAffichable, type SiteProche } from "./data/installations-seveso.ts";
 import type { EvidenceTargetKey } from "./decision/evidence-targets.ts";
 import { deCommune } from "./typography.ts";
 
@@ -236,7 +236,7 @@ function siteEnPhrase(s: SiteProche, depuis?: string): string {
   const fin = s.etat && /fin d'exploitation/i.test(s.etat) ? ", en fin d'exploitation" : "";
   // Position publiée absente ou fausse : le site est placé au centre de sa commune, la distance est approchée.
   const approx = s.approchee ? `environ ${distanceEnPhrase(s.distanceKm)} (position approchée : la fiche ne publie pas de position exploitable)` : distanceEnPhrase(s.distanceKm);
-  return `${s.nom} (${SEUIL_FR[s.seuil]}${fin}), à ${approx}${depuis ? ` du centre ${depuis}` : ""}`;
+  return `${nomAffichable(s.nom)} (${SEUIL_FR[s.seuil]}${fin}), à ${approx}${depuis ? ` du centre ${depuis}` : ""}`;
 }
 
 /** Les sites cités nommément ; au-delà, ils sont comptés. */

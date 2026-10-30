@@ -279,6 +279,14 @@ test("index Seveso : un site sans position exploitable est placé au centre de s
   assert.match(l.paragraphes.join(" "), /CHAIS DU PRUNELAS \(les\) \(Seveso seuil bas\), à environ 3,6 km \(position approchée : la fiche ne publie pas de position exploitable\)/);
 });
 
+test("un exploitant personne physique n'est pas nommé ; une société l'est", () => {
+  const l = ligne(carte([lecture({ seveso: [site("Monsieur Jean DUPONT", "seveso_bas", 1.5), site("HENNESSY", "seveso_bas", 4.3)] })]), "industrie");
+  const p = l.paragraphes.join(" ");
+  assert.doesNotMatch(p, /DUPONT/);
+  assert.match(p, /Exploitation au nom d'un particulier \(Seveso seuil bas\), à 1,5 km/);
+  assert.match(p, /HENNESSY \(Seveso seuil bas\), à 4,3 km/);
+});
+
 test("distance : Feyzin-raffinerie, valeur de référence haversine", () => {
   // 45,6745 N 4,8520 E → 45,673859 N 4,847375 E : 71 m vers le sud, 360 m vers l'ouest, soit environ 367 m.
   const d = distanceKm(45.6745, 4.852, 45.673859, 4.847375);
