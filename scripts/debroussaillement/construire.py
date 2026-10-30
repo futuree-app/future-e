@@ -356,10 +356,12 @@ def main():
     ap.add_argument("--exclusions", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "exclusions-arretes.json"))
     a = ap.parse_args()
     os.makedirs(a.sortie, exist_ok=True)
+    extraction = None
     if a.archive:
         m = re.search(r"_(\d{4}-\d{2}-\d{2})\.7z$", a.archive)
         edition = a.edition or (m and m.group(1))
-        gpkg = extraire(a.archive, tempfile.mkdtemp(dir=a.sortie, prefix=".extraction-"))
+        extraction = tempfile.mkdtemp(dir=a.sortie, prefix=".extraction-")
+        gpkg = extraire(a.archive, extraction)
     else:
         gpkg, edition = a.gpkg, a.edition
     if not gpkg or not edition or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", edition):
@@ -372,7 +374,12 @@ def main():
         exclusions = json.load(f)
     if exclusions.get("editionVerifiee") != edition.split(".")[0]:
         journal(f"ATTENTION : les exclusions ont été vérifiées sur l'édition {exclusions.get('editionVerifiee')}, pas {edition} : refaire la contre-épreuve des arrêtés")
-    construire(gpkg, edition, a.sortie, a.accepter_ecart_arrete, exclusions)
+    try:
+        construire(gpkg, edition, a.sortie, a.accepter_ecart_arrete, exclusions)
+    finally:
+        # L'extraction (1,8 Go pour l'édition nationale) ne reste pas dans le dossier de sortie (contre-revue du 30/10/2026).
+        if extraction:
+            shutil.rmtree(extraction, ignore_errors=True)
 
 
 if __name__ == "__main__":

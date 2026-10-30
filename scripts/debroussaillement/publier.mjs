@@ -7,7 +7,7 @@
  * ── L'ORGANISATION DU BUCKET (privé) ─────────────────────────────────────────────────────────────────
  *   <édition>/t/<ix>_<iy>.json.gz      les tuiles, immuables (jamais réécrites)
  *   <édition>/manifest.json            le manifeste de l'édition (couverture, profils, tuiles et empreintes)
- *   courant.json                       LE POINTEUR : l'édition que lit l'application
+ *   courant.json                       LE POINTEUR : l'édition que lit l'application, et le SHA-256 de son manifeste
  *
  * ── LA PUBLICATION EST ATOMIQUE, ET UNE ÉDITION PUBLIÉE EST IMMUABLE (revue indépendante du 29/10/2026) ─────
  *  1. `envoyer` dépose les tuiles puis le manifeste sous le préfixe de l'édition. Il ne REMPLACE JAMAIS rien :
@@ -19,10 +19,19 @@
  *     Un contenu différent pour le même millésime IGN se publie sous une RÉVISION (`2026-03-01.2`, construite par
  *     `construire.py --revision 2`), c'est-à-dire sous un préfixe neuf.
  *  2. `basculer` vérifie que chaque tuile du manifeste est en ligne, avec la taille et le SHA-256 attendus, puis
- *     réécrit le pointeur `courant.json`. C'est la SEULE écriture qui remplace un objet, et la seule que
- *     l'application voit ; elle la lit dans les dix minutes.
+ *     réécrit le pointeur `courant.json`, avec l'empreinte du manifeste vérifié. C'est la SEULE écriture qui
+ *     remplace un objet, et la seule que l'application voit ; elle la lit dans les dix minutes.
  *  3. `basculer --edition <ancienne>` est le retour arrière : l'ancien préfixe est toujours là, inchangé.
- *  4. `purger` efface les éditions ni courantes ni parmi les `--garder` plus récentes (2 par défaut).
+ *  4. `purger` efface les éditions ni courantes ni parmi les `--garder` plus récentes (2 par défaut), dans l'ordre
+ *     des dates puis des révisions (`2026-03-01.10` est plus récente que `2026-03-01.2`).
+ *
+ * ── NE JAMAIS RÉUTILISER UN IDENTIFIANT D'ÉDITION (contre-revue du 30/10/2026, R4) ─────────────────────
+ *  Le protocole ne réécrit jamais une édition, mais rien n'empêche de la purger puis d'en publier une autre sous
+ *  le même nom. L'application s'en protège : le pointeur porte l'empreinte du manifeste, et les tuiles gardées en
+ *  mémoire sont indexées par la leur ; un contenu nouveau sous un ancien nom est donc relu, jamais mélangé.
+ *  Le CDN, lui, peut garder l'ancienne tuile sous le même chemin (jusqu'à un jour, `max-age=86400`) : sa lecture
+ *  échoue sur l'empreinte, et l'adresse est dite « indisponible » jusqu'à l'expiration. Un contenu nouveau prend
+ *  donc TOUJOURS une révision neuve (`construire.py --revision N`), même après une purge.
  *
  * ── LA GARDE DE PRODUCTION ───────────────────────────────────────────────────────────────────────────
  *  `--cible test|production` est obligatoire, et l'URL doit être celle du projet nommé. La production exige en
@@ -169,13 +178,24 @@ export async function basculer(c, edition) {
   if (!manifesteValide(m) || m.edition !== edition) throw new Error(`${edition} : manifeste invalide`);
   await parallele(fichiersDuManifeste(m), async ({ chemin, attendu }) => verifierOctets(await c.lire(chemin), attendu, chemin));
   const avant = await c.lire("courant.json");
-  await c.deposer("courant.json", Buffer.from(JSON.stringify({ format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition })), "application/json", true);
+  // L'empreinte du manifeste vérifié : l'application ne lira que celui-là (et le garde en mémoire par elle).
+  await c.deposer("courant.json", Buffer.from(JSON.stringify({ format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition, manifeste: sha256(brut) })), "application/json", true);
   console.log(`pointeur : ${avant ? JSON.parse(avant.toString("utf8")).edition : "(aucun)"} -> ${edition}`);
+}
+
+/**
+ * L'ordre des éditions : par date, puis par révision (sans révision = 1). Un tri alphabétique plaçait
+ * `2026-03-01.10` avant `2026-03-01.2`, et `purger` aurait effacé la plus récente.
+ */
+export function comparerEditions(a, b) {
+  const [da, ra = "1"] = a.split(".");
+  const [db, rb = "1"] = b.split(".");
+  return da.localeCompare(db) || Number(ra) - Number(rb);
 }
 
 export async function etat(c) {
   const pointeur = await c.lire("courant.json");
-  const editions = (await c.lister("")).filter((o) => EDITION.test(o.nom)).map((o) => o.nom).sort();
+  const editions = (await c.lister("")).filter((o) => EDITION.test(o.nom)).map((o) => o.nom).sort(comparerEditions);
   const detail = {};
   for (const v of editions) {
     const objets = await c.lister(`${v}/t/`);
@@ -186,8 +206,9 @@ export async function etat(c) {
   return { courant, editions };
 }
 
-async function purger(c, garder) {
+export async function purger(c, garder) {
   const { courant, editions } = await etat(c);
+  if (!Number.isSafeInteger(garder) || garder < 1) throw new Error("--garder : un entier, au moins 1");
   const gardes = new Set([courant, ...editions.slice(-garder)].filter(Boolean));
   for (const v of editions.filter((x) => !gardes.has(x))) {
     const objets = [...(await c.lister(`${v}/t/`)).map((o) => `${v}/t/${o.nom}`), `${v}/manifest.json`];

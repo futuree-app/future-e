@@ -12,7 +12,7 @@
 //  ni de la forêt. Ni un nombre de mètres à débroussailler pour CE propriétaire : l'arrêté et le maire le fixent
 //  selon la construction et le secteur (la règle générale est dans « En savoir plus »). Ni un responsable désigné
 //  d'office : L134-8 le distingue selon les situations. Ni une obligation réduite aux seules constructions : en
-//  zone urbaine, elle peut porter sur le terrain (L134-6, 3°). Ni « pas d'obligation »
+//  zone urbaine, avec ou sans plan local d'urbanisme, elle porte sur le terrain (L134-6, 3° et 4°). Ni « pas d'obligation »
 //  hors zonage ou hors des départements publiés : le zonage est informatif.
 
 import type { LectureDebroussaillement, ProfilZonage } from "./debroussaillement.ts";
@@ -41,13 +41,19 @@ const ZONE = "une zone où le débroussaillement est obligatoire";
 /** Le zonage est informatif : la phrase dit d'où vient le constat, jamais qu'une décision réglementaire est prise. */
 const SELON = "selon le zonage informatif publié par l'État";
 
-// DEUX OBLIGATIONS DISTINCTES (code forestier, L134-6 et L134-8, relus le 29/10/2026 dans l'édition consolidée du
-// 13/10/2026). 1° : les abords des constructions, sur 50 m que le MAIRE peut porter à 100 m (dans une commune sans
-// plan local d'urbanisme, le préfet peut aller jusqu'à 200 m, 4°), à la charge du propriétaire des constructions.
-// 3° : les terrains situés en zone urbaine d'un plan local d'urbanisme, en entier, bâtis ou non, indépendamment
-// de toute décision du maire sur la profondeur, à la charge du propriétaire du terrain. D'autres cas (voies privées,
-// ZAC et lotissements, campings, installations classées) ont leurs propres règles et responsables.
-const REGLE = "Dans les bois, forêts, landes, maquis et garrigues classés à risque d'incendie, et jusqu'à 200 m autour, le code forestier prévoit notamment deux obligations distinctes. Autour des constructions, sur 50 m, que le maire peut porter à 100 m : elle incombe au propriétaire des constructions. Sur les terrains situés dans une zone urbaine d'un plan local d'urbanisme, sur la totalité du terrain, bâti ou non, quelle que soit cette distance : elle incombe au propriétaire du terrain. D'autres cas (voies privées, lotissements, campings, certaines installations) ont leurs propres règles. L'arrêté du préfet en précise les modalités, qui varient d'un département à l'autre (code forestier, articles L134-6 et L134-8).";
+// DEUX OBLIGATIONS DISTINCTES (code forestier, L134-6 et L134-8 dans leur rédaction issue de la loi n° 2023-580,
+// art. 21, relus le 29/10 puis le 30/10/2026 dans l'édition consolidée du 13/10/2026).
+//  - 1° : les abords des constructions, sur 50 m que le MAIRE peut porter à 100 m ; à la charge du propriétaire des
+//    constructions (L134-8, 1°). Dans une commune sans plan local d'urbanisme, le PRÉFET peut aussi porter cette
+//    profondeur au-delà de 50 m, sans excéder 200 m (4°, seconde phrase) : c'est l'arrêté qui le dit.
+//  - 3° et 4° : les terrains situés en ZONE URBAINE, en entier, bâtis ou non, indépendamment de toute profondeur ;
+//    à la charge du propriétaire du terrain (L134-8, 2°, qui vise les cas 3° à 6°). Le 3° vise les zones urbaines
+//    d'un plan local d'urbanisme (ou d'un document qui en tient lieu), le 4° celles des communes qui n'en ont pas.
+//    La contre-revue du 30/10/2026 a relevé que ce 4° manquait : l'écran réservait l'obligation sur le terrain aux
+//    communes dotées d'un plan local d'urbanisme. D'où « que la commune ait un plan local d'urbanisme ou non ».
+// D'autres cas (voies privées, ZAC et lotissements, campings, installations classées) ont leurs propres règles et
+// responsables (L134-6, 2° et 5° à 8° ; L134-8, 2° à 4°).
+const REGLE = "Dans les bois, forêts, landes, maquis et garrigues classés à risque d'incendie, et jusqu'à 200 m autour, le code forestier prévoit notamment deux obligations distinctes. Autour des constructions, sur 50 m, que le maire peut porter à 100 m : elle incombe au propriétaire des constructions. Sur les terrains situés en zone urbaine, que la commune ait un plan local d'urbanisme ou non, sur la totalité du terrain, bâti ou non, quelle que soit cette distance : elle incombe au propriétaire du terrain. D'autres cas (voies privées, lotissements, campings, certaines installations) ont leurs propres règles. L'arrêté du préfet en précise les modalités, qui varient d'un département à l'autre (code forestier, articles L134-6 et L134-8).";
 const INFORMATION = "Depuis le 1er janvier 2025, le vendeur ou le bailleur d'un bien situé dans une zone soumise doit en informer l'acquéreur ou le locataire ; l'état des risques comporte alors une fiche sur cette obligation (décret n° 2024-405 du 29 avril 2024, code de l'environnement, article R125-23).";
 const INDICATIF = "Ce zonage est indicatif : seuls l'arrêté du préfet et le code forestier font foi. Il ne mesure pas le danger d'incendie.";
 const PETITS_BOIS = "Ce zonage est indicatif : de petits bois peuvent y manquer, et seule la mairie peut confirmer qu'aucune obligation ne s'applique.";
@@ -175,7 +181,8 @@ function rattachement(l: LectureDebroussaillement): string | null {
   if (l.portee === "non_precisee") return "La précision de la localisation n'est pas connue : la lecture porte sur le point de l'adresse.";
   switch (l.parcelleEcartee) {
     case "repli": return "La parcelle rattachée à l'adresse l'a été par proximité et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse.";
-    case "limite": return "Le point de l'adresse tombe sur la limite de deux parcelles : la lecture porte sur ce point.";
+    // Une ou deux parcelles : le voisin de l'autre côté du trait peut être la voie publique (contre-revue du 30/10/2026).
+    case "limite": return "Le point de l'adresse tombe sur une limite de parcelle : la lecture porte sur ce point.";
     case "hors_point": return "La parcelle transmise ne contient pas le point de l'adresse et pourrait être celle d'un voisin : la lecture porte sur le point de l'adresse.";
     case "non_mesurable": return "Le tracé de la parcelle n'a pas pu être mesuré : la lecture porte sur le point de l'adresse.";
     case "absente": return "Aucune parcelle n'a été rattachée à l'adresse : la lecture porte sur son point.";
@@ -186,10 +193,10 @@ function rattachement(l: LectureDebroussaillement): string | null {
 
 const VERIFIER_ZONE = "Avant de vous engager, consultez le zonage officiel sur Géorisques et les règles qui s'appliquent (arrêté du préfet, décisions du maire sur la distance). Demandez au vendeur ou au bailleur l'état des risques, qui doit mentionner cette obligation, et si l'entretien a été fait.";
 const VERIFIER_LIMITE = "Vérifiez sur le zonage officiel (Géorisques) ou auprès de la mairie si le terrain est concerné. L'état des risques remis par le vendeur ou le bailleur doit le mentionner s'il l'est.";
-/** Une parcelle à cheval : deux obligations possibles (L134-6, 1° et 3°), que seule la mairie départage. */
-const VERIFIER_A_CHEVAL = "Demandez à la mairie quelles règles s'appliquent à ce terrain : le débroussaillement autour des constructions, et, si le terrain est en zone urbaine d'un plan local d'urbanisme, l'obligation sur tout le terrain. L'état des risques remis par le vendeur ou le bailleur doit la mentionner si le bien est concerné.";
-/** Qui doit débroussailler (L134-8) : le propriétaire des constructions pour leurs abords, celui du terrain en zone urbaine. */
-const RESPONSABLE = "Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine d'un plan local d'urbanisme.";
+/** Une parcelle à cheval : deux obligations possibles (L134-6, 1° d'une part, 3° ou 4° d'autre part), que seule la mairie départage. */
+const VERIFIER_A_CHEVAL = "Demandez à la mairie quelles règles s'appliquent à ce terrain : le débroussaillement autour des constructions, et, si le terrain est en zone urbaine (avec ou sans plan local d'urbanisme), l'obligation sur tout le terrain. L'état des risques remis par le vendeur ou le bailleur doit la mentionner si le bien est concerné.";
+/** Qui doit débroussailler (L134-8, 1° et 2°) : le propriétaire des constructions pour leurs abords, celui du terrain en zone urbaine. */
+const RESPONSABLE = "Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine (avec ou sans plan local d'urbanisme).";
 
 /**
  * LOGEMENT : le bien. `null` : rapport écrit avant FUT-149, ou lecture non activée. Le titre est le fait, la phrase

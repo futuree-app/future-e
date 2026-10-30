@@ -315,7 +315,7 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
     assert.ok(l.part! > 0.45 && l.part! < 0.55, `part ${l.part}`);
     assert.match(rendreLogement(l), /Terrain à cheval sur la limite du zonage/);
     assert.match(rendreLogement(l), /environ 50 % de la parcelle est dans une zone où le débroussaillement est obligatoire : selon les règles qui s'appliquent à ce terrain, tout ou partie du bien peut être concerné/);
-    assert.match(rendreLogement(l), /le débroussaillement autour des constructions, et, si le terrain est en zone urbaine d'un plan local d'urbanisme, l'obligation sur tout le terrain/);
+    assert.match(rendreLogement(l), /le débroussaillement autour des constructions, et, si le terrain est en zone urbaine \(avec ou sans plan local d'urbanisme\), l'obligation sur tout le terrain/);
     assert.doesNotMatch(rendreLogement(l), /selon l'emplacement des constructions/, "revue du 28/10/2026 : pas seulement les constructions (L134-6, 3°)");
   });
 
@@ -424,6 +424,19 @@ describe("3. À la parcelle : part, bordure, contact, microchevauchement, voisin
     assert.equal(l.parcelleEcartee, "limite");
   });
 
+  test("R6 (contre-revue du 30/10/2026) : un point sur la limite de sa SEULE parcelle ne parle pas de « deux parcelles »", () => {
+    const [lon, lat] = sw(-200);
+    const g = parcelleCarree(lon, lat, 40);
+    // Sur le bord ouest de la parcelle, un seul candidat transmis : le voisin peut être la voie publique.
+    const seul = avecParcelle(g, [lon, nord(lat, 20)], { candidatsAuPoint: 1 });
+    const deux = avecParcelle(g, [est(5.06, lat, 200), nord(lat, 20)], { candidatsAuPoint: 2 });
+    for (const l of [seul, deux]) {
+      assert.equal(l.parcelleEcartee, "limite");
+      assert.doesNotMatch(rendreLogement(l), /deux parcelles/);
+      assert.match(rendreLogement(l), /Le point de l'adresse tombe sur une limite de parcelle : la lecture porte sur ce point/);
+    }
+  });
+
   test("géocodage à la rue : secteur, parcelle ignorée, et dit", () => {
     const [lon, lat] = sw(-20);
     const l = lireSynth(entree([est(lon, lat, 10), nord(lat, 20)], { geocodage: "street", parcelle: { geometry: parcelleCarree(lon, lat, 40) as never, rattachement: "point" } }));
@@ -485,6 +498,8 @@ describe("4. Panne, données absentes, dossiers antérieurs", () => {
     const version = (r: LogementReport): VersionLogement => ({ numero: 1, collecteeLe: "2026-10-28", sourcesAbsentes: sourcesAbsentes(r), synthese: null, syntheseHash: null, report: r, reportHash: "h1", syntheseDpe: null });
     assert.equal(issueActualisation({ ...base, debroussaillement: panne() }, "h2", version(base)), "refusee");
     assert.equal(issueActualisation({ ...base, debroussaillement: lireSynth(entree([5.04, LAT])) }, "h2", version(base)), "nouvelle_version");
+    // Lecture jamais activée : un rapport existant (sans le champ) reste actualisable, et sa nouvelle version non plus n'a pas le champ.
+    assert.equal(issueActualisation(base, "h2", version(base)), "nouvelle_version");
     const [lon, lat] = [est(5.06, 43.43, -200), 43.43];
     const aParcelle = { ...base, debroussaillement: lireSynth(entree([est(lon, lat, 20), nord(lat, 20)], { parcelle: { geometry: parcelleCarree(lon, lat, 40) as never, rattachement: "point" } })) };
     assert.equal(aParcelle.debroussaillement.grain, "parcelle");
@@ -568,9 +583,27 @@ describe("5. Ce que les textes disent, et ne disent jamais", () => {
     const regle = texteLogement(cas[0][1])!.savoirPlus.join(" ");
     assert.match(regle, /deux obligations distinctes/);
     assert.match(regle, /Autour des constructions, sur 50 m, que le maire peut porter à 100 m : elle incombe au propriétaire des constructions/);
-    assert.match(regle, /Sur les terrains situés dans une zone urbaine d'un plan local d'urbanisme, sur la totalité du terrain, bâti ou non, quelle que soit cette distance : elle incombe au propriétaire du terrain/);
+    assert.match(regle, /Sur les terrains situés en zone urbaine, que la commune ait un plan local d'urbanisme ou non, sur la totalité du terrain, bâti ou non, quelle que soit cette distance : elle incombe au propriétaire du terrain/);
     assert.match(regle, /articles L134-6 et L134-8/);
     assert.doesNotMatch(regle, /dans une zone urbaine, il peut porter/, "l'ancienne formulation confondait les deux obligations");
+  });
+
+  test("R5 (contre-revue du 30/10/2026) : l'obligation sur tout le terrain vaut aussi dans les zones urbaines des communes SANS plan local d'urbanisme (L134-6, 4°)", () => {
+    // Une parcelle à cheval sur la zone A (la moitié dedans) : c'est elle qui porte la vérification « à cheval ».
+    const [lon, lat] = [est(5.06, 43.43, -20), 43.43];
+    const aCheval = lireSynth(entree([est(lon, lat, 10), nord(lat, 20)], { parcelle: { geometry: parcelleCarree(lon, lat, 40) as never, rattachement: "point" } }));
+    assert.equal(aCheval.limite?.cause, "a_cheval");
+    for (const [nom, l] of [...cas, ["à cheval", aCheval] as const]) {
+      for (const t of [texteAutour(l), texteLogement(l)]) {
+        if (!t) continue;
+        const tout = [t.retenir, t.limite, t.verifier, ...t.savoirPlus].join(" ");
+        // Chaque mention de la zone urbaine couvre les deux cas (3° et 4°) : jamais réservée aux communes dotées d'un PLU.
+        assert.doesNotMatch(tout, /zone urbaine d'un plan local d'urbanisme/, `${nom} : le 4° de L134-6 manquait`);
+        for (const m of tout.matchAll(/zone urbaine[^.:;]*/g)) assert.match(m[0], /plan local d'urbanisme ou non|avec ou sans plan local d'urbanisme/, `${nom} : ${m[0]}`);
+      }
+    }
+    // Les deux responsables restent distincts (L134-8, 1° et 2°).
+    assert.match(texteLogement(cas[0][1])!.retenir, /le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine \(avec ou sans plan local d'urbanisme\)/);
   });
 
   test("revue du 29/10/2026 : le constat dit toujours que le zonage est informatif, jamais une décision définitive", () => {
@@ -629,14 +662,29 @@ describe("6. Le lecteur serveur : Storage, empreintes, pannes", () => {
     }) as unknown as typeof fetch;
     return { f, appels };
   }
+  const brutManifeste = Buffer.from(JSON.stringify(MANIFESTE));
+  const pointeurVers = (edition: string, brut: Buffer) =>
+    Buffer.from(JSON.stringify({ format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition, manifeste: createHash("sha256").update(brut).digest("hex") }));
   const objets = () => new Map<string, Buffer | number>([
-    ["courant.json", Buffer.from(JSON.stringify({ format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition: "2026-03-01" }))],
-    ["2026-03-01/manifest.json", Buffer.from(JSON.stringify(MANIFESTE))],
+    ["courant.json", pointeurVers("2026-03-01", brutManifeste)],
+    ["2026-03-01/manifest.json", brutManifeste],
     ...[...TUILES].map(([k, t]) => [`2026-03-01/t/${k}.json.gz`, empreinte(t).brut] as [string, Buffer]),
   ]);
+  /** Avance l'horloge du lecteur (le pointeur est gardé dix minutes). */
+  async function plusTard<T>(minutes: number, f: () => Promise<T>): Promise<T> {
+    const vrai = Date.now;
+    Date.now = () => vrai() + minutes * 60_000;
+    try { return await f(); } finally { Date.now = vrai; }
+  }
 
-  test("non configuré : rien n'est lu, rien n'est écrit (undefined)", async () => {
-    assert.equal(await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), {} as NodeJS.ProcessEnv), undefined);
+  test("non configuré : rien n'est lu, rien n'est écrit (undefined), aucun appel réseau", async () => {
+    let appels = 0;
+    const espion = (async () => { appels++; return new Response("{}"); }) as unknown as typeof fetch;
+    assert.equal(await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), {} as NodeJS.ProcessEnv, espion), undefined);
+    // Les autres variables du projet présentes, seule DEBROUSSAILLEMENT_BUCKET manque : toujours rien.
+    const sansBucket = { ...env, DEBROUSSAILLEMENT_BUCKET: undefined } as unknown as NodeJS.ProcessEnv;
+    assert.equal(await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), sansBucket, espion), undefined);
+    assert.equal(appels, 0);
   });
 
   test("lecture réelle : pointeur, manifeste, une tuile ; le résultat est celui de la lib pure", async () => {
@@ -659,6 +707,10 @@ describe("6. Le lecteur serveur : Storage, empreintes, pannes", () => {
       (o: Map<string, Buffer | number>) => o.set("2026-03-01/t/50_434.json.gz", 500),
       (o: Map<string, Buffer | number>) => o.set("courant.json", Buffer.from("{\"format\":\"x\"}")),
       (o: Map<string, Buffer | number>) => o.delete("2026-03-01/manifest.json"),
+      // Un pointeur sans l'empreinte du manifeste (format antérieur au 30/10/2026) : rien n'est lu.
+      (o: Map<string, Buffer | number>) => o.set("courant.json", Buffer.from(JSON.stringify({ format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition: "2026-03-01" }))),
+      // Un manifeste en ligne qui n'est pas celui que désigne le pointeur.
+      (o: Map<string, Buffer | number>) => o.set("2026-03-01/manifest.json", Buffer.from(JSON.stringify({ ...MANIFESTE, couverture: ["13", "84"] }))),
     ]) {
       lecteur.oublierDebroussaillement();
       const o = objets();
@@ -666,6 +718,74 @@ describe("6. Le lecteur serveur : Storage, empreintes, pannes", () => {
       const l = await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, storage(o).f);
       assert.equal(l?.statut, "indisponible");
     }
+  });
+
+  test("R2 (contre-revue du 30/10/2026) : passé dix minutes, seul le pointeur est relu ; le manifeste ne l'est que s'il change", async () => {
+    lecteur.oublierDebroussaillement();
+    const o = objets();
+    const s = storage(o);
+    const e = entree([5.04, LAT]);
+    await lecteur.lireDebroussaillementAdresse(e, env, s.f);
+    assert.equal(s.appels.length, 3);
+    // Onze minutes plus tard, même édition : un seul appel, le pointeur (à l'origine).
+    const l = await plusTard(11, () => lecteur.lireDebroussaillementAdresse(e, env, s.f));
+    assert.deepEqual(l, lireSynth(e));
+    assert.equal(s.appels.length, 4);
+    assert.match(s.appels[3], /^courant\.json\?cacheNonce=\d+$/);
+    // Moins de dix minutes : rien n'est relu.
+    await plusTard(5, () => lecteur.lireDebroussaillementAdresse(e, env, s.f));
+    assert.equal(s.appels.length, 4);
+  });
+
+  test("R2 : une bascule vers une autre édition est vue au plus tard au bout de dix minutes, avec son manifeste et ses tuiles, jamais un mélange", async () => {
+    lecteur.oublierDebroussaillement();
+    const o = objets();
+    const s = storage(o);
+    const e = entree([5.04, LAT]);
+    const avant = await lecteur.lireDebroussaillementAdresse(e, env, s.f);
+    assert.equal(avant?.source?.edition, "2026-03-01");
+    // Une révision publiée sous un préfixe neuf : même contenu de tuiles, autre identifiant.
+    const tuiles2 = new Map([...TUILES].map(([k, t]) => [k, { ...t, edition: "2026-03-01.2" }]));
+    const m2 = { ...MANIFESTE, edition: "2026-03-01.2", tuiles: { ...MANIFESTE.tuiles } };
+    for (const [k, t] of tuiles2) { const x = empreinte(t); m2.tuiles[k] = { octets: x.brut.length, sha256: x.sha256 }; o.set(`2026-03-01.2/t/${k}.json.gz`, x.brut); }
+    const brut2 = Buffer.from(JSON.stringify(m2));
+    o.set("2026-03-01.2/manifest.json", brut2);
+    o.set("courant.json", pointeurVers("2026-03-01.2", brut2));
+    // Avant dix minutes : l'instance lit encore l'ancienne édition, entière et cohérente.
+    assert.equal((await plusTard(5, () => lecteur.lireDebroussaillementAdresse(e, env, s.f)))?.source?.edition, "2026-03-01");
+    const apres = await plusTard(11, () => lecteur.lireDebroussaillementAdresse(e, env, s.f));
+    assert.equal(apres?.statut, "lu");
+    assert.equal(apres?.source?.edition, "2026-03-01.2");
+    assert.deepEqual(s.appels.slice(3).map((a) => a.replace(/\?.*$/, "")), ["courant.json", "2026-03-01.2/manifest.json", "2026-03-01.2/t/50_434.json.gz"]);
+  });
+
+  test("R2 : deux lectures simultanées d'une instance froide ne téléchargent le manifeste qu'une fois", async () => {
+    lecteur.oublierDebroussaillement();
+    const s = storage(objets());
+    await Promise.all([lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, s.f), lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, s.f)]);
+    assert.equal(s.appels.filter((a) => a.startsWith("2026-03-01/manifest.json")).length, 1);
+  });
+
+  test("R4 : un identifiant d'édition réutilisé avec un autre contenu n'est jamais mélangé avec ce que l'instance a gardé en mémoire", async () => {
+    lecteur.oublierDebroussaillement();
+    const o = objets();
+    const s = storage(o);
+    const e = entree([5.04, LAT]);
+    const avant = await lecteur.lireDebroussaillementAdresse(e, env, s.f);
+    assert.equal(avant?.etat, "en_zone");
+    // Purge, puis republication SOUS LE MÊME NOM d'une tuile sans aucune zone (hors protocole) et de son manifeste.
+    const vide = { ...TUILES.get("50_434")!, morceaux: TUILES.get("50_434")!.morceaux.slice(0, 0) };
+    const x = empreinte(vide);
+    const m = { ...MANIFESTE, tuiles: { ...MANIFESTE.tuiles, "50_434": { octets: x.brut.length, sha256: x.sha256 } } };
+    const brut = Buffer.from(JSON.stringify(m));
+    o.set("2026-03-01/t/50_434.json.gz", x.brut);
+    o.set("2026-03-01/manifest.json", brut);
+    o.set("courant.json", pointeurVers("2026-03-01", brut));
+    const apres = await plusTard(11, () => lecteur.lireDebroussaillementAdresse(e, env, s.f));
+    // L'ancienne tuile gardée en mémoire n'est pas servie au nouveau manifeste : la nouvelle est relue.
+    assert.deepEqual(apres, lireDebroussaillement(m, new Map([["50_434", vide]]), e));
+    assert.notEqual(apres?.etat, "en_zone");
+    assert.equal(s.appels.filter((a) => a.startsWith("2026-03-01/t/50_434")).length, 2);
   });
 
   test("délai de 4 s : un Storage qui ne répond pas rend indisponible", async () => {
@@ -821,7 +941,7 @@ describe("7. Les adresses réelles (BAN et cadastre du 28/10/2026, tuiles de l'�
   test("La Teste-de-Buch en zone : le Logement dit le fait, la vérification et l'arrêté de Gironde du 17 octobre 2025", () => {
     const t = rendreLogement(lireReel("la-teste-pyla-en-zone"));
     assert.match(t, /Débroussaillement Terrain dans le zonage publié/);
-    assert.match(t, /Selon le zonage informatif publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire\. Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine d'un plan local d'urbanisme/);
+    assert.match(t, /Selon le zonage informatif publié par l'État, la parcelle est dans une zone où le débroussaillement est obligatoire\. Qui doit débroussailler dépend de la situation : le propriétaire des constructions pour leurs abords, celui du terrain s'il est en zone urbaine \(avec ou sans plan local d'urbanisme\)/);
     assert.match(t, /Gironde : zonage de l'IGN corrigé par la préfecture, à partir d'une carte des bois de 2021 ; arrêté préfectoral du 17 octobre 2025 \(date indiquée par la base/);
     sansInterdit(t);
   });

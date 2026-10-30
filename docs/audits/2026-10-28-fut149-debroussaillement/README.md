@@ -64,7 +64,8 @@ GeoPackage IGN (1,76 Go)  ──  scripts/debroussaillement/construire.py  (Pyth
             │  scripts/debroussaillement/publier.mjs  (préfixe neuf, empreintes relues, pointeur écrit en dernier)
    Supabase Storage, bucket privé `debroussaillement`  (non créé)
             │
-   src/lib/server/debroussaillement-tuiles.ts   (pointeur et manifeste 10 min en mémoire, 64 tuiles, 4 s, ne lève jamais)
+   src/lib/server/debroussaillement-tuiles.ts   (pointeur relu toutes les 10 min ; manifeste et 64 tuiles en mémoire
+                                                  par empreinte ; 4 s ; ne lève jamais)
             │
    src/lib/debroussaillement.ts   (pur : point, parcelle, coupes de tuile, départements, exclusions)
       │                                         │
@@ -92,9 +93,9 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 | | Mesure |
 |---|---|
 | Fonctions Vercel (build de production, tête contre `main`) | `/api/georisques-logement` 157 → 158 fichiers, 22,76 → 22,77 Mo ; `/api/logement-autour` 2 368 → 2 369 ; `/rapport/autour` 177 → 178. Le fichier ajouté est le code compilé ; **aucune donnée**, aucun glob `data/**`. La page de banc `/dev/fut149` (404 en production) embarque ses fixtures (0,35 Mo), comme `/dev/fut146`. |
-| Lecture par analyse | 1 à 4 tuiles, 8,8 Ko médiane, 128 Ko au plus ; calcul 2 ms (tuiles en mémoire). Latence Storage mesurée par FUT-156 : 81 ms médiane, 692 ms à froid (pointeur, manifeste, tuile). En parallèle des ~14 sources du Logement. |
+| Lecture par analyse | 1 à 4 tuiles, 8,8 Ko médiane, 128 Ko au plus ; calcul 1 ms en médiane, 14 ms au 99e centile, 49 ms au pire (9 972 lectures sur toutes les cellules, tuiles en mémoire, contre-revue du 30/10/2026). Latence Storage mesurée par FUT-156 : 81 ms médiane, 692 ms à froid (pointeur, manifeste, tuile). En parallèle des ~14 sources du Logement. |
 | Stockage | 32,8 Mo par édition ; deux éditions gardées : 66 Mo du quota Free de 1 Go, **partagé** entre test et production et avec la fibre (≈ 150 Mo). |
-| Egress | Autour relit au rendu (tuile gardée en mémoire de l'instance) ; ordre de grandeur 10 à 40 Ko par ouverture : 5 Go/mois couvrent plus de 100 000 lectures. |
+| Egress | Mesuré le 30/10/2026 avec le vrai lecteur sur l'édition nationale (`docs/audits/2026-10-30-fut149-contre-revue-pr111/sondes/egress.mjs`). Instance froide : **286 Ko** (pointeur, manifeste de 264 Ko, une tuile), soit environ 18 000 démarrages d'instance pour 5 Go, toutes fonctions confondues (Autour et Logement ont chacune leur mémoire). Instance chaude : le pointeur (≈ 130 octets) toutes les 10 min, le manifeste une seule fois par édition, puis les tuiles qui ne sont pas déjà en mémoire (≈ 13 Ko par lecture quand les adresses sont tirées au hasard en France). Le chiffre « 100 000 lectures pour 5 Go » ne vaut que pour des instances déjà chaudes. |
 | Construction | 3 min (Python), 590 Mo à télécharger. Envoi : ~2 450 objets, à mesurer à la première publication. |
 | Coût monétaire | Nul (Free). Aucun achat, aucun changement de tarif. |
 | Maintenance | Une édition IGN tous les 6 à 12 mois (5 en 3 ans) ; contre-épreuve des arrêtés à rejouer à chaque édition et à chaque arrêté ministériel. |
@@ -111,11 +112,11 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 
 ## Recette
 
-- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 80 tests (géométrie synthétique : contact, 1 cm, liseré,
+- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 86 tests (80 au 29/10, puis 6 de la contre-revue du 30/10) (géométrie synthétique : contact, 1 cm, liseré,
   coupe de tuile, vraie limite alignée sur la grille, cellule pleine, parcelle invalide, voisine, point hors de la
   parcelle, rue, immense ; départements ; pannes et versions ; textes rendus et interdits ; lecteur Storage ; 24
-  adresses réelles contre deux oracles) et `scripts/debroussaillement/publier.test.mjs`, 8 scénarios de
-  publication sur Storage simulé. Suite complète, seule, `--test-concurrency=1`, après réintégration de `main`
+  adresses réelles contre deux oracles) et `scripts/debroussaillement/publier.test.mjs`, 12 scénarios de
+  publication sur Storage simulé (8, puis 4 de la contre-revue du 30/10). Suite complète, seule, `--test-concurrency=1`, après réintégration de `main`
   (#108, #110, #112) : `main` 3 826 → tête 3 914 (+88), 0 échec. `tsc` propre ; ESLint identique à `main` (6 erreurs
   et 8 avertissements préexistants ; 0 erreur dans les fichiers de la PR).
 - **Rendu** : banc `/dev/fut149?vue=section|autour|logement&cas=…` capturé par Chrome sans interface

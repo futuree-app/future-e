@@ -12,6 +12,7 @@ import { pathToFileURL } from "node:url";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 // `server-only` et l'alias `@/` sont résolus par Next ; hors de Next, un crochet de chargement les résout.
 const racine = pathToFileURL(`${process.cwd()}/`).href;
@@ -22,9 +23,11 @@ register(`data:text/javascript,${encodeURIComponent(`export async function resol
 }`)}`);
 const ED = process.argv[2];
 const edition = path.basename(ED);
+// Le pointeur porte l'empreinte du manifeste, comme celui qu'écrit `publier.mjs basculer`.
+const empreinteManifeste = createHash("sha256").update(readFileSync(path.join(ED, "manifest.json"))).digest("hex");
 const serveur = http.createServer((req, res) => {
   const chemin = decodeURIComponent(new URL(req.url, "http://x").pathname).replace(/^\/storage\/v1\/object\/debroussaillement\//, "");
-  if (chemin === "courant.json") return res.end(JSON.stringify({ format: "debroussaillement-1", edition }));
+  if (chemin === "courant.json") return res.end(JSON.stringify({ format: "debroussaillement-1", edition, manifeste: empreinteManifeste }));
   const f = path.join(path.dirname(ED), chemin);
   if (!f.startsWith(path.dirname(ED)) || !existsSync(f)) { res.statusCode = 400; return res.end("absent"); }
   res.end(readFileSync(f));

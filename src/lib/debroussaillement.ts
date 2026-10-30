@@ -230,7 +230,8 @@ const PAS_EXAMEN = 500;
 /**
  * Les arêtes d'un anneau qui sont de VRAIES limites de zone, en polylignes (lon, lat). Une arête posée sur une
  * droite de la grille qui borde la cellule n'est écartée que par morceaux, là où la cellule voisine est couverte
- * de l'autre côté (cf. `Couvert`). Seules sont gardées les arêtes qui passent dans la `fenetre` (entiers).
+ * de l'autre côté (cf. `Couvert`). Seules sont gardées les arêtes qui passent dans la `fenetre` (entiers) ; d'une
+ * arête alignée, seuls les morceaux qui la croisent.
  */
 function vraiesLimites(pts: [number, number][], ix: number, iy: number, fenetre: Boite, couvert: Couvert): number[][][] {
   const [X0, Y0, X1, Y1] = [ix * PAS_TUILE, iy * PAS_TUILE, (ix + 1) * PAS_TUILE, (iy + 1) * PAS_TUILE];
@@ -254,7 +255,15 @@ function vraiesLimites(pts: [number, number][], ix: number, iy: number, fenetre:
     if (!voisin) { garder(ax, ay, bx, by); continue; }
     const [vx, vy, dx, dy] = voisin;
     const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / PAS_EXAMEN));
-    for (let k = 0; k < n; k++) {
+    // Seuls les pas qui croisent la fenêtre sont examinés, avec un pas de marge de chaque côté : une arête alignée
+    // court parfois sur des kilomètres, et l'examiner en entier coûtait jusqu'à une seconde de calcul par lecture
+    // (contre-revue du 30/10/2026). Ce qui est hors de la fenêtre est trop loin pour compter.
+    const [a, b, f0, f1] = ax === bx ? [ay, by, fy0, fy1] : [ax, bx, fx0, fx1];
+    const t0 = (Math.max(f0, Math.min(a, b)) - a) / (b - a || 1);
+    const t1 = (Math.min(f1, Math.max(a, b)) - a) / (b - a || 1);
+    const kmin = Math.max(0, Math.floor(Math.min(t0, t1) * n) - 1);
+    const kmax = Math.min(n, Math.ceil(Math.max(t0, t1) * n) + 1);
+    for (let k = kmin; k < kmax; k++) {
       const [px, py] = [Math.round(ax + ((bx - ax) * k) / n), Math.round(ay + ((by - ay) * k) / n)];
       const [qx, qy] = [Math.round(ax + ((bx - ax) * (k + 1)) / n), Math.round(ay + ((by - ay) * (k + 1)) / n)];
       const [mx, my] = [Math.round((px + qx) / 2) + dx, Math.round((py + qy) / 2) + dy];

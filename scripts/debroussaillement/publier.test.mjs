@@ -17,7 +17,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
-import { client, envoyer, basculer, RefusPublication } from "./publier.mjs";
+import { client, envoyer, basculer, purger, etat, comparerEditions, RefusPublication } from "./publier.mjs";
 
 // `server-only` et l'alias `@/` sont résolus par Next ; ici, par un crochet de chargement.
 const racine = pathToFileURL(`${process.cwd()}/`).href;
@@ -56,6 +56,10 @@ function storage() {
       ecritures.push(chemin);
       return Response.json({ Key: chemin });
     }
+    if (methode === "DELETE") {
+      for (const k of JSON.parse(corps).prefixes) objets.delete(k);
+      return Response.json([]);
+    }
     return new Response("non géré", { status: 405 });
   };
   return { objets, ecritures, f, coupureApres: (n) => { pannesApres = ecritures.length + n; }, retablir: () => { pannesApres = Infinity; } };
@@ -86,6 +90,12 @@ const env = { DEBROUSSAILLEMENT_BUCKET: BUCKET, NEXT_PUBLIC_SUPABASE_URL: "https
 // Le point (5,075 ; 43,44) est dans la zone A large (jusqu à 5,08), et à 2 km de la zone A étroite (jusqu à 5,05) : hors zone.
 const ICI = { point: [5.075, 43.44], geocodage: null, insee: "13092", parcelle: null };
 async function lire(s) { lecteur.oublierDebroussaillement(); return lecteur.lireDebroussaillementAdresse(ICI, env, s.f); }
+/** La lecture d'une instance déjà chaude (rien n'est oublié), `minutes` plus tard. */
+async function lireChaud(s, minutes) {
+  const vrai = Date.now;
+  Date.now = () => vrai() + minutes * 60_000;
+  try { return await lecteur.lireDebroussaillementAdresse(ICI, env, s.f); } finally { Date.now = vrai; }
+}
 const silencieux = async (f) => { const log = console.log; console.log = () => {}; try { return await f(); } finally { console.log = log; } };
 
 test("publication, puis bascule : le lecteur voit l'édition publiée", async () => {
@@ -197,4 +207,52 @@ test("le client refuse d'écraser autre chose que le pointeur", async () => {
   const s = storage();
   const c = client(env.NEXT_PUBLIC_SUPABASE_URL, "cle", s.f);
   await assert.rejects(c.deposer("2026-03-01/manifest.json", Buffer.from("{}"), "application/json", true), /seul courant\.json/);
+});
+
+test("le pointeur porte l'empreinte du manifeste vérifié par la bascule", async () => {
+  const s = storage();
+  const c = client(env.NEXT_PUBLIC_SUPABASE_URL, "cle", s.f);
+  await silencieux(() => envoyer(c, edition("2026-03-01", 0.08)));
+  await silencieux(() => basculer(c, "2026-03-01"));
+  const p = JSON.parse(s.objets.get("courant.json").toString("utf8"));
+  assert.equal(p.edition, "2026-03-01");
+  assert.equal(p.manifeste, createHash("sha256").update(s.objets.get("2026-03-01/manifest.json")).digest("hex"));
+});
+
+test("R7 (contre-revue du 30/10/2026) : les éditions se classent par date puis par révision, pas par ordre alphabétique", () => {
+  const l = ["2026-03-01.10", "2025-09-01", "2026-03-01.2", "2026-03-01", "2026-03-01.9"];
+  assert.deepEqual([...l].sort(comparerEditions), ["2025-09-01", "2026-03-01", "2026-03-01.2", "2026-03-01.9", "2026-03-01.10"]);
+  assert.deepEqual([...l].sort(), ["2025-09-01", "2026-03-01", "2026-03-01.10", "2026-03-01.2", "2026-03-01.9"], "le tri alphabétique, que la purge employait");
+});
+
+test("R7 : après un retour arrière sur la révision 2, la purge garde la révision 10, plus récente, et efface la plus ancienne", async () => {
+  const s = storage();
+  const c = client(env.NEXT_PUBLIC_SUPABASE_URL, "cle", s.f);
+  for (const [v, l] of [["2026-03-01", 0.08], ["2026-03-01.2", 0.05], ["2026-03-01.10", 0.06]]) await silencieux(() => envoyer(c, edition(v, l)));
+  await silencieux(() => basculer(c, "2026-03-01.10"));
+  await silencieux(() => basculer(c, "2026-03-01.2")); // retour arrière
+  assert.deepEqual((await silencieux(() => etat(c))).editions, ["2026-03-01", "2026-03-01.2", "2026-03-01.10"]);
+  await silencieux(() => purger(c, 1));
+  const restent = [...new Set([...s.objets.keys()].map((k) => k.split("/")[0]))].sort();
+  // Avec le tri alphabétique, la dernière était « 2026-03-01.2 » (la courante) : la révision 10 était effacée.
+  assert.deepEqual(restent, ["2026-03-01.10", "2026-03-01.2", "courant.json"]);
+  assert.equal((await lire(s)).source.edition, "2026-03-01.2", "l'édition courante reste lisible");
+  await assert.rejects(silencieux(() => purger(c, 0)), /au moins 1/);
+});
+
+test("R4 : purgée puis republiée SOUS LE MÊME NOM avec un autre contenu (hors protocole), une instance chaude relit tout, sans mélange", async () => {
+  const s = storage();
+  const c = client(env.NEXT_PUBLIC_SUPABASE_URL, "cle", s.f);
+  await silencieux(() => envoyer(c, edition("2026-03-01", 0.08)));
+  await silencieux(() => basculer(c, "2026-03-01"));
+  lecteur.oublierDebroussaillement();
+  assert.equal((await lireChaud(s, 0)).etat, "en_zone", "l'instance garde l'ancienne tuile en mémoire");
+  for (const k of [...s.objets.keys()]) if (k.startsWith("2026-03-01/")) s.objets.delete(k); // purge à la main
+  await silencieux(() => envoyer(c, edition("2026-03-01", 0.05)));
+  await silencieux(() => basculer(c, "2026-03-01"));
+  // Avant le 30/10, la tuile gardée (clé « édition/cellule ») servait le nouveau manifeste : « en zone ».
+  const apres = await lireChaud(s, 11);
+  assert.equal(apres.statut, "lu");
+  assert.equal(apres.etat, "hors_zone");
+  assert.deepEqual(apres, await lire(s), "identique à la lecture d'une instance neuve");
 });
