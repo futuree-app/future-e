@@ -114,7 +114,24 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   if (r.bruitAerien?.statut === "indisponible") absentes.push("bruit_aerien");
   // FUT-156 : mêmes règles. « À vérifier » est une réponse (l'adresse n'est pas rattachable), pas une panne.
   if (r.fibre?.statut === "indisponible") absentes.push("fibre");
+  // FUT-157 : mêmes règles, inventaire par inventaire. Une panne totale reste la seule `sites_sols` ; un
+  // inventaire en panne ou lu en partie est nommé, comme la liste communale des fiches sans emprise. Un rapport
+  // antérieur (champ absent) ne s'invente pas de panne.
+  absentes.push(...sitesSolsAbsents(r));
   return absentes;
+}
+
+/** Les sous-sources des sols pollués au terrain (FUT-157). */
+export const SOUS_SOURCES_SITES_SOLS = ["sites_sols", "sites_sols_sis", "sites_sols_sup", "sites_sols_instructions", "sites_sols_sans_emprise"] as const;
+
+function sitesSolsAbsents(r: LogementReport): string[] {
+  const l = r.sitesSols;
+  if (!l) return [];
+  if (l.statut === "indisponible") return ["sites_sols"];
+  const out: string[] = [];
+  for (const i of ["sis", "sup", "instructions"] as const) if (l.inventaires?.[i] !== "complet") out.push(`sites_sols_${i}`);
+  if (l.sansEmprise?.etat !== "complet") out.push("sites_sols_sans_emprise");
+  return out;
 }
 
 /**
@@ -158,6 +175,27 @@ export function pertesUrbanisme(ancien: LogementReport, nouveau: LogementReport)
   return pertes;
 }
 
+/**
+ * CE QUE LA LECTURE DES SOLS POLLUÉS DE N SAVAIT ET QUE N+1 NE SAIT PLUS (FUT-157), comparé sur les deux
+ * rapports comme le plan d'urbanisme : une version écrite avant FUT-157 n'avait aucune lecture, elle ne perd
+ * rien quand Géorisques tombe pendant son actualisation. Un inventaire lu en entier ne cède pas la place à
+ * une panne ; une parcelle attribuée ne cède pas la place à une lecture qui n'en a plus (même règle que le
+ * bruit aérien). Une fiche apparue ou disparue a été LUE : ce n'est jamais une perte.
+ */
+export function pertesSitesSols(ancien: LogementReport, nouveau: LogementReport): string[] {
+  const a = ancien.sitesSols;
+  const n = nouveau.sitesSols;
+  if (!a || a.statut === "indisponible") return [];
+  if (!n || n.statut === "indisponible") return ["sites_sols"];
+  const pertes: string[] = [];
+  for (const i of ["sis", "sup", "instructions"] as const) {
+    if (a.inventaires?.[i] === "complet" && n.inventaires?.[i] !== "complet") pertes.push(`sites_sols_${i}`);
+  }
+  if (a.sansEmprise?.etat === "complet" && n.sansEmprise?.etat !== "complet") pertes.push("sites_sols_sans_emprise");
+  if (a.parcelle?.statut === "attribuee" && n.parcelle?.statut !== "attribuee") pertes.push("sites_sols_parcelle");
+  return pertes;
+}
+
 /** Un rapport complet dans sa FORME : l'adresse est là et la route n'a pas rendu d'erreur. */
 export function rapportValide(r: unknown): r is LogementReport {
   if (!r || typeof r !== "object") return false;
@@ -179,10 +217,11 @@ export function issueActualisation(
   if (!ancienne) return "nouvelle_version";
   if (nouveauHash === ancienne.reportHash) return "identique";
   const avant = new Set(ancienne.sourcesAbsentes);
-  const urba = new Set<string>(SOUS_SOURCES_URBANISME);
-  if (sourcesAbsentes(nouveau).some((s) => !urba.has(s) && !avant.has(s))) return "refusee";
-  // Le plan d'urbanisme se compare sur les rapports eux-mêmes (cf. `pertesUrbanisme`).
+  const comparesSurLesRapports = new Set<string>([...SOUS_SOURCES_URBANISME, ...SOUS_SOURCES_SITES_SOLS]);
+  if (sourcesAbsentes(nouveau).some((s) => !comparesSurLesRapports.has(s) && !avant.has(s))) return "refusee";
+  // Le plan d'urbanisme et les sols pollués se comparent sur les rapports eux-mêmes (cf. `pertesUrbanisme`).
   if (pertesUrbanisme(ancienne.report, nouveau).length > 0) return "refusee";
+  if (pertesSitesSols(ancienne.report, nouveau).length > 0) return "refusee";
   // FUT-146 : même règle que le plan d'urbanisme. Une lecture des plans de bruit faite à la parcelle ne cède
   // pas la place à une lecture au point : ce n'est pas une panne, mais une lecture moins sûre.
   if (ancienne.report.bruitAerien?.grain === "parcelle" && nouveau.bruitAerien?.grain !== "parcelle") return "refusee";

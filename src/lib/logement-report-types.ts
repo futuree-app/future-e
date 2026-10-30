@@ -13,6 +13,7 @@ import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { LectureBruitAerien } from "./bruit-aerien.ts";
 import type { LectureFibre } from "./fibre-adresse.ts";
+import type { LectureSitesSols } from "./sites-sols-etat.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
@@ -128,6 +129,13 @@ export type LogementReport = {
    * millésime. `undefined` : rapport écrit avant FUT-156, ou lecture non activée ; l'écran n'affiche RIEN.
    */
   fibre?: LectureFibre;
+  /**
+   * FUT-157 : LE TERRAIN FACE AUX SOLS POLLUÉS (SIS, servitudes, instructions de l'administration ; cf.
+   * `sites-sols-terrain.ts`), figé avec la date de consultation. Ce qui est DÉMONTRÉ ne s'y enregistre pas :
+   * il se dérive à la lecture (`etatSitesSols`). `undefined` : rapport écrit avant FUT-157 ; l'écran n'affiche
+   * RIEN, ni une absence ni une panne.
+   */
+  sitesSols?: LectureSitesSols;
   sinistralite?: OnrnSinistralite | null;
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.

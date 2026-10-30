@@ -1,0 +1,114 @@
+// L'ÉTAT D'UNE LECTURE DES SOLS POLLUÉS AU TERRAIN (FUT-157). Types et règles de lecture, SANS dépendance :
+// l'écran (rendu côté client) et la couverture du module les lisent sans embarquer le calcul géométrique
+// (Clipper), qui vit dans `sites-sols-terrain.ts` et ne s'exécute que côté serveur. Même découpage que
+// `urbanisme-nomenclature.ts` (FUT-81).
+
+/** Version de la règle de lecture, gravée dans chaque lecture enregistrée. */
+export const SITES_SOLS_TERRAIN_CONVENTION = "fut157-2026-10-30";
+
+export type InventaireTerrain = "sis" | "sup" | "instructions";
+export const INVENTAIRES: InventaireTerrain[] = ["sis", "sup", "instructions"];
+
+/** « adresse » : géocodé au numéro. « secteur » : à la voie, au lieu-dit, à la commune. Comme FUT-146. */
+export type PorteeSitesSols = "adresse" | "secteur" | "non_precisee";
+
+/**
+ * CE QUE LA PARCELLE PEUT PROUVER. `attribuee` : rattachée au point, seule, mesurable, adresse au numéro.
+ * `incertaine` : mesurable, mais trouvée par proximité (`repli`) ou sur une limite (`limite`) ; elle peut être
+ * celle d'un voisin. `ecartee` : elle ne sert pas (absente, non mesurable, trop étendue, ou adresse sans numéro).
+ */
+export type UsageParcelle =
+  | { statut: "attribuee"; code: string | null }
+  | { statut: "incertaine"; code: string | null; raison: "repli" | "limite"; distanceM: number | null }
+  | { statut: "ecartee"; raison: "absente" | "non_mesurable" | "trop_etendue" | "adresse_sans_numero" };
+
+/**
+ * OÙ EST LE PÉRIMÈTRE PAR RAPPORT AU TERRAIN. Deux situations démontrent (`point_dans`, `parcelle_recoupe`) ;
+ * toutes les autres appellent une vérification, et disent pourquoi.
+ * - `point_dans` : le point de l'adresse est dans le périmètre.
+ * - `parcelle_recoupe` : le périmètre couvre au moins 2 % de la parcelle attribuée (convention du bruit
+ *   aérien, FUT-146, issue de FUT-81).
+ * - `parcelle_bordure` : il en couvre moins de 2 %, mais au moins 25 m² (en deçà, c'est un liseré de tracé,
+ *   qui n'est pas retenu).
+ * - `point_en_limite` : le point est sur la limite du périmètre (à 1 cm près).
+ * - `parcelle_incertaine` : il recoupe une parcelle rattachée par proximité ou sur une limite.
+ * - `localisation_ponctuelle` : la fiche n'est localisée que par un point, qui tombe dans la parcelle.
+ * - `geometrie_illisible` : le périmètre publié ne se mesure pas ; sa position ne se vérifie pas.
+ * - `adresse_publiee` : une fiche sans emprise (un point, ou rien) est publiée à l'adresse même du logement.
+ */
+export type Situation =
+  | "point_dans" | "parcelle_recoupe"
+  | "parcelle_bordure" | "point_en_limite" | "parcelle_incertaine" | "localisation_ponctuelle" | "geometrie_illisible"
+  | "adresse_publiee";
+
+export type FicheTerrain = {
+  inventaire: InventaireTerrain;
+  id: string;
+  nom: string;
+  /** Instructions : « En cours » ou « Clôturée », tel que publié. */
+  statut: string | null;
+  /** Fiche officielle (domaine public filtré par `lienFicheSur`). */
+  fiche: string | null;
+  /** Date de mise à jour de la fiche (AAAA-MM-JJ), telle que publiée. */
+  miseAJour: string | null;
+  situation: Situation;
+  /** Part de la parcelle couverte (0 à 1) et aire (m²) ; `null` sans mesure à la parcelle. */
+  part: number | null;
+  surfaceM2: number | null;
+  /** `adresse_publiee` seulement : l'adresse telle que la fiche la publie, et ce qui tient lieu de localisation. */
+  adressePubliee?: { texte: string; localisation: "point" | "aucune" };
+};
+
+export type EtatInventaire = "complet" | "partiel" | "indisponible";
+
+export type LectureSitesSols = {
+  convention: typeof SITES_SOLS_TERRAIN_CONVENTION;
+  /** `indisponible` : aucun des trois inventaires n'a pu être lu. Jamais une absence. */
+  statut: "lu" | "indisponible";
+  portee: PorteeSitesSols;
+  parcelle: UsageParcelle;
+  /** Le rayon demandé à l'API (préfiltre), en mètres. Jamais affiché comme un seuil. */
+  rayonM: number;
+  inventaires: Record<InventaireTerrain, EtatInventaire>;
+  /** Les fiches qui concernent le terrain ou appellent une vérification, triées par inventaire puis par nom. */
+  fiches: FicheTerrain[];
+  /**
+   * LES FICHES DE LA COMMUNE SANS EMPRISE PUBLIÉE : localisées par un simple point (`ponctuelles`), ou sans
+   * aucune géométrie (`sansGeometrie`, qu'aucune recherche géographique ne voit). Lues à la commune (avec
+   * arrondissements et anciens codes, FUT-152) ; `null` si cette lecture n'a pas été faite.
+   */
+  sansEmprise: { etat: EtatInventaire; ponctuelles: number; sansGeometrie: number } | null;
+  consulteLe: string;
+};
+
+// ── Ce que la lecture établit (dérivé à chaque lecture, jamais enregistré) ──────────────────────
+
+/**
+ * UNE FICHE DÉMONTRE-T-ELLE QUE LE TERRAIN EST CONCERNÉ ? Le point dans le périmètre, ou la parcelle attribuée
+ * recoupée, et seulement pour une adresse géocodée au numéro : le point d'une voie n'est pas un terrain.
+ * Calculé ici, à la lecture, et non figé dans le rapport (cf. AGENTS.md : un champ pré-calculé est un seuil figé).
+ */
+export function ficheDemontree(f: FicheTerrain, l: Pick<LectureSitesSols, "portee">): boolean {
+  return l.portee === "adresse" && (f.situation === "point_dans" || f.situation === "parcelle_recoupe");
+}
+
+/**
+ * L'ÉTAT DE LA LECTURE, dans cet ordre :
+ * - `concerne` : au moins une fiche démontrée. Un résultat attesté est gardé même si un autre inventaire manque.
+ * - `a_verifier` : au moins une fiche située sans preuve suffisante.
+ * - `indisponible` : aucun inventaire n'a pu être lu.
+ * - `incomplet` : un inventaire, ou la liste communale des fiches sans emprise, n'a pas été lu en entier.
+ * - `terrain_non_situe` : tout a été lu, aucun périmètre ne contient le point, mais aucune parcelle n'a pu
+ *   être attribuée : l'absence vaut pour le point, pas pour le terrain.
+ * - `aucun` : tout a été lu, à la parcelle attribuée, sans aucune correspondance.
+ */
+export type EtatSitesSols = "concerne" | "a_verifier" | "indisponible" | "incomplet" | "terrain_non_situe" | "aucun";
+
+export function etatSitesSols(l: LectureSitesSols): EtatSitesSols {
+  if (l.fiches.some((f) => ficheDemontree(f, l))) return "concerne";
+  if (l.fiches.length > 0) return "a_verifier";
+  if (l.statut === "indisponible") return "indisponible";
+  if (INVENTAIRES.some((i) => l.inventaires[i] !== "complet") || l.sansEmprise?.etat !== "complet") return "incomplet";
+  if (l.parcelle.statut !== "attribuee") return "terrain_non_situe";
+  return "aucun";
+}

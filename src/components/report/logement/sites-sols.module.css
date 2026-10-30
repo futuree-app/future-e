@@ -1,0 +1,8 @@
+/* FUT-157 · les liens qui se tiennent seuls sur leur ligne (fiche officielle, carte) se touchent au doigt :
+   44 px de haut sur écran tactile, comme les dépliants du Relevé (FUT-126), sans changer leur taille de texte. */
+.lienSeul { display: inline-flex; align-items: center; min-height: 24px; }
+@media (pointer: coarse) { .lienSeul { min-height: 44px; } }
+.lienSeul:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+
+.site { display: grid; gap: 4px; padding-left: 14px; border-left: 2px solid var(--r-filet-fort); }
+.inscriptions { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
