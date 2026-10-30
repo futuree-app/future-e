@@ -31,6 +31,12 @@ export type EvidenceTargetKey =
   // leur carte dans le module Territoire mais aucune règle ne les cite encore : les inscrire ici ferait
   // croire, à la lecture, que le lien existe. Ils reviendront avec la preuve qui les portera (le feu, par
   // exemple, avec le lot « feu en mismatch »).
+  // santé environnementale (FUT-167) : une seule carte, « Santé environnementale », les démontre toutes
+  // les quatre, une ligne par phénomène. La preuve qui vise l'une ouvre le volet sur SA ligne.
+  | "health.air_background"
+  | "health.industrial_site"
+  | "health.noise_infrastructure"
+  | "health.radon"
   // cadre
   | "nature.green_spaces"
   | "nature.forest_cover"
@@ -52,6 +58,10 @@ export const EVIDENCE_TARGET_MODULE: Record<EvidenceTargetKey, "territoire" | "l
   // la preuve qui les compte doit y mener, et non à la carte du zonage inondation, qui n'en dit rien.
   "risk.catnat": "territoire",
   "risk.wildfire": "territoire",
+  "health.air_background": "territoire",
+  "health.industrial_site": "territoire",
+  "health.noise_infrastructure": "territoire",
+  "health.radon": "territoire",
   "nature.green_spaces": "territoire",
   "nature.forest_cover": "territoire",
   "housing.energy_label": "logement",
