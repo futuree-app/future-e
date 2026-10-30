@@ -78,7 +78,8 @@ export type LectureSitesSols = {
    * arrondissements et anciens codes, FUT-152) ; `null` si cette lecture n'a pas été faite.
    */
   sansEmprise: { etat: EtatInventaire; ponctuelles: number; sansGeometrie: number } | null;
-  consulteLe: string;
+  // Aucune date de consultation : le rapport entier fait l'empreinte de sa version, et une date changerait
+  // l'empreinte de deux collectes identiques. La date est celle de la collecte (`version.collecteeLe`).
 };
 
 // ── Ce que la lecture établit (dérivé à chaque lecture, jamais enregistré) ──────────────────────

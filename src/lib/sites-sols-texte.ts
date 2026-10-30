@@ -205,7 +205,7 @@ export type TexteSitesSols = {
   limites: string[];
   /** Les gestes qui engagent. */
   verifier: string[];
-  marge: { grain: string; valeur: string; source: string; date: string | null };
+  marge: { grain: string; valeur: string; source: string };
   savoirPlus: string[];
 };
 
@@ -288,10 +288,9 @@ export function texteSitesSols(l: LectureSitesSols | null | undefined): TexteSit
   if (sansEmprise && (etat === "aucun" || etat === "terrain_non_situe")) limites.push(sansEmprise);
 
   const grain = l.parcelle.statut === "attribuee" ? "parcelle" : l.parcelle.statut === "incertaine" ? "parcelle à confirmer" : "point de l'adresse";
-  const date = dateLongue(l.consulteLe);
   return {
     etat, titre: titreDe(etat, l), sites: sites(l), change, limites, verifier,
-    marge: { grain, valeur: valeurMarge(etat, l), source: SOURCE, date },
+    marge: { grain, valeur: valeurMarge(etat, l), source: SOURCE },
     savoirPlus: [
       "Un secteur d'information sur les sols est arrêté par le préfet sur des terrains où l'État connaît une pollution des sols. Une servitude d'utilité publique y restreint des usages par arrêté. Un site suivi par l'administration (ancienne base BASOL) est un terrain où elle est intervenue pour une pollution suspectée ou avérée.",
       "Chaque périmètre publié est confronté au point de l'adresse et à sa parcelle cadastrale : une simple proximité ne compte jamais. La parcelle n'est retenue comme celle du logement que si le point de l'adresse y tombe, et elle seule.",
@@ -300,7 +299,7 @@ export function texteSitesSols(l: LectureSitesSols | null | undefined): TexteSit
       "Ne sont pas lus ici : les anciennes activités industrielles et de services (CASIAS), qui disent qu'une activité a existé, pas qu'une pollution a été constatée ; les friches ; le registre des émissions industrielles.",
       ...(sansEmprise && (etat === "concerne" || etat === "a_verifier") ? [sansEmprise] : []),
       "Une fiche sans emprise publiée (localisée par un simple point, ou pas du tout) ne se situe pas : seule son adresse publiée est comparée à celle du logement, numéro et voie. Ces fiches sont lues dans la commune de l'adresse (avec ses arrondissements et ses anciens codes), pas dans les communes voisines.",
-      `Inventaires consultés${date ? ` le ${date}` : ""} sur ${SOURCE}. Références : Code de l'environnement, articles L. 125-6 et L. 125-7 (information), L. 556-2 (étude de sols), L. 515-12 (servitudes).`,
+      `Inventaires consultés lors de la collecte des données de ce dossier, sur ${SOURCE}. Références : Code de l'environnement, articles L. 125-6 et L. 125-7 (information), L. 556-2 (étude de sols), L. 515-12 (servitudes).`,
     ],
   };
 }

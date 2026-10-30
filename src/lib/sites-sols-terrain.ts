@@ -273,7 +273,6 @@ const etatDe = (c: CategorieGeoLue): EtatInventaire =>
 export type ReponsesSitesSols = {
   categories: Record<InventaireTerrain, CategorieGeoLue>;
   sansEmprise: { etat: EtatInventaire; fiches: (FicheSspGeo & { inventaire: InventaireTerrain })[] } | null;
-  consulteLe: string;
 };
 
 const ponctuelle = (f: FicheSspGeo) => f.geometrie != null && (f.geometrie.type === "Point" || f.geometrie.type === "MultiPoint");
@@ -317,16 +316,15 @@ export function lireSitesSolsTerrain(e: EntreeSitesSols, rep: ReponsesSitesSols)
           sansGeometrie: rep.sansEmprise.fiches.filter((f) => f.geometrie == null).length,
         }
       : null,
-    consulteLe: rep.consulteLe,
   };
 }
 
 /** Une lecture qui n'a pas pu se faire (collecte qui lève, délai dépassé). Jamais une absence. */
-export function sitesSolsIndisponible(e: EntreeSitesSols, consulteLe: string): LectureSitesSols {
+export function sitesSolsIndisponible(e: EntreeSitesSols): LectureSitesSols {
   const plan = planDeRecherche(e);
   return {
     convention: SITES_SOLS_TERRAIN_CONVENTION, statut: "indisponible", portee: plan.portee, parcelle: plan.usage, rayonM: plan.rayonM,
     inventaires: { sis: "indisponible", sup: "indisponible", instructions: "indisponible" },
-    fiches: [], sansEmprise: null, consulteLe,
+    fiches: [], sansEmprise: null,
   };
 }

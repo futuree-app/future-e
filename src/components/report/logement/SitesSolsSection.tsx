@@ -17,7 +17,7 @@ export function SitesSolsSection({ lecture }: { lecture: LectureSitesSols | null
   const marge: ElementDeMarge[] = [
     { type: "grain", grain: "adresse", libelle: t.marge.grain },
     { type: "valeur", valeur: t.marge.valeur },
-    { type: "source", texte: t.marge.source, ...(t.marge.date ? { date: t.marge.date } : {}) },
+    { type: "source", texte: t.marge.source },
   ];
   return (
     <section aria-labelledby="sites-sols" style={{ display: "grid", gap: 18, paddingTop: 22, borderTop: "1px solid var(--r-filet)" }}>

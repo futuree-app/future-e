@@ -128,15 +128,14 @@ export async function lireSansEmprise(insee: string): Promise<NonNullable<Repons
  * jamais : une collecte qui échoue rend une lecture `indisponible`, jamais une absence.
  */
 export async function lireSitesSolsAdresse(e: EntreeSitesSols, insee: string | null): Promise<LectureSitesSols> {
-  const consulteLe = new Date().toISOString();
   try {
     const { rayonM } = planDeRecherche(e);
     const [categories, sansEmprise] = await Promise.all([
       getSitesSolsAutour(e.point[0], e.point[1], rayonM),
       insee ? lireSansEmprise(insee) : Promise.resolve(null),
     ]);
-    return lireSitesSolsTerrain(e, { categories, sansEmprise, consulteLe });
+    return lireSitesSolsTerrain(e, { categories, sansEmprise });
   } catch {
-    return sitesSolsIndisponible(e, consulteLe);
+    return sitesSolsIndisponible(e);
   }
 }

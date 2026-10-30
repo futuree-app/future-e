@@ -29,7 +29,7 @@ for (const r of lignes) {
       const [x, y] = f.geometry.coordinates;
       const lu = await findCadastreParcelWithGeometry(x, y).catch(() => null);
       const e = { point: [x, y], geocodage: "housenumber", parcelle: lu ? { geometry: lu.geometry, code: lu.parcel.parcelCode, rattachement: lu.parcel.rattachement ?? "point", candidatsAuPoint: lu.parcel.candidatsAuPoint, distanceRepliM: lu.parcel.distanceRepliM } : null };
-      const l = T.lireSitesSolsTerrain(e, { categories, sansEmprise: { etat: "complet", fiches: [] }, consulteLe: "2026-10-30" });
+      const l = T.lireSitesSolsTerrain(e, { categories, sansEmprise: { etat: "complet", fiches: [] } });
       for (const fi of l.fiches.filter((z) => z.id === r.identifiant_ssp && z.situation !== "point_dans")) {
         console.log(JSON.stringify({ adresse: f.properties.label, ban: f.properties.id, site: fi.nom, situation: fi.situation, part: fi.part, surfaceM2: fi.surfaceM2, parcelle: l.parcelle }));
         n++;

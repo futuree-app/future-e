@@ -35,7 +35,7 @@ function lecture(c: Cas, panne: InventaireTerrain[] = []): LectureSitesSols {
   const categories = Object.fromEntries(Object.entries(c.reponses).map(([k, p]) => [
     k, panne.includes(k as InventaireTerrain) ? lireCategorieGeo([null]) : lireCategorieGeo(p, lotIncomplet(p, PAGES_MAX)),
   ])) as ReponsesSitesSols["categories"];
-  return lireSitesSolsTerrain(c.entree, { categories, sansEmprise: panne.length ? null : c.sansEmprise, consulteLe: CONSULTE });
+  return lireSitesSolsTerrain(c.entree, { categories, sansEmprise: panne.length ? null : c.sansEmprise });
 }
 
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -47,7 +47,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   const paris = tous.find((x) => x.adresse.startsWith("64 Rue de Grenelle"))!;
   const c = cle === "panne" || cle === "partiel" ? paris : tous.find((x) => x.ban === cle) ?? tous[0];
   const lu: LectureSitesSols | undefined = cle === "ancien" ? undefined
-    : cle === "panne" ? sitesSolsIndisponible(c.entree, CONSULTE)
+    : cle === "panne" ? sitesSolsIndisponible(c.entree)
     : cle === "partiel" ? lecture(c, ["sup", "instructions"])
     : lecture(c);
 

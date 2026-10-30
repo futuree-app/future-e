@@ -18,7 +18,7 @@ import {
 } from "./sites-sols-terrain.ts";
 import { texteSitesSols, type TexteSitesSols } from "./sites-sols-texte.ts";
 import { couvertureSitesSols, deriveLogementCoverage } from "./decision/logement-coverage.ts";
-import { issueActualisation, pertesSitesSols, sourcesAbsentes, type VersionLogement } from "./logement-report-version.ts";
+import { issueActualisation, jsonCanonique, pertesSitesSols, sourcesAbsentes, type VersionLogement } from "./logement-report-version.ts";
 import type { LogementReport } from "./logement-report-types.ts";
 
 // ── Les cas réels ─────────────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ function categories(r: Record<InventaireTerrain, (PageSsp | null)[]>): Record<In
 function rejouer(c: Cas, change: Partial<{ reponses: Record<InventaireTerrain, (PageSsp | null)[]>; sansEmprise: ReponsesSitesSols["sansEmprise"]; entree: EntreeSitesSols }> = {}): LectureSitesSols {
   return lireSitesSolsTerrain(change.entree ?? c.entree, {
     categories: categories(change.reponses ?? c.reponses),
-    sansEmprise: "sansEmprise" in change ? change.sansEmprise! : c.sansEmprise, consulteLe: CONSULTE,
+    sansEmprise: "sansEmprise" in change ? change.sansEmprise! : c.sansEmprise,
   });
 }
 const cas = (debut: string) => {
@@ -158,7 +158,7 @@ const PARCELLE = { geometry: rect(-10, -10, 10, 10), code: "75056-000-AB-0012", 
 const ENTREE: EntreeSitesSols = { point: pt(0, 0), geocodage: "housenumber", parcelle: PARCELLE, adresse: { numero: "12", voie: "RUE DU TEST" } };
 
 function lire(reponses: Partial<Record<InventaireTerrain, (PageSsp | null)[]>>, e: EntreeSitesSols = ENTREE, sansEmprise: ReponsesSitesSols["sansEmprise"] = SANS_EMPRISE_VIDE) {
-  return lireSitesSolsTerrain(e, { categories: categories({ ...VIDE, ...reponses }), sansEmprise, consulteLe: CONSULTE });
+  return lireSitesSolsTerrain(e, { categories: categories({ ...VIDE, ...reponses }), sansEmprise });
 }
 
 describe("FUT-157 · le grain de la preuve", () => {
@@ -292,7 +292,7 @@ describe("FUT-157 · une panne n'est jamais une absence", () => {
   });
 
   test("les trois sources en panne : indisponible ; la collecte qui lève aussi", () => {
-    for (const l of [lire({ sis: [null], sup: [null], instructions: [null] }), sitesSolsIndisponible(ENTREE, CONSULTE)]) {
+    for (const l of [lire({ sis: [null], sup: [null], instructions: [null] }), sitesSolsIndisponible(ENTREE)]) {
       assert.equal(l.statut, "indisponible");
       assert.equal(etatSitesSols(l), "indisponible");
       assert.match(texteSitesSols(l)!.titre, /n'ont pas répondu.*rien ne peut être conclu/);
@@ -442,11 +442,10 @@ describe("FUT-157 · le texte", () => {
     }
   });
 
-  test("le grain est dit dans la marge, et la date de consultation", () => {
+  test("le grain est dit dans la marge", () => {
     assert.equal(texteSitesSols(rejouer(cas("64 Rue de Grenelle")))!.marge.grain, "parcelle");
     assert.equal(texteSitesSols(rejouer(cas("96b Boulevard Solidarité")))!.marge.grain, "parcelle à confirmer");
     assert.equal(texteSitesSols(rejouer(cas("Boulevard Solidarité")))!.marge.grain, "point de l'adresse");
-    assert.equal(texteSitesSols(lire({}))!.marge.date, "30 octobre 2026");
   });
 
   test("un rapport antérieur à FUT-157 n'affiche rien", () => {
@@ -482,7 +481,7 @@ describe("FUT-157 · couverture et versions", () => {
 
   test("un rapport antérieur ne s'invente aucune panne, et reçoit la lecture même si Géorisques tombe", () => {
     assert.deepEqual(absentesSitesSols(BASE), []);
-    const panne = { ...BASE, sitesSols: sitesSolsIndisponible(ENTREE, CONSULTE) };
+    const panne = { ...BASE, sitesSols: sitesSolsIndisponible(ENTREE) };
     assert.equal(issueActualisation(panne, "h2", version(BASE)), "nouvelle_version");
     assert.deepEqual(pertesSitesSols(BASE, panne), []);
   });
@@ -490,11 +489,18 @@ describe("FUT-157 · couverture et versions", () => {
   test("une actualisation ne remplace pas un inventaire lu par une panne, ni une parcelle attribuée par une lecture qui n'en a plus", () => {
     const complet = { ...BASE, sitesSols: lire({}) };
     assert.equal(issueActualisation({ ...BASE, sitesSols: lire({ sup: [null] }) }, "h2", version(complet)), "refusee");
-    assert.equal(issueActualisation({ ...BASE, sitesSols: sitesSolsIndisponible(ENTREE, CONSULTE) }, "h2", version(complet)), "refusee");
+    assert.equal(issueActualisation({ ...BASE, sitesSols: sitesSolsIndisponible(ENTREE) }, "h2", version(complet)), "refusee");
     assert.equal(issueActualisation({ ...BASE, sitesSols: lire({}, { ...ENTREE, parcelle: null }) }, "h2", version(complet)), "refusee");
     assert.deepEqual(pertesSitesSols(complet, { ...BASE, sitesSols: lire({}, ENTREE, null) }), ["sites_sols_sans_emprise"]);
     // Une fiche apparue a été lue : ce n'est pas une perte.
     assert.equal(issueActualisation({ ...BASE, sitesSols: lire({ sis: [page([ligne("A", rect(-50, -50, 50, 50))])] }) }, "h2", version(complet)), "nouvelle_version");
+  });
+
+  test("deux collectes identiques gardent la même empreinte : la lecture ne porte aucune date", () => {
+    const a = jsonCanonique({ ...BASE, sitesSols: rejouer(cas("64 Rue de Grenelle")) });
+    const b = jsonCanonique({ ...BASE, sitesSols: rejouer(cas("64 Rue de Grenelle")) });
+    assert.equal(a, b);
+    assert.doesNotMatch(a, /consult|202\d-\d\d-\d\dT/);
   });
 
   test("la synthèse rédigée n'est pas touchée : son empreinte ignore la lecture", async () => {
