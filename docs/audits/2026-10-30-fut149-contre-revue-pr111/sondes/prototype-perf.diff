@@ -1,0 +1,18 @@
+diff --git a/src/lib/debroussaillement.ts b/src/lib/debroussaillement.ts
+index da5b1906..98ff9f09 100644
+--- a/src/lib/debroussaillement.ts
++++ b/src/lib/debroussaillement.ts
+@@ -254,7 +254,12 @@ function vraiesLimites(pts: [number, number][], ix: number, iy: number, fenetre:
+     if (!voisin) { garder(ax, ay, bx, by); continue; }
+     const [vx, vy, dx, dy] = voisin;
+     const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / PAS_EXAMEN));
+-    for (let k = 0; k < n; k++) {
++    // Seule la partie de l'arête qui passe dans la fenêtre compte (prototype de contre-revue).
++    const t0 = ax === bx ? (Math.min(Math.max(fy0, Math.min(ay, by)), Math.max(ay, by)) - ay) / (by - ay || 1) : (Math.min(Math.max(fx0, Math.min(ax, bx)), Math.max(ax, bx)) - ax) / (bx - ax || 1);
++    const t1 = ax === bx ? (Math.min(Math.max(fy1, Math.min(ay, by)), Math.max(ay, by)) - ay) / (by - ay || 1) : (Math.min(Math.max(fx1, Math.min(ax, bx)), Math.max(ax, bx)) - ax) / (bx - ax || 1);
++    const kmin = Math.max(0, Math.floor(Math.min(t0, t1) * n) - 1), kmax = Math.min(n, Math.ceil(Math.max(t0, t1) * n) + 1);
++    cours = null;
++    for (let k = kmin; k < kmax; k++) {
+       const [px, py] = [Math.round(ax + ((bx - ax) * k) / n), Math.round(ay + ((by - ay) * k) / n)];
+       const [qx, qy] = [Math.round(ax + ((bx - ax) * (k + 1)) / n), Math.round(ay + ((by - ay) * (k + 1)) / n)];
+       const [mx, my] = [Math.round((px + qx) / 2) + dx, Math.round((py + qy) / 2) + dy];

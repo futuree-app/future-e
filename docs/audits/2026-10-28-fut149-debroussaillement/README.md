@@ -7,6 +7,8 @@
 > - `02-contre-epreuves.md` : lecture contre l'oracle (20 000 points), contre la carte officielle (300 points), contre
 >   les arrêtés de classement (commune par commune), et les adresses de recette.
 > - `captures/` et `recette-textes.json` : rendu réel, ordinateur (1 280 px) et mobile (390 px).
+> - `../2026-10-30-fut149-contre-revue-pr111.md` : contre-revue du 30/10/2026 (sections 1 à 10), corrections des
+>   réserves R1, R2, R4 à R8 (section 11) et options pour R3, à arbitrer (section 12).
 
 ## Décision : **GO** pour la revue, sous deux conditions de mise en service
 
