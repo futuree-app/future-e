@@ -4,8 +4,9 @@ import { bindOrphans } from "@/lib/typography";
 import { releve as s, Ligne, Marge, Surtitre, type ElementDeMarge } from "@/components/releve/primitives";
 import c from "./sites-sols.module.css";
 
-// LES SOLS POLLUÉS SUR CE TERRAIN (FUT-157), dans la grammaire du Relevé, comme la fibre (FUT-156) : un énoncé
-// et sa marge de preuve, séparés du reste par un filet. Les phrases sont décidées dans `sites-sols-texte.ts`
+// LA POLLUTION DES SOLS SUR CE TERRAIN (FUT-157). Le surtitre nomme un sujet, jamais un constat : il s'affiche
+// aussi au-dessus d'une absence ou d'une panne (relecture éditoriale du 30/10/2026). Dans la grammaire du Relevé,
+// comme la fibre (FUT-156) : un énoncé et sa marge de preuve, séparés du reste par un filet. Les phrases sont décidées dans `sites-sols-texte.ts`
 // (pur, testé) ; ce composant ne fait que les poser : le fait, les sites en cause, ce que cela change, les
 // limites, la vérification, puis la méthode repliée.
 //
@@ -21,7 +22,7 @@ export function SitesSolsSection({ lecture }: { lecture: LectureSitesSols | null
   ];
   return (
     <section aria-labelledby="sites-sols" style={{ display: "grid", gap: 18, paddingTop: 22, borderTop: "1px solid var(--r-filet)" }}>
-      <Surtitre id="sites-sols">Sols pollués sur ce terrain</Surtitre>
+      <Surtitre id="sites-sols">Pollution des sols sur ce terrain</Surtitre>
       <Ligne marge={<Marge elements={marge} />}>
         <p className={`${s.corps} ${s.encre}`}>{bindOrphans(t.titre)}</p>
         {t.sites.length > 0 && (

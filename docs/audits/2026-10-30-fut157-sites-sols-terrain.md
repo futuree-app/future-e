@@ -9,8 +9,9 @@
 - **Le cas de référence ne dit pas ce que le ticket supposait.** Aucun des 25 numéros BAN du boulevard de la Solidarité (Metz) n'a son point dans le SIS Sotrameuse. Le 94 a, le 96 et le 96 b sont posés sur la voie, à 2 ou 3 m du périmètre, hors de toute parcelle ; le cadastre les rattache par proximité à des parcelles que le SIS couvre entièrement. Une recherche par rayon disait « dans le SIS », le point seul dirait « rien ». La section dit « à vérifier », avec la raison.
 - **Une panne n'est jamais une absence.** Six issues distinctes : concerné, à vérifier, aucun (tout lu, à la parcelle attribuée), terrain non situé, incomplet, indisponible. Un résultat attesté est gardé si un autre inventaire tombe.
 - **Deux défauts de la source, mesurés et traités** : 11 % des périmètres portent des « trous » d'aire nulle qui les rendaient illisibles ; et l'API ne rend **jamais** une fiche localisée par un simple point dans une recherche géographique (même à 10 m de son point).
+- **Revue du 30/10 (§11)** : la preuve est désormais une **profondeur de 2 m**, et non plus les seuils du bruit aérien (2 %, 25 m²), qui se trompaient dans les deux sens face aux listes officielles de parcelles. Aucun recoupement n'est plus écarté pour sa petite taille. Les 327 périmètres se lisent (deux réparés à moins de 0,01 m²). Cartofriches n'est plus chargé. Les textes sont relus (éditorial et droit).
 - **Coût** : 6 à 12 appels Géorisques gratuits par dossier, au plus 250 Ko, en parallèle du reste ; la lecture communale est mise en cache une journée. Aucun appel Anthropic, aucune écriture Supabase, aucun changement du moteur de décision.
-- **Signalés à part (hors périmètre)** : la synthèse Logement affiche le HTML de la page de connexion si la session expire (§9) ; Cartofriches est chargé sans être affiché et peut faire refuser une actualisation (§8) ; l'horodatage du bâtiment (FUT-80) empêche probablement la règle « collecte identique » de jouer (§9).
+- **Signalés à part (hors périmètre)** : la synthèse Logement affiche le HTML de la page de connexion si la session expire (§9, reproduit) ; l'horodatage du bâtiment (FUT-80) empêche la règle « collecte identique » de jouer (§9, reproduit). Cartofriches : retiré (§8).
 
 ## 1. Audit de l'existant
 
@@ -35,7 +36,7 @@
 | Les géométries | SIS et SUP : `MultiPolygon` (199 et 14 sur Paris, Lyon, Marseille, Metz). Instructions : 64 points sur 295, 2 sans géométrie (Metz). | Un point ne prouve aucune emprise ; une fiche sans géométrie ne se situe pas. |
 | Les fiches ponctuelles dans une recherche par point | GIVAUDAN (Lyon) : absente d'une recherche à 10 m et à 100 m **de son propre point** ; à 1 km, seules des fiches à polygone sortent. | L'API ne rend jamais une fiche ponctuelle autour d'un point. Elles sont lues à la commune (§3). |
 | Les doublons | 107 fiches répétées sous la ville et l'arrondissement : seule la commune diffère, la géométrie est identique. | Dédoublonnage par identifiant sûr ; deux géométries différentes sous un même identifiant rendent la catégorie `partielle`. |
-| Les tracés | 35 périmètres sur 327 portent des anneaux d'aire nulle (`[a, a, b, a]`). 4 sont réellement invalides (RHODIACETA, BUIRE AUTOMOBILE, Lyon). | Anneaux nuls écartés (288 → 323 lisibles) ; les invalides restent « à vérifier » s'ils touchent le terrain. |
+| Les tracés | 35 périmètres sur 327 portent des anneaux d'aire nulle (`[a, a, b, a]`). 4 sont invalides (RHODIACETA, BUIRE AUTOMOBILE, Lyon) : des replis de quelques centimètres carrés. | Anneaux nuls écartés (288 → 323 lisibles), replis réparés à 0,1 m² au plus (327 sur 327, §11.2). Un tracé illisible qui peut toucher le terrain reste « à vérifier ». |
 | Les positions ponctuelles | 61 instructions ponctuelles : 14 à moins de 20 m du géocodage de leur propre adresse, d'autres à plus d'un kilomètre. | Une distance à une fiche ponctuelle ne prouve rien. Seule l'adresse publiée est un fait. |
 | Disponibilité | Le 30/10 vers 12 h 40 : `HTTP/2 INTERNAL_ERROR` sur toutes les requêtes pendant quelques minutes, puis des délais dépassés sur SIS et SUP à Marseille. | Les pannes réelles ont été vues ; elles donnent `indisponible` ou `incomplet`, jamais `aucun`. |
 
@@ -43,8 +44,8 @@
 
 | Situation | Issue |
 |---|---|
-| Intersection géométrique démontrée | `point_dans` (le point dans le périmètre) ou `parcelle_recoupe` (au moins 2 % de la parcelle attribuée) → **concerné** |
-| Simple proximité d'une fiche | Jamais retenue. Le voisin d'un SIS (Metz 98, Lyon 14 Tony Garnier) → **aucun** |
+| Intersection géométrique démontrée | `point_dans` (le point à plus de 2 m dans le périmètre) ou `parcelle_recoupe` (le périmètre entre de plus de 2 m dans la parcelle attribuée) → **concerné** (§11.1) |
+| Simple proximité d'une fiche | Jamais retenue. Le voisin d'un SIS (Metz 98) → **aucun** ; un liseré sur la parcelle (Lyon 14 Tony Garnier, CHIMICOLOR) → **à vérifier**, jamais démontré |
 | Localisation approximative | `localisation_ponctuelle` (point de la fiche dans la parcelle), `adresse_publiee` (fiche sans emprise publiée à cette adresse), `parcelle_incertaine` (parcelle par proximité ou sur une limite), `point_en_limite`, `parcelle_bordure`, `geometrie_illisible` → **à vérifier** |
 | Absence après consultation complète | Trois inventaires et la liste communale lus en entier, parcelle attribuée → **aucun**, avec sa limite |
 | Couverture incomplète | Un inventaire ou la liste communale non lus en entier → **incomplet** (ou la réserve « Non lus en entier » sous un résultat) ; parcelle non attribuable → **terrain non situé** |
@@ -56,7 +57,7 @@ Aucune règle nouvelle n'a été inventée là où une convention validée exist
 
 1. **Le grain de la preuve (FUT-81, FUT-146)**. La parcelle est **attribuée** seulement si l'adresse est géocodée au numéro, que son point tombe dans une parcelle et une seule, et que la parcelle se mesure. Trouvée par proximité (`repli`) ou sur une limite (`candidatsAuPoint > 1`), elle est **incertaine** : elle fonde un « à vérifier », jamais un « concerné ». C'est la règle du bruit aérien, la plus récente et la plus stricte.
 2. **Point et parcelle n'ont pas la même portée.** « Cette adresse est dans… » (point) ; « La parcelle de cette adresse est (en partie) dans… » (parcelle). La part de la parcelle est dite, et le dépliable rappelle qu'une parcelle peut être bien plus grande que le logement.
-3. **La part (convention du bruit aérien, FUT-146)** : recoupe à partir de 2 % ; bordure dite à partir de 25 m² ; en deçà, liseré de tracé non retenu. Mesuré à Lyon : les parcelles voisines d'un SIS en touchent 0,1 à 0,6 m². Les compter aurait mis tout le voisinage « à vérifier ».
+3. ~~**La part (convention du bruit aérien, FUT-146)**~~ : remplacée le 30/10 par la profondeur de 2 m (§11.1). Les seuils de 2 % et 25 m² écartaient des parcelles que l'administration déclare concernées.
 4. **Le rayon de recherche** = le sommet de la parcelle le plus éloigné du point + 5 m (une marge technique de mesure, jamais affichée) ; sans parcelle, 5 m. Une parcelle qui exigerait plus de 10 km n'est pas utilisée.
 5. **Les fiches sans emprise** (point ou rien) sont lues à la commune, avec arrondissements et anciens codes (périmètre de FUT-152). Leur point est confronté à la parcelle ; à défaut, leur **adresse publiée** est comparée à celle du logement : même numéro, même voie après normalisation, plage du même côté de la voie. Elles ne fondent qu'un « à vérifier ». Leur nombre borne toute absence (« 9 fiches de la commune n'ont pas d'emprise publiée… Aucune n'est publiée à cette adresse »).
 6. **Une adresse géocodée à la voie** n'est pas un terrain : un périmètre qui contient le point de la voie est « à vérifier », et l'absence vaut pour le point seulement (« terrain non situé »).
@@ -83,7 +84,7 @@ Depuis le 01/01/2023 (décret n° 2022-1289), l'information sur un SIS peut êtr
 
 **Interdits testés** sur les 17 cas réels et les cas construits : « logement pollué » ou « sain », « aucune pollution », exposition, santé, « obligatoire », « état des risques », CASIAS, IREP, friche au premier niveau ; obligations d'un SIS dites sans SIS, d'une servitude sans servitude ; toute distance autre que celle du repli cadastral.
 
-Le texte n'a pas encore été relu par l'Editorial Writer, comme le ticket le prévoyait.
+Relecture éditoriale (Editorial Writer) et juridique faites le 30/10 : §11.4.
 
 ## 5. Modifications de code
 
@@ -108,7 +109,7 @@ Aucune génération Anthropic : tout est déterministe. La synthèse rédigée n
 
 ## 6. Tests et contre-épreuves
 
-**`src/lib/fut157-sites-sols-terrain.test.ts` : 67 tests.**
+**`src/lib/fut157-sites-sols-terrain.test.ts` : 67 tests au premier passage, 82 après la revue du 30/10 (§11.5).**
 
 Dix-sept adresses réelles, rejouées hors réseau depuis les réponses brutes figées le 30/10/2026 (`src/lib/__fixtures__/fut157/cas.json`). L'attendu a été fixé avant le rejeu :
 
@@ -119,15 +120,15 @@ Dix-sept adresses réelles, rejouées hors réseau depuis les réponses brutes f
 | Boulevard Solidarité (voie), Metz | terrain non situé | Polygone à 2 m du point de voie ; une voie n'est pas un terrain |
 | 13 rue des Alliés, Metz | concerné | Dans la servitude du dépôt BP-Total ; l'instruction du même dépôt, publiée à cette adresse, est pointée à 958 m (à vérifier) |
 | 18 avenue Tony Garnier, Lyon | concerné | SIS CHIMICOLOR et instruction, point dedans |
-| 14 avenue Tony Garnier, Lyon | concerné | Dans le SIS TOTAL Gerland ; CHIMICOLOR, voisin à un liseré, n'est pas listé |
+| 14 avenue Tony Garnier, Lyon | concerné | Dans le SIS TOTAL Gerland (sa fiche cite BZ 244) ; CHIMICOLOR, qui ne touche la parcelle que d'un liseré de 0,1 m² et ne la cite pas, est dit « à vérifier » (revu le 30/10) |
 | 50 rue Saint-Jean-de-Dieu, Lyon | concerné | Servitude de l'ancienne usine à gaz, 95 % de la parcelle |
 | 5 rue du 3-Septembre-1944, Lyon | concerné | Point dehors, parcelle attribuée dedans (99,9 %) |
-| 98 rue Saint-Pierre-de-Vaise, Lyon | concerné | Point dehors, parcelle traversée (7 %) |
+| 98 rue Saint-Pierre-de-Vaise, Lyon | à vérifier (revu le 30/10 ; avant : concerné) | 7 % de la parcelle, mais une bande de moins d'1 m de large ; la fiche ne cite pas BP 80 parmi ses 9 parcelles |
 | 38 rue Sainte-Anne-de-Baraban, Lyon | à vérifier | Parcelle rattachée par proximité (0,1 m) |
-| 30 rue du Chapeau-Rouge, Lyon | à vérifier | Périmètre RHODIACETA invalide (anneaux qui se croisent) |
+| 30 rue du Chapeau-Rouge, Lyon | concerné (revu le 30/10 ; avant : à vérifier) | Périmètre RHODIACETA réparé (0,008 m²) ; point à 5,8 m à l'intérieur ; la fiche cite BT 141 |
 | 62 rue Paul-Cazeneuve, Lyon | à vérifier | Instruction GIVAUDAN pointée dans la parcelle, sans emprise |
 | 56 rue Paul-Cazeneuve, Lyon | à vérifier | Instruction GIVAUDAN LAVIROTTE publiée au 56, pointée ailleurs |
-| 64 rue de Grenelle, Paris | concerné | SIS et instruction AVIA-RASPAIL, toute la parcelle |
+| 64 rue de Grenelle, Paris | concerné | SIS et instruction AVIA-RASPAIL, toute la parcelle ; le point est à 1 m de la limite : la preuve passe par la parcelle (revu le 30/10) |
 | 10 rue de Rivoli, Paris | aucun | Rien après lecture complète (Paris : 3 lots, 21 codes) |
 | 9 av. Maurice-Chevance-Bertin, Marseille | concerné | SIS TLM, lisible une fois l'anneau nul écarté |
 
@@ -163,12 +164,12 @@ Les deux lectures partent en parallèle, et en parallèle de tout le fan-out. En
 
 Un affichage « sous la même règle » n'est pas défendable : une friche ne dit pas une pollution avérée, et la seule qualification de pollution de Cartofriches est déclarative.
 
-**Proposition (non appliquée, à arbitrer)** : retirer l'appel de la route, le champ `cartofriches` des nouveaux rapports et « friches » de `sourcesAbsentes`. Garder le type optionnel pour lire les rapports déjà enregistrés. La route `/api/cartofriches` et la lib peuvent rester pour un usage futur.
+**Appliqué le 30/10, sur accord de principe du porteur, dans un commit distinct de FUT-157** : voir §11.3.
 
 ## 9. Signalés, hors périmètre
 
-1. **`LogementSynthesis` affiche le HTML de la page de connexion si la session expire.** Sans session, `/api/synthesize-logement` répond 307 vers la connexion ; `fetch` suit la redirection, la réponse est `ok`, et le composant diffuse ce HTML comme synthèse. Ses jetons insécables élargissent alors **tout le module** à 3 828 px, coupé par un `overflow: hidden` (vu sur les bancs FUT-156 et FUT-157). Correctif probable : refuser `res.redirected` ou un `content-type` autre que texte. À traiter dans un ticket dédié.
-2. **L'horodatage du bâtiment (FUT-80, `batiment.consulteLe`) entre dans l'empreinte du rapport.** Deux collectes identiques n'ont donc probablement jamais la même empreinte, et « Aucune donnée n'a changé depuis cette collecte » ne s'affiche plus. La lecture des sols ne porte aucune date pour ne pas aggraver ce point. À vérifier en contre-revue.
+1. **`LogementSynthesis` affiche le HTML de la page de connexion si la session expire.** Reproduit et proposé en ticket séparé le 30/10 (§11.6). Sans session, `/api/synthesize-logement` répond 307 vers la connexion ; `fetch` suit la redirection, la réponse est `ok`, et le composant diffuse ce HTML comme synthèse. Ses jetons insécables élargissent alors **tout le module** à 3 828 px, coupé par un `overflow: hidden` (vu sur les bancs FUT-156 et FUT-157). Correctif probable : refuser `res.redirected` ou un `content-type` autre que texte. À traiter dans un ticket dédié.
+2. **L'horodatage du bâtiment (FUT-80, `batiment.consulteLe`) entre dans l'empreinte du rapport.** Confirmé le 30/10 (§11.6). Deux collectes identiques n'ont donc probablement jamais la même empreinte, et « Aucune donnée n'a changé depuis cette collecte » ne s'affiche plus. La lecture des sols ne porte aucune date pour ne pas aggraver ce point. À vérifier en contre-revue.
 3. **Geste dans « À vérifier avant de décider »** : la section porte ses propres vérifications. Ajouter un geste au `DecisionChecklist` relèverait du moteur de décision, exclu de ce ticket.
 
 ## 10. Reproduire
@@ -181,3 +182,127 @@ node scripts/fut157/cout.mjs "<adresse>"                                        
 node --test src/lib/fut157-sites-sols-terrain.test.ts
 BASE=http://localhost:3157 node scripts/fut157/recette.mjs                                 # avec next dev -p 3157
 ```
+
+## 11. Revue du porteur du 30/10/2026 : derniers arbitrages
+
+### 11.1 Les seuils géométriques : une profondeur de 2 m, plus de part ni d'aire
+
+**La question.** Les seuils repris du bruit aérien (2 % de la parcelle pour « recouper », 25 m² pour une « bordure », un liseré plus petit écarté) avaient été faits pour d'autres données. Conviennent-ils aux SIS, aux servitudes et aux instructions ?
+
+**L'oracle indépendant.** Chaque fiche officielle (SIS, SUP, instruction) publie un tableau « Parcelle(s) concernée(s) ». C'est la base réglementaire : la liste des SIS « précis[e] les parcelles concernées » (R. 125-24, 3°). `scripts/fut157/parcelles-officielles.mjs` lit ce tableau pour les 327 périmètres de Paris, Lyon, Marseille et Metz : 318 listes lues, 2 559 numéros déclarés. Il charge aussi les parcelles cadastrales de chaque emprise (API Carto) ; tout est gardé en cache dans `~/Documents/futuree-fut157/officielles/`. `profondeur.mjs` mesure ensuite, pour chaque parcelle recoupée, la **profondeur** du recoupement : la plus grande tolérance e pour laquelle le périmètre, rétréci de e (érosion exacte, Clipper), recoupe encore la parcelle. Chiffres complets : `officielles/analyse-seuils.txt`.
+
+**Ce que montrent les données** (325 périmètres qui recoupent au moins une parcelle, 4 268 recoupements d'au moins 0,05 m²) :
+
+| Profondeur atteinte (m) | 0 | 0,1 | 0,25 | 0,5 | 0,75 | 1 | 1,5 | 2 | 3 | 5 | 10 | 20 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| SIS, parcelles déclarées | 5 | 0 | 2 | 4 | 5 | 7 | 6 | 14 | 29 | 79 | 180 | 684 |
+| SIS, non déclarées | 578 | 21 | 34 | 10 | 8 | 5 | 1 | **0** | 7 | 21 | 44 | 141 |
+| SUP, déclarées | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 2 | 6 | 50 |
+| SUP, non déclarées | 68 | 5 | 0 | 0 | 2 | 1 | 0 | 1 | 3 | 13 | 13 | 113 |
+| Instructions, déclarées | 5 | 0 | 2 | 4 | 5 | 7 | 6 | 13 | 31 | 93 | 207 | 691 |
+| Instructions, non déclarées | 686 | 22 | 37 | 11 | 10 | 8 | 1 | **0** | 11 | 23 | 53 | 177 |
+
+(La colonne « 2 » compte les recoupements dont la profondeur est comprise entre 2 et 3 m.)
+
+- Les recoupements de parcelles non déclarées forment deux populations : des liserés de moins de 2 m (578 SIS de moins de 10 cm), puis, **après un vide entre 2 et 3 m**, des emprises profondes. Ces dernières sont des parcelles renumérotées depuis la fiche : 358 des 2 559 numéros déclarés n'existent plus au cadastre. La liste officielle peut donc confirmer un recoupement, jamais l'exclure.
+- **Les seuils de 2 % et 25 m² se trompaient dans les deux sens** :
+  - ils **écartaient 8 parcelles déclarées** (14 recoupements) : CRE Lyon CH 321, 449, 452 et 501 (0,26 à 3,4 m²), Rebellet BK 92 (0,34 m²), La Charbonnière BV 18 (0,36 m²), Sylviana BH 57 (2,1 m²), Danzel CJ 9 (17,7 m², 3 m de profondeur) ;
+  - ils disaient **« concernés » 81 recoupements** (38 de SIS) où le périmètre n'entre pas de 2 m : des parcelles de 1 à 266 m² couvertes le long d'une limite, et la bande de 7 % du 98 rue Saint-Pierre-de-Vaise, que la fiche ne cite pas.
+- Une aire ou une part ne sépare pas ces populations : un liseré de 0,26 m² peut être déclaré, une parcelle de 2 m² couverte à 100 % le long d'une limite ne l'est pas. La profondeur les sépare.
+
+**Décision appliquée** (`TOLERANCE_TRACE_M = 2`, `sites-sols-terrain.ts`) :
+
+| Situation | Issue |
+|---|---|
+| Point de l'adresse à plus de 2 m à l'intérieur d'un périmètre valide (adresse au numéro) | **concerné** (`point_dans`) |
+| Parcelle attribuée dans laquelle le périmètre entre de plus de 2 m | **concerné** (`parcelle_recoupe`), « en partie » avec la part si elle n'est pas entière (« moins de 1 % » sous 1 %), et le geste « regardez si la parcelle figure sur la liste de la fiche » |
+| Recoupement de la parcelle attribuée de moins de 2 m de profondeur, **quelle que soit son aire** | **à vérifier** (`parcelle_bordure`), jamais écarté |
+| Point sur la limite, ou dedans à moins de 2 m, sans parcelle qui tranche | **à vérifier** (`point_en_limite`) |
+| Parcelle trouvée par proximité ou sur une limite | **à vérifier** (`parcelle_incertaine`), jamais la parcelle certaine de l'adresse |
+| Contact sans surface (moins de 0,05 m², deux limites confondues) | rien |
+
+Une seule parcelle déclarée tombe sous le contact : une parcelle d'1 m² à Lyon Confluence (BC 208), touchée sur 0,007 m², où aucun logement ne se rattache.
+
+Avec la nouvelle règle, aucune parcelle déclarée n'est plus écartée, et aucun recoupement de moins de 2 m n'est plus dit « concerné ». 29 parcelles déclarées d'un SIS, recoupées sur moins de 2 m, passent à « à vérifier », jamais à l'absence.
+
+**SIS, SUP et instructions : une seule règle.** Leurs distributions sont les mêmes ; les instructions reprennent souvent le périmètre du SIS. Les 14 servitudes mesurées n'en montrent pas d'autre (un seul cas entre 2 et 3 m : NEXANS BN 200, 21 m² couverts en entier, « concerné »). Rien ne justifie une règle distincte.
+
+**Le coût, assumé et dit.** Un SIS a en moyenne 4,8 parcelles voisines touchées par un liseré (23 au plus). Elles passent de « aucun » à « à vérifier ». Le texte le dit sans alarmer : « Ce peut n'être qu'un écart entre deux cartes… », puis donne le geste décisif : chercher la parcelle dans la liste de la fiche. **Option restante, non appliquée (décision produit)** : lire nous-mêmes cette liste, pour dire au lecteur si sa parcelle y figure. C'est un appel gratuit par fiche à vérifier, mais une page HTML à analyser et non une API. La liste confirme ; elle n'infirme pas (358 numéros obsolètes).
+
+**Cas réels qui changent** (revus contre les listes officielles, un oracle indépendant de la géométrie) : 98 rue Saint-Pierre-de-Vaise (concerné → à vérifier ; BP 80 non citée), 30 rue du Chapeau-Rouge (à vérifier → concerné ; BT 141 citée), 14 avenue Tony Garnier (CHIMICOLOR désormais dit, à vérifier ; BZ 244 non citée par CHIMICOLOR, citée par TOTAL), 64 rue de Grenelle (concerné par la parcelle et non plus par le point, à 1 m de la limite).
+
+### 11.2 Les quatre périmètres illisibles, et les 35 aux anneaux nuls
+
+| Fiche | Inventaire | Localisation | Anomalie | Écart lacets / surface couverte |
+|---|---|---|---|---|
+| SSP00005690101 RHODIACETA | SIS | ZAC Saint-Pierre de Vaise, Lyon 9e (86 360 m² publiés) | Le trou de la partie 0 est un aller-retour de 30 m sur une ligne, qui se croise une fois (4,806983 ; 45,771504) | 0,0078 m² |
+| SSP000056901 RHODIACETA | instruction | même tracé | même défaut | 0,0078 m² |
+| SSP00005770101 SOCIÉTÉ NOUVELLE DE LA BUIRE AUTOMOBILE | SIS | 74 avenue Félix-Faure, Lyon 3e (2 945 m²) | Le contour se replie sur quelques centimètres au premier sommet (4,856611 ; 45,752617) | 0,0011 m² |
+| SSP000057701 BUIRE AUTOMOBILE | instruction | même tracé | même défaut | 0,0011 m² |
+
+Diagnostic : `scripts/fut157/croisements.mjs`. Ce sont des replis de quelques centimètres carrés nés de l'arrondi des coordonnées publiées (six décimales, une dizaine de centimètres).
+
+**Traitement.** Un tracé qui n'est pas un polygone valide est remplacé par la surface qu'il recouvre (union Clipper), **seulement si** celle-ci ne s'écarte pas de plus de 0,1 m² de l'aire de ses anneaux (`TOLERANCE_REPARATION_M2`, `reparer` dans `geometrie-parcelle.ts`). Cette borne est inférieure aux plus petits recoupements déclarés (0,26 à 0,36 m²) : une réparation ne peut ni créer ni effacer un liseré que la liste contredirait. Au-delà, le tracé reste illisible. **Résultat : 327 périmètres lisibles sur 327.**
+
+**Effet sur les adresses.** RHODIACETA recoupe 56 parcelles, dont 51 sur plus de 2 m ; BUIRE en recoupe 4, dont 2 sur plus de 2 m. Avant, toute parcelle de leur emprise élargie (112 et 16 parcelles) était « à vérifier, périmètre illisible ». Désormais, elles sont lues comme les autres. Parmi les 17 adresses réelles, une seule change : le 30 rue du Chapeau-Rouge, désormais « concerné », et sa fiche cite BT 141.
+
+**Un périmètre illisible ne produit jamais « aucun »**, testé :
+- un tracé illisible dont l'emprise touche la parcelle ou le point donne « à vérifier », même quand tout le reste est lu en entier, avec ou sans parcelle ;
+- un tracé illisible dont **tous** les sommets sont loin est ignoré : quelle que soit sa forme, il reste dans leur emprise ;
+- **défaut corrigé** : un sommet illisible était ignoré dans le calcul de l'emprise, qui pouvait alors se croire loin du terrain. Désormais, un seul sommet illisible suffit à compter le périmètre ;
+- vingt formes illisibles construites (papillons de 1 à 100 m², parties superposées) : jamais « aucun », jamais « terrain non situé ».
+
+**Les 35 périmètres aux anneaux nuls** (66 anneaux) : écarter ces anneaux change l'aire de 2·10⁻¹⁰ m², c'est-à-dire rien (`scripts/fut157/surfaces.mjs`, `~/Documents/futuree-fut157/surfaces-apres.json`). Contrôle externe : pour les 155 périmètres qui publient une superficie, notre aire, après nettoyage et réparation, s'en écarte de **0,12 % en médiane et de 0,63 % au plus**. Pour les périmètres aux anneaux nuls, l'écart maximal est de 0,23 %, comme les autres ; pour les deux réparés, il est de 0,19 et 0,20 %. Ces écarts tiennent à la projection et à l'arrondi, pas au nettoyage.
+
+### 11.3 Cartofriches : chargement retiré (commit distinct de FUT-157)
+
+- **Consommateurs** (`grep -rni "cartofriche\|friche" src scripts supabase`) : la route le chargeait et le posait dans le rapport ; `sourcesAbsentes` en faisait une source ; `LogementModule` en nommait l'absence. Aucun composant, aucune règle, aucune décision, aucune couverture et aucune synthèse ne le lisaient (`logement-synthesis-cache` l'écartait déjà). `/api/cartofriches` n'est appelé par aucun écran.
+- **Le défaut reproduit** (`scripts/fut157/cartofriches-refus.mjs`, sur `5ba4dcaa`) : une version N avec Cartofriches, puis une collecte N+1 où seul Cartofriches tombe et où une autre donnée change. Résultat : `{"sourcesAbsentesN1":["friches"],"issue":"refusee"}`. Après le retrait : `{"sourcesAbsentesN1":[],"issue":"nouvelle_version"}`.
+- **Modifié** : l'appel retiré de la route ; « friches » retiré de `sourcesAbsentes` ; le champ du type gardé et marqué historique ; le libellé « friches (Cartofriches) » gardé pour les versions qui l'ont noté absent ; le test de la route mis à jour (elle n'appelle plus Cartofriches). La lib et ses tests de délai restent, pour `/api/cartofriches`.
+- **Rapports historiques** (testé) : une version enregistrée avec `cartofriches` et « friches » dans ses sources absentes se relit telle quelle. Son actualisation n'est pas refusée faute de friches. La première actualisation crée une nouvelle version, l'empreinte ayant changé, ce qui est attendu.
+- **Aucun changement transversal** : la route, la version, le type, un libellé et deux tests.
+
+### 11.4 Relecture éditoriale et juridique
+
+Rapport de l'Editorial Writer : `docs/rapports-agents/editorial-writer/2026-10-30-fut157-sites-sols.md`. Ses 3 points bloquants, 12 importants et 10 mineurs ont été appliqués, sauf ceux notés ci-dessous.
+
+- **Surtitre** : « Pollution des sols sur ce terrain » (un sujet, pas un constat, puisqu'il s'affiche aussi au-dessus d'une absence ou d'une panne).
+- **Le premier mot porte l'état** : « Le terrain n'a pas pu être situé : rien ne peut être conclu pour lui… » ; « Aucun des trois inventaires de sols pollués consultés ne concerne la parcelle de cette adresse. »
+- **Inventaires distingués** : la servitude n'est plus placée « dans » le SIS. « Site suivi par l'administration pour une pollution des sols » (et non « site pollué » : la pollution peut n'être que suspectée). « Suivi en cours / terminé » remplace « instruction en cours / clôturée ».
+- **Le locataire** n'est plus oublié : « vendeur ou bailleur » dans chaque geste.
+- **Un site déclaré à l'adresse, ou repéré dans la parcelle**, a un titre propre : « … est déclaré à cette adresse. On ne sait pas jusqu'où il s'étend : c'est à vérifier. »
+- **Liseré** : « Ce peut n'être qu'un écart entre deux cartes, qui ne se superposent pas au mètre près : la carte seule ne permet pas de trancher. » La version précédente disait « le plus souvent », une fréquence non mesurée et rassurante.
+- **Le geste décisif dans futur•e** : la liste des parcelles de la fiche, en nommant la fiche et la parcelle (« La fiche officielle « CHIMICOLOR » liste les parcelles concernées : regardez si la parcelle BZ 244 en fait partie »). Il est aussi proposé quand un SIS ne couvre qu'une partie de la parcelle. Pour une adresse sans numéro : « refaites la recherche avec l'adresse complète ».
+- **Exposition** : « Ces inventaires disent ce que l'administration sait du sol, pas ce à quoi les occupants sont exposés. » La phrase est visible dès qu'un site est signalé (c'est la première question d'un acheteur) et repliée sinon. Elle est la seule mention de l'exposition, et elle dit ce que l'inventaire ne mesure pas (testé).
+
+**Droit, relu dans le texte** (extrait officiel de la préfecture de Lozère, reproductions OPPBTP, en plus des sources du §4) :
+
+| Point | Avant | Après |
+|---|---|---|
+| L. 556-2 al. 1 et 2 | « un projet … soumis à permis devra comporter l'attestation… » | Tout projet de construction ou de lotissement dans un SIS fait l'objet d'une étude des sols ; l'attestation d'un bureau certifié est exigée « en principe » pour un permis (deux exceptions : lotissement déjà attesté, DUP) |
+| L. 125-7 al. 2 | absent | Dans le dépliable, seulement si un SIS est en cause : sans information écrite, et si une pollution rend le terrain impropre à l'usage prévu, résolution, restitution d'une partie du prix ou baisse du loyer dans les deux ans de la découverte. Texte relu, et non cité de mémoire |
+| L. 514-20 | absent | Instructions, au conditionnel, pour la vente seulement : « Si une installation classée soumise à autorisation ou à enregistrement a été exploitée sur ce terrain, le vendeur doit toutefois vous en informer par écrit. » L'inscription ne le prouve pas |
+| Servitude | « s'impose aux autorisations d'urbanisme » (jargon) | « Lesquels : c'est l'arrêté du préfet qui le dit, à lire depuis la fiche. Tout permis de construire ou de travaux doit le respecter. » Le contenu de l'arrêté n'est jamais résumé |
+| Certificat d'urbanisme | « … sur la carte des anciens sites industriels » | « … carte des anciennes activités industrielles et de services » (L. 125-6 IV) |
+
+**Non appliqués, à trancher** :
+1. En `incomplet`, dire l'absence partielle (« les autres inventaires ont été lus en entier : aucun SIS… »). La prudence est gardée (« ce terrain n'a pas pu être vérifié en entier »), parce qu'une absence partielle est une décision de doctrine, pas de style.
+2. Afficher dans futur•e la description de la fiche officielle (polluants, activité passée) : décision produit.
+3. Lire nous-mêmes la liste des parcelles des fiches (§11.1).
+
+### 11.5 Tests et contre-épreuves après la revue
+
+- `fut157-sites-sols-terrain.test.ts` : **82 tests** (67 avant). Ajouts : les cas de profondeur, chacun en défaut sous les anciens seuils (liseré de 0,5 m², bande de 1,5 m à 7,5 %, emprise de 36 m² au cœur d'un hectare, contact) ; les trois inventaires sous la même règle ; le point à moins de 2 m ; le périmètre illisible (touche, loin, sommet illisible, réparable ou non, vingt formes) ; la réparation de RHODIACETA bornée à 0,01 m² ; les textes relus (titres, liste des parcelles, recours de L. 125-7 seulement pour un SIS, L. 514-20 jamais pour un bailleur, exposition).
+- `logement-report-version.test.ts` : deux tests Cartofriches (absence non comptée, rapports historiques relus).
+- **Mutations** : 20 garde-fous retirés un à un (`~/Documents/futuree-fut157/scripts/mutations.py`), tous détectés. Parmi eux, 8 nouveaux : tolérance à 0 (11 échecs), retour au seuil de 2 % (5), liseré écarté (8), point près de la limite lu dedans (3), sommet illisible ignoré (1), réparation sans borne (1), réparation retirée (3), « friches » redevenue une source absente (1).
+- **Recette navigateur** (`scripts/fut157/recette.mjs`, vrai module Logement, Chrome) : 12 états, dont 4 nouveaux (bande de moins de 2 m, liseré CHIMICOLOR, RHODIACETA réparé, site déclaré à l'adresse) et le rapport antérieur, à 1 440 px, 390 et 360 px. **378 vérifications sur 378.** Le premier passage a relevé une erreur de page isolée à 360 px (`Cannot read properties of null (reading 'sequence')`) ; elle ne s'est reproduite ni en 12 chargements ciblés du même cas, ni au passage complet suivant, et rien n'apparaît dans le journal du serveur. Elle vient vraisemblablement du runtime de développement, mais ce n'est pas démontré. Un premier passage avait aussi compté des sections absentes à 360 px avant leur rendu ; la recette attend désormais la section avant de compter.
+- **Non-régression** : `tsc` 0 erreur ; `eslint` sur les fichiers touchés, 0 erreur et 0 avertissement (4 variables inutilisées des scripts du premier passage retirées). Voisins (FUT-81, 127, 146, 152, 156, 157, 158, géométrie, versions Logement) : 520 sur 520. **Suite complète (`--test-concurrency=1`, motifs de `npm test`) : 3 992 tests, 0 échec** (3 975 + 15 FUT-157 + 2 Cartofriches). **Build de production** réussi ; aucun fichier client ne contient Clipper.
+- Moteur de décision : `git diff origin/main -- src/lib/decision` ne touche que `logement-coverage.ts` (le champ optionnel `sitesSols`, inchangé depuis `5ba4dcaa`). `fetchLogementDecisionData` ne fournit pas la lecture : sa sortie est inchangée (testé).
+- **Compatibilité** : `main` est toujours à `82cbc171`. La PR #111 (FUT-149, `87c1cca2`) touche aussi la route et `LogementModule.tsx`. Une fusion simulée (`git merge-tree`) donne **deux conflits mécaniques**, déjà présents sur `5ba4dcaa` : chaque branche ajoute une source au même `Promise.all` de la route, et au compte des dépendances chaînées de `logement-sources-bornees.test.ts`. La branche fusionnée en second les résout en gardant les deux sources. FUT-149 n'est pas modifié.
+
+### 11.6 Défauts hors périmètre : reproduits, proposés en tickets
+
+Les deux propositions détaillées : `~/Documents/futuree-fut157/tickets-hors-perimetre.md`.
+
+- **A. Session expirée** (gravité haute). `requireCurrentUser` (`src/lib/user-account.ts:14`) fait `redirect("/connexion")` dans les routes d'API (11 routes). Reproduit le 30/10 : `POST /api/synthesize-logement` sans session répond `307 location: /connexion` ; suivi comme le fait `fetch`, il donne `200 text/html`, 41 974 octets, que `LogementSynthesis.tsx` diffuse comme synthèse (débordement à 3 828 px).
+- **B. Empreinte et heure du RNB** (gravité moyenne). Reproduit par `scripts/fut157/empreinte-batiment.mjs` : deux collectes aux faits identiques, à 5 minutes d'écart, ont deux empreintes différentes (`6dbd1808` ≠ `5ea77111`), et l'actualisation écrit une version 2 au lieu de répondre « identique ». La synthèse n'est pas touchée : son cache dépend de l'empreinte des faits, sans `batiment`.

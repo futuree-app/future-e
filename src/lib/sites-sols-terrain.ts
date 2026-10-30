@@ -19,17 +19,17 @@
 // Une recherche par rayon disait « dans le SIS » ; le point seul dirait « rien ». La vérité est entre les deux :
 // à vérifier, avec la raison. C'est ce que cette lib rend.
 //
-// ── LE GRAIN DE LA PREUVE (conventions de FUT-81 et FUT-146) ────────────────────────────────────────
+// ── LE GRAIN DE LA PREUVE (rattachement de FUT-81 et FUT-146, profondeur propre à FUT-157) ──────────────
 // La parcelle n'est attribuée au logement que si l'adresse est géocodée au numéro, que son point tombe dans
 // UNE parcelle, et que cette parcelle se mesure. Une parcelle trouvée par proximité, ou sur une limite entre
 // deux parcelles, n'est pas écartée : elle fonde un « à vérifier », jamais un « concerné ». Le point et la
 // parcelle n'ont pas la même portée : le point dit où est l'entrée, la parcelle dit le terrain.
 
 import {
-  aireIntersection, aireRegion, classer, pointsDe, projectionAutour, regionDe, regionMesurable,
-  type Geometrie, type Region,
+  aireAuDela, aireIntersection, aireRegion, classer, distanceLignes, pointsDe, projectionAutour, regionDe, regionMesurable,
+  reparer, type Geometrie, type Region,
 } from "./geometrie-parcelle.ts";
-import { PART_MIN, SURFACE_CONTACT_M2, SURFACE_MIN_M2 } from "./urbanisme-nomenclature.ts";
+import { SURFACE_CONTACT_M2 } from "./urbanisme-nomenclature.ts";
 import type { CategorieGeoLue, FicheSspGeo } from "./sites-sols.ts";
 import {
   INVENTAIRES, SITES_SOLS_TERRAIN_CONVENTION,
@@ -45,6 +45,40 @@ export * from "./sites-sols-etat.ts";
 export const MARGE_RECHERCHE_M = 5;
 /** Le rayon maximal accepté par l'API (spécification v1). Un terrain plus étendu ne se lit pas en un appel. */
 export const RAYON_MAX_M = 10_000;
+
+/**
+ * L'IMPRÉCISION DES TRACÉS, EN MÈTRES (arbitrage du 30/10/2026, après la revue des seuils de FUT-146). Un
+ * périmètre ne « concerne » le terrain que s'il y entre de plus de 2 m : le point de l'adresse à plus de 2 m de
+ * sa limite, ou une partie de la parcelle attribuée à plus de 2 m de sa limite. En deçà, c'est « à vérifier ».
+ *
+ * POURQUOI UNE PROFONDEUR, ET POURQUOI 2 m. Mesuré sur les 327 périmètres publiés à Paris, Lyon, Marseille et
+ * Metz (325 recoupent au moins une parcelle), confrontés aux 2 559 numéros de parcelles que leurs fiches
+ * officielles déclarent « concernées » et au cadastre actuel (scripts/fut157/parcelles-officielles.mjs,
+ * profondeur.mjs) :
+ *   - Les seuils du bruit aérien (2 % de la parcelle, 25 m²) se trompaient dans les deux sens. Ils écartaient
+ *     8 parcelles déclarées concernées, touchées sur 0,3 à 17,7 m² (CRE Lyon, La Charbonnière, Sylviana, Rebellet,
+ *     Danzel), et disaient « concernés » 81 recoupements (38 de SIS) où le périmètre n'entre pas de 2 m : des
+ *     parcelles de 1 à 266 m² longeant une limite, que l'écart de tracé suffit à couvrir.
+ *   - Les recoupements des parcelles non déclarées forment deux populations. Pour les SIS : 657 liserés de moins
+ *     de 2 m de profondeur (578 de moins de 10 cm), puis un vide entre 2 et 3 m, puis 213 emprises de 3 m et plus,
+ *     des parcelles renumérotées depuis la fiche (358 des 2 559 numéros déclarés n'existent plus au cadastre).
+ *   - Une aire ou une part ne sépare pas ces populations : un liseré de 0,3 m² peut être déclaré, une parcelle de
+ *     2 m² couverte à 100 % le long d'une limite ne l'est pas. Une profondeur, si.
+ * 29 parcelles déclarées d'un SIS sont recoupées sur moins de 2 m : elles sont « à vérifier », jamais écartées.
+ * Les trois inventaires suivent la même règle : les instructions reprennent souvent le périmètre du SIS et ont
+ * la même distribution ; les 14 servitudes mesurées n'en montrent pas d'autre (une seule entre 2 et 3 m, une
+ * parcelle de 21 m² couverte en entier).
+ */
+export const TOLERANCE_TRACE_M = 2;
+
+/**
+ * LA RÉPARATION ADMISE D'UN TRACÉ, EN m². Un périmètre qui n'est pas un polygone valide n'est remplacé par la
+ * surface qu'il recouvre que si celle-ci ne s'écarte de l'aire de ses anneaux que de 0,1 m² au plus : moins que les
+ * plus petits recoupements déclarés concernés (0,26 à 0,36 m² : CRE Lyon, Rebellet, La Charbonnière). Mesuré le 30/10/2026 : les deux périmètres de Lyon
+ * qui en relèvent (RHODIACETA, BUIRE) s'écartent de 0,008 et 0,001 m², des replis de quelques centimètres nés de
+ * l'arrondi des coordonnées publiées (six décimales, une dizaine de centimètres).
+ */
+export const TOLERANCE_REPARATION_M2 = 0.1;
 
 const porteeDe = (geocodage: string | null): PorteeSitesSols =>
   geocodage == null ? "non_precisee" : geocodage === "housenumber" ? "adresse" : "secteur";
@@ -166,20 +200,25 @@ export function planDeRecherche(e: EntreeSitesSols): Plan {
 
 const arrondi = (v: number, pas: number) => { const k = Math.round(1 / pas); return Math.round(v * k) / k; };
 
-/** L'emprise (projetée) des sommets lisibles d'une géométrie ; `null` s'il n'y en a aucun. */
+/**
+ * L'emprise (projetée) de TOUS les sommets d'une géométrie ; `null` s'il n'y en a aucun, ou si un seul est
+ * illisible : l'emprise des autres ne borne alors plus le tracé (revue du 30/10/2026, un sommet illisible était
+ * ignoré et l'emprise pouvait se croire loin du terrain).
+ */
 function emprise(coordinates: unknown, proj: Plan["proj"]): [number, number, number, number] | null {
   const pts: [number, number][] = [];
+  let illisible = false;
   const visiter = (v: unknown): void => {
-    if (!Array.isArray(v)) return;
-    if (v.length >= 2 && typeof v[0] === "number" && typeof v[1] === "number") {
+    if (!Array.isArray(v)) { illisible = true; return; }
+    if (v.length > 0 && !Array.isArray(v[0])) {
       const q = pointsDe({ type: "Point", coordinates: v }, proj);
-      if (q) pts.push(q[0]);
+      if (q) pts.push(q[0]); else illisible = true;
       return;
     }
     v.forEach(visiter);
   };
   visiter(coordinates);
-  if (pts.length === 0) return null;
+  if (illisible || pts.length === 0) return null;
   return [Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1]))];
 }
 
@@ -227,6 +266,18 @@ export function sansAnneauxNuls(g: { type: string; coordinates: unknown }, proj:
   return { type: "MultiPolygon", coordinates: nettoyes };
 }
 
+/**
+ * LE PÉRIMÈTRE TEL QU'ON PEUT LE MESURER, ou `null` s'il ne se mesure pas : ses anneaux d'aire nulle écartés
+ * (`sansAnneauxNuls`), puis, s'il n'est toujours pas un polygone valide, réparé à la précision de ses coordonnées
+ * (`TOLERANCE_REPARATION_M2`). `reparationM2` dit de combien la réparation a déplacé de surface (0 sans réparation).
+ */
+export function perimetreLisible(g: { type: string; coordinates: unknown }, proj: Plan["proj"]): { region: Region; reparationM2: number } | null {
+  const r = regionDe(sansAnneauxNuls(g, proj), proj);
+  if (!r || !(aireRegion(r) > 0)) return null;
+  const rep = reparer(r, TOLERANCE_REPARATION_M2);
+  return rep && aireRegion(rep.region) > 0 ? { region: rep.region, reparationM2: rep.ecartM2 } : null;
+}
+
 function situer(f: FicheSspGeo, plan: Plan, point: [number, number]): Pick<FicheTerrain, "situation" | "part" | "surfaceM2"> | null {
   const g = f.geometrie;
   const ici = pointsDe({ type: "Point", coordinates: point }, plan.proj)![0];
@@ -238,29 +289,44 @@ function situer(f: FicheSspGeo, plan: Plan, point: [number, number]): Pick<Fiche
     if (!pts) return null;
     return pts.some((q) => classer(q, plan.region!).lieu !== "dehors") ? { situation: "localisation_ponctuelle", part: null, surfaceM2: null } : null;
   }
-  const r = g && (g.type === "Polygon" || g.type === "MultiPolygon") ? regionDe(sansAnneauxNuls(g, plan.proj), plan.proj) : null;
+  const lu = g && (g.type === "Polygon" || g.type === "MultiPolygon") ? perimetreLisible(g, plan.proj) : null;
   // Rendue par la recherche géographique, mais illisible : si elle touche le terrain, on ne sait pas où elle passe.
-  if (!r || !(aireRegion(r) > 0) || !regionMesurable(r)) return illisibleQuiTouche(g, plan, ici) ? ILLISIBLE : null;
+  if (!lu) return illisibleQuiTouche(g, plan, ici) ? ILLISIBLE : null;
+  const r = lu.region;
 
+  // LA PREUVE EST UNE PROFONDEUR, PAS UNE PART (arbitrage du 30/10/2026, cf. `TOLERANCE_TRACE_M`). Un périmètre
+  // « concerne » le terrain s'il y entre au-delà de l'imprécision des tracés : le point de l'adresse à plus de
+  // `TOLERANCE_TRACE_M` à l'intérieur, ou une partie de la parcelle attribuée à plus de `TOLERANCE_TRACE_M` de sa
+  // limite. En deçà, le recoupement est un liseré qui peut n'être qu'un écart de tracé, mais il n'est JAMAIS
+  // écarté : il appelle une vérification, quelle que soit son aire. Seul un contact sans surface (aire inférieure
+  // à `SURFACE_CONTACT_M2`, 0,05 m², deux limites confondues) ne compte pas. Une seule des 2 559 parcelles déclarées
+  // est en deçà : une parcelle d'1 m² à Lyon Confluence (BC 208), touchée sur 0,007 m², où aucun logement ne se
+  // rattache.
   const lieu = classer(ici, r).lieu;
-  // LA CONVENTION DU BRUIT AÉRIEN (FUT-146), reprise telle quelle : le périmètre recoupe la parcelle au-delà de
-  // 2 % ; en deçà, il la borde s'il en prend au moins 25 m² ; un liseré plus petit est l'écart de tracé entre
-  // l'inventaire et le cadastre. Mesuré le 30/10/2026 à Lyon : les parcelles voisines d'un SIS en touchent
-  // 0,1 à 0,6 m² (CHIMICOLOR, SITE REI, Lyon Vaise). Les compter ferait « à vérifier » tout le voisinage.
-  let mesure: { part: number; surfaceM2: number; recoupe: boolean } | null = null;
+  const pointProfond = lieu === "dedans" && distanceLignes(ici, r) >= TOLERANCE_TRACE_M;
+  let mesure: { part: number; surfaceM2: number; profond: boolean } | null = null;
   if (plan.region) {
     const aire = aireIntersection(plan.region, r);
     if (aire == null) return ILLISIBLE;
-    const part = Math.min(1, arrondi(aire / aireRegion(plan.region), 0.001));
-    const surfaceM2 = arrondi(aire, 0.1);
-    if (aire >= SURFACE_CONTACT_M2 && (part >= PART_MIN || surfaceM2 >= SURFACE_MIN_M2)) mesure = { part, surfaceM2, recoupe: part >= PART_MIN };
+    if (aire >= SURFACE_CONTACT_M2) {
+      const auDela = aireAuDela(plan.region, r, TOLERANCE_TRACE_M);
+      if (auDela == null) return ILLISIBLE;
+      mesure = {
+        part: Math.min(1, arrondi(aire / aireRegion(plan.region), 0.001)),
+        surfaceM2: arrondi(aire, 0.1),
+        profond: auDela >= SURFACE_CONTACT_M2,
+      };
+    }
   }
   const avecMesure = { part: mesure?.part ?? null, surfaceM2: mesure?.surfaceM2 ?? null };
-  if (lieu === "dedans") return { situation: "point_dans", ...avecMesure };
+  if (pointProfond) return { situation: "point_dans", ...avecMesure };
+  if (mesure?.profond && plan.usage.statut === "attribuee") return { situation: "parcelle_recoupe", ...avecMesure };
   if (lieu === "bord") return { situation: "point_en_limite", ...avecMesure };
-  if (!mesure) return null;
-  if (plan.usage.statut === "incertaine") return { situation: "parcelle_incertaine", ...avecMesure };
-  return { situation: mesure.recoupe ? "parcelle_recoupe" : "parcelle_bordure", ...avecMesure };
+  if (mesure && plan.usage.statut === "incertaine") return { situation: "parcelle_incertaine", ...avecMesure };
+  if (mesure) return { situation: "parcelle_bordure", ...avecMesure };
+  // Le point est dedans, mais à moins de la tolérance de la limite, et aucune parcelle ne tranche.
+  if (lieu === "dedans") return { situation: "point_en_limite", ...avecMesure };
+  return null;
 }
 
 const etatDe = (c: CategorieGeoLue): EtatInventaire =>

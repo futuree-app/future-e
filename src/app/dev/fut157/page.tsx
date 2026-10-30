@@ -29,7 +29,6 @@ type Cas = {
   adresse: string; ban: string; insee: string; entree: EntreeSitesSols;
   reponses: Record<InventaireTerrain, PageSsp[]>; sansEmprise: ReponsesSitesSols["sansEmprise"];
 };
-const CONSULTE = "2026-10-30T12:00:00.000Z";
 
 function lecture(c: Cas, panne: InventaireTerrain[] = []): LectureSitesSols {
   const categories = Object.fromEntries(Object.entries(c.reponses).map(([k, p]) => [

@@ -5,7 +5,7 @@ import fs from "node:fs";
 import { createJiti } from "jiti";
 const racine = process.cwd() + "/";
 const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
-const { urlRechercheBan, urlReverseBan } = await jiti.import(racine + "src/lib/geocodeur-ban.ts");
+const { urlReverseBan } = await jiti.import(racine + "src/lib/geocodeur-ban.ts");
 const { findCadastreParcelWithGeometry } = await jiti.import(racine + "src/lib/cadastre.ts");
 const T = await jiti.import(racine + "src/lib/sites-sols-terrain.ts");
 const S = await jiti.import(racine + "src/lib/sites-sols.ts");

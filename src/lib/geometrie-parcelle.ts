@@ -407,3 +407,77 @@ export function projectionPour(g: Geometrie, repli: [number, number]): Projectio
   const p = g ? premier(g.coordinates) : null;
   return projectionAutour(p ? p[0] : repli[0], p ? p[1] : repli[1]);
 }
+
+// ── Deux outils pour les tracés imprécis (FUT-157) ──────────────────────────────────────────────
+// Ajoutés pour les périmètres de sols pollués ; rien de ce qui précède ne les appelle.
+
+/** Des chemins Clipper (micromètres) relus en région fermée. Clipper rend les contours positifs, les trous négatifs. */
+function regionDeChemins(ps: { X: number; Y: number }[][]): Region {
+  return ps.filter((p) => p.length >= 3).map((p) => {
+    const a: Pt[] = p.map((q) => [q.X * MAILLE_M, q.Y * MAILLE_M]);
+    a.push(a[0]);
+    return a;
+  });
+}
+
+/**
+ * LA RÉGION RÉTRÉCIE DE `e` MÈTRES : les points à au moins `e` de son bord, à l'intérieur (érosion exacte, coins
+ * arrondis à 1 mm près, par défaut). `null` si Clipper échoue ; une région vide si rien ne reste.
+ */
+export function eroder(r: Region, e: number): Region | null {
+  try {
+    const co = new ClipperLib.ClipperOffset(2, 0.001 / MAILLE_M);
+    co.AddPaths(chemins(r), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon);
+    const sortie: { X: number; Y: number }[][] = [];
+    co.Execute(sortie, -e / MAILLE_M);
+    return regionDeChemins(sortie);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * L'AIRE (m²) DE A QUI EST À AU MOINS `e` MÈTRES À L'INTÉRIEUR DE B : A ∩ (B rétrécie de e). Elle dit si B entre
+ * dans A au-delà d'une imprécision de tracé de `e` : un liseré plus étroit que `e` rend 0, quelle que soit sa
+ * longueur. B est d'abord découpée à une fenêtre autour de A élargie de `e` (le rétrécissement ne déplace les bords
+ * artificiels de la fenêtre que de `e`, ils restent hors de A). `null` si la mesure ne peut pas être garantie.
+ */
+export function aireAuDela(a: Region, b: Region, e: number): number | null {
+  if (!regionMesurable(a)) return null;
+  try {
+    const [ax0, ay0, ax1, ay1] = boite(a);
+    const m = MARGE_FENETRE_M + e;
+    const bf = fenetre(b, [ax0 - m, ay0 - m, ax1 + m, ay1 + m]);
+    if (bf.length === 0) return 0;
+    if (!coherente(bf)) return null;
+    const be = eroder(bf, e);
+    if (be == null) return null;
+    if (be.length === 0) return 0;
+    return aireIntersection(a, be);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * UN TRACÉ RÉPARÉ À LA PRÉCISION DE SES COORDONNÉES, ou `null`. Une région qui n'est pas un polygone valide (un
+ * anneau qui se replie sur quelques centimètres, un trou réduit à un aller-retour) est remplacée par la surface
+ * qu'elle recouvre (union Clipper, remplissage non nul), SEULEMENT si cette surface ne s'écarte de l'aire de ses
+ * anneaux que de `toleranceM2` au plus : la réparation ne déplace alors aucune surface de plus que cela. Au-delà,
+ * le défaut n'est plus un arrondi, et la région reste illisible. Une région déjà valide est rendue telle quelle.
+ */
+export function reparer(r: Region, toleranceM2: number): { region: Region; ecartM2: number } | null {
+  if (regionMesurable(r)) return { region: r, ecartM2: 0 };
+  try {
+    const c = new ClipperLib.Clipper();
+    if (!c.AddPaths(chemins(r), ClipperLib.PolyType.ptSubject, true)) return null;
+    const sortie: { X: number; Y: number }[][] = [];
+    if (!c.Execute(ClipperLib.ClipType.ctUnion, sortie, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero)) return null;
+    const region = regionDeChemins(sortie);
+    if (region.length === 0 || !regionMesurable(region)) return null;
+    const ecartM2 = Math.abs(aireRegion(region) - aireRegion(r));
+    return ecartM2 <= toleranceM2 ? { region, ecartM2 } : null;
+  } catch {
+    return null;
+  }
+}

@@ -1,4 +1,4 @@
-// FUT-157 · Recette en vrai navigateur de la section « Sols pollués sur ce terrain », dans le vrai module Logement
+// FUT-157 · Recette en vrai navigateur de la section « Pollution des sols sur ce terrain », dans le vrai module Logement
 // (`/dev/fut157`, réponses réelles figées le 30/10/2026). Bureau (1440 px, souris), mobile 390 et 360 px (toucher).
 // Vérifie le texte rendu de chaque état, l'absence de défilement horizontal, la taille des cibles au toucher,
 // le parcours au clavier (focus visible, dépliant ouvert à la touche Entrée) et l'absence d'erreur de page.
@@ -17,15 +17,18 @@ const verifier = (ok, message) => { console.log(`${ok ? "ok  " : "ÉCHEC"} ${mes
 
 /** Le cas, l'identifiant de capture, et ce que le lecteur doit lire (et ne jamais lire). */
 const CAS = [
-  { cas: "57463_6453_00096_b", nom: "metz-sotrameuse-96b", lit: [/touche peut-être ce terrain : c.est à vérifier/, /ne tombe dans aucune parcelle\. La plus proche, à 2 m,/, /Sotrameuse/, /instruction en cours/], jamais: [/Cette adresse est dans/] },
-  { cas: "57463_6453_00098", nom: "metz-98-voisin", lit: [/^Aucun secteur d.information sur les sols/m, /pas la preuve d.un sol sans pollution/, /9 fiches de la commune n.ont pas d.emprise publiée.*Aucune n.est publiée à cette adresse/], jamais: [/Sotrameuse/] },
-  { cas: "57463_6453", nom: "metz-voie", lit: [/ne contient le point de l.adresse, mais le terrain lui-même n.a pas pu être situé/, /n.est connue qu.à la voie/], jamais: [/Sotrameuse/] },
-  { cas: "75107_4314_00064", nom: "paris-grenelle-sis", lit: [/Cette adresse est dans un secteur d.information sur les sols : l.État y connaît une pollution des sols/, /Station-service AVIA-RASPAIL/, /soumis à permis/, /informer par écrit/], jamais: [/obligatoire/i, /état des risques/i] },
-  { cas: "69387_6430_00050", nom: "lyon-sup", lit: [/périmètre d.une servitude liée à une pollution des sols/, /certificat d.urbanisme/], jamais: [/étude de sols par un bureau/] },
+  { cas: "57463_6453_00096_b", nom: "metz-sotrameuse-96b", lit: [/^Pollution des sols sur ce terrain/m, /touche peut-être ce terrain : c.est à vérifier/, /Sur le plan cadastral, l.adresse ne tombe dans aucune parcelle\. La plus proche, à 2 m,/, /Sotrameuse/, /suivi en cours/, /Si le terrain est bien dans ce secteur/, /pas ce à quoi les occupants sont exposés/], jamais: [/Cette adresse est dans/, /Sols pollués sur ce terrain/] },
+  { cas: "57463_6453_00098", nom: "metz-98-voisin", lit: [/^Aucun des trois inventaires de sols pollués consultés ne concerne la parcelle de cette adresse/m, /pas la preuve d.un sol sans pollution/, /9 sites de la commune ne sont repérés que par un point.*Aucun n.est déclaré à cette adresse/], jamais: [/Sotrameuse/, /Sols pollués sur ce terrain/] },
+  { cas: "57463_6453", nom: "metz-voie", lit: [/^Le terrain n.a pas pu être situé : rien ne peut être conclu pour lui/m, /L.adresse n.est connue qu.à la rue, pas au numéro/, /refaites la recherche avec l.adresse complète/], jamais: [/Sotrameuse/, /^Aucun/m] },
+  { cas: "75107_4314_00064", nom: "paris-grenelle-sis", lit: [/La parcelle de cette adresse est dans un secteur d.information sur les sols : l.État y connaît une pollution des sols/, /Station-service AVIA-RASPAIL/, /avec un permis, il faudra en principe joindre l.attestation/, /informer par écrit/], jamais: [/obligatoire/i, /état des risques/i] },
+  { cas: "69387_6430_00050", nom: "lyon-sup", lit: [/périmètre d.une servitude liée à une pollution des sols/, /Lesquels : c.est l.arrêté du préfet qui le dit/, /certificat d.urbanisme/], jamais: [/étude des sols/, /deux ans/] },
   { cas: "69389_7170_00005", nom: "lyon-parcelle-traversee", lit: [/La parcelle de cette adresse est dans un secteur/, /Toute la parcelle BP 85 de l.adresse est dans ce périmètre/], jamais: [] },
-  { cas: "69388_5265_00056", nom: "lyon-adresse-publiee", lit: [/publiée à l.adresse « 56 RUE PAUL CAZENEUVE »/, /n.est située que par un point/], jamais: [/Comparez sur la carte/] },
-  { cas: "partiel", nom: "paris-panne-partielle", lit: [/Cette adresse est dans un secteur d.information sur les sols/, /Non lus en entier : servitudes liées à une pollution des sols, sites pollués suivis par l.administration et la liste des fiches de la commune sans emprise publiée\. D.autres périmètres peuvent exister/], jamais: [] },
-  { cas: "panne", nom: "panne-totale", lit: [/n.ont pas répondu lors de la collecte : rien ne peut être conclu sur ce terrain/, /Actualisez les données plus tard/], jamais: [/^Aucun/m] },
+  { cas: "69389_6525_00098", nom: "lyon-bande-moins-de-2m", lit: [/touche peut-être ce terrain : c.est à vérifier/, /ne touche la parcelle BP 80 que sur une bande étroite le long de sa limite \(23 m²\)/, /regardez si la parcelle BP 80 en fait partie/], jamais: [/est en partie dans/] },
+  { cas: "69387_7035_00014", nom: "lyon-liseré-chimicolor", lit: [/Cette adresse est dans un secteur d.information sur les sols/, /CHIMICOLOR/, /moins d.un mètre carré/, /La fiche officielle « CHIMICOLOR » liste les parcelles concernées/], jamais: [] },
+  { cas: "69389_1440_00030", nom: "lyon-rhodiaceta-repare", lit: [/Cette adresse est dans un secteur d.information sur les sols/, /RHODIACETA/], jamais: [/n.a pas pu être lu/] },
+  { cas: "69388_5265_00056", nom: "lyon-adresse-publiee", lit: [/est déclaré à cette adresse\. On ne sait pas jusqu.où il s.étend/, /déclaré à l.adresse « 56 RUE PAUL CAZENEUVE »/, /repéré sur la carte que par un point/], jamais: [/emprise/] },
+  { cas: "partiel", nom: "paris-panne-partielle", lit: [/La parcelle de cette adresse est dans un secteur d.information sur les sols/, /Non lus en entier : servitudes liées à une pollution des sols, sites suivis par l.administration pour une pollution des sols et la liste des sites de la commune repérés par un simple point, ou pas du tout\. D.autres périmètres peuvent exister/], jamais: [] },
+  { cas: "panne", nom: "panne-totale", lit: [/n.ont pas répondu quand ce dossier a été préparé : ce terrain n.a pas pu être vérifié/, /Réessayez plus tard avec « Actualiser les données »/], jamais: [/^Aucun/m] },
 ];
 
 async function contexte(format) {
@@ -44,6 +47,9 @@ for (const format of ["bureau", "mobile-390", "mobile-360"]) {
     p.on("pageerror", (e) => erreurs.push(String(e)));
     await p.goto(`${BASE}/dev/fut157?vue=logement&cas=${c.cas}`, { waitUntil: "networkidle", timeout: 120_000 });
     const s = p.locator("section[aria-labelledby='sites-sols']");
+    // `networkidle` peut précéder le rendu du module (compilation à la demande du serveur de développement) : on
+    // attend la section, sans en faire une condition de réussite (le comptage qui suit tranche).
+    await s.first().waitFor({ timeout: 60_000 }).catch(() => {});
     const present = await s.count();
     verifier(present === 1, `${format} ${c.nom} : une seule section`);
     if (!present) { await p.close(); continue; }
@@ -90,6 +96,7 @@ for (const format of ["bureau", "mobile-390", "mobile-360"]) {
   // Un rapport antérieur à FUT-157 : rien ne s'affiche, ni absence ni panne.
   const p = await ctx.newPage();
   await p.goto(`${BASE}/dev/fut157?vue=logement&cas=ancien`, { waitUntil: "networkidle", timeout: 120_000 });
+  await p.getByText("Ce à quoi cette adresse est exposée").first().waitFor({ timeout: 60_000 }).catch(() => {});
   verifier(await p.locator("section[aria-labelledby='sites-sols']").count() === 0, `${format} rapport antérieur : aucune section`);
   verifier(await p.getByText("Ce à quoi cette adresse est exposée").count() >= 1, `${format} rapport antérieur : le module est rendu`);
   if (format === "bureau") await p.screenshot({ path: `${SORTIE}/${format}-module-entier-ancien.png`, fullPage: true });

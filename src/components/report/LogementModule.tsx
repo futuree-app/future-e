@@ -790,8 +790,8 @@ const NOM_SOURCE: Record<string, string> = {
   fibre: "fibre à l'adresse (Arcep)",
   sites_sols: "sols pollués (Géorisques)", sites_sols_sis: "secteurs d'information sur les sols (Géorisques)",
   sites_sols_sup: "servitudes liées à une pollution des sols (Géorisques)",
-  sites_sols_instructions: "sites pollués suivis par l'administration (Géorisques)",
-  sites_sols_sans_emprise: "fiches de sols pollués sans emprise publiée (Géorisques)",
+  sites_sols_instructions: "sites suivis par l'administration pour une pollution des sols (Géorisques)",
+  sites_sols_sans_emprise: "sites de sols pollués repérés par un simple point (Géorisques)",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

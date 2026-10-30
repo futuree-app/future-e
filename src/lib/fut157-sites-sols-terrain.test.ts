@@ -13,10 +13,12 @@ import {
   CHEMIN, PAGES_MAX, lireCategorie, lireCategorieGeo, lotIncomplet, type CategorieGeoLue, type FicheSspGeo, type PageSsp,
 } from "./sites-sols.ts";
 import {
-  MARGE_RECHERCHE_M, adresseDuLibelle, adressesPubliees, etatSitesSols, ficheDemontree, lireSitesSolsTerrain, planDeRecherche,
+  MARGE_RECHERCHE_M, TOLERANCE_REPARATION_M2, TOLERANCE_TRACE_M, adresseDuLibelle, adressesPubliees, etatSitesSols, ficheDemontree,
+  lireSitesSolsTerrain, perimetreLisible, planDeRecherche,
   publieeALAdresse, sitesSolsIndisponible, type EntreeSitesSols, type InventaireTerrain, type LectureSitesSols, type ReponsesSitesSols,
 } from "./sites-sols-terrain.ts";
 import { texteSitesSols, type TexteSitesSols } from "./sites-sols-texte.ts";
+import { regionDe, regionMesurable } from "./geometrie-parcelle.ts";
 import { couvertureSitesSols, deriveLogementCoverage } from "./decision/logement-coverage.ts";
 import { issueActualisation, jsonCanonique, pertesSitesSols, sourcesAbsentes, type VersionLogement } from "./logement-report-version.ts";
 import type { LogementReport } from "./logement-report-types.ts";
@@ -46,7 +48,11 @@ const cas = (debut: string) => {
 };
 const situations = (l: LectureSitesSols) => l.fiches.map((f) => `${f.inventaire}:${f.situation}`).sort();
 
-/** L'attendu de chaque adresse, décidé AVANT de rejouer (cf. audit, §4) : l'état et les situations. */
+/**
+ * L'attendu de chaque adresse, décidé AVANT de rejouer (cf. audit, §4) : l'état et les situations. Revu le
+ * 30/10/2026 avec la règle de profondeur (`TOLERANCE_TRACE_M`) : les quatre attendus qui changent ont été vérifiés
+ * contre la liste des parcelles que la fiche officielle déclare concernées, un oracle indépendant de la géométrie.
+ */
 const ATTENDU: [string, ReturnType<typeof etatSitesSols>, string[]][] = [
   // Sotrameuse : le point est sur la voie, hors de toute parcelle ; la parcelle rattachée par proximité (2 m) est
   // dans le SIS. Ni « dans le SIS » (rayon), ni « rien » (point) : à vérifier.
@@ -59,19 +65,24 @@ const ATTENDU: [string, ReturnType<typeof etatSitesSols>, string[]][] = [
   // Une servitude, et l'instruction du même dépôt publiée à la même adresse mais pointée à 958 m.
   ["13 Rue des Alliés", "concerne", ["instructions:adresse_publiee", "sup:point_dans"]],
   ["18 Avenue Tony Garnier", "concerne", ["instructions:point_dans", "sis:point_dans"]],
-  // Dans un SIS (station-service TOTAL), et voisin d'un autre (CHIMICOLOR) qui ne touche sa parcelle que d'un liseré.
-  ["14 Avenue Tony Garnier", "concerne", ["instructions:point_dans", "sis:point_dans"]],
+  // Dans un SIS (station-service TOTAL, dont la fiche cite BZ 244), et voisin d'un autre (CHIMICOLOR, qui ne la cite
+  // pas) qui ne touche sa parcelle que d'un liseré de 0,1 m². Le liseré n'est plus caché : il est dit, à vérifier.
+  ["14 Avenue Tony Garnier", "concerne", ["instructions:parcelle_bordure", "instructions:point_dans", "sis:parcelle_bordure", "sis:point_dans"]],
   ["50 Rue Saint Jean de Dieu", "concerne", ["sup:point_dans"]],
-  // Le point est dehors, la parcelle attribuée est dedans (99,9 %, puis 7,2 %).
+  // Le point est dehors, la parcelle attribuée est dedans (99,9 %).
   ["5 Rue du 3 Septembre 1944", "concerne", ["instructions:parcelle_recoupe", "sis:parcelle_recoupe"]],
-  ["98 Rue Saint Pierre de Vaise", "concerne", ["instructions:parcelle_recoupe", "sis:parcelle_recoupe"]],
+  // 7 % de la parcelle BP 80, mais une bande de moins d'1 m de large le long de sa limite. « Concerné » avec les
+  // seuils du bruit aérien ; à vérifier avec la profondeur. La fiche officielle ne cite pas BP 80 parmi ses 9 parcelles.
+  ["98 Rue Saint Pierre de Vaise", "a_verifier", ["instructions:parcelle_bordure", "sis:parcelle_bordure"]],
   ["38 Rue Sainte Anne de Baraban", "a_verifier", ["instructions:parcelle_incertaine", "sis:parcelle_incertaine"]],
-  // RHODIACETA : un périmètre publié dont les anneaux se croisent.
-  ["30 Rue du Chapeau Rouge", "a_verifier", ["instructions:geometrie_illisible", "sis:geometrie_illisible"]],
+  // RHODIACETA : un trou publié réduit à un aller-retour (0,008 m²) rendait le périmètre illisible. Réparé à la
+  // précision des coordonnées, il se lit : le point est à 5,8 m à l'intérieur, et la fiche cite BT 141.
+  ["30 Rue du Chapeau Rouge", "concerne", ["instructions:point_dans", "sis:point_dans"]],
   // GIVAUDAN : une instruction pointée dans la parcelle ; une autre publiée au 56 et pointée ailleurs.
   ["62 Rue Paul Cazeneuve", "a_verifier", ["instructions:localisation_ponctuelle"]],
   ["56 Rue Paul Cazeneuve", "a_verifier", ["instructions:adresse_publiee"]],
-  ["64 Rue de Grenelle", "concerne", ["instructions:point_dans", "sis:point_dans"]],
+  // Le point est à 1 m de la limite (moins que l'imprécision des tracés), mais toute la parcelle est dedans.
+  ["64 Rue de Grenelle", "concerne", ["instructions:parcelle_recoupe", "sis:parcelle_recoupe"]],
   ["10 Rue de Rivoli", "aucun", []],
   // TLM : un trou d'aire nulle rendait tout le périmètre illisible.
   ["9 Avenue general maurice chevance-bertin", "concerne", ["instructions:point_dans", "sis:point_dans"]],
@@ -106,10 +117,16 @@ describe("FUT-157 · dix-sept adresses réelles, rejouées sans réseau", () => 
     assert.doesNotMatch(t.titre, /est dans/);
   });
 
-  test("le voisin d'un SIS n'en hérite pas : CHIMICOLOR n'est pas listé au 14 avenue Tony Garnier", () => {
+  test("le voisin d'un SIS n'en hérite pas : CHIMICOLOR est dit, à vérifier, jamais démontré au 14 avenue Tony Garnier", () => {
     const l = rejouer(cas("14 Avenue Tony Garnier"));
-    assert.ok(l.fiches.every((f) => f.nom !== "CHIMICOLOR"));
-    assert.ok(l.fiches.some((f) => f.nom === "STATION SERVICE TOTAL FRANCE GERLAND"));
+    const chimicolor = l.fiches.filter((f) => f.nom === "CHIMICOLOR");
+    assert.equal(chimicolor.length, 2);
+    assert.ok(chimicolor.every((f) => f.situation === "parcelle_bordure" && !ficheDemontree(f, l) && (f.surfaceM2 ?? 0) < 1));
+    const t = texteSitesSols(l)!;
+    assert.match(t.titre, /^Cette adresse est dans un secteur d'information sur les sols/, "le titre est celui du site démontré");
+    assert.equal(t.sites[0].nom, "STATION SERVICE TOTAL FRANCE GERLAND", "le site démontré vient d'abord");
+    assert.match(t.sites[1].situation, /bande étroite.*moins d'un mètre carré.*Ce peut n'être qu'un écart entre deux cartes.*la carte seule ne permet pas de trancher/);
+    assert.ok(t.verifier.some((v) => /La fiche officielle « CHIMICOLOR » liste les parcelles concernées : regardez si la parcelle BZ 244 en fait partie/.test(v)), "la fiche à ouvrir est nommée");
   });
 
   test("plusieurs inventaires pour un même site : une seule entrée, deux inscriptions, deux liens", () => {
@@ -119,10 +136,21 @@ describe("FUT-157 · dix-sept adresses réelles, rejouées sans réseau", () => 
     assert.ok(t.sites[0].inscriptions.every((i) => i.lien?.startsWith("https://fiches-risques.brgm.fr/")));
   });
 
-  test("une parcelle traversée : la part est dite, le titre dit « en partie »", () => {
-    const t = texteSitesSols(rejouer(cas("98 Rue Saint Pierre de Vaise")))!;
-    assert.match(t.titre, /^La parcelle de cette adresse est en partie dans un secteur d'information sur les sols/);
-    assert.match(t.sites[0].situation, /7 % de la parcelle BP 80/);
+  test("une bande de 7 % sur moins d'1 m de profondeur : à vérifier, avec la parcelle à chercher dans la fiche", () => {
+    const l = rejouer(cas("98 Rue Saint Pierre de Vaise"));
+    assert.ok(l.fiches.every((f) => f.part === 0.072 && f.surfaceM2 === 22.9));
+    const t = texteSitesSols(l)!;
+    assert.match(t.titre, /touche peut-être ce terrain : c'est à vérifier/);
+    assert.match(t.sites[0].situation, /ne touche la parcelle BP 80 que sur une bande étroite le long de sa limite \(23 m²\)/);
+    assert.ok(t.verifier.some((v) => /regardez si la parcelle BP 80 en fait partie/.test(v)));
+  });
+
+  test("RHODIACETA : la réparation du tracé déplace moins d'un centième de mètre carré", () => {
+    const c = cas("30 Rue du Chapeau Rouge");
+    const brut = c.reponses.sis[0].data.find((r) => (r as { nom?: string }).nom === "RHODIACETA") as { geom: { type: string; coordinates: unknown } };
+    const plan = planDeRecherche(c.entree);
+    const lu = perimetreLisible(brut.geom, plan.proj)!;
+    assert.ok(lu.reparationM2 > 0 && lu.reparationM2 < 0.01, `réparation de ${lu.reparationM2} m²`);
   });
 
   test("la recherche ne rend jamais une fiche ponctuelle : sans la liste communale, GIVAUDAN disparaît", () => {
@@ -184,22 +212,71 @@ describe("FUT-157 · le grain de la preuve", () => {
     assert.equal(etatSitesSols(l), "aucun");
   });
 
-  test("un liseré de tracé (0,5 m², moins de 2 %) n'est pas retenu ; une bordure de 30 m² l'est, à vérifier", () => {
-    assert.deepEqual(lire({ sis: [page([ligne("A", rect(9.975, -10, 40, 10))])] }).fiches, []);
-    const bordure = lire({ sis: [page([ligne("A", rect(8.5, -10, 40, 10))])] }); // 1,5 × 20 = 30 m², 7,5 %
-    assert.equal(bordure.fiches[0].situation, "parcelle_recoupe", "au-delà de 2 % : recoupe");
-    // Une grande parcelle (100 × 100 m) bordée sur 30 m² : moins de 2 %, mais au moins 25 m².
+  // LA PROFONDEUR, PAS LA PART (`TOLERANCE_TRACE_M`, 2 m). Chaque cas met en défaut les seuils du bruit aérien
+  // (2 % de la parcelle, 25 m²) repris avant le 30/10/2026 ; l'ancien verdict est rappelé en commentaire.
+  test("un liseré de 0,5 m² n'est jamais écarté : à vérifier, en moins d'un mètre carré (avant : écarté)", () => {
+    const l = lire({ sis: [page([ligne("A", rect(9.975, -10, 40, 10))])] });
+    assert.equal(l.fiches[0].situation, "parcelle_bordure");
+    assert.equal(etatSitesSols(l), "a_verifier");
+    assert.match(texteSitesSols(l)!.sites[0].situation, /bande étroite le long de sa limite \(moins d'un mètre carré\)/);
+  });
+
+  test("une bande de 1,5 m couvrant 7,5 % de la parcelle : à vérifier (avant : concerné)", () => {
+    const l = lire({ sis: [page([ligne("A", rect(8.5, -10, 40, 10))])] }); // 1,5 × 20 = 30 m²
+    assert.equal(l.fiches[0].situation, "parcelle_bordure");
+    assert.equal(l.fiches[0].part, 0.075);
+    assert.equal(etatSitesSols(l), "a_verifier");
+  });
+
+  test("une bande de 2,5 m : concerné, en partie (12,5 %)", () => {
+    const l = lire({ sis: [page([ligne("A", rect(7.5, -10, 40, 10))])] });
+    assert.equal(l.fiches[0].situation, "parcelle_recoupe");
+    assert.equal(etatSitesSols(l), "concerne");
+    assert.match(texteSitesSols(l)!.titre, /est en partie dans/);
+  });
+
+  test("une emprise de 36 m² au cœur d'une parcelle d'un hectare (0,36 %) : concerné, « moins de 1 % » (avant : à vérifier)", () => {
+    const grande = { ...ENTREE, parcelle: { ...PARCELLE, geometry: rect(-50, -50, 50, 50) } };
+    const l = lire({ sis: [page([ligne("A", rect(40, 40, 46, 46))])] }, grande);
+    assert.equal(l.fiches[0].situation, "parcelle_recoupe");
+    assert.equal(etatSitesSols(l), "concerne");
+    assert.match(texteSitesSols(l)!.sites[0].situation, /couvre moins de 1 % de la parcelle AB 12/);
+  });
+
+  test("une parcelle d'un hectare bordée sur 30 m² et 0,3 m de large : à vérifier", () => {
     const grande = { ...ENTREE, parcelle: { ...PARCELLE, geometry: rect(-50, -50, 50, 50) } };
     const l = lire({ sis: [page([ligne("A", rect(49.7, -50, 80, 50))])] }, grande);
     assert.equal(l.fiches[0].situation, "parcelle_bordure");
     assert.equal(etatSitesSols(l), "a_verifier");
   });
 
-  test("le point exactement sur la limite : à vérifier, jamais « dans »", () => {
+  test("seul un contact sans surface (moins de 0,05 m², deux limites confondues) ne compte pas", () => {
+    assert.deepEqual(lire({ sis: [page([ligne("A", rect(9.999, -10, 40, 10))])] }).fiches, []); // 0,02 m²
+  });
+
+  test("les trois inventaires suivent la même règle de profondeur", () => {
+    for (const inv of ["sis", "sup", "instructions"] as const) {
+      assert.equal(lire({ [inv]: [page([ligne("A", rect(8.5, -10, 40, 10))])] }).fiches[0].situation, "parcelle_bordure", inv);
+      assert.equal(lire({ [inv]: [page([ligne("A", rect(7.5, -10, 40, 10))])] }).fiches[0].situation, "parcelle_recoupe", inv);
+    }
+  });
+
+  test("le point exactement sur la limite, ou dedans à moins de 2 m, sans parcelle : à vérifier, jamais « dans »", () => {
     const sansParcelle = { ...ENTREE, parcelle: null };
-    const l = lire({ sis: [page([ligne("A", rect(0, -50, 50, 50))])] }, sansParcelle);
-    assert.equal(l.fiches[0].situation, "point_en_limite");
-    assert.equal(etatSitesSols(l), "a_verifier");
+    for (const x0 of [0, -1.5]) {
+      const l = lire({ sis: [page([ligne("A", rect(x0, -50, 50, 50))])] }, sansParcelle);
+      assert.equal(l.fiches[0].situation, "point_en_limite", `limite à ${x0} m`);
+      assert.equal(etatSitesSols(l), "a_verifier");
+      assert.match(texteSitesSols(l)!.sites[0].situation, /à moins de 2 m de la limite/);
+    }
+    assert.equal(lire({ sis: [page([ligne("A", rect(-3, -50, 50, 50))])] }, sansParcelle).fiches[0].situation, "point_dans", "à 3 m");
+    assert.equal(TOLERANCE_TRACE_M, 2);
+  });
+
+  test("le point à 1 m de la limite, la parcelle traversée sur 11 m : concerné par la parcelle (64 rue de Grenelle)", () => {
+    const l = lire({ sis: [page([ligne("A", rect(-1, -50, 50, 50))])] });
+    assert.equal(l.fiches[0].situation, "parcelle_recoupe");
+    assert.equal(etatSitesSols(l), "concerne");
   });
 
   test("une adresse géocodée à la voie : le point dans un SIS reste à vérifier, et la parcelle ne sert pas", () => {
@@ -228,7 +305,14 @@ describe("FUT-157 · le grain de la preuve", () => {
     const l = lire({}, { ...ENTREE, parcelle: tordue });
     assert.deepEqual(l.parcelle, { statut: "ecartee", raison: "non_mesurable" });
     assert.equal(etatSitesSols(l), "terrain_non_situe");
-    assert.match(texteSitesSols(l)!.limites[0], /pas une absence vérifiée pour le terrain/);
+    const t = texteSitesSols(l)!;
+    assert.match(t.titre, /^Le terrain n'a pas pu être situé : rien ne peut être conclu pour lui\./, "le premier mot porte l'état, jamais « Aucun »");
+    assert.deepEqual(t.limites[0], "Le tracé de la parcelle n'a pas pu être lu.");
+    // Une adresse sans numéro : le geste utile se fait dans futur•e.
+    const voie = texteSitesSols(lire({}, { ...ENTREE, geocodage: "street" }))!;
+    assert.equal(voie.limites[0], "L'adresse n'est connue qu'à la rue, pas au numéro.");
+    assert.match(voie.verifier[0], /^Si vous connaissez le numéro, refaites la recherche avec l'adresse complète/);
+    assert.match(voie.verifier[1], /secteur d'information sur les sols ou sous une servitude liée à une pollution/);
   });
 
   test("le rayon demandé couvre le sommet le plus éloigné de la parcelle, plus la marge ; trop étendue, elle ne sert pas", () => {
@@ -238,11 +322,61 @@ describe("FUT-157 · le grain de la preuve", () => {
     assert.equal(immense.rayonM, MARGE_RECHERCHE_M);
   });
 
-  test("un périmètre illisible ne compte que s'il touche le terrain", () => {
-    const croise = { type: "Polygon", coordinates: [[pt(-5, -5), pt(5, 5), pt(5, -5), pt(-5, 5), pt(-5, -5)]] };
+  // ── LES PÉRIMÈTRES ILLISIBLES (revue du 30/10/2026) : jamais « aucun » tant qu'ils peuvent toucher le terrain ──
+  // Un papillon (anneau qui se croise) dont les deux lobes font 50 m² : bien au-delà d'une réparation admise.
+  const croise = { type: "Polygon", coordinates: [[pt(-5, -5), pt(5, 5), pt(5, -5), pt(-5, 5), pt(-5, -5)]] };
+
+  test("un périmètre illisible qui touche le terrain : à vérifier, jamais « aucun », même tout le reste lu", () => {
+    const l = lire({ sis: [page([ligne("A", croise)])] });
+    assert.deepEqual(situations(l), ["sis:geometrie_illisible"]);
+    assert.deepEqual(l.inventaires, { sis: "complet", sup: "complet", instructions: "complet" });
+    assert.equal(etatSitesSols(l), "a_verifier");
+    const t = texteSitesSols(l)!;
+    assert.match(t.sites[0].situation, /n'a pas pu être lu/);
+    assert.ok(t.verifier.some((v) => /tracé publié de ce périmètre n'a pas pu être lu/.test(v)));
+    assert.ok(!t.verifier.some((v) => /regardez si/.test(v)), "pas de limite à comparer");
+    // Sans parcelle attribuée non plus : l'emprise du papillon contient le point.
+    assert.equal(etatSitesSols(lire({ sis: [page([ligne("A", croise)])] }, { ...ENTREE, parcelle: null })), "a_verifier");
+  });
+
+  test("un périmètre illisible dont TOUS les sommets sont loin ne compte pas : son tracé, quel qu'il soit, reste dans leur emprise", () => {
     const loin = { type: "Polygon", coordinates: [[pt(200, 200), pt(210, 210), pt(210, 200), pt(200, 210), pt(200, 200)]] };
-    assert.equal(lire({ sis: [page([ligne("A", croise)])] }).fiches[0].situation, "geometrie_illisible");
-    assert.deepEqual(lire({ sis: [page([ligne("B", loin)])] }).fiches, []);
+    const l = lire({ sis: [page([ligne("B", loin)])] });
+    assert.deepEqual(l.fiches, []);
+    assert.equal(etatSitesSols(l), "aucun");
+  });
+
+  test("un périmètre dont un sommet est illisible compte, même si les autres sont loin : on ne sait pas où il passe", () => {
+    const troue = { type: "Polygon", coordinates: [[pt(200, 200), pt(210, 210), [null, LAT0], pt(200, 210), pt(200, 200)]] };
+    const l = lire({ sis: [page([ligne("C", troue)])] });
+    assert.deepEqual(situations(l), ["sis:geometrie_illisible"]);
+    assert.equal(etatSitesSols(l), "a_verifier");
+  });
+
+  test("un repli de quelques centimètres carrés (arrondi des coordonnées) est réparé ; un vrai croisement ne l'est pas", () => {
+    // Un contour de 100 × 100 m dont le bord nord se croise sur 40 cm : deux lobes de 0,005 m², comme le repli de BUIRE.
+    const replie = { type: "Polygon", coordinates: [[pt(-50, -50), pt(50, -50), pt(50, 50), pt(0.2, 50), pt(-0.2, 50.05), pt(0.2, 50.05), pt(-0.2, 50), pt(-50, 50), pt(-50, -50)]] };
+    assert.equal(regionMesurable(regionDe(replie, planDeRecherche(ENTREE).proj)!), false, "le tracé brut n'est pas valide");
+    const plan = planDeRecherche(ENTREE);
+    const lu = perimetreLisible(replie, plan.proj);
+    assert.ok(lu && lu.reparationM2 > 0 && lu.reparationM2 <= TOLERANCE_REPARATION_M2, `réparé de ${lu?.reparationM2} m²`);
+    assert.equal(etatSitesSols(lire({ sis: [page([ligne("A", replie)])] })), "concerne");
+    assert.equal(perimetreLisible(croise, plan.proj), null, "un papillon de 50 m² n'est pas un arrondi");
+  });
+
+  test("les vingt formes illisibles construites ne donnent jamais « aucun » quand elles touchent le terrain", () => {
+    const formes: unknown[] = [];
+    for (let k = 1; k <= 10; k++) {
+      formes.push({ type: "Polygon", coordinates: [[pt(-k, -k), pt(k, k), pt(k, -k), pt(-k, k), pt(-k, -k)]] });
+      formes.push({ type: "MultiPolygon", coordinates: [[rect(-20, -20, 20, 20).coordinates[0], rect(-30 - k, -5, 30 + k, 5).coordinates[0]]] });
+    }
+    for (const g of formes) {
+      for (const parcelle of [PARCELLE, null]) {
+        const l = lire({ sis: [page([ligne("X", g)])] }, { ...ENTREE, parcelle });
+        assert.notEqual(etatSitesSols(l), "aucun", JSON.stringify(g).slice(0, 80));
+        assert.notEqual(etatSitesSols(l), "terrain_non_situe");
+      }
+    }
   });
 
   test("un anneau d'aire nulle (aller-retour sur un segment) n'empêche pas la mesure", () => {
@@ -262,7 +396,7 @@ describe("FUT-157 · le grain de la preuve", () => {
     const ailleurs = lire({}, ENTREE, { etat: "complet", fiches: [f("P2", { type: "Point", coordinates: pt(30, 0) }, "40 RUE DU TEST")] });
     assert.deepEqual(situations(ailleurs), []);
     assert.equal(etatSitesSols(ailleurs), "aucun");
-    assert.match(texteSitesSols(ailleurs)!.limites.join(" "), /Une fiche de la commune n'a pas d'emprise publiée.*Aucune n'est publiée à cette adresse/);
+    assert.match(texteSitesSols(ailleurs)!.limites.join(" "), /Un site de la commune n'est repéré que par un point, ou pas du tout.*Il n'est pas déclaré à cette adresse/);
     const publiee = lire({}, ENTREE, { etat: "complet", fiches: [f("P3", null, "10-14 RUE DU TEST")] });
     assert.deepEqual(situations(publiee), ["instructions:adresse_publiee"]);
     assert.equal(publiee.fiches[0].adressePubliee?.localisation, "aucune");
@@ -280,7 +414,7 @@ describe("FUT-157 · une panne n'est jamais une absence", () => {
     assert.equal(etatSitesSols(l), "concerne");
     assert.deepEqual(l.inventaires, { sis: "complet", sup: "indisponible", instructions: "indisponible" });
     const t = texteSitesSols(l)!;
-    assert.match(t.limites[0], /^Non lus en entier : servitudes liées à une pollution des sols et sites pollués suivis par l'administration\./);
+    assert.match(t.limites[0], /^Non lus en entier : servitudes liées à une pollution des sols et sites suivis par l'administration pour une pollution des sols\./);
     assert.deepEqual(absentesSitesSols({ ...BASE, sitesSols: l }), ["sites_sols_sup", "sites_sols_instructions"]);
   });
 
@@ -295,7 +429,7 @@ describe("FUT-157 · une panne n'est jamais une absence", () => {
     for (const l of [lire({ sis: [null], sup: [null], instructions: [null] }), sitesSolsIndisponible(ENTREE)]) {
       assert.equal(l.statut, "indisponible");
       assert.equal(etatSitesSols(l), "indisponible");
-      assert.match(texteSitesSols(l)!.titre, /n'ont pas répondu.*rien ne peut être conclu/);
+      assert.match(texteSitesSols(l)!.titre, /n'ont pas répondu quand ce dossier a été préparé : ce terrain n'a pas pu être vérifié/);
       assert.deepEqual(absentesSitesSols({ ...BASE, sitesSols: l }), ["sites_sols"]);
     }
   });
@@ -310,7 +444,7 @@ describe("FUT-157 · une panne n'est jamais une absence", () => {
     assert.equal(etatSitesSols(l), "aucun");
     assert.equal(couvertureSitesSols(l).coverage, "none");
     const t = texteSitesSols(l)!;
-    assert.match(t.titre, /^Aucun secteur d'information sur les sols, aucune servitude/);
+    assert.match(t.titre, /^Aucun des trois inventaires de sols pollués consultés ne concerne la parcelle de cette adresse\.$/);
     assert.match(t.limites[0], /ce n'est pas la preuve d'un sol sans pollution/);
   });
 
@@ -385,7 +519,9 @@ describe("FUT-157 · le texte", () => {
 
   test("jamais « pollué » ou « sain » dit du logement, jamais une exposition, jamais une obligation sans condition", () => {
     for (const l of lectures) {
-      const p = premierNiveau(texteSitesSols(l)!);
+      // La seule phrase qui nomme l'exposition le fait pour dire ce que ces inventaires NE mesurent PAS : elle est
+      // retirée avant de chercher toute autre mention (relecture éditoriale du 30/10/2026, I9).
+      const p = premierNiveau(texteSitesSols(l)!).replace("Ces inventaires disent ce que l'administration sait du sol, pas ce à quoi les occupants sont exposés.", "");
       assert.doesNotMatch(p, /logement (est |serait )?(pollué|contaminé|sain)/i);
       assert.doesNotMatch(p, /sol (est )?sain|aucune pollution|sans danger|sans risque/i);
       assert.doesNotMatch(p, /expos|santé|toxique|cancer/i);
@@ -400,19 +536,23 @@ describe("FUT-157 · le texte", () => {
       const t = texteSitesSols(l)!;
       const inv = new Set(l.fiches.map((f) => f.inventaire));
       const p = premierNiveau(t);
-      if (!inv.has("sis")) assert.doesNotMatch(p, /étude de sols par un bureau|informer par écrit/, "SIS absent");
-      if (!inv.has("sup")) assert.doesNotMatch(p, /arrêté de servitude|s'impose aux autorisations/, "SUP absente");
-      if (inv.has("sis")) assert.match(p, /soumis à permis/, "l'étude de sols n'est exigée que pour un projet soumis à permis");
+      if (!inv.has("sis")) assert.doesNotMatch(p, /étude des sols|bureau d'études|informer par écrit l'acquéreur|doit vous en informer par écrit, et l'acte/, "SIS absent");
+      if (!inv.has("sup")) assert.doesNotMatch(p, /arrêté de servitude|arrêté du préfet dit lesquels|tout permis/i, "SUP absente");
+      // L. 556-2 : l'étude des sols vaut pour tout projet de construction ; l'attestation, pour un permis, « en principe ».
+      if (inv.has("sis") && l.fiches.some((f) => f.inventaire === "sis" && ficheDemontree(f, l))) assert.match(p, /avec un permis, il faudra en principe joindre l'attestation/);
+      if (inv.has("sis")) assert.match(p, /étude des sols/);
+      // L. 514-20 ne vaut que pour une vente, et au conditionnel : jamais pour le bailleur.
+      assert.doesNotMatch(p, /installation classée[^.]*bailleur/);
     }
     const sup = texteSitesSols(rejouer(cas("50 Rue Saint Jean de Dieu")))!;
-    assert.match(sup.change.join(" "), /servitude d'utilité publique limite certains usages/);
+    assert.match(sup.change.join(" "), /^Lesquels : c'est l'arrêté du préfet qui le dit/);
     assert.match(sup.verifier.join(" "), /certificat d'urbanisme/);
   });
 
   test("sans preuve, ce qu'un inventaire changerait est dit au conditionnel, en une phrase", () => {
     const t = texteSitesSols(rejouer(cas("96b Boulevard Solidarité")))!;
     assert.deepEqual(t.change, [
-      "Si c'est le cas, le vendeur ou le bailleur doit vous en informer par écrit, et un projet de construction ou de lotissement soumis à permis devra comporter l'attestation d'une étude de sols par un bureau d'études certifié.",
+      "Si le terrain est bien dans ce secteur, le vendeur ou le bailleur doit vous en informer par écrit, et un projet de construction ou de lotissement y exige une étude des sols.",
     ]);
     const prouve = texteSitesSols(rejouer(cas("18 Avenue Tony Garnier")))!;
     assert.match(prouve.change[0], /^En cas de vente ou de location, le vendeur ou le bailleur doit vous en informer par écrit/);
@@ -420,19 +560,49 @@ describe("FUT-157 · le texte", () => {
 
   test("les fiches sans emprise bornent une absence : au premier niveau sans fiche listée, dans le dépliable sinon", () => {
     const aucun = texteSitesSols(rejouer(cas("98 Boulevard Solidarité")))!;
-    assert.match(aucun.limites.join(" "), /9 fiches de la commune n'ont pas d'emprise publiée.*Aucune n'est publiée à cette adresse\./);
+    assert.match(aucun.limites.join(" "), /9 sites de la commune ne sont repérés que par un point, ou pas du tout.*Aucun n'est déclaré à cette adresse\./);
     const liste = texteSitesSols(rejouer(cas("96b Boulevard Solidarité")))!;
-    assert.doesNotMatch(premierNiveau(liste), /emprise publiée/);
-    assert.ok(liste.savoirPlus.some((x) => /^9 fiches de la commune n'ont pas d'emprise publiée/.test(x)));
+    assert.doesNotMatch(premierNiveau(liste), /repérés que par un point/);
+    assert.ok(liste.savoirPlus.some((x) => /^9 sites de la commune ne sont repérés que par un point/.test(x)));
   });
 
   test("une instruction seule n'entraîne pas d'obligation, et une instruction clôturée n'est pas un sol propre", () => {
     const l = lire({ instructions: [page([ligne("I", rect(-50, -50, 50, 50), { nom_etablissement: "Usine", statut: "Clôturée" })])] });
     const t = texteSitesSols(l)!;
-    assert.match(t.titre, /^Cette adresse est dans le périmètre d'un site pollué suivi par l'administration\.$/);
-    assert.match(t.change.join(" "), /n'entraîne pas, à elle seule, d'obligation/);
-    assert.match(t.change.join(" "), /clôturée veut dire que l'administration a terminé son suivi, pas que le sol est sans pollution/);
-    assert.match(t.sites[0].inscriptions[0].libelle, /\(instruction clôturée\)$/);
+    assert.match(t.titre, /^Cette adresse est dans le périmètre d'un site suivi par l'administration pour une pollution des sols\.$/);
+    assert.match(t.change.join(" "), /Cette inscription, à elle seule, n'impose rien de particulier à la vente ou à la location/);
+    assert.match(t.change.join(" "), /^.*Si une installation classée soumise à autorisation ou à enregistrement a été exploitée sur ce terrain.*le vendeur doit toutefois/);
+    assert.match(t.change.join(" "), /Un suivi terminé veut dire que l'administration a clos son dossier, pas que le sol est sans pollution/);
+    assert.match(t.sites[0].inscriptions[0].libelle, /\(suivi terminé\)$/);
+    assert.ok(!t.savoirPlus.some((x) => /deux ans/.test(x)), "le recours de L. 125-7 ne vaut que pour un SIS");
+  });
+
+  // ── Relecture éditoriale et juridique du 30/10/2026 (docs/rapports-agents/editorial-writer/2026-10-30-fut157-sites-sols.md)
+  test("un site déclaré à l'adresse, ou repéré dans la parcelle, n'est pas un vague « peut-être » : le titre le dit", () => {
+    assert.equal(texteSitesSols(rejouer(cas("56 Rue Paul Cazeneuve")))!.titre,
+      "Un site suivi par l'administration pour une pollution des sols est déclaré à cette adresse. On ne sait pas jusqu'où il s'étend : c'est à vérifier.");
+    const t = texteSitesSols(rejouer(cas("62 Rue Paul Cazeneuve")))!;
+    assert.equal(t.titre, "Le repère d'un site suivi par l'administration pour une pollution des sols tombe dans la parcelle de cette adresse. On ne sait pas jusqu'où il s'étend : c'est à vérifier.");
+    assert.match(t.sites[0].situation, /repéré sur la carte que par un point, qui tombe dans la parcelle CI 78/);
+    assert.equal(t.verifier.filter((v) => /^Lisez la fiche/.test(v)).length, 1, "un seul « Lisez la fiche »");
+  });
+
+  test("le recours de L. 125-7 n'est dit que lorsqu'un SIS est en cause, et la phrase d'exposition n'est visible qu'avec un site", () => {
+    const sis = texteSitesSols(rejouer(cas("96b Boulevard Solidarité")))!;
+    assert.ok(sis.savoirPlus.some((x) => /dans les deux ans suivant sa découverte, demander l'annulation du contrat, une partie du prix ou une baisse du loyer/.test(x)));
+    assert.ok(sis.limites.includes("Ces inventaires disent ce que l'administration sait du sol, pas ce à quoi les occupants sont exposés."));
+    const sup = texteSitesSols(rejouer(cas("50 Rue Saint Jean de Dieu")))!;
+    assert.ok(!sup.savoirPlus.some((x) => /deux ans/.test(x)));
+    const aucun = texteSitesSols(rejouer(cas("10 Rue de Rivoli")))!;
+    assert.ok(!aucun.limites.some((x) => /exposés/.test(x)) && aucun.savoirPlus.some((x) => /exposés/.test(x)));
+  });
+
+  test("un SIS qui ne couvre qu'une partie de la parcelle : concerné, et la liste de la fiche dit si l'arrêté la vise", () => {
+    const l = lire({ sis: [page([ligne("A", rect(4, -50, 60, 50))])] });
+    assert.equal(etatSitesSols(l), "concerne");
+    assert.ok(texteSitesSols(l)!.verifier.some((v) => /^La fiche officielle liste les parcelles concernées : regardez si la parcelle AB 12 en fait partie/.test(v)));
+    // Toute la parcelle dedans : rien à chercher dans la liste.
+    assert.ok(!texteSitesSols(lire({ sis: [page([ligne("A", rect(-50, -50, 50, 50))])] }))!.verifier.some((v) => /regardez si/.test(v)));
   });
 
   test("une distance n'est jamais un niveau de danger : seule la distance du repli cadastral est dite", () => {
@@ -584,7 +754,7 @@ describe("FUT-157 · l'écran", () => {
     assert.equal(rendreHtml(undefined), "");
     const html = rendreHtml(rejouer(cas("64 Rue de Grenelle")));
     assert.match(html, /<section aria-labelledby="sites-sols"/);
-    assert.match(html, /id="sites-sols"[^>]*><span>Sols pollués sur ce terrain<\/span>/);
+    assert.match(html, /id="sites-sols"[^>]*><span>Pollution des sols sur ce terrain<\/span>/);
   });
 
   test("chaque lien externe s'ouvre dans un nouvel onglet, sans référent, et porte un nom distinct", () => {

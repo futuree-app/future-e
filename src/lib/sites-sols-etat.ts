@@ -4,7 +4,7 @@
 // `urbanisme-nomenclature.ts` (FUT-81).
 
 /** Version de la règle de lecture, gravée dans chaque lecture enregistrée. */
-export const SITES_SOLS_TERRAIN_CONVENTION = "fut157-2026-10-30";
+export const SITES_SOLS_TERRAIN_CONVENTION = "fut157-2026-10-30b";
 
 export type InventaireTerrain = "sis" | "sup" | "instructions";
 export const INVENTAIRES: InventaireTerrain[] = ["sis", "sup", "instructions"];
@@ -25,12 +25,15 @@ export type UsageParcelle =
 /**
  * OÙ EST LE PÉRIMÈTRE PAR RAPPORT AU TERRAIN. Deux situations démontrent (`point_dans`, `parcelle_recoupe`) ;
  * toutes les autres appellent une vérification, et disent pourquoi.
- * - `point_dans` : le point de l'adresse est dans le périmètre.
- * - `parcelle_recoupe` : le périmètre couvre au moins 2 % de la parcelle attribuée (convention du bruit
- *   aérien, FUT-146, issue de FUT-81).
- * - `parcelle_bordure` : il en couvre moins de 2 %, mais au moins 25 m² (en deçà, c'est un liseré de tracé,
- *   qui n'est pas retenu).
- * - `point_en_limite` : le point est sur la limite du périmètre (à 1 cm près).
+ * La preuve est une PROFONDEUR (`TOLERANCE_TRACE_M`, 2 m, dans `sites-sols-terrain.ts`) : un périmètre qui
+ * n'entre pas de 2 m dans le terrain peut n'être qu'un écart de tracé. Aucun recoupement n'est écarté pour sa
+ * petite taille.
+ * - `point_dans` : le point de l'adresse est dans le périmètre, à plus de 2 m de sa limite.
+ * - `parcelle_recoupe` : le périmètre entre de plus de 2 m dans la parcelle attribuée (en tout ou en partie).
+ * - `parcelle_bordure` : il recoupe la parcelle attribuée sans y entrer de 2 m : un liseré le long d'une limite,
+ *   quelle que soit son aire.
+ * - `point_en_limite` : le point est sur la limite du périmètre, ou dedans à moins de 2 m d'elle, et aucune
+ *   parcelle attribuée ne tranche.
  * - `parcelle_incertaine` : il recoupe une parcelle rattachée par proximité ou sur une limite.
  * - `localisation_ponctuelle` : la fiche n'est localisée que par un point, qui tombe dans la parcelle.
  * - `geometrie_illisible` : le périmètre publié ne se mesure pas ; sa position ne se vérifie pas.
