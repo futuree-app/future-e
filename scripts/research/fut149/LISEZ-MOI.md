@@ -19,3 +19,10 @@ Environnement : `python3 -m venv venv && venv/bin/pip install -r scripts/debrous
 | `candidats.py` | Recherche d'adresses de recette dans et hors zone, par commune (BAN inverse sur une grille). |
 
 Résultats du 28/10/2026 : `docs/audits/2026-10-28-fut149-debroussaillement/02-contre-epreuves.md`.
+
+**Format `debroussaillement-2` (30/10/2026, option A de R3).** Les tuiles portent les vraies limites du zonage,
+calculées par `construire.py`. `limites-alignees.mjs` (recherche des vraies limites posées sur la grille, que la lib
+du format 1 devait deviner) n'a plus d'objet. Les contre-épreuves du format 2 (oracle sur la géométrie d'origine,
+jonctions, trous, interstices, multipolygones, frontières construites par le vrai constructeur) sont dans
+`docs/audits/2026-10-30-fut149-contre-revue-pr111/sondes/` et leurs résultats dans le rapport du même nom (§ 14).
+

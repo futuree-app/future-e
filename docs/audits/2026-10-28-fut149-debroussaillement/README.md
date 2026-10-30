@@ -59,17 +59,18 @@ l'emplacement n'est pas connu (choix fait sur les cas réels de Gonfaron, Fréju
 ## Architecture
 
 ```
-GeoPackage IGN (1,76 Go)  ──  scripts/debroussaillement/construire.py  (Python, versions épinglées, 3 min)
+GeoPackage IGN (1,76 Go)  ──  scripts/debroussaillement/construire.py  (Python, versions épinglées, 5 min)
    contrôles : 52 départements = arrêtés ; validité ; surface conservée ; exclusions des arrêtés
             │
-   <édition>/manifest.json  +  <édition>/t/<ix>_<iy>.json.gz   (2 453 tuiles de 0,1°, 32,8 Mo, médiane 8,8 Ko)
+   <édition>/manifest.json  +  <édition>/t/<ix>_<iy>.json.gz   (2 453 tuiles de 0,1°, morceaux + vraies limites,
+                                                                  format 2 : 54,9 Mo, médiane 10,2 Ko)
             │  scripts/debroussaillement/publier.mjs  (préfixe neuf, empreintes relues, pointeur écrit en dernier)
    Supabase Storage, bucket privé `debroussaillement`  (non créé)
             │
    src/lib/server/debroussaillement-tuiles.ts   (pointeur relu toutes les 10 min ; manifeste et 64 tuiles en mémoire
                                                   par empreinte ; 4 s ; ne lève jamais)
             │
-   src/lib/debroussaillement.ts   (pur : point, parcelle, coupes de tuile, départements, exclusions)
+   src/lib/debroussaillement.ts   (pur : point, parcelle, vraies limites publiées, départements, exclusions)
       │                                         │
    /api/georisques-logement (parcelle)       autour-response.ts (point, relu au rendu)
    LogementReport.debroussaillement (figé)   AutourResponse.debroussaillement
@@ -77,15 +78,21 @@ GeoPackage IGN (1,76 Go)  ──  scripts/debroussaillement/construire.py  (Pyth
    src/lib/debroussaillement-texte.ts   (pur : ce que l'écran dit)  →  DebroussaillementBlocs.tsx
 ```
 
-**Pourquoi hors de Vercel.** 4 237 zones, 9,5 millions de sommets : même découpée, la géométrie pèse 32,8 Mo
+**Pourquoi hors de Vercel.** 4 237 zones, 9,5 millions de sommets : même découpée, la géométrie pèse 32,8 Mo (54,9 Mo avec les limites du format 2)
 compressés. L'embarquer dans les fonctions de Logement et d'Autour (comme les 11,8 Mo du bruit aérien) aurait
 défait #106/#107. Un appel au WFS à chaque dossier aurait été plus simple (105 ms), mais dépendant d'un service
 déjà vu en panne (FUT-146) et ne donnant pas l'aire d'intersection. Même patron que la fibre (FUT-156, #108).
 
-**Les coupes de tuile.** Une zone coupée par la grille garde des arêtes posées exactement sur une droite de la
-grille ; la lib les écarte avant toute distance (sinon un point au milieu d'une forêt serait « en limite »).
-Une cellule entièrement couverte n'a pas de fichier (« pleine », 40) ; une cellule absente du manifeste ne
-contient aucune zone (absence établie) ; une tuile listée et non lue est une panne.
+**Les limites (format `debroussaillement-2`, 30/10/2026).** Chaque tuile porte, à côté des morceaux de zone, les
+vraies limites du zonage qui la traversent : le bord de la **réunion** de toutes les zones, calculé par
+`construire.py` sur les géométries d'origine (Lambert-93), sans tolérance, puis projeté et rangé par cellule. Une
+coupe de tuile, ou la frontière entre deux zones voisines (souvent une limite de département), n'en est pas une ; un
+trou, un vrai interstice, une limite posée sur la grille en sont. La lib mesure la distance d'un point du zonage à
+ces seules limites, et celle d'un point hors zone à la zone la plus proche. Elle ne devine plus rien de la grille.
+Une cellule entièrement couverte et qu'aucune limite ne touche n'a pas de fichier (« pleine », 40) ; une cellule
+absente du manifeste ne contient aucune zone (absence établie) ; une tuile listée et non lue, ou d'un autre format,
+est une panne. Historique : jusqu'au format 1, la lib reconnaissait les coupes à l'exécution et prenait les
+frontières entre zones pour des limites (R3 de la contre-revue du 30/10/2026).
 
 **Arrondi.** Coordonnées WGS84 en entiers de 1e-7 degré, arrondies par GEOS (`set_precision`) : l'arrondi sommet
 par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu des communes entières « incertaines ».
@@ -95,10 +102,10 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 | | Mesure |
 |---|---|
 | Fonctions Vercel (build de production, tête contre `main`) | `/api/georisques-logement` 157 → 158 fichiers, 22,76 → 22,77 Mo ; `/api/logement-autour` 2 368 → 2 369 ; `/rapport/autour` 177 → 178. Le fichier ajouté est le code compilé ; **aucune donnée**, aucun glob `data/**`. La page de banc `/dev/fut149` (404 en production) embarque ses fixtures (0,35 Mo), comme `/dev/fut146`. |
-| Lecture par analyse | 1 à 4 tuiles, 8,8 Ko médiane, 128 Ko au plus ; calcul 1 ms en médiane, 14 ms au 99e centile, 49 ms au pire (9 972 lectures sur toutes les cellules, tuiles en mémoire, contre-revue du 30/10/2026). Latence Storage mesurée par FUT-156 : 81 ms médiane, 692 ms à froid (pointeur, manifeste, tuile). En parallèle des ~14 sources du Logement. |
-| Stockage | 32,8 Mo par édition ; deux éditions gardées : 66 Mo du quota Free de 1 Go, **partagé** entre test et production et avec la fibre (≈ 150 Mo). |
-| Egress | Mesuré le 30/10/2026 avec le vrai lecteur sur l'édition nationale (`docs/audits/2026-10-30-fut149-contre-revue-pr111/sondes/egress.mjs`). Instance froide : **286 Ko** (pointeur, manifeste de 264 Ko, une tuile), soit environ 18 000 démarrages d'instance pour 5 Go, toutes fonctions confondues (Autour et Logement ont chacune leur mémoire). Instance chaude : le pointeur (≈ 130 octets) toutes les 10 min, le manifeste une seule fois par édition, puis les tuiles qui ne sont pas déjà en mémoire (≈ 13 Ko par lecture quand les adresses sont tirées au hasard en France). Le chiffre « 100 000 lectures pour 5 Go » ne vaut que pour des instances déjà chaudes. |
-| Construction | 3 min (Python), 590 Mo à télécharger. Envoi : ~2 450 objets, à mesurer à la première publication. |
+| Lecture par analyse | 1 à 4 tuiles, 10,2 Ko médiane, 251 Ko au plus (format 2) ; calcul 1,1 ms en médiane, 15 ms au 99e centile, 48 ms au pire ; décodage d'une tuile 0,3 ms en médiane, 6 ms au pire (9 972 lectures sur toutes les cellules, contre-revue du 30/10/2026, § 14). Latence Storage mesurée par FUT-156 : 81 ms médiane, 692 ms à froid (pointeur, manifeste, tuile). En parallèle des ~14 sources du Logement. |
+| Stockage | 54,9 Mo par édition (format 2) ; deux éditions gardées : 110 Mo du quota Free de 1 Go, **partagé** entre test et production et avec la fibre (≈ 150 Mo). |
+| Egress | Mesuré le 30/10/2026 avec le vrai lecteur sur l'édition nationale (`docs/audits/2026-10-30-fut149-contre-revue-pr111/sondes/egress.mjs`). Instance froide : **≈ 300 Ko** (pointeur, manifeste de 264 Ko, une tuile), soit environ 17 000 démarrages d'instance pour 5 Go, toutes fonctions confondues (Autour et Logement ont chacune leur mémoire). Instance chaude : le pointeur (≈ 130 octets) toutes les 10 min, le manifeste une seule fois par édition, puis les tuiles qui ne sont pas déjà en mémoire (≈ 22 Ko par lecture au format 2, ≈ 13 Ko au format 1, quand les adresses sont tirées au hasard en France). Le chiffre « 100 000 lectures pour 5 Go » ne vaut que pour des instances déjà chaudes. |
+| Construction | 5 min (Python, déterministe à l'octet), 590 Mo à télécharger. Envoi : ~2 450 objets, à mesurer à la première publication. |
 | Coût monétaire | Nul (Free). Aucun achat, aucun changement de tarif. |
 | Maintenance | Une édition IGN tous les 6 à 12 mois (5 en 3 ans) ; contre-épreuve des arrêtés à rejouer à chaque édition et à chaque arrêté ministériel. |
 
@@ -114,7 +121,7 @@ par sommet créait 26 polygones invalides (jusqu'à 72 km²), qui auraient rendu
 
 ## Recette
 
-- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 86 tests (80 au 29/10, puis 6 de la contre-revue du 30/10) (géométrie synthétique : contact, 1 cm, liseré,
+- **Tests** : `src/lib/fut149-debroussaillement.test.ts`, 94 tests (80 au 29/10, puis 14 des contre-revues du 30/10, dont le format 2) (géométrie synthétique : contact, 1 cm, liseré,
   coupe de tuile, vraie limite alignée sur la grille, cellule pleine, parcelle invalide, voisine, point hors de la
   parcelle, rue, immense ; départements ; pannes et versions ; textes rendus et interdits ; lecteur Storage ; 24
   adresses réelles contre deux oracles) et `scripts/debroussaillement/publier.test.mjs`, 12 scénarios de

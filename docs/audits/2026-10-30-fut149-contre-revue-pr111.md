@@ -369,3 +369,218 @@ le reste de R1.
 
 Le § 10 reste valable. Seule la commande `basculer` écrit désormais l'empreinte du manifeste dans le pointeur :
 aucune étape ne s'ajoute.
+
+## 14. R3, option A (arbitrage du porteur, 30/10/2026 au soir) : format `debroussaillement-2`
+
+> Décision du porteur : option A, calculer les vraies limites de la réunion des zones à la construction ; aucune
+> approximation à l'exécution ; aucune tolérance arbitraire pour fusionner des zones séparées. Ni fusion, ni
+> déploiement, ni bucket, ni publication, ni variable Vercel. FUT-149 reste In Progress.
+
+### Ce qui change
+
+| | Format 1 (`87c1cca2`) | Format 2 |
+|---|---|---|
+| Tuile | les morceaux de zone | les morceaux **et les vraies limites** du zonage dans la cellule (`limites`, lignes codées comme les anneaux) |
+| Limites | déduites par la lib à l'exécution : bord de chaque morceau, moins les coupes de la grille reconnues en regardant de l'autre côté (`vraiesLimites`, `Couvert`, `PAS_EXAMEN`) | calculées par `construire.py` (`limites_cellule`) : bord de la **réunion** des zones d'origine (Lambert-93), projeté, rangé par cellule. La lib ne devine plus rien |
+| Point dans le zonage | distance au bord du morceau qui le contient (R3 : une frontière entre zones comptait) | distance aux seules vraies limites |
+| Point hors zonage | distance aux vraies limites des morceaux | distance à la zone la plus proche (le point est hors de chaque morceau, donc de leur réunion) |
+| Parcelle | inchangé (aires des morceaux) ; distance parcelle-zone sans recouvrement | inchangé ; distance aux morceaux eux-mêmes |
+| Cellule « pleine » | entièrement couverte | entièrement couverte **et** qu'aucune limite ne touche (sinon un fichier, pour ses limites) |
+| Lecteur | `debroussaillement-1` | refuse tout autre format que `debroussaillement-2` (tuile, manifeste, pointeur) : « indisponible », jamais une lecture |
+| Convention de lecture | `fut149-1` | `fut149-2` (aucune lecture `fut149-1` n'a été publiée) |
+
+Supprimé de la lib : `vraiesLimites`, `Couvert`, `PAS_EXAMEN`, `dansMorceau` (≈ 90 lignes). Le reste du protocole est
+inchangé : édition immuable, empreintes du manifeste (au pointeur) et des tuiles, mémoire par empreinte, bascule et
+retour arrière, contrôle « le point est dans la parcelle ».
+
+### Trois défauts trouvés en chemin, corrigés
+
+1. **Une vraie limite posée exactement sur le bord d'une cellule disparaissait** (première construction). Après
+   l'aller-retour Lambert-93 → WGS84, elle tombait à 1e-12 degré hors du carré de la cellule. La sonde
+   `frontieres2.mts`, qui fait construire les mondes synthétiques par le vrai `construire.py`, l'a montré : 10 lectures
+   « en zone » à 1-49 m d'une vraie limite alignée. Correctif : les limites sont rangées dans le carré élargi de
+   10 cm (`MARGE_RANGEMENT`). Ce n'est pas une tolérance géométrique : la marge choisit seulement la tuile qui range
+   une limite, et une vraie limite rangée deux fois reste une vraie limite.
+2. **La réunion en virgule flottante n'est pas toujours fusionnée.** GEOS rend parfois un trou que recouvre une
+   autre partie du résultat. Exemple : dans la Drôme (4,7058 ; 44,5720), un « vide » fantôme de 5 700 m² apparaît à
+   13 m d'un point avec une découpe de 1 km, et disparaît avec 10 km ; le point est couvert par la zone de l'Ardèche.
+   Correctif : réunion à **précision de calcul fixe de 1 µm** (`GRILLE_CALCUL_M`), dans le constructeur et dans
+   l'oracle. La réunion est alors toujours fusionnée. La grille n'agit qu'à l'échelle du micromètre : elle peut faire
+   apparaître ou disparaître un liseré de cette largeur (195 vides de moins de 0,5 µm à précision fixe, aucun en
+   virgule flottante), jamais un vide plus large. 154 des 1 277 « jonctions non dissoutes » de l'oracle en virgule
+   flottante étaient ce défaut de calcul.
+3. Le harnais synthétique décrivait des jonctions en T en degrés. Projetées, elles laissaient un liseré qui n'existait
+   pas dans le monde voulu : les sommets en T sont insérés avant projection (`construire_monde.py`). C'était un défaut
+   de la sonde, pas du constructeur.
+
+### Le résidu de R3 : les raccords imparfaits de la base, que seule une fermeture effacerait
+
+La base IGN est numérisée département par département. À beaucoup de frontières, deux zones voisines **ne se
+touchent pas exactement** : elles laissent un vide de 1 µm à quelques millimètres. La réunion exacte le garde, donc
+le format 2 strict aussi, comme une limite (lecture « en limite », prudente, jamais dangereuse).
+
+| Largeur moyenne des vides de la réunion nationale (précision fixe ; trous de la réunion) | Nombre | Périmètre | Touchant plusieurs zones |
+|---|---|---|---|
+| < 1 mm | 7 091 | 1 739 km | 3 888 |
+| 1 mm – 1 cm | 451 | 156 km | 143 |
+| 1 – 10 cm | 667 | 77 km | 161 |
+| 10 cm – 1 m | 795 | 85 km | 99 |
+| 1 – 10 m | 3 740 | 658 km | 241 |
+| ≥ 10 m (enclaves, clairières, villages…) | 19 331 | 47 624 km | 547 |
+
+Les vides qui débouchent sur l'extérieur (encoches entre deux zones) ne sont pas des trous et n'y figurent pas.
+
+Dans l'édition construite : 8 155 anneaux de limite fermés de moins de 1 cm de large, soit 1 769 km (sur 96 754 km
+de limites, rangées une ou deux fois). Aucune largeur ne sépare naturellement le bruit de raccord des vrais
+interstices : la distribution est continue jusqu'au mètre. La source n'a pas non plus de résolution propre (3 720 zones
+sur 4 237 ont des coordonnées plus fines que le millimètre).
+
+**Fermeture mesurée, non appliquée** (`--fermeture-m`, 0 par défaut, `sondes/fermeture.py`) : dilatation puis érosion
+à angles vifs, qui ne referme que les vides plus étroits que f. Sur les 1 314 points de jonction encore « en limite » :
+
+| f | jonctions dissoutes | effets sur des points hors zone (sur 600 interstices, 600 trous) |
+|---|---|---|
+| 1 mm | 1 026 (78 %) | 3 points d'interstices de moins de 1 mm passent de « hors zone » à « en zone » |
+| 1 cm | 1 119 (85 %) | + 1 point d'un trou de 1 à 10 mm |
+| 10 cm | 1 153 (88 %) | + 2 points de trous |
+| 1 m | 1 185 (90 %) | 6 points de trous, 3 d'interstices |
+
+Toute fermeture transforme quelques points strictement hors zone (dans un vide plus étroit qu'elle) en points « en
+zone ». La consigne l'interdit ; c'est donc au porteur d'en décider (§ 15).
+
+### Contre-épreuves indépendantes
+
+Oracle : géométries IGN **d'origine** (GeoPackage, Lambert-93), Shapely, réunion à précision fixe de 1 µm des zones
+découpées à 1 km autour du point ; aucune tuile lue (`sondes/oracle_r3.py`, `verite_points.py`). Archive IGN
+retéléchargée ce matin, SHA-256 `b224f900…9b42e`, identique à celle de la PR.
+
+| Contre-épreuve | `87c1cca2` (format 1) | Format 2 |
+|---|---|---|
+| 3 000 points de jonction de ce matin (bande R3) | 21 / 3 000 justes | **3 000 / 3 000** |
+| 3 000 nouveaux points de jonction (5-40 m d'une arête partagée) | 1 328 justes ; 1 672 « en limite » à tort | **2 986 justes** ; 14 sur des liserés submicrométriques (ci-dessous) |
+| 20 000 points près des droites de la grille | 19 972 / 19 999 (27 R3) | **19 999 / 19 999** |
+| 4 000 points de part et d'autre du vrai bord (1-120 m, hors zone compris) | 3 998 / 4 000 | **4 000 / 4 000** |
+| 600 points dans ou près des trous | 598 ; **1 dangereux** (un point hors zone, dans un trou, lu « en zone ») | 598 ; 2 à moins de 1 mm du bord (ci-dessous) ; **0 dangereux** |
+| 600 points dans des interstices de moins de 20 m entre deux zones | 539 | 588 ; 12 à moins de 1 cm du bord |
+| 600 points dans ou près des parties secondaires des multipolygones | 594 | 597 ; 3 à moins de 1 cm du bord |
+| **Total des 8 800 points R3** | 1 743 désaccords, 1 dangereux | **31 désaccords, 0 dangereux** |
+| 14 958 lectures (toutes cellules, bords et coins) : lectures qui changent | — | 13, toutes « en limite » → « en zone », **toutes justes** selon l'oracle (vrai bord à 68 m et plus) |
+| 155 cas synthétiques de frontières, construits par le **vrai** `construire.py` (`frontieres2.mts`) | — | **155 / 155** |
+| 24 adresses réelles, au point et au Logement, contre l'oracle des géométries d'origine | 48 / 48 | **48 / 48** (états et parts identiques) |
+| 17 cas de parcelles (`parcelles.mts`) | 17 / 17 | **17 / 17**, sortie identique |
+
+**Les 31 désaccords restants, un par un** (`sondes/evaluer_r3.mts`, `analyser_ecarts.py`) :
+- **17 points à moins de 1 cm du bord**, la vérité les dit dehors, la lib dedans ; les deux disent « en limite ».
+  C'est la résolution de publication (1e-7 degré, ≈ 1 cm), à laquelle les morceaux sont arrondis. Seule la
+  formulation change : « dans la zone, à moins de 50 m de sa limite » au lieu de « à environ 5 m ».
+  - Trous (34) : deux vides de 1,7 mm de large, points à 1 mm et 0 mm.
+  - Interstices : 12 points à moins de 7 mm du bord, en 31, 09, 11, 06, 28, 84, 43.
+  - Multipolygones : 3 points à moins de 3 cm, en 49, 2A, 83.
+- **13 points du zonage lus « en zone » alors que la vérité voit, à 7-49 m, un liseré submicrométrique**
+  (largeur moyenne < 0,001 mm), en 30, 07, 26, 06, 34, 48 et 65. Leur existence dépend de l'arithmétique : décaler
+  le point de 8 cm, donc le carré de découpe, le fait apparaître ou disparaître (cas de 4,64835 ; 44,36103 : 20 m à
+  pleine précision, 67 m à 6 décimales). L'oracle et le constructeur ne les voient pas aux mêmes endroits. Le point
+  est bien dans le zonage, et sa vraie limite au sens utile est au-delà de 50 m.
+- **1 point dans la bande 49-51 m.**
+
+**Tests et mutations.**
+- Tests FUT-149 : 94 (synthétiques, avec des tuiles construites à partir d'un monde de rectangles dont les limites
+  sont calculées indépendamment de la lib). Ils couvrent :
+  - une jonction entre départements hors de la grille, à 0, 1, 10 et 40 m ;
+  - un vrai interstice de 8 m ;
+  - un liseré d'un cran de grille (8 mm), qui reste une limite ;
+  - un trou formé par quatre zones ;
+  - une cellule bordée d'une vraie limite qui a un fichier ;
+  - une vraie cellule pleine ;
+  - le refus du format 1 (tuile, manifeste, pointeur) ;
+  - « jamais en zone » pour un point hors zone près d'une vraie limite.
+- Publieur : 12 tests.
+- 12 mutations des garde-fous, toutes détectées :
+  - limites ignorées, non lues, ou fenêtre vide ;
+  - distance hors zone ignorée ;
+  - tuile sans limites acceptée ;
+  - format non vérifié ;
+  - R3 réintroduit (bord du morceau contenant) ;
+  - ambigu ignoré ;
+  - cellule pleine ignorée ;
+  - tuile manquante lue comme absence ;
+  - distance parcelle-zone ignorée ;
+  - point dans la parcelle non contrôlé.
+
+### Performances et données
+
+Mêmes machine et séance, deux passes par version. La machine était un peu plus lente qu'au § 11 : seules les
+comparaisons dans un même tableau valent.
+
+| Calcul par lecture (`sondes/perf.mts`, 9 972 lectures, toutes cellules) | `c1afce5e` | `87c1cca2` | Format 2 |
+|---|---|---|---|
+| Médiane | 2,5 – 2,8 ms | 1,2 – 1,3 ms | 1,1 – 1,2 ms |
+| 99e centile | 221 – 231 ms | 17,0 – 17,4 ms | **14,5 – 15,2 ms** |
+| Maximum | 1 202 – 1 224 ms | 51 – 52 ms | **46 – 48 ms** |
+| Décodage d'une tuile (gunzip + JSON), médiane / 99e centile / max | 0,17 / 1,9 / 3,1 ms | idem | 0,27 / 3,8 / 5,7 ms |
+
+Le retrait de l'examen de la grille fait gagner ≈ 13 % au 99e centile. C'est moins qu'escompté au § 12 (« proche de
+9 ms ») : le coût dominant n'est plus la grille, mais la projection et le parcours des morceaux entiers (et, pour un
+point hors zone, la distance à chacun). Le décodage, plus lourd, reste de l'ordre de la milliseconde.
+
+| Données | Format 1 | Format 2 |
+|---|---|---|
+| Tuiles (total) | 32,8 Mo | **54,9 Mo (+67 %)** |
+| Tuile médiane / 99e centile / max | 8,8 / 85,9 / 128 Ko | 10,2 / 164 / 251 Ko |
+| Fichiers / cellules pleines | 2 453 / 40 | 2 453 / 40 |
+| Manifeste | 270,3 Ko | 270,6 Ko |
+| Limites | — | 50 398 lignes, 9,27 millions de sommets, 96 754 km (rangées une ou deux fois) |
+| Construction | 3 min | 5 min (réunion par cellule à précision fixe) |
+| Déterminisme | — | deux constructions **identiques à l'octet** |
+| Stockage, deux éditions gardées | 66 Mo | 110 Mo (quota Free 1 Go, partagé avec la fibre) |
+
+| Réseau (`sondes/egress.mjs`, vrai lecteur, une instance) | `c1afce5e` | `87c1cca2` | Format 2 |
+|---|---|---|---|
+| Instance froide, une lecture : appels / octets | 3 / 286 Ko | 3 / 286 Ko | 3 / **301 Ko** |
+| Instance chaude, 1 lecture/min pendant 24 h : appels | 1 676 | 1 533 | 1 533 |
+| idem : manifeste / tuiles / total | 38,0 / 18,8 / 56,9 Mo | 0,26 / 18,8 / 19,1 Mo | 0,26 / **31,7** / 32,0 Mo |
+| Deux lectures simultanées à froid | 571 Ko | 307 Ko | 342 Ko |
+
+Le nombre de lectures réseau ne change pas. Ce qui change, c'est le poids des tuiles : ≈ 22 Ko par lecture qui ne
+trouve pas sa tuile en mémoire (adresses tirées au hasard en France), contre ≈ 13 Ko. À titre d'ordre de grandeur,
+sans compter les démarrages d'instance (≈ 300 Ko chacun), 5 Go couvrent ≈ 240 000 de ces lectures par mois, contre
+≈ 400 000 au format 1. Un dossier ouvert lit le zonage deux fois (Logement à la collecte, Autour au rendu), dans deux
+fonctions distinctes. Économie possible, non faite : ranger les limites comme des renvois aux anneaux qu'elles
+suivent (elles en reprennent presque tous les sommets), plutôt qu'en lignes recopiées.
+
+La consommation réelle de Supabase (egress et stockage du projet, fibre comprise) **n'a pas été vérifiée** : pas
+d'accès aux mesures de facturation. C'est un prérequis distinct avant l'activation.
+
+## 15. Verdict après l'option A, et réserves
+
+**Fusion : GO technique** (sans activation), sous réserve de la contre-revue indépendante ciblée sur R3 et sur les
+effets du nouveau format.
+- La classification est exacte au sens de la réunion des géométries d'origine, à la résolution de publication près
+  (1 cm) : 0 lecture dangereuse sur 31 800 points contre l'oracle, 0 écart sur 20 000 points de grille, 3 000 / 3 000
+  sur la bande R3 de ce matin.
+- Le moteur est plus simple (≈ 90 lignes de calcul de grille retirées) et un peu plus rapide.
+- Les défauts déjà corrigés ne reviennent pas : frontières alignées (155 / 155 par le vrai constructeur), parcelles
+  (17 / 17), adresses (48 / 48), publication et mémoire (tests et mutations).
+- La PR reste inerte sans `DEBROUSSAILLEMENT_BUCKET` (test : aucun appel réseau, aucun champ écrit).
+
+**R3 n'est que partiellement levé : un arbitrage reste à rendre.** Avec la réunion exacte, 56 % des points de jonction
+retrouvent « en zone ». Les autres longent un vrai vide de raccord entre deux zones, de 1 µm à quelques millimètres
+(≈ 1 770 km de limites en anneaux fermés de moins de 1 cm, davantage en comptant les encoches ouvertes). Ils restent
+« en limite » : prudent, jamais faux dans le sens dangereux, mais l'écran dit « selon l'endroit exact, le logement
+peut y être ou non » là où il y est. Deux voies :
+- **(a) Garder la règle stricte** : rien à faire ; la bande de jonction est réduite de moitié environ.
+- **(b) Une fermeture `--fermeture-m`** : 1 mm efface 78 % du résidu, 1 cm 85 %. En contrepartie, quelques points
+  situés dans un vide plus étroit que le seuil, donc strictement hors zone, sont lus « en zone » : 3 sur 600
+  interstices tirés à 1 mm, plus 1 trou à 1 cm. C'est contraire à la consigne « ne jamais transformer un point hors
+  zone en point du zonage » ; je ne l'ai pas activée.
+
+L'édition est à reconstruire avec l'option retenue avant publication. La construction dit la valeur choisie
+(`stats.limites.fermetureM`).
+
+**Réserves avant publication et activation**
+1. Arbitrage de la fermeture (ci-dessus) ; reconstruction de l'édition en conséquence ; la contre-revue ciblée.
+2. Quota Supabase réel, fibre comprise (tableau de bord) : non vérifié. Les tuiles pèsent 67 % de plus.
+3. Les 13 liserés submicrométriques et les 17 points à moins de 1 cm du bord (§ 14) sont des limites de la
+   représentation, pas des défauts de lecture ; ils restent documentés.
+4. Inchangé depuis le § 13 : procédures du § 10 (bucket, publication, bascule, variable en dernier, retour arrière
+   par `basculer`).

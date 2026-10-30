@@ -1,14 +1,16 @@
 const W = process.argv[2];
-const { lireDebroussaillement } = await import(`${W}/src/lib/debroussaillement.ts`);
+const { lireDebroussaillement, FORMAT_TUILES_DEBROUSSAILLEMENT: FORMAT } = await import(`${W}/src/lib/debroussaillement.ts`);
 const PAS = 1_000_000, IX = 50, IY = 435, X1 = (IX + 1) * PAS;
 const LAT = 43.55, mLon = 1 / (111320 * Math.cos(LAT * Math.PI / 180)), mLat = 1 / 111132;
 const code = (r: number[][]) => { const o = [r[0][0], r[0][1]]; for (let i = 1; i < r.length; i++) o.push(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]); return o; };
 // Zone : ouest de la droite x = 5,07 (vraie limite NON alignée), dans la cellule 50_435
 const XL = 5.07;
-const man = { format: "debroussaillement-1", edition: "2026-03-01", construitLe: "x", producteur: "IGN", diffuseur: "IGN", licence: "LO", source: { url: "u" }, couverture: ["83"],
+const man = { format: FORMAT, edition: "2026-03-01", construitLe: "x", producteur: "IGN", diffuseur: "IGN", licence: "LO", source: { url: "u" }, couverture: ["83"],
   profils: [{ departement: "83", source: "Zonage IGN", origine: null, millesime: "2020", arrete: null, arreteBrut: null, url: null, integration: null, integrationBrut: null }],
   tuiles: { "50_435": { octets: 1, sha256: "x" } } };
-const tuiles = new Map([["50_435", { format: "debroussaillement-1", edition: "2026-03-01", ix: 50, iy: 435, morceaux: [{ p: 0, o: "Z", r: [code([[IX * PAS, IY * PAS], [XL * 1e7, IY * PAS], [XL * 1e7, (IY + 1) * PAS], [IX * PAS, (IY + 1) * PAS]])] }] }]]);
+// Format 2 : la zone est seule ; ses quatre côtés sont de vraies limites (l'anneau refermé). Le format 1 les ignore.
+const anneau = [[IX * PAS, IY * PAS], [XL * 1e7, IY * PAS], [XL * 1e7, (IY + 1) * PAS], [IX * PAS, (IY + 1) * PAS]];
+const tuiles = new Map([["50_435", { format: FORMAT, edition: "2026-03-01", ix: 50, iy: 435, morceaux: [{ p: 0, o: "Z", r: [code(anneau)] }], limites: [code([...anneau, anneau[0]])] }]]);
 // Parcelle carrée de 30 m, centrée sur (cx, cy)
 const carre = (cx: number, cy: number, l = 30) => ({ type: "Polygon", coordinates: [[[cx - l / 2 * mLon, cy - l / 2 * mLat], [cx + l / 2 * mLon, cy - l / 2 * mLat], [cx + l / 2 * mLon, cy + l / 2 * mLat], [cx - l / 2 * mLon, cy + l / 2 * mLat], [cx - l / 2 * mLon, cy - l / 2 * mLat]]] });
 const lire = (pt: [number, number], parcelle: unknown, geocodage = "housenumber") => {
