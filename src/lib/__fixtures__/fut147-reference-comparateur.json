@@ -1069,7 +1069,7 @@
          },
          {
           "insee": "67448",
-          "palier": "Présence étudiante limitée dans l'agglomération de La Broque",
+          "palier": "Aucun étudiant inscrit dans l'agglomération de La Broque",
           "qualifier": "aucun établissement supérieur recensé à moins de 25 km",
           "disponible": true,
           "alerte": false
@@ -1264,7 +1264,7 @@
       "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
       "air": "air généralement plus sain",
       "vie_locale": "vie locale animée",
-      "vie_etudiante": "présence étudiante limitée dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+      "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
       "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
      },
      "inondation": null
@@ -1322,7 +1322,7 @@
       "calme_sonore": "à l'écart des grandes infrastructures bruyantes",
       "air": "air généralement plus sain",
       "vie_locale": "vie locale animée",
-      "vie_etudiante": "présence étudiante limitée dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
+      "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de La Broque, aucun établissement supérieur recensé à moins de 25 km",
       "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
      },
      "inondation": null
@@ -5690,8 +5690,8 @@
          },
          {
           "insee": "64125",
-          "palier": "Forte présence étudiante dans l'agglomération de Bayonne",
-          "qualifier": null,
+          "palier": "Présence étudiante intermédiaire dans l'agglomération de Bayonne",
+          "qualifier": "au moins un établissement supérieur recensé à moins de 10 km",
           "disponible": true,
           "alerte": false
          },
@@ -6818,9 +6818,9 @@
      "signaux": {
       "soins": "accès aux soins plus limité",
       "ecoles": "accès aux écoles plus limité",
+      "vie_etudiante": "aucun étudiant inscrit dans l'agglomération de Pignans, aucun établissement supérieur recensé à moins de 25 km",
       "vie_locale": "vie locale animée",
       "culture": "offre culturelle plus limitée",
-      "vie_etudiante": "présence étudiante limitée dans l'agglomération de Pignans, aucun établissement supérieur recensé à moins de 25 km",
       "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque",
       "climat_inondation": "Les pluies extrêmes tendent à s'intensifier dans ce secteur."
      },
@@ -6864,7 +6864,7 @@
       "vie_locale": "vie locale intermédiaire",
       "soins": "accès aux soins intermédiaire",
       "ecoles": "accès aux écoles plus facile",
-      "culture": "offre culturelle intermédiaire",
+      "vie_etudiante": "aucun étudiant inscrit dans la commune, au moins un établissement supérieur recensé à moins de 25 km",
       "inondation": "inondations indemnisées fréquentes de 1995 à 2021 (5 à 10 sinistres pour 1 000 biens assurés chaque année)",
       "climat_inondation": "Inondations indemnisées fréquentes de 1995 à 2021 ; les pluies extrêmes tendent à s'intensifier."
      },
@@ -7732,7 +7732,7 @@
         "cellules": [
          {
           "insee": "83067",
-          "palier": "Présence étudiante limitée dans l'agglomération de Pignans",
+          "palier": "Aucun étudiant inscrit dans l'agglomération de Pignans",
           "qualifier": "aucun établissement supérieur recensé à moins de 25 km",
           "disponible": true,
           "alerte": false
@@ -7746,8 +7746,8 @@
          },
          {
           "insee": "83148",
-          "palier": "Présence étudiante intermédiaire",
-          "qualifier": null,
+          "palier": "Aucun étudiant inscrit dans la commune",
+          "qualifier": "au moins un établissement supérieur recensé à moins de 25 km",
           "disponible": true,
           "alerte": false
          }
@@ -8748,8 +8748,8 @@
          },
          {
           "insee": "83137",
-          "palier": "Forte présence étudiante",
-          "qualifier": null,
+          "palier": "Présence étudiante intermédiaire",
+          "qualifier": "au moins un établissement supérieur recensé à moins de 5 km",
           "disponible": true,
           "alerte": false
          }
