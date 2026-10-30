@@ -24,6 +24,8 @@ import { getZfeForPoint } from "@/lib/zfe";
 import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
 import { resultatAudit, voisinAutorise, type AuditLookup } from "@/lib/audit-record";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
+import { getIndustrieAdresse } from "@/lib/server/industrie-adresse";
+import { precisionDuPoint } from "@/lib/industrie-adresse";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
@@ -84,6 +86,13 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     // FUT-156 : LA FIBRE À L'ADRESSE. Une lecture de l'index trimestriel (un lot de quelques dizaines de Ko),
     // en parallèle de tout le reste, par l'identifiant BAN seul : jamais par la proximité. Ne lève jamais.
     const fibreP = lireFibreAdresse(address.id);
+    // FUT-167 (D2) : LES RISQUES INDUSTRIELS À L'ADRESSE. Les sites Seveso autour du point (index local) et les
+    // plans de prévention des risques technologiques, au point et sur la commune (Géorisques). Ne lève jamais :
+    // chaque lecture porte son état, et une panne n'est jamais une absence.
+    const industrieAdresseP = getIndustrieAdresse({
+      lat: address.latitude, lon: address.longitude, citycode: address.citycode ?? null,
+      precision: precisionDuPoint(banFeatureType ?? precisionDepuisBanId(address.id)),
+    });
 
     // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
     // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
@@ -130,7 +139,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre, industrieAdresse] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -155,7 +164,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, fibreP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, fibreP, industrieAdresseP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -214,6 +223,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       bruitAerien,
       // FUT-156 : posée seulement quand la lecture est activée (`FIBRE_ADRESSE_BUCKET`).
       ...(fibre ? { fibre } : {}),
+      // FUT-167 : les sites Seveso et les plans de prévention des risques technologiques, à l'adresse.
+      industrieAdresse,
       pointHazards,
       // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
       // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en

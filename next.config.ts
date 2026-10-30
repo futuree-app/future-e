@@ -53,6 +53,8 @@ const nextConfig: NextConfig = {
       "./data/onrn-secheresse.json",
       "./data/onrn-inondation.json",
       "./data/bruit-aerien.json",
+      // FUT-167 (D2) : les sites Seveso autour de l'adresse (lib/server/installations-seveso.ts).
+      "./data/installations-seveso.json",
     ],
     // La PAGE du module Logement lit l'index pour le compte d'arrêtés inondation, qui réconcilie
     // les trois sources de la carte « Ce que disent les sources sur l'inondation ». Il est lu ICI
