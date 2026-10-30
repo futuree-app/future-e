@@ -52,6 +52,104 @@ function toLevel(code: string | number | null | undefined): AtmoLevel | null {
   return { value: n, ...INDEX[n] };
 }
 
+// ── Appels à ATMO : jeton, nouvelle tentative, journal (FUT-152, 29/10/2026) ──
+// L'INCIDENT. Le 29/10/2026, deux 502 sans trace en production, en 150 ms sur une instance chaude. Mesuré le même
+// jour : `admindata.atmo-france.org` répond par moments 500 (« Internal Server Error »), au login comme à la
+// lecture, puis 200 quinze secondes plus tard avec le même jeton. Ce n'est ni un quota (pas de 429) ni un
+// timeout. D'où trois règles :
+//   - UNE seule nouvelle tentative, après 500 ms, sur un 5xx seulement. Jamais sur 401, 429, timeout, réseau ou
+//     réponse illisible : ce ne sont pas des pannes passagères mesurées, et deux appels au plus par étape ;
+//   - un jeton refusé (401) est oublié, sauf si un plus récent l'a déjà remplacé ; l'appel suivant se reconnecte ;
+//   - une ligne de journal par incident (`atmo_incident`), sans identifiant, jeton, en-tête ni corps de réponse.
+//     Une étape réussie du premier coup n'écrit rien.
+// Le jeton ATMO vit 24 h (champ `exp`, relevé le 29/10/2026) ; il est gardé une heure, par prudence.
+const PAUSE_AVANT_NOUVELLE_TENTATIVE_MS = 500;
+
+type EtapeAtmo = "login" | "lecture" | "validation";
+type CategorieAtmo = "http_5xx" | "http_401" | "http_429" | "http_4xx" | "timeout" | "reseau" | "forme_inattendue" | "configuration" | "interne";
+
+/** Un échec qualifié d'une étape ATMO : ce que le journal en retient, rien de plus. */
+class EchecAtmo extends Error {
+  /** 2 quand l'échec suit une nouvelle tentative. */
+  tentatives = 1;
+  readonly etape: EtapeAtmo;
+  readonly categorie: CategorieAtmo;
+  readonly statut: number | null;
+  constructor(etape: EtapeAtmo, categorie: CategorieAtmo, statut: number | null = null) {
+    super(`ATMO ${etape} : ${categorie}${statut ? ` (${statut})` : ""}`);
+    this.etape = etape;
+    this.categorie = categorie;
+    this.statut = statut;
+  }
+}
+
+function categorieHttp(statut: number): CategorieAtmo {
+  if (statut === 401) return "http_401";
+  if (statut === 429) return "http_429";
+  return statut >= 500 ? "http_5xx" : "http_4xx";
+}
+
+/** La trace d'un incident ATMO : une ligne JSON. Les champs sont fixes ; aucun ne vient d'un secret. */
+function tracerIncidentAtmo(e: EchecAtmo, issue: "echec" | "retabli", dureeMs: number, tentatives: number): void {
+  const ligne = JSON.stringify({
+    evenement: "atmo_incident",
+    etape: e.etape,
+    statut: e.statut,
+    categorie: e.categorie,
+    duree_ms: Math.round(dureeMs),
+    tentatives,
+    issue,
+  });
+  if (issue === "echec") console.error(ligne);
+  else console.warn(ligne);
+}
+
+/**
+ * UN APPEL HTTP À ATMO, BORNÉ À 8 S, qualifié en cas d'échec. `lire` reçoit la réponse 2xx et rend la valeur ;
+ * une erreur qu'il lève (JSON illisible, forme inattendue) est une réponse inattendue de cette étape.
+ */
+async function appelAtmo<T>(etape: "login" | "lecture", requete: (signal: AbortSignal) => Promise<Response>, lire: (res: Response) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    let res: Response;
+    try {
+      res = await requete(controller.signal);
+    } catch {
+      throw new EchecAtmo(etape, controller.signal.aborted ? "timeout" : "reseau");
+    }
+    if (!res.ok) throw new EchecAtmo(etape, categorieHttp(res.status), res.status);
+    try {
+      return await lire(res);
+    } catch (e) {
+      if (controller.signal.aborted) throw new EchecAtmo(etape, "timeout");
+      if (e instanceof EchecAtmo) throw e;
+      throw new EchecAtmo(etape === "lecture" ? "validation" : etape, "forme_inattendue");
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/** L'appel, puis au plus UNE nouvelle tentative après un 5xx. Une reprise réussie laisse une trace « retabli ». */
+async function avecUneNouvelleTentative<T>(appel: () => Promise<T>): Promise<T> {
+  const debut = performance.now();
+  try {
+    return await appel();
+  } catch (e) {
+    if (!(e instanceof EchecAtmo) || e.categorie !== "http_5xx") throw e;
+    await new Promise((r) => setTimeout(r, PAUSE_AVANT_NOUVELLE_TENTATIVE_MS));
+    try {
+      const valeur = await appel();
+      tracerIncidentAtmo(e, "retabli", performance.now() - debut, 2);
+      return valeur;
+    } catch (e2) {
+      if (e2 instanceof EchecAtmo) e2.tentatives = 2;
+      throw e2;
+    }
+  }
+}
+
 // ── Token cache (module-level, per serverless instance) ──────────────────────
 let cachedToken: string | null = null;
 let tokenExpiresAt = 0;
@@ -61,35 +159,41 @@ async function getToken(): Promise<string> {
   const password = process.env.ATMO_PASSWORD;
 
   if (!username || !password) {
-    throw new Error("ATMO_USERNAME and ATMO_PASSWORD are required.");
+    throw new EchecAtmo("login", "configuration");
   }
 
   if (cachedToken && Date.now() < tokenExpiresAt - 60_000) {
     return cachedToken;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const token = await avecUneNouvelleTentative(() =>
+    appelAtmo(
+      "login",
+      (signal) => fetch(`${ATMO_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        signal,
+        cache: "no-store",
+      }),
+      async (res) => {
+        const json = (await res.json()) as { token?: unknown; value?: unknown };
+        const t = json.token ?? json.value;
+        if (typeof t !== "string" || !t) throw new Error("jeton absent");
+        return t;
+      },
+    ),
+  );
+  cachedToken = token;
+  tokenExpiresAt = Date.now() + 60 * 60 * 1000;
+  return token;
+}
 
-  try {
-    const res = await fetch(`${ATMO_BASE}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-      signal: controller.signal,
-      cache: "no-store",
-    });
-
-    if (!res.ok) throw new Error(`ATMO login failed: ${res.status}`);
-    const json = (await res.json()) as { token?: string; value?: string };
-    const token = json.token ?? json.value;
-    if (!token) throw new Error("ATMO login: no token in response");
-    cachedToken = token;
-    tokenExpiresAt = Date.now() + 60 * 60 * 1000;
-    return token;
-  } finally {
-    clearTimeout(timeout);
-  }
+/** Oublie un jeton refusé, sauf si une autre requête l'a déjà remplacé par un plus récent. */
+function oublierJeton(token: string): void {
+  if (cachedToken !== token) return;
+  cachedToken = null;
+  tokenExpiresAt = 0;
 }
 
 // ── Fetch ────────────────────────────────────────────────────────────────────
@@ -101,28 +205,29 @@ async function fetchRecords(inseeCode: string, date: string): Promise<AtmoRawRec
     date_ech: { operator: "=", value: date },
   });
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
   try {
-    const res = await fetch(
-      `${ATMO_BASE}/data/112/${encodeURIComponent(filter)}?withGeom=false`,
-      {
-        headers: {
-          accept: "application/json",
-          authorization: `Bearer ${token}`,
-        },
-        signal: controller.signal,
-        // Pas de cache de données Next : il garderait une heure une réponse 200 au contenu inattendu, que
-        // `enregistrementsAtmo` refuse. Seule une lecture réussie est gardée, par `lire` puis par la route.
-        cache: "no-store",
-      },
+    return await avecUneNouvelleTentative(() =>
+      appelAtmo(
+        "lecture",
+        (signal) => fetch(
+          `${ATMO_BASE}/data/112/${encodeURIComponent(filter)}?withGeom=false`,
+          {
+            headers: {
+              accept: "application/json",
+              authorization: `Bearer ${token}`,
+            },
+            signal,
+            // Pas de cache de données Next : il garderait une heure une réponse 200 au contenu inattendu, que
+            // `enregistrementsAtmo` refuse. Seule une lecture réussie est gardée, par la route.
+            cache: "no-store",
+          },
+        ),
+        async (res) => enregistrementsAtmo(await res.json()),
+      ),
     );
-
-    if (!res.ok) throw new Error(`ATMO data failed: ${res.status}`);
-    return enregistrementsAtmo(await res.json());
-  } finally {
-    clearTimeout(timeout);
+  } catch (e) {
+    if (e instanceof EchecAtmo && e.categorie === "http_401") oublierJeton(token);
+    throw e;
   }
 }
 
@@ -225,7 +330,16 @@ function lire(inseeCode: string): Promise<AtmoAirQuality | null> {
   const insee = inseeCode.trim();
   const deja = enCours.get(insee);
   if (deja) return deja;
-  const lecture = load(insee).finally(() => enCours.delete(insee));
+  // L'échec définitif est tracé ICI, une fois par lecture partagée : deux demandes simultanées, une seule ligne.
+  const debut = performance.now();
+  const lecture = load(insee)
+    .catch((e: unknown) => {
+      const echec = e instanceof EchecAtmo ? e
+        : new EchecAtmo("validation", e instanceof ReponseAtmoInattendue ? "forme_inattendue" : "interne");
+      tracerIncidentAtmo(echec, "echec", performance.now() - debut, echec.tentatives);
+      throw e;
+    })
+    .finally(() => enCours.delete(insee));
   enCours.set(insee, lecture);
   return lecture;
 }
