@@ -37,7 +37,7 @@ Usage (depuis un venv avec pyarrow + numpy, cf. .venv-bpe) :
     python scripts/populate-bpe.py --face3-shards  # shards de lieux du module Autour
     python scripts/populate-bpe.py --selftest      # règles de rayon, d'adresse et de doublons
 """
-import json, os, sys, argparse, bisect
+import json, math, os, sys, argparse, bisect
 import numpy as np
 import pyarrow.parquet as pq
 
@@ -193,6 +193,23 @@ def percentile_scores(counts):
     return [round(100 * bisect.bisect_right(srt, float(c)) / n) if n else None for c in counts]
 
 
+def plateau_zero_au_milieu(counts, scores):
+    """FUT-141 : le plateau des communes SANS établissement (accès exactement 0) au rang par le milieu.
+
+    `percentile_scores` donne à un groupe d'ex æquo le rang du HAUT du groupe. Pour l'accès au supérieur,
+    40 % des communes n'ont aucun établissement dans leur rayon : ce plateau valait 40, et ces 20 points
+    d'accès fictif suffisaient à noter « forte présence étudiante » des communes sans établissement. Par le
+    milieu (convention d'etudes_dyn, FUT-135, et de rang-national.ts), il vaut 20. Seul ce plateau change
+    (arbitrage porteur, 29/10/2026) : écoles, culture et les autres rangs gardent leur convention."""
+    srt = sorted(float(c) for c in counts)
+    n = len(srt)
+    if not n:
+        return scores
+    nb_zero = bisect.bisect_right(srt, 0.0)  # accès ≥ 0 : les zéros sont en tête
+    rang = math.floor(100 * nb_zero / 2 / n + 0.5)  # (nb < 0 + nb ≤ 0) / 2, arrondi au demi supérieur
+    return [rang if float(c) == 0.0 else s for c, s in zip(counts, scores)]
+
+
 def selftest():
     # Bornes exactes de la table de rayons.
     assert radius_for(None) == 25.0
@@ -273,6 +290,13 @@ def selftest():
         {"t": "B202", "lat": 46.00000, "lon": -1.00000, "adresse": "", "nom": "A", "siret": "1"},
         {"t": "B202", "lat": 46.00036, "lon": -1.00000, "adresse": "", "nom": "B", "siret": "2"},
     ])) == 2
+
+    # FUT-141 : le plateau des zéros au rang par le milieu, les autres rangs inchangés.
+    acc = [0.0] * 4 + [0.5, 1.0, 2.0, 3.0]
+    sc = plateau_zero_au_milieu(acc, percentile_scores(acc))
+    assert percentile_scores(acc)[0] == 50 and sc[:4] == [25] * 4, sc  # haut du plateau 50, milieu 25
+    assert sc[4:] == percentile_scores(acc)[4:], sc
+    assert plateau_zero_au_milieu([1.0, 2.0], [50, 100]) == [50, 100]  # sans plateau, rien ne bouge
 
     print("✓ selftest OK", file=sys.stderr)
 
@@ -584,6 +608,7 @@ def main():
         counts, ecount = count_within_radius(clat, clon, elat, elon, radius)  # (accès pondéré, compte)
         scores = percentile_scores(counts)
         if field == "etudes_acces":
+            scores = plateau_zero_au_milieu(counts, scores)
             est_counts = ecount
         for i, code in enumerate(codes):
             # count = accès pondéré (somme des 1 - d/DMAX), debug only, plus un entier.

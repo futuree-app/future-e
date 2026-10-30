@@ -1,0 +1,1276 @@
+{
+ "candidates": {
+  "avant": 259,
+  "apres": 134
+ },
+ "retirees": 125,
+ "ajoutees": 0,
+ "retireesParPalierDeLaPartEtudiante": {
+  "intermédiaire (34-65)": 119,
+  "limitée (< 34)": 6
+ },
+ "premiersLibellesChanges": 53,
+ "premiersApres": {
+  "Pour une petite ville qui reste vraiment vivante.": 19,
+  "Pour s'installer dans une commune qui gagne des habitants.": 24,
+  "Pour un quotidien au calme, loin de l'agitation.": 4,
+  "Pour un cadre rural préservé, loin de l'agitation.": 6
+ },
+ "autresCandidatsModifies": 0,
+ "invariants": {
+  "candidatesHorsRegle": 0,
+  "regleSatisfaiteSansIdentite": 0
+ },
+ "detailRetirees": [
+  {
+   "insee": "83137",
+   "nom": "Toulon",
+   "population": 180452,
+   "vie": 75,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "84007",
+   "nom": "Avignon",
+   "population": 90330,
+   "vie": 73,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "59183",
+   "nom": "Dunkerque",
+   "population": 86788,
+   "vie": 74,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+   "premierApres": "Pour la vie au bord de l'eau avec les services d'une vraie ville."
+  },
+  {
+   "insee": "34032",
+   "nom": "Béziers",
+   "population": 80341,
+   "vie": 74,
+   "dyn": 61,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "50129",
+   "nom": "Cherbourg-en-Cotentin",
+   "population": 77808,
+   "vie": 72,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+   "premierApres": "Pour la vie au bord de l'eau avec les services d'une vraie ville."
+  },
+  {
+   "insee": "44184",
+   "nom": "Saint-Nazaire",
+   "population": 72057,
+   "vie": 69,
+   "dyn": 54,
+   "etablissement": "presence",
+   "premierAvant": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+   "premierApres": "Pour la vie au bord de l'eau avec les services d'une vraie ville."
+  },
+  {
+   "insee": "68066",
+   "nom": "Colmar",
+   "population": 67730,
+   "vie": 68,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un quotidien au calme, loin de l'agitation."
+  },
+  {
+   "insee": "82121",
+   "nom": "Montauban",
+   "population": 61919,
+   "vie": 70,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "77284",
+   "nom": "Meaux",
+   "population": 55616,
+   "vie": 59,
+   "dyn": 51,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "02691",
+   "nom": "Saint-Quentin",
+   "population": 52958,
+   "vie": 74,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "64102",
+   "nom": "Bayonne",
+   "population": 52749,
+   "vie": 77,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "13004",
+   "nom": "Arles",
+   "population": 50415,
+   "vie": 66,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "2B033",
+   "nom": "Bastia",
+   "population": 48768,
+   "vie": 55,
+   "dyn": 45,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "35288",
+   "nom": "Saint-Malo",
+   "population": 47323,
+   "vie": 71,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+   "premierApres": "Pour un quotidien tourné vers la mer, à un rythme plus posé."
+  },
+  {
+   "insee": "19031",
+   "nom": "Brive-la-Gaillarde",
+   "population": 46599,
+   "vie": 69,
+   "dyn": 57,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "08105",
+   "nom": "Charleville-Mézières",
+   "population": 46398,
+   "vie": 73,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "11069",
+   "nom": "Carcassonne",
+   "population": 46218,
+   "vie": 71,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "71076",
+   "nom": "Chalon-sur-Saône",
+   "population": 45031,
+   "vie": 68,
+   "dyn": 56,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "13103",
+   "nom": "Salon-de-Provence",
+   "population": 44731,
+   "vie": 61,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "30007",
+   "nom": "Alès",
+   "population": 43892,
+   "vie": 61,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "36044",
+   "nom": "Châteauroux",
+   "population": 42968,
+   "vie": 74,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "81065",
+   "nom": "Castres",
+   "population": 42672,
+   "vie": 72,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "57672",
+   "nom": "Thionville",
+   "population": 42163,
+   "vie": 59,
+   "dyn": 44,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "05061",
+   "nom": "Gap",
+   "population": 40500,
+   "vie": 68,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour vivre en montagne dans une commune qui reste animée.",
+   "premierApres": "Pour vivre en montagne dans une commune qui reste animée."
+  },
+  {
+   "insee": "26198",
+   "nom": "Montélimar",
+   "population": 40399,
+   "vie": 56,
+   "dyn": 49,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "83050",
+   "nom": "Draguignan",
+   "population": 39745,
+   "vie": 59,
+   "dyn": 44,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "59178",
+   "nom": "Douai",
+   "population": 39648,
+   "vie": 65,
+   "dyn": 55,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "28085",
+   "nom": "Chartres",
+   "population": 38447,
+   "vie": 71,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un quotidien au calme, loin de l'agitation."
+  },
+  {
+   "insee": "67180",
+   "nom": "Haguenau",
+   "population": 35715,
+   "vie": 60,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "42187",
+   "nom": "Roanne",
+   "population": 34762,
+   "vie": 67,
+   "dyn": 61,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "71270",
+   "nom": "Mâcon",
+   "population": 34448,
+   "vie": 64,
+   "dyn": 52,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "03185",
+   "nom": "Montluçon",
+   "population": 33342,
+   "vie": 70,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un quotidien au calme, loin de l'agitation."
+  },
+  {
+   "insee": "47001",
+   "nom": "Agen",
+   "population": 32485,
+   "vie": 75,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "86066",
+   "nom": "Châtellerault",
+   "population": 31284,
+   "vie": 60,
+   "dyn": 51,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "38544",
+   "nom": "Vienne",
+   "population": 31051,
+   "vie": 55,
+   "dyn": 48,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "40192",
+   "nom": "Mont-de-Marsan",
+   "population": 30674,
+   "vie": 72,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "06083",
+   "nom": "Menton",
+   "population": 30412,
+   "vie": 55,
+   "dyn": 37,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "38053",
+   "nom": "Bourgoin-Jallieu",
+   "population": 29577,
+   "vie": 55,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "59392",
+   "nom": "Maubeuge",
+   "population": 29066,
+   "vie": 64,
+   "dyn": 48,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "02722",
+   "nom": "Soissons",
+   "population": 28705,
+   "vie": 69,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "49328",
+   "nom": "Saumur",
+   "population": 26215,
+   "vie": 64,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "03310",
+   "nom": "Vichy",
+   "population": 25789,
+   "vie": 72,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "59017",
+   "nom": "Armentières",
+   "population": 25581,
+   "vie": 68,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "25388",
+   "nom": "Montbéliard",
+   "population": 25573,
+   "vie": 70,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "62119",
+   "nom": "Béthune",
+   "population": 24992,
+   "vie": 61,
+   "dyn": 47,
+   "etablissement": "presence",
+   "premierAvant": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+   "premierApres": "Pour vivre aux portes d'une grande ville, sans en habiter le centre."
+  },
+  {
+   "insee": "33243",
+   "nom": "Libourne",
+   "population": 24557,
+   "vie": 57,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "27681",
+   "nom": "Vernon",
+   "population": 24543,
+   "vie": 58,
+   "dyn": 42,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "39198",
+   "nom": "Dole",
+   "population": 23775,
+   "vie": 62,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "52448",
+   "nom": "Saint-Dizier",
+   "population": 23068,
+   "vie": 57,
+   "dyn": 51,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "52121",
+   "nom": "Chaumont",
+   "population": 21699,
+   "vie": 74,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "59295",
+   "nom": "Hazebrouck",
+   "population": 21498,
+   "vie": 58,
+   "dyn": 54,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "40088",
+   "nom": "Dax",
+   "population": 21347,
+   "vie": 65,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "35115",
+   "nom": "Fougères",
+   "population": 20653,
+   "vie": 62,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "46042",
+   "nom": "Cahors",
+   "population": 20141,
+   "vie": 69,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "14366",
+   "nom": "Lisieux",
+   "population": 19807,
+   "vie": 64,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "03190",
+   "nom": "Moulins",
+   "population": 19343,
+   "vie": 71,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "88413",
+   "nom": "Saint-Dié-des-Vosges",
+   "population": 19319,
+   "vie": 65,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "67462",
+   "nom": "Sélestat",
+   "population": 19300,
+   "vie": 67,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "77053",
+   "nom": "Brie-Comte-Robert",
+   "population": 19213,
+   "vie": 64,
+   "dyn": 40,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "63300",
+   "nom": "Riom",
+   "population": 18736,
+   "vie": 62,
+   "dyn": 40,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "54329",
+   "nom": "Lunéville",
+   "population": 17755,
+   "vie": 56,
+   "dyn": 39,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "14762",
+   "nom": "Vire Normandie",
+   "population": 17135,
+   "vie": 60,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "39300",
+   "nom": "Lons-le-Saunier",
+   "population": 17043,
+   "vie": 67,
+   "dyn": 61,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "55545",
+   "nom": "Verdun",
+   "population": 16689,
+   "vie": 63,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "08409",
+   "nom": "Sedan",
+   "population": 16608,
+   "vie": 63,
+   "dyn": 51,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "85109",
+   "nom": "Les Herbiers",
+   "population": 16453,
+   "vie": 55,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "49307",
+   "nom": "Loire-Authion",
+   "population": 16416,
+   "vie": 60,
+   "dyn": 36,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "29103",
+   "nom": "Landerneau",
+   "population": 16206,
+   "vie": 63,
+   "dyn": 45,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+   "premierApres": "Pour un quotidien tourné vers la mer, à un rythme plus posé."
+  },
+  {
+   "insee": "42147",
+   "nom": "Montbrison",
+   "population": 16064,
+   "vie": 61,
+   "dyn": 57,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "42279",
+   "nom": "Saint-Just-Saint-Rambert",
+   "population": 15419,
+   "vie": 55,
+   "dyn": 30,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "60612",
+   "nom": "Senlis",
+   "population": 15255,
+   "vie": 57,
+   "dyn": 56,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "54323",
+   "nom": "Longwy",
+   "population": 15191,
+   "vie": 62,
+   "dyn": 54,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "70550",
+   "nom": "Vesoul",
+   "population": 15130,
+   "vie": 68,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "57606",
+   "nom": "Saint-Avold",
+   "population": 15045,
+   "vie": 60,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un quotidien au calme, loin de l'agitation."
+  },
+  {
+   "insee": "29151",
+   "nom": "Morlaix",
+   "population": 14903,
+   "vie": 64,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+   "premierApres": "Pour un quotidien tourné vers la mer, à un rythme plus posé."
+  },
+  {
+   "insee": "55029",
+   "nom": "Bar-le-Duc",
+   "population": 14668,
+   "vie": 66,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "62765",
+   "nom": "Saint-Omer",
+   "population": 14661,
+   "vie": 68,
+   "dyn": 57,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "56007",
+   "nom": "Auray",
+   "population": 14222,
+   "vie": 58,
+   "dyn": 40,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+   "premierApres": "Pour un quotidien tourné vers la mer, à un rythme plus posé."
+  },
+  {
+   "insee": "19272",
+   "nom": "Tulle",
+   "population": 13992,
+   "vie": 68,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "71014",
+   "nom": "Autun",
+   "population": 13145,
+   "vie": 59,
+   "dyn": 52,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "23096",
+   "nom": "Guéret",
+   "population": 12840,
+   "vie": 68,
+   "dyn": 64,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "66037",
+   "nom": "Canet-en-Roussillon",
+   "population": 12598,
+   "vie": 57,
+   "dyn": 34,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "63284",
+   "nom": "Pont-du-Château",
+   "population": 12459,
+   "vie": 59,
+   "dyn": 34,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "67348",
+   "nom": "Obernai",
+   "population": 12216,
+   "vie": 64,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "44036",
+   "nom": "Châteaubriant",
+   "population": 12189,
+   "vie": 60,
+   "dyn": 57,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "76057",
+   "nom": "Barentin",
+   "population": 12154,
+   "vie": 61,
+   "dyn": 37,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "66171",
+   "nom": "Saint-Cyprien",
+   "population": 11398,
+   "vie": 56,
+   "dyn": 33,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "67437",
+   "nom": "Saverne",
+   "population": 11390,
+   "vie": 56,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "68112",
+   "nom": "Guebwiller",
+   "population": 11137,
+   "vie": 55,
+   "dyn": 41,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "36088",
+   "nom": "Issoudun",
+   "population": 10992,
+   "vie": 65,
+   "dyn": 65,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "67130",
+   "nom": "Erstein",
+   "population": 10887,
+   "vie": 74,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "70285",
+   "nom": "Héricourt",
+   "population": 10478,
+   "vie": 57,
+   "dyn": 35,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "60157",
+   "nom": "Clermont",
+   "population": 10475,
+   "vie": 58,
+   "dyn": 56,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "67067",
+   "nom": "Brumath",
+   "population": 10238,
+   "vie": 72,
+   "dyn": 54,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "95250",
+   "nom": "Fosses",
+   "population": 9929,
+   "vie": 59,
+   "dyn": 36,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "35240",
+   "nom": "Le Rheu",
+   "population": 9535,
+   "vie": 71,
+   "dyn": 52,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "67300",
+   "nom": "Molsheim",
+   "population": 9359,
+   "vie": 59,
+   "dyn": 34,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "35236",
+   "nom": "Redon",
+   "population": 9312,
+   "vie": 58,
+   "dyn": 54,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "77215",
+   "nom": "Gretz-Armainvilliers",
+   "population": 8556,
+   "vie": 57,
+   "dyn": 29,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "59449",
+   "nom": "Orchies",
+   "population": 8455,
+   "vie": 57,
+   "dyn": 32,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "34299",
+   "nom": "Sérignan",
+   "population": 8123,
+   "vie": 65,
+   "dyn": 49,
+   "etablissement": "presence",
+   "premierAvant": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+   "premierApres": "Pour un quotidien méditerranéen, les pieds près de l'eau."
+  },
+  {
+   "insee": "54099",
+   "nom": "Val de Briey",
+   "population": 7996,
+   "vie": 64,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "34199",
+   "nom": "Pézenas",
+   "population": 7788,
+   "vie": 60,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "34022",
+   "nom": "Baillargues",
+   "population": 7735,
+   "vie": 76,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "88383",
+   "nom": "Remiremont",
+   "population": 7611,
+   "vie": 55,
+   "dyn": 50,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "64256",
+   "nom": "Hasparren",
+   "population": 7577,
+   "vie": 69,
+   "dyn": 57,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "43268",
+   "nom": "Yssingeaux",
+   "population": 7345,
+   "vie": 55,
+   "dyn": 59,
+   "etablissement": "presence",
+   "premierAvant": "Pour vivre en montagne dans une commune qui reste animée.",
+   "premierApres": "Pour vivre en montagne dans une commune qui reste animée."
+  },
+  {
+   "insee": "38562",
+   "nom": "Vizille",
+   "population": 7293,
+   "vie": 58,
+   "dyn": 31,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "64495",
+   "nom": "Saint-Pée-sur-Nivelle",
+   "population": 7170,
+   "vie": 68,
+   "dyn": 52,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "35188",
+   "nom": "Montfort-sur-Meu",
+   "population": 6742,
+   "vie": 69,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "74280",
+   "nom": "Thônes",
+   "population": 6600,
+   "vie": 64,
+   "dyn": 49,
+   "etablissement": "presence",
+   "premierAvant": "Pour vivre en montagne dans une commune qui reste animée.",
+   "premierApres": "Pour vivre en montagne dans une commune qui reste animée."
+  },
+  {
+   "insee": "80212",
+   "nom": "Corbie",
+   "population": 6177,
+   "vie": 63,
+   "dyn": 43,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "69279",
+   "nom": "Jonage",
+   "population": 6160,
+   "vie": 77,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "35095",
+   "nom": "Dol-de-Bretagne",
+   "population": 5767,
+   "vie": 55,
+   "dyn": 60,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "68004",
+   "nom": "Altkirch",
+   "population": 5608,
+   "vie": 65,
+   "dyn": 49,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  },
+  {
+   "insee": "42059",
+   "nom": "Chazelles-sur-Lyon",
+   "population": 5472,
+   "vie": 62,
+   "dyn": 51,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour s'installer dans une commune qui gagne des habitants."
+  },
+  {
+   "insee": "14228",
+   "nom": "Douvres-la-Délivrande",
+   "population": 5097,
+   "vie": 69,
+   "dyn": 49,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "60338",
+   "nom": "Lacroix-Saint-Ouen",
+   "population": 4978,
+   "vie": 64,
+   "dyn": 58,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "65460",
+   "nom": "Vic-en-Bigorre",
+   "population": 4822,
+   "vie": 70,
+   "dyn": 63,
+   "etablissement": "presence",
+   "premierAvant": "Pour des hivers parmi les plus doux du pays.",
+   "premierApres": "Pour des hivers parmi les plus doux du pays."
+  },
+  {
+   "insee": "88304",
+   "nom": "Mirecourt",
+   "population": 4782,
+   "vie": 58,
+   "dyn": 62,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "48092",
+   "nom": "Marvejols",
+   "population": 4738,
+   "vie": 62,
+   "dyn": 56,
+   "etablissement": "presence",
+   "premierAvant": "Pour vivre en montagne dans une commune qui reste animée.",
+   "premierApres": "Pour vivre en montagne dans une commune qui reste animée."
+  },
+  {
+   "insee": "91232",
+   "nom": "La Ferté-Alais",
+   "population": 3649,
+   "vie": 59,
+   "dyn": 34,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour un cadre rural préservé, loin de l'agitation."
+  },
+  {
+   "insee": "78265",
+   "nom": "Garancières",
+   "population": 2512,
+   "vie": 63,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "22362",
+   "nom": "Tréguier",
+   "population": 2409,
+   "vie": 57,
+   "dyn": 53,
+   "etablissement": "presence",
+   "premierAvant": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+   "premierApres": "Pour chercher davantage de fraîcheur et un rythme plus posé."
+  },
+  {
+   "insee": "25258",
+   "nom": "Franois",
+   "population": 2260,
+   "vie": 58,
+   "dyn": 32,
+   "etablissement": "presence",
+   "premierAvant": "Pour une ville étudiante à taille humaine.",
+   "premierApres": "Pour une petite ville qui reste vraiment vivante."
+  }
+ ]
+}

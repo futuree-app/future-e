@@ -639,10 +639,15 @@ const INDEX_GZ_PATH = path.join(process.cwd(), "data", "comparateur-index.json.g
 // gunzip + mémoïse + valide la racine, et appelle buildUuPop une seule fois.
 // FUT-135 : les libellés d'agglomération sont dérivés au même moment, pour les phrases qui nomment l'échelle
 // d'une mesure (« dans l'agglomération de Lyon »).
-const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, (communes) => {
+// FUT-141 : le rang du « vrai zéro » de la part étudiante (bassin mesuré, aucun étudiant inscrit) est lu dans la
+// provenance de l'index, pas deviné : une phrase ne dit pas « présence limitée » là où il n'y a personne.
+const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, (communes, meta) => {
   buildUuPop(communes);
   buildUuLabels(communes);
+  const rang = (meta.etudesDyn as { vraiZero?: { rang?: unknown } } | undefined)?.vraiZero?.rang;
+  rangAucunEtudiant = typeof rang === "number" ? rang : null;
 });
+let rangAucunEtudiant: number | null = null;
 
 let nameCache: Map<string, IndexCommune> | null = null;
 
@@ -1141,7 +1146,11 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // Traits de caractère (départagent deux communes de même géographie).
   // FUT-135 : seulement si la commune porte elle-même la mesure (pôle de son bassin, établissement positivement
   // attesté dans son rayon) ; sinon la preuve est celle de l'agglomération, dite par la raison, pas par l'identité.
-  if (etudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
+  // FUT-141 (contre-revue) : « ville étudiante » dit une présence étudiante forte. Le score combiné ne suffit plus :
+  // il faut aussi la part étudiante du bassin au palier fort (`etudes_dyn` ≥ 66, la borne existante des paliers).
+  // Montluçon (part 63), Gap, Vichy, Toulon ne la portent plus ; le score et son palier ne changent pas.
+  const partEtudianteForte = c.etudes_dyn != null && bandIndex(c.etudes_dyn) === 0;
+  if (etudianteForte && partEtudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
   // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
   // phrase dit le fait observé, sans lui prêter de cause.
   if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");
@@ -1811,10 +1820,17 @@ export function buildComparaisonComplete(
         const arr = winners.get(insee) ?? [];
         // FUT-135 : hors du pôle, ou sans établissement positivement attesté, « sa vie étudiante » prêterait à la
         // commune la mesure de son agglomération.
+        // FUT-141 : quand la part étudiante du bassin est en deçà du palier fort (niveau plafonné), ce n'est pas la
+        // présence étudiante qui distingue la commune, pôle compris, c'est l'établissement attesté dans son rayon ;
+        // sans lui, rien n'est dit.
         const col = cols[trio.findIndex((r) => r.insee === insee)];
-        const forte = l.id === "vie_etudiante" && col && !villeEtudianteLocale(col)
-          ? "la présence étudiante de son agglomération"
-          : forteById.get(l.id) ?? l.label.toLowerCase();
+        const parties = l.id === "vie_etudiante" && col ? presenceEtudianteParties(col, 0) : null;
+        if (parties?.plafonne && parties.etablissement !== "presence") continue;
+        const forte = parties?.plafonne
+          ? "l'enseignement supérieur à sa portée"
+          : l.id === "vie_etudiante" && col && !villeEtudianteLocale(col)
+            ? "la présence étudiante de son agglomération"
+            : forteById.get(l.id) ?? l.label.toLowerCase();
         arr.push(forte);
         winners.set(insee, arr);
       }
@@ -2335,7 +2351,7 @@ export function etatEtablissementSup(sup: IndexCommune["etudesSup"]): EtatEtabli
   return acces > 0 ? "presence" : "absence";
 }
 
-type GrainEtudiant = { pole: boolean; agglomeration: string | null; etablissement: EtatEtablissementSup; rayonSansEtablissementKm: number | null };
+type GrainEtudiant = { pole: boolean; seule: boolean; agglomeration: string | null; etablissement: EtatEtablissementSup; rayonSansEtablissementKm: number | null };
 function grainEtudiant(c: IndexCommune): GrainEtudiant {
   const uuPop = c.uu ? uuPopCache?.get(c.uu) ?? null : null;
   // La commune EST son bassin : hors unité urbaine, ou seule commune de la sienne.
@@ -2345,7 +2361,7 @@ function grainEtudiant(c: IndexCommune): GrainEtudiant {
   const pole = seule || (agglomeration != null && normalizeName(agglomeration) === normalizeName(nomVille));
   const etablissement = etatEtablissementSup(c.etudesSup);
   return {
-    pole, agglomeration: pole ? null : agglomeration, etablissement,
+    pole, seule, agglomeration: pole ? null : agglomeration, etablissement,
     rayonSansEtablissementKm: etablissement === "absence" ? c.etudesSup!.radiusKm : null,
   };
 }
@@ -2357,15 +2373,41 @@ function deAgglomeration(nom: string): string {
   return deCommune(nom);
 }
 
-// Deux faits distincts : la présence étudiante, à l'échelle de sa mesure, et l'absence d'établissement recensé
-// dans le rayon de la commune (null quand au moins un y est recensé). La comparaison complète les montre sur deux
-// lignes (palier, qualificatif) ; les phrases les joignent.
-function presenceEtudianteParties(c: IndexCommune, niveau: 0 | 1 | 2): { presence: string; rayon: string | null } {
+// FUT-141 : le niveau de PRÉSENCE étudiante ne vient jamais de l'accès local. La présence se mesure dans le bassin
+// (`etudes_dyn`, la part d'étudiants inscrits) ; l'accès, depuis la commune, dans un rayon. Le niveau dit est le
+// plus bas entre le palier du score (jamais au-dessus, FUT-135) et celui de la part étudiante du bassin (mêmes
+// bornes 66 / 34), pour un pôle comme hors pôle. Montluçon (part 63, accès 81) ne dit plus « forte présence
+// étudiante ». Quand le niveau est ainsi plafonné, c'est l'accès qui porte le score : la phrase le dit séparément,
+// avec le rayon, si un établissement y est positivement attesté (au moins un : le compte n'est pas dans l'index).
+// Un bassin mesuré SANS AUCUN étudiant inscrit (le vrai zéro, FUT-135) ne dit pas « présence limitée » : il dit
+// qu'aucun étudiant n'y est inscrit. Le score, son palier, l'avantage et le classement ne changent pas.
+function niveauEtudiantDit(c: IndexCommune, niveau: 0 | 1 | 2): { niveau: 0 | 1 | 2; plafonne: boolean } {
+  if (c.etudes_dyn == null) return { niveau, plafonne: false };
+  const bassin = bandIndex(c.etudes_dyn);
+  return bassin > niveau ? { niveau: bassin, plafonne: true } : { niveau, plafonne: false };
+}
+
+// Deux faits distincts : la présence étudiante, à l'échelle de sa mesure, et ce qui est recensé dans le rayon de
+// la commune : l'absence démontrée d'établissement, ou, quand la présence ne porte pas le niveau du score (niveau
+// plafonné, aucun étudiant inscrit), l'établissement positivement attesté (sinon null). La comparaison complète
+// les montre sur deux lignes (palier, qualificatif) ; les phrases les joignent.
+function presenceEtudianteParties(c: IndexCommune, niveau: 0 | 1 | 2): { presence: string; rayon: string | null; plafonne: boolean; etablissement: EtatEtablissementSup } {
   const g = grainEtudiant(c);
-  let presence: string = PRESENCE_ETUDIANTE[niveau];
-  if (!g.pole) presence += g.agglomeration ? ` dans l'agglomération ${deAgglomeration(g.agglomeration)}` : " dans son agglomération";
-  const rayon = g.rayonSansEtablissementKm != null ? `aucun établissement supérieur recensé à moins de ${g.rayonSansEtablissementKm} km` : null;
-  return { presence, rayon };
+  const aucun = c.etudes_dyn != null && c.etudes_dyn === rangAucunEtudiant;
+  const dit = niveauEtudiantDit(c, niveau);
+  const echelle = g.pole
+    ? null
+    : g.agglomeration ? `dans l'agglomération ${deAgglomeration(g.agglomeration)}` : "dans son agglomération";
+  const presence = aucun
+    ? `aucun étudiant inscrit ${echelle ?? (g.seule ? "dans la commune" : "dans son agglomération")}`
+    : echelle ? `${PRESENCE_ETUDIANTE[dit.niveau]} ${echelle}` : PRESENCE_ETUDIANTE[dit.niveau];
+  const accesSansPresence = dit.plafonne || aucun;
+  const rayon = g.rayonSansEtablissementKm != null
+    ? `aucun établissement supérieur recensé à moins de ${g.rayonSansEtablissementKm} km`
+    : accesSansPresence && g.etablissement === "presence"
+      ? `au moins un établissement supérieur recensé à moins de ${c.etudesSup!.radiusKm} km`
+      : null;
+  return { presence, rayon, plafonne: dit.plafonne, etablissement: g.etablissement };
 }
 
 /** La présence étudiante d'une commune, au niveau d'un palier (0 forte, 1 intermédiaire, 2 limitée), à l'échelle mesurée. */

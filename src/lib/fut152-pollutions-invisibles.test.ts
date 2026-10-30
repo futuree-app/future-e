@@ -834,3 +834,218 @@ test("E · plus aucune insertion de HTML, et les formulations arbitrées par le 
   assert.match(code, /Il ne garantit pas la qualité de l’eau aujourd’hui/);
   assert.match(code, /les nombres ne s’additionnent pas/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+// C · robustesse ATMO (29/10/2026) : une nouvelle tentative après un 5xx, le jeton refusé oublié, un journal
+// d'incident sans secret. Mesuré en production le même jour : ATMO répond par moments 500, puis 200.
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+
+const SECRETS = { user: "identifiant-tres-secret", pass: "mdp-tres-secret", jeton: "jeton-tres-secret" };
+type Rep = Response | Promise<Response> | "muet";
+/**
+ * Un ATMO scripté, pour un jour donné : `login` et `lecture` sont les réponses successives (la dernière se
+ * répète). Note chaque appel et chaque ligne de journal. Horloge simulée sur ce jour, en 2030 : le jeton d'un
+ * test précédent (le plus tardif simule 2028) est expiré, chaque test part d'une instance sans jeton valide.
+ */
+function atmoScripte(jour: string, login: (() => Rep)[], lecture: ((jeton: string) => Rep)[]) {
+  process.env.ATMO_USERNAME = SECRETS.user;
+  process.env.ATMO_PASSWORD = SECRETS.pass;
+  mock.timers.reset(); // un script peut en suivre un autre dans le même test
+  mock.timers.enable({ apis: ["Date"], now: new Date(`${jour}T15:00:00+01:00`).getTime() });
+  const n = { login: 0, lecture: 0 };
+  const jetons: string[] = [];
+  globalThis.fetch = (async (input: string | URL, init?: RequestInit) => {
+    const estLogin = String(input).endsWith("/login");
+    const r = estLogin
+      ? login[Math.min(n.login++, login.length - 1)]()
+      : lecture[Math.min(n.lecture++, lecture.length - 1)](((init?.headers ?? {}) as Record<string, string>).authorization?.replace("Bearer ", "") ?? "");
+    if (!estLogin) jetons.push(((init?.headers ?? {}) as Record<string, string>).authorization ?? "");
+    if (r !== "muet") return r;
+    return new Promise<Response>((_, rej) => init?.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
+  }) as typeof fetch;
+  const lignes: string[] = [];
+  const e = mock.method(console, "error", (l: string) => { lignes.push(l); });
+  const w = mock.method(console, "warn", (l: string) => { lignes.push(l); });
+  const journal = () => lignes.map((l) => JSON.parse(l) as M);
+  const fin = () => { mock.timers.reset(); e.mock.restore(); w.mock.restore(); };
+  return { n, jetons, lignes, journal, fin };
+}
+const jetonOk = (j = SECRETS.jeton) => () => Response.json({ token: j });
+const indiceDu = (jour: string) => () => Response.json({ features: [{ properties: { date_ech: jour, code_qual: 2, source: "Atmo Grand Est" } }] });
+const erreur = (statut: number) => () => statut >= 500
+  ? Response.json({ type: "https://tools.ietf.org/html/rfc2616#section-10", title: "An error occurred", status: statut, detail: "Internal Server Error" }, { status: statut })
+  : new Response("", { status: statut });
+const html500 = () => new Response("<!DOCTYPE html><title>An Error Occurred: Internal Server Error</title>", { status: 500, headers: { "content-type": "text/html" } });
+const routeAtmo = (insee: string) => ATMOR.GET(new Request(`http://localhost/api/atmo/${insee}`), { params: Promise.resolve({ insee }) });
+const CHAMPS_JOURNAL = ["categorie", "duree_ms", "etape", "evenement", "issue", "statut", "tentatives"];
+/** Aucune ligne ne porte un secret, et chaque ligne n'a que les champs fixes. */
+function journalSain(lignes: string[]) {
+  for (const l of lignes) {
+    for (const s of Object.values(SECRETS)) assert.ok(!l.includes(s), `secret dans le journal : ${l}`);
+    assert.ok(!/bearer|authorization|password|username|Internal Server Error/i.test(l), l);
+    assert.deepEqual(Object.keys(JSON.parse(l)).sort(), CHAMPS_JOURNAL);
+  }
+}
+
+test("C · robustesse 1 · login 500 (page HTML) puis 200 : l'indice est servi, une trace « retabli »", async () => {
+  const a = atmoScripte("2030-01-01", [html500, jetonOk()], [indiceDu("2030-01-01")]);
+  try {
+    const r = await json(await routeAtmo("57463"));
+    assert.equal(r.status, 200);
+    assert.deepEqual(a.n, { login: 2, lecture: 1 });
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.statut, l.categorie, l.tentatives, l.issue]), [["login", 500, "http_5xx", 2, "retabli"]]);
+    assert.ok(a.journal()[0].duree_ms >= 500, "la pause de 500 ms a eu lieu");
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 2 · lecture 500 puis 200 : l'indice est servi, avec le même jeton", async () => {
+  const a = atmoScripte("2030-01-02", [jetonOk()], [erreur(500), indiceDu("2030-01-02")]);
+  try {
+    const r = await json(await routeAtmo("57463"));
+    assert.equal(r.status, 200);
+    assert.equal(r.corps.date, "2030-01-02");
+    assert.deepEqual(a.n, { login: 1, lecture: 2 });
+    assert.equal(new Set(a.jetons).size, 1);
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.categorie, l.issue]), [["lecture", "http_5xx", "retabli"]]);
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 3 · deux 500 : 502 `indisponible` non mis en cache, deux tentatives et pas une de plus", async () => {
+  const a = atmoScripte("2030-01-03", [jetonOk()], [erreur(503)]);
+  try {
+    const r = await json(await routeAtmo("57463"));
+    assert.deepEqual([r.status, r.cache, r.corps], [502, "no-store", { etat: "indisponible" }]);
+    assert.deepEqual(a.n, { login: 1, lecture: 2 }, "pas de repli sur la veille après une panne");
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.statut, l.categorie, l.tentatives, l.issue]), [["lecture", 503, "http_5xx", 2, "echec"]]);
+    // Le login aussi : deux tentatives au plus.
+    const b = atmoScripte("2030-01-04", [erreur(500)], [indiceDu("2030-01-04")]);
+    try {
+      assert.equal((await routeAtmo("57463")).status, 502);
+      assert.deepEqual(b.n, { login: 2, lecture: 0 });
+    } finally { b.fin(); }
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 4 · 401 : le jeton est oublié, sans nouvelle tentative ; l'appel suivant se reconnecte", async () => {
+  let n = 0;
+  const a = atmoScripte("2030-01-05", [() => Response.json({ token: `${SECRETS.jeton}-${++n}` })], [erreur(401), indiceDu("2030-01-05")]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    assert.deepEqual(a.n, { login: 1, lecture: 1 }, "aucune nouvelle tentative sur 401");
+    assert.equal((await routeAtmo("57463")).status, 200);
+    assert.equal(a.n.login, 2, "reconnexion à l'appel suivant, pas une heure plus tard");
+    assert.notEqual(a.jetons[0], a.jetons[1]);
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.statut, l.categorie, l.tentatives, l.issue]), [["lecture", 401, "http_401", 1, "echec"]]);
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 4 bis · un 401 tardif n'efface pas un jeton plus récent obtenu entre-temps", async () => {
+  let n = 0;
+  let refuser!: () => void;
+  const a = atmoScripte("2030-01-06", [() => Response.json({ token: `${SECRETS.jeton}-${++n}` })], [
+    () => new Promise<Response>((res) => { refuser = () => res(new Response("", { status: 401 })); }),
+    indiceDu("2030-01-06"),
+  ]);
+  try {
+    const lente = routeAtmo("57463"); // jeton 1, réponse 401 retenue
+    while (!refuser) await new Promise((r) => setImmediate(r));
+    mock.timers.tick(2 * 3600_000); // le jeton 1 expire : la commune suivante se reconnecte (jeton 2)
+    assert.equal((await routeAtmo("57227")).status, 200);
+    assert.equal(a.n.login, 2);
+    refuser();
+    assert.equal((await lente).status, 502);
+    assert.equal((await routeAtmo("57230")).status, 200);
+    assert.equal(a.n.login, 2, "le jeton 2 a survécu au 401 du jeton 1");
+    assert.equal(a.jetons.at(-1), `Bearer ${SECRETS.jeton}-2`);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 5 · 429 : aucune nouvelle tentative, au login comme à la lecture", async () => {
+  const a = atmoScripte("2030-01-07", [jetonOk()], [erreur(429)]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    assert.deepEqual(a.n, { login: 1, lecture: 1 });
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.statut, l.categorie, l.tentatives]), [["lecture", 429, "http_429", 1]]);
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+  const b = atmoScripte("2030-01-08", [erreur(429)], [indiceDu("2030-01-08")]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    assert.deepEqual(b.n, { login: 1, lecture: 0 });
+  } finally { b.fin(); }
+});
+
+test("C · robustesse 6 · timeout de 8 s : 502, aucune nouvelle tentative", async () => {
+  const a = atmoScripte("2030-01-09", [jetonOk()], [() => "muet"]);
+  try {
+    const t0 = performance.now();
+    assert.equal((await routeAtmo("57463")).status, 502);
+    const ms = performance.now() - t0;
+    assert.ok(ms >= 7900 && ms < 9000, `abandon à ${Math.round(ms)} ms`);
+    assert.deepEqual(a.n, { login: 1, lecture: 1 });
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.statut, l.categorie, l.tentatives]), [["lecture", null, "timeout", 1]]);
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 7 · JSON inattendu (200) : indisponible, aucune nouvelle tentative, étape « validation »", async () => {
+  const a = atmoScripte("2030-01-10", [jetonOk()], [() => Response.json({ error: "x" })]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    assert.deepEqual(a.n, { login: 1, lecture: 1 });
+    assert.deepEqual(a.journal().map((l) => [l.etape, l.categorie, l.issue]), [["validation", "forme_inattendue", "echec"]]);
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+  // Un login 200 sans jeton, ou illisible : réponse inattendue du login, sans nouvelle tentative.
+  const b = atmoScripte("2030-01-11", [() => Response.json({ ok: true })], [indiceDu("2030-01-11")]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    assert.deepEqual(b.n, { login: 1, lecture: 0 });
+    assert.deepEqual(b.journal().map((l) => [l.etape, l.categorie]), [["login", "forme_inattendue"]]);
+  } finally { b.fin(); }
+});
+
+test("C · robustesse 8 · demandes simultanées : un seul appel partagé, nouvelle tentative comprise, une seule trace", async () => {
+  const a = atmoScripte("2030-01-12", [jetonOk()], [erreur(500), indiceDu("2030-01-12")]);
+  try {
+    const [x, y] = await Promise.all([ATMO.lireAtmoCommune("57463"), ATMO.lireAtmoCommune("57463")]);
+    assert.equal(x.etat, "disponible");
+    assert.deepEqual(x, y);
+    assert.deepEqual(a.n, { login: 1, lecture: 2 });
+    assert.equal(a.lignes.length, 1);
+    // Échec définitif partagé : une seule ligne pour deux demandes.
+    const b = atmoScripte("2030-01-13", [jetonOk()], [erreur(500)]);
+    try {
+      const [p, q] = await Promise.all([ATMO.lireAtmoCommune("57463"), ATMO.lireAtmoCommune("57463")]);
+      assert.deepEqual([p.etat, q.etat], ["indisponible", "indisponible"]);
+      assert.equal(b.lignes.length, 1);
+    } finally { b.fin(); }
+  } finally { a.fin(); }
+});
+
+test("C · robustesse 9 · après un échec, une nouvelle recherche réussit et ne sert rien de périmé", async () => {
+  const a = atmoScripte("2030-01-14", [jetonOk()], [erreur(500), erreur(500), indiceDu("2030-01-14")]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 502);
+    const r = await json(await routeAtmo("57463"));
+    assert.equal(r.status, 200);
+    assert.equal(r.corps.date, "2030-01-14");
+    assert.deepEqual(a.n, { login: 1, lecture: 3 });
+    // `getAtmoForCommune` (page chaleur, aperçu de l'accueil) : même transport, toujours `null` sur panne.
+    const b = atmoScripte("2030-01-15", [jetonOk()], [erreur(500)]);
+    try { assert.equal(await ATMO.getAtmoForCommune("57463"), null); } finally { b.fin(); }
+    journalSain(a.lignes);
+  } finally { a.fin(); }
+});
+
+test("C · robustesse · une étape réussie du premier coup n'écrit rien au journal", async () => {
+  const a = atmoScripte("2030-01-16", [jetonOk()], [indiceDu("2030-01-16")]);
+  try {
+    assert.equal((await routeAtmo("57463")).status, 200);
+    assert.equal(a.lignes.length, 0);
+  } finally { a.fin(); }
+});

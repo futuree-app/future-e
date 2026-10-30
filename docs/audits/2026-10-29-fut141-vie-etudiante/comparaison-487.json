@@ -1,0 +1,409 @@
+{
+  "les487": {
+    "avant": 487,
+    "definitionApres": 360,
+    "sortiesDeLaDefinition": 127,
+    "entrees": 0
+  },
+  "lecteur": {
+    "vie ≥ 55 (raison favorable)": {
+      "avant": 487,
+      "apres": 360
+    },
+    "palier forte": {
+      "avant": 255,
+      "apres": 11
+    },
+    "découverte (> 65)": {
+      "avant": 255,
+      "apres": 11
+    },
+    "trait d'ancre vie étudiante": {
+      "avant": 96,
+      "apres": 0
+    },
+    "identité ville étudiante": {
+      "avant": 0,
+      "apres": 0
+    },
+    "phrase « forte … »": {
+      "avant": 255,
+      "apres": 11
+    },
+    "à égalité avec Poitiers": {
+      "avant": 255,
+      "apres": 11
+    },
+    "mène la comparaison avec Poitiers": {
+      "avant": 0,
+      "apres": 0
+    },
+    "synthèse « se distingue par » la vie étudiante": {
+      "avant": 0,
+      "apres": 0
+    }
+  },
+  "transitions": {
+    "forte -> intermédiaire": 244,
+    "intermédiaire -> intermédiaire": 232,
+    "forte -> forte": 11
+  },
+  "temoins": {
+    "15014 Aurillac": "identique",
+    "31555 Toulouse": "identique",
+    "33318 Pessac": "identique",
+    "33522 Talence": "identique",
+    "34172 Montpellier": "identique",
+    "35238 Rennes": "identique",
+    "38421 Saint-Martin-d'Hères": "identique",
+    "43157 Le Puy-en-Velay": "identique",
+    "49007 Angers": "identique",
+    "59009 Villeneuve-d'Ascq": "identique",
+    "63014 Aubière": "identique",
+    "67482 Strasbourg": "identique",
+    "69266 Villeurbanne": "identique",
+    "69381 Lyon 1er Arrondissement": "identique",
+    "86194 Poitiers": "identique",
+    "91471 Orsay": "identique",
+    "2B096 Corte": "identique"
+  },
+  "grain": {
+    "avant": {
+      "mesurees": 5555,
+      "horsPole": 4397,
+      "auDessusDuBassin": 1457,
+      "auDessusDuBassinPoles": 509,
+      "enDessousDuBassin": 237,
+      "presenceSansEtudiant": 1280,
+      "exemples": [
+        [
+          "01014",
+          "Arbent",
+          32,
+          44,
+          "présence étudiante intermédiaire dans l'agglomération d'Oyonnax"
+        ],
+        [
+          "01025",
+          "Bâgé-Dommartin",
+          30,
+          48,
+          "présence étudiante intermédiaire"
+        ],
+        [
+          "01026",
+          "Bâgé-le-Châtel",
+          30,
+          49,
+          "présence étudiante intermédiaire dans l'agglomération de Bâgé-Dommartin"
+        ],
+        [
+          "01027",
+          "Balan",
+          12,
+          45,
+          "présence étudiante intermédiaire dans l'agglomération de Béligneux"
+        ],
+        [
+          "01031",
+          "Bellignat",
+          32,
+          45,
+          "présence étudiante intermédiaire dans l'agglomération d'Oyonnax"
+        ],
+        [
+          "01032",
+          "Béligneux",
+          12,
+          38,
+          "présence étudiante intermédiaire"
+        ],
+        [
+          "01054",
+          "Bourg-Saint-Christophe",
+          12,
+          34,
+          "présence étudiante intermédiaire dans l'agglomération de Meximieux"
+        ],
+        [
+          "01071",
+          "Cessy",
+          32,
+          42,
+          "présence étudiante intermédiaire dans l'agglomération de Gex"
+        ]
+      ]
+    },
+    "apres": {
+      "mesurees": 5555,
+      "horsPole": 4704,
+      "auDessusDuBassin": 0,
+      "auDessusDuBassinPoles": 0,
+      "enDessousDuBassin": 704,
+      "presenceSansEtudiant": 0,
+      "exemples": []
+    }
+  },
+  "poles": {
+    "83137 Toulon": {
+      "vie": [
+        75,
+        75
+      ],
+      "palier": [
+        "forte",
+        "forte"
+      ],
+      "phrase": [
+        "forte présence étudiante",
+        "présence étudiante intermédiaire, au moins un établissement supérieur recensé à moins de 5 km"
+      ],
+      "identiteEtudiante": [
+        true,
+        true
+      ],
+      "comparaison": [
+        {
+          "palier": "Forte présence étudiante",
+          "qualificatif": null,
+          "avantage": "egalite",
+          "synthese": "Sur ce thème, les deux territoires se ressemblent : rien ne les départage ici."
+        },
+        {
+          "palier": "Présence étudiante intermédiaire",
+          "qualificatif": "au moins un établissement supérieur recensé à moins de 5 km",
+          "avantage": "egalite",
+          "synthese": "Sur ce thème, les deux territoires se ressemblent : rien ne les départage ici."
+        }
+      ]
+    },
+    "83148 Vidauban": {
+      "vie": [
+        35,
+        35
+      ],
+      "palier": [
+        "intermédiaire",
+        "intermédiaire"
+      ],
+      "phrase": [
+        "présence étudiante intermédiaire",
+        "aucun étudiant inscrit dans la commune, au moins un établissement supérieur recensé à moins de 25 km"
+      ],
+      "identiteEtudiante": [
+        false,
+        false
+      ],
+      "comparaison": [
+        {
+          "palier": "Présence étudiante intermédiaire",
+          "qualificatif": null,
+          "avantage": [
+            "Poitiers"
+          ],
+          "synthese": "Poitiers se distingue par son bassin d'emploi étendu et sa vie locale animée."
+        },
+        {
+          "palier": "Aucun étudiant inscrit dans la commune",
+          "qualificatif": "au moins un établissement supérieur recensé à moins de 25 km",
+          "avantage": [
+            "Poitiers"
+          ],
+          "synthese": "Poitiers se distingue par son bassin d'emploi étendu et sa vie locale animée."
+        }
+      ]
+    },
+    "03185 Montluçon": {
+      "vie": [
+        70,
+        70
+      ],
+      "palier": [
+        "forte",
+        "forte"
+      ],
+      "phrase": [
+        "forte présence étudiante",
+        "présence étudiante intermédiaire, au moins un établissement supérieur recensé à moins de 15 km"
+      ],
+      "identiteEtudiante": [
+        true,
+        true
+      ],
+      "comparaison": [
+        {
+          "palier": "Forte présence étudiante",
+          "qualificatif": null,
+          "avantage": "egalite",
+          "synthese": "Poitiers se distingue par sa vie locale animée et sa croissance démographique."
+        },
+        {
+          "palier": "Présence étudiante intermédiaire",
+          "qualificatif": "au moins un établissement supérieur recensé à moins de 15 km",
+          "avantage": "egalite",
+          "synthese": "Poitiers se distingue par sa vie locale animée et sa croissance démographique."
+        }
+      ]
+    },
+    "05061 Gap": {
+      "vie": [
+        68,
+        68
+      ],
+      "palier": [
+        "forte",
+        "forte"
+      ],
+      "phrase": [
+        "forte présence étudiante",
+        "présence étudiante intermédiaire, au moins un établissement supérieur recensé à moins de 15 km"
+      ],
+      "identiteEtudiante": [
+        true,
+        true
+      ],
+      "comparaison": [
+        {
+          "palier": "Forte présence étudiante",
+          "qualificatif": null,
+          "avantage": "egalite",
+          "synthese": "Poitiers se distingue par son bassin d'emploi étendu et sa croissance démographique."
+        },
+        {
+          "palier": "Présence étudiante intermédiaire",
+          "qualificatif": "au moins un établissement supérieur recensé à moins de 15 km",
+          "avantage": "egalite",
+          "synthese": "Poitiers se distingue par son bassin d'emploi étendu et sa croissance démographique."
+        }
+      ]
+    },
+    "03310 Vichy": {
+      "vie": [
+        72,
+        72
+      ],
+      "palier": [
+        "forte",
+        "forte"
+      ],
+      "phrase": [
+        "forte présence étudiante",
+        "présence étudiante intermédiaire, au moins un établissement supérieur recensé à moins de 15 km"
+      ],
+      "identiteEtudiante": [
+        true,
+        true
+      ],
+      "comparaison": [
+        {
+          "palier": "Forte présence étudiante",
+          "qualificatif": null,
+          "avantage": "egalite",
+          "synthese": "Sur ce thème, les deux territoires se ressemblent : rien ne les départage ici."
+        },
+        {
+          "palier": "Présence étudiante intermédiaire",
+          "qualificatif": "au moins un établissement supérieur recensé à moins de 15 km",
+          "avantage": "egalite",
+          "synthese": "Sur ce thème, les deux territoires se ressemblent : rien ne les départage ici."
+        }
+      ]
+    }
+  },
+  "exemples": {
+    "69249 Thurins": {
+      "avant": {
+        "nom": "Thurins",
+        "population": 3131,
+        "acces": 40,
+        "dyn": 92,
+        "etablissement": "absence",
+        "rayonKm": 5,
+        "vie": 71,
+        "palier": "forte",
+        "raison": true,
+        "decouverte": true,
+        "signature": false,
+        "identiteEtudiante": false,
+        "phrase": "forte présence étudiante dans l'agglomération de Lyon, aucun établissement supérieur recensé à moins de 5 km",
+        "comparaison": {
+          "palier": "Forte présence étudiante dans l'agglomération de Lyon",
+          "qualificatif": "aucun établissement supérieur recensé à moins de 5 km",
+          "avantage": "egalite",
+          "synthese": "Sur ce thème, les deux territoires se ressemblent : rien ne les départage ici."
+        }
+      },
+      "apres": {
+        "nom": "Thurins",
+        "population": 3131,
+        "acces": 20,
+        "dyn": 92,
+        "etablissement": "absence",
+        "rayonKm": 5,
+        "vie": 63,
+        "palier": "intermédiaire",
+        "raison": true,
+        "decouverte": false,
+        "signature": false,
+        "identiteEtudiante": false,
+        "phrase": "présence étudiante intermédiaire dans l'agglomération de Lyon, aucun établissement supérieur recensé à moins de 5 km",
+        "comparaison": {
+          "palier": "Présence étudiante intermédiaire dans l'agglomération de Lyon",
+          "qualificatif": "aucun établissement supérieur recensé à moins de 5 km",
+          "avantage": [
+            "Poitiers"
+          ],
+          "synthese": "Poitiers se distingue par sa vie étudiante."
+        }
+      }
+    },
+    "43153 Pont-Salomon": {
+      "avant": {
+        "nom": "Pont-Salomon",
+        "population": 1876,
+        "acces": 40,
+        "dyn": 78,
+        "etablissement": "absence",
+        "rayonKm": 10,
+        "vie": 63,
+        "palier": "intermédiaire",
+        "raison": true,
+        "decouverte": false,
+        "signature": false,
+        "identiteEtudiante": false,
+        "phrase": "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km",
+        "comparaison": {
+          "palier": "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne",
+          "qualificatif": "aucun établissement supérieur recensé à moins de 10 km",
+          "avantage": [
+            "Poitiers"
+          ],
+          "synthese": "Poitiers se distingue par sa vie étudiante et sa croissance démographique."
+        }
+      },
+      "apres": {
+        "nom": "Pont-Salomon",
+        "population": 1876,
+        "acces": 20,
+        "dyn": 78,
+        "etablissement": "absence",
+        "rayonKm": 10,
+        "vie": 55,
+        "palier": "intermédiaire",
+        "raison": true,
+        "decouverte": false,
+        "signature": false,
+        "identiteEtudiante": false,
+        "phrase": "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km",
+        "comparaison": {
+          "palier": "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne",
+          "qualificatif": "aucun établissement supérieur recensé à moins de 10 km",
+          "avantage": [
+            "Poitiers"
+          ],
+          "synthese": "Poitiers se distingue par sa vie étudiante et sa croissance démographique."
+        }
+      }
+    }
+  }
+}
