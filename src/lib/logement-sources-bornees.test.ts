@@ -93,9 +93,10 @@ test("T4 : la route rattrape chaque source, donc un abandon devient une absence,
   for (const appel of [
     "getZfeForPoint(address.latitude, address.longitude).catch(() => null)",
     "getAuditByBanId(address.id).catch((): AuditLookup => ({ status: \"unavailable\" }))",
-    "CARTOFRICHES_RAYON_RECHERCHE_M).catch(() => null)",
     "{ lat: address.latitude, lon: address.longitude }).catch(() => null)",
   ]) assert.ok(route.includes(appel), appel);
+  // Cartofriches n'est plus collecté par la route (30/10/2026) : sa lib reste éprouvée ci-dessus pour `/api/cartofriches`.
+  assert.ok(!/getCartofriches/.test(route.replace(/^\s*\/\/.*$/gm, "")), "la route n'appelle plus Cartofriches");
 });
 
 // ── T5 : source en erreur ───────────────────────────────────────────────────────────────────────────

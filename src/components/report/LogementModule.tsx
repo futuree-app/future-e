@@ -777,6 +777,7 @@ const LIBELLE_ETAT: Record<"en_cours" | "nouvelle_version" | "identique" | "refu
 
 /** La date de la collecte affichée, et le geste qui la renouvelle. Discret : aucun spinner global. */
 // Les sources muettes, dites en clair (FUT-13) : une source qui n'a pas répondu n'est pas « rien à signaler ».
+// `friches` n'est plus collecté (30/10/2026) mais reste nommé : une version antérieure peut l'avoir noté absent.
 const NOM_SOURCE: Record<string, string> = {
   parcelle: "cadastre", altitude: "altitude", zfe: "zones à faibles émissions", friches: "friches (Cartofriches)",
   donnees_communales: "données communales", sinistralite: "sinistralité", georisques_commune: "Géorisques (commune)",

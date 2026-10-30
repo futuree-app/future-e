@@ -84,7 +84,7 @@ export type IssueActualisation = "nouvelle_version" | "identique" | "refusee";
 
 /**
  * Les sources dont la collecte n'a rien rendu (panne, délai dépassé). Une ABSENCE LÉGITIME (aucun
- * audit, aucune ZFE, aucune friche autour) n'en est pas une : seules comptent les sources qui
+ * audit, aucune ZFE) n'en est pas une : seules comptent les sources qui
  * rendent `null` quand elles n'ont pas pu répondre.
  */
 export function sourcesAbsentes(r: LogementReport): string[] {
@@ -92,7 +92,8 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   if (r.parcel == null) absentes.push("parcelle");
   if (r.altitude == null) absentes.push("altitude");
   if (r.zfe == null) absentes.push("zfe");
-  if (r.cartofriches == null) absentes.push("friches");
+  // Cartofriches n'est plus collecté (30/10/2026) : son absence n'est plus une panne. Une version antérieure
+  // qui l'avait noté absent garde « friches » dans sa liste enregistrée, et l'affiche telle quelle.
   if (r.communeData == null) absentes.push("donnees_communales");
   if (r.sinistralite == null) absentes.push("sinistralite");
   if (r.georisques?.commune == null) absentes.push("georisques_commune");

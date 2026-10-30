@@ -25,7 +25,6 @@ import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
 import { resultatAudit, voisinAutorise, type AuditLookup } from "@/lib/audit-record";
-import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
@@ -153,17 +152,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre, sitesSols] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre, sitesSols] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
-      // AUTOUR DE L'ADRESSE, PLUS AUTOUR DE LA COMMUNE (29/07/2026). L'appel communal rendait
-      // cinquante friches situées n'importe où dans la commune, SANS distance : « une friche
-      // polluée quelque part à Nantes » n'est pas une information sur un logement nantais.
-      //
-      // Le rayon est une convention nommée et versionnée : cf. `CARTOFRICHES_RAYON_RECHERCHE_M`,
-      // qui dit ce qu'il est (un périmètre de recherche) et ce qu'il n'est pas (un seuil sanitaire).
-      getCartofrichesNearPoint(address.latitude, address.longitude, CARTOFRICHES_RAYON_RECHERCHE_M).catch(() => null),
       // AVEC LE POINT : les indicateurs IRIS décrivent alors le SECTEUR de l'adresse, pas la moyenne
       // de la commune. L'écart n'est pas cosmétique — La Rochelle centre affiche 7,3 % de HLM là où
       // la commune entière en affiche 31,1 %. `irisScope` dit toujours à quelle échelle lire.
@@ -224,7 +216,14 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       // index local (`data/irep-registre.json`, `lib/server/irep-registre.ts`), lu par la page publique
       // /agir/pollutions-invisibles. Son retour au dossier est une décision distincte (FUT-152 phase 2,
       // cf. docs/audits/2026-10-28-fut152-pollutions-invisibles.md) : ne pas le rebrancher sans elle.
-      cartofriches,
+      //
+      // CARTOFRICHES DÉBRANCHÉ LE 30/10/2026 (PR #118, à part de FUT-157), pour la même raison. Les friches
+      // autour de l'adresse étaient collectées à chaque dossier et lues par AUCUN composant, aucune règle ni
+      // aucune synthèse (`logement-synthesis-cache` les écartait déjà). Pire : la source comptait parmi les
+      // sources absentes, et sa seule panne faisait REFUSER une actualisation par ailleurs légitime
+      // (scripts/fut157/cartofriches-refus.mjs). Les rapports enregistrés gardent leur champ `cartofriches`,
+      // que rien ne lit ; la lib et `/api/cartofriches` restent. Une friche n'est pas une pollution avérée :
+      // son retour au dossier serait une décision produit, pas une réparation.
       communeData,
       sinistralite,
       georisques: {
