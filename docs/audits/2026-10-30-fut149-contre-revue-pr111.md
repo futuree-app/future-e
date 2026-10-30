@@ -561,7 +561,11 @@ effets du nouveau format.
 - Le moteur est plus simple (≈ 90 lignes de calcul de grille retirées) et un peu plus rapide.
 - Les défauts déjà corrigés ne reviennent pas : frontières alignées (155 / 155 par le vrai constructeur), parcelles
   (17 / 17), adresses (48 / 48), publication et mémoire (tests et mutations).
-- La PR reste inerte sans `DEBROUSSAILLEMENT_BUCKET` (test : aucun appel réseau, aucun champ écrit).
+- La PR reste inerte sans `DEBROUSSAILLEMENT_BUCKET` (test : aucun appel réseau, aucun champ écrit ; un rapport
+  existant reste actualisable).
+- Validation : suite de la branche **3 932** ✔ ; fusion simulée avec `main` `82cbc171` sans conflit, `tsc` propre,
+  **4 014** ✔ (= 3 908 + 106 FUT-149), 0 échec ; banc `/dev/fut149`, 16 cas × 2 largeurs, aucun débordement, captures
+  et textes de recette **inchangés**.
 
 **R3 n'est que partiellement levé : un arbitrage reste à rendre.** Avec la réunion exacte, 56 % des points de jonction
 retrouvent « en zone ». Les autres longent un vrai vide de raccord entre deux zones, de 1 µm à quelques millimètres
