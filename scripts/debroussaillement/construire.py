@@ -28,13 +28,21 @@ point (`src/lib/debroussaillement.ts`).
  - La surface totale des tuiles retrouve celle des zones (à 0,01 % près).
  - L'écriture est faite dans un dossier temporaire, renommé à la fin.
 
-── LE FORMAT (`debroussaillement-1`) ─────────────────────────────────────────────────────────────────────────
+── LE FORMAT (`debroussaillement-2`, contre-revue du 30/10/2026, option A de R3) ─────────────────────────────
  <sortie>/<édition>/manifest.json        couverture, profils (département, source, arrêté…), tuiles et empreintes
- <sortie>/<édition>/t/<ix>_<iy>.json.gz  les morceaux de zone de la cellule [ix/10, (ix+1)/10[ × [iy/10, (iy+1)/10[
- Coordonnées WGS84 (pyproj, EPSG:2154 → EPSG:4326) en entiers de 1e-7 degré, chaque anneau codé en différences.
- Les bords de cellule sont des droites exactes (ix × 1 000 000) : l'application les reconnaît comme des coupes
- de tuile, pas comme des limites de zone. Une cellule entièrement dans une zone n'a pas de fichier : le manifeste
- la marque `plein`. Une cellule absente du manifeste ne contient aucune zone publiée.
+ <sortie>/<édition>/t/<ix>_<iy>.json.gz  la cellule [ix/10, (ix+1)/10] × [iy/10, (iy+1)/10] :
+   - `morceaux` : les morceaux de zone (le profil, l'objet, les anneaux), pour dire SI un point est dans une zone,
+     LAQUELLE, et la PART d'une parcelle qui y tombe ;
+   - `limites` : les VRAIES limites du zonage dans la cellule (bord compris), pour dire À QUELLE DISTANCE de sa
+     limite est un point du zonage. Ce sont les limites de la RÉUNION de toutes les zones publiées, calculées sur les
+     géométries d'origine (Lambert-93), sans aucune tolérance : la frontière entre deux zones voisines (souvent une
+     limite de département) n'en est pas une, une coupe de tuile non plus ; un trou, un interstice réel entre deux
+     zones, une limite qui tombe exactement sur la grille en sont. En `debroussaillement-1`, la lib déduisait ces
+     limites des anneaux de chaque morceau, à l'exécution : elle prenait les frontières entre zones pour des
+     limites (R3), et devait examiner l'autre côté de la grille pour reconnaître les coupes (R1).
+ Coordonnées WGS84 (pyproj, EPSG:2154 → EPSG:4326) en entiers de 1e-7 degré, chaque anneau ou ligne codé en
+ différences. Une cellule entièrement dans une zone, et qu'aucune limite ne touche, n'a pas de fichier : le
+ manifeste la marque `plein`. Une cellule absente du manifeste ne contient aucune zone publiée.
 
  Usage :
    python3 -I scripts/debroussaillement/construire.py --archive <DEBROUSSAILLEMENT_…_2026-03-01.7z> --sortie <dossier>
@@ -61,7 +69,7 @@ from shapely import wkb
 from shapely.geometry import box
 from shapely.strtree import STRtree
 
-FORMAT = "debroussaillement-1"
+FORMAT = "debroussaillement-2"
 PAS = 1_000_000  # 0,1 degré en unités de 1e-7 degré
 ECHELLE = 1e7
 
@@ -171,6 +179,93 @@ def anneau_code(coords):
     return plat, propres
 
 
+def ligne_code(coords):
+    """Une ligne → [x0, y0, dx1, dy1, …] en entiers de 1e-7 degré ; None si elle se réduit à un point."""
+    pts = []
+    for x, y in coords:
+        p = (round(x * ECHELLE), round(y * ECHELLE))
+        if not pts or pts[-1] != p:
+            pts.append(p)
+    if len(pts) < 2:
+        return None
+    plat = [pts[0][0], pts[0][1]]
+    for a, b in zip(pts, pts[1:]):
+        plat += [b[0] - a[0], b[1] - a[1]]
+    return plat
+
+
+def lignes(g):
+    if g.is_empty:
+        return []
+    if g.geom_type == "LineString":
+        return [g]
+    if g.geom_type in ("MultiLineString", "GeometryCollection"):
+        return [l for x in g.geoms for l in lignes(x)]
+    return []  # un point isolé (contact de deux limites en un sommet) : aucune longueur
+
+
+# La réunion locale déborde de la cellule de cette marge (degrés) : les bords artificiels de la découpe tombent
+# hors de la cellule et n'entrent jamais dans ses limites. Toute valeur positive convient ; 0,002° ≈ 150 à 220 m.
+MARGE_REUNION = 0.002
+# La grille de calcul de la réunion (mètres, Lambert-93) : cf. `limites_cellule`.
+GRILLE_CALCUL_M = 1e-6
+# Les limites rangées dans une cellule débordent de son carré de cette marge (degrés, ≈ 10 cm) : cf. `limites_cellule`.
+MARGE_RANGEMENT = 1e-6
+
+
+def limites_cellule(zones_l93, arbre_l93, cellule, vers_l93, vers_wgs84, fermeture=0.0):
+    """
+    LES VRAIES LIMITES DU ZONAGE DANS UNE CELLULE (bord compris, et `MARGE_RANGEMENT` autour), en lignes WGS84 non arrondies, et leur longueur
+    en mètres (Lambert-93). Calculées en Lambert-93, sur les géométries d'ORIGINE, comme l'oracle : la réunion
+    exacte (`unary_union`, aucune tolérance, aucun accrochage) des zones découpées à un rectangle qui déborde de la
+    cellule, puis son bord, projeté en WGS84 et coupé au carré de la cellule élargi de 10 cm. Une limite posée
+    exactement sur le bord de la cellule est donc gardée (dans les deux cellules qui la bordent).
+    """
+    x0, y0, x1, y1 = cellule
+    m = MARGE_REUNION
+    # Le rectangle Lambert-93 qui contient la cellule élargie (bords échantillonnés : la projection les courbe).
+    t = numpy.linspace(0, 1, 21)
+    lon = numpy.concatenate([x0 - m + (x1 - x0 + 2 * m) * t, numpy.full(21, x1 + m), x1 + m - (x1 - x0 + 2 * m) * t, numpy.full(21, x0 - m)])
+    lat = numpy.concatenate([numpy.full(21, y0 - m), y0 - m + (y1 - y0 + 2 * m) * t, numpy.full(21, y1 + m), y1 + m - (y1 - y0 + 2 * m) * t])
+    X, Y = vers_l93.transform(lon, lat)
+    rect = (float(X.min()), float(Y.min()), float(X.max()), float(Y.max()))
+    idx = arbre_l93.query(box(*rect), predicate="intersects")
+    if len(idx) == 0:
+        return [], 0.0
+    # PRÉCISION DE CALCUL FIXE (1 µm, `GRILLE_CALCUL_M`) : en virgule flottante, GEOS rend parfois une réunion non
+    # fusionnée (un trou que recouvre une autre partie du résultat), d'où une fausse limite (contre-épreuve du
+    # 30/10/2026 : dans la Drôme, un « vide » fantôme de 5 700 m² à 13 m d'un point). À précision fixe, la réunion
+    # est robuste (toujours fusionnée). La grille n'agit qu'à l'échelle du micromètre : elle peut faire apparaître
+    # ou disparaître un liseré de largeur micrométrique (195 vides de moins de 0,5 µm à précision fixe, aucun en
+    # virgule flottante), jamais un vide plus large ; la virgule flottante le fait aussi, mais sans garantie de
+    # fusion (`sondes/largeurs_vides.py`).
+    reunion = shapely.unary_union([_decoupe(zones_l93[i], rect) for i in idx], grid_size=GRILLE_CALCUL_M)
+    if fermeture > 0:
+        # FERMETURE (option, `--fermeture-m`, 0 par défaut) : referme les vides plus étroits que `fermeture` mètres
+        # (dilatation puis érosion à angles vifs ; le reste du tracé ne bouge pas). Ce n'est PAS la règle par défaut :
+        # la réunion est exacte, et un liseré de numérisation entre deux zones reste une limite (prudente).
+        reunion = reunion.buffer(fermeture / 2, join_style="mitre", mitre_limit=10).buffer(-fermeture / 2, join_style="mitre", mitre_limit=10)
+    if not reunion.is_valid:
+        raise SystemExit(f"cellule {cellule} : réunion des zones invalide ({shapely.is_valid_reason(reunion)})")
+    bord_wgs = shapely.transform(reunion.boundary, lambda c: _transformer(vers_wgs84, c))
+    # Le carré de la cellule, élargi de `MARGE_RANGEMENT` : sans cela, une limite posée EXACTEMENT sur le bord de la
+    # cellule (une vraie limite alignée sur la grille) tombait à 1e-12 degré dehors après l'aller-retour Lambert-93 →
+    # WGS84, et disparaissait (contre-épreuve du 30/10/2026, `sondes/frontieres2.mts`). Ce n'est pas une tolérance sur
+    # la géométrie : la marge choisit seulement la tuile qui RANGE une limite ; une vraie limite rangée deux fois
+    # reste une vraie limite, et aucune n'est créée.
+    e = MARGE_RANGEMENT
+    morceaux = lignes(shapely.intersection(bord_wgs, box(x0 - e, y0 - e, x1 + e, y1 + e)))
+    ls = [l for l in lignes(shapely.line_merge(shapely.MultiLineString(morceaux))) if l.length > 0] if morceaux else []
+    longueur = sum(shapely.transform(l, lambda c: _transformer(vers_l93, c)).length for l in ls)
+    return ls, longueur
+
+
+def _decoupe(g, rect):
+    """`clip_by_rect` (rapide) ; s'il rend une géométrie invalide, l'intersection exacte avec le rectangle."""
+    c = shapely.clip_by_rect(g, *rect)
+    return c if c.is_valid else shapely.intersection(g, box(*rect))
+
+
 def polygones(g):
     if g.is_empty:
         return []
@@ -181,7 +276,7 @@ def polygones(g):
     return []  # lignes et points nés de la découpe : aucune surface
 
 
-def construire(gpkg, edition, sortie, accepter_ecart, exclusions):
+def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0):
     t0 = dt.datetime.now()
     journal("empreinte de la source…")
     empreinte = sha256_fichier(gpkg)
@@ -210,11 +305,14 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions):
     for z in zones:
         z["wgs"] = shapely.transform(z["geom"], lambda c: _transformer(vers_wgs84, c))
     arbre = STRtree([z["wgs"] for z in zones])
+    zones_l93 = [z["geom"] for z in zones]
+    arbre_l93 = STRtree(zones_l93)
     x0, y0, x1, y1 = shapely.total_bounds([z["wgs"] for z in zones])
 
     tmp = tempfile.mkdtemp(prefix=f".{edition}-", dir=sortie)
     os.makedirs(os.path.join(tmp, "t"))
     tuiles, nmorceaux, invalides, sommets = {}, 0, 0, 0
+    nlignes, sommets_limites, longueur_limites = 0, 0, 0.0
     aire_tuiles = 0.0  # en Lambert-93, pour comparer à la source
     vers_l93 = Transformer.from_crs(4326, 2154, always_xy=True)
     for ix in range(math.floor(x0 * 10), math.floor(x1 * 10) + 1):
@@ -257,15 +355,21 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions):
             if plein is None and not morceaux:
                 continue
             cle = f"{ix}_{iy}"
-            if plein is not None and not morceaux:
+            ls, longueur = limites_cellule(zones_l93, arbre_l93, cellule, vers_l93, vers_wgs84, fermeture)
+            limites = [c for c in (ligne_code(list(l.coords)) for l in ls) if c is not None]
+            if plein is not None and not morceaux and not limites:
                 tuiles[cle] = {"plein": plein}
                 aire_tuiles += shapely.transform(box(*cellule), lambda c: _transformer(vers_l93, c)).area
                 continue
             if plein is not None:
-                # Une cellule pleine ET d'autres morceaux : deux zones se recouvrent. Le rectangle devient un morceau.
+                # Une cellule pleine ET d'autres morceaux (deux zones se recouvrent), ou qu'une limite touche (elle
+                # longe son bord) : le rectangle devient un morceau, et la cellule a un fichier pour ses limites.
                 carre = [ix * PAS, iy * PAS, PAS, 0, 0, PAS, -PAS, 0]
                 morceaux.append({**{k: v for k, v in plein.items()}, "r": [carre]})
-            contenu = {"format": FORMAT, "edition": edition, "ix": ix, "iy": iy, "morceaux": morceaux}
+            nlignes += len(limites)
+            sommets_limites += sum(len(c) // 2 for c in limites)
+            longueur_limites += longueur
+            contenu = {"format": FORMAT, "edition": edition, "ix": ix, "iy": iy, "morceaux": morceaux, "limites": limites}
             octets = gzip.compress(json.dumps(contenu, separators=(",", ":")).encode(), compresslevel=9, mtime=0)
             with open(os.path.join(tmp, "t", f"{cle}.json.gz"), "wb") as f:
                 f.write(octets)
@@ -301,6 +405,8 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions):
             "tuiles": len(tuiles), "fichiers": len(tailles), "pleines": sum(1 for t in tuiles.values() if "plein" in t),
             "octets": sum(tailles), "medianeOctets": tailles[len(tailles) // 2] if tailles else 0, "maxOctets": tailles[-1] if tailles else 0,
             "morceaux": nmorceaux, "nonMesurables": invalides, "sommets": sommets, "ecartAire": round(ecart_aire, 8),
+            # `fermetureM` : la largeur des vides refermés pour le calcul des limites (0 : réunion exacte). L'édition le dit.
+            "limites": {"lignes": nlignes, "sommets": sommets_limites, "km": round(longueur_limites / 1000), "fermetureM": fermeture, "grilleCalculM": GRILLE_CALCUL_M},
             "aireKm2": round(aire_source / 1e6),
         },
     }
@@ -353,6 +459,8 @@ def main():
     ap.add_argument("--sortie", required=True)
     ap.add_argument("--accepter-ecart-arrete", action="store_true")
     ap.add_argument("--revision", type=int, help="numéro de révision (2, 3…) quand le même millésime IGN est reconstruit")
+    ap.add_argument("--fermeture-m", type=float, default=0.0,
+                    help="referme, pour le calcul des limites, les vides plus étroits que N mètres (0 : réunion exacte, par défaut)")
     ap.add_argument("--exclusions", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "exclusions-arretes.json"))
     a = ap.parse_args()
     os.makedirs(a.sortie, exist_ok=True)
@@ -375,7 +483,7 @@ def main():
     if exclusions.get("editionVerifiee") != edition.split(".")[0]:
         journal(f"ATTENTION : les exclusions ont été vérifiées sur l'édition {exclusions.get('editionVerifiee')}, pas {edition} : refaire la contre-épreuve des arrêtés")
     try:
-        construire(gpkg, edition, a.sortie, a.accepter_ecart_arrete, exclusions)
+        construire(gpkg, edition, a.sortie, a.accepter_ecart_arrete, exclusions, a.fermeture_m)
     finally:
         # L'extraction (1,8 Go pour l'édition nationale) ne reste pas dans le dossier de sortie (contre-revue du 30/10/2026).
         if extraction:

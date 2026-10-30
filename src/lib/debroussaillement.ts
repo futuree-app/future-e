@@ -24,11 +24,14 @@
 //  C. Portée : « à l'adresse » seulement avec un géocodage au numéro ET une parcelle rattachée au point,
 //     unique et mesurable. Sinon la lecture se fait au point, et le dit. Aucun rattachement à une parcelle voisine.
 //
-// ── LES TUILES ───────────────────────────────────────────────────────────────────────────────
-//  Cellules de 0,1° ; coordonnées en entiers de 1e-7 degré. Une zone coupée par la grille garde, le long de la
-//  coupe, des arêtes qui ne sont PAS des limites de zone : elles sont exactement sur une droite de la grille, et
-//  la lib les écarte avant toute mesure de distance. Une cellule absente du manifeste ne contient aucune zone
-//  publiée : c'est une absence établie, pas une panne. Une tuile listée et non lue est une panne.
+// ── LES TUILES (`debroussaillement-2`) ────────────────────────────────────────────────────────────
+//  Cellules de 0,1° ; coordonnées en entiers de 1e-7 degré. Chaque tuile porte les MORCEAUX de zone de sa cellule
+//  (dans quelle zone est un point, quelle part d'une parcelle y tombe) et les LIMITES du zonage qui la traversent :
+//  le bord de la réunion de toutes les zones, calculé à la construction sur les géométries d'origine. Une coupe de
+//  tuile, ou la frontière entre deux zones voisines (souvent une limite de département), n'en est pas une ; un trou,
+//  un vrai interstice, une limite posée sur la grille en sont. La lib ne devine plus rien de la grille (contre-revue
+//  du 30/10/2026, R3 option A). Une cellule absente du manifeste ne contient aucune zone publiée : c'est une
+//  absence établie, pas une panne. Une tuile listée et non lue est une panne. Une tuile d'un autre format aussi.
 
 import {
   aireIntersection, aireRegion, classer, distanceLignes, distanceRegion, lignesDe, pointsDe, projectionAutour, regionDe,
@@ -105,6 +108,11 @@ export type TuileDebroussaillement = {
   ix: number;
   iy: number;
   morceaux: Morceau[];
+  /**
+   * Les vraies limites du zonage dans la cellule, bord compris : lignes [x0, y0, dx1, dy1, …] en 1e-7 degré. Le bord
+   * de la réunion de toutes les zones publiées, calculé à la construction (`construire.py`, `limites_cellule`).
+   */
+  limites: number[][];
 };
 
 // ── La lecture publiée (contrat du rapport) ──────────────────────────────────────────────────
@@ -187,7 +195,9 @@ export function tuileValide(t: unknown, attendu: { edition: string; ix: number; 
   return !!x && typeof x === "object" && x.format === FORMAT_TUILES_DEBROUSSAILLEMENT && x.edition === attendu.edition
     && x.ix === attendu.ix && x.iy === attendu.iy && Array.isArray(x.morceaux)
     && x.morceaux.every((m) => entier(m.p) && m.p >= 0 && m.p < attendu.profils && typeof m.o === "string"
-      && Array.isArray(m.r) && m.r.length > 0 && m.r.every((a) => Array.isArray(a) && a.length >= 6 && a.length % 2 === 0 && a.every(entier)));
+      && Array.isArray(m.r) && m.r.length > 0 && m.r.every((a) => Array.isArray(a) && a.length >= 6 && a.length % 2 === 0 && a.every(entier)))
+    // Une tuile sans limites (format antérieur) ne se lit pas : la lib conclurait « en zone » près d'une vraie limite.
+    && Array.isArray(x.limites) && x.limites.every((l) => Array.isArray(l) && l.length >= 4 && l.length % 2 === 0 && l.every(entier));
 }
 
 /** Un anneau codé → ses sommets entiers (1e-7 degré), fermé. */
@@ -206,99 +216,41 @@ function sommets(code: number[]): [number, number][] {
 
 type Boite = [number, number, number, number];
 
-/** Un morceau prêt à mesurer : sa géométrie (lon, lat) et ses vraies limites, sans les coupes de la grille. */
-type Piece = { profil: number; objet: string; ambigu: boolean; nonMesurable: boolean; geometrie: Geometrie; limites: number[][][] };
+/** Un morceau prêt à mesurer : sa géométrie (lon, lat). */
+type Piece = { profil: number; ambigu: boolean; nonMesurable: boolean; geometrie: Geometrie };
 
-/**
- * CE QU'IL Y A DE L'AUTRE CÔTÉ D'UNE DROITE DE LA GRILLE (revue indépendante du 29/10/2026). Une arête posée sur
- * le bord de sa cellule est, le plus souvent, une coupe de tuile : la zone continue dans la cellule voisine. Mais
- * une VRAIE limite de zone peut être exactement alignée sur la grille (la zone s'arrête là, ou s'y arrêtait déjà
- * dans la base) ; l'écarter faisait lire « en zone » ou « hors zone » un point à 10 m de cette limite. La première
- * version écartait toute arête alignée : elle confondait les deux. Désormais, l'arête n'est écartée que là où la
- * cellule voisine est couverte par une zone, juste de l'autre côté.
- *
- * `couvert(ix, iy, x, y)` : le point entier (x, y), dans la cellule (ix, iy), est-il dans une zone publiée ?
- * `true` (cellule pleine, ou un morceau le contient), `false` (cellule absente du manifeste, ou aucun morceau),
- * `null` (cellule listée mais non chargée : on ne sait pas). Un `null` garde l'arête comme limite : dans le doute,
- * la lecture penche vers « en limite », jamais vers une conclusion.
- */
-type Couvert = (ix: number, iy: number, x: number, y: number) => boolean | null;
-
-/** Le pas (en 1e-7 degré, environ 5 m) auquel une arête alignée est découpée pour regarder de l'autre côté. */
-const PAS_EXAMEN = 500;
-
-/**
- * Les arêtes d'un anneau qui sont de VRAIES limites de zone, en polylignes (lon, lat). Une arête posée sur une
- * droite de la grille qui borde la cellule n'est écartée que par morceaux, là où la cellule voisine est couverte
- * de l'autre côté (cf. `Couvert`). Seules sont gardées les arêtes qui passent dans la `fenetre` (entiers) ; d'une
- * arête alignée, seuls les morceaux qui la croisent.
- */
-function vraiesLimites(pts: [number, number][], ix: number, iy: number, fenetre: Boite, couvert: Couvert): number[][][] {
-  const [X0, Y0, X1, Y1] = [ix * PAS_TUILE, iy * PAS_TUILE, (ix + 1) * PAS_TUILE, (iy + 1) * PAS_TUILE];
-  const [fx0, fy0, fx1, fy1] = fenetre;
-  const out: number[][][] = [];
-  let cours: number[][] | null = null;
-  const garder = (ax: number, ay: number, bx: number, by: number) => {
-    const der = cours?.[cours.length - 1];
-    if (!cours || der![0] !== ax / ECHELLE || der![1] !== ay / ECHELLE) { cours = [[ax / ECHELLE, ay / ECHELLE]]; out.push(cours); }
-    cours.push([bx / ECHELLE, by / ECHELLE]);
+function piece(m: { p: number; a?: 1; v?: 0 }, anneaux: [number, number][][]): Piece {
+  return {
+    profil: m.p, ambigu: m.a === 1, nonMesurable: m.v === 0,
+    geometrie: { type: "Polygon", coordinates: anneaux.map((a) => a.map(([x, y]) => [x / ECHELLE, y / ECHELLE])) },
   };
-  for (let i = 0; i + 1 < pts.length; i++) {
-    const [ax, ay] = pts[i];
-    const [bx, by] = pts[i + 1];
-    const loin = Math.max(ax, bx) < fx0 || Math.min(ax, bx) > fx1 || Math.max(ay, by) < fy0 || Math.min(ay, by) > fy1;
-    if (loin) { cours = null; continue; }
-    // La cellule voisine de l'autre côté de l'arête alignée, et le pas d'un cran (1e-7 degré) vers elle.
-    const voisin: [number, number, number, number] | null =
-      ax === bx && ax === X0 ? [ix - 1, iy, -1, 0] : ax === bx && ax === X1 ? [ix + 1, iy, 1, 0]
-        : ay === by && ay === Y0 ? [ix, iy - 1, 0, -1] : ay === by && ay === Y1 ? [ix, iy + 1, 0, 1] : null;
-    if (!voisin) { garder(ax, ay, bx, by); continue; }
-    const [vx, vy, dx, dy] = voisin;
-    const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / PAS_EXAMEN));
-    // Seuls les pas qui croisent la fenêtre sont examinés, avec un pas de marge de chaque côté : une arête alignée
-    // court parfois sur des kilomètres, et l'examiner en entier coûtait jusqu'à une seconde de calcul par lecture
-    // (contre-revue du 30/10/2026). Ce qui est hors de la fenêtre est trop loin pour compter.
-    const [a, b, f0, f1] = ax === bx ? [ay, by, fy0, fy1] : [ax, bx, fx0, fx1];
-    const t0 = (Math.max(f0, Math.min(a, b)) - a) / (b - a || 1);
-    const t1 = (Math.min(f1, Math.max(a, b)) - a) / (b - a || 1);
-    const kmin = Math.max(0, Math.floor(Math.min(t0, t1) * n) - 1);
-    const kmax = Math.min(n, Math.ceil(Math.max(t0, t1) * n) + 1);
-    for (let k = kmin; k < kmax; k++) {
-      const [px, py] = [Math.round(ax + ((bx - ax) * k) / n), Math.round(ay + ((by - ay) * k) / n)];
-      const [qx, qy] = [Math.round(ax + ((bx - ax) * (k + 1)) / n), Math.round(ay + ((by - ay) * (k + 1)) / n)];
-      const [mx, my] = [Math.round((px + qx) / 2) + dx, Math.round((py + qy) / 2) + dy];
-      // Couvert de l'autre côté : la zone continue, c'est une coupe de tuile. Sinon (ou inconnu) : une vraie limite.
-      if (couvert(vx, vy, mx, my) === true) cours = null;
-      else garder(px, py, qx, qy);
-    }
-  }
-  return out;
 }
 
-function piece(ix: number, iy: number, m: { p: number; o: string; a?: 1; v?: 0 }, anneaux: [number, number][][], fenetre: Boite, couvert: Couvert): Piece {
-  return {
-    profil: m.p, objet: m.o, ambigu: m.a === 1, nonMesurable: m.v === 0,
-    geometrie: { type: "Polygon", coordinates: anneaux.map((a) => a.map(([x, y]) => [x / ECHELLE, y / ECHELLE])) },
-    limites: anneaux.flatMap((a) => vraiesLimites(a, ix, iy, fenetre, couvert)),
-  };
+/**
+ * Les morceaux d'une ligne de limite codée qui passent dans la `fenetre` (entiers), en polylignes (lon, lat). Une
+ * limite peut courir sur toute la cellule : ce qui est hors de la fenêtre est trop loin pour compter.
+ */
+function limitesDansFenetre(code: number[], [fx0, fy0, fx1, fy1]: Boite): number[][][] {
+  const out: number[][][] = [];
+  let cours: number[][] | null = null;
+  let [ax, ay] = [code[0], code[1]];
+  for (let i = 2; i + 1 < code.length; i += 2) {
+    const [bx, by] = [ax + code[i], ay + code[i + 1]];
+    const loin = Math.max(ax, bx) < fx0 || Math.min(ax, bx) > fx1 || Math.max(ay, by) < fy0 || Math.min(ay, by) > fy1;
+    if (loin) cours = null;
+    else {
+      if (!cours) { cours = [[ax / ECHELLE, ay / ECHELLE]]; out.push(cours); }
+      cours.push([bx / ECHELLE, by / ECHELLE]);
+    }
+    [ax, ay] = [bx, by];
+  }
+  return out;
 }
 
 /** Le carré d'une cellule, en sommets entiers. */
 function carre(ix: number, iy: number): [number, number][] {
   const [x0, y0, x1, y1] = [ix * PAS_TUILE, iy * PAS_TUILE, (ix + 1) * PAS_TUILE, (iy + 1) * PAS_TUILE];
   return [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]];
-}
-
-/** Point dans un polygone (anneaux entiers, extérieur puis trous), règle pair-impair, sans projection. */
-function dansMorceau([x, y]: [number, number], anneaux: [number, number][][]): boolean {
-  const dans = (a: [number, number][]) => {
-    let d = false;
-    for (let i = 0, j = a.length - 1; i < a.length; j = i++) {
-      if ((a[i][1] > y) !== (a[j][1] > y) && x < ((a[j][0] - a[i][0]) * (y - a[i][1])) / (a[j][1] - a[i][1]) + a[i][0]) d = !d;
-    }
-    return d;
-  };
-  return dans(anneaux[0]) && !anneaux.slice(1).some(dans);
 }
 
 // ── La préparation : portée, parcelle, fenêtre, tuiles ───────────────────────────────────────
@@ -461,28 +413,19 @@ export function lireDebroussaillement(
   if (!manifesteValide(m)) return debroussaillementIndisponible(e);
   const prep = preparer(e);
   const departement = departementInsee(e.insee);
-  // Les anneaux entiers de chaque cellule chargée (pleine : son carré), pour lire les pièces et regarder de
-  // l'autre côté des droites de la grille.
-  const anneauxDe = new Map<string, { m: { p: number; o: string; a?: 1; v?: 0 }; anneaux: [number, number][][] }[]>();
+  // Les morceaux de chaque cellule chargée (pleine : son carré), et les vraies limites qui passent dans la fenêtre.
+  const toutes: Piece[] = [];
+  const limites: number[][][] = [];
   for (const [ix, iy] of prep.cellules) {
     const k = cleTuile(ix, iy);
     const entree = m.tuiles[k];
     if (!entree) continue; // aucune zone publiée dans cette cellule : absence établie
-    if ("plein" in entree) { anneauxDe.set(k, [{ m: entree.plein, anneaux: [carre(ix, iy)] }]); continue; }
+    // Une cellule pleine n'est touchée par aucune limite (`construire.py`) : son carré suffit.
+    if ("plein" in entree) { toutes.push(piece(entree.plein, [carre(ix, iy)])); continue; }
     const t = tuiles.get(k);
     if (!t) return debroussaillementIndisponible(e, m);
-    anneauxDe.set(k, t.morceaux.map((x) => ({ m: x, anneaux: x.r.map(sommets) })));
-  }
-  const couvert: Couvert = (ix, iy, x, y) => {
-    const k = cleTuile(ix, iy);
-    if (!m.tuiles[k]) return false;
-    const contenu = anneauxDe.get(k);
-    if (!contenu) return null;
-    return contenu.some((c) => dansMorceau([x, y], c.anneaux));
-  };
-  const toutes: Piece[] = [];
-  for (const [ix, iy] of prep.cellules) {
-    for (const c of anneauxDe.get(cleTuile(ix, iy)) ?? []) toutes.push(piece(ix, iy, c.m, c.anneaux, prep.fenetreInt, couvert));
+    for (const x of t.morceaux) toutes.push(piece(x, x.r.map(sommets)));
+    for (const l of t.limites) limites.push(...limitesDansFenetre(l, prep.fenetreInt));
   }
   const base = {
     convention: DEBROUSSAILLEMENT_CONVENTION as typeof DEBROUSSAILLEMENT_CONVENTION, statut: "lu" as const, portee: prep.portee, parcelleEcartee: prep.parcelleEcartee,
@@ -490,7 +433,7 @@ export function lireDebroussaillement(
   };
   const resultat = prep.parcelle
     ? lireALaParcelle(toutes, prep.parcelle, prep.proj)
-    : lireAuPoint(toutes, prep.proj, e.point);
+    : lireAuPoint(toutes, limites, prep.proj, e.point);
   const zone = resultat.profil != null ? m.profils[resultat.profil] ?? null : null;
   let etat: EtatDebroussaillement = resultat.etat;
   // Hors de toute zone : la conclusion n'est permise que dans un département qui a un zonage publié.
@@ -521,44 +464,39 @@ const resultat = (etat: Resultat["etat"], r: Partial<Resultat> = {}): Resultat =
 type Proj = ReturnType<typeof projectionAutour>;
 type Pt = [number, number];
 
-/** La distance d'un point aux VRAIES limites des morceaux (Infinity s'il n'y en a aucune dans la fenêtre). */
-function distanceAuxLimites(ici: Pt, ps: Piece[], proj: Proj): number {
-  let d = Infinity;
-  for (const p of ps) {
-    if (p.limites.length === 0) continue;
-    const l = lignesDe({ type: "MultiLineString", coordinates: p.limites }, proj);
-    if (l) d = Math.min(d, distanceLignes(ici, l));
-  }
-  return d;
+/** La distance d'un point aux vraies limites du zonage (Infinity s'il n'y en a aucune dans la fenêtre). */
+function distanceAuxLimites(ici: Pt, limites: number[][][], proj: Proj): number {
+  if (limites.length === 0) return Infinity;
+  const l = lignesDe({ type: "MultiLineString", coordinates: limites }, proj);
+  return l ? distanceLignes(ici, l) : Infinity;
 }
 
 /**
  * Au point. Dedans : un morceau le contient (un point posé sur une coupe de tuile est dedans : la coupe traverse
- * la zone). La limite proche se mesure aux seules vraies limites.
+ * la zone) ; la distance à la limite se mesure aux seules vraies limites du zonage. Dehors : la distance à la zone
+ * la plus proche est celle de son morceau le plus proche (le point est hors de tous, donc hors de leur réunion).
  */
-function lireAuPoint(ps: Piece[], proj: Proj, point: Pt): Resultat {
+function lireAuPoint(ps: Piece[], limites: number[][][], proj: Proj, point: Pt): Resultat {
   const ici = pointsDe({ type: "Point", coordinates: point }, proj)![0];
   let contient: Piece | null = null;
   let proche: { p: Piece; d: number } | null = null;
   for (const p of ps) {
     const region = regionDe(p.geometrie, proj);
     if (!region) return resultat("incertain", { motif: "geometrie" });
-    const dedans = classer(ici, region).lieu !== "dehors";
-    const dLimite = distanceAuxLimites(ici, [p], proj);
+    const d = distanceRegion(ici, region); // 0 : dedans, ou sur le bord
     // Une donnée qu'on ne peut pas lire, ou dont la diffusion est ambiguë, ne décide de rien près du point.
-    if ((p.nonMesurable || p.ambigu) && (dedans || dLimite <= LIMITE_PROCHE_M)) {
+    if ((p.nonMesurable || p.ambigu) && d <= LIMITE_PROCHE_M) {
       return resultat("incertain", { motif: p.ambigu ? "diffusion_ambigue" : "geometrie", profil: p.profil });
     }
-    if (dedans && !contient) contient = p;
-    if (dLimite <= LIMITE_PROCHE_M && (!proche || dLimite < proche.d)) proche = { p, d: dLimite };
+    if (d === 0) { contient ??= p; continue; }
+    if (d <= LIMITE_PROCHE_M && (!proche || d < proche.d)) proche = { p, d };
   }
-  if (contient && !proche) return resultat("en_zone", { profil: contient.profil });
-  if (proche) {
-    return resultat("en_limite", {
-      profil: (contient ?? proche.p).profil,
-      limite: { cause: "point_proche", distanceM: contient ? null : arrondi5(proche.d) },
-    });
+  if (contient) {
+    return distanceAuxLimites(ici, limites, proj) <= LIMITE_PROCHE_M
+      ? resultat("en_limite", { profil: contient.profil, limite: { cause: "point_proche", distanceM: null } })
+      : resultat("en_zone", { profil: contient.profil });
   }
+  if (proche) return resultat("en_limite", { profil: proche.p.profil, limite: { cause: "point_proche", distanceM: arrondi5(proche.d) } });
   return resultat("hors_zone");
 }
 
@@ -614,18 +552,17 @@ function lireALaParcelle(ps: Piece[], parcelle: Region, proj: Proj): Resultat {
 }
 
 /**
- * La plus courte distance entre la parcelle et les VRAIES limites des morceaux. Entre deux ensembles de segments
- * qui ne se croisent pas, elle est atteinte en un sommet de l'un des deux : sommets de la parcelle contre les
- * limites, sommets des limites contre la parcelle.
+ * La plus courte distance entre la parcelle et les morceaux, quand elle ne les recouvre pas : la parcelle est hors
+ * de chacun, donc la distance à leur réunion est celle du plus proche. Entre deux ensembles de segments qui ne se
+ * croisent pas, elle est atteinte en un sommet de l'un des deux.
  */
 function distanceParcelle(parcelle: Region, ps: Piece[], proj: Proj): number {
   let d = Infinity;
   for (const p of ps) {
-    if (p.limites.length === 0) continue;
-    const l = lignesDe({ type: "MultiLineString", coordinates: p.limites }, proj);
-    if (!l) continue;
-    for (const a of parcelle) for (const v of a) d = Math.min(d, distanceLignes(v, l));
-    for (const ligne of l) for (const v of ligne) d = Math.min(d, distanceRegion(v, parcelle));
+    const region = regionDe(p.geometrie, proj);
+    if (!region) continue;
+    for (const a of parcelle) for (const v of a) d = Math.min(d, distanceRegion(v, region));
+    for (const a of region) for (const v of a) d = Math.min(d, distanceRegion(v, parcelle));
   }
   return d;
 }

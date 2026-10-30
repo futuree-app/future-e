@@ -115,27 +115,79 @@ function rect(lon0: number, lat0: number, lon1: number, lat1: number): number[] 
   const [x0, y0, x1, y1] = [lon0, lat0, lon1, lat1].map((v) => Math.round(v * E));
   return [x0, y0, x1 - x0, 0, 0, y1 - y0, x0 - x1, 0];
 }
-function tuile(ix: number, iy: number, morceaux: TuileDebroussaillement["morceaux"]): TuileDebroussaillement {
-  return { format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition: "2026-03-01", ix, iy, morceaux };
+
+// ── Un monde de zones rectangulaires, découpé en tuiles comme le fait `construire.py` ─────────────
+// Les LIMITES de chaque tuile (format `debroussaillement-2`) sont calculées ici indépendamment de la lib : le bord
+// de la réunion des rectangles, sur la grille compressée de leurs coordonnées (une arête élémentaire est une limite
+// si elle sépare une case couverte d'une case qui ne l'est pas), puis coupé au carré FERMÉ de chaque cellule.
+type ZoneMonde = { p: number; o: string; a?: 1; b: [number, number, number, number] };
+const PAS = 1_000_000;
+function tuilesDuMonde(monde: ZoneMonde[], edition = "2026-03-01") {
+  const zs = monde.map((z) => ({ ...z, i: z.b.map((v) => Math.round(v * E)) as [number, number, number, number] }));
+  const xs = [...new Set(zs.flatMap((z) => [z.i[0], z.i[2]]))].sort((a, b) => a - b);
+  const ys = [...new Set(zs.flatMap((z) => [z.i[1], z.i[3]]))].sort((a, b) => a - b);
+  const couvert = (i: number, j: number) => i >= 0 && j >= 0 && i < xs.length - 1 && j < ys.length - 1
+    && zs.some((z) => z.i[0] <= xs[i] && xs[i + 1] <= z.i[2] && z.i[1] <= ys[j] && ys[j + 1] <= z.i[3]);
+  const bord: [number, number, number, number][] = [];
+  for (let i = 0; i < xs.length; i++) for (let j = 0; j + 1 < ys.length; j++) if (couvert(i - 1, j) !== couvert(i, j)) bord.push([xs[i], ys[j], xs[i], ys[j + 1]]);
+  for (let j = 0; j < ys.length; j++) for (let i = 0; i + 1 < xs.length; i++) if (couvert(i, j - 1) !== couvert(i, j)) bord.push([xs[i], ys[j], xs[i + 1], ys[j]]);
+  const cellules = new Set<string>();
+  for (const z of zs) for (let ix = Math.floor(z.i[0] / PAS); ix <= Math.floor((z.i[2] - 1) / PAS); ix++) for (let iy = Math.floor(z.i[1] / PAS); iy <= Math.floor((z.i[3] - 1) / PAS); iy++) cellules.add(`${ix}_${iy}`);
+  const tuiles = new Map<string, TuileDebroussaillement>();
+  const entrees: Record<string, { plein: { p: number; o: string; a?: 1 } }> = {};
+  for (const k of [...cellules].sort()) {
+    const [ix, iy] = k.split("_").map(Number);
+    const [X0, Y0, X1, Y1] = [ix * PAS, iy * PAS, (ix + 1) * PAS, (iy + 1) * PAS];
+    const morceaux = zs.filter((z) => z.i[0] < X1 && z.i[2] > X0 && z.i[1] < Y1 && z.i[3] > Y0).map((z) => {
+      const [x0, y0, x1, y1] = [Math.max(z.i[0], X0), Math.max(z.i[1], Y0), Math.min(z.i[2], X1), Math.min(z.i[3], Y1)];
+      return { p: z.p, o: z.o, ...(z.a ? { a: 1 as const } : {}), r: [[x0, y0, x1 - x0, 0, 0, y1 - y0, x0 - x1, 0]], plein: x0 === X0 && y0 === Y0 && x1 === X1 && y1 === Y1 };
+    });
+    const limites = bord.flatMap(([ax, ay, bx, by]) => {
+      const [x0, y0, x1, y1] = [Math.max(ax, X0), Math.max(ay, Y0), Math.min(bx, X1), Math.min(by, Y1)];
+      return x0 <= x1 && y0 <= y1 && (x1 > x0 || y1 > y0) ? [[x0, y0, x1 - x0, y1 - y0]] : [];
+    });
+    if (morceaux.length === 1 && morceaux[0].plein && limites.length === 0) {
+      entrees[k] = { plein: { p: morceaux[0].p, o: morceaux[0].o, ...(morceaux[0].a ? { a: 1 as const } : {}) } };
+      continue;
+    }
+    tuiles.set(k, { format: FORMAT_TUILES_DEBROUSSAILLEMENT, edition, ix, iy, morceaux: morceaux.map(({ plein: _, ...m }) => m), limites });
+  }
+  return { tuiles, entrees };
 }
+
 // Zone A : 5,02-5,06 × 43,42-43,46, dans la cellule 50_434. Zone B : 5,08-5,12, à cheval sur 50_434 et 51_434
-// (la droite 5,1 est une COUPE de tuile, pas une limite). Cellule 52_434 : pleine. Zone ambiguë en 50_435.
-const TUILES = new Map<string, TuileDebroussaillement>([
-  ["50_434", tuile(50, 434, [
-    { p: 0, o: "A", r: [rect(5.02, 43.42, 5.06, 43.46)] },
-    { p: 0, o: "B", r: [rect(5.08, 43.42, 5.1, 43.46)] },
-  ])],
-  ["51_434", tuile(51, 434, [{ p: 0, o: "B", r: [rect(5.1, 43.42, 5.12, 43.46)] }])],
-  ["50_435", tuile(50, 435, [{ p: 0, o: "X", a: 1, r: [rect(5.02, 43.52, 5.04, 43.54)] }])],
-  // Revue du 29/10/2026 : la zone C occupe toute la largeur de la cellule 53_434 (5,3-5,4) sur 43,42-43,46. Son bord
-  // est (5,4) est une VRAIE limite exactement alignée sur la grille : la cellule 54_434 n'a aucune zone. Son bord
-  // ouest (5,3) touche la cellule pleine 52_434 : coupe de tuile entre 43,42 et 43,46, vraie limite de P ailleurs.
-  ["53_434", tuile(53, 434, [{ p: 0, o: "C", r: [rect(5.3, 43.42, 5.4, 43.46)] }])],
-  // La zone E (5,6-5,7, cellule 56_434) s'arrête sur la grille en 5,7 ; de l'autre côté, la cellule 57_434 porte une
-  // zone d'un AUTRE objet (F, 5,7-5,72) : le zonage continue, l'arête n'est pas une limite.
-  ["56_434", tuile(56, 434, [{ p: 0, o: "E", r: [rect(5.6, 43.42, 5.7, 43.46)] }])],
-  ["57_434", tuile(57, 434, [{ p: 1, o: "F", r: [rect(5.7, 43.42, 5.72, 43.46)] }])],
-]);
+// (la droite 5,1 est une COUPE de tuile, pas une limite). Zone P : toute la cellule 52_434 ; ses bords sont de vraies
+// limites, sauf là où C la prolonge : elle a donc un fichier. Zone ambiguë X en 50_435.
+// Revue du 29/10/2026 : la zone C occupe toute la largeur de la cellule 53_434 (5,3-5,4) sur 43,42-43,46. Son bord
+// est (5,4) est une VRAIE limite exactement alignée sur la grille. Son bord ouest (5,3) touche P : jonction entre
+// 43,42 et 43,46, vraie limite de P ailleurs.
+// La zone E (5,6-5,7) s'arrête sur la grille en 5,7 ; de l'autre côté, un AUTRE objet (F, 5,7-5,72, autre profil).
+// Contre-revue du 30/10/2026 (R3) : G et H, deux zones de départements différents, jointives en 6,56, HORS de la
+// grille (une frontière départementale) ; I et J séparées par un VRAI interstice de 8 m environ (6,6400-6,6401) ;
+// un cadre de quatre zones autour d'un TROU (6,82-6,88 × 43,42-43,46) ; Q, une zone de 3 × 3 cellules dont la
+// cellule centrale (60_434) est pleine : aucune limite ne la touche.
+const MONDE: ZoneMonde[] = [
+  { p: 0, o: "A", b: [5.02, 43.42, 5.06, 43.46] },
+  { p: 0, o: "B", b: [5.08, 43.42, 5.12, 43.46] },
+  { p: 0, o: "X", a: 1, b: [5.02, 43.52, 5.04, 43.54] },
+  { p: 0, o: "P", b: [5.2, 43.4, 5.3, 43.5] },
+  { p: 0, o: "C", b: [5.3, 43.42, 5.4, 43.46] },
+  { p: 0, o: "E", b: [5.6, 43.42, 5.7, 43.46] },
+  { p: 1, o: "F", b: [5.7, 43.42, 5.72, 43.46] },
+  { p: 0, o: "Q", b: [5.9, 43.3, 6.2, 43.6] },
+  { p: 0, o: "G", b: [6.52, 43.42, 6.56, 43.46] },
+  { p: 1, o: "H", b: [6.56, 43.42, 6.6, 43.46] },
+  { p: 0, o: "I", b: [6.62, 43.42, 6.64, 43.46] },
+  { p: 0, o: "J", b: [6.6401, 43.42, 6.66, 43.46] },
+  { p: 0, o: "K1", b: [6.8, 43.4, 6.9, 43.42] },
+  { p: 0, o: "K2", b: [6.8, 43.46, 6.9, 43.48] },
+  { p: 0, o: "K3", b: [6.8, 43.42, 6.82, 43.46] },
+  { p: 0, o: "K4", b: [6.88, 43.42, 6.9, 43.46] },
+  // Un liseré d'un seul cran de grille (1e-7 degré, ≈ 8 mm) entre deux zones de départements différents.
+  { p: 0, o: "L", b: [6.72, 43.42, 6.74, 43.46] },
+  { p: 1, o: "M", b: [6.7400001, 43.42, 6.76, 43.46] },
+];
+const { tuiles: TUILES, entrees: PLEINES } = tuilesDuMonde(MONDE);
 function empreinte(t: TuileDebroussaillement) {
   const o = gzipSync(Buffer.from(JSON.stringify(t)));
   return { octets: o.length, sha256: createHash("sha256").update(o).digest("hex"), brut: o };
@@ -147,7 +199,7 @@ const MANIFESTE: ManifesteDebroussaillement = {
   couverture: ["13", "33", "2A"], profils: [PROFIL, PROFIL_RECENT],
   tuiles: {
     ...Object.fromEntries([...TUILES].map(([k, t]) => { const { octets, sha256 } = empreinte(t); return [k, { octets, sha256 }]; })),
-    "52_434": { plein: { p: 0, o: "P" } },
+    ...PLEINES,
   },
 };
 
@@ -242,10 +294,67 @@ describe("1. Au point : dedans, en limite, dehors, et les coupes de tuile", () =
     assert.equal(coupe.part, 1);
   });
 
-  test("une cellule pleine : en zone, sans fichier à lire", () => {
-    const e = entree([5.25, LAT]);
+  test("une cellule pleine (aucune limite ne la touche) : en zone, sans fichier à lire", () => {
+    const e = entree([6.05, 43.45]);
+    assert.ok("plein" in MANIFESTE.tuiles["60_434"]);
     assert.deepEqual(tuilesALire(MANIFESTE, e), []);
     assert.equal(lireSynth(e).etat, "en_zone");
+  });
+
+  test("format 2 : une cellule entièrement couverte mais bordée d'une vraie limite a un fichier, pour ses limites", () => {
+    assert.ok(!("plein" in MANIFESTE.tuiles["52_434"]), "P remplit sa cellule, mais ses bords sont des limites");
+    assert.ok(TUILES.get("52_434")!.limites.length > 0);
+    assert.equal(lireSynth(entree([5.25, LAT])).etat, "en_zone", "au milieu de P");
+    assert.equal(lireSynth(entree([est(5.2, LAT, 10), LAT])).etat, "en_limite", "à 10 m du bord ouest de P, une vraie limite posée sur la grille");
+  });
+
+  test("R3 (contre-revue du 30/10/2026) : la frontière entre deux zones jointives, de départements différents, n'est pas une limite", () => {
+    for (const dx of [-10, -1, 0, 1, 10, 40]) {
+      const l = lireSynth(entree([est(6.56, LAT, dx), LAT]));
+      assert.equal(l.etat, "en_zone", `à ${dx} m de la frontière G/H`);
+      assert.equal(l.limite, null);
+    }
+    // La zone en cause est celle qui contient le point : son département, son arrêté.
+    assert.equal(lireSynth(entree([est(6.56, LAT, -10), LAT])).zone?.departement, "13");
+    assert.equal(lireSynth(entree([est(6.56, LAT, 10), LAT])).zone?.departement, "33");
+    // Le bord extérieur de la réunion reste une limite, des deux côtés.
+    assert.equal(lireSynth(entree([est(6.6, LAT, -10), LAT])).etat, "en_limite");
+    assert.equal(lireSynth(entree([est(6.6, LAT, 10), LAT])).limite?.distanceM, 10);
+  });
+
+  test("R3 : un VRAI interstice entre deux zones (≈ 8 m) reste une limite : aucune tolérance ne le referme", () => {
+    const milieu = lireSynth(entree([6.64005, LAT]));
+    assert.equal(milieu.etat, "en_limite", "dans l'interstice, le point est hors des deux zones");
+    assert.equal(milieu.limite?.distanceM, 5);
+    for (const lon of [est(6.64, LAT, -10), est(6.6401, LAT, 10)]) {
+      const l = lireSynth(entree([lon, LAT]));
+      assert.equal(l.etat, "en_limite", `${lon} : à 10 m de l'interstice, dedans`);
+      assert.deepEqual(l.limite, { cause: "point_proche", distanceM: null });
+    }
+  });
+
+  test("R3 : règle stricte, sans fermeture par défaut : même un liseré de 8 mm entre deux zones reste une limite (prudente)", () => {
+    for (const lon of [est(6.74, LAT, -10), est(6.7400001, LAT, 10)]) {
+      const l = lireSynth(entree([lon, LAT]));
+      assert.equal(l.etat, "en_limite", `${lon} : à 10 m du liseré`);
+      assert.deepEqual(l.limite, { cause: "point_proche", distanceM: null });
+    }
+  });
+
+  test("R3 : un trou dans le zonage (un cadre de quatre zones) : son bord est une limite, son centre est hors zone", () => {
+    assert.equal(lireSynth(entree([6.85, LAT])).etat, "hors_zone", "au centre du trou, à plus de 2 km de son bord");
+    assert.equal(lireSynth(entree([est(6.82, LAT, 10), LAT])).limite?.distanceM, 10, "dans le trou, à 10 m de son bord");
+    assert.equal(lireSynth(entree([est(6.82, LAT, -10), LAT])).etat, "en_limite", "dans le cadre, à 10 m du trou");
+    // Les jonctions entre les quatre zones du cadre ne sont pas des limites.
+    assert.equal(lireSynth(entree([6.81, nord(43.42, 5)])).etat, "en_zone", "à 5 m de la jonction K1/K3, loin du trou");
+  });
+
+  test("format 2 : un point hors zone, près d'une vraie limite, n'est jamais dit dans le zonage", () => {
+    for (const [lon, lat] of [[est(5.06, LAT, 1), LAT], [est(5.4, LAT, 1), LAT], [est(6.6, LAT, 1), LAT], [6.64005, LAT], [est(6.82, LAT, 1), LAT]] as [number, number][]) {
+      const l = lireSynth(entree([lon, lat]));
+      assert.notEqual(l.etat, "en_zone", `${lon}, ${lat}`);
+      assert.ok(l.limite?.distanceM != null, `${lon}, ${lat} : dehors, la distance est dite`);
+    }
   });
 
   test("une zone à la diffusion ambiguë (« O ») ne décide de rien : incertain", () => {
@@ -471,7 +580,7 @@ describe("4. Panne, données absentes, dossiers antérieurs", () => {
   });
 
   test("une cellule absente du manifeste est une absence établie (aucune tuile à lire)", () => {
-    const e = entree([5.95, LAT]);
+    const e = entree([5.85, LAT]);
     assert.deepEqual(tuilesALire(MANIFESTE, e), []);
     assert.equal(lireDebroussaillement(MANIFESTE, new Map(), e).etat, "hors_zone");
   });
@@ -482,6 +591,16 @@ describe("4. Panne, données absentes, dossiers antérieurs", () => {
     assert.ok(!tuileValide(TUILES.get("50_434"), { edition: "2026-03-01", ix: 51, iy: 434, profils: 2 }), "mauvaise cellule");
     assert.ok(!tuileValide(TUILES.get("50_434"), { edition: "2025-02-01", ix: 50, iy: 434, profils: 2 }), "autre édition");
     assert.ok(!tuileValide({ ...TUILES.get("50_434")!, morceaux: [{ p: 9, o: "A", r: [rect(5, 43, 5.01, 43.01)] }] }, { edition: "2026-03-01", ix: 50, iy: 434, profils: 2 }), "profil inconnu");
+  });
+
+  test("format 2 : une tuile ou un manifeste d'un autre format est refusé (indisponible), jamais lu", () => {
+    const { limites: _, ...sansLimites } = TUILES.get("50_434")!;
+    assert.ok(!tuileValide(sansLimites, { edition: "2026-03-01", ix: 50, iy: 434, profils: 2 }), "tuile sans limites (format 1)");
+    assert.ok(!tuileValide({ ...TUILES.get("50_434")!, format: "debroussaillement-1" }, { edition: "2026-03-01", ix: 50, iy: 434, profils: 2 }), "format 1 déclaré");
+    assert.ok(!tuileValide({ ...TUILES.get("50_434")!, limites: [[1, 2]] }, { edition: "2026-03-01", ix: 50, iy: 434, profils: 2 }), "limite réduite à un point");
+    const ancien = { ...MANIFESTE, format: "debroussaillement-1" };
+    assert.ok(!manifesteValide(ancien));
+    assert.equal(lireDebroussaillement(ancien, TUILES, entree([5.04, LAT])).statut, "indisponible");
   });
 
   const base = { address: { id: "x", label: "x", city: null, citycode: null, postcode: null, latitude: 43, longitude: 5 } } as LogementReport;
@@ -718,6 +837,27 @@ describe("6. Le lecteur serveur : Storage, empreintes, pannes", () => {
       const l = await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, storage(o).f);
       assert.equal(l?.statut, "indisponible");
     }
+  });
+
+  test("format 2 : une tuile de l'ancien format, même avec la bonne empreinte au manifeste, rend la lecture indisponible", async () => {
+    lecteur.oublierDebroussaillement();
+    const o = objets();
+    const { limites: _, ...ancienne } = { ...TUILES.get("50_434")!, format: "debroussaillement-1" };
+    const x = empreinte(ancienne as unknown as TuileDebroussaillement);
+    const m = { ...MANIFESTE, tuiles: { ...MANIFESTE.tuiles, "50_434": { octets: x.brut.length, sha256: x.sha256 } } };
+    const brut = Buffer.from(JSON.stringify(m));
+    o.set("2026-03-01/t/50_434.json.gz", x.brut);
+    o.set("2026-03-01/manifest.json", brut);
+    o.set("courant.json", pointeurVers("2026-03-01", brut));
+    const l = await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, storage(o).f);
+    assert.equal(l?.statut, "indisponible");
+    // Et un pointeur ou un manifeste de l'ancien format : rien n'est lu non plus.
+    lecteur.oublierDebroussaillement();
+    const o2 = objets();
+    const ancienBrut = Buffer.from(JSON.stringify({ ...MANIFESTE, format: "debroussaillement-1" }));
+    o2.set("2026-03-01/manifest.json", ancienBrut);
+    o2.set("courant.json", Buffer.from(JSON.stringify({ format: "debroussaillement-1", edition: "2026-03-01", manifeste: createHash("sha256").update(ancienBrut).digest("hex") })));
+    assert.equal((await lecteur.lireDebroussaillementAdresse(entree([5.04, LAT]), env, storage(o2).f))?.statut, "indisponible");
   });
 
   test("R2 (contre-revue du 30/10/2026) : passé dix minutes, seul le pointeur est relu ; le manifeste ne l'est que s'il change", async () => {

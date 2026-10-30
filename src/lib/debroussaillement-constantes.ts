@@ -10,10 +10,17 @@
  * proche à `LIMITE_PROCHE_M`, au point comme à la parcelle ; données sources dites anciennes à
  * `MILLESIME_ANCIEN_ANS`.
  */
-export const DEBROUSSAILLEMENT_CONVENTION = "fut149-1";
+export const DEBROUSSAILLEMENT_CONVENTION = "fut149-2";
+// `fut149-2` (30/10/2026, option A de R3) : mêmes seuils ; au point, la limite proche se mesure au bord de la
+// RÉUNION des zones publiées (la frontière entre deux zones voisines n'est plus une limite), et la distance d'un
+// point hors zone à la zone la plus proche. Aucune lecture `fut149-1` n'a été publiée.
 
-/** Le format des tuiles et du manifeste (`scripts/debroussaillement/construire.py`). */
-export const FORMAT_TUILES_DEBROUSSAILLEMENT = "debroussaillement-1";
+/**
+ * Le format des tuiles, du manifeste et du pointeur (`scripts/debroussaillement/construire.py`). `debroussaillement-2`
+ * (30/10/2026) : chaque tuile porte les vraies limites du zonage (`limites`). Le lecteur refuse tout autre format
+ * (« indisponible ») : une tuile `debroussaillement-1`, sans limites, ferait lire « en zone » près d'une vraie limite.
+ */
+export const FORMAT_TUILES_DEBROUSSAILLEMENT = "debroussaillement-2";
 
 /**
  * EN DEÇÀ DE CETTE DISTANCE D'UNE LIMITE DE ZONE, LA LECTURE EST « EN LIMITE ». Même valeur que la limite proche

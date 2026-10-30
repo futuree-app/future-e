@@ -30,6 +30,7 @@ let lecteur;
 before(async () => { lecteur = await import("../../src/lib/server/debroussaillement-tuiles.ts"); });
 
 const BUCKET = "debroussaillement";
+const FORMAT = "debroussaillement-2";
 /** Le Storage simulé : objets en mémoire ; journal des écritures ; panne injectable après N dépôts. */
 function storage() {
   const objets = new Map();
@@ -73,12 +74,14 @@ function edition(edition, largeur) {
   mkdirSync(path.join(dossier, "t"));
   const tuiles = {};
   for (const [ix, iy, morceaux] of [[50, 434, [{ p: 0, o: "A", r: [rect(5.02, 43.42, 5.0 + largeur, 43.46)] }]], [51, 434, [{ p: 0, o: "B", r: [rect(5.12, 43.42, 5.14, 43.46)] }]]]) {
-    const o = gzipSync(Buffer.from(JSON.stringify({ format: "debroussaillement-1", edition, ix, iy, morceaux })));
+    // Format 2 : chaque zone, seule dans sa cellule, est bordée par sa propre limite (l'anneau, refermé).
+    const limites = morceaux.map((m) => [...m.r[0], 0, -m.r[0][5]]);
+    const o = gzipSync(Buffer.from(JSON.stringify({ format: FORMAT, edition, ix, iy, morceaux, limites })));
     writeFileSync(path.join(dossier, "t", `${ix}_${iy}.json.gz`), o);
     tuiles[`${ix}_${iy}`] = { octets: o.length, sha256: createHash("sha256").update(o).digest("hex") };
   }
   const manifeste = {
-    format: "debroussaillement-1", edition, construitLe: "2026-10-29", producteur: "IGN", diffuseur: "IGN", licence: "Licence Ouverte 2.0",
+    format: FORMAT, edition, construitLe: "2026-10-29", producteur: "IGN", diffuseur: "IGN", licence: "Licence Ouverte 2.0",
     source: { url: "https://data.geopf.fr/telechargement/resource/DEBROUSSAILLEMENT" }, couverture: ["13"],
     profils: [{ departement: "13", source: "Zonage local", origine: null, millesime: "2008", arrete: null, arreteBrut: null, url: null, integration: null, integrationBrut: null }],
     tuiles,

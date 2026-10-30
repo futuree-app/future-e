@@ -27,7 +27,7 @@ const edition = path.basename(ED);
 const empreinteManifeste = createHash("sha256").update(readFileSync(path.join(ED, "manifest.json"))).digest("hex");
 const serveur = http.createServer((req, res) => {
   const chemin = decodeURIComponent(new URL(req.url, "http://x").pathname).replace(/^\/storage\/v1\/object\/debroussaillement\//, "");
-  if (chemin === "courant.json") return res.end(JSON.stringify({ format: "debroussaillement-1", edition, manifeste: empreinteManifeste }));
+  if (chemin === "courant.json") return res.end(JSON.stringify({ format: JSON.parse(readFileSync(path.join(ED, "manifest.json"))).format, edition, manifeste: empreinteManifeste }));
   const f = path.join(path.dirname(ED), chemin);
   if (!f.startsWith(path.dirname(ED)) || !existsSync(f)) { res.statusCode = 400; return res.end("absent"); }
   res.end(readFileSync(f));
