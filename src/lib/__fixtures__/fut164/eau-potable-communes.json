@@ -1,0 +1,500 @@
+{
+ "13055": {
+  "nom": "Marseille",
+  "lu": {
+   "etat": "partiel",
+   "consulteLe": "2026-10-30T15:19:25.552Z",
+   "reseaux": [
+    {
+     "code": "013000519",
+     "nom": "MARSEILLE VALLON D'OL",
+     "zone": "MARSEILLE NORD",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013000521",
+     "nom": "MARSEILLE ST BARNABE",
+     "zone": "MARSEILLE EST",
+     "dernier": {
+      "date": "2026-08-25",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013000577",
+     "nom": "MARSEILLE SAINTE-MARTHE",
+     "zone": "MARSEILLE CENTRE ET SUD",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006573",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 11",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-25",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006613",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 2",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-17",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006614",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 3",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006615",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 4",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006616",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 5",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-25",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006617",
+     "nom": "GRAND PORT MARITIME MARSEILLE ST CAS.SUD",
+     "zone": "port maritime",
+     "dernier": "indisponible"
+    },
+    {
+     "code": "013006618",
+     "nom": "GRAND PORT MARITIME MARSEILLE ST CAS.N ",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006619",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 8",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-25",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006620",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 8B",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006621",
+     "nom": "GRAND PORT MARITIME MARSEILLE EST SEM 9",
+     "zone": "port maritime",
+     "dernier": "indisponible"
+    },
+    {
+     "code": "013006622",
+     "nom": "GRAND PORT MARITIME MARSEILLE SEM 10 SUD",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-17",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006623",
+     "nom": "GRAND PORT MARITIME MARSEILLE SEM 10 N",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-14",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "013006624",
+     "nom": "GRAND PORT MARITIME MARSEILLE SEM 13",
+     "zone": "port maritime",
+     "dernier": {
+      "date": "2026-08-17",
+      "conclusion": "L’eau d’alimentation est conforme aux limites de qualité et non conforme aux références de qualité pour le paramètre température.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    }
+   ],
+   "parametres": [
+    {
+     "code": "1340",
+     "libelle": "Nitrates",
+     "valeur": "0,80",
+     "unite": "mg/L",
+     "date": "2026-08-25",
+     "reseau": "MARSEILLE ST BARNABE",
+     "depasseLimite": false,
+     "depasseVigilance": false,
+     "limite": 50,
+     "vigilance": 25
+    },
+    {
+     "code": "1339",
+     "libelle": "Nitrites",
+     "valeur": "<0,01",
+     "unite": "mg/L",
+     "date": "2026-08-25",
+     "reseau": "MARSEILLE ST BARNABE",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    },
+    {
+     "code": "1369",
+     "libelle": "Arsenic",
+     "valeur": "<2",
+     "unite": "µg/L",
+     "date": "2026-08-03",
+     "reseau": "GRAND PORT MARITIME MARSEILLE EST SEM 4, GRAND PORT MARITIME MARSEILLE EST SEM 9, GRAND PORT MARITIME MARSEILLE SEM 13, GRAND PORT MARITIME MARSEILLE EST SEM 8B, GRAND PORT MARITIME MARSEILLE SEM 10 N, GRAND PORT MARITIME MARSEILLE ST CAS.N, GRAND PORT MARITIME MARSEILLE EST SEM 5, GRAND PORT MARITIME MARSEILLE SEM 10 SUD, GRAND PORT MARITIME MARSEILLE EST SEM 11, GRAND PORT MARITIME MARSEILLE EST SEM 8, GRAND PORT MARITIME MARSEILLE ST CAS.SUD, GRAND PORT MARITIME MARSEILLE EST SEM 2, GRAND PORT MARITIME MARSEILLE EST SEM 3, MARSEILLE SAINTE-MARTHE",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 10,
+     "vigilance": null
+    },
+    {
+     "code": "6276",
+     "libelle": "Total des pesticides analysés",
+     "valeur": "<0,500",
+     "unite": "µg/L",
+     "date": "2026-08-03",
+     "reseau": "GRAND PORT MARITIME MARSEILLE EST SEM 4, GRAND PORT MARITIME MARSEILLE EST SEM 9, GRAND PORT MARITIME MARSEILLE SEM 13, GRAND PORT MARITIME MARSEILLE EST SEM 8B, GRAND PORT MARITIME MARSEILLE SEM 10 N, GRAND PORT MARITIME MARSEILLE ST CAS.N, GRAND PORT MARITIME MARSEILLE EST SEM 5, GRAND PORT MARITIME MARSEILLE SEM 10 SUD, GRAND PORT MARITIME MARSEILLE EST SEM 11, GRAND PORT MARITIME MARSEILLE EST SEM 8, GRAND PORT MARITIME MARSEILLE ST CAS.SUD, GRAND PORT MARITIME MARSEILLE EST SEM 2, GRAND PORT MARITIME MARSEILLE EST SEM 3, MARSEILLE SAINTE-MARTHE",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    }
+   ]
+  }
+ },
+ "57463": {
+  "nom": "Metz",
+  "lu": {
+   "etat": "disponible",
+   "consulteLe": "2026-10-30T15:19:41.614Z",
+   "reseaux": [
+    {
+     "code": "057000392",
+     "nom": "SERM 1",
+     "zone": null,
+     "dernier": {
+      "date": "2026-08-28",
+      "conclusion": "Eau d'alimentation ne satisfaisant pas à la référence de qualité réglementaire pour le paramètre carbone organique total. Une analyse d e recontrôle est en cours.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "non_conforme"
+     }
+    },
+    {
+     "code": "057000393",
+     "nom": "SERM 2",
+     "zone": null,
+     "dernier": {
+      "date": "2026-08-28",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    }
+   ],
+   "parametres": [
+    {
+     "code": "1340",
+     "libelle": "Nitrates",
+     "valeur": "4,9",
+     "unite": "mg/L",
+     "date": "2026-08-28",
+     "reseau": "SERM 1, VILLE DE METZ 1",
+     "depasseLimite": false,
+     "depasseVigilance": false,
+     "limite": 50,
+     "vigilance": 25
+    },
+    {
+     "code": "1339",
+     "libelle": "Nitrites",
+     "valeur": "<0,01",
+     "unite": "mg/L",
+     "date": "2026-08-28",
+     "reseau": "SERM 1, VILLE DE METZ 1",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    }
+   ]
+  }
+ },
+ "75056": {
+  "nom": "Paris",
+  "lu": {
+   "etat": "disponible",
+   "consulteLe": "2026-10-30T15:19:41.816Z",
+   "reseaux": [
+    {
+     "code": "075000221",
+     "nom": "CENTRE",
+     "zone": "du 1° au 13°, 15° et 16° arrondissement",
+     "dernier": {
+      "date": "2026-06-30",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    },
+    {
+     "code": "075000222",
+     "nom": "NORD OUEST",
+     "zone": "8° à 10°, 16° à 18° arrondissement",
+     "dernier": {
+      "date": "2026-06-30",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    },
+    {
+     "code": "075000225",
+     "nom": "SUD OUEST",
+     "zone": "5°, 6°, 13° à 16° arrondissement",
+     "dernier": {
+      "date": "2026-06-30",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    },
+    {
+     "code": "075000227",
+     "nom": "EST",
+     "zone": "12°,19°, 20°, est des 10, 11,18",
+     "dernier": {
+      "date": "2026-06-29",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    }
+   ],
+   "parametres": [
+    {
+     "code": "1340",
+     "libelle": "Nitrates",
+     "valeur": "22,80",
+     "unite": "mg/L",
+     "date": "2026-06-30",
+     "reseau": "SUD OUEST",
+     "depasseLimite": false,
+     "depasseVigilance": false,
+     "limite": 50,
+     "vigilance": 25
+    },
+    {
+     "code": "1339",
+     "libelle": "Nitrites",
+     "valeur": "<0,01",
+     "unite": "mg/L",
+     "date": "2026-06-30",
+     "reseau": "SUD OUEST",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    },
+    {
+     "code": "1382",
+     "libelle": "Plomb",
+     "valeur": "13",
+     "unite": "µg/L",
+     "date": "2026-06-01",
+     "reseau": "CENTRE",
+     "depasseLimite": true,
+     "depasseVigilance": null,
+     "limite": 10,
+     "vigilance": null
+    },
+    {
+     "code": "1369",
+     "libelle": "Arsenic",
+     "valeur": "<2",
+     "unite": "µg/L",
+     "date": "2026-06-26",
+     "reseau": "EST",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 10,
+     "vigilance": null
+    },
+    {
+     "code": "6276",
+     "libelle": "Total des pesticides analysés",
+     "valeur": "<0,500",
+     "unite": "µg/L",
+     "date": "2026-06-26",
+     "reseau": "EST",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    }
+   ]
+  }
+ },
+ "_source": "getEauPotableCommune, Hub'Eau en direct, relevé le 2026-10-30T15:19:25.551Z",
+ "01001": {
+  "nom": "L'Abergement-Clémenciat",
+  "lu": {
+   "etat": "disponible",
+   "consulteLe": "2026-10-30T15:19:41.962Z",
+   "reseaux": [
+    {
+     "code": "001000556",
+     "nom": "BDS ST DIDIER/CHALARONNE",
+     "zone": null,
+     "dernier": {
+      "date": "2026-02-05",
+      "conclusion": "Eau d'alimentation conforme aux exigences de qualité en vigueur pour l'ensemble des paramètres mesurés.",
+      "limitesBacterio": "conforme",
+      "limitesPhysicoChimie": "conforme",
+      "referencesBacterio": "conforme",
+      "referencesPhysicoChimie": "conforme"
+     }
+    }
+   ],
+   "parametres": [
+    {
+     "code": "1340",
+     "libelle": "Nitrates",
+     "valeur": "18",
+     "unite": "mg/L",
+     "date": "2026-02-05",
+     "reseau": "BDS ST DIDIER/CHALARONNE",
+     "depasseLimite": false,
+     "depasseVigilance": false,
+     "limite": 50,
+     "vigilance": 25
+    },
+    {
+     "code": "1339",
+     "libelle": "Nitrites",
+     "valeur": "<0,01",
+     "unite": "mg/L",
+     "date": "2026-02-05",
+     "reseau": "BDS ST DIDIER/CHALARONNE",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 0.5,
+     "vigilance": null
+    },
+    {
+     "code": "1382",
+     "libelle": "Plomb",
+     "valeur": "<2",
+     "unite": "µg/L",
+     "date": "2024-02-09",
+     "reseau": "BDS ST DIDIER/CHALARONNE",
+     "depasseLimite": false,
+     "depasseVigilance": null,
+     "limite": 10,
+     "vigilance": null
+    }
+   ]
+  }
+ }
+}

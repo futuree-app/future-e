@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
     // + ADEME/DRIAS/Hub'Eau (caches framework côté lib).
     const [referentiel, enrichment] = await Promise.all([
       lireReferentielInterne(communeInsee, supabase),
-      gatherCommuneEnrichment(communeInsee),
+      gatherCommuneEnrichment(communeInsee, { avecEauPotable: true }),
     ]);
     const systemPrompt = construireSystemPrompt({
       communeName,

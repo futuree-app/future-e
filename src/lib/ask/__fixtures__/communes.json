@@ -178,7 +178,6 @@
     },
     "eau": {
      "inseeCode": "13039",
-     "drinkingWater": null,
      "drought": null
     },
     "vigieau": {
@@ -482,7 +481,6 @@
     },
     "eau": {
      "inseeCode": "74056",
-     "drinkingWater": null,
      "drought": {
       "lastObservationDate": "2026-09-26",
       "riverName": "L'Arve",
@@ -835,7 +833,6 @@
     },
     "eau": {
      "inseeCode": "84080",
-     "drinkingWater": null,
      "drought": null
     },
     "vigieau": {
@@ -1178,13 +1175,6 @@
     },
     "eau": {
      "inseeCode": "01053",
-     "drinkingWater": {
-      "conformBacterio": true,
-      "conformPhysicoChem": true,
-      "lastSampleDate": "2026-07-17T13:09:00Z",
-      "nitrates": 37.3,
-      "nitrites": null
-     },
      "drought": null
     },
     "vigieau": {
@@ -1493,7 +1483,6 @@
     },
     "eau": {
      "inseeCode": "06088",
-     "drinkingWater": null,
      "drought": null
     },
     "vigieau": {
@@ -1771,5 +1760,6 @@
     }
    }
   }
- }
+ },
+ "_fut164": "30/10/2026 : `eau.drinkingWater` retiré (l'ancien résumé eau potable n'existe plus, FUT-164). La lecture par réseau a ses propres fixtures : __fixtures__/fut164/."
 }

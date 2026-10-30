@@ -191,9 +191,19 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 });
 
 test("IA : les prompts, contrats et routes de synthèse sont identiques à main, octet pour octet", () => {
-  for (const f of ["src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts"]) {
+  for (const f of ["src/lib/territoire/synthesis-contract.ts"]) {
     assert.equal(readFileSync(f, "utf8"), execFileSync("git", ["show", `4d75603f:${f}`], { encoding: "utf8", maxBuffer: 1 << 26 }), f);
   }
+});
+
+// FUT-164 (30/10/2026) a dû réécrire le bloc eau potable de l'assistant (lecture par réseau, FUT-152). Le prompt
+// n'est donc plus identique à 4d75603f, mais aucune ligne changée ne parle des feux : c'est ce que ce test garde.
+test("IA : le prompt de l'assistant n'a changé que de son bloc eau (FUT-164), et rien sur les feux", () => {
+  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", "src/lib/ask/system-prompt.ts"], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  assert.ok(changees.length > 0);
+  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
+  assert.match(readFileSync("src/lib/ask/system-prompt.ts", "utf8"), /export function formatEauPotableBlock/);
 });
 
 // FUT-155 (29/10/2026) a dû toucher les deux routes du comparateur et leur contrat : une couverture absente ou
