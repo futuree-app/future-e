@@ -379,7 +379,7 @@ export default function AgirPollutionsInvisiblesPage() {
                 color: 'var(--fg-1)',
                 margin: '0 0 8px',
               }}>
-                Trouvez les communes les moins exposées<br />aux pollutions, selon votre projet de vie.
+                Trouvez des communes à l&apos;air moins chargé<br />et loin des sites industriels classés.
               </p>
               <p style={{
                 fontSize: '14px',
@@ -387,7 +387,10 @@ export default function AgirPollutionsInvisiblesPage() {
                 margin: '0 0 28px',
                 lineHeight: '1.6',
               }}>
-                IREP, sites pollués, qualité de l&apos;air, eau potable : ces signaux entrent dans le choix d&apos;une commune où vivre.
+                {/* FUT-166 : la phrase annonçait qu'IREP, les sites pollués et l'eau potable entraient dans Où vivre.
+                    Seuls l'air de fond et l'éloignement des sites industriels classés y comptent (critères `air_sain` et
+                    `faible_exposition_industrielle`) ; un ancien site pollué n'y est cité que si le lecteur le demande. */}
+                Où vivre compare l&apos;air de fond (particules fines, dioxyde d&apos;azote) et l&apos;éloignement des sites industriels classés, selon votre projet de vie. L&apos;eau potable et les rejets industriels déclarés se consultent ici, commune par commune.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link href="/ou-vivre" style={{
