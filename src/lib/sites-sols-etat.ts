@@ -4,7 +4,12 @@
 // `urbanisme-nomenclature.ts` (FUT-81).
 
 /** Version de la règle de lecture, gravée dans chaque lecture enregistrée. */
-export const SITES_SOLS_TERRAIN_CONVENTION = "fut157-2026-10-30b";
+// `fut157-2026-10-31` (contre-revue) : une intersection positive de moins de 0,05 m² n'est plus supprimée, et le
+// point de l'adresse ne démontre le terrain que dans la parcelle attribuée. Une lecture enregistrée sous
+// `fut157-2026-10-30b` se relit sans erreur ; sa preuve par le point est re-dérivée par `ficheDemontree`.
+export const SITES_SOLS_TERRAIN_CONVENTION = "fut157-2026-10-31";
+/** Les conventions qu'une lecture enregistrée peut porter (compatibilité historique). */
+export type ConventionSitesSols = typeof SITES_SOLS_TERRAIN_CONVENTION | "fut157-2026-10-30b";
 
 export type InventaireTerrain = "sis" | "sup" | "instructions";
 export const INVENTAIRES: InventaireTerrain[] = ["sis", "sup", "instructions"];
@@ -23,12 +28,14 @@ export type UsageParcelle =
   | { statut: "ecartee"; raison: "absente" | "non_mesurable" | "trop_etendue" | "adresse_sans_numero" };
 
 /**
- * OÙ EST LE PÉRIMÈTRE PAR RAPPORT AU TERRAIN. Deux situations démontrent (`point_dans`, `parcelle_recoupe`) ;
- * toutes les autres appellent une vérification, et disent pourquoi.
+ * OÙ EST LE PÉRIMÈTRE PAR RAPPORT AU TERRAIN. Deux situations peuvent démontrer (`point_dans`, `parcelle_recoupe`),
+ * et seulement à la parcelle attribuée (`ficheDemontree`) ; toutes les autres appellent une vérification, et disent pourquoi.
  * La preuve est une PROFONDEUR (`TOLERANCE_TRACE_M`, 2 m, dans `sites-sols-terrain.ts`) : un périmètre qui
  * n'entre pas de 2 m dans le terrain peut n'être qu'un écart de tracé. Aucun recoupement n'est écarté pour sa
- * petite taille.
- * - `point_dans` : le point de l'adresse est dans le périmètre, à plus de 2 m de sa limite.
+ * petite taille : seul un contact, une aire indiscernable de zéro à la précision du calcul, ne compte pas.
+ * - `point_dans` : le point de l'adresse est dans le périmètre, à plus de 2 m de sa limite. C'est un fait sur le
+ *   POINT : il ne dit le terrain que si ce point tombe dans la parcelle attribuée. Une adresse posée sur la voie,
+ *   rattachée par proximité, sur une limite entre deux parcelles, ou sans parcelle trouvée, reste « à vérifier ».
  * - `parcelle_recoupe` : le périmètre entre de plus de 2 m dans la parcelle attribuée (en tout ou en partie).
  * - `parcelle_bordure` : il recoupe la parcelle attribuée sans y entrer de 2 m : un liseré le long d'une limite,
  *   quelle que soit son aire.
@@ -65,7 +72,7 @@ export type FicheTerrain = {
 export type EtatInventaire = "complet" | "partiel" | "indisponible";
 
 export type LectureSitesSols = {
-  convention: typeof SITES_SOLS_TERRAIN_CONVENTION;
+  convention: ConventionSitesSols;
   /** `indisponible` : aucun des trois inventaires n'a pu être lu. Jamais une absence. */
   statut: "lu" | "indisponible";
   portee: PorteeSitesSols;
@@ -88,12 +95,16 @@ export type LectureSitesSols = {
 // ── Ce que la lecture établit (dérivé à chaque lecture, jamais enregistré) ──────────────────────
 
 /**
- * UNE FICHE DÉMONTRE-T-ELLE QUE LE TERRAIN EST CONCERNÉ ? Le point dans le périmètre, ou la parcelle attribuée
- * recoupée, et seulement pour une adresse géocodée au numéro : le point d'une voie n'est pas un terrain.
- * Calculé ici, à la lecture, et non figé dans le rapport (cf. AGENTS.md : un champ pré-calculé est un seuil figé).
+ * UNE FICHE DÉMONTRE-T-ELLE QUE LE TERRAIN EST CONCERNÉ ? Le point dans le périmètre, ou la parcelle recoupée en
+ * profondeur, et seulement à la PARCELLE ATTRIBUÉE : une adresse géocodée au numéro dont le point tombe dans une
+ * parcelle, et elle seule. Le point d'une voie n'est pas un terrain ; le point d'un numéro non plus, quand il ne
+ * tombe dans aucune parcelle (contre-revue du 31/10/2026 : une adresse posée sur la voie, à l'intérieur d'un SIS,
+ * rattachée par proximité à une parcelle voisine hors du SIS, était dite « concernée »).
+ * Calculé ici, à la lecture, et non figé dans le rapport (cf. AGENTS.md : un champ pré-calculé est un seuil figé) :
+ * une lecture enregistrée avant cette règle est relue avec elle.
  */
-export function ficheDemontree(f: FicheTerrain, l: Pick<LectureSitesSols, "portee">): boolean {
-  return l.portee === "adresse" && (f.situation === "point_dans" || f.situation === "parcelle_recoupe");
+export function ficheDemontree(f: FicheTerrain, l: Pick<LectureSitesSols, "portee" | "parcelle">): boolean {
+  return l.portee === "adresse" && l.parcelle?.statut === "attribuee" && (f.situation === "point_dans" || f.situation === "parcelle_recoupe");
 }
 
 /**

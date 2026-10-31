@@ -333,15 +333,26 @@ function fenetre(r: Region, [x0, y0, x1, y1]: Boite): Region {
  * celle de chaque région, aux écarts d'arrondi près.
  */
 export function aireIntersection(a: Region, b: Region): number | null {
+  return mesureIntersection(a, b)?.aire ?? null;
+}
+
+/**
+ * L'AIRE DE A ∩ B ET SON INCERTITUDE DE CALCUL (m²), ou `null` (FUT-157, contre-revue du 31/10/2026). Le calcul
+ * est celui d'`aireIntersection` ; `incertitude` est l'écart d'arrondi à la maille qu'il admet (`ecartAdmis`, borné
+ * par les périmètres de A et de B découpée). Une aire qui ne la dépasse pas ne se distingue pas de zéro : c'est un
+ * contact. Au-delà, il y a une intersection positive, si petite soit-elle. Cette frontière est la précision du
+ * calcul (de l'ordre du dix-millième de mètre carré pour une parcelle), pas une règle sur ce qui « compte ».
+ */
+export function mesureIntersection(a: Region, b: Region): { aire: number; incertitude: number } | null {
   if (!regionMesurable(a)) return null;
   try {
     const [ax0, ay0, ax1, ay1] = boite(a);
     const [bx0, by0, bx1, by1] = boite(b);
     // Boîtes disjointes : aucun point de A n'est dans B, quel que soit le tracé de B.
-    if (bx0 > ax1 || bx1 < ax0 || by0 > ay1 || by1 < ay0) return 0;
+    if (bx0 > ax1 || bx1 < ax0 || by0 > ay1 || by1 < ay0) return { aire: 0, incertitude: 0 };
     const m = MARGE_FENETRE_M;
     const bf = fenetre(b, [ax0 - m, ay0 - m, ax1 + m, ay1 + m]);
-    if (bf.length === 0) return 0;
+    if (bf.length === 0) return { aire: 0, incertitude: 0 };
     // Découpée, B peut n'avoir plus d'aire (la fenêtre tombe dans un de ses trous) : elle doit rester cohérente.
     if (!coherente(bf)) return null;
     const ab = aireOperation(ClipperLib.ClipType.ctIntersection, a, bf);
@@ -351,7 +362,7 @@ export function aireIntersection(a: Region, b: Region): number | null {
     if (Math.abs(ab - ba) > ecart) return null;
     const aire = (ab + ba) / 2;
     if (aire > Math.min(aireRegion(a), aireRegion(bf)) + ecart) return null;
-    return aire;
+    return { aire, incertitude: ecart };
   } catch {
     return null;
   }

@@ -79,10 +79,24 @@ function laParcelle(u: UsageParcelle): string {
 export function phraseSituation(f: FicheTerrain, l: LectureSitesSols): string {
   const couvre = f.part == null ? "recoupée par ce périmètre" : entiere(f) ? "entièrement dans ce périmètre" : `couverte à ${pourcent(f.part)} par ce périmètre`;
   switch (f.situation) {
-    case "point_dans":
+    case "point_dans": {
       if (l.portee !== "adresse") return "L'adresse n'est connue qu'à la voie : le point de la voie est dans ce périmètre, pas forcément le logement.";
-      if (l.parcelle.statut === "attribuee" && f.part != null) return entiere(f) ? `L'adresse et toute ${laParcelle(l.parcelle)} sont dans ce périmètre.` : `L'adresse est dans ce périmètre, qui couvre ${pourcent(f.part)} de ${laParcelle(l.parcelle)}.`;
-      return "Le point de l'adresse est dans ce périmètre.";
+      const u = l.parcelle;
+      if (u.statut === "attribuee") {
+        if (f.part != null) return entiere(f) ? `L'adresse et toute ${laParcelle(u)} sont dans ce périmètre.` : `L'adresse est dans ce périmètre, qui couvre ${pourcent(f.part)} de ${laParcelle(u)}.`;
+        return "Le point de l'adresse est dans ce périmètre.";
+      }
+      // LE POINT SEUL NE DIT PAS LE TERRAIN (contre-revue du 31/10/2026) : le fait vérifié est dit, puis ce qui manque.
+      const point = "Le point de l'adresse est dans ce périmètre";
+      if (u.statut === "incertaine" && u.raison === "limite") return `${point}, mais il tombe sur la limite entre deux parcelles : on ne sait pas laquelle est celle du logement.`;
+      if (u.statut === "incertaine") {
+        const d = u.distanceM != null ? `, à ${Math.max(1, Math.round(u.distanceM))} m,` : "";
+        const voisine = f.part == null ? `est hors de ce périmètre` : `est ${couvre}`;
+        return `${point}, mais sur le plan cadastral il ne tombe dans aucune parcelle. La plus proche${d} ${voisine}, mais rien ne garantit que ce soit celle du logement.`;
+      }
+      const raison = u.raison === "non_mesurable" ? "le tracé de sa parcelle n'a pas pu être lu" : u.raison === "trop_etendue" ? "sa parcelle est trop étendue pour être lue" : "aucune parcelle cadastrale n'a été trouvée à cette adresse";
+      return `${point}, mais ${raison} : le terrain du logement n'a pas pu être situé.`;
+    }
     case "parcelle_recoupe":
       return entiere(f) ? `Toute ${laParcelle(l.parcelle)} de l'adresse est dans ce périmètre.` : `Ce périmètre couvre ${pourcent(f.part ?? 0)} de ${laParcelle(l.parcelle)} de l'adresse.`;
     case "parcelle_bordure":
@@ -271,6 +285,10 @@ function titreDe(etat: EtatSitesSols, l: LectureSitesSols): string {
       // UN SITE DÉCLARÉ À L'ADRESSE, OU REPÉRÉ DANS LA PARCELLE, n'est pas un vague « peut-être » : le fait est établi,
       // seule son étendue est inconnue (relecture éditoriale du 30/10/2026). Le titre le dit.
       const fs = l.fiches.filter((f) => f.inventaire === i);
+      // Le point dans le périmètre est un fait vérifié : il est dit, sans être étendu au terrain.
+      if (l.portee === "adresse" && fs.some((f) => f.situation === "point_dans")) {
+        return `Le point de cette adresse est dans ${UN[i]}, mais pas forcément le terrain du logement : c'est à vérifier.`;
+      }
       if (fs.every(sansEmpriseSituee)) {
         return fs.some((f) => f.situation === "adresse_publiee")
           ? `${Un} est déclaré à cette adresse. On ne sait pas jusqu'où il s'étend : c'est à vérifier.`
@@ -360,7 +378,7 @@ export function texteSitesSols(l: LectureSitesSols | null | undefined): TexteSit
       ...(enCause.includes("sis")
         ? ["Si l'information écrite sur un secteur d'information sur les sols n'a pas été donnée et qu'une pollution rend ensuite le terrain impropre à l'usage prévu au contrat, l'acheteur ou le locataire peut, dans les deux ans suivant sa découverte, demander l'annulation du contrat, une partie du prix ou une baisse du loyer."]
         : []),
-      "Chaque périmètre publié est confronté au point de l'adresse et à sa parcelle cadastrale : une simple proximité ne compte jamais. La parcelle n'est retenue comme celle du logement que si le point de l'adresse y tombe, et elle seule. Ce point situe l'adresse, pas un bâtiment ni un logement précis.",
+      "Chaque périmètre publié est confronté au point de l'adresse et à sa parcelle cadastrale : une simple proximité ne compte jamais. La parcelle n'est retenue comme celle du logement que si le point de l'adresse y tombe, et elle seule. Ce point situe l'adresse, pas un bâtiment ni un logement précis : sans parcelle retenue, un point dans un périmètre est signalé, à vérifier, car il peut être posé sur la voie.",
       "Les cartes de l'inventaire et du cadastre ne se superposent pas au mètre près. Un périmètre ne concerne le terrain que s'il y entre de plus de 2 m ; en deçà, même une bande de moins d'un mètre carré est signalée, à vérifier, et jamais écartée.",
       "La part indiquée est celle de la parcelle, qui peut être bien plus grande que le logement.",
       ...(signale ? [] : [EXPOSITION]),

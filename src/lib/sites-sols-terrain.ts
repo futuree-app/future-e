@@ -23,10 +23,11 @@
 // La parcelle n'est attribuée au logement que si l'adresse est géocodée au numéro, que son point tombe dans
 // UNE parcelle, et que cette parcelle se mesure. Une parcelle trouvée par proximité, ou sur une limite entre
 // deux parcelles, n'est pas écartée : elle fonde un « à vérifier », jamais un « concerné ». Le point et la
-// parcelle n'ont pas la même portée : le point dit où est l'entrée, la parcelle dit le terrain.
+// parcelle n'ont pas la même portée : le point dit où est l'entrée, la parcelle dit le terrain. Le point dans un
+// périmètre ne démontre donc le terrain que s'il tombe dans la parcelle attribuée (`ficheDemontree`).
 
 import {
-  aireAuDela, aireIntersection, aireRegion, classer, distanceLignes, pointsDe, projectionAutour, regionDe, regionMesurable,
+  aireAuDela, aireRegion, classer, distanceLignes, mesureIntersection, pointsDe, projectionAutour, regionDe, regionMesurable,
   reparer, type Geometrie, type Region,
 } from "./geometrie-parcelle.ts";
 import { SURFACE_CONTACT_M2 } from "./urbanisme-nomenclature.ts";
@@ -295,30 +296,40 @@ function situer(f: FicheSspGeo, plan: Plan, point: [number, number]): Pick<Fiche
   const r = lu.region;
 
   // LA PREUVE EST UNE PROFONDEUR, PAS UNE PART (arbitrage du 30/10/2026, cf. `TOLERANCE_TRACE_M`). Un périmètre
-  // « concerne » le terrain s'il y entre au-delà de l'imprécision des tracés : le point de l'adresse à plus de
-  // `TOLERANCE_TRACE_M` à l'intérieur, ou une partie de la parcelle attribuée à plus de `TOLERANCE_TRACE_M` de sa
-  // limite. En deçà, le recoupement est un liseré qui peut n'être qu'un écart de tracé, mais il n'est JAMAIS
-  // écarté : il appelle une vérification, quelle que soit son aire. Seul un contact sans surface (aire inférieure
-  // à `SURFACE_CONTACT_M2`, 0,05 m², deux limites confondues) ne compte pas. Une seule des 2 559 parcelles déclarées
-  // est en deçà : une parcelle d'1 m² à Lyon Confluence (BC 208), touchée sur 0,007 m², où aucun logement ne se
-  // rattache.
+  // « concerne » le terrain s'il y entre au-delà de l'imprécision des tracés : une partie de la parcelle attribuée à
+  // plus de `TOLERANCE_TRACE_M` de sa limite, ou le point de l'adresse à plus de `TOLERANCE_TRACE_M` à l'intérieur
+  // quand ce point est dans la parcelle attribuée (`ficheDemontree`, `sites-sols-etat.ts`). En deçà, le recoupement
+  // est un liseré qui peut n'être qu'un écart de tracé, mais il n'est JAMAIS écarté : il appelle une vérification.
+  //
+  // UN CONTACT N'EST PAS UNE PETITE INTERSECTION (contre-revue du 31/10/2026). Jusqu'au SHA 971e423a, toute aire de
+  // moins de 0,05 m² était supprimée sans rien dire : une parcelle touchée sur 0,02 m² lisait « aucun ». Seul un
+  // contact est désormais ignoré : une aire qui ne dépasse pas l'incertitude du calcul lui-même (`mesureIntersection`,
+  // l'arrondi au micromètre, de l'ordre de 10⁻⁴ m²), indiscernable de deux limites confondues. Toute intersection
+  // positive au-delà, si petite soit-elle, est mesurée et dite « à vérifier ». Une seule des 2 559 parcelles que les
+  // fiches officielles déclarent concernées est touchée sur moins de 0,05 m² : BC 208 à Lyon Confluence (0,007 m²),
+  // désormais signalée.
   const lieu = classer(ici, r).lieu;
   const pointProfond = lieu === "dedans" && distanceLignes(ici, r) >= TOLERANCE_TRACE_M;
   let mesure: { part: number; surfaceM2: number; profond: boolean } | null = null;
   if (plan.region) {
-    const aire = aireIntersection(plan.region, r);
-    if (aire == null) return ILLISIBLE;
-    if (aire >= SURFACE_CONTACT_M2) {
+    const m = mesureIntersection(plan.region, r);
+    if (m == null) return ILLISIBLE;
+    if (m.aire > m.incertitude) {
       const auDela = aireAuDela(plan.region, r, TOLERANCE_TRACE_M);
       if (auDela == null) return ILLISIBLE;
       mesure = {
-        part: Math.min(1, arrondi(aire / aireRegion(plan.region), 0.001)),
-        surfaceM2: arrondi(aire, 0.1),
+        part: Math.min(1, arrondi(m.aire / aireRegion(plan.region), 0.001)),
+        // Au dixième de m² ; en deçà, deux chiffres significatifs : une aire infime n'est jamais arrondie à zéro.
+        surfaceM2: m.aire >= 0.1 ? arrondi(m.aire, 0.1) : Number(m.aire.toPrecision(2)),
+        // Ce qui reste de l'intersection au-delà de 2 m de profondeur doit lui-même dépasser un contact (0,05 m²,
+        // FUT-81) : un reste plus petit ne fait pas « concerné », il laisse le recoupement « à vérifier ».
         profond: auDela >= SURFACE_CONTACT_M2,
       };
     }
   }
   const avecMesure = { part: mesure?.part ?? null, surfaceM2: mesure?.surfaceM2 ?? null };
+  // Le point au-delà de la tolérance : le fait géographique est gardé. Il ne démontre le terrain que si la parcelle est
+  // attribuée (`ficheDemontree`) ; sinon (proximité, limite de deux parcelles, cadastre muet), il est « à vérifier ».
   if (pointProfond) return { situation: "point_dans", ...avecMesure };
   if (mesure?.profond && plan.usage.statut === "attribuee") return { situation: "parcelle_recoupe", ...avecMesure };
   if (lieu === "bord") return { situation: "point_en_limite", ...avecMesure };
@@ -342,6 +353,27 @@ export type ReponsesSitesSols = {
 };
 
 const ponctuelle = (f: FicheSspGeo) => f.geometrie != null && (f.geometrie.type === "Point" || f.geometrie.type === "MultiPoint");
+
+/**
+ * LA LISTE COMMUNALE DES FICHES SANS EMPRISE, À PARTIR DES TROIS INVENTAIRES LUS À LA COMMUNE (contre-revue du
+ * 31/10/2026). Jusqu'au SHA 971e423a, un seul inventaire en panne vidait toute la liste : une instruction publiée à
+ * l'adresse même du logement disparaissait parce que les SIS n'avaient pas répondu. Désormais :
+ *   - les fiches de chaque inventaire lu (en entier ou en partie) sont gardées ;
+ *   - `partiel` dès qu'un inventaire est en panne ou n'a pas été lu en entier : la liste n'est pas établie, et
+ *     aucune absence ne peut en être conclue (`etatSitesSols` rend `incomplet` sans fiche) ;
+ *   - `indisponible` seulement quand aucun des trois n'a répondu.
+ */
+export function assemblerSansEmprise(lus: Record<InventaireTerrain, CategorieGeoLue>): NonNullable<ReponsesSitesSols["sansEmprise"]> {
+  if (INVENTAIRES.every((i) => lus[i].etat === "indisponible")) return { etat: "indisponible", fiches: [] };
+  const fiches = INVENTAIRES.flatMap((inventaire) => {
+    const c = lus[inventaire];
+    return c.etat === "indisponible" ? [] : c.fiches
+      .filter((f) => f.geometrie == null || ponctuelle(f))
+      .map((f) => ({ ...f, inventaire }));
+  });
+  const complet = INVENTAIRES.every((i) => lus[i].etat === "disponible" || lus[i].etat === "absent_dans_source");
+  return { etat: complet ? "complet" : "partiel", fiches };
+}
 
 /** LA LECTURE D'UNE ADRESSE. Ne lève jamais ; une panne reste une panne. */
 export function lireSitesSolsTerrain(e: EntreeSitesSols, rep: ReponsesSitesSols): LectureSitesSols {

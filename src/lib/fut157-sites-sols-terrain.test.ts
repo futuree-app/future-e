@@ -250,8 +250,13 @@ describe("FUT-157 · le grain de la preuve", () => {
     assert.equal(etatSitesSols(l), "a_verifier");
   });
 
-  test("seul un contact sans surface (moins de 0,05 m², deux limites confondues) ne compte pas", () => {
-    assert.deepEqual(lire({ sis: [page([ligne("A", rect(9.999, -10, 40, 10))])] }).fiches, []); // 0,02 m²
+  // Contre-revue du 31/10/2026 : ce test affirmait qu'une intersection de 0,02 m² « ne compte pas ». C'était le défaut :
+  // seul un contact (deux limites confondues, une aire indiscernable de zéro au calcul) ne compte pas.
+  test("seul un contact sans surface ne compte pas ; une intersection de 0,02 m² est à vérifier (avant : écartée)", () => {
+    assert.deepEqual(lire({ sis: [page([ligne("A", rect(10, -10, 40, 10))])] }).fiches, []);
+    const l = lire({ sis: [page([ligne("A", rect(9.999, -10, 40, 10))])] }); // 0,02 m²
+    assert.equal(l.fiches[0].situation, "parcelle_bordure");
+    assert.equal(etatSitesSols(l), "a_verifier");
   });
 
   test("les trois inventaires suivent la même règle de profondeur", () => {

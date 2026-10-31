@@ -5,7 +5,7 @@ import {
 } from "@/lib/sites-sols";
 import { EN_TETES_GEORISQUES, tracerEchecGeorisques } from "@/lib/georisques-http";
 import {
-  lireSitesSolsTerrain, planDeRecherche, sitesSolsIndisponible, type EntreeSitesSols, type LectureSitesSols, type ReponsesSitesSols,
+  assemblerSansEmprise, lireSitesSolsTerrain, planDeRecherche, sitesSolsIndisponible, type EntreeSitesSols, type LectureSitesSols, type ReponsesSitesSols,
 } from "@/lib/sites-sols-terrain";
 
 // L'APPEL À L'API GÉORISQUES « sites et sols » (FUT-152). Service officiel documenté (spécification OpenAPI
@@ -103,8 +103,8 @@ export async function getSitesSolsAutour(lon: number, lat: number, rayonM: numbe
  * LES FICHES DE LA COMMUNE SANS EMPRISE PUBLIÉE : localisées par un simple point, ou sans géométrie, qu'aucune
  * recherche géographique ne situe (mesuré le 30/10/2026 : 2 instructions sans géométrie sur 19 à Metz, 33
  * ponctuelles sur 111 à Lyon). Lecture communale (avec arrondissements et anciens codes), mise en cache une
- * journée comme celle de la page publique. `partiel` ou `indisponible` dès qu'un inventaire n'a pas été lu en
- * entier : la liste n'est alors pas établie.
+ * journée comme celle de la page publique. `partiel` dès qu'un inventaire est en panne ou n'a pas été lu en
+ * entier : la liste n'est pas établie, mais ce qui a été lu est gardé. `indisponible` quand aucun n'a répondu.
  */
 export async function lireSansEmprise(insee: string): Promise<NonNullable<ReponsesSitesSols["sansEmprise"]>> {
   const groupes = lots(perimetreDe(insee).codes);
@@ -112,14 +112,8 @@ export async function lireSansEmprise(insee: string): Promise<NonNullable<Repons
     const l = await Promise.all(groupes.map((g) => toutesLesPages(CHEMIN[cat], parCodes(g))));
     return lireCategorieGeo(l.flatMap((x) => x.pages), l.some((x) => x.incomplet));
   }));
-  if (lus.some((c) => c.etat === "indisponible")) return { etat: "indisponible", fiches: [] };
-  const fiches = INVENTAIRES_TERRAIN.flatMap((inventaire, i) => {
-    const c = lus[i];
-    return c.etat === "indisponible" ? [] : c.fiches
-      .filter((f) => f.geometrie == null || f.geometrie.type === "Point" || f.geometrie.type === "MultiPoint")
-      .map((f) => ({ ...f, inventaire }));
-  });
-  return { etat: lus.some((c) => c.etat === "partiel") ? "partiel" : "complet", fiches };
+  // Une catégorie en panne ne vide pas les autres (contre-revue du 31/10/2026) : `assemblerSansEmprise`.
+  return assemblerSansEmprise(Object.fromEntries(INVENTAIRES_TERRAIN.map((cat, i) => [cat, lus[i]])) as Record<(typeof INVENTAIRES_TERRAIN)[number], CategorieGeoLue>);
 }
 
 /**

@@ -214,14 +214,16 @@ BASE=http://localhost:3157 node scripts/fut157/recette.mjs                      
 
 | Situation | Issue |
 |---|---|
-| Point de l'adresse à plus de 2 m à l'intérieur d'un périmètre valide (adresse au numéro) | **concerné** (`point_dans`) |
+| Point de l'adresse à plus de 2 m à l'intérieur d'un périmètre valide, point dans la parcelle attribuée | **concerné** (`point_dans`) |
+| Même point, mais parcelle trouvée par proximité, sur une limite, ou absente (contre-revue du 31/10) | **à vérifier** (`point_dans` gardé comme fait, non démontré) |
 | Parcelle attribuée dans laquelle le périmètre entre de plus de 2 m | **concerné** (`parcelle_recoupe`), « en partie » avec la part si elle n'est pas entière (« moins de 1 % » sous 1 %), et le geste « regardez si la parcelle figure sur la liste de la fiche » |
 | Recoupement de la parcelle attribuée de moins de 2 m de profondeur, **quelle que soit son aire** | **à vérifier** (`parcelle_bordure`), jamais écarté |
 | Point sur la limite, ou dedans à moins de 2 m, sans parcelle qui tranche | **à vérifier** (`point_en_limite`) |
 | Parcelle trouvée par proximité ou sur une limite | **à vérifier** (`parcelle_incertaine`), jamais la parcelle certaine de l'adresse |
-| Contact sans surface (moins de 0,05 m², deux limites confondues) | rien |
+| Contact sans surface : aire indiscernable de zéro à la précision du calcul (`mesureIntersection`, ≤ 10⁻³ m²) | rien |
+| Intersection positive au-delà de cette précision, même sous 0,05 m² (contre-revue du 31/10) | **à vérifier** (`parcelle_bordure` ou `parcelle_incertaine`) |
 
-Une seule parcelle déclarée tombe sous le contact : une parcelle d'1 m² à Lyon Confluence (BC 208), touchée sur 0,007 m², où aucun logement ne se rattache.
+Jusqu'au SHA 971e423a, le contact était « moins de 0,05 m² », et la seule parcelle déclarée en deçà (BC 208, Lyon Confluence, 0,007 m²) était supprimée. Elle est désormais « à vérifier » (§12).
 
 Avec la nouvelle règle, aucune parcelle déclarée n'est plus écartée, et aucun recoupement de moins de 2 m n'est plus dit « concerné ». 29 parcelles déclarées d'un SIS, recoupées sur moins de 2 m, passent à « à vérifier », jamais à l'absence.
 
@@ -306,3 +308,26 @@ Les deux propositions détaillées : `~/Documents/futuree-fut157/tickets-hors-pe
 
 - **A. Session expirée** (gravité haute). `requireCurrentUser` (`src/lib/user-account.ts:14`) fait `redirect("/connexion")` dans les routes d'API (11 routes). Reproduit le 30/10 : `POST /api/synthesize-logement` sans session répond `307 location: /connexion` ; suivi comme le fait `fetch`, il donne `200 text/html`, 41 974 octets, que `LogementSynthesis.tsx` diffuse comme synthèse (débordement à 3 828 px).
 - **B. Empreinte et heure du RNB** (gravité moyenne). Reproduit par `scripts/fut157/empreinte-batiment.mjs` : deux collectes aux faits identiques, à 5 minutes d'écart, ont deux empreintes différentes (`6dbd1808` ≠ `5ea77111`), et l'actualisation écrit une version 2 au lieu de répondre « identique ». La synthèse n'est pas touchée : son cache dépend de l'empreinte des faits, sans `batiment`.
+
+
+## 12. Contre-revue indépendante du 31/10/2026 (SHA refusé 971e423a)
+
+Trois défauts, corrigés sans changer le reste de la règle. Reproductions : `src/lib/fut157-contre-revue.test.ts`, 24 tests, dont 13 échouent au SHA refusé.
+
+**1. Le point dans un SIS ne dit pas le terrain si la parcelle est incertaine.** `point_dans` démontrait le terrain dès que le point était à plus de 2 m à l'intérieur, même posé sur la voie et rattaché par proximité à une parcelle voisine HORS du SIS. Désormais `ficheDemontree` (`sites-sols-etat.ts`) exige la parcelle attribuée. Le fait géographique est gardé (`point_dans`) ; le texte le dit, puis ce qui manque (« sur le plan cadastral il ne tombe dans aucune parcelle. La plus proche, à 3 m, est hors de ce périmètre… »). La règle est dérivée à la lecture : une lecture enregistrée sous `fut157-2026-10-30b` est relue avec elle. Les 17 adresses réelles ne changent pas : aucune n'était dans ce cas.
+
+**2. Une intersection positive sous 0,05 m² n'est plus supprimée.** Le seuil `SURFACE_CONTACT_M2` (FUT-81) écartait toute intersection plus petite. La frontière est maintenant la précision du calcul lui-même (`mesureIntersection`, `geometrie-parcelle.ts` : l'écart d'arrondi au micromètre que Clipper admet, `ecartAdmis`). Ce n'est pas une règle réglementaire nouvelle : en deçà, l'aire ne se distingue pas de zéro. `aireIntersection` est inchangée pour FUT-81 et FUT-146. Contre-épreuve sur les 327 périmètres et leurs listes officielles (`scripts/fut157/contacts-infimes.mjs`, cache du 30/10) :
+
+| Classe | Déclarées par la fiche | Non déclarées |
+|---|---|---|
+| Contact (aire ≤ incertitude, au plus 8,3·10⁻⁴ m²) | 0 | 27 |
+| Infime (au-delà, sous 0,05 m²) : supprimée avant, « à vérifier » désormais | 2 (BC 208, SIS et instruction) | 433 |
+| Au-delà de 0,05 m² (inchangé) | 2 140 | 2 128 |
+
+Aucune parcelle déclarée n'est un contact. Coût : 433 recoupements infimes non déclarés passent de « aucun » à « à vérifier ». C'est le coût que la contre-revue a demandé d'assumer.
+
+**Parcelle officiellement désignée : non lue à l'exécution.** L'API ne publie pas la liste des parcelles ; elle n'est que sur la fiche HTML. Elle sert ici d'oracle hors ligne. Au lecteur, elle reste le geste proposé (« regardez si la parcelle … en fait partie »).
+
+**3. Une panne partielle de la lecture communale ne vide plus les fiches.** `lireSansEmprise` rendait `{ indisponible, [] }` dès qu'un inventaire était en panne. L'assemblage est maintenant pur et testé (`assemblerSansEmprise`) : les fiches lues sont gardées ; l'état est `partiel` dès qu'un inventaire manque ou est tronqué, `indisponible` seulement si aucun n'a répondu. Sans fiche, l'état reste `incomplet`, jamais `aucun`, et la phrase « aucun n'est déclaré à cette adresse » n'est dite que sur une liste complète. Huit combinaisons sont testées par appels simulés au vrai module serveur.
+
+Recette en vrai Chrome (`scripts/fut157/recette.mjs`) : 16 cas × ordinateur 1440, mobile 390 et 360, 507 vérifications. Les quatre nouveaux cas du banc `/dev/fut157` sont `voie-dans-sis`, `infime`, `communal-partiel` et `incomplet`. Leurs captures sont dans `2026-10-31-fut157-contre-revue/`.
