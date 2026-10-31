@@ -691,7 +691,9 @@ describe("FUT-157 · le câblage", () => {
 
   test("la route lit le terrain en parallèle, derrière la seule parcelle, et le passe au rapport et à la couverture", () => {
     assert.match(route, /const sitesSolsP = parcelLueP\.then\(\(lu\) =>\s*lireSitesSolsAdresse\(/);
-    assert.match(route, /bruitAerienP, fibreP, sitesSolsP\]\)/);
+    // Livraison groupée FUT-163 : d'autres lectures parallèles (débroussaillement, risques industriels) s'intercalent.
+    assert.match(route, /bruitAerienP, (?:\w+P, )*sitesSolsP\]\)/);
+    assert.match(route, /bruitAerien, (?:\w+, )*sitesSols\] = await Promise\.all/);
     assert.match(route, /\n {6}sitesSols,\n/);
     assert.match(route, /parcelleParRepli: parcel\?\.rattachement === "repli",\n {8}sitesSols,/);
     assert.match(route, /adresse: adresseDuLibelle\(address\.label, address\.postcode, address\.city\)/);
