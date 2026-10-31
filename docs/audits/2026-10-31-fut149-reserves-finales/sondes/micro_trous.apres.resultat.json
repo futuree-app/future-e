@@ -1,0 +1,36 @@
+{
+ "trous": 1521,
+ "cellules": 2,
+ "bilan": {
+  "0.5 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "1 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "2 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "3 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "5 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "8 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "12 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "20 mm": {
+   "en_limite(à 5 m)": 26,
+   "en_limite(dans la zone)": 143
+  },
+  "50 mm": {
+   "en_limite(à 5 m)": 169
+  }
+ },
+ "dangereux": 0,
+ "exemples": []
+}
