@@ -84,6 +84,7 @@ export default async function RapportAutourPage({
     : null;
   const initialCarOwnership = relu?.carOwnership ?? null;
   const initialBruitAerien = relu?.bruitAerien ?? null;
+  const initialDebroussaillement = relu?.debroussaillement ?? null;
 
   // LE CONTEXTE AFFICHÉ VIENT DU DOSSIER, PAS DU PROFIL (revue du 11/08/2026). Le profil porte le
   // dernier bien PERSISTÉ : sur une ouverture directe, les traceurs enregistraient l'ancienne
@@ -107,6 +108,7 @@ export default async function RapportAutourPage({
         dossier={dossier}
         initialCarOwnership={initialCarOwnership}
         initialBruitAerien={initialBruitAerien}
+        initialDebroussaillement={initialDebroussaillement}
       />
     </>
   );

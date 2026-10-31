@@ -27,6 +27,8 @@ import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
 import type { CarOwnership } from "@/lib/iris-logement";
 import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
 import type { LectureBruitAerien } from "@/lib/bruit-aerien";
+import { lireDebroussaillementAdresse } from "@/lib/server/debroussaillement-tuiles";
+import type { LectureDebroussaillement } from "@/lib/debroussaillement";
 
 export type AutourResponse = {
   snapshot: Face3Snapshot;
@@ -39,6 +41,11 @@ export type AutourResponse = {
    * ouverture, jamais par une valeur supposée.
    */
   bruitAerien: LectureBruitAerien;
+  /**
+   * FUT-149 : le zonage du débroussaillement obligatoire du SECTEUR (au point du dossier), relu au rendu dans
+   * l'édition publiée, dont la date s'affiche avec lui (seconde famille). `null` : lecture non activée.
+   */
+  debroussaillement: LectureDebroussaillement | null;
 };
 
 /**
@@ -53,10 +60,12 @@ export async function buildAutourResponse(input: {
   lon: number;
   insee: string | null;
 }): Promise<AutourResponse> {
-  const [carOwnership, bruitAerien] = await Promise.all([
+  const [carOwnership, bruitAerien, debroussaillement] = await Promise.all([
     getCarOwnershipAtPoint(input.lat, input.lon, input.insee).catch(() => ({ kind: "unknown" as const })),
     // Autour lit le point seul : la parcelle et la précision du géocodage appartiennent au module Logement.
     lireBruitAerienAdresse({ point: [input.lon, input.lat], geocodage: null, parcelle: null }),
+    // Même règle : le point seul. La commune décide seulement si « hors zone » peut se dire (département couvert).
+    lireDebroussaillementAdresse({ point: [input.lon, input.lat], geocodage: null, insee: input.insee, parcelle: null }),
   ]);
-  return { snapshot: input.snapshot, carOwnership, bruitAerien };
+  return { snapshot: input.snapshot, carOwnership, bruitAerien, debroussaillement: debroussaillement ?? null };
 }

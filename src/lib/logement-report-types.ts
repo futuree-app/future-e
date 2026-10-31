@@ -12,6 +12,7 @@ import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { LectureBruitAerien } from "./bruit-aerien.ts";
+import type { LectureDebroussaillement } from "./debroussaillement.ts";
 import type { LectureFibre } from "./fibre-adresse.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
@@ -122,6 +123,12 @@ export type LogementReport = {
    * alors RIEN, ni « hors zone » ni une panne.
    */
   bruitAerien?: LectureBruitAerien;
+  /**
+   * FUT-149 : LE ZONAGE DU DÉBROUSSAILLEMENT OBLIGATOIRE (base DÉBROUSSAILLEMENT de l'IGN) lu à la parcelle ou au
+   * point (cf. `debroussaillement.ts`). `undefined` : rapport écrit avant FUT-149, ou lecture non activée ; rien
+   * n'a été calculé, et l'écran n'affiche RIEN, ni « hors zone » ni une panne.
+   */
+  debroussaillement?: LectureDebroussaillement;
   /**
    * FUT-156 : LA FIBRE À L'ADRESSE (Arcep : état de déploiement du bâtiment et nombre d'opérateurs qui y
    * déclarent une offre, cf. `fibre-adresse.ts`), lue une fois dans l'index trimestriel et figée ici avec son

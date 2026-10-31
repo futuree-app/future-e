@@ -14,6 +14,7 @@ import { getAltitude } from "@/lib/ign";
 import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
 import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
 import { precisionDepuisBanId } from "@/lib/bruit-aerien";
+import { lireDebroussaillementAdresse } from "@/lib/server/debroussaillement-tuiles";
 import { lireFibreAdresse } from "@/lib/server/fibre-adresse-index";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
@@ -81,6 +82,19 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       }),
     );
 
+    // FUT-149 : LE ZONAGE DU DÉBROUSSAILLEMENT OBLIGATOIRE, À LA PARCELLE. Une à quatre tuiles lues sur Supabase
+    // Storage (≈ 10 Ko, délai borné à 4 s, aucune exception) : il n'attend que la parcelle, comme le bruit aérien,
+    // et la même précision de géocodage décide de la portée. `undefined` tant que la lecture n'est pas activée.
+    const debroussaillementP = parcelLueP.then((lu) =>
+      lireDebroussaillementAdresse({
+        point: [address.longitude, address.latitude],
+        geocodage: banFeatureType ?? precisionDepuisBanId(address.id),
+        insee: address.citycode,
+        parcelle: lu
+          ? { geometry: lu.geometry, rattachement: lu.parcel.rattachement ?? "point", candidatsAuPoint: lu.parcel.candidatsAuPoint }
+          : null,
+      }),
+    );
     // FUT-156 : LA FIBRE À L'ADRESSE. Une lecture de l'index trimestriel (un lot de quelques dizaines de Ko),
     // en parallèle de tout le reste, par l'identifiant BAN seul : jamais par la proximité. Ne lève jamais.
     const fibreP = lireFibreAdresse(address.id);
@@ -130,7 +144,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, debroussaillement, fibre] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -155,7 +169,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, fibreP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, debroussaillementP, fibreP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -212,6 +226,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       heritage,
       urbanisme,
       bruitAerien,
+      // FUT-149 : posé seulement quand la lecture est activée ; un rapport sans le champ n'affiche rien.
+      ...(debroussaillement ? { debroussaillement } : {}),
       // FUT-156 : posée seulement quand la lecture est activée (`FIBRE_ADRESSE_BUCKET`).
       ...(fibre ? { fibre } : {}),
       pointHazards,
