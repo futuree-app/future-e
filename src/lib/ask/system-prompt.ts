@@ -6,9 +6,10 @@
 // `communes_tension` (FUT-16). La route ne garde que les accès (Supabase, enrichissement, Anthropic) ;
 // tout ce qui devient texte pour le modèle passe par `construireSystemPrompt`.
 //
-// Module PUR : aucune I/O, imports de types seulement, chemins relatifs (testable sous `node --test`).
+// Module PUR : aucune I/O, imports de types (et de fonctions pures), chemins relatifs (testable sous `node --test`).
 import type { CommuneFullData } from "../commune-data.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
+import { lireEcoulement } from "../eaufrance-ecoulement.ts";
 import type { EauPotableCommune, ParametreLu, PrelevementLu, ReseauLu } from "../eau-potable.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { GeorisquesSummary, GasparCatnatSummary } from "../georisques.ts";
@@ -308,12 +309,35 @@ export function formatEauPotableBlock(e: EauPotableCommune | undefined): string 
   return out.join("\n");
 }
 
+// FUT-163 (31/10/2026) : CINQ ÉTATS, JAMAIS CONFONDUS. Le bloc lisait `drought: null` comme « pas d'observation »
+// alors qu'une panne ONDE le rend aussi (`droughtIndisponible`, FUT-165) ; un relevé ancien sans état sortait
+// « n/a ». L'état se lit sur la valeur brute de la source (`lireEcoulement`), jamais sur `isDry`, et un relevé
+// est borné à sa station et à sa date : il ne décrit pas les autres cours d'eau de la commune.
+const TITRE_ECOULEMENT = "[Hub'Eau — écoulement des cours d'eau (réseau ONDE de l'OFB)]";
 function formatEcoulementBlock(data: EaufranceSummary | null): string {
   const drought = data?.drought;
-  if (!drought || !drought.lastObservationDate) {
-    return "[Hub'Eau — écoulement des cours d'eau] Pas d'observation de cours d'eau disponible pour cette commune.";
+  if (!drought) {
+    return data == null || data.droughtIndisponible
+      ? `${TITRE_ECOULEMENT}\n- Source indisponible lors de la consultation. Ne concluez rien sur l'état des cours d'eau de la commune, ni dans un sens, ni dans l'autre.`
+      : `${TITRE_ECOULEMENT}\n- Aucune observation disponible dans la couverture interrogée (stations ONDE de la commune, douze derniers mois). Cela ne renseigne pas sur l'état des cours d'eau de la commune.`;
   }
-  return `[Hub'Eau — écoulement des cours d'eau (réseau ONDE)]\n- Observation cours d'eau (${drought.riverName ?? "inconnu"}) le ${drought.lastObservationDate} : ${drought.status ?? "n/a"}${drought.isDry ? " (assec)" : ""}`;
+  const quand = drought.lastObservationDate ? `Relevé du ${dateFr(drought.lastObservationDate)}` : "Relevé non daté";
+  const ou = drought.stationName
+    ? ` à la station « ${drought.stationName} »${drought.riverName ? ` (cours d'eau : ${drought.riverName})` : ""}`
+    : drought.riverName ? ` sur le cours d'eau « ${drought.riverName} »` : "";
+  const brut = drought.status?.trim() ?? "";
+  const etat = {
+    assec: "assec, le cours d'eau était à sec au point observé.",
+    ecoulement_interrompu: `« ${brut} » : l'eau est encore présente au point observé, mais ne s'écoule plus visiblement. Ce n'est pas un assec.`,
+    ecoulement: `« ${brut} ».`,
+    observation_impossible: `« ${brut} » : aucun état n'a été relevé ce jour-là. Ne concluez rien sur l'écoulement.`,
+    non_verifiable: "état non vérifiable (relevé daté, sans état transmis). Ne concluez ni à un assec, ni à un écoulement.",
+  }[lireEcoulement(drought).etat];
+  return [
+    TITRE_ECOULEMENT,
+    `- ${quand}${ou} : ${etat}`,
+    "- Ce relevé vaut pour ce point d'observation, à cette date. Il ne décrit ni les autres cours d'eau de la commune, ni leur état aujourd'hui.",
+  ].join("\n");
 }
 
 function formatGeorisquesBlock(g: GeorisquesSummary | null): string {
