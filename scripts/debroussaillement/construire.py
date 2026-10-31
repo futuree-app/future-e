@@ -41,7 +41,8 @@ point (`src/lib/debroussaillement.ts`).
      limites des anneaux de chaque morceau, à l'exécution : elle prenait les frontières entre zones pour des
      limites (R3), et devait examiner l'autre côté de la grille pour reconnaître les coupes (R1).
  Coordonnées WGS84 (pyproj, EPSG:2154 → EPSG:4326) en entiers de 1e-7 degré, chaque anneau ou ligne codé en
- différences. Une cellule entièrement dans une zone, et qu'aucune limite ne touche, n'a pas de fichier : le
+ différences. Une limite plus petite qu'un cran de cette grille (un trou de quelques millimètres) est gardée comme un
+ point, `[x0, y0, 0, 0]` (cf. `ligne_code`). Une cellule entièrement dans une zone, et qu'aucune limite ne touche, n'a pas de fichier : le
  manifeste la marque `plein`. Une cellule absente du manifeste ne contient aucune zone publiée.
 
  Usage :
@@ -180,14 +181,24 @@ def anneau_code(coords):
 
 
 def ligne_code(coords):
-    """Une ligne → [x0, y0, dx1, dy1, …] en entiers de 1e-7 degré ; None si elle se réduit à un point."""
+    """
+    Une ligne → [x0, y0, dx1, dy1, …] en entiers de 1e-7 degré.
+
+    UNE VRAIE LIMITE PLUS PETITE QUE LA RÉSOLUTION DE PUBLICATION RESTE UNE LIMITE (31/10/2026). Quand tous ses
+    sommets tombent sur le même point de la grille (un trou de la réunion de quelques millimètres, un fragment rangé
+    dans une cellule voisine), elle est gardée comme un point, codé en segment de longueur nulle : [x0, y0, 0, 0].
+    Avant, elle était jetée ; le trou ayant aussi disparu du morceau arrondi, un point strictement hors zone, dans ce
+    trou, était lu « en zone » faute de toute limite à moins de 50 m (contre-épreuve du 31/10/2026 : 15 limites ainsi
+    effacées dans l'édition du 01/03/2026, dont un liseré de 0,07 mm² lu « en zone » à la jonction 13/83). Ce n'est ni
+    une fermeture ni un changement de précision : le point est la limite, à la résolution près.
+    """
     pts = []
     for x, y in coords:
         p = (round(x * ECHELLE), round(y * ECHELLE))
         if not pts or pts[-1] != p:
             pts.append(p)
     if len(pts) < 2:
-        return None
+        return [pts[0][0], pts[0][1], 0, 0]
     plat = [pts[0][0], pts[0][1]]
     for a, b in zip(pts, pts[1:]):
         plat += [b[0] - a[0], b[1] - a[1]]
@@ -312,7 +323,7 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0)
     tmp = tempfile.mkdtemp(prefix=f".{edition}-", dir=sortie)
     os.makedirs(os.path.join(tmp, "t"))
     tuiles, nmorceaux, invalides, sommets = {}, 0, 0, 0
-    nlignes, sommets_limites, longueur_limites = 0, 0, 0.0
+    nlignes, sommets_limites, longueur_limites, ponctuelles = 0, 0, 0.0, 0
     aire_tuiles = 0.0  # en Lambert-93, pour comparer à la source
     vers_l93 = Transformer.from_crs(4326, 2154, always_xy=True)
     for ix in range(math.floor(x0 * 10), math.floor(x1 * 10) + 1):
@@ -356,7 +367,8 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0)
                 continue
             cle = f"{ix}_{iy}"
             ls, longueur = limites_cellule(zones_l93, arbre_l93, cellule, vers_l93, vers_wgs84, fermeture)
-            limites = [c for c in (ligne_code(list(l.coords)) for l in ls) if c is not None]
+            limites = [ligne_code(list(l.coords)) for l in ls]
+            ponctuelles += sum(1 for c in limites if len(c) == 4 and c[2] == 0 and c[3] == 0)
             if plein is not None and not morceaux and not limites:
                 tuiles[cle] = {"plein": plein}
                 aire_tuiles += shapely.transform(box(*cellule), lambda c: _transformer(vers_l93, c)).area
@@ -388,6 +400,11 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0)
     manifeste = {
         "format": FORMAT,
         "edition": edition,
+        # La SEULE valeur qui dépend du jour (contre-épreuve du 31/10/2026) : deux constructions de la même source, à
+        # des dates différentes, ont des tuiles identiques à l'octet et des manifestes qui ne diffèrent que par elle
+        # (donc des empreintes de manifeste différentes). L'identité géographique d'une édition est la table `tuiles`
+        # (taille et SHA-256 de chaque tuile) ; l'empreinte du manifeste identifie l'objet publié, que `publier.mjs`
+        # ne remplace jamais.
         "construitLe": dt.date.today().isoformat(),
         "producteur": "IGN, pour le ministère chargé des forêts",
         "diffuseur": "IGN (Géoplateforme)",
@@ -406,7 +423,8 @@ def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0)
             "octets": sum(tailles), "medianeOctets": tailles[len(tailles) // 2] if tailles else 0, "maxOctets": tailles[-1] if tailles else 0,
             "morceaux": nmorceaux, "nonMesurables": invalides, "sommets": sommets, "ecartAire": round(ecart_aire, 8),
             # `fermetureM` : la largeur des vides refermés pour le calcul des limites (0 : réunion exacte). L'édition le dit.
-            "limites": {"lignes": nlignes, "sommets": sommets_limites, "km": round(longueur_limites / 1000), "fermetureM": fermeture, "grilleCalculM": GRILLE_CALCUL_M},
+            # `ponctuelles` : les vraies limites plus petites que la résolution, gardées comme un point (`ligne_code`).
+            "limites": {"lignes": nlignes, "sommets": sommets_limites, "km": round(longueur_limites / 1000), "ponctuelles": ponctuelles, "fermetureM": fermeture, "grilleCalculM": GRILLE_CALCUL_M},
             "aireKm2": round(aire_source / 1e6),
         },
     }

@@ -357,6 +357,29 @@ describe("1. Au point : dedans, en limite, dehors, et les coupes de tuile", () =
     }
   });
 
+  // Contre-épreuve du 31/10/2026 (micro-trous) : un trou de quelques millimètres disparaît du morceau arrondi au
+  // 1e-7 degré, et sa limite se réduit à un seul point de la grille. `construire.py` jetait cette limite : un point
+  // strictement hors zone, dans le trou, était lu « en zone » (un cas dans l'édition nationale, jonction 13/83). La
+  // tuile vient du VRAI constructeur (`docs/audits/2026-10-31-fut149-reserves-finales/sondes/micro_trous_monde.py`,
+  // côté 1 500 m) : 81 trous de 0,5 à 50 mm, à 150 m les uns des autres.
+  test("micro-trous (tuile du vrai constructeur) : une limite plus petite que la résolution reste une limite, jamais « en zone »", () => {
+    const D = "src/lib/__fixtures__/fut149/micro-trous";
+    const man = JSON.parse(readFileSync(`${D}/manifest.json`, "utf8")) as ManifesteDebroussaillement;
+    const brut = readFileSync(`${D}/t/60_433.json.gz`);
+    const t = JSON.parse(gunzipSync(brut).toString()) as TuileDebroussaillement;
+    assert.ok(tuileValide(t, { edition: man.edition, ix: 60, iy: 433, profils: man.profils.length }), "le lecteur accepte une limite codée en point");
+    const ponctuelles = t.limites.filter((l) => l.length === 4 && l[2] === 0 && l[3] === 0);
+    assert.ok(ponctuelles.length > 0, "la fixture contient des limites réduites à un point");
+    const trous = JSON.parse(readFileSync(`${D}/trous.json`, "utf8")) as { lon: number; lat: number; largeurMm: number }[];
+    const lire = (tuile: TuileDebroussaillement) => trous.map((h) => lireDebroussaillement(man, new Map([["60_433", tuile]]), entree([h.lon, h.lat], { insee: "83065" })));
+    for (const [i, l] of lire(t).entries()) {
+      assert.equal(l.etat, "en_limite", `trou de ${trous[i].largeurMm} mm : le centre est hors zone, à quelques millimètres d'elle`);
+    }
+    // Sans les limites ponctuelles (l'encodage d'avant), des centres de trous sont lus « en zone » : le test le verrait.
+    const ancienne = { ...t, limites: t.limites.filter((l) => !ponctuelles.includes(l)) };
+    assert.ok(lire(ancienne).some((l) => l.etat === "en_zone"), "l'ancien encodage rendait des points hors zone « en zone »");
+  });
+
   test("une zone à la diffusion ambiguë (« O ») ne décide de rien : incertain", () => {
     const l = lireSynth(entree([5.03, 43.53]));
     assert.equal(l.etat, "incertain");
