@@ -44,8 +44,9 @@ import { deCommune } from "./typography.ts";
 export const REPERE_PM25_OMS = 5;
 /** Valeur limite européenne 2030 pour le NO₂ (directive 2024/2881). Repère d'affichage. */
 export const REPERE_NO2_UE_2030 = 20;
-/** Le minimum national des PM2,5 dans l'index (mesuré le 29/07/2026, `sante-facts.ts`). */
-export const PM25_MINIMUM_NATIONAL = 5.6;
+// FUT-163 (31/10/2026) : `PM25_MINIMUM_NATIONAL` (5,6 µg/m³, minimum de l'index) fondait « aucune commune
+// française ne la respecte ». L'index n'a pas démontré sa couverture nationale exhaustive : la généralisation est
+// retirée. Le texte compare la valeur LUE à la recommandation, et ne parle d'aucune commune qu'il n'a pas lue.
 
 export const AIR_SOURCE =
   "Moyennes annuelles modélisées par l'Ineris (modèle de chimie-transport CHIMERE, corrigé par les mesures des stations des associations de surveillance de la qualité de l'air), diffusées par l'ADEME (jeu data_communes).";
@@ -180,7 +181,7 @@ function phrasePm25(v: number): string {
   const ue = v >= AIR_PM25_UE_2030
     ? `au-delà de la valeur limite européenne applicable en 2030 (${AIR_PM25_UE_2030} µg/m³)`
     : `sous la valeur limite européenne applicable en 2030 (${AIR_PM25_UE_2030} µg/m³)`;
-  return `Particules fines (PM2,5) : ${nb(v)} µg/m³ en moyenne annuelle, ${ue}. La recommandation de l'Organisation mondiale de la santé est de ${REPERE_PM25_OMS} µg/m³ : aucune commune française ne la respecte (minimum national : ${nb(PM25_MINIMUM_NATIONAL)} µg/m³).`;
+  return `Particules fines (PM2,5) : ${nb(v)} µg/m³ en moyenne annuelle, ${ue}. La recommandation de l'Organisation mondiale de la santé est de ${REPERE_PM25_OMS} µg/m³ : cette moyenne ${v > REPERE_PM25_OMS ? "la dépasse" : "la respecte"}.`;
 }
 
 function phraseNo2(v: number): string {
@@ -220,7 +221,7 @@ function ligneAir(ls: LectureLocale[]): LigneSante {
     `Ces moyennes sont publiées par arrondissement : elles vont ${pm.length ? `${plage(pm)} µg/m³ pour les particules fines (PM2,5)` : ""}${pm.length && no.length ? " et " : ""}${no.length ? `${plage(no)} µg/m³ pour le dioxyde d'azote (NO₂)` : ""}, selon l'arrondissement.`,
     auDela.length
       ? `${auDela.length === lues.length ? "Tous les arrondissements dépassent" : `${cap(listeFr(auDela))} ${auDela.length > 1 ? "dépassent" : "dépasse"}`} au moins un des seuils que retient futur•e : la recommandation de l'Organisation mondiale de la santé pour le dioxyde d'azote (${AIR_NO2_OMS} µg/m³) ou la valeur limite européenne de 2030 pour les particules fines (${AIR_PM25_UE_2030} µg/m³).`
-      : `Aucun arrondissement ne dépasse la recommandation de l'Organisation mondiale de la santé pour le dioxyde d'azote (${AIR_NO2_OMS} µg/m³) ni la valeur limite européenne de 2030 pour les particules fines (${AIR_PM25_UE_2030} µg/m³). Aucune commune française ne respecte la recommandation de l'OMS pour les particules fines (${REPERE_PM25_OMS} µg/m³).`,
+      : `Aucun arrondissement ne dépasse la recommandation de l'Organisation mondiale de la santé pour le dioxyde d'azote (${AIR_NO2_OMS} µg/m³) ni la valeur limite européenne de 2030 pour les particules fines (${AIR_PM25_UE_2030} µg/m³).${pm.length ? ` La recommandation de l'OMS pour les particules fines est de ${REPERE_PM25_OMS} µg/m³ : ${pm.every((v) => v > REPERE_PM25_OMS) ? "chacune de ces moyennes la dépasse" : pm.every((v) => v <= REPERE_PM25_OMS) ? "chacune de ces moyennes la respecte" : "certaines de ces moyennes la dépassent"}.` : ""}`,
     AIR_PERIODE,
   ];
   return { ...base, valeur, signal: auDela.length > 0, grain: "moyenne annuelle de chaque arrondissement", paragraphes };
