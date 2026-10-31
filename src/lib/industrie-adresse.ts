@@ -69,7 +69,12 @@ export type PrecisionPoint = "numero" | "rue" | "lieu_dit" | "commune" | "inconn
 export type LectureIndustrieAdresse = {
   precision: PrecisionPoint;
   seveso: { etat: "lu"; extraitLe: string; rayonKm: number; sites: SiteSevesoAdresse[] } | { etat: "indisponible" };
-  pprtPoint: { etat: "lu"; plans: PlanPprt[] } | { etat: "indisponible" };
+  /**
+   * FUT-163 (31/10/2026) : `annonces` n'existe que si la page au point n'a pas rendu tous les plans annoncés
+   * (`totalElements`). Une lecture PARTIELLE ne prouve jamais l'absence d'un plan : sans plan lu, elle rend
+   * « non déterminable » ; avec un plan lu, elle dit ce plan sans prétendre que la liste est complète.
+   */
+  pprtPoint: { etat: "lu"; plans: PlanPprt[]; annonces?: number } | { etat: "indisponible" };
   pprtCommune: { etat: "lu"; plans: { id: string; nom: string }[] } | { etat: "indisponible" };
 };
 
@@ -79,8 +84,15 @@ export type ReponsePprt = "dans_un_plan" | "plan_sur_la_commune" | "aucun_plan" 
 export function reponsePprt(l: LectureIndustrieAdresse): ReponsePprt {
   if (l.pprtPoint.etat === "indisponible") return "non_determinable";
   if (l.pprtPoint.plans.length > 0) return "dans_un_plan";
+  // FUT-163 : la base annonce des plans au point, aucun n'a pu être lu. Jamais « aucun plan ».
+  if (pointPartiel(l)) return "non_determinable";
   if (l.pprtCommune.etat === "indisponible") return "incomplet";
   return l.pprtCommune.plans.length > 0 ? "plan_sur_la_commune" : "aucun_plan";
+}
+
+/** La page au point n'a pas rendu tous les plans annoncés (FUT-163). */
+export function pointPartiel(l: LectureIndustrieAdresse): boolean {
+  return l.pprtPoint.etat === "lu" && l.pprtPoint.annonces != null && l.pprtPoint.annonces > l.pprtPoint.plans.length;
 }
 
 // ── Lecture des réponses Géorisques (formes vérifiées le 30/10/2026) ─────────────────────────────
@@ -93,7 +105,7 @@ const isoDepuisFr = (v: unknown): string | null => {
 };
 
 /** Une page `content[]` lisible : le total annoncé est-il entièrement lu ? `null` = réponse inexploitable. */
-export function lirePagePprt(r: unknown): { plans: PlanPprt[]; complete: boolean } | null {
+export function lirePagePprt(r: unknown): { plans: PlanPprt[]; complete: boolean; total: number } | null {
   const p = r as { totalElements?: unknown; content?: unknown };
   if (!p || typeof p.totalElements !== "number" || !Array.isArray(p.content)) return null;
   const plans: PlanPprt[] = [];
@@ -111,7 +123,7 @@ export function lirePagePprt(r: unknown): { plans: PlanPprt[]; complete: boolean
       zones: zones.map((z) => ({ regimeCode: texte(z.code), regime: texte(z.libelle), code: texte(z.codeZone), nom: texte(z.nom) })),
     });
   }
-  return { plans, complete: plans.length >= p.totalElements };
+  return { plans, complete: plans.length >= p.totalElements, total: p.totalElements };
 }
 
 // ── Les mots ──────────────────────────────────────────────────────────────────────────────────
@@ -163,6 +175,11 @@ export function texteIndustrieAdresse(l: LectureIndustrieAdresse, collecteeLe: s
     const p = plans[0]!;
     const zones = [...p.zones].sort((a, b) => (RANG_REGIME[a.regimeCode ?? ""] ?? 9) - (RANG_REGIME[b.regimeCode ?? ""] ?? 9));
     constat = `Oui. Le point de cette adresse est dans le périmètre réglementé du plan « ${p.nom} »${plans.length > 1 ? `, et de ${plans.length - 1} autre${plans.length > 2 ? "s" : ""} plan${plans.length > 2 ? "s" : ""} (${listeFr(plans.slice(1).map((x) => `« ${x.nom} »`))})` : ""} (base GASPAR, consultée ${consulte}).`;
+    // FUT-163 : une page partielle dit le plan lu, jamais une liste complète.
+    if (pointPartiel(l)) {
+      const annonces = (l.pprtPoint as { annonces: number }).annonces;
+      constat += ` La base annonce ${annonces} plans à ce point, ${plans.length === 1 ? "un seul a pu être lu" : `${plans.length} seulement ont pu être lus`} : cette liste n'est pas complète, l'état des risques la donne en entier.`;
+    }
     if (zones.length) {
       pourCeBien.push(`Au point de l'adresse, la base publie ${zones.length > 1 ? "ces zones" : "cette zone"} : ${listeFr(zones.map(zoneEnPhrase))}.`);
     } else {
@@ -182,7 +199,10 @@ export function texteIndustrieAdresse(l: LectureIndustrieAdresse, collecteeLe: s
   } else if (r === "incomplet") {
     constat = `Le point de cette adresse n'est dans aucune zone réglementée publiée (base GASPAR, consultée ${consulte}). La liste des plans de la commune n'a pas pu être lue : l'état des risques le confirme.`;
   } else {
-    constat = `Non déterminable : la base des plans n'a pas répondu ${consulte}. Rien n'en est déduit ; l'état des risques fourni par le vendeur ou le bailleur répond à cette question.`;
+    constat = pointPartiel(l)
+      // FUT-163 : la base a répondu, mais sans la liste qu'elle annonce. Ni « aucun plan », ni une panne.
+      ? `Non déterminable : la base annonce ${(l.pprtPoint as { annonces: number }).annonces > 1 ? `${(l.pprtPoint as { annonces: number }).annonces} plans` : "un plan"} au point de cette adresse, mais leur liste n'a pas pu être lue ${consulte}. Rien n'en est déduit ; l'état des risques fourni par le vendeur ou le bailleur répond à cette question.`
+      : `Non déterminable : la base des plans n'a pas répondu ${consulte}. Rien n'en est déduit ; l'état des risques fourni par le vendeur ou le bailleur répond à cette question.`;
     if (l.pprtCommune.etat === "lu" && l.pprtCommune.plans.length) {
       pourCeBien.push(`La commune est concernée par ${listeFr(l.pprtCommune.plans.map((p) => `le plan « ${p.nom} »`))}.`);
     }

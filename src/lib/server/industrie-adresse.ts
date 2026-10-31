@@ -64,8 +64,15 @@ export async function getIndustrieAdresse(o: {
         })),
       }
       : { etat: "indisponible" },
-    // Une page incomplète au point (plus de 50 plans) n'existe pas en pratique ; elle serait lue comme lue.
-    pprtPoint: pointLu ? { etat: "lu", plans: pointLu.plans } : { etat: "indisponible" },
+    // FUT-163 (31/10/2026) : une page au point INCOMPLÈTE (moins de plans lus que `totalElements`) était lue
+    // comme complète : zéro plan lu y devenait « aucun PPRT à cette adresse ». Elle porte désormais le total
+    // annoncé (`annonces`) : sans plan lu, la réponse est « non déterminable » ; avec un plan lu, il est dit,
+    // sans prétendre que la liste est complète. Même exigence que la lecture communale ci-dessous.
+    pprtPoint: !pointLu
+      ? { etat: "indisponible" }
+      : pointLu.complete
+        ? { etat: "lu", plans: pointLu.plans }
+        : { etat: "lu", plans: pointLu.plans, annonces: pointLu.total },
     pprtCommune: communeLue && communeLue.complete
       ? { etat: "lu", plans: communeLue.plans.map((p) => ({ id: p.id, nom: p.nom })) }
       : { etat: "indisponible" },
