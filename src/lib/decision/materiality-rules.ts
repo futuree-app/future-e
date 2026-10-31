@@ -1011,6 +1011,7 @@ const ruleAir: DecisionRule = {
       preuves.push({
         factId: "viv.no2", module: "territoire", label: `Air · ${f.nom}`,
         observedValue: `NO₂ ${air.no2.toFixed(1).replace(".", ",")} µg/m³`, grain: "commune", href: territoireHref,
+        targetKey: "health.air_background", // FUT-167 : la ligne « Air de fond » de la carte Santé environnementale
       });
     }
     if (air.pm25 != null && air.pm25 >= AIR_PM25_UE_2030) {
@@ -1018,6 +1019,7 @@ const ruleAir: DecisionRule = {
       preuves.push({
         factId: "viv.pm25", module: "territoire", label: `Air · ${f.nom}`,
         observedValue: `PM2,5 ${air.pm25.toFixed(1).replace(".", ",")} µg/m³`, grain: "commune", href: territoireHref,
+        targetKey: "health.air_background",
       });
     }
 
@@ -1097,7 +1099,7 @@ const ruleBruit: DecisionRule = {
       // Ce qui rend cette vérification LÉGITIME : la donnée qui trancherait vraiment (les décibels à la
       // façade) existe, elle est publique, et nous ne pouvons pas la lire à la place du lecteur.
       limitation: "Cette distance est mesurée depuis le point de référence de la commune, pas depuis une adresse. Le bruit réellement perçu dépend de la façade, de l'étage, du relief et de l'isolation.",
-      evidence: [{ factId: "calmeSonore", module: "territoire", label: `Bruit · ${f.nom}`, observedValue: `${BRUIT_LABEL_COURT[b.source]} à ${distanceEnPhrase(b.distanceKm)}`, grain: "commune", href: territoireHref }],
+      evidence: [{ factId: "calmeSonore", module: "territoire", label: `Bruit · ${f.nom}`, observedValue: `${BRUIT_LABEL_COURT[b.source]} à ${distanceEnPhrase(b.distanceKm)}`, grain: "commune", href: territoireHref, targetKey: "health.noise_infrastructure" }],
       action: {
         type: "verifier_sur_place",
         label: "Écoutez sur place, à plusieurs heures",
@@ -1122,7 +1124,16 @@ const ruleIndustrie: DecisionRule = {
     if (preferenceWeight(p, key) === 0) return ret("not_applicable", [], "priorité non déclarée");
     const i = f.sante?.industrie;
     if (!i?.lu) return ret("uncertain", [], "exposition industrielle indisponible");
-    if (!i.notable || i.classe == null) return ret("satisfied", [], "aucun site industriel à risque à portée");
+    // FUT-167 (engine-8) : LE MÊME MENSONGE SILENCIEUX QUE LE BRUIT, FERMÉ DE LA MÊME FAÇON. L'exposition est
+    // calculée depuis le point de référence de la commune, dans un rayon de 8 km : une adresse en bordure de
+    // commune peut se trouver à 3 km d'un site que le centre voit à 9 km. Avec une adresse, ce `satisfied` sans
+    // fait rendait le critère « favorable » pour le logement, sans carte ni limitation. Il devient non concluant ;
+    // la lecture à l'adresse (sites Seveso, plans de prévention) vit dans le module Logement.
+    if (!i.notable || i.classe == null) {
+      return f.hasAddress
+        ? ret("uncertain", [], "exposition industrielle non concluante à l'adresse : mesure ancrée sur le centroïde communal")
+        : ret("satisfied", [], "aucun site industriel à risque à portée");
+    }
 
     // Examiné, signal établi, mais tu à poids 1 : le lecteur l'a dit secondaire. Une condition confirmée
     // le montre quel que soit son poids (conditions.ts).
@@ -1135,7 +1146,7 @@ const ruleIndustrie: DecisionRule = {
       // maison (exposition hybride, rayon de 8 km) n'est qu'un déclencheur : il n'est jamais affiché.
       statement: `${cap(industrieEnPhrase(i.classe))} est recensé à proximité de cette commune. ${industrieGlose(i.classe)}`.trim(),
       limitation: "Cette exposition est lue dans un rayon autour du point de référence de la commune. La distance réelle depuis un logement, et le plan de prévention qui s'y applique, se vérifient à l'adresse.",
-      evidence: [{ factId: "expoIndustrielle", module: "territoire", label: `Industrie · ${f.nom}`, grain: "commune", href: territoireHref }],
+      evidence: [{ factId: "expoIndustrielle", module: "territoire", label: `Industrie · ${f.nom}`, grain: "commune", href: territoireHref, targetKey: "health.industrial_site" }],
       action: {
         type: "obtenir_document",
         label: "Consultez l'état des risques applicable à l'adresse",

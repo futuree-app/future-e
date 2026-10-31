@@ -86,8 +86,9 @@ test("toute clé du catalogue est ÉMISE par au moins une règle (pas de vocabul
     "src/lib/decision/logement-rules.ts",
     "src/lib/decision/materiality-rules.ts",
     "src/lib/decision/mismatch-rules.ts",
+    "src/lib/decision/radon-rules.ts", // FUT-167 : la preuve radon vise la ligne « Radon » de la carte Santé environnementale
   ].map((f) => readFileSync(f, "utf8")).join("\n");
-  const emises = new Set([...regles.matchAll(/"((?:climate|risk|nature|housing)\.[a-z_]+)"/g)].map((m) => m[1]!));
+  const emises = new Set([...regles.matchAll(/"((?:climate|risk|nature|housing|health)\.[a-z_]+)"/g)].map((m) => m[1]!));
   const jamaisEmises = (Object.keys(EVIDENCE_TARGET_MODULE) as EvidenceTargetKey[]).filter((k) => !emises.has(k));
   assert.deepEqual(
     jamaisEmises, [],
