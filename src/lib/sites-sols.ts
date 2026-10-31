@@ -177,22 +177,77 @@ export function lotIncomplet(pages: (PageSsp | null)[], plafond: number): boolea
  * annonce `results > 0` interdit `absent_dans_source`, même si aucune fiche n'a pu en être tirée.
  */
 export function lireCategorie(pages: (PageSsp | null)[], incomplet = false): CategorieLue {
+  return lireLignes(pages, incomplet, fiche);
+}
+
+/**
+ * LE CŒUR COMMUN DE LA LECTURE, quelle que soit la forme rendue d'une ligne (FUT-157). `versFiche` rend
+ * `null` pour une ligne inexploitable, qui rend la catégorie `partielle`. Une même fiche qui revient (ville
+ * et arrondissement) n'est gardée qu'une fois ; `memeFiche` dit si ses répétitions disent bien la même chose :
+ * sinon, elle n'est pas gardée et la catégorie est `partielle` (aucune des deux versions n'est choisie).
+ */
+function lireLignes<F extends { id: string; nom: string }>(
+  pages: (PageSsp | null)[], incomplet: boolean, versFiche: (r: Record<string, unknown>) => F | null,
+  memeFiche: (a: F, b: F) => boolean = () => true,
+): { etat: "indisponible" } | { etat: "absent_dans_source"; total: 0; fiches: [] } | { etat: "disponible" | "partiel"; total: number; fiches: F[] } {
   if (pages.length === 0 || pages.some((p) => p === null || !pageLisible(p))) return { etat: "indisponible" };
   const lisibles = pages as { results: number; data: Record<string, unknown>[] }[];
-  const parId = new Map<string, FicheSsp>();
+  const parId = new Map<string, F>();
+  const contradictoires = new Set<string>();
   let nonExploitees = 0;
   for (const p of lisibles) {
     for (const r of p.data) {
-      const f = r && typeof r === "object" ? fiche(r) : null;
-      if (!f) nonExploitees++;
-      else if (!parId.has(f.id)) parId.set(f.id, f);
+      const f = r && typeof r === "object" ? versFiche(r) : null;
+      if (!f) { nonExploitees++; continue; }
+      const deja = parId.get(f.id);
+      if (!deja) parId.set(f.id, f);
+      else if (!memeFiche(deja, f)) contradictoires.add(f.id);
     }
   }
+  for (const id of contradictoires) parId.delete(id);
   const fiches = [...parId.values()].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
   const annonce = lisibles.some((p) => p.results > 0);
-  const partiel = incomplet || nonExploitees > 0 || (fiches.length === 0 && annonce);
+  const partiel = incomplet || nonExploitees > 0 || contradictoires.size > 0 || (fiches.length === 0 && annonce);
   if (fiches.length === 0 && !partiel) return { etat: "absent_dans_source", total: 0, fiches: [] };
   return { etat: partiel ? "partiel" : "disponible", total: fiches.length, fiches };
+}
+
+// ── Lecture géographique (FUT-157) ───────────────────────────────────────────────────────────────
+
+/**
+ * UNE FICHE AVEC SA GÉOMÉTRIE PUBLIÉE (champ `geom` de la spécification v1, en WGS84). Mesuré le 30/10/2026 :
+ * les SIS et les SUP portent un MultiPolygon ; une partie des instructions n'est localisée que par un POINT
+ * (Lyon : 33 sur 111, Marseille : 24 sur 100), et quelques-unes n'ont aucune géométrie (Metz : 2 sur 19).
+ * `geometrie` vaut `null` dans ce dernier cas : une fiche sans géométrie ne se situe pas, elle se compte.
+ */
+export type FicheSspGeo = FicheSsp & { geometrie: { type: string; coordinates: unknown } | null };
+
+function geometrie(v: unknown): FicheSspGeo["geometrie"] {
+  if (!v || typeof v !== "object") return null;
+  const g = v as { type?: unknown; coordinates?: unknown };
+  return typeof g.type === "string" && Array.isArray(g.coordinates) ? { type: g.type, coordinates: g.coordinates } : null;
+}
+
+function ficheGeo(r: Record<string, unknown>): FicheSspGeo | null {
+  const f = fiche(r);
+  return f ? { ...f, geometrie: geometrie(r.geom) } : null;
+}
+
+/**
+ * Une même fiche répétée sous la ville et sous l'arrondissement ne diffère que par sa commune de
+ * rattachement (mesuré sur Paris, Lyon et Marseille, 107 cas, 30/10/2026). Deux GÉOMÉTRIES différentes
+ * sous un même identifiant ne sont pas une répétition : la source se contredit.
+ */
+const memeGeometrie = (a: FicheSspGeo, b: FicheSspGeo) => JSON.stringify(a.geometrie) === JSON.stringify(b.geometrie);
+
+export type CategorieGeoLue =
+  | { etat: "indisponible" }
+  | { etat: "absent_dans_source"; total: 0; fiches: [] }
+  | { etat: "disponible" | "partiel"; total: number; fiches: FicheSspGeo[] };
+
+/** Comme `lireCategorie`, en gardant la géométrie de chaque fiche. Mêmes états, mêmes garanties. */
+export function lireCategorieGeo(pages: (PageSsp | null)[], incomplet = false): CategorieGeoLue {
+  return lireLignes(pages, incomplet, ficheGeo, memeGeometrie);
 }
 
 /**

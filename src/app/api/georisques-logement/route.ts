@@ -15,6 +15,8 @@ import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
 import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
 import { precisionDepuisBanId } from "@/lib/bruit-aerien";
 import { lireFibreAdresse } from "@/lib/server/fibre-adresse-index";
+import { lireSitesSolsAdresse } from "@/lib/server/sites-sols";
+import { adresseDuLibelle } from "@/lib/sites-sols-terrain";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
 import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
@@ -23,7 +25,6 @@ import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
 import { resultatAudit, voisinAutorise, type AuditLookup } from "@/lib/audit-record";
-import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
@@ -81,6 +82,27 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       }),
     );
 
+    // FUT-157 : LES SOLS POLLUÉS AU TERRAIN (SIS, servitudes, instructions de l'administration). Il attend la
+    // parcelle, comme le bruit aérien : elle fixe le rayon de la recherche et sert de preuve quand elle est
+    // attribuée. Trois appels Géorisques autour du point, plus la lecture communale des fiches sans
+    // géométrie (cache d'une journée), en parallèle de tout le reste. Ne lève jamais.
+    const sitesSolsP = parcelLueP.then((lu) =>
+      lireSitesSolsAdresse(
+        {
+          point: [address.longitude, address.latitude],
+          geocodage: banFeatureType ?? precisionDepuisBanId(address.id),
+          parcelle: lu
+            ? {
+                geometry: lu.geometry, code: lu.parcel.parcelCode, rattachement: lu.parcel.rattachement ?? "point",
+                candidatsAuPoint: lu.parcel.candidatsAuPoint, distanceRepliM: lu.parcel.distanceRepliM,
+              }
+            : null,
+          adresse: adresseDuLibelle(address.label, address.postcode, address.city),
+        },
+        address.citycode,
+      ),
+    );
+
     // FUT-156 : LA FIBRE À L'ADRESSE. Une lecture de l'index trimestriel (un lot de quelques dizaines de Ko),
     // en parallèle de tout le reste, par l'identifiant BAN seul : jamais par la proximité. Ne lève jamais.
     const fibreP = lireFibreAdresse(address.id);
@@ -130,17 +152,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme, bruitAerien, fibre, sitesSols] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
-      // AUTOUR DE L'ADRESSE, PLUS AUTOUR DE LA COMMUNE (29/07/2026). L'appel communal rendait
-      // cinquante friches situées n'importe où dans la commune, SANS distance : « une friche
-      // polluée quelque part à Nantes » n'est pas une information sur un logement nantais.
-      //
-      // Le rayon est une convention nommée et versionnée : cf. `CARTOFRICHES_RAYON_RECHERCHE_M`,
-      // qui dit ce qu'il est (un périmètre de recherche) et ce qu'il n'est pas (un seuil sanitaire).
-      getCartofrichesNearPoint(address.latitude, address.longitude, CARTOFRICHES_RAYON_RECHERCHE_M).catch(() => null),
       // AVEC LE POINT : les indicateurs IRIS décrivent alors le SECTEUR de l'adresse, pas la moyenne
       // de la commune. L'écart n'est pas cosmétique — La Rochelle centre affiche 7,3 % de HLM là où
       // la commune entière en affiche 31,1 %. `irisScope` dit toujours à quelle échelle lire.
@@ -155,7 +170,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, fibreP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP, bruitAerienP, fibreP, sitesSolsP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -201,7 +216,14 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       // index local (`data/irep-registre.json`, `lib/server/irep-registre.ts`), lu par la page publique
       // /agir/pollutions-invisibles. Son retour au dossier est une décision distincte (FUT-152 phase 2,
       // cf. docs/audits/2026-10-28-fut152-pollutions-invisibles.md) : ne pas le rebrancher sans elle.
-      cartofriches,
+      //
+      // CARTOFRICHES DÉBRANCHÉ LE 30/10/2026 (PR #118, à part de FUT-157), pour la même raison. Les friches
+      // autour de l'adresse étaient collectées à chaque dossier et lues par AUCUN composant, aucune règle ni
+      // aucune synthèse (`logement-synthesis-cache` les écartait déjà). Pire : la source comptait parmi les
+      // sources absentes, et sa seule panne faisait REFUSER une actualisation par ailleurs légitime
+      // (scripts/fut157/cartofriches-refus.mjs). Les rapports enregistrés gardent leur champ `cartofriches`,
+      // que rien ne lit ; la lib et `/api/cartofriches` restent. Une friche n'est pas une pollution avérée :
+      // son retour au dossier serait une décision produit, pas une réparation.
       communeData,
       sinistralite,
       georisques: {
@@ -214,6 +236,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       bruitAerien,
       // FUT-156 : posée seulement quand la lecture est activée (`FIBRE_ADRESSE_BUCKET`).
       ...(fibre ? { fibre } : {}),
+      // FUT-157 : toujours posée, lue ou indisponible. Absente d'un rapport antérieur : l'écran n'affiche rien.
+      sitesSols,
       pointHazards,
       // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
       // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en
@@ -225,6 +249,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         heritage,
         sinistralite,
         parcelleParRepli: parcel?.rattachement === "repli",
+        sitesSols,
       }),
       granularity: {
         geocoding: "address",

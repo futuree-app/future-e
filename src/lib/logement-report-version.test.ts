@@ -349,3 +349,30 @@ test("T19 : à la première génération, une source indisponible est « non vé
   // lu plus bas pouvant l'être.
   assert.match(bloc, /\{!g \? \([\s\S]*?Risques réglementés non déterminés[\s\S]*?\) : plans\.length === 0/);
 });
+
+// ── CARTOFRICHES N'EST PLUS COLLECTÉ (30/10/2026, PR #118, à part de FUT-157) ─────────────────────────
+// Reproduit avant le retrait (scripts/fut157/cartofriches-refus.mjs) : une version N collectée avec Cartofriches,
+// puis une collecte N+1 dont seul Cartofriches n'avait pas répondu, était REFUSÉE (« friches » devenait une
+// source absente). Aucun composant, aucune règle ni aucune synthèse ne lisait ces friches.
+test("Cartofriches : son absence n'est plus une panne, et ne fait plus refuser une actualisation", () => {
+  const avecFriches = rapport();
+  const { cartofriches: _retire, ...sansFriches } = rapport({ altitude: 13 });
+  assert.equal("cartofriches" in sansFriches, false);
+  assert.deepEqual(sourcesAbsentes(sansFriches), []);
+  assert.equal(issueActualisation(sansFriches, "h2", version(1, avecFriches, "h1")), "nouvelle_version");
+  // Une collecte faite pendant une panne, avant le retrait (`cartofriches: null`), ne la nomme plus non plus.
+  assert.deepEqual(sourcesAbsentes(rapport({ cartofriches: null })), []);
+});
+
+test("Cartofriches : une version enregistrée avant le retrait se relit telle quelle, champ et liste compris", () => {
+  const ancien = rapport({ cartofriches: { count: 1, tronque: false, sansCoordonnees: 0, friches: [] } });
+  const ligne = { version: 2, report: ancien, report_hash: "h", sources_absentes: ["friches"], collected_at: "2026-09-01T10:00:00.000Z" };
+  const v = lireLigneVersion(ligne)!;
+  assert.deepEqual(v.sourcesAbsentes, ["friches"], "l'absence notée à l'époque est conservée et reste affichable");
+  assert.equal(v.report.cartofriches?.count, 1);
+  // Une actualisation de cette version n'est pas refusée parce que la nouvelle collecte n'a plus de friches.
+  const { cartofriches: _r, ...nouveau } = rapport({ altitude: 13 });
+  assert.equal(issueActualisation(nouveau, "h2", v), "nouvelle_version");
+  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(module, /friches: "friches \(Cartofriches\)"/, "le libellé reste pour les versions qui l'ont noté");
+});

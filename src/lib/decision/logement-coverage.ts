@@ -25,6 +25,7 @@
 import type { RegulatoryPlan } from "../pprn-zonage.ts";
 import { zonageInondationDeLAdresse, type ZonageInondationFait } from "./zonage-inondation.ts";
 import type { OnrnSinistralite } from "../onrn-sinistralite.ts";
+import { etatSitesSols, type EtatSitesSols, type LectureSitesSols } from "../sites-sols-etat.ts";
 
 export type SourceCoverage = "present" | "none" | "unavailable"; // none = la source a répondu, rien trouvé
 
@@ -43,6 +44,11 @@ export type LogementCoverageInputs = {
   sinistralite: OnrnSinistralite | null;
   /** FUT-127 : la parcelle vient du repli cadastral (le point ne tombait dans aucune parcelle). */
   parcelleParRepli?: boolean;
+  /**
+   * FUT-157 : la lecture des sols pollués au terrain. Transmise par la route du module seulement : le moteur
+   * de décision (`fetchLogementDecisionData`) ne la lit pas, et sa couverture reste ce qu'elle était.
+   */
+  sitesSols?: LectureSitesSols;
 };
 
 export type LogementCoverage = {
@@ -53,7 +59,20 @@ export type LogementCoverage = {
   sinistralite: { coverage: SourceCoverage; active: boolean };
   /** FUT-127 : le zonage inondation de l'adresse, point et parcelle confrontés. */
   zonageInondation: ZonageInondationFait;
+  /**
+   * FUT-157 : les sols pollués au terrain. `present` : un périmètre concerne le terrain ou appelle une
+   * vérification (`etat` dit lequel) ; `none` : tout a été lu, à la parcelle attribuée, sans correspondance ;
+   * `unavailable` : panne, lecture incomplète, ou terrain non situé (l'absence ne vaut alors que pour le point).
+   * Posé seulement quand la lecture est fournie.
+   */
+  sitesSols?: { coverage: SourceCoverage; etat: EtatSitesSols };
 };
+
+/** La couverture d'une lecture des sols pollués : seule une absence établie à la parcelle est un « rien trouvé ». */
+export function couvertureSitesSols(l: LectureSitesSols): { coverage: SourceCoverage; etat: EtatSitesSols } {
+  const etat = etatSitesSols(l);
+  return { coverage: etat === "concerne" || etat === "a_verifier" ? "present" : etat === "aucun" ? "none" : "unavailable", etat };
+}
 
 /**
  * L'ÉTAT ÉNERGÉTIQUE, DEPUIS L'ÉTIQUETTE.
@@ -130,5 +149,6 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
       parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
       parcelleParRepli: i.parcelleParRepli,
     }),
+    ...(i.sitesSols ? { sitesSols: couvertureSitesSols(i.sitesSols) } : {}),
   };
 }
