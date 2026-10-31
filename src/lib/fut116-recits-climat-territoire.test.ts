@@ -388,12 +388,22 @@ test("FUT-165 · un relevé daté sans état (dossier ancien) est dit non vérif
 });
 
 test("FUT-165 · « Ecoulement non visible » se dit écoulement interrompu, pas assec", () => {
-  const f = carte(facteurs(null, "gwl20", "Commune test", { onde: ondeEtat("Ecoulement non visible", true) }), SECHERESSE);
-  assert.equal(f.val, "Écoulement interrompu");
-  const texte = volet(f.detail!);
-  assert.match(texte, /Écoulement interrompu observé/);
-  assert.match(texte, /Relevé de terrain du 28 octobre 2026 Écoulement interrompu, plus visible : le Mas/);
-  assert.doesNotMatch(texte, /à sec/);
+  // FUT-163 : `isDry` vaut désormais FAUX pour cet état (seul l'assec le rend vrai). La carte le dit quand
+  // même, comme observation distincte ; et un booléen ancien resté vrai ne change rien : l'état brut décide.
+  for (const isDry of [false, true]) {
+    const f = carte(facteurs(null, "gwl20", "Commune test", { onde: ondeEtat("Ecoulement non visible", isDry) }), SECHERESSE);
+    assert.equal(f.val, "Écoulement interrompu");
+    const texte = volet(f.detail!);
+    assert.match(texte, /Écoulement interrompu observé/);
+    assert.match(texte, /Relevé de terrain du 28 octobre 2026 Écoulement interrompu, plus visible : le Mas/);
+    assert.doesNotMatch(texte, /à sec/);
+  }
+});
+
+test("FUT-163 · un assec confirmé reste dit « à sec », daté et nommé", () => {
+  const f = carte(facteurs(null, "gwl20", "Commune test", { onde: ondeEtat("Assec", true) }), SECHERESSE);
+  assert.equal(f.val, "Cours d'eau à sec");
+  assert.match(volet(f.detail!), /Cours d'eau à sec observé .* Relevé de terrain du 28 octobre 2026 Cours d'eau à sec \(assec\) : le Mas/);
 });
 
 test("FUT-165 · un écoulement visible est dit tel quel ; une panne est dite indisponible", async () => {

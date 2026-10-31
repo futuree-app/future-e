@@ -13,6 +13,7 @@ import { CHAMPS_ECOULEMENT, lireEcoulement } from "./eaufrance-ecoulement.ts";
 import { buildTerritoireSnapshot, type TerritoireInputs } from "./territoire/facts.ts";
 import { screenFromSnapshot } from "./territoire/screen.ts";
 import { valueOf } from "./facts/contract.ts";
+import { projectForSynthesis } from "./territoire/synthesis-contract.ts";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
 const hook = `
@@ -94,6 +95,88 @@ test("un relevé lu passe au relevé Territoire avec son état", () => {
   const s = buildTerritoireSnapshot({ ...MINIMAL, drought: d } as TerritoireInputs, "2026-10-30T10:00:00Z");
   assert.deepEqual(valueOf(s, "water.river_drought"), d);
   assert.deepEqual(screenFromSnapshot(s).drought, d);
+});
+
+// ── FUT-163 (31/10/2026) : la CHAÎNE COMPLÈTE, de la réponse ONDE à la projection de synthèse ─────────
+// `estACec` comptait « Ecoulement non visible » comme un assec, et `isDry` nourrit `cours_eau_a_sec_observe` :
+// le modèle aurait affirmé un cours d'eau à sec que l'OFB n'a pas publié. Chaque cas part d'une réponse Hub'Eau
+// simulée (ou d'une panne), passe par `getEaufranceSummary` (le vrai code de collecte), le relevé Territoire,
+// l'écran, et s'arrête sur ce que le modèle reçoit. Un code INSEE par cas : le module garde un cache en mémoire.
+async function chaine(insee: string, reponse: Record<string, unknown>[] | "panne") {
+  if (reponse === "panne") globalThis.fetch = (async () => new Response("panne", { status: 503 })) as typeof fetch;
+  else hubeauQuiFiltre(reponse);
+  const eau = await EAU.getEaufranceSummary(insee);
+  // Même câblage que `territoire-snapshot.ts` (drought, droughtIndisponible).
+  const snapshot = buildTerritoireSnapshot(
+    { ...MINIMAL, insee, drought: eau.drought ?? null, droughtIndisponible: eau.droughtIndisponible === true } as TerritoireInputs,
+    "2026-10-31T10:00:00Z",
+  );
+  return { eau, snapshot, ecran: screenFromSnapshot(snapshot), projection: projectForSynthesis(snapshot, "gwl20") };
+}
+const ligne = (libelle_ecoulement: string | null) => ({ date_observation: "2026-10-28", libelle_ecoulement, libelle_cours_eau: "le Mas" });
+
+test("FUT-163 · chaîne « Assec » : isDry vrai, assec confirmé dans la projection", async () => {
+  const c = await chaine("16901", [ligne("Assec")]);
+  assert.equal(c.eau.drought.isDry, true);
+  assert.equal(c.ecran.drought!.status, "Assec");
+  assert.deepEqual(c.projection.cours_eau_a_sec_observe, { nom: "le Mas" });
+});
+
+test("FUT-163 · chaîne « Ecoulement non visible » : isDry faux, état conservé, JAMAIS projeté comme assec", async () => {
+  const c = await chaine("16902", [ligne("Ecoulement non visible")]);
+  assert.equal(c.eau.drought.isDry, false);
+  // L'état n'est pas perdu : il voyage tel quel jusqu'à l'écran, et s'y lit « écoulement interrompu ».
+  assert.equal(valueOf<{ status: string }>(c.snapshot, "water.river_drought")!.status, "Ecoulement non visible");
+  assert.equal(lireEcoulement(c.ecran.drought!).etat, "ecoulement_interrompu");
+  assert.equal(c.projection.cours_eau_a_sec_observe, null);
+  assert.doesNotMatch(JSON.stringify(c.projection), /assec|à sec/i);
+});
+
+test("FUT-163 · chaîne « écoulement visible » et « observation impossible » : aucun assec", async () => {
+  for (const [insee, etat] of [["16903", "Ecoulement visible acceptable"], ["16904", "Observation impossible"]] as const) {
+    const c = await chaine(insee, [ligne(etat)]);
+    assert.equal(c.eau.drought.isDry, false, etat);
+    assert.equal(c.ecran.drought!.status, etat);
+    assert.equal(c.projection.cours_eau_a_sec_observe, null, etat);
+  }
+});
+
+test("FUT-163 · chaîne sans observation : fait manquant, pas de panne, pas d'assec", async () => {
+  const c = await chaine("16905", []);
+  assert.equal(c.eau.drought, null);
+  assert.equal(c.eau.droughtIndisponible, undefined);
+  assert.equal(c.snapshot.facts.find((f) => f.key === "water.river_drought")!.status, "missing");
+  assert.equal(c.ecran.droughtIndisponible, false);
+  assert.equal(c.projection.cours_eau_a_sec_observe, null);
+});
+
+test("FUT-163 · chaîne en panne Hub'Eau : source indisponible, jamais une absence d'assec affirmée", async () => {
+  const c = await chaine("16906", "panne");
+  assert.equal(c.eau.drought, null);
+  assert.equal(c.eau.droughtIndisponible, true);
+  assert.equal(c.snapshot.facts.find((f) => f.key === "water.river_drought")!.status, "source_unavailable");
+  assert.equal(c.ecran.droughtIndisponible, true);
+  assert.equal(c.projection.cours_eau_a_sec_observe, null);
+});
+
+test("FUT-163 · ancien snapshot incomplet : relu sans mutation, jamais projeté comme assec", () => {
+  // Dossiers enregistrés avant FUT-165 : un relevé daté SANS état (`main` demandait `libelle_observation`,
+  // l'état n'arrivait jamais, `isDry` valait toujours faux). Aucun dossier enregistré ne porte donc un `isDry`
+  // vrai : le contrat de synthèse, qui lit ce booléen, reste identique octet pour octet (garde FUT-147), et sa
+  // version ne monte pas. Le rendu Territoire, lui, lit l'état brut (cf. fut116-recits-climat-territoire).
+  const anciens = [
+    { lastObservationDate: "2026-07-01", riverName: "le Mas", status: null, isDry: false },
+    { lastObservationDate: "2026-07-01", riverName: "le Mas", isDry: false },
+  ];
+  for (const d of anciens) {
+    const gele = structuredClone(d);
+    const s = buildTerritoireSnapshot({ ...MINIMAL, drought: d } as unknown as TerritoireInputs, "2026-07-01T10:00:00Z");
+    const avant = JSON.stringify(s);
+    assert.equal(projectForSynthesis(s, "gwl20").cours_eau_a_sec_observe, null, JSON.stringify(d));
+    screenFromSnapshot(s);
+    assert.equal(JSON.stringify(s), avant, "la relecture ne modifie pas le relevé");
+    assert.deepEqual(d, gele);
+  }
 });
 
 // Les entrées minimales d'un relevé Territoire : toutes les sources absentes.

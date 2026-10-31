@@ -12,14 +12,18 @@
 //
 // ONDE renvoie six valeurs distinctes, SANS accent sur le E initial (vérifié le 25/07/2026) :
 // « Assec », « Ecoulement visible faible », « Ecoulement visible acceptable », « Ecoulement non
-// visible », « Ecoulement visible », « Observation impossible ». Seules les deux premières formes
-// ci-dessous signalent un cours d'eau effectivement à sec.
+// visible », « Ecoulement visible », « Observation impossible ». SEULE « Assec » dit un cours d'eau à sec.
+//
+// FUT-163 (31/10/2026) : « Ecoulement non visible » N'EST PAS un assec. Dans la typologie ONDE, l'eau est
+// encore présente au point observé, mais elle ne s'écoule plus visiblement. Cette fonction le comptait
+// comme sec, et `isDry` nourrit `cours_eau_a_sec_observe` dans la projection de synthèse : le modèle
+// aurait affirmé un assec que l'OFB n'a pas publié. L'état reste conservé tel quel (`status`) et se lit
+// par `lireEcoulement` (« ecoulement_interrompu ») : il n'est pas perdu, il n'est plus confondu.
 //
 // « Observation impossible » n'est PAS un assec : c'est une absence de mesure, et la traiter comme une
 // bonne ou une mauvaise nouvelle inventerait un état que la source ne donne pas.
 export function estACec(libelle: string | null | undefined): boolean {
-  const obs = (libelle ?? "").toLowerCase();
-  return obs.includes("assec") || obs.includes("non visible");
+  return (libelle ?? "").toLowerCase().includes("assec");
 }
 
 // ── FUT-165 (30/10/2026) : LE CHAMP ÉTAIT LU, JAMAIS DEMANDÉ ─────────────────────────────────────
@@ -48,7 +52,10 @@ export type EtatEcoulement =
   | "non_verifiable";
 
 /** L'état à dire, et sa phrase. L'état brut de la source reste la référence ; rien n'est déduit au-delà. */
-export function lireEcoulement(d: EcoulementLu): { etat: EtatEcoulement; texte: string } {
+//
+// La lecture se fait sur l'ÉTAT BRUT (`status`), jamais sur `isDry` : un booléen enregistré dans un dossier
+// porte la sémantique du jour où il a été calculé, l'état de la source, lui, ne change pas de sens.
+export function lireEcoulement(d: Pick<EcoulementLu, "status">): { etat: EtatEcoulement; texte: string } {
   const s = (d.status ?? "").trim().toLowerCase();
   if (!s) return { etat: "non_verifiable", texte: "État du cours d'eau non vérifiable à la date de ce dossier" };
   if (s.includes("assec")) return { etat: "assec", texte: "Cours d'eau à sec (assec)" };

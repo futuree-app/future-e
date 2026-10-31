@@ -524,7 +524,12 @@ export function buildFactors(
   // Restriction du moment (VigiEau), relevé de terrain (ONDE), sols secs projetés (DRIAS) : trois
   // sources, trois natures. FUT-116 : aucune ne dit une tendance (le composant ne lit aucun écart de
   // sécheresse), et l'une ne se déduit pas des autres. Les noms de bases restent en pied de drawer.
-  const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
+  // FUT-163 (31/10/2026) : `isDry` ne dit plus que l'assec confirmé. L'écoulement interrompu (« Ecoulement
+  // non visible ») reste une observation à dire, distincte : tout se lit sur l'état brut, jamais sur le booléen
+  // enregistré dans le dossier (son sens a changé, l'état de la source non).
+  const etatOnde = drought ? lireEcoulement(drought).etat : null;
+  const ondeSignale = etatOnde === "assec" || etatOnde === "ecoulement_interrompu";
+  const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || ondeSignale;
   // « Vigilance » est le niveau le plus bas de VigiEau : c'est de la
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
   // contredit le reste de la carte. On ne parle de restriction qu'à partir
@@ -584,8 +589,8 @@ export function buildFactors(
               ? restrictions.texte
               // FUT-116 : l'observation ne se dit QUE si ONDE l'a relevée. Elle était la branche par
               // défaut : toute ouverture du volet sans sols secs ni restriction l'aurait affirmée.
-              : drought?.isDry
-                ? (lireEcoulement(drought).etat === "assec" ? "Cours d'eau à sec observé" : "Écoulement interrompu observé")
+              : ondeSignale
+                ? (etatOnde === "assec" ? "Cours d'eau à sec observé" : "Écoulement interrompu observé")
                 : restrictions.texte,
         subhead: "Restrictions d'eau, cours d'eau et sols : trois lectures à ne pas confondre.",
         accent: "var(--orange)",
@@ -646,8 +651,8 @@ export function buildFactors(
           ? `${drySoilDays} jours/an en ${meta.year}`
           : vigieau?.maxLevel
             ? levelLabel(vigieau.maxLevel)
-            : drought?.isDry
-              ? (lireEcoulement(drought).etat === "assec" ? "Cours d'eau à sec" : "Écoulement interrompu")
+            : ondeSignale
+              ? (etatOnde === "assec" ? "Cours d'eau à sec" : "Écoulement interrompu")
               : "—",
       col: "var(--orange)",
       src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
@@ -1189,13 +1194,15 @@ function buildParagraphs(
     );
   }
 
-  if (drought?.isDry) {
+  // FUT-163 : l'état brut décide, pas `isDry` (cf. la carte « Sécheresse des sols »).
+  const etatReleve = drought ? lireEcoulement(drought).etat : null;
+  if (drought && (etatReleve === "assec" || etatReleve === "ecoulement_interrompu")) {
     const cours = drought.riverName ? `le ${drought.riverName}` : "le cours d'eau local";
     const lead = droughtSentences.length === 0
       ? `${cours.charAt(0).toUpperCase()}${cours.slice(1)} a été observé`
       : `Localement, ${cours} a été observé`;
     // FUT-165 : « écoulement non visible » n'est pas un assec ; la phrase dit l'état relevé, et sa date.
-    const etat = lireEcoulement(drought).etat === "assec" ? "à sec" : "sans écoulement visible";
+    const etat = etatReleve === "assec" ? "à sec" : "sans écoulement visible";
     const quand = drought.lastObservationDate ? ` le ${formatFrDate(drought.lastObservationDate)}` : "";
     droughtSentences.push(
       `${lead} ${etat}${quand} par le réseau ONDE (Hub'Eau, OFB).`,
