@@ -25,6 +25,7 @@ type EcoulementRecord = {
   // /v1/ecoulement/observations (300 observations, 6 valeurs distinctes).
   libelle_ecoulement?: string | null;
   libelle_cours_eau?: string | null;
+  libelle_station?: string | null;
 };
 
 type HubeauPage<T> = {
@@ -44,6 +45,8 @@ export type EaufranceSummary = {
   drought: {
     lastObservationDate: string | null;
     riverName: string | null;
+    /** FUT-163 : la station ONDE du relevé. Absente des relevés enregistrés avant le 31/10/2026. */
+    stationName?: string | null;
     status: string | null;
     isDry: boolean;
   } | null;
@@ -153,6 +156,7 @@ export async function loadDrought(inseeCode: string) {
   return {
     lastObservationDate: latest.date_observation ?? null,
     riverName: latest.libelle_cours_eau ?? null,
+    stationName: latest.libelle_station ?? null,
     status: latest.libelle_ecoulement ?? null,
     isDry: estACec(latest.libelle_ecoulement),
   };

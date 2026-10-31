@@ -31,7 +31,7 @@ const fetchReel = globalThis.fetch;
 beforeEach(() => { globalThis.fetch = fetchReel; });
 
 /** La ligne relevée pour 16016 (Hub'Eau, 30/10/2026). */
-const LIGNE_16016 = { date_observation: "2026-10-28", libelle_ecoulement: "Assec", libelle_cours_eau: "le Mas" };
+const LIGNE_16016 = { date_observation: "2026-10-28", libelle_ecoulement: "Assec", libelle_cours_eau: "le Mas", libelle_station: "Le Mas à Ansac-sur-Vienne" };
 
 /** Un Hub'Eau qui, comme le vrai, ne renvoie que les champs listés dans `fields`. */
 function hubeauQuiFiltre(lignes: Record<string, unknown>[]) {
@@ -53,7 +53,7 @@ test("la requête demande le champ d'état que la lecture lit, et l'assec arrive
   assert.equal(vus[0]!.pathname, "/api/v1/ecoulement/observations");
   assert.deepEqual(vus[0]!.searchParams.get("fields")!.split(","), [...CHAMPS_ECOULEMENT]);
   assert.ok(CHAMPS_ECOULEMENT.includes("libelle_ecoulement"));
-  assert.deepEqual(d, { lastObservationDate: "2026-10-28", riverName: "le Mas", status: "Assec", isDry: true });
+  assert.deepEqual(d, { lastObservationDate: "2026-10-28", riverName: "le Mas", stationName: "Le Mas à Ansac-sur-Vienne", status: "Assec", isDry: true });
 });
 
 test("l'ancienne requête (sans `libelle_ecoulement`) aurait rendu un état vide : c'est la signature reconnue", () => {

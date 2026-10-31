@@ -34,11 +34,15 @@ export function estACec(libelle: string | null | undefined): boolean {
 // sec ». Commune 16016, 28/10/2026 : la source disait « Assec ». Le test d'alors vérifiait la lecture
 // d'une réponse fabriquée, jamais la requête. La liste des champs vit donc ICI, à côté de la lecture, et
 // un test fait tourner la vraie requête contre un Hub'Eau simulé qui ne rend que les champs demandés.
-export const CHAMPS_ECOULEMENT = ["date_observation", "libelle_ecoulement", "libelle_cours_eau"] as const;
+// FUT-163 (31/10/2026) : `libelle_station` s'y ajoute (« Le Mas à Ansac-sur-Vienne », vérifié le 31/10/2026) :
+// un relevé ONDE vaut pour UNE station, et l'assistant doit pouvoir la nommer sans l'étendre à la commune.
+export const CHAMPS_ECOULEMENT = ["date_observation", "libelle_ecoulement", "libelle_cours_eau", "libelle_station"] as const;
 
 export type EcoulementLu = {
   lastObservationDate: string | null;
   riverName: string | null;
+  /** FUT-163 : la station ONDE du relevé. Absente des relevés enregistrés avant le 31/10/2026. */
+  stationName?: string | null;
   status: string | null;
   isDry: boolean;
 };
