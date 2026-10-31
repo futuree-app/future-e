@@ -23,6 +23,7 @@ import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSect
 import { InondationLectureBlock } from "@/components/report/logement/InondationSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { FibreAdresseSection } from "@/components/report/logement/FibreAdresseSection";
+import { IndustrieAdresseSection } from "@/components/report/logement/IndustrieAdresseSection";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
@@ -685,6 +686,11 @@ export default function LogementModule({
               </ReportSection>
             )}
 
+            {/* FUT-167 (D2) : les risques industriels À L'ADRESSE (sites Seveso autour, plans de prévention des
+                risques technologiques au point et sur la commune), à côté des risques au point. La place voisine des
+                sols pollués au terrain (FUT-157), quand ils seront fusionnés. */}
+            <IndustrieAdresseSection lecture={result.industrieAdresse} collecteeLe={result.version?.collecteeLe ?? null} />
+
             {result.georisques && (
               <div id={evidenceAnchorId("housing.regulated_zone")} className="scroll-mt-24">
                 <RegulatoryStatusBlock
@@ -781,6 +787,8 @@ const NOM_SOURCE: Record<string, string> = {
   urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
   bruit_aerien: "plans de bruit aérien (DGAC)",
   fibre: "fibre à l'adresse (Arcep)",
+  industrie_seveso: "sites Seveso (index Géorisques)", pprt_point: "plans de prévention des risques technologiques au point (Géorisques)",
+  pprt_commune: "plans de prévention des risques technologiques de la commune (Géorisques)",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {
