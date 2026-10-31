@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { estACec } from "./eaufrance-ecoulement.ts";
-import { ONDE_ECOULEMENTS, ONDE_FORMES_SECHES } from "./fixtures-sources-externes.ts";
+import { ONDE_ECOULEMENTS, ONDE_ECOULEMENT_NON_VISIBLE, ONDE_FORMES_SECHES } from "./fixtures-sources-externes.ts";
 
 // CONTRAT DE DONNÉES — EAUFRANCE / ONDE.
 //
@@ -9,7 +9,7 @@ import { ONDE_ECOULEMENTS, ONDE_FORMES_SECHES } from "./fixtures-sources-externe
 // (`libelle_observation` au lieu de `libelle_ecoulement`) : `isDry` valait toujours false. Même
 // signature que le bug « feux de forêt » de Géorisques — une chaîne d'API jamais confrontée à la source.
 
-test("CONTRAT — les deux formes SÈCHES réelles sont reconnues", () => {
+test("CONTRAT — la forme SÈCHE réelle est reconnue", () => {
   for (const l of ONDE_FORMES_SECHES) {
     assert.equal(estACec(l), true, `« ${l} » signale un cours d'eau à sec`);
   }
@@ -27,9 +27,11 @@ test("CONTRAT — « Observation impossible » n'est NI sec NI humide : c'est un
   assert.equal(estACec("Observation impossible"), false);
 });
 
-test("CONTRAT — l'accent ne change rien (la source écrit sans, le code doit tolérer les deux)", () => {
-  assert.equal(estACec("Écoulement non visible"), true);
-  assert.equal(estACec("Ecoulement non visible"), true);
+test("CONTRAT — « Ecoulement non visible » n'est PAS un assec, avec ou sans accent (FUT-163)", () => {
+  // L'eau est encore présente au point observé : un écoulement interrompu, que `lireEcoulement` conserve.
+  assert.equal(estACec(ONDE_ECOULEMENT_NON_VISIBLE), false);
+  assert.equal(estACec("Écoulement non visible"), false);
+  assert.ok(!(ONDE_FORMES_SECHES as readonly string[]).includes(ONDE_ECOULEMENT_NON_VISIBLE));
 });
 
 test("CONTRAT — une valeur absente ne signale JAMAIS un assec", () => {

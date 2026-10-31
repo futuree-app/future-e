@@ -77,6 +77,8 @@ export type TerritoireInputs = {
   catnatInondationIndex: CatnatInondation | null;
   vigieau: VigieauSummary | null;
   drought: NonNullable<EaufranceSummary["drought"]> | null;
+  /** FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation ». */
+  droughtIndisponible?: boolean;
   littoral: LittoralSummary | null;
   era5: Era5Trend | null;
   saisonnalitePct: number | null;
@@ -351,6 +353,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     }),
     fact({
       key: "water.river_drought", value: i.drought, scale: "point",
+      ...(i.drought == null && i.droughtIndisponible ? { status: "source_unavailable" as const } : {}),
       source: { producer: "OFB", dataset: "ONDE (Hub'Eau)", field: "observations d'écoulement" },
       card: card("climate.drought"), synthesis: INCLUDE,
     }),

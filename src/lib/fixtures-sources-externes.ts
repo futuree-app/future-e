@@ -84,8 +84,10 @@ export const ONDE_ECOULEMENTS = [
   "Observation impossible",
 ] as const;
 
-// Les deux seules formes qui signalent un cours d'eau effectivement à sec.
-export const ONDE_FORMES_SECHES = ["Assec", "Ecoulement non visible"] as const;
+// La seule forme qui signale un cours d'eau effectivement à sec. FUT-163 (31/10/2026) : « Ecoulement non
+// visible » y figurait ; c'est un écoulement interrompu (l'eau est encore là), pas un assec.
+export const ONDE_FORMES_SECHES = ["Assec"] as const;
+export const ONDE_ECOULEMENT_NON_VISIBLE = "Ecoulement non visible" as const;
 
 // ── CARTOFRICHES (ADEME) — l'état de pollution du sol d'une friche ──────────────
 // Relevé le 29/07/2026 sur /values/sol_pollution_existe (28 373 friches). SEPT valeurs, pas un

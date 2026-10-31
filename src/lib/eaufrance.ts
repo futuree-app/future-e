@@ -1,5 +1,5 @@
 import "server-only";
-import { estACec } from "./eaufrance-ecoulement.ts";
+import { estACec, CHAMPS_ECOULEMENT } from "./eaufrance-ecoulement.ts";
 
 const HUBEAU_BASE = "https://hubeau.eaufrance.fr/api";
 const REQUEST_TIMEOUT_MS = 8000;
@@ -25,6 +25,7 @@ type EcoulementRecord = {
   // /v1/ecoulement/observations (300 observations, 6 valeurs distinctes).
   libelle_ecoulement?: string | null;
   libelle_cours_eau?: string | null;
+  libelle_station?: string | null;
 };
 
 type HubeauPage<T> = {
@@ -44,9 +45,13 @@ export type EaufranceSummary = {
   drought: {
     lastObservationDate: string | null;
     riverName: string | null;
+    /** FUT-163 : la station ONDE du relevé. Absente des relevés enregistrés avant le 31/10/2026. */
+    stationName?: string | null;
     status: string | null;
     isDry: boolean;
   } | null;
+  /** FUT-165 : la lecture de l'écoulement a échoué. `drought: null` seul veut dire « aucune observation ». */
+  droughtIndisponible?: boolean;
 };
 
 // ── Fetch helpers ────────────────────────────────────────────────────────────
@@ -124,7 +129,7 @@ async function loadDrinkingWater(inseeCode: string) {
   };
 }
 
-async function loadDrought(inseeCode: string) {
+export async function loadDrought(inseeCode: string) {
   const oneYearAgo = new Date(Date.now() - 365 * 86_400_000)
     .toISOString()
     .split("T")[0];
@@ -132,7 +137,9 @@ async function loadDrought(inseeCode: string) {
   const params = new URLSearchParams({
     code_commune: inseeCode,
     date_observation_min: oneYearAgo,
-    fields: ["date_observation", "libelle_observation", "libelle_cours_eau"].join(","),
+    // FUT-165 : la requête demande le champ que la lecture lit (`libelle_ecoulement`). Elle demandait
+    // `libelle_observation` : l'état n'arrivait jamais, et aucun assec n'a pu être signalé.
+    fields: CHAMPS_ECOULEMENT.join(","),
     sort: "desc",
     size: "5",
   });
@@ -149,6 +156,7 @@ async function loadDrought(inseeCode: string) {
   return {
     lastObservationDate: latest.date_observation ?? null,
     riverName: latest.libelle_cours_eau ?? null,
+    stationName: latest.libelle_station ?? null,
     status: latest.libelle_ecoulement ?? null,
     isDry: estACec(latest.libelle_ecoulement),
   };
@@ -159,12 +167,13 @@ async function loadDrought(inseeCode: string) {
 const eaufranceCache = new Map<string, Promise<EaufranceSummary>>();
 
 async function load(inseeCode: string): Promise<EaufranceSummary> {
+  let droughtIndisponible = false;
   const [drinkingWater, drought] = await Promise.all([
     loadDrinkingWater(inseeCode).catch(() => null),
-    loadDrought(inseeCode).catch(() => null),
+    loadDrought(inseeCode).catch(() => { droughtIndisponible = true; return null; }),
   ]);
 
-  return { inseeCode, drinkingWater, drought };
+  return { inseeCode, drinkingWater, drought, ...(droughtIndisponible ? { droughtIndisponible } : {}) };
 }
 
 export async function getEaufranceSummary(inseeCode: string): Promise<EaufranceSummary> {
