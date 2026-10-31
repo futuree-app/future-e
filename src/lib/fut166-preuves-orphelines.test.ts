@@ -15,8 +15,8 @@ import { readFileSync, readdirSync } from "node:fs";
 const DOSSIER = "src/lib/decision/";
 
 /** Chaque objet de preuve qui porte `href: territoireHref`, avec l'expression de son `factId`. */
-function preuvesTerritoire(): { fichier: string; factId: string; aUneCle: boolean }[] {
-  const out: { fichier: string; factId: string; aUneCle: boolean }[] = [];
+function preuvesTerritoire(): { fichier: string; factId: string; aUneCle: boolean; cle: string | null }[] {
+  const out: { fichier: string; factId: string; aUneCle: boolean; cle: string | null }[] = [];
   for (const fichier of readdirSync(DOSSIER).filter((f) => f.endsWith(".ts") && !f.includes(".test."))) {
     const s = readFileSync(DOSSIER + fichier, "utf8");
     for (let i = s.indexOf("href: territoireHref"); i !== -1; i = s.indexOf("href: territoireHref", i + 1)) {
@@ -25,23 +25,17 @@ function preuvesTerritoire(): { fichier: string; factId: string; aUneCle: boolea
       for (p = 0; e < s.length; e++) { if (s[e] === "{") p++; else if (s[e] === "}") { if (p === 0) break; p--; } }
       const objet = s.slice(a, e + 1);
       const factId = /factId:\s*([^,\n]+)/.exec(objet)?.[1]?.trim() ?? "?";
-      out.push({ fichier, factId, aUneCle: objet.includes("targetKey") });
+      out.push({ fichier, factId, aUneCle: objet.includes("targetKey"), cle: /targetKey:\s*([^,\n}]+)/.exec(objet)?.[1]?.trim() ?? null });
     }
   }
   return out;
 }
 
-const SANTE = "constat de santé environnementale sans carte : la carte « Santé environnementale » (FUT-167, D1) le démontrera";
 const IDENTITE = "fait d'identité ou de position de la commune (taille, rivage, position, rang, attestation) : aucune carte ne le porte, repli assumé sur le module ; hors FUT-163";
 const A_INSTRUIRE = "une carte voisine existe (inondation, feu) mais ne montre pas ce fait précis : à instruire hors FUT-163";
 
 /** L'inventaire du 30/10/2026, clé `fichier factId`. */
 const CONNUES: Record<string, string> = {
-  "materiality-rules.ts \"viv.no2\"": SANTE,
-  "materiality-rules.ts \"viv.pm25\"": SANTE,
-  "materiality-rules.ts \"calmeSonore\"": SANTE,
-  "materiality-rules.ts \"expoIndustrielle\"": SANTE,
-  "radon-rules.ts \"radon.classePotentiel\"": SANTE,
   "materiality-rules.ts \"inondation.ppr-commune\"": A_INSTRUIRE,
   "materiality-rules.ts \"georisques.feu\"": A_INSTRUIRE,
   "absence-rules.ts `absenceAttestation.${spec.key}`": IDENTITE,
@@ -63,6 +57,36 @@ test("aucune nouvelle preuve vers Territoire sans clé de phénomène", () => {
 test("l'inventaire ne garde que des preuves qui existent encore sans clé", () => {
   const orphelines = new Set(preuvesTerritoire().filter((p) => !p.aUneCle).map((p) => `${p.fichier} ${p.factId}`));
   for (const k of Object.keys(CONNUES)) assert.ok(orphelines.has(k), `« ${k} » a reçu sa clé ou a disparu : retirez-la de l'inventaire`);
+});
+
+// FUT-163 (31/10/2026) : les cinq constats de santé (air NO₂ et PM2,5, bruit, industrie, radon) ont reçu leur clé
+// avec la carte « Santé environnementale » (FUT-167, D1). Leurs exceptions sont retirées de l'inventaire ; elles
+// n'existaient que tant que la carte manquait. Chacune ouvre une clé que la carte déclare.
+test("les cinq preuves de santé ouvrent la carte « Santé environnementale »", () => {
+  const attendues: Record<string, string> = {
+    "materiality-rules.ts \"viv.no2\"": "health.air_background",
+    "materiality-rules.ts \"viv.pm25\"": "health.air_background",
+    "materiality-rules.ts \"calmeSonore\"": "health.noise_infrastructure",
+    "materiality-rules.ts \"expoIndustrielle\"": "health.industrial_site",
+    "radon-rules.ts \"radon.classePotentiel\"": "health.radon",
+  };
+  const carte = readFileSync("src/components/report/QuartierClimatData.tsx", "utf8");
+  const declarees = /label: "Santé environnementale",\s*targets: \[([^\]]+)\]/.exec(carte)?.[1] ?? "";
+  for (const [preuve, cle] of Object.entries(attendues)) {
+    const p = preuvesTerritoire().find((x) => `${x.fichier} ${x.factId}` === preuve);
+    assert.ok(p, `preuve introuvable : ${preuve}`);
+    assert.equal(p.aUneCle, true, preuve);
+    assert.ok(p.cle?.includes(cle), `${preuve} : clé ${p.cle}, attendue ${cle}`);
+    assert.ok(declarees.includes(`"${cle}"`), `la carte Santé ne déclare pas ${cle}`);
+  }
+});
+
+test("le garde-fou reste strict : une preuve sans clé hors inventaire est détectée", () => {
+  const orphelines = preuvesTerritoire().filter((p) => !p.aUneCle).map((p) => `${p.fichier} ${p.factId}`);
+  // Les preuves sans clé restantes sont exactement l'inventaire : rien de plus, rien de moins.
+  assert.deepEqual([...new Set(orphelines)].sort(), Object.keys(CONNUES).sort());
+  // Et une preuve de santé qui perdrait sa clé ne serait plus admise.
+  assert.equal("materiality-rules.ts \"viv.pm25\"" in CONNUES, false);
 });
 
 test("le scan voit bien les preuves qui ont une clé (contrôle du garde-fou lui-même)", () => {
