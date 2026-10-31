@@ -61,7 +61,7 @@ test("air (Lille) : le NO₂ au-delà de la recommandation OMS est signalé, ave
   assert.equal(l.signal, true);
   assert.equal(l.valeur, "PM2,5 9,9 · NO₂ 15,9 µg/m³");
   assert.match(l.paragraphes.join(" "), /Dioxyde d'azote \(NO₂\) : 15,9 µg\/m³ en moyenne annuelle, au-delà de la recommandation de l'Organisation mondiale de la santé \(10 µg\/m³\)\. La valeur limite européenne applicable en 2030 est de 20 µg\/m³\./);
-  assert.match(l.paragraphes.join(" "), /9,9 µg\/m³ en moyenne annuelle, sous la valeur limite européenne applicable en 2030 \(10 µg\/m³\)\. La recommandation de l'Organisation mondiale de la santé est de 5 µg\/m³ : aucune commune française ne la respecte/);
+  assert.match(l.paragraphes.join(" "), /9,9 µg\/m³ en moyenne annuelle, sous la valeur limite européenne applicable en 2030 \(10 µg\/m³\)\. La recommandation de l'Organisation mondiale de la santé est de 5 µg\/m³ : cette moyenne la dépasse\./);
   assert.ok(l.paragraphes.includes(AIR_PERIODE));
   assert.doesNotMatch(AIR_PERIODE, /\b20(1\d|2[0-6]) ?(est|sont) l'année/); // aucune année affirmée comme mesurée
   assert.match(l.limite, /d'une rue à l'autre/);
@@ -291,4 +291,34 @@ test("distance : Feyzin-raffinerie, valeur de référence haversine", () => {
   // 45,6745 N 4,8520 E → 45,673859 N 4,847375 E : 71 m vers le sud, 360 m vers l'ouest, soit environ 367 m.
   const d = distanceKm(45.6745, 4.852, 45.673859, 4.847375);
   assert.ok(d > 0.36 && d < 0.37, String(d));
+});
+
+// ── FUT-163 (31/10/2026) : aucune généralisation nationale sans preuve de couverture ───────────
+// « Aucune commune française ne la respecte » se déduisait du minimum d'un index dont la couverture nationale
+// exhaustive n'est pas démontrée. Le texte compare la valeur LUE à la recommandation OMS, et rien d'autre.
+const UNIVERSEL = /aucune commune|toutes les communes|commune française|en France|minimum national|national/i;
+
+test("PM2,5 : la valeur locale et la recommandation OMS sont comparées, sans aucune affirmation nationale", () => {
+  for (const [pm25, verbe] of [[9.9, "la dépasse"], [5, "la respecte"], [4.2, "la respecte"], [5.1, "la dépasse"]] as const) {
+    const t = ligne(carte([lecture({ air: { pm25, no2: 8 } })]), "air").paragraphes.join(" ");
+    assert.match(t, new RegExp(`La recommandation de l'Organisation mondiale de la santé est de 5 µg/m³ : cette moyenne ${verbe}\\.`), String(pm25));
+    assert.doesNotMatch(t, UNIVERSEL, String(pm25));
+  }
+});
+
+test("PM2,5 par arrondissement : la conclusion collective est bornée aux arrondissements lus", () => {
+  const arr = (pms: number[]) => carte(pms.map((pm25, k) => lecture({
+    code: String(75101 + k), libelle: `${k + 1}e arrondissement`, estArrondissement: true, air: { pm25, no2: 8 },
+  })));
+  const cas: [number[], RegExp][] = [
+    [[6, 7, 8], /chacune de ces moyennes la dépasse\./],
+    [[4, 4.5, 5], /chacune de ces moyennes la respecte\./],
+    [[4, 6], /certaines de ces moyennes la dépassent\./],
+  ];
+  for (const [pms, attendu] of cas) {
+    const c = arr(pms);
+    const t = ligne(c, "air").paragraphes.join(" ");
+    assert.match(t, attendu, pms.join(","));
+    assert.doesNotMatch(tout(c), UNIVERSEL, pms.join(","));
+  }
 });
