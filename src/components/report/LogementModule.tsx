@@ -701,6 +701,7 @@ export default function LogementModule({
                     parcelCode: result.parcel?.parcelCode ?? null,
                   }}
                   bruitAerien={result.bruitAerien}
+                  debroussaillement={result.debroussaillement}
                 />
               </div>
             )}
@@ -786,6 +787,7 @@ const NOM_SOURCE: Record<string, string> = {
   urbanisme_vigueur: "statut des documents d'urbanisme", urbanisme_pieces: "pièces des documents d'urbanisme",
   urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
   bruit_aerien: "plans de bruit aérien (DGAC)",
+  debroussaillement: "zonage du débroussaillement obligatoire (IGN)",
   fibre: "fibre à l'adresse (Arcep)",
   industrie_seveso: "sites Seveso (index Géorisques)", pprt_point: "plans de prévention des risques technologiques au point (Géorisques)",
   pprt_commune: "plans de prévention des risques technologiques de la commune (Géorisques)",

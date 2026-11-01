@@ -10,15 +10,18 @@ import { Disclosure } from "./logement/kit";
 // ce que vous pouvez vérifier, en savoir plus. Présentation reprise du bloc d'urbanisme, en attendant
 // l'harmonisation de FUT-118.
 
-const EYEBROW: React.CSSProperties = { fontSize: 12.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", margin: "0 0 8px" };
+export const EYEBROW: React.CSSProperties = { fontSize: 12.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", margin: "0 0 8px" };
 const RUBRIQUE: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)", margin: "0 0 4px" };
-const TITRE: React.CSSProperties = { fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 };
-const CONSTAT: React.CSSProperties = { fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 };
-const CORPS: React.CSSProperties = { fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 };
+export const TITRE: React.CSSProperties = { fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", lineHeight: 1.5, margin: 0 };
+export const CONSTAT: React.CSSProperties = { fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 };
+export const CORPS: React.CSSProperties = { fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 };
 const LIMITE: React.CSSProperties = { fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.55, margin: "6px 0 0" };
 const LIEN: React.CSSProperties = { fontSize: 13, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline" };
 
-function Corps({ t, constat }: { t: TexteBruit; constat: React.CSSProperties }) {
+/** Le corps commun aux blocs de zonage réglementaire (bruit aérien, FUT-146 ; débroussaillement, FUT-149). */
+export type TexteZonage = Pick<TexteBruit, "retenir" | "limite" | "complement" | "verifier" | "savoirPlus" | "document">;
+
+export function CorpsZonage({ t, constat }: { t: TexteZonage; constat: React.CSSProperties }) {
   return (
     <>
       <div>
@@ -53,7 +56,7 @@ export function BruitAerienAutour({ lecture }: { lecture: LectureBruitAerien | n
     <ReportSection eyebrow="Bruit des avions : les plans de l’aérodrome" tone="neutral">
       <GlassCard>
         <div style={{ display: "grid", gap: 14 }}>
-          <Corps t={t} constat={CONSTAT} />
+          <CorpsZonage t={t} constat={CONSTAT} />
         </div>
       </GlassCard>
     </ReportSection>
@@ -73,7 +76,7 @@ export function BruitAerienLogement({ lecture, withDivider }: { lecture: Lecture
         <p style={EYEBROW}>Bruit aérien</p>
         <p style={TITRE}>{bindOrphans(t.titre)}</p>
       </div>
-      <Corps t={t} constat={CORPS} />
+      <CorpsZonage t={t} constat={CORPS} />
     </div>
   );
 }
