@@ -729,9 +729,40 @@ test("INDUSTRIE : la phrase dit la CATÉGORIE LÉGALE, que le lecteur peut retro
   assert.match(f.action!.detail!, /Géorisques/);
 });
 
-test("INDUSTRIE : un site banal et lointain ne déclenche rien", () => {
-  const r = run(facts({ sante: SANTE_EPARGNEE }), projetClimat("faible_exposition_industrielle"));
+test("INDUSTRIE : un site banal et lointain ne déclenche rien (sans adresse)", () => {
+  const r = run(facts({ sante: SANTE_EPARGNEE, hasAddress: false }), projetClimat("faible_exposition_industrielle"));
   assert.equal(r.evaluations.find((x) => x.ruleId === "territoire.sante-industrie")!.outcome, "satisfied");
+});
+
+test("INDUSTRIE (FUT-167, engine-8) : avec une ADRESSE, l'absence de signal ne se conclut plus depuis le centre", () => {
+  // Même défaut que le bruit, fermé de la même façon : le calcul part du point de référence de la commune
+  // (rayon 8 km). Un `satisfied` sans fait rendait le critère « favorable » pour le logement, sans limitation.
+  const r = run(facts({ sante: SANTE_EPARGNEE, hasAddress: true }), projetClimat("faible_exposition_industrielle"));
+  const e = r.evaluations.find((x) => x.ruleId === "territoire.sante-industrie")!;
+  assert.equal(e.outcome, "uncertain");
+  assert.equal(e.facts.length, 0);
+  assert.match(e.reason, /centroïde communal/);
+});
+
+test("INDUSTRIE (FUT-167) : un site réellement à portée reste dit avec ou sans adresse, et sa preuve vise sa ligne", () => {
+  for (const hasAddress of [false, true]) {
+    const r = run(facts({ sante: SANTE_EXPOSEE, hasAddress }), projetClimat("faible_exposition_industrielle"));
+    const f = r.facts.find((x) => x.ruleId === "territoire.sante-industrie")!;
+    assert.equal(f.evidence[0]!.targetKey, "health.industrial_site", `hasAddress=${hasAddress}`);
+  }
+});
+
+test("SANTÉ (FUT-167) : chaque preuve air, bruit et industrie vise la ligne de la carte Santé environnementale", () => {
+  const p = project({
+    reformulation: "x", hardConstraints: {},
+    preferences: [{ key: "air_sain", weight: 3 }, { key: "calme_sonore", weight: 3 }, { key: "faible_exposition_industrielle", weight: 3 }],
+  });
+  const deux = facts({ sante: { ...SANTE_EXPOSEE, air: { no2: 15.9, pm25: 12.4, notable: true, complet: true } } as never });
+  const r = run(deux, p);
+  const cles = (id: string) => r.facts.find((x) => x.ruleId === id)!.evidence.map((e) => e.targetKey);
+  assert.deepEqual(cles("territoire.sante-air"), ["health.air_background", "health.air_background"]);
+  assert.deepEqual(cles("territoire.sante-bruit"), ["health.noise_infrastructure"]);
+  assert.deepEqual(cles("territoire.sante-industrie"), ["health.industrial_site"]);
 });
 
 test("SANTÉ : les trois cartes passent assertFactValid, et aucune n'est decision_critical", () => {

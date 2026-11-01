@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
       "./data/bdiff-incendies.json",
       // FUT-148 : la carte « Fibre optique », lue hors du snapshot (lib/fibre-commune.ts).
       "./data/arcep-fibre.json",
+      // FUT-167 : la carte « Santé environnementale » lit l'index des sites Seveso (lib/server/installations-seveso.ts).
+      "./data/installations-seveso.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json.gz",

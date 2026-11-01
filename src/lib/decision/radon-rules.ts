@@ -55,6 +55,7 @@ const radonRule: DecisionRule = {
       grain: "commune",
       relation: "attribut",
       href: territoireHref,
+      targetKey: "health.radon", // FUT-167 : la ligne « Radon » de la carte Santé environnementale
     };
 
     const fact: VerificationFact = {
