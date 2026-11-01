@@ -9,6 +9,7 @@ import { test, before, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
 import { CHAMPS_ECOULEMENT, lireEcoulement } from "./eaufrance-ecoulement.ts";
 import { buildTerritoireSnapshot, type TerritoireInputs } from "./territoire/facts.ts";
 import { screenFromSnapshot } from "./territoire/screen.ts";
@@ -194,4 +195,41 @@ test("FUT-163 · le volet ne rogne plus une valeur longue à 360 px (règle de m
   const css = readFileSync("src/components/MetricDrawer.tsx", "utf8");
   assert.match(css, /\.metric-drawer-row-head \{\s*display: flex; flex-wrap: wrap;/);
   assert.match(css, /\.metric-drawer-row-head \.metric-drawer-val \{ text-align: right; flex: 1 1 auto; width: min-content; \}/);
+});
+
+// ── FUT-163 · contre-revue de la PR #124 (01/11/2026) : un SNAPSHOT ANCIEN et contradictoire ─────────────
+// La collecte ne produit plus `isDry: true` que pour « Assec », mais un snapshot enregistré garde le booléen du
+// jour de sa collecte. La projection lisait ce booléen : « Ecoulement non visible » + `isDry: true` aurait été
+// envoyé au modèle comme un cours d'eau à sec. Elle lit désormais l'état brut, comme l'écran et l'assistant.
+test("FUT-163 · snapshot ancien « Ecoulement non visible » avec isDry vrai : JAMAIS projeté comme assec", () => {
+  const ancien = { lastObservationDate: "2026-07-01", riverName: "le Mas", status: "Ecoulement non visible", isDry: true };
+  const s = buildTerritoireSnapshot({ ...MINIMAL, drought: ancien } as TerritoireInputs, "2026-07-02T10:00:00Z");
+  // Le snapshot rejoué tel qu'enregistré : le booléen contradictoire est bien là.
+  const relu = JSON.parse(JSON.stringify(s));
+  assert.equal(valueOf<{ isDry: boolean }>(relu, "water.river_drought")!.isDry, true);
+  const p = projectForSynthesis(relu, "gwl20");
+  assert.equal(p.cours_eau_a_sec_observe, null);
+  assert.doesNotMatch(JSON.stringify(p), /assec|à sec/i);
+  assert.equal(lireEcoulement(screenFromSnapshot(relu).drought!).etat, "ecoulement_interrompu");
+});
+
+test("FUT-163 · la projection suit l'état brut dans les deux sens, jamais le booléen enregistré", () => {
+  const projeter = (status: string | null, isDry: boolean) =>
+    projectForSynthesis(
+      buildTerritoireSnapshot({ ...MINIMAL, drought: { lastObservationDate: "2026-07-01", riverName: "le Mas", status, isDry } } as TerritoireInputs, "2026-07-02T10:00:00Z"),
+      "gwl20",
+    ).cours_eau_a_sec_observe;
+  assert.deepEqual(projeter("Assec", true), { nom: "le Mas" });
+  assert.deepEqual(projeter("Assec", false), { nom: "le Mas" });
+  // Un relevé sans état (dossiers d'avant FUT-165) n'est pas vérifiable : le booléen seul ne fait pas un assec.
+  assert.equal(projeter(null, true), null);
+  for (const etat of ["Ecoulement non visible", "Ecoulement visible acceptable", "Observation impossible"]) {
+    assert.equal(projeter(etat, true), null, etat);
+  }
+});
+
+test("FUT-163 · la projection de synthèse ne lit plus `isDry`", () => {
+  const code = readFileSync(new URL("./territoire/synthesis-contract.ts", import.meta.url), "utf8").replace(/\/\/.*$/gm, "");
+  assert.doesNotMatch(code, /isDry/);
+  assert.match(code, /lireEcoulement\(river\)\.etat === "assec"/);
 });

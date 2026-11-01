@@ -16,6 +16,7 @@ import { DEMOGRAPHY_PHRASE, isDemographyCode, type GwlScenarios, type UrbanRole 
 import type { GasparCatnatSummary } from "../georisques.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
+import { lireEcoulement } from "../eaufrance-ecoulement.ts";
 import type { LittoralSummary } from "../littoral.ts";
 import type { Era5Trend } from "../era5-trend.ts";
 
@@ -192,7 +193,9 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
     restrictions_eau_en_vigueur: vigieau?.maxLevel && vigieau.maxLevel !== "vigilance"
       ? { niveau: vigieau.maxLevel, bassin: vigieau.topZone?.label ?? null }
       : null,
-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,
+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de
+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.
+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,
     risques_recenses_echelle_communale: risks
       ? {
           inondation: risks.flood ? "recensé" : "non recensé",

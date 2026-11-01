@@ -190,10 +190,23 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
   }
 });
 
-test("IA : les prompts, contrats et routes de synthèse sont identiques à main, octet pour octet", () => {
-  for (const f of ["src/lib/territoire/synthesis-contract.ts"]) {
-    assert.equal(readFileSync(f, "utf8"), execFileSync("git", ["show", `4d75603f:${f}`], { encoding: "utf8", maxBuffer: 1 << 26 }), f);
-  }
+// FUT-163 (01/11/2026, contre-revue de la PR #124) a dû toucher la projection : `cours_eau_a_sec_observe` lisait
+// `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
+// brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
+// parle des feux. Toute autre modification du contrat le fait échouer.
+test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
+  const f = "src/lib/territoire/synthesis-contract.ts";
+  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  assert.deepEqual(changees, [
+    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
+    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
+    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
+    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
+    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
+  ]);
+  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
+  assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
 });
 
 // FUT-164 (30/10/2026) a dû réécrire le bloc eau potable de l'assistant (lecture par réseau, FUT-152). Le prompt
