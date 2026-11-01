@@ -190,10 +190,33 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
   }
 });
 
-test("IA : les prompts, contrats et routes de synthèse sont identiques à main, octet pour octet", () => {
-  for (const f of ["src/lib/ask/system-prompt.ts", "src/lib/territoire/synthesis-contract.ts"]) {
-    assert.equal(readFileSync(f, "utf8"), execFileSync("git", ["show", `4d75603f:${f}`], { encoding: "utf8", maxBuffer: 1 << 26 }), f);
-  }
+// FUT-163 (01/11/2026, contre-revue de la PR #124) a dû toucher la projection : `cours_eau_a_sec_observe` lisait
+// `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
+// brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
+// parle des feux. Toute autre modification du contrat le fait échouer.
+test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
+  const f = "src/lib/territoire/synthesis-contract.ts";
+  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  assert.deepEqual(changees, [
+    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
+    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
+    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
+    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
+    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
+  ]);
+  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
+  assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
+});
+
+// FUT-164 (30/10/2026) a dû réécrire le bloc eau potable de l'assistant (lecture par réseau, FUT-152). Le prompt
+// n'est donc plus identique à 4d75603f, mais aucune ligne changée ne parle des feux : c'est ce que ce test garde.
+test("IA : le prompt de l'assistant n'a changé que de son bloc eau (FUT-164), et rien sur les feux", () => {
+  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", "src/lib/ask/system-prompt.ts"], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  assert.ok(changees.length > 0);
+  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
+  assert.match(readFileSync("src/lib/ask/system-prompt.ts", "utf8"), /export function formatEauPotableBlock/);
 });
 
 // FUT-155 (29/10/2026) a dû toucher les deux routes du comparateur et leur contrat : une couverture absente ou
@@ -272,7 +295,9 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // statut n'atteint ni l'écran ni la synthèse (`valueOf` et `synthesisFacts` ne lisent que `ok`, cf.
 // `territoire/fut160-statut-source.test.ts`). Le registre reste figé pour tout le reste : aucune ligne retirée,
 // et seules ces lignes ajoutées.
-test("IA : le registre des faits Territoire n'a changé que du statut de panne Géorisques (FUT-160)", () => {
+// FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
+// `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
+test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165)", () => {
   const f = "src/lib/territoire/facts.ts";
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
   const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
@@ -282,6 +307,9 @@ test("IA : le registre des faits Territoire n'a changé que du statut de panne G
     /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
     /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
     /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
+    /^\+ {2}droughtIndisponible\?: boolean;$/,
+    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
   ];
   for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
 });

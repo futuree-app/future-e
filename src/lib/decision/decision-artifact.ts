@@ -79,7 +79,12 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // (`scripts/admin/fut74-compter-dpe-hors-logement.mjs`) : parmi les dossiers à DPE retenu, aucun DPE d'immeuble
 // ni de grain indéterminé ; aucun artefact n'est concerné. Et la route refuse désormais ce choix, donc aucun dossier
 // futur ne peut y entrer. Le seul texte changé ailleurs est la limite de « Diagnostic non attribué ».
-export const ENGINE_VERSION = "engine-7";
+// engine-8 (FUT-167, 30/10/2026) : la règle « exposition industrielle » ne rend plus `satisfied` quand une adresse
+// est connue. L'exposition est calculée depuis le point de référence de la commune (rayon de 8 km) : le critère
+// devenait « favorable » pour un logement qui peut être bien plus proche d'un site que le centre. Avec une adresse,
+// il est désormais non concluant, comme le bruit depuis le 29/07/2026. Le registre des critères et la couverture
+// changent : c'est ce que le moteur CONCLUT. Un dossier engine-7 garde son registre tel qu'il a été vendu.
+export const ENGINE_VERSION = "engine-8";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

@@ -128,8 +128,10 @@ async function budgetEpuise(type: TypeAppel): Promise<boolean> {
  * Rend `null` quand la voie est libre, ou la réponse à renvoyer telle quelle. 429 dit à la
  * personne d'attendre : c'est une gêne passagère, pas une fermeture.
  */
-export function limiteParAdresse(request: Request): Response | null {
-  const ip = adresseAppelante(request);
+export function limiteParAdresse(request: Request, portee = ""): Response | null {
+  // `portee` sépare les compteurs d'une route qui ne doit pas consommer ceux des questions (pré-chargement
+  // AskFuture, FUT-163). Vide par défaut : les clés des routes existantes ne changent pas.
+  const ip = `${portee}${adresseAppelante(request)}`;
   if (depasse(MINUTE, `${ip}:m`, PAR_MINUTE, 60_000)) {
     return Response.json(
       { error: "Trop de demandes en peu de temps. Réessayez dans une minute." },

@@ -331,7 +331,7 @@ test("Nouvelle génération des mêmes entrées : seules les deux formulations c
     const json = (x: unknown) => JSON.stringify(x);
     assert.equal(json(neuf.dossier), corrige(json(fige.dossier)), nom);
     // Le moteur a changé ce qu'il conclut ailleurs (D7) : le nouvel artefact le dit, le figé garde sa version.
-    assert.equal(neuf.engineVersion, "engine-7", nom);
+    assert.equal(neuf.engineVersion, D.ENGINE_VERSION, nom);
     assert.equal(fige.engineVersion, "engine-5", nom);
     for (const k of ["conventionsVersion", "projectSnapshot"]) assert.deepEqual(neuf[k], fige[k], `${nom} : ${k}`);
   }
@@ -478,7 +478,7 @@ test("D7 retirée : Strasbourg (contradiction) ne dit plus une priorité chaleur
     // Les transports restent examinés par leurs propres règles (rang, gare), sur leur propre convention.
     assert.equal(d.criteria.registry.find((r: M) => r.criterionKey === "acces_transports").coverage, "examined", nom);
     assert.equal(issue(d, "acces_transports"), "favorable", nom);
-    assert.equal(D.buildDecisionArtifact(d, project, "2026-10-19T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION).engineVersion, "engine-7", nom);
+    assert.equal(D.buildDecisionArtifact(d, project, "2026-10-19T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION).engineVersion, D.ENGINE_VERSION, nom);
   }
   const { d } = await dossier({ ...(FIGES_D7["commune-d7-contradiction"]!.entree as Opts), entry: STRASBOURG_RANG });
   assert.equal(d.narrativePlan.verdict.headline.text, "Strasbourg répond à deux de vos priorités, dont l'accès au train.");
@@ -522,7 +522,7 @@ test("Plusieurs analyses, deux moteurs : chaque version se sert telle qu'elle a 
   // Une v2 engine-6 prête : c'est elle qui se sert, la v1 engine-5 reste en base telle quelle.
   const deux = D.etatArtefact([ligne(1, "ready", v1), ligne(2, "ready", v2)]);
   assert.equal(deux.servedVersion, 2);
-  assert.equal(deux.artifact.engineVersion, "engine-7");
+  assert.equal(deux.artifact.engineVersion, D.ENGINE_VERSION);
   // Une v2 en cours ou échouée ne masque jamais la v1 vendue, qui se rend mot pour mot.
   for (const statut of ["generating", "failed"]) {
     const e = D.etatArtefact([ligne(1, "ready", v1), ligne(2, statut, null)]);

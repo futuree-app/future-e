@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
       "./data/bdiff-incendies.json",
       // FUT-148 : la carte « Fibre optique », lue hors du snapshot (lib/fibre-commune.ts).
       "./data/arcep-fibre.json",
+      // FUT-167 : la carte « Santé environnementale » lit l'index des sites Seveso (lib/server/installations-seveso.ts).
+      "./data/installations-seveso.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json.gz",
@@ -51,6 +53,8 @@ const nextConfig: NextConfig = {
       "./data/onrn-secheresse.json",
       "./data/onrn-inondation.json",
       "./data/bruit-aerien.json",
+      // FUT-167 (D2) : les sites Seveso autour de l'adresse (lib/server/installations-seveso.ts).
+      "./data/installations-seveso.json",
     ],
     // La PAGE du module Logement lit l'index pour le compte d'arrêtés inondation, qui réconcilie
     // les trois sources de la carte « Ce que disent les sources sur l'inondation ». Il est lu ICI

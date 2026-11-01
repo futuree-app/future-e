@@ -1,0 +1,22 @@
+{
+ "cellulesModifiees": [
+  "-3_430",
+  "21_434",
+  "39_438",
+  "39_445",
+  "56_433",
+  "57_432",
+  "57_433",
+  "57_434",
+  "57_436"
+ ],
+ "points": 48840,
+ "parGroupe": {
+  "national": 24840,
+  "cellule modifiée": 18000,
+  "60 m d'une limite ponctuelle": 6000
+ },
+ "changements": {
+  "60 m d'une limite ponctuelle : en_zone → en_limite(dans la zone)": 420
+ }
+}

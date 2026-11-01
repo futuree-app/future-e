@@ -4,5 +4,11 @@
     "marqueur": "kitDeprecie",
     "nombre": 6,
     "motif": "FUT-146 : bloc inséré dans le module Autour, écran historique non migré, dont il reprend la section et la carte pour ne pas mêler deux grammaires sur la même page. Le ticket demande de réutiliser la présentation existante en attendant FUT-118 ; à migrer avec AutourModule."
+  },
+  {
+    "fichier": "src/components/report/DebroussaillementBlocs.tsx",
+    "marqueur": "kitDeprecie",
+    "nombre": 6,
+    "motif": "FUT-149 : bloc inséré dans le module Autour, écran historique non migré, juste sous le bloc du bruit aérien dont il reprend la section et la carte (même exception que FUT-146), pour ne pas mêler deux grammaires sur la même page. À migrer avec AutourModule (FUT-118)."
   }
 ]

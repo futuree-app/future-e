@@ -1,5 +1,6 @@
 import "server-only";
 import { EAU_SOURCE, PARAMETRES_EAU, lireEauPotable, reponseLisible, type EauPotableCommune, type ReponseHubeau } from "@/lib/eau-potable";
+import { villeDeArrondissement } from "@/lib/territoire/plm-communal";
 
 // L'APPEL À HUB'EAU « Qualité de l'eau potable » (FUT-152). Service public documenté, sans clé. Ne lève jamais.
 // La liste des réseaux (une page par tranche de 50), un appel par réseau, un par paramètre mis en avant : 2 réseaux → 1 + 2 + 5 appels, mis en
@@ -72,7 +73,22 @@ async function reseauxDe(insee: string, maintenant: Date): Promise<{ reseaux: Re
   return { reseaux: [], incomplet: false };
 }
 
+/**
+ * PARIS, LYON, MARSEILLE (FUT-163, contre-revue du 01/11/2026). Hub'Eau ne publie l'eau potable qu'au code de la
+ * COMMUNE : 75056 rend 4 réseaux, 75115 n'en rend aucun (de même 13055/13208, 69123/69387, relevé du 01/11/2026).
+ * Interroger un arrondissement faisait dire « la source ne publie aucun prélèvement » sur Paris 15e. On lit donc
+ * la ville, et la lecture le dit (`villePLM`) : elle n'est jamais présentée comme celle de l'arrondissement.
+ */
 export async function getEauPotableCommune(insee: string, maintenant = new Date()): Promise<EauPotableCommune> {
+  const ville = villeDeArrondissement(insee);
+  if (ville) {
+    const lu = await lireCommune(ville.code, maintenant);
+    return lu.etat === "indisponible" ? lu : { ...lu, villePLM: ville.nom };
+  }
+  return lireCommune(insee, maintenant);
+}
+
+async function lireCommune(insee: string, maintenant: Date): Promise<EauPotableCommune> {
   const dernier = (filtre: Record<string, string>) =>
     hubeau("resultats_dis", { code_commune: insee, ...filtre, sort: "desc", size: "1", fields: CHAMPS_PRELEVEMENT });
 

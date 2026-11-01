@@ -78,9 +78,11 @@ test("M4b. arrivée par la pastille inondation : le volet s'ouvre sur la ligne �
   assert.equal(arriveeDepuisPastille(null, INONDATION_INDEX), null);
   const carte = code("src/components/report/QuartierClimatData.tsx");
   contient(carte, /targets: \["risk\.catnat"\],[\s\S]{0,300}arrivee: arriveeDepuisPastille\(catnat \?\? null, catnatInondation \?\? null\) \?\? undefined,/, "carte");
-  contient(carte, /f\.arrivee && f\.detail && f\.targets\?\.some\(\(t\) => evidenceAnchorId\(t\) === ancre\)/, "carte");
+  // FUT-167 : une carte peut aussi arriver PAR PHÉNOMÈNE (`arriveePar`), la clé visée l'emporte sur `arrivee`.
+  contient(carte, /\(f\.arrivee \|\| f\.arriveePar\) && f\.detail && f\.targets\?\.some\(\(t\) => evidenceAnchorId\(t\) === ancre\)/, "carte");
+  contient(carte, /const arrivee = \(cle && cible\?\.arriveePar\?\.\[cle\]\) \|\| cible\?\.arrivee;/, "carte");
   // Le contexte s'applique à CETTE ouverture : il est fusionné dans l'état ouvert, pas dans le volet de la carte.
-  contient(carte, /setOpenDetail\(\{ \.\.\.cible\.detail, \.\.\.cible\.arrivee \}\)/, "carte");
+  contient(carte, /setOpenDetail\(\{ \.\.\.cible\.detail, \.\.\.arrivee \}\)/, "carte");
   const volet = code("src/components/MetricDrawer.tsx");
   contient(volet, /data-cible=\{r\.label === detail\.surligner \? "true" : undefined\}/, "MetricDrawer");
   // Seule la pastille inondation vise cette carte : arriver par son ancre, c'est arriver par l'inondation.

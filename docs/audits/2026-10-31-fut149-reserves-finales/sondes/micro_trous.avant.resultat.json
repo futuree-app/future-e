@@ -1,0 +1,72 @@
+{
+ "trous": 1521,
+ "cellules": 2,
+ "bilan": {
+  "0.5 mm": {
+   "en_limite(dans la zone)": 75,
+   "en_zone": 94
+  },
+  "1 mm": {
+   "en_zone": 72,
+   "en_limite(dans la zone)": 97
+  },
+  "2 mm": {
+   "en_zone": 55,
+   "en_limite(dans la zone)": 114
+  },
+  "3 mm": {
+   "en_limite(dans la zone)": 133,
+   "en_zone": 36
+  },
+  "5 mm": {
+   "en_limite(dans la zone)": 165,
+   "en_zone": 4
+  },
+  "8 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "12 mm": {
+   "en_limite(dans la zone)": 169
+  },
+  "20 mm": {
+   "en_limite(à 5 m)": 26,
+   "en_limite(dans la zone)": 143
+  },
+  "50 mm": {
+   "en_limite(à 5 m)": 169
+  }
+ },
+ "dangereux": 261,
+ "exemples": [
+  {
+   "lon": 6.0819829036657636,
+   "lat": 43.30803244034932,
+   "largeurMm": 1,
+   "forme": "carre"
+  },
+  {
+   "lon": 6.08221066888586,
+   "lat": 43.30910913717321,
+   "largeurMm": 2,
+   "forme": "carre"
+  },
+  {
+   "lon": 6.082610674160794,
+   "lat": 43.318771287422386,
+   "largeurMm": 0.5,
+   "forme": "triangle"
+  },
+  {
+   "lon": 6.084009005388164,
+   "lat": 43.34312248819901,
+   "largeurMm": 0.5,
+   "forme": "carre"
+  },
+  {
+   "lon": 6.084801516930833,
+   "lat": 43.355170312840926,
+   "largeurMm": 0.5,
+   "forme": "triangle"
+  }
+ ]
+}

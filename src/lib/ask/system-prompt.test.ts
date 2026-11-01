@@ -60,7 +60,8 @@ test("T1 : pour une commune qui a des lignes communes_tension, le system ne port
 
 test("T1 : le system ne contient que les blocs attendus ; aucun bloc de notes ne peut revenir sous un autre nom", () => {
   // Les en-têtes « [ … ] » en début de ligne sont exactement ceux du référentiel et des sources réelles.
-  const ATTENDUS = ["Référentiel interne futur•e", "ADEME", "DRIAS-TRACC", "Géorisques", "GASPAR", "VigiEau", "Hub'Eau", "Baignade"];
+  // FUT-164 : Hub'Eau porte deux blocs, l'eau potable (par réseau) puis l'écoulement des cours d'eau.
+  const ATTENDUS = ["Référentiel interne futur•e", "ADEME", "DRIAS-TRACC", "Géorisques", "GASPAR", "VigiEau", "Hub'Eau", "Hub'Eau", "Baignade"];
   for (const insee of [...COMMUNES_AVEC_LIGNES, "74056"]) {
     const entetes = (systemDe(insee).match(/^\[[^\]]+\]/gm) ?? []).map((e) => e.slice(1, -1).split(" — ")[0]);
     assert.deepEqual(entetes, ATTENDUS, F[insee].nom);
@@ -107,7 +108,9 @@ test("T3 : les mesures qui rendaient les notes redondantes sont toujours là (DR
   assert.match(fos, /Risques recensés : .*submersion marine/);
   assert.match(fos, /\[GASPAR — historique des reconnaissances de catastrophe naturelle \(CatNat\)/);
   assert.match(fos, /\[VigiEau\]/);
-  assert.match(fos, /\[Hub'Eau — eau potable et hydrologie\]/);
+  // FUT-164 : l'eau potable (par réseau) et l'écoulement des cours d'eau sont deux blocs distincts.
+  assert.match(fos, /\[Hub'Eau — eau potable : contrôle sanitaire des ARS, par réseau de distribution\]/);
+  assert.match(fos, /\[Hub'Eau — écoulement des cours d'eau/);
   assert.match(fos, /\[Baignade — /);
 
   const bourg = systemDe("01053");

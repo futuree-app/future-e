@@ -26,6 +26,8 @@ import { SOURCES_VERSION, type AddressDossierRow } from "@/lib/address-dossier-s
 import type { CarOwnership } from "@/lib/iris-logement";
 import type { LectureBruitAerien } from "@/lib/bruit-aerien";
 import { BruitAerienAutour } from "@/components/report/BruitAerienBlocs";
+import type { LectureDebroussaillement } from "@/lib/debroussaillement";
+import { DebroussaillementAutour } from "@/components/report/DebroussaillementBlocs";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
@@ -59,11 +61,13 @@ export default function AutourModule({
   dossier,
   initialCarOwnership = null,
   initialBruitAerien = null,
+  initialDebroussaillement = null,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow;
   initialCarOwnership?: CarOwnership | null;
   initialBruitAerien?: LectureBruitAerien | null;
+  initialDebroussaillement?: LectureDebroussaillement | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +77,7 @@ export default function AutourModule({
   const [autour, setAutour] = useState<Face3Snapshot | null>(null);
   const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
   const [bruitAerien, setBruitAerien] = useState<LectureBruitAerien | null>(null);
+  const [debroussaillement, setDebroussaillement] = useState<LectureDebroussaillement | null>(null);
   const autourRetriedRef = useRef(false);
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
@@ -98,12 +103,14 @@ export default function AutourModule({
       });
       const payload = (await res.json()) as {
         snapshot?: Face3Snapshot; carOwnership?: CarOwnership; bruitAerien?: LectureBruitAerien;
+        debroussaillement?: LectureDebroussaillement | null;
         error?: string; code?: string; insee?: string | null;
       };
       if (!res.ok || !payload.snapshot) throw new Error(payload.error ?? `Erreur ${res.status}`);
       setAutour(payload.snapshot);
       setCarOwnership(payload.carOwnership ?? null);
       setBruitAerien(payload.bruitAerien ?? null);
+      setDebroussaillement(payload.debroussaillement ?? null);
       setAnalyzed(a);
       posthog?.capture("autour_analyzed", {
         insee: a.citycode,
@@ -157,6 +164,7 @@ export default function AutourModule({
         setAutour(dossier.snapshot);
         setCarOwnership(initialCarOwnership);
         setBruitAerien(initialBruitAerien);
+        setDebroussaillement(initialDebroussaillement);
         setAnalyzed(address);
         posthog?.capture("autour_restored", {
           insee: dossier.insee,
@@ -361,6 +369,11 @@ export default function AutourModule({
                 ferrées à distance ; ce bloc dit si le secteur est dans un plan de bruit d'aérodrome, ce que
                 le plan permet de conclure, et la visite à faire. Il disparaît loin de tout aérodrome. */}
             <BruitAerienAutour lecture={bruitAerien} />
+
+            {/* FUT-149 : LE DÉBROUSSAILLEMENT OBLIGATOIRE, ZONAGE DU SECTEUR. Un fait réglementaire (le secteur est-il
+                dans le zonage publié ?), pas une mesure du feu : le danger d'incendie se lit dans Territoire. La
+                parcelle et les documents de la transaction sont dans Logement. */}
+            <DebroussaillementAutour lecture={debroussaillement} />
 
             {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
                 visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six

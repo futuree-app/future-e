@@ -63,7 +63,7 @@ type Detail = { eyebrow: string; headline: string; why: string; breakdown?: { la
 type Facteur = { label: string; val: string; detail?: Detail };
 
 type Era5 = { delta_c: number; baseline_mean_c: number; recent_mean_c: number; data_through_year: number };
-type Autres = { era5?: Era5 | null; vigieau?: unknown; onde?: unknown };
+type Autres = { era5?: Era5 | null; vigieau?: unknown; onde?: unknown; ondeIndisponible?: boolean };
 let facteurs: (scenarios: Scenarios | null, horizon: Horizon, commune: string, autres?: Autres) => Facteur[];
 let volet: (detail: Detail) => string;
 let grille: (scenarios: Scenarios | null, commune: string) => string;
@@ -79,7 +79,7 @@ before(async () => {
   facteurs = (scenarios, horizon, commune, autres = {}) =>
     (mod.buildFactors as (...a: unknown[]) => Facteur[])(
       scenarios, horizon, null, null, autres.vigieau ?? null, autres.onde ?? null, commune,
-      null, null, null, null, null, null, null, null, null, autres.era5 ?? null, null,
+      null, null, null, null, null, null, null, null, null, autres.era5 ?? null, null, null, autres.ondeIndisponible ?? false,
     );
   volet = (detail) => texteRendu(renderToStaticMarkup(createElement(MetricDrawer, { detail: detail as never, onClose: () => {} })));
   // La page rend la grille à l'horizon par défaut (2050) : c'est ce que voit le lecteur en arrivant.
@@ -365,12 +365,54 @@ test("Sécheresse · ONDE seule, cours d'eau réellement à sec : l'observation 
   assert.equal(f.val, "Cours d'eau à sec");
   assert.equal(
     volet(f.detail!),
-    `${TETE_SECHERESSE} Cours d'eau à sec observé ${SOUS_TITRE_SECHERESSE} Le fil de la sécheresse Aujourd'hui État des restrictions non disponible Relevé de terrain du 12 août 2026 Cours d'eau à sec par endroits ${PIED_SECHERESSE}`,
+    `${TETE_SECHERESSE} Cours d'eau à sec observé ${SOUS_TITRE_SECHERESSE} Le fil de la sécheresse Aujourd'hui État des restrictions non disponible Relevé de terrain du 12 août 2026 Cours d'eau à sec (assec) : Le Ruisseau ${PIED_SECHERESSE}`,
   );
   // ONDE qui ne relève rien de sec, sans autre source : pas de volet (rien à raconter, la face dit « — »).
   const sec = carte(facteurs(null, "gwl20", "Commune test", { onde: onde(false) }), SECHERESSE);
   assert.equal(sec.val, "—");
   assert.equal(sec.detail, undefined);
+});
+
+// ── FUT-165 : l'état relevé par ONDE, enfin demandé à la source ──────────────────────────────────
+// La requête ne demandait pas `libelle_ecoulement` : `status` valait `null` et la ligne disait « Pas de cours
+// d'eau à sec » quoi que la source ait relevé (16016, « Assec » le 28/10/2026). Les dossiers enregistrés avant
+// le correctif portent cette signature (un relevé daté, sans état) : ils disent « non vérifiable ».
+const ondeEtat = (status: string | null, isDry: boolean) => ({ lastObservationDate: "2026-10-28", riverName: "le Mas", status, isDry });
+
+test("FUT-165 · un relevé daté sans état (dossier ancien) est dit non vérifiable, jamais « pas de cours d'eau à sec »", async () => {
+  const s = await drias("17300");
+  const f = carte(facteurs(s, "gwl20", "Commune test", { onde: ondeEtat(null, false) }), SECHERESSE);
+  const texte = volet(f.detail!);
+  assert.match(texte, /Relevé de terrain du 28 octobre 2026 État du cours d'eau non vérifiable à la date de ce dossier : le Mas/);
+  assert.doesNotMatch(texte, /Pas de cours d'eau à sec/);
+});
+
+test("FUT-165 · « Ecoulement non visible » se dit écoulement interrompu, pas assec", () => {
+  // FUT-163 : `isDry` vaut désormais FAUX pour cet état (seul l'assec le rend vrai). La carte le dit quand
+  // même, comme observation distincte ; et un booléen ancien resté vrai ne change rien : l'état brut décide.
+  for (const isDry of [false, true]) {
+    const f = carte(facteurs(null, "gwl20", "Commune test", { onde: ondeEtat("Ecoulement non visible", isDry) }), SECHERESSE);
+    assert.equal(f.val, "Écoulement interrompu");
+    const texte = volet(f.detail!);
+    assert.match(texte, /Écoulement interrompu observé/);
+    assert.match(texte, /Relevé de terrain du 28 octobre 2026 Écoulement interrompu, plus visible : le Mas/);
+    assert.doesNotMatch(texte, /à sec/);
+  }
+});
+
+test("FUT-163 · un assec confirmé reste dit « à sec », daté et nommé", () => {
+  const f = carte(facteurs(null, "gwl20", "Commune test", { onde: ondeEtat("Assec", true) }), SECHERESSE);
+  assert.equal(f.val, "Cours d'eau à sec");
+  assert.match(volet(f.detail!), /Cours d'eau à sec observé .* Relevé de terrain du 28 octobre 2026 Cours d'eau à sec \(assec\) : le Mas/);
+});
+
+test("FUT-165 · un écoulement visible est dit tel quel ; une panne est dite indisponible", async () => {
+  const s = await drias("17300");
+  const visible = volet(carte(facteurs(s, "gwl20", "Commune test", { onde: ondeEtat("Ecoulement visible acceptable", false) }), SECHERESSE).detail!);
+  assert.match(visible, /Écoulement visible au point observé : le Mas/);
+  const panne = volet(carte(facteurs(s, "gwl20", "Commune test", { ondeIndisponible: true }), SECHERESSE).detail!);
+  assert.match(panne, /Relevé de terrain Source indisponible lors de la consultation/);
+  assert.doesNotMatch(panne, /Pas de cours d'eau à sec/);
 });
 
 test("Sécheresse · DRIAS seule (La Rochelle 2050) : la projection, à son horizon, sans tendance", async () => {

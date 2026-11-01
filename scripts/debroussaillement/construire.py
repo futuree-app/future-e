@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+"""
+construire.py (FUT-149) : construit les tuiles du ZONAGE INFORMATIF DES OBLIGATIONS LÉGALES DE DÉBROUSSAILLEMENT
+(base DÉBROUSSAILLEMENT de l'IGN, pour le ministère chargé des forêts), lues par l'application à la parcelle et au
+point (`src/lib/debroussaillement.ts`).
+
+── POURQUOI DES TUILES SUR SUPABASE STORAGE, ET PAS UN FICHIER DANS LES FONCTIONS ─────────────────────────────────
+ La publication complète pèse 1,76 Go (590 Mo compressés) ; ses 4 237 zones publiées comptent 9,5 millions de
+ sommets sur 128 000 km². Embarquer ne serait-ce que la géométrie (≈ 33 Mo compressés) dans les fonctions de
+ Logement et d'Autour défairait l'optimisation du traçage de #106/#107. Découpée en tuiles de 0,1° (≈ 2 200
+ objets immuables, 9 Ko en médiane), une analyse ne lit qu'une à quatre tuiles. Même patron que la fibre à
+ l'adresse (FUT-156) : préfixe neuf par édition, pointeur `courant.json` écrit en dernier.
+
+── LA SOURCE ──────────────────────────────────────────────────────────────────────────────────────────────────
+ Version COMPLÈTE (GeoPackage, Lambert-93), seule à porter la date de l'arrêté préfectoral, le millésime des
+ données sources et le lien de la préfecture. On garde les objets `ZONAGE = 2` (les zones à OLD : massifs et bande
+ de 200 m, documentation IGN v7.0 § 3.2.2) ; les objets `ZONAGE = 1` (massifs seuls) ne sont pas diffusés.
+ `DIFFUSION` vaut « Oui » pour les 4 236 objets de la carte officielle ; un objet vaut « O » (Savoie, édition du
+ 01/03/2026) et n'est pas affiché par la carte : il est gardé, marqué `ambigu`, et l'application n'en conclut
+ rien (« données imprécises »), ni « dans la zone » ni « hors zone ».
+
+── LES CONTRÔLES (le script s'arrête au lieu d'écrire une édition douteuse) ──────────────────────────────────
+ - Les départements présents sont EXACTEMENT ceux des arrêtés de classement en vigueur (`DEPARTEMENTS_ARRETES`) ;
+   un écart arrête la construction (`--accepter-ecart-arrete` pour construire quand même, en le disant).
+ - Chaque zone est un polygone valide (Shapely) dans sa projection d'origine.
+ - Chaque morceau de tuile, une fois arrondi au 1e-7 degré, reste un polygone valide ; sinon il est marqué
+   non mesurable (`v: 0`) et l'application rend la lecture incertaine près de lui, jamais « hors zone ».
+ - La surface totale des tuiles retrouve celle des zones (à 0,01 % près).
+ - L'écriture est faite dans un dossier temporaire, renommé à la fin.
+
+── LE FORMAT (`debroussaillement-2`, contre-revue du 30/10/2026, option A de R3) ─────────────────────────────
+ <sortie>/<édition>/manifest.json        couverture, profils (département, source, arrêté…), tuiles et empreintes
+ <sortie>/<édition>/t/<ix>_<iy>.json.gz  la cellule [ix/10, (ix+1)/10] × [iy/10, (iy+1)/10] :
+   - `morceaux` : les morceaux de zone (le profil, l'objet, les anneaux), pour dire SI un point est dans une zone,
+     LAQUELLE, et la PART d'une parcelle qui y tombe ;
+   - `limites` : les VRAIES limites du zonage dans la cellule (bord compris), pour dire À QUELLE DISTANCE de sa
+     limite est un point du zonage. Ce sont les limites de la RÉUNION de toutes les zones publiées, calculées sur les
+     géométries d'origine (Lambert-93), sans aucune tolérance : la frontière entre deux zones voisines (souvent une
+     limite de département) n'en est pas une, une coupe de tuile non plus ; un trou, un interstice réel entre deux
+     zones, une limite qui tombe exactement sur la grille en sont. En `debroussaillement-1`, la lib déduisait ces
+     limites des anneaux de chaque morceau, à l'exécution : elle prenait les frontières entre zones pour des
+     limites (R3), et devait examiner l'autre côté de la grille pour reconnaître les coupes (R1).
+ Coordonnées WGS84 (pyproj, EPSG:2154 → EPSG:4326) en entiers de 1e-7 degré, chaque anneau ou ligne codé en
+ différences. Une limite plus petite qu'un cran de cette grille (un trou de quelques millimètres) est gardée comme un
+ point, `[x0, y0, 0, 0]` (cf. `ligne_code`). Une cellule entièrement dans une zone, et qu'aucune limite ne touche, n'a pas de fichier : le
+ manifeste la marque `plein`. Une cellule absente du manifeste ne contient aucune zone publiée.
+
+ Usage :
+   python3 -I scripts/debroussaillement/construire.py --archive <DEBROUSSAILLEMENT_…_2026-03-01.7z> --sortie <dossier>
+   python3 -I scripts/debroussaillement/construire.py --gpkg <fichier.gpkg> --edition 2026-03-01 --sortie <dossier>
+ Dépendances épinglées : scripts/debroussaillement/requirements.txt (dans un environnement virtuel).
+"""
+import argparse
+import datetime as dt
+import gzip
+import hashlib
+import json
+import math
+import os
+import re
+import shutil
+import sqlite3
+import sys
+import tempfile
+
+import numpy
+import shapely
+from pyproj import Transformer
+from shapely import wkb
+from shapely.geometry import box
+from shapely.strtree import STRtree
+
+FORMAT = "debroussaillement-2"
+PAS = 1_000_000  # 0,1 degré en unités de 1e-7 degré
+ECHELLE = 1e7
+
+# LES DÉPARTEMENTS DONT DES BOIS ET FORÊTS SONT CLASSÉS À RISQUE D'INCENDIE (code forestier, L132-1 et L133-1).
+# Arrêté du 6 février 2024, article 3 (25 départements, en entier sauf exclusions de l'annexe 2), et annexe 1
+# remplacée par l'arrêté du 20 mai 2025 puis par celui du 13 avril 2026 (JO du 28/04/2026, 27 départements, en
+# partie). Relevé le 28/10/2026 (docs/audits/2026-10-28-fut149-debroussaillement/01-source.md).
+DEPARTEMENTS_ARRETES = {
+    "article 3 (L133-1)": "04 05 06 07 09 11 12 13 2A 2B 24 26 30 33 34 40 46 47 48 64 65 66 81 83 84".split(),
+    "annexe 1 (L132-1)": "16 17 18 19 22 27 28 29 31 32 35 36 37 38 41 42 43 45 49 56 72 73 77 79 82 86 91".split(),
+}
+SOURCE_URL = "https://data.geopf.fr/telechargement/resource/DEBROUSSAILLEMENT"
+
+
+def journal(*a):
+    print(*a, file=sys.stderr, flush=True)
+
+
+def sha256_fichier(chemin):
+    h = hashlib.sha256()
+    with open(chemin, "rb") as f:
+        for bloc in iter(lambda: f.read(1 << 20), b""):
+            h.update(bloc)
+    return h.hexdigest()
+
+
+def geometrie(blob):
+    """Une géométrie GeoPackage : en-tête « GP », enveloppe de taille variable, puis WKB."""
+    if blob[:2] != b"GP":
+        raise ValueError("en-tête GeoPackage absent")
+    enveloppe = {0: 0, 1: 32, 2: 48, 3: 48, 4: 64}[(blob[3] >> 1) & 7]
+    return wkb.loads(bytes(blob[8 + enveloppe:]))
+
+
+def departement(code):
+    """« 004 » → « 04 », « 02A » → « 2A » : le code Insee du département, celui des communes."""
+    code = code.strip()
+    return code[1:] if len(code) == 3 and code[0] == "0" else code
+
+
+def date_iso(v):
+    """« 17/10/25 » → « 2025-10-17 » ; toute autre forme (« Mi-juin 2023 », vide) : None, le texte brut reste."""
+    m = re.fullmatch(r"(\d{2})/(\d{2})/(\d{2})", (v or "").strip())
+    if not m:
+        return None
+    j, mo, a = map(int, m.groups())
+    try:
+        return dt.date(2000 + a, mo, j).isoformat()
+    except ValueError:
+        return None
+
+
+def lire_zones(gpkg):
+    con = sqlite3.connect(f"file:{gpkg}?mode=ro", uri=True)
+    tables = [r[0] for r in con.execute("select table_name from gpkg_contents where data_type = 'features'")]
+    if len(tables) != 1:
+        raise SystemExit(f"une seule table attendue dans le GeoPackage, trouvé : {tables}")
+    srs = con.execute("select srs_id from gpkg_geometry_columns").fetchone()[0]
+    if srs != 2154:
+        raise SystemExit(f"projection inattendue (srs {srs}) : la version complète est publiée en EPSG:2154")
+    cols = "geom, ID, DEPT, SOURCE, MILLESIME, ORIGINE, ZONAGE, DIFFUSION, URL, DATE_INTEG, DAT_AP_OLD"
+    zones = []
+    diffusions = {}
+    for row in con.execute(f"select {cols} from {tables[0]} where ZONAGE = 2"):
+        g, ident, dept, source, millesime, origine, _, diffusion, url, integ, arrete = row
+        diffusions[diffusion] = diffusions.get(diffusion, 0) + 1
+        if diffusion not in ("Oui", "O"):
+            raise SystemExit(f"valeur de DIFFUSION inconnue pour {ident} : {diffusion!r}")
+        geom = geometrie(g)
+        if geom.is_empty or not geom.is_valid:
+            raise SystemExit(f"zone {ident} : géométrie vide ou invalide ({shapely.is_valid_reason(geom)})")
+        zones.append({
+            "id": ident, "geom": geom, "ambigu": diffusion != "Oui",
+            "profil": (departement(dept), (source or "").strip(), (origine or "").strip(), (millesime or "").strip() or None,
+                       (arrete or "").strip() or None, (url or "").strip() or None, (integ or "").strip() or None),
+        })
+    total = con.execute(f"select count(*) from {tables[0]}").fetchone()[0]
+    return zones, {"table": tables[0], "objets": total, "zones": len(zones), "diffusion": diffusions}
+
+
+def verifier_departements(zones, accepter):
+    presents = {z["profil"][0] for z in zones}
+    attendus = {d for l in DEPARTEMENTS_ARRETES.values() for d in l}
+    manque, en_trop = sorted(attendus - presents), sorted(presents - attendus)
+    if manque or en_trop:
+        msg = f"départements : absents de la base {manque}, absents des arrêtés {en_trop}"
+        if not accepter:
+            raise SystemExit(msg + " (relire les arrêtés de classement, ou --accepter-ecart-arrete)")
+        journal("ATTENTION", msg)
+    return sorted(presents), {"absentsDeLaBase": manque, "absentsDesArretes": en_trop}
+
+
+def anneau_code(coords):
+    """Un anneau fermé → [x0, y0, dx1, dy1, …] en entiers de 1e-7 degré, sans le sommet de fermeture."""
+    pts = [(round(x * ECHELLE), round(y * ECHELLE)) for x, y in coords[:-1]]
+    propres = []
+    for p in pts:
+        if not propres or propres[-1] != p:
+            propres.append(p)
+    if len(propres) > 1 and propres[0] == propres[-1]:
+        propres.pop()
+    if len(propres) < 3:
+        return None, None
+    plat = [propres[0][0], propres[0][1]]
+    for a, b in zip(propres, propres[1:]):
+        plat += [b[0] - a[0], b[1] - a[1]]
+    return plat, propres
+
+
+def ligne_code(coords):
+    """
+    Une ligne → [x0, y0, dx1, dy1, …] en entiers de 1e-7 degré.
+
+    UNE VRAIE LIMITE PLUS PETITE QUE LA RÉSOLUTION DE PUBLICATION RESTE UNE LIMITE (31/10/2026). Quand tous ses
+    sommets tombent sur le même point de la grille (un trou de la réunion de quelques millimètres, un fragment rangé
+    dans une cellule voisine), elle est gardée comme un point, codé en segment de longueur nulle : [x0, y0, 0, 0].
+    Avant, elle était jetée ; le trou ayant aussi disparu du morceau arrondi, un point strictement hors zone, dans ce
+    trou, était lu « en zone » faute de toute limite à moins de 50 m (contre-épreuve du 31/10/2026 : 15 limites ainsi
+    effacées dans l'édition du 01/03/2026, dont un liseré de 0,07 mm² lu « en zone » à la jonction 13/83). Ce n'est ni
+    une fermeture ni un changement de précision : le point est la limite, à la résolution près.
+    """
+    pts = []
+    for x, y in coords:
+        p = (round(x * ECHELLE), round(y * ECHELLE))
+        if not pts or pts[-1] != p:
+            pts.append(p)
+    if len(pts) < 2:
+        return [pts[0][0], pts[0][1], 0, 0]
+    plat = [pts[0][0], pts[0][1]]
+    for a, b in zip(pts, pts[1:]):
+        plat += [b[0] - a[0], b[1] - a[1]]
+    return plat
+
+
+def lignes(g):
+    if g.is_empty:
+        return []
+    if g.geom_type == "LineString":
+        return [g]
+    if g.geom_type in ("MultiLineString", "GeometryCollection"):
+        return [l for x in g.geoms for l in lignes(x)]
+    return []  # un point isolé (contact de deux limites en un sommet) : aucune longueur
+
+
+# La réunion locale déborde de la cellule de cette marge (degrés) : les bords artificiels de la découpe tombent
+# hors de la cellule et n'entrent jamais dans ses limites. Toute valeur positive convient ; 0,002° ≈ 150 à 220 m.
+MARGE_REUNION = 0.002
+# La grille de calcul de la réunion (mètres, Lambert-93) : cf. `limites_cellule`.
+GRILLE_CALCUL_M = 1e-6
+# Les limites rangées dans une cellule débordent de son carré de cette marge (degrés, ≈ 10 cm) : cf. `limites_cellule`.
+MARGE_RANGEMENT = 1e-6
+
+
+def limites_cellule(zones_l93, arbre_l93, cellule, vers_l93, vers_wgs84, fermeture=0.0):
+    """
+    LES VRAIES LIMITES DU ZONAGE DANS UNE CELLULE (bord compris, et `MARGE_RANGEMENT` autour), en lignes WGS84 non arrondies, et leur longueur
+    en mètres (Lambert-93). Calculées en Lambert-93, sur les géométries d'ORIGINE, comme l'oracle : la réunion
+    exacte (`unary_union`, aucune tolérance, aucun accrochage) des zones découpées à un rectangle qui déborde de la
+    cellule, puis son bord, projeté en WGS84 et coupé au carré de la cellule élargi de 10 cm. Une limite posée
+    exactement sur le bord de la cellule est donc gardée (dans les deux cellules qui la bordent).
+    """
+    x0, y0, x1, y1 = cellule
+    m = MARGE_REUNION
+    # Le rectangle Lambert-93 qui contient la cellule élargie (bords échantillonnés : la projection les courbe).
+    t = numpy.linspace(0, 1, 21)
+    lon = numpy.concatenate([x0 - m + (x1 - x0 + 2 * m) * t, numpy.full(21, x1 + m), x1 + m - (x1 - x0 + 2 * m) * t, numpy.full(21, x0 - m)])
+    lat = numpy.concatenate([numpy.full(21, y0 - m), y0 - m + (y1 - y0 + 2 * m) * t, numpy.full(21, y1 + m), y1 + m - (y1 - y0 + 2 * m) * t])
+    X, Y = vers_l93.transform(lon, lat)
+    rect = (float(X.min()), float(Y.min()), float(X.max()), float(Y.max()))
+    idx = arbre_l93.query(box(*rect), predicate="intersects")
+    if len(idx) == 0:
+        return [], 0.0
+    # PRÉCISION DE CALCUL FIXE (1 µm, `GRILLE_CALCUL_M`) : en virgule flottante, GEOS rend parfois une réunion non
+    # fusionnée (un trou que recouvre une autre partie du résultat), d'où une fausse limite (contre-épreuve du
+    # 30/10/2026 : dans la Drôme, un « vide » fantôme de 5 700 m² à 13 m d'un point). À précision fixe, la réunion
+    # est robuste (toujours fusionnée). La grille n'agit qu'à l'échelle du micromètre : elle peut faire apparaître
+    # ou disparaître un liseré de largeur micrométrique (195 vides de moins de 0,5 µm à précision fixe, aucun en
+    # virgule flottante), jamais un vide plus large ; la virgule flottante le fait aussi, mais sans garantie de
+    # fusion (`sondes/largeurs_vides.py`).
+    reunion = shapely.unary_union([_decoupe(zones_l93[i], rect) for i in idx], grid_size=GRILLE_CALCUL_M)
+    if fermeture > 0:
+        # FERMETURE (option, `--fermeture-m`, 0 par défaut) : referme les vides plus étroits que `fermeture` mètres
+        # (dilatation puis érosion à angles vifs ; le reste du tracé ne bouge pas). Ce n'est PAS la règle par défaut :
+        # la réunion est exacte, et un liseré de numérisation entre deux zones reste une limite (prudente).
+        reunion = reunion.buffer(fermeture / 2, join_style="mitre", mitre_limit=10).buffer(-fermeture / 2, join_style="mitre", mitre_limit=10)
+    if not reunion.is_valid:
+        raise SystemExit(f"cellule {cellule} : réunion des zones invalide ({shapely.is_valid_reason(reunion)})")
+    bord_wgs = shapely.transform(reunion.boundary, lambda c: _transformer(vers_wgs84, c))
+    # Le carré de la cellule, élargi de `MARGE_RANGEMENT` : sans cela, une limite posée EXACTEMENT sur le bord de la
+    # cellule (une vraie limite alignée sur la grille) tombait à 1e-12 degré dehors après l'aller-retour Lambert-93 →
+    # WGS84, et disparaissait (contre-épreuve du 30/10/2026, `sondes/frontieres2.mts`). Ce n'est pas une tolérance sur
+    # la géométrie : la marge choisit seulement la tuile qui RANGE une limite ; une vraie limite rangée deux fois
+    # reste une vraie limite, et aucune n'est créée.
+    e = MARGE_RANGEMENT
+    morceaux = lignes(shapely.intersection(bord_wgs, box(x0 - e, y0 - e, x1 + e, y1 + e)))
+    ls = [l for l in lignes(shapely.line_merge(shapely.MultiLineString(morceaux))) if l.length > 0] if morceaux else []
+    longueur = sum(shapely.transform(l, lambda c: _transformer(vers_l93, c)).length for l in ls)
+    return ls, longueur
+
+
+def _decoupe(g, rect):
+    """`clip_by_rect` (rapide) ; s'il rend une géométrie invalide, l'intersection exacte avec le rectangle."""
+    c = shapely.clip_by_rect(g, *rect)
+    return c if c.is_valid else shapely.intersection(g, box(*rect))
+
+
+def polygones(g):
+    if g.is_empty:
+        return []
+    if g.geom_type == "Polygon":
+        return [g]
+    if g.geom_type in ("MultiPolygon", "GeometryCollection"):
+        return [p for x in g.geoms for p in polygones(x)]
+    return []  # lignes et points nés de la découpe : aucune surface
+
+
+def construire(gpkg, edition, sortie, accepter_ecart, exclusions, fermeture=0.0):
+    t0 = dt.datetime.now()
+    journal("empreinte de la source…")
+    empreinte = sha256_fichier(gpkg)
+    zones, lecture = lire_zones(gpkg)
+    couverture, ecart = verifier_departements(zones, accepter_ecart)
+    journal(f"{lecture['zones']} zones publiées sur {lecture['objets']} objets ; {len(couverture)} départements")
+
+    # Les profils : ce qui est dit d'une zone (département, nature de la source, arrêté, millésime, lien).
+    profils, index_profil = [], {}
+    for z in zones:
+        if z["profil"] not in index_profil:
+            dept, source, origine, millesime, arrete, url, integ = z["profil"]
+            index_profil[z["profil"]] = len(profils)
+            profils.append({
+                "departement": dept, "source": source, "origine": origine or None, "millesime": millesime,
+                "arrete": date_iso(arrete), "arreteBrut": arrete, "url": url, "integration": date_iso(integ), "integrationBrut": integ,
+            })
+        z["p"] = index_profil[z["profil"]]
+
+    # Projection : WGS84 en ordre lon, lat. Transformation de chaque sommet (aucune densification : la base
+    # est déjà simplifiée par l'IGN et ses segments sont courts ; l'écart d'une corde Lambert projetée en
+    # WGS84 reste sub-centimétrique à cette échelle).
+    vers_wgs84 = Transformer.from_crs(2154, 4326, always_xy=True)
+    journal("projection en WGS84…")
+    aire_source = sum(z["geom"].area for z in zones)
+    for z in zones:
+        z["wgs"] = shapely.transform(z["geom"], lambda c: _transformer(vers_wgs84, c))
+    arbre = STRtree([z["wgs"] for z in zones])
+    zones_l93 = [z["geom"] for z in zones]
+    arbre_l93 = STRtree(zones_l93)
+    x0, y0, x1, y1 = shapely.total_bounds([z["wgs"] for z in zones])
+
+    tmp = tempfile.mkdtemp(prefix=f".{edition}-", dir=sortie)
+    os.makedirs(os.path.join(tmp, "t"))
+    tuiles, nmorceaux, invalides, sommets = {}, 0, 0, 0
+    nlignes, sommets_limites, longueur_limites, ponctuelles = 0, 0, 0.0, 0
+    aire_tuiles = 0.0  # en Lambert-93, pour comparer à la source
+    vers_l93 = Transformer.from_crs(4326, 2154, always_xy=True)
+    for ix in range(math.floor(x0 * 10), math.floor(x1 * 10) + 1):
+        for iy in range(math.floor(y0 * 10), math.floor(y1 * 10) + 1):
+            cellule = (ix / 10, iy / 10, (ix + 1) / 10, (iy + 1) / 10)
+            idx = arbre.query(box(*cellule), predicate="intersects")
+            if len(idx) == 0:
+                continue
+            morceaux, plein = [], None
+            aire_cellule = box(*cellule).area
+            for k in sorted(idx, key=lambda i: zones[i]["id"]):
+                z = zones[k]
+                # Arrondi à la grille de 1e-7 degré par GEOS (`set_precision`, arrondi topologique) : un arrondi
+                # sommet par sommet créait des auto-intersections minuscules (26 morceaux sur l'édition du
+                # 01/03/2026, jusqu'à 72 km²), qui auraient rendu « incertaine » toute une commune.
+                for p in polygones(shapely.set_precision(shapely.clip_by_rect(z["wgs"], *cellule), 1 / ECHELLE)):
+                    if p.area <= 0:
+                        continue
+                    if abs(p.area - aire_cellule) <= 1e-12 * aire_cellule and len(p.interiors) == 0:
+                        plein = {"p": z["p"], "o": z["id"], **({"a": 1} if z["ambigu"] else {})}
+                        continue
+                    anneaux, valide = [], True
+                    ext, pts_ext = anneau_code(list(p.exterior.coords))
+                    if ext is None:
+                        continue
+                    anneaux.append(ext)
+                    trous_pts = []
+                    for trou in p.interiors:
+                        t, pts = anneau_code(list(trou.coords))
+                        if t is not None:
+                            anneaux.append(t)
+                            trous_pts.append(pts)
+                    # Le polygone arrondi doit rester valide : sinon on le dit non mesurable.
+                    q = shapely.Polygon([(a / ECHELLE, b / ECHELLE) for a, b in pts_ext], [[(a / ECHELLE, b / ECHELLE) for a, b in t] for t in trous_pts])
+                    if not q.is_valid:
+                        valide = False
+                        invalides += 1
+                    sommets += len(pts_ext) + sum(len(t) for t in trous_pts)
+                    morceaux.append({"p": z["p"], "o": z["id"], "r": anneaux, **({"v": 0} if not valide else {}), **({"a": 1} if z["ambigu"] else {})})
+            if plein is None and not morceaux:
+                continue
+            cle = f"{ix}_{iy}"
+            ls, longueur = limites_cellule(zones_l93, arbre_l93, cellule, vers_l93, vers_wgs84, fermeture)
+            limites = [ligne_code(list(l.coords)) for l in ls]
+            ponctuelles += sum(1 for c in limites if len(c) == 4 and c[2] == 0 and c[3] == 0)
+            if plein is not None and not morceaux and not limites:
+                tuiles[cle] = {"plein": plein}
+                aire_tuiles += shapely.transform(box(*cellule), lambda c: _transformer(vers_l93, c)).area
+                continue
+            if plein is not None:
+                # Une cellule pleine ET d'autres morceaux (deux zones se recouvrent), ou qu'une limite touche (elle
+                # longe son bord) : le rectangle devient un morceau, et la cellule a un fichier pour ses limites.
+                carre = [ix * PAS, iy * PAS, PAS, 0, 0, PAS, -PAS, 0]
+                morceaux.append({**{k: v for k, v in plein.items()}, "r": [carre]})
+            nlignes += len(limites)
+            sommets_limites += sum(len(c) // 2 for c in limites)
+            longueur_limites += longueur
+            contenu = {"format": FORMAT, "edition": edition, "ix": ix, "iy": iy, "morceaux": morceaux, "limites": limites}
+            octets = gzip.compress(json.dumps(contenu, separators=(",", ":")).encode(), compresslevel=9, mtime=0)
+            with open(os.path.join(tmp, "t", f"{cle}.json.gz"), "wb") as f:
+                f.write(octets)
+            tuiles[cle] = {"octets": len(octets), "sha256": hashlib.sha256(octets).hexdigest()}
+            nmorceaux += len(morceaux)
+            for m in morceaux:
+                aire_tuiles += _aire_l93(m["r"], vers_l93)
+
+    ecart_aire = abs(aire_tuiles - aire_source) / aire_source
+    journal(f"tuiles : {len(tuiles)} ; morceaux : {nmorceaux} ; non mesurables : {invalides} ; écart d'aire {ecart_aire:.6%}")
+    if ecart_aire > 1e-4:
+        shutil.rmtree(tmp)
+        raise SystemExit(f"la surface des tuiles s'écarte de celle des zones de {ecart_aire:.4%} : construction refusée")
+
+    tailles = sorted(t["octets"] for t in tuiles.values() if "octets" in t)
+    manifeste = {
+        "format": FORMAT,
+        "edition": edition,
+        # La SEULE valeur qui dépend du jour (contre-épreuve du 31/10/2026) : deux constructions de la même source, à
+        # des dates différentes, ont des tuiles identiques à l'octet et des manifestes qui ne diffèrent que par elle
+        # (donc des empreintes de manifeste différentes). L'identité géographique d'une édition est la table `tuiles`
+        # (taille et SHA-256 de chaque tuile) ; l'empreinte du manifeste identifie l'objet publié, que `publier.mjs`
+        # ne remplace jamais.
+        "construitLe": dt.date.today().isoformat(),
+        "producteur": "IGN, pour le ministère chargé des forêts",
+        "diffuseur": "IGN (Géoplateforme)",
+        "licence": "Licence Ouverte 2.0 (Etalab)",
+        "source": {"url": SOURCE_URL, "fichier": os.path.basename(gpkg), "sha256": empreinte, "octets": os.path.getsize(gpkg), **lecture},
+        "couverture": couverture,
+        "arretes": DEPARTEMENTS_ARRETES,
+        # Communes où l'arrêté exclut tous les massifs mais où la base publie des zones : l'application n'y conclut rien.
+        "exclusionsArretes": {c: v["commune"] for c, v in exclusions["communes"].items()},
+        "exclusionsTexte": exclusions["texte"],
+        "ecartArretes": ecart,
+        "profils": profils,
+        "tuiles": tuiles,
+        "stats": {
+            "tuiles": len(tuiles), "fichiers": len(tailles), "pleines": sum(1 for t in tuiles.values() if "plein" in t),
+            "octets": sum(tailles), "medianeOctets": tailles[len(tailles) // 2] if tailles else 0, "maxOctets": tailles[-1] if tailles else 0,
+            "morceaux": nmorceaux, "nonMesurables": invalides, "sommets": sommets, "ecartAire": round(ecart_aire, 8),
+            # `fermetureM` : la largeur des vides refermés pour le calcul des limites (0 : réunion exacte). L'édition le dit.
+            # `ponctuelles` : les vraies limites plus petites que la résolution, gardées comme un point (`ligne_code`).
+            "limites": {"lignes": nlignes, "sommets": sommets_limites, "km": round(longueur_limites / 1000), "ponctuelles": ponctuelles, "fermetureM": fermeture, "grilleCalculM": GRILLE_CALCUL_M},
+            "aireKm2": round(aire_source / 1e6),
+        },
+    }
+    with open(os.path.join(tmp, "manifest.json"), "w") as f:
+        json.dump(manifeste, f, ensure_ascii=False, separators=(",", ":"))
+    final = os.path.join(sortie, edition)
+    if os.path.exists(final):
+        shutil.rmtree(final)
+    os.rename(tmp, final)
+    journal(f"écrit : {final} ({(dt.datetime.now() - t0).seconds} s)")
+    print(json.dumps(manifeste["stats"], ensure_ascii=False))
+
+
+def _transformer(t, coords):
+    x, y = t.transform(coords[:, 0], coords[:, 1])
+    return numpy.column_stack([x, y])
+
+
+def _aire_l93(anneaux, t):
+    rings = []
+    for plat in anneaux:
+        x, y = plat[0], plat[1]
+        pts = [(x, y)]
+        for i in range(2, len(plat), 2):
+            x += plat[i]
+            y += plat[i + 1]
+            pts.append((x, y))
+        lon = [p[0] / ECHELLE for p in pts]
+        lat = [p[1] / ECHELLE for p in pts]
+        X, Y = t.transform(lon, lat)
+        rings.append(list(zip(X, Y)))
+    return shapely.Polygon(rings[0], rings[1:]).area
+
+
+def extraire(archive, dossier):
+    import py7zr
+    with py7zr.SevenZipFile(archive) as z:
+        noms = [n for n in z.getnames() if n.endswith(".gpkg")]
+        if len(noms) != 1:
+            raise SystemExit(f"un seul GeoPackage attendu dans l'archive, trouvé : {noms}")
+        z.extract(path=dossier, targets=noms)
+    return os.path.join(dossier, noms[0])
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--archive")
+    ap.add_argument("--gpkg")
+    ap.add_argument("--edition")
+    ap.add_argument("--sortie", required=True)
+    ap.add_argument("--accepter-ecart-arrete", action="store_true")
+    ap.add_argument("--revision", type=int, help="numéro de révision (2, 3…) quand le même millésime IGN est reconstruit")
+    ap.add_argument("--fermeture-m", type=float, default=0.0,
+                    help="referme, pour le calcul des limites, les vides plus étroits que N mètres (0 : réunion exacte, par défaut)")
+    ap.add_argument("--exclusions", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "exclusions-arretes.json"))
+    a = ap.parse_args()
+    os.makedirs(a.sortie, exist_ok=True)
+    extraction = None
+    if a.archive:
+        m = re.search(r"_(\d{4}-\d{2}-\d{2})\.7z$", a.archive)
+        edition = a.edition or (m and m.group(1))
+        extraction = tempfile.mkdtemp(dir=a.sortie, prefix=".extraction-")
+        gpkg = extraire(a.archive, extraction)
+    else:
+        gpkg, edition = a.gpkg, a.edition
+    if not gpkg or not edition or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", edition):
+        raise SystemExit("--archive <…_AAAA-MM-JJ.7z>, ou --gpkg <fichier> --edition AAAA-MM-JJ")
+    # Une édition publiée est immuable : reconstruire le même millésime IGN avec un contenu différent (exclusions,
+    # correction du script) demande une révision, publiée sous un identifiant neuf (`2026-03-01.2`).
+    if a.revision:
+        edition = f"{edition}.{a.revision}"
+    with open(a.exclusions) as f:
+        exclusions = json.load(f)
+    if exclusions.get("editionVerifiee") != edition.split(".")[0]:
+        journal(f"ATTENTION : les exclusions ont été vérifiées sur l'édition {exclusions.get('editionVerifiee')}, pas {edition} : refaire la contre-épreuve des arrêtés")
+    try:
+        construire(gpkg, edition, a.sortie, a.accepter_ecart_arrete, exclusions, a.fermeture_m)
+    finally:
+        # L'extraction (1,8 Go pour l'édition nationale) ne reste pas dans le dossier de sortie (contre-revue du 30/10/2026).
+        if extraction:
+            shutil.rmtree(extraction, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    main()

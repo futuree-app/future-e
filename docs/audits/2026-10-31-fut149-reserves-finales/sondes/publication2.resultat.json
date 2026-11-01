@@ -1,0 +1,66 @@
+{
+ "lectures": 817,
+ "melanges": 0,
+ "resultats": [
+  {
+   "n": "1a",
+   "titre": "deux envois concurrents du même contenu",
+   "ok": true,
+   "detail": "20/20 : en ligne identique à l'octet à la construction (au pire après une reprise)"
+  },
+  {
+   "n": "1b",
+   "titre": "deux envois concurrents de contenus différents sous le même identifiant",
+   "ok": true,
+   "detail": "16 bascules abouties (sur une édition entière, l'une ou l'autre), 4 refusées (intégrité : tuiles des deux envois sous le même nom), 0 lectures hybrides"
+  },
+  {
+   "n": "1c",
+   "titre": "deux bascules concurrentes",
+   "ok": true,
+   "detail": "pointeur final 2026-03-01.2 ; lectures {\"2026-03-01.2\":19}"
+  },
+  {
+   "n": "2",
+   "titre": "publication interrompue puis reprise",
+   "ok": true,
+   "detail": "coupure après 0 dépôt(s) : envoi interrompu, bascule refusée (pas de manifeste), lecteurs {\"2026-03-01\":19} ; reprise 18 déposées + 0 déjà là, bascule faite, lecteurs {\"2026-03-01.2\":19} | coupure après 1 dépôt(s) : envoi interrompu, bascule refusée (pas de manifeste), lecteurs {\"2026-03-01\":19} ; reprise 17 déposées + 1 déjà là, bascule faite, lecteurs {\"2026-03-01.2\":19} | coupure après 9 dépôt(s) : envoi interrompu, bascule refusée (pas de manifeste), lecteurs {\"2026-03-01\":19} ; reprise 9 déposées + 9 déjà là, bascule faite, lecteurs {\"2026-03-01.2\":19} | coupure après 17 dépôt(s) : envoi interrompu, bascule refusée (pas de manifeste), lecteurs {\"2026-03-01\":19} ; reprise 1 déposées + 17 déjà là, bascule faite, lecteurs {\"2026-03-01.2\":19} | coupure après 18 dépôt(s) : envoi interrompu, bascule refusée (pas de manifeste), lecteurs {\"2026-03-01\":19} ; reprise 0 déposées + 18 déjà là, bascule faite, lecteurs {\"2026-03-01.2\":19}"
+  },
+  {
+   "n": "3",
+   "titre": "tuile corrompue",
+   "ok": true,
+   "detail": "avant bascule : « intégrité : 2026-03-01.2/t/52_435.json.gz, taille ou SHA-256 » / « intégrité : 2026-03-01.2/t/52_435.json.gz, taille ou SHA-256 », pointeur resté 2026-03-01 ; après bascule, tuile remplacée en ligne : lecteurs {\"2026-03-01.2\":17,\"indisponible\":2} (point 7 : indisponible, jamais lu)"
+  },
+  {
+   "n": "4",
+   "titre": "bascule E1 → E2 (instance neuve)",
+   "ok": true,
+   "detail": "{\"2026-03-01.2\":19}"
+  },
+  {
+   "n": "7",
+   "titre": "cache chaud pendant la bascule (lectures concurrentes)",
+   "ok": true,
+   "detail": "avant : {\"2026-03-01\":19} ; après la bascule : 0 min {\"2026-03-01\":19} ; 3 min {\"2026-03-01\":19} ; 6 min {\"2026-03-01\":19} ; 9 min {\"2026-03-01\":19} ; 9.99 min {\"2026-03-01\":19} ; 10.01 min {\"2026-03-01.2\":19} ; 12 min {\"2026-03-01.2\":19}"
+  },
+  {
+   "n": "5",
+   "titre": "retour arrière E2 → E1",
+   "ok": true,
+   "detail": "0 min {\"2026-03-01.2\":19} ; 10.01 min {\"2026-03-01\":19}"
+  },
+  {
+   "n": "6",
+   "titre": "purge conservant l'édition du retour arrière",
+   "ok": true,
+   "detail": "courante E2 après retour arrière, purger --garder 1 → restent 2026-03-01.2,2026-03-01.3 ; retour sur E3 faite, lecteurs {\"2026-03-01.3\":19} ; puis purger --garder 2 (E3 courante) → restent 2026-03-01.2,2026-03-01.3 ; retour arrière sur E2 faite, lecteurs {\"2026-03-01.2\":19}"
+  },
+  {
+   "n": "6b",
+   "titre": "édition purgée encore désignée par une instance chaude",
+   "ok": true,
+   "detail": "avant expiration du pointeur : {\"2026-03-01\":1,\"indisponible\":18} (tuile en mémoire servie, les autres indisponibles) ; après : {\"2026-03-01.3\":19}"
+  }
+ ]
+}

@@ -7,9 +7,11 @@ import { arriveeDepuisPastille, faceMemoireCatastrophes } from "@/lib/catnat-mem
 import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
+import type { CarteSante } from "@/lib/sante-environnementale";
 import { MetricTooltip } from "@/components/MetricTooltip";
 import type { GeorisquesSummary, GasparCatnatSummary } from "@/lib/georisques";
 import type { EaufranceSummary } from "@/lib/eaufrance";
+import { lireEcoulement } from "@/lib/eaufrance-ecoulement";
 import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
@@ -71,6 +73,12 @@ type Factor = {
    * ne s'ouvre pas seule. Le volet ordinaire n'en garde aucune trace.
    */
   arrivee?: Pick<CardDetail, "surligner" | "note" | "noteLabel">;
+  /**
+   * FUT-167 : l'arrivée PAR PHÉNOMÈNE, pour une carte qui en démontre plusieurs sur des lignes distinctes
+   * (« Santé environnementale » : air, industrie, bruit, radon). La preuve qui vise l'air ouvre le volet sur
+   * la ligne de l'air, pas sur celle du radon. Prioritaire sur `arrivee` pour la clé visée.
+   */
+  arriveePar?: Partial<Record<EvidenceTargetKey, Pick<CardDetail, "surligner" | "note" | "noteLabel">>>;
 };
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
@@ -85,6 +93,8 @@ type SharedProps = {
   scenarios: GwlScenarios | null;
   georisques: GeorisquesSummary | null;
   drought: Drought | null;
+  /** FUT-165 : l'écoulement n'a pas pu être lu ; dit « indisponible », jamais « pas de cours d'eau à sec ». */
+  droughtIndisponible?: boolean;
   territoire: Territoire | null;
   vigieau: VigieauSummary | null;
   catnat?: GasparCatnatSummary | null;
@@ -124,6 +134,11 @@ type SharedProps = {
    * a parlé de connexion ou de télétravail ; la carte passe en tête du groupe « Le territoire ».
    */
   fibre?: { texte: TexteFibre; pourLeProjet: boolean };
+  /**
+   * FUT-167 · LA CARTE « SANTÉ ENVIRONNEMENTALE », lue à côté du snapshot, jamais dedans (comme les incendies
+   * et la fibre) : air de fond, sites industriels, bruit des infrastructures, radon. Absente : pas de carte.
+   */
+  sante?: CarteSante | null;
   // FUT-116 : plus d'archétype (`climatType`). Il choisissait le récit des volets climat sur un
   // classement administratif (Littoral, Montagne…), sans rapport avec la donnée affichée.
 };
@@ -157,6 +172,7 @@ const THEME_OF: Record<string, ThemeKey> = {
   "Conditions favorables au feu": "risque",
   "Mémoire des catastrophes": "risque",
   "Érosion du littoral": "risque",
+  "Santé environnementale": "risque",
 };
 function themeOf(label: string): ThemeKey {
   return THEME_OF[label] ?? "territoire";
@@ -167,6 +183,7 @@ const CARD_ORDER: string[] = [
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
   "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Nuits tropicales", "Jours de pluie intense",
   "Mémoire des catastrophes", "Inondation fluviale", "Submersion marine", "Conditions favorables au feu", "Érosion du littoral",
+  "Santé environnementale",
 ];
 function cardRank(label: string): number {
   const i = CARD_ORDER.indexOf(label);
@@ -394,6 +411,7 @@ export function buildFactors(
   era5?: Era5Trend | null,
   catnatVille?: string | null,
   incendies?: MemoireIncendies | null,
+  droughtIndisponible?: boolean,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -520,7 +538,12 @@ export function buildFactors(
   // Restriction du moment (VigiEau), relevé de terrain (ONDE), sols secs projetés (DRIAS) : trois
   // sources, trois natures. FUT-116 : aucune ne dit une tendance (le composant ne lit aucun écart de
   // sécheresse), et l'une ne se déduit pas des autres. Les noms de bases restent en pied de drawer.
-  const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
+  // FUT-163 (31/10/2026) : `isDry` ne dit plus que l'assec confirmé. L'écoulement interrompu (« Ecoulement
+  // non visible ») reste une observation à dire, distincte : tout se lit sur l'état brut, jamais sur le booléen
+  // enregistré dans le dossier (son sens a changé, l'état de la source non).
+  const etatOnde = drought ? lireEcoulement(drought).etat : null;
+  const ondeSignale = etatOnde === "assec" || etatOnde === "ecoulement_interrompu";
+  const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || ondeSignale;
   // « Vigilance » est le niveau le plus bas de VigiEau : c'est de la
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
   // contredit le reste de la carte. On ne parle de restriction qu'à partir
@@ -546,11 +569,16 @@ export function buildFactors(
     // restriction en cours.
     ...(drought
       // FUT-116 : un relevé ponctuel porte sa date, comme la consultation VigiEau ci-dessus.
+      // FUT-165 : la valeur est l'état que la source a relevé (assec, écoulement interrompu, visible,
+      // observation impossible). « Pas de cours d'eau à sec » se disait quand l'état n'était jamais lu ; un
+      // relevé daté sans état (dossiers enregistrés avant le correctif) est dit « non vérifiable ».
       ? [{
           label: drought.lastObservationDate ? `Relevé de terrain du ${formatFrDate(drought.lastObservationDate)}` : "Sur le terrain",
-          value: drought.isDry ? "Cours d'eau à sec par endroits" : "Pas de cours d'eau à sec",
+          value: `${lireEcoulement(drought).texte}${drought.riverName ? ` : ${drought.riverName}` : ""}`,
         }]
-      : []),
+      : droughtIndisponible
+        ? [{ label: "Relevé de terrain", value: "Source indisponible lors de la consultation" }]
+        : []),
     ...(drySoilDays != null
       ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours de sols secs par an` }]
       : []),
@@ -575,8 +603,8 @@ export function buildFactors(
               ? restrictions.texte
               // FUT-116 : l'observation ne se dit QUE si ONDE l'a relevée. Elle était la branche par
               // défaut : toute ouverture du volet sans sols secs ni restriction l'aurait affirmée.
-              : drought?.isDry
-                ? "Cours d'eau à sec observé"
+              : ondeSignale
+                ? (etatOnde === "assec" ? "Cours d'eau à sec observé" : "Écoulement interrompu observé")
                 : restrictions.texte,
         subhead: "Restrictions d'eau, cours d'eau et sols : trois lectures à ne pas confondre.",
         accent: "var(--orange)",
@@ -637,8 +665,8 @@ export function buildFactors(
           ? `${drySoilDays} jours/an en ${meta.year}`
           : vigieau?.maxLevel
             ? levelLabel(vigieau.maxLevel)
-            : drought?.isDry
-              ? "Cours d'eau à sec"
+            : ondeSignale
+              ? (etatOnde === "assec" ? "Cours d'eau à sec" : "Écoulement interrompu")
               : "—",
       col: "var(--orange)",
       src: `DRIAS · indice SWI < 0,4 · France ${meta.france}`,
@@ -1180,13 +1208,18 @@ function buildParagraphs(
     );
   }
 
-  if (drought?.isDry) {
+  // FUT-163 : l'état brut décide, pas `isDry` (cf. la carte « Sécheresse des sols »).
+  const etatReleve = drought ? lireEcoulement(drought).etat : null;
+  if (drought && (etatReleve === "assec" || etatReleve === "ecoulement_interrompu")) {
     const cours = drought.riverName ? `le ${drought.riverName}` : "le cours d'eau local";
     const lead = droughtSentences.length === 0
       ? `${cours.charAt(0).toUpperCase()}${cours.slice(1)} a été observé`
       : `Localement, ${cours} a été observé`;
+    // FUT-165 : « écoulement non visible » n'est pas un assec ; la phrase dit l'état relevé, et sa date.
+    const etat = etatReleve === "assec" ? "à sec" : "sans écoulement visible";
+    const quand = drought.lastObservationDate ? ` le ${formatFrDate(drought.lastObservationDate)}` : "";
     droughtSentences.push(
-      `${lead} à sec dans une observation récente du réseau ONDE (Hub'Eau, OFB).`,
+      `${lead} ${etat}${quand} par le réseau ONDE (Hub'Eau, OFB).`,
     );
   }
 
@@ -1251,11 +1284,54 @@ function facteurFibre(t: TexteFibre): Factor {
   };
 }
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+// ─── FUT-167 : la carte « Santé environnementale » ─────────────────────────────────────────────
+// Quatre lectures que le dossier fait déjà (air, industrie, bruit, radon), une ligne chacune. Le texte vient
+// tout entier de `lib/sante-environnementale.ts` (pur, testé) ; ce composant ne fait que le disposer. Les
+// quatre clés sont déclarées ICI, en littéral : le garde-fou d'`evidence-targets.test.ts` lit ce fichier.
+function facteurSante(c: CarteSante): Factor {
+  const ligne = (cle: "air" | "industrie" | "bruit" | "radon") => c.lignes.find((l) => l.cle === cle)!;
+  return {
+    label: "Santé environnementale",
+    targets: ["health.air_background", "health.industrial_site", "health.noise_infrastructure", "health.radon"],
+    val: c.face.valeur,
+    sub: c.face.sous,
+    col: "var(--blue)",
+    src: "Ineris, Géorisques, OpenStreetMap · commune",
+    missing: c.manquante,
+    detail: {
+      eyebrow: "L'environnement sanitaire",
+      title: "Santé environnementale",
+      headline: c.face.valeur,
+      subhead: "Quatre lectures, chacune à son échelle : la commune ou son centre, jamais un logement.",
+      accent: "var(--blue)",
+      breakdownLabel: "Les quatre lectures",
+      breakdown: c.lignes.map((l) => ({ label: l.libelle, value: l.signal ? `${l.valeur} · à vérifier` : l.valeur })),
+      sections: c.lignes.map((l) => ({
+        label: `${l.libelle} · ${l.grain}`,
+        paragraphs: [...l.paragraphes, ...(l.geste ? [`À vérifier : ${l.geste}`] : [])],
+        more: [l.limite],
+      })),
+      why: "Une ligne mise « à vérifier » franchit le seuil que retient le dossier de décision. Les autres valeurs sont données avec leurs repères, sans conclusion d'ensemble : aucune de ces lectures ne mesure ce que respire, entend ou subit un logement précis.",
+      whyLabel: "Comment les lire",
+      note: c.note,
+      noteLabel: "Date de lecture",
+      sources: c.sources,
+    },
+    arriveePar: {
+      "health.air_background": { surligner: ligne("air").libelle },
+      "health.industrial_site": { surligner: ligne("industrie").libelle },
+      "health.noise_infrastructure": { surligner: ligne("bruit").libelle },
+      "health.radon": { surligner: ligne("radon").libelle },
+    },
+  };
+}
+
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre, sante }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null, droughtIndisponible ?? false);
   if (fibre) factors.push(facteurFibre(fibre.texte));
+  if (sante) factors.push(facteurSante(sante));
   // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
   // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.
   const rangPourLeProjet = (label: string) => (fibre?.pourLeProjet && label === "Fibre optique" ? -1 : cardRank(label));
@@ -1266,10 +1342,13 @@ export function QuartierAside({ registres, communeName, scenarios, georisques, t
   useEffect(() => {
     const ancre = window.location.hash.slice(1);
     if (!ancre) return;
-    const cible = factors.find((f) => f.arrivee && f.detail && f.targets?.some((t) => evidenceAnchorId(t) === ancre));
+    const cible = factors.find((f) => (f.arrivee || f.arriveePar) && f.detail && f.targets?.some((t) => evidenceAnchorId(t) === ancre));
+    // FUT-167 : la clé visée choisit la ligne mise en évidence, quand la carte en démontre plusieurs.
+    const cle = cible?.targets?.find((t) => evidenceAnchorId(t) === ancre);
+    const arrivee = (cle && cible?.arriveePar?.[cle]) || cible?.arrivee;
     // Lecture du hash au montage, côté client seulement : pas de rendu en cascade.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (cible?.detail) setOpenDetail({ ...cible.detail, ...cible.arrivee });
+    if (cible?.detail) setOpenDetail({ ...cible.detail, ...arrivee });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
