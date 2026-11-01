@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
-  const enrichment = await gatherCommuneEnrichment(insee);
+  const enrichment = await gatherCommuneEnrichment(insee, { avecEauPotable: true });
 
   return NextResponse.json({
     ok: true,
@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       ademe: enrichment.ademe !== null,
       drias: enrichment.drias !== null,
       eau: enrichment.eau !== null,
+      eauPotable: enrichment.eauPotable != null && enrichment.eauPotable.etat !== "indisponible",
     },
   });
 }

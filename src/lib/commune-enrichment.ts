@@ -3,7 +3,7 @@
 // est disponible partout où le contexte territorial est utile, sans dupliquer
 // fetchs et logique :
 //   - /api/synthesize-quartier (synthèse IA Quartier)
-//   - /api/ask + /api/ask/context (AskFuture)
+//   - /api/ask + /api/ask/context (AskFuture, seuls à demander l'eau potable)
 //   - page /rapport/quartier (cartes, chips sources)
 //   - futurs modules IA / Suivi
 //
@@ -18,6 +18,8 @@
 import { getCommuneFullData, type CommuneFullData } from "@/lib/commune-data";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { getEaufranceSummary, type EaufranceSummary } from "@/lib/eaufrance";
+import { getEauPotableCommune } from "@/lib/server/eau-potable";
+import type { EauPotableCommune } from "@/lib/eau-potable";
 import { getVigieauSummary, type VigieauSummary } from "@/lib/vigieau";
 import {
   getGeorisquesSummary,
@@ -33,7 +35,14 @@ export type ClimatData = Awaited<ReturnType<typeof getClimatDataCommune>>;
 export type EnrichmentResult = {
   ademe: CommuneFullData | null;
   drias: ClimatData;
+  /** L'écoulement des cours d'eau (ONDE). L'eau potable n'y est plus : elle vit dans `eauPotable`. */
   eau: EaufranceSummary | null;
+  /**
+   * FUT-164 · L'EAU POTABLE, RÉSEAU PAR RÉSEAU (lecture FUT-152). Lue seulement pour l'assistant
+   * (`avecEauPotable`) : aucun écran ne l'affiche, et la synthèse Territoire n'en a pas l'usage. Absente =
+   * non demandée ; `{ etat: "indisponible" }` = demandée, source en panne.
+   */
+  eauPotable?: EauPotableCommune;
   vigieau: VigieauSummary | null;
   georisques: GeorisquesSummary | null;
   catnat: GasparCatnatSummary | null;
@@ -48,8 +57,9 @@ export type EnrichmentResult = {
 
 export async function gatherCommuneEnrichment(
   insee: string,
+  options: { avecEauPotable?: boolean } = {},
 ): Promise<EnrichmentResult> {
-  const [ademeRes, driasRes, eauRes, vigieauRes, georisquesRes, catnatRes, littoralRes, baignadeRes] =
+  const [ademeRes, driasRes, eauRes, vigieauRes, georisquesRes, catnatRes, littoralRes, baignadeRes, eauPotableRes] =
     await Promise.allSettled([
       getCommuneFullData(insee),
       getClimatDataCommune(insee),
@@ -59,6 +69,8 @@ export async function gatherCommuneEnrichment(
       getGasparCatnatSummary(insee),
       getLittoralSummary(insee),
       getBaignadeSummary(insee),
+      // Ne lève jamais : une panne rend `{ etat: "indisponible" }`.
+      options.avecEauPotable ? getEauPotableCommune(insee) : Promise.resolve(undefined),
     ]);
 
   return {
@@ -71,5 +83,8 @@ export async function gatherCommuneEnrichment(
     littoral: littoralRes.status === "fulfilled" ? littoralRes.value : null,
     baignade: baignadeRes.status === "fulfilled" ? baignadeRes.value : null,
     indisponibles: { georisques: georisquesRes.status === "rejected", catnat: catnatRes.status === "rejected" },
+    ...(options.avecEauPotable
+      ? { eauPotable: eauPotableRes.status === "fulfilled" && eauPotableRes.value ? eauPotableRes.value : { etat: "indisponible" as const } }
+      : {}),
   };
 }

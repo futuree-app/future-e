@@ -9,6 +9,7 @@
 // Module PUR : aucune I/O, imports de types seulement, chemins relatifs (testable sous `node --test`).
 import type { CommuneFullData } from "../commune-data.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
+import type { EauPotableCommune, ParametreLu, PrelevementLu, ReseauLu } from "../eau-potable.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { GeorisquesSummary, GasparCatnatSummary } from "../georisques.ts";
 import type { BaignadeSummary } from "../baignade.ts";
@@ -214,38 +215,105 @@ function formatDriasBlock(data: ClimatData): string {
   return out.join("\n");
 }
 
-function formatEauBlock(data: EaufranceSummary | null): string {
-  if (!data) {
-    return "[Hub'Eau] Pas de données Hub'Eau disponibles pour cette commune.";
+// ─── L'eau potable, réseau par réseau (FUT-164) ─────────────────────────────
+// L'ancien bloc lisait un seul réseau comme la commune entière, la conformité de la première ligne venue,
+// les limites sans les références, sur six mois, et le phosphore sous le nom « nitrites ». Il transmet
+// désormais la lecture FUT-152 (`eau-potable.ts`), celle de la page gratuite : chaque réseau, sa zone, la
+// date de son dernier prélèvement publié et la conclusion de l'ARS. Le modèle reçoit aussi la consigne qui
+// l'empêche de rattacher un réseau à une adresse : aucune donnée publique nationale ne le permet.
+
+/** « 2026-08-25 » → « 25/08/2026 ». */
+const dateFr = (iso: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+};
+
+/** Les verdicts du prélèvement : les écarts sont nommés un par un ; sans écart, une seule phrase. */
+function verdicts(p: PrelevementLu): string | null {
+  const lus: [PrelevementLu["limitesBacterio"], string][] = [
+    [p.limitesBacterio, "bactériologie : limite de qualité NON RESPECTÉE"],
+    [p.limitesPhysicoChimie, "physico-chimie : limite de qualité NON RESPECTÉE"],
+    [p.referencesBacterio, "bactériologie : référence de qualité non respectée"],
+    [p.referencesPhysicoChimie, "physico-chimie : référence de qualité non respectée"],
+  ];
+  const ecarts = lus.filter(([c]) => c === "non_conforme").map(([, t]) => t);
+  if (ecarts.length) return ecarts.join(", ");
+  return lus.some(([c]) => c === "conforme") ? "aucun écart aux limites ni aux références de qualité publié" : null;
+}
+
+function lignePrelevement(p: PrelevementLu): string {
+  return [
+    `dernier prélèvement publié le ${dateFr(p.date)}`,
+    p.conclusion ? `conclusion de l'ARS : « ${p.conclusion} »` : "pas de conclusion de l'ARS publiée",
+    verdicts(p),
+  ].filter(Boolean).join(" ; ");
+}
+
+function ligneReseau(r: ReseauLu): string {
+  const nom = `Réseau « ${r.nom} »${r.zone ? ` (zone desservie selon la source : ${r.zone})` : ""}`;
+  if (r.dernier === "indisponible") return `- ${nom} : résultat indisponible lors de la consultation. Ne concluez rien pour ce réseau.`;
+  if (r.dernier === null) return `- ${nom} : aucun prélèvement publié dans la source.`;
+  return `- ${nom} : ${lignePrelevement(r.dernier)}.`;
+}
+
+const nombreFr = (n: number): string => String(n).replace(".", ",");
+
+/** « A, B, C » ; au-delà de trois réseaux, « A, B, C et 11 autres réseaux » (Marseille en cite 14 pour un prélèvement). */
+function reseauxFr(noms: string): string {
+  const liste = noms.split(", ");
+  return liste.length <= 3 ? `réseau « ${noms} »` : `réseaux « ${liste.slice(0, 3).join(", ")} » et ${liste.length - 3} autres`;
+}
+
+function ligneParametre(p: ParametreLu): string {
+  const limite = `${nombreFr(p.limite)} ${p.unite}`;
+  const depasse = p.depasseLimite === true
+    ? `, AU-DELÀ de la limite de qualité (${limite})`
+    : p.depasseLimite === false
+      ? `, sous la limite de qualité (${limite})`
+      : `, comparaison à la limite de qualité (${limite}) impossible avec la valeur publiée`;
+  return `- ${p.libelle} : ${p.valeur} ${p.unite} le ${dateFr(p.date)}${p.reseau ? ` (${reseauxFr(p.reseau)})` : ""}${depasse}.`;
+}
+
+/** Au-delà, la liste noie le reste du contexte ; les réseaux tus sont comptés, jamais présentés comme absents. */
+const RESEAUX_MAX = 20;
+
+export function formatEauPotableBlock(e: EauPotableCommune | undefined): string {
+  const titre = "[Hub'Eau — eau potable : contrôle sanitaire des ARS, par réseau de distribution]";
+  if (e === undefined) return `${titre}\n- Non consultée pour cette question. Ne concluez rien sur l'eau du robinet.`;
+  if (e.etat === "indisponible") {
+    return `${titre}\n- La source n'a pas pu être lue lors de cette consultation. Dites-le, ne concluez rien sur la qualité de l'eau, et ne parlez jamais d'absence de contrôle.`;
   }
-  const out: string[] = ["[Hub'Eau — eau potable et hydrologie]"];
-  const dw = data.drinkingWater;
-  if (dw) {
-    if (dw.lastSampleDate) out.push(`- Dernier prélèvement eau potable : ${dw.lastSampleDate}`);
-    if (dw.conformBacterio !== null) {
-      out.push(
-        `- Conformité bactériologique : ${dw.conformBacterio ? "oui" : "non"}`,
-      );
-    }
-    if (dw.conformPhysicoChem !== null) {
-      out.push(
-        `- Conformité physico-chimique : ${dw.conformPhysicoChem ? "oui" : "non"}`,
-      );
-    }
-    if (dw.nitrates != null) out.push(`- Nitrates : ${dw.nitrates} mg/L`);
-    if (dw.nitrites != null) out.push(`- Nitrites : ${dw.nitrites} mg/L`);
-  } else {
-    out.push("- Pas de relevé eau potable récent disponible.");
+  const consigne = [
+    "- CONSIGNES : un prélèvement décrit l'eau d'un réseau à sa date, jamais l'eau d'aujourd'hui. Ne rattachez JAMAIS un réseau à une adresse ou à un logement : aucune donnée publique ne dit quel réseau dessert une adresse ; ce rattachement se demande à la mairie ou au service des eaux. Quand la commune a plusieurs réseaux, nommez-les et ne généralisez pas le résultat d'un réseau à la commune. Les limites de qualité sont des seuils sanitaires réglementaires ; les références de qualité sont des indicateurs de fonctionnement des installations : ne confondez pas les deux.",
+  ];
+  if (e.etat === "absent_dans_source") {
+    return [titre, `- Consultée le ${dateFr(e.consulteLe)} : la source ne publie aucun prélèvement pour cette commune.`, ...consigne].join("\n");
   }
-  const drought = data.drought;
-  if (drought) {
-    if (drought.lastObservationDate) {
-      out.push(
-        `- Observation cours d'eau (${drought.riverName ?? "inconnu"}) le ${drought.lastObservationDate} : ${drought.status ?? "n/a"}${drought.isDry ? " (assec)" : ""}`,
-      );
+  const out: string[] = [titre, `- Consultée le ${dateFr(e.consulteLe)}.`];
+  if (e.etat === "partiel") out.push("- Lecture PARTIELLE : certains réseaux ou paramètres n'ont pas pu être lus. Ne concluez rien pour eux.");
+  const n = e.reseaux.length;
+  if (n > 1) out.push(`- La commune est desservie par ${n} réseaux de distribution.`);
+  out.push(...e.reseaux.slice(0, RESEAUX_MAX).map(ligneReseau));
+  if (n > RESEAUX_MAX) out.push(`- ${n - RESEAUX_MAX} autres réseaux ne sont pas détaillés ici : ne concluez rien sur eux.`);
+  if (e.parametres.length) {
+    out.push("Dernier résultat publié dans la commune pour quelques paramètres, chacun avec sa date et son réseau :");
+    out.push(...e.parametres.map(ligneParametre));
+    // Le plomb vient surtout des branchements et des canalisations intérieures : un résultat dit le point
+    // prélevé, ni le réseau entier ni un autre immeuble (Paris, 01/06/2026 : 13 µg/L sur un seul point).
+    if (e.parametres.some((p) => p.code === "1382")) {
+      out.push("- Le plomb dépend surtout des canalisations du bâtiment où il est prélevé : ce résultat ne décrit ni tout le réseau ni un autre logement.");
     }
   }
+  out.push(...consigne);
   return out.join("\n");
+}
+
+function formatEcoulementBlock(data: EaufranceSummary | null): string {
+  const drought = data?.drought;
+  if (!drought || !drought.lastObservationDate) {
+    return "[Hub'Eau — écoulement des cours d'eau] Pas d'observation de cours d'eau disponible pour cette commune.";
+  }
+  return `[Hub'Eau — écoulement des cours d'eau (réseau ONDE)]\n- Observation cours d'eau (${drought.riverName ?? "inconnu"}) le ${drought.lastObservationDate} : ${drought.status ?? "n/a"}${drought.isDry ? " (assec)" : ""}`;
 }
 
 function formatGeorisquesBlock(g: GeorisquesSummary | null): string {
@@ -326,7 +394,8 @@ export function formatEnrichmentBlock(enr: EnrichmentResult): string {
     formatGeorisquesBlock(enr.georisques),
     formatGasparBlock(enr.catnat),
     formatVigieauBlock(enr.vigieau),
-    formatEauBlock(enr.eau),
+    formatEauPotableBlock(enr.eauPotable),
+    formatEcoulementBlock(enr.eau),
     formatBaignadeBlock(enr.baignade),
   ].join("\n\n");
 }
@@ -427,6 +496,7 @@ export function aDesDonneesDetaillees(enrichment: EnrichmentResult): boolean {
     enrichment.ademe !== null ||
     enrichment.drias !== null ||
     enrichment.eau !== null ||
+    (enrichment.eauPotable != null && enrichment.eauPotable.etat !== "indisponible") ||
     enrichment.georisques !== null ||
     enrichment.catnat !== null ||
     enrichment.vigieau !== null ||
