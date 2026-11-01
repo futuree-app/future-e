@@ -70,10 +70,12 @@ export type ParametreLu = {
 
 export type EauPotableCommune =
   | { etat: "indisponible" }
-  | { etat: "absent_dans_source"; consulteLe: string }
+  | { etat: "absent_dans_source"; consulteLe: string; villePLM?: string }
   | {
       etat: "disponible" | "partiel";
       consulteLe: string;
+      /** Paris, Lyon ou Marseille demandés par un arrondissement : la source ne publie que la ville, lue à sa place. */
+      villePLM?: string;
       reseaux: ReseauLu[];
       /** Les paramètres mis en avant, chacun avec SA date et SON réseau ; absents s'ils ne sont pas publiés. */
       parametres: ParametreLu[];

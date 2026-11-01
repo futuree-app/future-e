@@ -287,10 +287,14 @@ export function formatEauPotableBlock(e: EauPotableCommune | undefined): string 
   const consigne = [
     "- CONSIGNES : un prélèvement décrit l'eau d'un réseau à sa date, jamais l'eau d'aujourd'hui. Ne rattachez JAMAIS un réseau à une adresse ou à un logement : aucune donnée publique ne dit quel réseau dessert une adresse ; ce rattachement se demande à la mairie ou au service des eaux. Quand la commune a plusieurs réseaux, nommez-les et ne généralisez pas le résultat d'un réseau à la commune. Les limites de qualité sont des seuils sanitaires réglementaires ; les références de qualité sont des indicateurs de fonctionnement des installations : ne confondez pas les deux.",
   ];
+  // FUT-163 : un arrondissement de Paris, Lyon ou Marseille est lu au niveau de la ville, seule maille publiée.
+  const ville = e.villePLM
+    ? [`- Lecture à l'échelle de la ville de ${e.villePLM} : la source ne publie pas l'eau potable par arrondissement. Ne présentez jamais ces résultats comme ceux de l'arrondissement ; les zones desservies sont celles que la source nomme.`]
+    : [];
   if (e.etat === "absent_dans_source") {
-    return [titre, `- Consultée le ${dateFr(e.consulteLe)} : la source ne publie aucun prélèvement pour cette commune.`, ...consigne].join("\n");
+    return [titre, `- Consultée le ${dateFr(e.consulteLe)} : la source ne publie aucun prélèvement pour cette commune.`, ...ville, ...consigne].join("\n");
   }
-  const out: string[] = [titre, `- Consultée le ${dateFr(e.consulteLe)}.`];
+  const out: string[] = [titre, `- Consultée le ${dateFr(e.consulteLe)}.`, ...ville];
   if (e.etat === "partiel") out.push("- Lecture PARTIELLE : certains réseaux ou paramètres n'ont pas pu être lus. Ne concluez rien pour eux.");
   const n = e.reseaux.length;
   if (n > 1) out.push(`- La commune est desservie par ${n} réseaux de distribution.`);
