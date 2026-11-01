@@ -13,6 +13,7 @@ import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { LectureBruitAerien } from "./bruit-aerien.ts";
 import type { LectureFibre } from "./fibre-adresse.ts";
+import type { LectureIndustrieAdresse } from "./industrie-adresse.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
@@ -128,6 +129,12 @@ export type LogementReport = {
    * millésime. `undefined` : rapport écrit avant FUT-156, ou lecture non activée ; l'écran n'affiche RIEN.
    */
   fibre?: LectureFibre;
+  /**
+   * FUT-167 (D2) : LES RISQUES INDUSTRIELS À L'ADRESSE. Sites Seveso autour du point (index local daté) et plans
+   * de prévention des risques technologiques au point et sur la commune (Géorisques), chacun avec son état
+   * (cf. `industrie-adresse.ts`). `undefined` : rapport écrit avant FUT-167 ; l'écran le dit, sans rien conclure.
+   */
+  industrieAdresse?: LectureIndustrieAdresse;
   sinistralite?: OnrnSinistralite | null;
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.

@@ -114,6 +114,11 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   if (r.bruitAerien?.statut === "indisponible") absentes.push("bruit_aerien");
   // FUT-156 : mêmes règles. « À vérifier » est une réponse (l'adresse n'est pas rattachable), pas une panne.
   if (r.fibre?.statut === "indisponible") absentes.push("fibre");
+  // FUT-167 : chaque lecture des risques industriels à l'adresse est nommée quand elle n'a pas répondu.
+  if (r.industrieAdresse?.seveso.etat === "indisponible") absentes.push("industrie_seveso");
+  // FUT-163 : une page au point incomplète n'a pas entièrement répondu ; elle est nommée comme telle.
+  if (r.industrieAdresse && (r.industrieAdresse.pprtPoint.etat === "indisponible" || (r.industrieAdresse.pprtPoint.annonces ?? 0) > r.industrieAdresse.pprtPoint.plans.length)) absentes.push("pprt_point");
+  if (r.industrieAdresse?.pprtCommune.etat === "indisponible") absentes.push("pprt_commune");
   return absentes;
 }
 
