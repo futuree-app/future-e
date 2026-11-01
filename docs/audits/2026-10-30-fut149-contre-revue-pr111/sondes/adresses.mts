@@ -5,8 +5,8 @@ const { lireDebroussaillement, tuilesALire } = await import(`${W}/src/lib/debrou
 const man = JSON.parse(readFileSync(`${ED}/manifest.json`, "utf8"));
 const oracle = JSON.parse(readFileSync(ORA, "utf8"));
 const D = `${W}/src/lib/__fixtures__/fut149/adresses`;
-const charge = (e: any) => new Map(tuilesALire(man, e).map((k: string) => [k, JSON.parse(gunzipSync(readFileSync(`${ED}/t/${k}.json.gz`)).toString())]));
-const attenduPoint = (o: any, dep: boolean) => !dep ? "non_couvert" : o.dist != null && o.dist <= 50 ? "en_limite" : o.dedans ? "en_zone" : "hors_zone";
+const charge = (e: unknown) => new Map(tuilesALire(man, e).map((k: string) => [k, JSON.parse(gunzipSync(readFileSync(`${ED}/t/${k}.json.gz`)).toString())]));
+const attenduPoint = (o: { dist: number | null; dedans: boolean }, dep: boolean) => !dep ? "non_couvert" : o.dist != null && o.dist <= 50 ? "en_limite" : o.dedans ? "en_zone" : "hors_zone";
 for (const f of readdirSync(D).sort()) {
   const c = f.replace(/\.json$/, ""); const a = JSON.parse(readFileSync(`${D}/${f}`, "utf8")); const o = oracle[c];
   const base = { point: [a.ban.lon, a.ban.lat], geocodage: a.ban.type, insee: a.ban.citycode };
