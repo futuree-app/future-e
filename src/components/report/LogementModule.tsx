@@ -24,6 +24,7 @@ import { InondationLectureBlock } from "@/components/report/logement/InondationS
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
 import { FibreAdresseSection } from "@/components/report/logement/FibreAdresseSection";
 import { IndustrieAdresseSection } from "@/components/report/logement/IndustrieAdresseSection";
+import { SitesSolsSection } from "@/components/report/logement/SitesSolsSection";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
@@ -686,6 +687,11 @@ export default function LogementModule({
               </ReportSection>
             )}
 
+            {/* FUT-157 : les sols pollués AU TERRAIN (SIS, servitudes, sites suivis par l'administration), à côté
+                des risques au point. Un statut du terrain et ce qu'il change à l'achat, jamais une exposition des
+                occupants. Absent d'un rapport antérieur, il ne s'affiche pas. */}
+            <SitesSolsSection lecture={result.sitesSols} />
+
             {/* FUT-167 (D2) : les risques industriels À L'ADRESSE (sites Seveso autour, plans de prévention des
                 risques technologiques au point et sur la commune), à côté des risques au point. La place voisine des
                 sols pollués au terrain (FUT-157), quand ils seront fusionnés. */}
@@ -778,6 +784,7 @@ const LIBELLE_ETAT: Record<"en_cours" | "nouvelle_version" | "identique" | "refu
 
 /** La date de la collecte affichée, et le geste qui la renouvelle. Discret : aucun spinner global. */
 // Les sources muettes, dites en clair (FUT-13) : une source qui n'a pas répondu n'est pas « rien à signaler ».
+// `friches` n'est plus collecté (30/10/2026) mais reste nommé : une version antérieure peut l'avoir noté absent.
 const NOM_SOURCE: Record<string, string> = {
   parcelle: "cadastre", altitude: "altitude", zfe: "zones à faibles émissions", friches: "friches (Cartofriches)",
   donnees_communales: "données communales", sinistralite: "sinistralité", georisques_commune: "Géorisques (commune)",
@@ -791,6 +798,10 @@ const NOM_SOURCE: Record<string, string> = {
   fibre: "fibre à l'adresse (Arcep)",
   industrie_seveso: "sites Seveso (index Géorisques)", pprt_point: "plans de prévention des risques technologiques au point (Géorisques)",
   pprt_commune: "plans de prévention des risques technologiques de la commune (Géorisques)",
+  sites_sols: "sols pollués (Géorisques)", sites_sols_sis: "secteurs d'information sur les sols (Géorisques)",
+  sites_sols_sup: "servitudes liées à une pollution des sols (Géorisques)",
+  sites_sols_instructions: "sites suivis par l'administration pour une pollution des sols (Géorisques)",
+  sites_sols_sans_emprise: "sites de sols pollués repérés par un simple point (Géorisques)",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {
