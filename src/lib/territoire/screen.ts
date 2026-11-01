@@ -22,6 +22,8 @@ export type TerritoireScreenData = {
   territoire: { densite: number | null; incendies: number | null; taux_boisement: number | null } | null;
   vigieau: VigieauSummary | null;
   drought: NonNullable<EaufranceSummary["drought"]> | null;
+  /** FUT-165 : l'écoulement n'a pas pu être lu (panne), distinct de « aucune observation ». */
+  droughtIndisponible: boolean;
   catnat: GasparCatnatSummary | null;
   catnatInondationIndex: CatnatInondation | null;
   littoral: LittoralSummary | null;
@@ -58,6 +60,7 @@ export function screenFromSnapshot(s: FactsSnapshot): TerritoireScreenData {
       ? ({ ...vigieauFact.value, consultedAt: vigieauFact.observedAt ?? "" } as VigieauSummary)
       : null,
     drought: valueOf<NonNullable<EaufranceSummary["drought"]>>(s, "water.river_drought"),
+    droughtIndisponible: factOf(s, "water.river_drought")?.status === "source_unavailable",
     catnat: valueOf<GasparCatnatSummary>(s, "risk.catnat"),
     catnatInondationIndex: valueOf<CatnatInondation>(s, "risk.catnat_flood_index"),
     littoral: valueOf<LittoralSummary>(s, "coast.littoral"),

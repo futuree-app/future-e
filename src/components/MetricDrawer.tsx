@@ -285,10 +285,15 @@ export function MetricDrawer({
           font-size: 14px; color: #c6cfdb;
         }
         .metric-drawer-row-head {
-          display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+          display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+          column-gap: 16px; row-gap: 2px;
         }
         .metric-drawer-row-head > span:first-child { flex-shrink: 0; }
-        .metric-drawer-row-head .metric-drawer-val { text-align: right; }
+        /* FUT-163 (01/11/2026) : à 360 px, « Écoulement » (chasse fixe) ne tenait plus à côté de « Relevé de terrain
+           du 28 octobre 2026 » et sortait du volet, rogné. La valeur part de sa largeur minimale (son mot le plus
+           long) et s'étend sur la place restante : une ligne qui tenait reste identique ; seule une valeur dont un
+           mot ne tient plus passe sous le libellé, alignée à droite. */
+        .metric-drawer-row-head .metric-drawer-val { text-align: right; flex: 1 1 auto; width: min-content; }
         .metric-drawer-bar {
           display: block; margin-top: 7px; height: 5px; border-radius: 3px;
           background: var(--bg-elev-3); overflow: hidden;

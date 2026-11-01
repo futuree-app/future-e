@@ -101,6 +101,7 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     catnatInondationIndex: catnatInondationDepuisIndex(entreeCatnat),
     vigieau: enrichment?.vigieau ?? null,
     drought: enrichment?.eau?.drought ?? null,
+    droughtIndisponible: !enrichment?.eau || enrichment.eau.droughtIndisponible === true,
     littoral: enrichment?.littoral ?? null,
     era5,
     saisonnalitePct,

@@ -106,6 +106,7 @@ export default async function RapportQuartierPage(
   const logementVacancePct = screen?.logementVacancePct ?? null;
   const vigieau = screen?.vigieau ?? null;
   const drought = screen?.drought ?? null;
+  const droughtIndisponible = screen?.droughtIndisponible ?? false;
 
   // Identité visuelle du territoire (déterministe, sans appel réseau).
   // FUT-33 : la typologie figée dans le snapshot (commune, loi Littoral) fait foi ; le repli ne sait plus rien
@@ -323,7 +324,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} droughtIndisponible={droughtIndisponible} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
