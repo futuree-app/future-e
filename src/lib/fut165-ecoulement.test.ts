@@ -185,3 +185,13 @@ const MINIMAL = {
   ademe: null, scenarios: null, georisques: null, catnat: null, catnatInondationIndex: null, vigieau: null, drought: null,
   littoral: null, era5: null, saisonnalitePct: null, distinctiveTrait: null,
 };
+
+// FUT-163 (01/11/2026) : à 360 px, « Écoulement interrompu, plus visible » sortait du volet, rogné de 3,5 px (mesuré
+// sur le vrai composant). La valeur d'une ligne part de sa largeur minimale et passe sous le libellé quand un de
+// ses mots ne tient plus ; une ligne qui tenait ne change pas (mesures 360/390/1440, rapport FUT-163 du 31/10).
+test("FUT-163 · le volet ne rogne plus une valeur longue à 360 px (règle de mise en page gardée)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const css = readFileSync("src/components/MetricDrawer.tsx", "utf8");
+  assert.match(css, /\.metric-drawer-row-head \{\s*display: flex; flex-wrap: wrap;/);
+  assert.match(css, /\.metric-drawer-row-head \.metric-drawer-val \{ text-align: right; flex: 1 1 auto; width: min-content; \}/);
+});
