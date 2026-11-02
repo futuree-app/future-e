@@ -38,6 +38,8 @@ import { contexteIrrecevable, lectureDuContexte, longueurQuestion, MAX_QUESTION_
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
 import { porteeSansFavorable, raisonsSousReserve } from "@/lib/comparateur/portee-favorable";
 import { lireCorpsBorne } from "@/lib/server/corps-borne";
+import { getLecturesPrix } from "@/lib/prix-immobiliers-commune";
+import { blocPrixPourModele, type LecturePrix } from "@/lib/prix-immobiliers";
 
 export const runtime = "nodejs";
 
@@ -201,9 +203,19 @@ note est absente, ne l'inventez pas.
 SI UNE NOTE "logement" EST DONNÉE POUR UN TERRITOIRE
 C'est un NIVEAU DE PRIX relatif (achat et/ou loyers, par rapport au reste de la
 France), déjà en clair. Vous pouvez le reprendre tel quel SI on vous interroge,
-sans chiffre, jamais le mot "abordable" ni un jugement d'accessibilité (vous ne
-connaissez pas le budget du lecteur), jamais un verdict. Si la note est absente,
-ne l'inventez pas (l'absence de donnée d'achat n'est pas un marché "moyen").
+jamais le mot "abordable" ni un jugement d'accessibilité (vous ne connaissez pas
+le budget du lecteur), jamais un verdict. Si la note est absente, ne l'inventez
+pas (l'absence de donnée d'achat n'est pas un marché "moyen").
+
+SI LA QUESTION PORTE SUR LES PRIX IMMOBILIERS (achat, prix au m², loyers)
+Répondez avec le champ "prix_immobiliers" de chaque territoire concerné : ce sont
+les seuls chiffres de prix que vous pouvez citer, avec leur période, leur échelle
+(commune, arrondissement, ville, intercommunalité) et leur source. Ce sont des
+médianes de ventes passées et des loyers d'annonce : jamais la valeur d'un
+logement précis ni une estimation, même si le lecteur donne une surface ; jamais
+un prix futur ; achat et location séparés. Ces prix n'entrent pas dans l'ordre des
+cartes : ne dites jamais qu'une commune est classée ou recommandée parce qu'elle
+est moins chère. Si le champ est absent, dites que le prix n'est pas disponible.
 
 SI UNE NOTE "littoral" EST DONNÉE POUR UN TERRITOIRE
 Elle signale que la commune est exposée à l'érosion du littoral (la côte recule). N'en
@@ -246,7 +258,7 @@ des formations, de la réputation, des classements ni des débouchés. Répondez
 et de dynamisme, jamais en évaluation qualitative des études.
 
 SI LA QUESTION SORT DU SUJET futur•e
-Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce
+Écoles (au-delà de l'accès), vie nocturne, politique : ramenez brièvement vers ce
 que le comparateur éclaire. La vitalité du bassin d'emploi est, elle, pesée par le
 comparateur (vous pouvez l'expliquer qualitativement), mais le détail d'un métier
 précis ou d'un salaire reste au rapport.
@@ -281,7 +293,7 @@ lit cette question à l'adresse. »`;
 const CAUSES_DE_L_ORDRE = {
   causes: ["raisons", "compromis"],
   descriptifs_hors_classement: [
-    "logement", "signaux", "littoral", "trait_distinctif", "pression_climatique_economie", "heritage_industriel",
+    "logement", "prix_immobiliers", "signaux", "littoral", "trait_distinctif", "pression_climatique_economie", "heritage_industriel",
   ],
 };
 
@@ -294,11 +306,15 @@ const SENS_DE_L_ORDRE: Record<LectureAsk["mode"], string> = {
     "Ordre d'affichage, pas un classement établi : certaines priorités ne sont pas mesurées pour tous les territoires, ou leur mesure n'est pas connue.",
 };
 
+// FUT-138 : un code INSEE de commune ou d'arrondissement (métropole, Corse). Tout le reste est ignoré.
+const CODE_INSEE = /^(?:\d{5}|2[AB]\d{3})$/;
+
 function buildContextBlock(
   ctx: ContexteAsk,
   lecture: LectureAsk,
   focusRang: number | null,
   alertes: { premisse: string | null; historique: boolean },
+  prix: Record<string, string> = {},
 ): string {
   const territoires = (ctx.territoires ?? []).map((t, i) => ({
     position: i + 1,
@@ -317,6 +333,8 @@ function buildContextBlock(
     compromis: t.compromis ?? null,
     pression_climatique_economie: t.pression_eco ?? null,
     logement: t.logement ?? null,
+    // FUT-138 : relus dans l'index par la route, jamais pris dans le corps de la requête.
+    prix_immobiliers: (t.insee && prix[t.insee]) || null,
     littoral: t.littoral ?? null,
     trait_distinctif: t.distinctive ?? null,
     signaux: t.signaux ?? {},
@@ -442,9 +460,15 @@ export async function POST(request: NextRequest) {
     historique: history.some((m) => affirmationsNonEtablies(m.content, lecture.mode).length > 0),
   };
 
+  // FUT-138 : les prix immobiliers de chaque carte, relus dans l'index à partir de son code (aucun chiffre
+  // du navigateur). Une lecture locale, sans appel externe.
+  const codes = (ctx.territoires ?? []).flatMap((t) => (typeof t.insee === "string" && CODE_INSEE.test(t.insee) ? [{ insee: t.insee, nom: t.nom }] : []));
+  const lectures: Record<string, LecturePrix> = codes.length ? await getLecturesPrix(codes).catch(() => ({})) : {};
+  const prix = Object.fromEntries(Object.entries(lectures).map(([k, l]) => [k, blocPrixPourModele(l)]));
+
   const messages = [
     ...history,
-    { role: "user" as const, content: `${buildContextBlock(ctx, lecture, focusRang, alertes)}\n\nQUESTION : ${question}` },
+    { role: "user" as const, content: `${buildContextBlock(ctx, lecture, focusRang, alertes, prix)}\n\nQUESTION : ${question}` },
   ];
 
   try {

@@ -1268,6 +1268,12 @@ export function OuVivreClient() {
                     <p className="mt-3 text-[12px] leading-[1.5] text-label/75">{bindOrphans(r.incendiesObserves)}</p>
                   )}
 
+                  {/* FUT-138 : les prix immobiliers de la commune (ventes passées, loyers d'annonce), sur chaque
+                      carte. Un fait communal daté et sourcé, posé après le classement : il ne l'a pas fait. */}
+                  {r.prix && (
+                    <p className="mt-3 text-[12px] leading-[1.5] text-label/75">{bindOrphans(r.prix.ligne)}</p>
+                  )}
+
                   {/* FUT-148 : la fibre de la commune, quand le lecteur a parlé de connexion ou de télétravail.
                       Un fait communal daté, jamais un classement ni une promesse à l'adresse. */}
                   {r.fibre && (
@@ -1276,8 +1282,9 @@ export function OuVivreClient() {
 
                   {/* Compromis : la tension assumée, ce qui distingue le territoire et donne
                       envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
-                      Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
-                      et vivent dans la synthèse, AskFuture et le rapport. */}
+                      Pression éco / niveau de prix / littoral restent hors carte (doctrine 2026-06-02)
+                      et vivent dans la synthèse, AskFuture et le rapport. Les CHIFFRES de prix, eux, sont
+                      sur la carte depuis FUT-138 (ligne factuelle ci-dessus). */}
                   {!outcome?.inondation?.exploration && r.compromis && (
                     <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-caption)] leading-[1.55] text-muted">
                       Compromis : {r.compromis}

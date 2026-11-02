@@ -10,6 +10,7 @@
 // PREFERENCE_KEYS est ajoutée au moteur, l'ajouter ici.
 
 import { termeDeConnexion } from "./fibre-texte.ts";
+import { PHRASE_PRIX, termeDePrix } from "./prix-immobiliers.ts";
 
 export const PREFERENCE_LABELS: Record<string, string> = {
   faible_chaleur: "des étés plus frais",
@@ -182,9 +183,10 @@ export function horsMesureToLignes(
   const out: HorsMesureLigne[] = [];
   for (const it of items) {
     // Un terme de connexion porte sa propre phrase, quelle que soit la famille que le parseur lui a donnée.
-    const phrase = termeDeConnexion(it.term) ? PHRASE_CONNEXION : HORS_MESURE_PHRASES[it.kind];
+    // FUT-138 : un budget ou un prix, de même : les prix sont sur chaque carte, sans avoir classé.
+    const phrase = termeDeConnexion(it.term) ? PHRASE_CONNEXION : termeDePrix(it.term) ? PHRASE_PRIX : HORS_MESURE_PHRASES[it.kind];
     if (!phrase) continue;
-    if (it.kind !== "autre" && phrase !== PHRASE_CONNEXION) {
+    if (it.kind !== "autre" && phrase !== PHRASE_CONNEXION && phrase !== PHRASE_PRIX) {
       if (phrasesVues.has(phrase)) continue;
       phrasesVues.add(phrase);
       out.push({ terme: null, phrase });

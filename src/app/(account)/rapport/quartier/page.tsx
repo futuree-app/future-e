@@ -40,6 +40,8 @@ import { getMemoireIncendies } from "@/lib/bdiff-incendies-commune";
 import { getFibreCommune } from "@/lib/fibre-commune";
 import { projetEvoqueLaConnexion, texteFibre } from "@/lib/fibre-texte";
 import { getSanteEnvironnementale } from "@/lib/server/sante-environnementale";
+import { getLecturePrix } from "@/lib/prix-immobiliers-commune";
+import { textePrix } from "@/lib/prix-immobiliers";
 
 export default async function RapportQuartierPage(
   { searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> },
@@ -205,6 +207,9 @@ export default async function RapportQuartierPage(
   // FUT-167 : LA CARTE « SANTÉ ENVIRONNEMENTALE », LUE À CÔTÉ DU SNAPSHOT, JAMAIS DEDANS (comme les incendies et
   // la fibre). Elle démontre les quatre preuves de santé du dossier (air, industrie, bruit, radon) et se date
   // elle-même : un dossier déjà vendu garde ses constats, la carte ne les réécrit pas. Une panne ne casse rien.
+  // FUT-138 : les prix immobiliers de la commune, lus dans l'index (aucun appel externe).
+  const prix = inseeCode ? textePrix(await getLecturePrix(inseeCode, displayName)) : undefined;
+
   const sante = inseeCode
     ? await getSanteEnvironnementale(inseeCode, displayName, { adresseConnue: aUneAdresseIci }).catch(() => null)
     : null;
@@ -332,7 +337,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} droughtIndisponible={droughtIndisponible} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} sante={sante} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} droughtIndisponible={droughtIndisponible} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} prix={prix} sante={sante} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

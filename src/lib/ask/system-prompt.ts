@@ -21,7 +21,7 @@ export const SYSTEM_PROMPT_BASE = `Vous êtes l'assistant de futur•e. Votre r�
 
 PÉRIMÈTRE STRICT
 Vous répondez uniquement sur :
-- Le logement (risques, valeur, assurabilité, rénovation).
+- Le logement (prix immobiliers observés dans la commune, risques, assurabilité, rénovation ; jamais l'estimation d'un bien précis).
 - La santé environnementale (qualité de l'air, eau potable, sols, bruit).
 - Le climat local (canicule, inondation, submersion, sécheresse).
 - La mobilité et la dépendance automobile du territoire.
@@ -507,7 +507,7 @@ function buildUserProfileText(profile: ProfileRow): string {
 }
 
 // ─── Le system prompt complet, tel qu'il part chez Anthropic ───────────────
-const CLES_SYSTEM = ["communeName", "communeInsee", "referentiel", "enrichment", "profile"] as const;
+const CLES_SYSTEM = ["communeName", "communeInsee", "referentiel", "enrichment", "profile", "prix"] as const;
 
 export type EntreeSystemPrompt = {
   communeName: string;
@@ -516,6 +516,8 @@ export type EntreeSystemPrompt = {
   referentiel: string;
   enrichment: EnrichmentResult;
   profile: ProfileRow;
+  /** FUT-138 : le bloc de `blocPrixPourModele` (prix de vente DVF, loyers ANIL), lu dans l'index. */
+  prix?: string | null;
 };
 
 /** Y a-t-il au moins une source détaillée ? Seules les vraies sources comptent. */
@@ -546,8 +548,8 @@ DONNÉES TERRITORIALES DISPONIBLES — ${communeName} (INSEE ${communeInsee})
 ${referentiel}
 
 ${enrichmentText}
-${
-  aDesDonneesDetaillees(enrichment)
+${args.prix ? `\n[Prix immobiliers : DVF, DGFiP ; Carte des loyers, ANIL]\n${args.prix}\n` : ""}${
+  aDesDonneesDetaillees(enrichment) || args.prix
     ? ""
     : "\nIndication : aucune donnée détaillée disponible dans futur•e pour cette commune. Si l'utilisateur demande des chiffres précis, dites-le explicitement plutôt que d'extrapoler."
 }

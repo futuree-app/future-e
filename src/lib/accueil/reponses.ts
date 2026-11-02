@@ -150,7 +150,8 @@ function reponseImmobilier(): ReponseQna {
     verdict: "futur•e ne prédit pas les prix futurs.",
     detail:
       "futur•e peut vérifier des éléments qui comptent dans une décision d'achat : la performance énergétique du logement, " +
-      "les risques recensés à l'adresse et certains faits documentés sur le territoire.",
+      "les risques recensés à l'adresse, les prix de vente observés et les loyers d'annonce de la commune, " +
+      "et certains faits documentés sur le territoire.",
     cta: CTA_LOGEMENT,
   };
 }

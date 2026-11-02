@@ -8,6 +8,8 @@ import { ModeChoixSearch } from "./ModeChoixSearch";
 import { ModeChoixAsk } from "./ModeChoixAsk";
 import { ModeChoixSynthese } from "./ModeChoixSynthese";
 import { ThemeExplorer } from "./ThemeExplorer";
+import { getLecturesPrix } from "@/lib/prix-immobiliers-commune";
+import { lignePrixComparateur } from "@/lib/prix-immobiliers";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +127,9 @@ export default async function ComparateurPage({
   }
 
   const { trio, comparaison, ignores } = seeded;
+  // FUT-138 : les prix immobiliers de chaque commune, lus dans l'index. Une ligne factuelle par carte ; la
+  // comparaison ne les lit pas (aucun gagnant, aucun « moins cher donc mieux »).
+  const prix = await getLecturesPrix(trio.map((r) => ({ insee: r.insee, nom: r.nom }))).catch(() => ({} as Record<string, never>));
   const initial = trio.map((r) => ({ code: r.insee, nom: r.nom }));
   const ctaHref = `/comparateur/pack-decision?communes=${trio.map((r) => r.insee).join(",")}&mode=choix`;
   const colsClass = trio.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
@@ -182,6 +187,9 @@ export default async function ComparateurPage({
                 <p className="mt-3 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-dense)] leading-[1.55] text-muted">
                   {r.compromis}
                 </p>
+              )}
+              {prix[r.insee] && (
+                <p className="mt-3 text-[12px] leading-[1.5] text-label/75">{bindOrphans(lignePrixComparateur(prix[r.insee]))}</p>
               )}
             </div>
           ))}

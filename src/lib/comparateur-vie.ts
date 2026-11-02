@@ -2,6 +2,7 @@ import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createCompressedIndexLoader } from "@/lib/compressed-index-loader";
+import type { LogementIndex, MetaPrix } from "@/lib/prix-immobiliers";
 import {
   resolveZoneAnchors,
   resolveExclusions,
@@ -214,6 +215,9 @@ export type MatchResult = {
   // télétravail. Posée par la route `match` APRÈS le classement : aucun score, palier ni ordre ne la lit, et la
   // synthèse rédigée ne la reçoit pas.
   fibre?: { ligne: string };
+  // FUT-138 : les prix immobiliers de la commune (ventes DVF, loyers d'annonce ANIL), sur TOUTES les cartes.
+  // Posés par la route `match` APRÈS le classement : aucun score, palier ni ordre ne les lit.
+  prix?: { ligne: string };
   // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
   // géométrie (l'isochrone), et l'itinéraire n'a pas tranché pour elle. Elle est proposée (l'exclure
   // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais
@@ -519,24 +523,10 @@ export type IndexCommune = {
     radius_pct: number | null;
     composition: Record<string, number>;
   } | null;
-  // Logement (cf. scripts/populate-logement.mjs). Niveaux relatifs en paliers ;
-  // médianes/maille/fiabilité conservées pour le RAPPORT, jamais exposées au gate.
-  logement?: {
-    achat:
-      | { dispo: false }
-      | {
-          dispo: true;
-          niveau: "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
-          maison: { eur_m2: number; maille: string } | null;
-          appart: { eur_m2: number; maille: string } | null;
-        };
-    location: {
-      niveau: "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
-      appart_eur_m2: number | null;
-      maison_eur_m2: number | null;
-      fiabilite: "observee" | "estimee";
-    } | null;
-  } | null;
+  // Logement (cf. scripts/populate-logement.mjs). Niveaux relatifs en paliers pour la phrase du
+  // comparateur ; médianes, maille, effectifs et fiabilité pour les autres surfaces, toujours formulés par
+  // `prix-immobiliers.ts` (FUT-138). Jamais lus par le score ni le tri.
+  logement?: LogementIndex | null;
   // Accès BPE pondéré par la proximité, rayon adapté au territoire, 5 km en métropole à
   // 25 km en rural (cf. scripts/populate-bpe.py). score = percentile national
   // du comptage d'équipements ; count = brut conservé pour un futur rapport. Accès, pas qualité.
@@ -646,8 +636,18 @@ const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, (communes, meta
   buildUuLabels(communes);
   const rang = (meta.etudesDyn as { vraiZero?: { rang?: unknown } } | undefined)?.vraiZero?.rang;
   rangAucunEtudiant = typeof rang === "number" ? rang : null;
+  // FUT-138 : la provenance des prix immobiliers (période, livraison, sources) et les prix de Paris, Lyon,
+  // Marseille en ville entière, que l'index ne porte que par arrondissement.
+  metaLogement = (meta.logement as typeof metaLogement) ?? null;
 });
 let rangAucunEtudiant: number | null = null;
+let metaLogement: (MetaPrix & { villesPLM?: Record<string, LogementIndex> }) | null = null;
+
+/** FUT-138 : la provenance des prix immobiliers de l'index (cf. `prix-immobiliers.ts`). */
+export async function getMetaLogement(): Promise<typeof metaLogement> {
+  await loadIndex();
+  return metaLogement;
+}
 
 let nameCache: Map<string, IndexCommune> | null = null;
 
@@ -2758,7 +2758,7 @@ const isExtreme = (n: string | null) => n === "tres_haut" || n === "tres_bas";
 function logementNote(c: IndexCommune): string | null {
   const lg = c.logement;
   if (!lg) return null;
-  const aN = lg.achat?.dispo ? lg.achat.niveau : null;
+  const aN = lg.achat?.dispo ? lg.achat.niveau ?? null : null;
   const lN = lg.location ? lg.location.niveau : null;
   const a = logementSens(aN), l = logementSens(lN);
   if (a === 0 && l === 0) return null;
@@ -2931,7 +2931,7 @@ function erosionSeverity(insee: string, littoralIndex: Map<string, LittoralSumma
 const LOGEMENT_ORDINAL: Record<string, number> = { tres_bas: 1, bas: 2, moyen: 3, haut: 4, tres_haut: 5 };
 function logementNiveau(c: IndexCommune): number | null {
   const a = c.logement?.achat;
-  if (!a || !a.dispo) return null;
+  if (!a || !a.dispo || !a.niveau) return null;
   return LOGEMENT_ORDINAL[a.niveau] ?? null;
 }
 function eteSupportable(c: IndexCommune): number | null {
@@ -2971,7 +2971,9 @@ function buildDistinctive(
     { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", key: "viabilite_emploi", guard: (w) => w >= 50 },
     { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables", key: "faible_chaleur" },
     { tier: 1, value: (c) => erosionSeverity(c.insee, littoralIndex), dir: "min", scale: 1, mode: "step", label: "le littoral le moins exposé" },
-    { tier: 1, value: logementNiveau, dir: "min", scale: 1, mode: "step", label: "le marché immobilier le plus accessible" },
+    // FUT-138 : un FAIT de prix (« les prix de vente les plus bas »), jamais « accessible » : le budget du lecteur
+    // n'est pas connu, et un prix bas n'est pas un mérite en soi.
+    { tier: 1, value: logementNiveau, dir: "min", scale: 1, mode: "step", label: "les prix de vente les plus bas" },
     { tier: 1, value: (c) => c.relief_proximite ?? null, dir: "max", scale: 22, label: "la plus proche de la montagne", guard: (w) => w >= 55 },
     { tier: 2, value: (c) => c.clim.NORRR_yr ?? null, dir: "max", scale: 250, label: "la plus pluvieuse", guard: (w) => w >= 850 },
     { tier: 2, value: (c) => c.clim.NORTMm_seas_DJF ?? null, dir: "max", scale: 4, label: "les hivers les plus doux", key: "douceur_climat" },

@@ -1,0 +1,2398 @@
+{
+ "genere": "2026-11-02",
+ "communes": 34788,
+ "bilans": {
+  "E2": {
+   "mutations": 6005558,
+   "retenues": 3180323,
+   "rejets": {
+    "sans_logement": 1700173,
+    "pas_une_vente": 447348,
+    "plusieurs_logements": 585012,
+    "aberrant": 49933,
+    "valeur_ou_surface": 2134
+   },
+   "abstentions": {},
+   "reprises": 0,
+   "horsReferentiel": 40635
+  },
+  "E2b": {
+   "mutations": 6005558,
+   "retenues": 3512365,
+   "rejets": {
+    "sans_logement": 1700173,
+    "pas_une_vente": 447348,
+    "plusieurs_logements": 195853,
+    "aberrant": 53630,
+    "logements_indiscernables": 51317,
+    "valeur_ou_surface": 2344
+   },
+   "abstentions": {},
+   "reprises": 0,
+   "horsReferentiel": 42528
+  },
+  "E3": {
+   "mutations": 5757221,
+   "retenues": 3295331,
+   "rejets": {
+    "sans_logement": 1725677,
+    "pas_une_vente": 399642,
+    "plusieurs_logements": 177923,
+    "logements_indiscernables": 46557,
+    "aberrant": 49539,
+    "valeur_ou_surface": 22944
+   },
+   "abstentions": {},
+   "reprises": 0,
+   "horsReferentiel": 39608
+  },
+  "E4": {
+   "mutations": 5757221,
+   "retenues": 3297971,
+   "rejets": {
+    "sans_logement": 1725677,
+    "pas_une_vente": 399642,
+    "plusieurs_logements": 177923,
+    "logements_indiscernables": 46557,
+    "aberrant": 49539,
+    "valeur_ou_surface": 22944
+   },
+   "abstentions": {
+    "retablissement_non_reparti": 3,
+    "hors_index": 36965
+   },
+   "reprises": 0,
+   "horsReferentiel": 0
+  }
+ },
+ "reproduction_main": {
+  "communesAchatChange": 0,
+  "prixChange": {
+   "maison": 0,
+   "appart": 0
+  },
+  "mailleChange": {
+   "maison": {},
+   "appart": {}
+  },
+  "niveauChange": 0,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 33196,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0,
+    "plus_de_5pct": 0
+   },
+   "appart": {
+    "n": 32463,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0,
+    "plus_de_5pct": 0
+   }
+  },
+  "exemples": []
+ },
+ "effet_multilots": {
+  "communesAchatChange": 33082,
+  "prixChange": {
+   "maison": 30930,
+   "appart": 31957
+  },
+  "mailleChange": {
+   "maison": {
+    "commune→EPCI": 3468
+   },
+   "appart": {
+    "commune→EPCI": 789,
+    "EPCI→aucune": 3374,
+    "commune→aucune": 71
+   }
+  },
+  "niveauChange": 6136,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 29728,
+    "mediane_pct": -2.99,
+    "abs_p50_pct": 3.43,
+    "abs_p90_pct": 11.95,
+    "abs_p99_pct": 26.53,
+    "plus_de_5pct": 10930
+   },
+   "appart": {
+    "n": 28229,
+    "mediane_pct": -7.2,
+    "abs_p50_pct": 7.24,
+    "abs_p90_pct": 27.72,
+    "abs_p99_pct": 50.55,
+    "plus_de_5pct": 17801
+   }
+  },
+  "exemples": [
+   {
+    "insee": "01001",
+    "nom": "L'Abergement-Clémenciat",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2487,
+      "commune"
+     ],
+     "appart": [
+      2568,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2450,
+      "commune"
+     ],
+     "appart": [
+      2527,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01002",
+    "nom": "L'Abergement-de-Varey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      1942,
+      "commune"
+     ],
+     "appart": [
+      2193,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      1942,
+      "commune"
+     ],
+     "appart": [
+      2111,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01004",
+    "nom": "Ambérieu-en-Bugey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2500,
+      "commune"
+     ],
+     "appart": [
+      2191,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2491,
+      "commune"
+     ],
+     "appart": [
+      2131,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    }
+   }
+  ]
+ },
+ "effet_repetitions": {
+  "communesAchatChange": 30742,
+  "prixChange": {
+   "maison": 30058,
+   "appart": 8064
+  },
+  "mailleChange": {
+   "maison": {
+    "EPCI→commune": 2861
+   },
+   "appart": {
+    "EPCI→commune": 10,
+    "aucune→EPCI": 29
+   }
+  },
+  "niveauChange": 2460,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 30335,
+    "mediane_pct": 2.19,
+    "abs_p50_pct": 2.7,
+    "abs_p90_pct": 11.09,
+    "abs_p99_pct": 31.26,
+    "plus_de_5pct": 9300
+   },
+   "appart": {
+    "n": 29008,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0.28,
+    "abs_p99_pct": 3.63,
+    "plus_de_5pct": 207
+   }
+  },
+  "exemples": [
+   {
+    "insee": "01001",
+    "nom": "L'Abergement-Clémenciat",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2450,
+      "commune"
+     ],
+     "appart": [
+      2527,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2475,
+      "commune"
+     ],
+     "appart": [
+      2527,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01004",
+    "nom": "Ambérieu-en-Bugey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2491,
+      "commune"
+     ],
+     "appart": [
+      2131,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2500,
+      "commune"
+     ],
+     "appart": [
+      2131,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    }
+   },
+   {
+    "insee": "01005",
+    "nom": "Ambérieux-en-Dombes",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      3017,
+      "commune"
+     ],
+     "appart": [
+      2631,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.2,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      3122,
+      "commune"
+     ],
+     "appart": [
+      2631,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.2,
+      "estimee"
+     ]
+    }
+   }
+  ]
+ },
+ "effet_actualisation": {
+  "communesAchatChange": 32983,
+  "prixChange": {
+   "maison": 31817,
+   "appart": 28516
+  },
+  "mailleChange": {
+   "maison": {
+    "commune→EPCI": 1243,
+    "EPCI→commune": 551
+   },
+   "appart": {
+    "commune→EPCI": 220,
+    "EPCI→commune": 148,
+    "aucune→EPCI": 310,
+    "EPCI→aucune": 397,
+    "commune→aucune": 4,
+    "aucune→commune": 2
+   }
+  },
+  "niveauChange": 3562,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 31402,
+    "mediane_pct": 2.12,
+    "abs_p50_pct": 3.23,
+    "abs_p90_pct": 11.73,
+    "abs_p99_pct": 30.6,
+    "plus_de_5pct": 10531
+   },
+   "appart": {
+    "n": 28278,
+    "mediane_pct": 3.06,
+    "abs_p50_pct": 3.6,
+    "abs_p90_pct": 9.43,
+    "abs_p99_pct": 25.35,
+    "plus_de_5pct": 9239
+   }
+  },
+  "exemples": [
+   {
+    "insee": "01001",
+    "nom": "L'Abergement-Clémenciat",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2475,
+      "commune"
+     ],
+     "appart": [
+      2527,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2556,
+      "commune"
+     ],
+     "appart": [
+      2550,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01002",
+    "nom": "L'Abergement-de-Varey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      1942,
+      "commune"
+     ],
+     "appart": [
+      2111,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2000,
+      "commune"
+     ],
+     "appart": [
+      2204,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01004",
+    "nom": "Ambérieu-en-Bugey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2500,
+      "commune"
+     ],
+     "appart": [
+      2131,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2543,
+      "commune"
+     ],
+     "appart": [
+      2267,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    }
+   }
+  ]
+ },
+ "effet_geographie": {
+  "communesAchatChange": 708,
+  "prixChange": {
+   "maison": 532,
+   "appart": 209
+  },
+  "mailleChange": {
+   "maison": {
+    "EPCI→commune": 2
+   },
+   "appart": {
+    "EPCI→commune": 2
+   }
+  },
+  "niveauChange": 8,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 33194,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0.13,
+    "plus_de_5pct": 20
+   },
+   "appart": {
+    "n": 28956,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0,
+    "plus_de_5pct": 0
+   }
+  },
+  "exemples": [
+   {
+    "insee": "01006",
+    "nom": "Ambléon",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2020,
+      "EPCI"
+     ],
+     "appart": [
+      1883,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      11.7,
+      9.8,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2023,
+      "EPCI"
+     ],
+     "appart": [
+      1872,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      11.7,
+      9.8,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01009",
+    "nom": "Andert-et-Condon",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2218,
+      "commune"
+     ],
+     "appart": [
+      1883,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      13.3,
+      9.8,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2218,
+      "commune"
+     ],
+     "appart": [
+      1872,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      13.3,
+      9.8,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01015",
+    "nom": "Arboys en Bugey",
+    "avant": {
+     "dispo": true,
+     "niveau": "moyen",
+     "maison": [
+      1841,
+      "commune"
+     ],
+     "appart": [
+      1883,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      13.3,
+      9.8,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "moyen",
+     "maison": [
+      1841,
+      "commune"
+     ],
+     "appart": [
+      1872,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      13.3,
+      9.8,
+      "estimee"
+     ]
+    }
+   }
+  ]
+ },
+ "effet_repli_plm": {
+  "communesAchatChange": 15,
+  "prixChange": {
+   "maison": 15,
+   "appart": 0
+  },
+  "mailleChange": {
+   "maison": {
+    "EPCI→ville": 15
+   },
+   "appart": {}
+  },
+  "niveauChange": 0,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 33181,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0,
+    "plus_de_5pct": 0
+   },
+   "appart": {
+    "n": 28958,
+    "mediane_pct": 0,
+    "abs_p50_pct": 0,
+    "abs_p90_pct": 0,
+    "abs_p99_pct": 0,
+    "plus_de_5pct": 0
+   }
+  },
+  "exemples": [
+   {
+    "insee": "13201",
+    "nom": "Marseille 1er Arrondissement",
+    "avant": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      4356,
+      "EPCI"
+     ],
+     "appart": [
+      3150,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      14.7,
+      14.1,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      4786,
+      "ville"
+     ],
+     "appart": [
+      3150,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      14.7,
+      14.1,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "69381",
+    "nom": "Lyon 1er Arrondissement",
+    "avant": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      4499,
+      "EPCI"
+     ],
+     "appart": [
+      5293,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      17.1,
+      14.6,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      5952,
+      "ville"
+     ],
+     "appart": [
+      5293,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      17.1,
+      14.6,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "69382",
+    "nom": "Lyon 2e Arrondissement",
+    "avant": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      4499,
+      "EPCI"
+     ],
+     "appart": [
+      5517,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      17.6,
+      14.6,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "tres_haut",
+     "maison": [
+      5952,
+      "ville"
+     ],
+     "appart": [
+      5517,
+      "commune"
+     ],
+     "location": [
+      "tres_haut",
+      17.6,
+      14.6,
+      "estimee"
+     ]
+    }
+   }
+  ]
+ },
+ "total": {
+  "communesAchatChange": 33159,
+  "prixChange": {
+   "maison": 31837,
+   "appart": 32067
+  },
+  "mailleChange": {
+   "maison": {
+    "commune→EPCI": 1668,
+    "EPCI→commune": 371,
+    "EPCI→ville": 15
+   },
+   "appart": {
+    "commune→EPCI": 896,
+    "EPCI→commune": 46,
+    "EPCI→aucune": 3433,
+    "commune→aucune": 72
+   }
+  },
+  "niveauChange": 6375,
+  "dispoChange": 0,
+  "locationChange": 0,
+  "ecartsRelatifs": {
+   "maison": {
+    "n": 31142,
+    "mediane_pct": 1.25,
+    "abs_p50_pct": 2.95,
+    "abs_p90_pct": 11.94,
+    "abs_p99_pct": 30.75,
+    "plus_de_5pct": 9954
+   },
+   "appart": {
+    "n": 28016,
+    "mediane_pct": -4.44,
+    "abs_p50_pct": 5.33,
+    "abs_p90_pct": 26.19,
+    "abs_p99_pct": 48.5,
+    "plus_de_5pct": 14610
+   }
+  },
+  "exemples": [
+   {
+    "insee": "01001",
+    "nom": "L'Abergement-Clémenciat",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2487,
+      "commune"
+     ],
+     "appart": [
+      2568,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2556,
+      "commune"
+     ],
+     "appart": [
+      2550,
+      "EPCI"
+     ],
+     "location": [
+      "haut",
+      12.4,
+      11.4,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01002",
+    "nom": "L'Abergement-de-Varey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      1942,
+      "commune"
+     ],
+     "appart": [
+      2193,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2000,
+      "commune"
+     ],
+     "appart": [
+      2204,
+      "EPCI"
+     ],
+     "location": [
+      "moyen",
+      10.2,
+      9.5,
+      "estimee"
+     ]
+    }
+   },
+   {
+    "insee": "01004",
+    "nom": "Ambérieu-en-Bugey",
+    "avant": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2500,
+      "commune"
+     ],
+     "appart": [
+      2191,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    },
+    "apres": {
+     "dispo": true,
+     "niveau": "haut",
+     "maison": [
+      2543,
+      "commune"
+     ],
+     "appart": [
+      2267,
+      "commune"
+     ],
+     "location": [
+      "haut",
+      12.3,
+      10.8,
+      "observee"
+     ]
+    }
+   }
+  ]
+ },
+ "cas": {
+  "13208": {
+   "nom": "Marseille 8e Arrondissement",
+   "E0": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7400,
+     "commune"
+    ],
+    "appart": [
+     4163,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7400,
+     "commune"
+    ],
+    "appart": [
+     4163,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7268,
+     "commune"
+    ],
+    "appart": [
+     4134,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7300,
+     "commune"
+    ],
+    "appart": [
+     4134,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7405,
+     "commune"
+    ],
+    "appart": [
+     4271,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7405,
+     "commune"
+    ],
+    "appart": [
+     4271,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     7405,
+     "commune"
+    ],
+    "appart": [
+     4271,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     18.1,
+     20.5,
+     "observee"
+    ]
+   }
+  },
+  "17300": {
+   "nom": "La Rochelle",
+   "E0": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4472,
+     "commune"
+    ],
+    "appart": [
+     5000,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4472,
+     "commune"
+    ],
+    "appart": [
+     5000,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4440,
+     "commune"
+    ],
+    "appart": [
+     4983,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4444,
+     "commune"
+    ],
+    "appart": [
+     4987,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4507,
+     "commune"
+    ],
+    "appart": [
+     5000,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4507,
+     "commune"
+    ],
+    "appart": [
+     5000,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4507,
+     "commune"
+    ],
+    "appart": [
+     5000,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     14.7,
+     14.6,
+     "observee"
+    ]
+   }
+  },
+  "49126": {
+   "nom": "Orée d'Anjou",
+   "E0": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1758,
+     "EPCI"
+    ],
+    "appart": [
+     1745,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1758,
+     "EPCI"
+    ],
+    "appart": [
+     1745,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1703,
+     "EPCI"
+    ],
+    "appart": [
+     1525,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1754,
+     "EPCI"
+    ],
+    "appart": [
+     1525,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2156,
+     "commune"
+    ],
+    "appart": [
+     1594,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2182,
+     "commune"
+    ],
+    "appart": [
+     1591,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2182,
+     "commune"
+    ],
+    "appart": [
+     1591,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     11.3,
+     9.2,
+     "observee"
+    ]
+   }
+  },
+  "57463": {
+   "nom": "Metz",
+   "E0": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     13.4,
+     12.9,
+     "observee"
+    ]
+   }
+  },
+  "67482": {
+   "nom": "Strasbourg",
+   "E0": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": false,
+    "niveau": null,
+    "maison": null,
+    "appart": null,
+    "location": [
+     "tres_haut",
+     15.6,
+     15.7,
+     "observee"
+    ]
+   }
+  },
+  "69381": {
+   "nom": "Lyon 1er Arrondissement",
+   "E0": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4630,
+     "EPCI"
+    ],
+    "appart": [
+     5550,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4630,
+     "EPCI"
+    ],
+    "appart": [
+     5550,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4474,
+     "EPCI"
+    ],
+    "appart": [
+     5505,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4620,
+     "EPCI"
+    ],
+    "appart": [
+     5506,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4499,
+     "EPCI"
+    ],
+    "appart": [
+     5293,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4499,
+     "EPCI"
+    ],
+    "appart": [
+     5293,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     5952,
+     "ville"
+    ],
+    "appart": [
+     5293,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     17.1,
+     14.6,
+     "estimee"
+    ]
+   }
+  },
+  "75111": {
+   "nom": "Paris 11e Arrondissement",
+   "E0": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     5063,
+     "EPCI"
+    ],
+    "appart": [
+     10556,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     5063,
+     "EPCI"
+    ],
+    "appart": [
+     10556,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     5000,
+     "EPCI"
+    ],
+    "appart": [
+     10543,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     5000,
+     "EPCI"
+    ],
+    "appart": [
+     10543,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4950,
+     "EPCI"
+    ],
+    "appart": [
+     10237,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4940,
+     "EPCI"
+    ],
+    "appart": [
+     10237,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     12557,
+     "ville"
+    ],
+    "appart": [
+     10237,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     31.7,
+     24.8,
+     "estimee"
+    ]
+   }
+  },
+  "85084": {
+   "nom": "Essarts-en-Bocage",
+   "E0": {
+    "dispo": true,
+    "niveau": "haut",
+    "maison": [
+     1995,
+     "commune"
+    ],
+    "appart": [
+     2361,
+     "commune"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "haut",
+    "maison": [
+     1995,
+     "commune"
+    ],
+    "appart": [
+     2361,
+     "commune"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1987,
+     "commune"
+    ],
+    "appart": [
+     1741,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1996,
+     "commune"
+    ],
+    "appart": [
+     1741,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2071,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2093,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     2093,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10.3,
+     9,
+     "observee"
+    ]
+   }
+  },
+  "85165": {
+   "nom": "L'Oie",
+   "E0": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1880,
+     "EPCI"
+    ],
+    "appart": [
+     2068,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1880,
+     "EPCI"
+    ],
+    "appart": [
+     2068,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1845,
+     "EPCI"
+    ],
+    "appart": [
+     1741,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1875,
+     "EPCI"
+    ],
+    "appart": [
+     1741,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1570,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1735,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1735,
+     "commune"
+    ],
+    "appart": [
+     1764,
+     "EPCI"
+    ],
+    "location": [
+     "moyen",
+     10,
+     8.7,
+     "estimee"
+    ]
+   }
+  },
+  "93066": {
+   "nom": "Saint-Denis",
+   "E0": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4464,
+     "commune"
+    ],
+    "appart": [
+     4274,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4464,
+     "commune"
+    ],
+    "appart": [
+     4274,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4333,
+     "commune"
+    ],
+    "appart": [
+     4241,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     4333,
+     "commune"
+    ],
+    "appart": [
+     4243,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     3840,
+     "commune"
+    ],
+    "appart": [
+     4111,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     3730,
+     "commune"
+    ],
+    "appart": [
+     3971,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "tres_haut",
+    "maison": [
+     3730,
+     "commune"
+    ],
+    "appart": [
+     3971,
+     "commune"
+    ],
+    "location": [
+     "tres_haut",
+     21,
+     18,
+     "observee"
+    ]
+   }
+  },
+  "08053": {
+   "nom": "Bazeilles",
+   "E0": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1429,
+     "commune"
+    ],
+    "appart": [
+     2706,
+     "commune"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E1": {
+    "dispo": true,
+    "niveau": "moyen",
+    "maison": [
+     1429,
+     "commune"
+    ],
+    "appart": [
+     2706,
+     "commune"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E2": {
+    "dispo": true,
+    "niveau": "bas",
+    "maison": [
+     1410,
+     "commune"
+    ],
+    "appart": [
+     1075,
+     "EPCI"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E2b": {
+    "dispo": true,
+    "niveau": "bas",
+    "maison": [
+     1415,
+     "commune"
+    ],
+    "appart": [
+     1077,
+     "EPCI"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E3": {
+    "dispo": true,
+    "niveau": "bas",
+    "maison": [
+     1548,
+     "commune"
+    ],
+    "appart": [
+     1100,
+     "EPCI"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E4": {
+    "dispo": true,
+    "niveau": "bas",
+    "maison": [
+     1568,
+     "commune"
+    ],
+    "appart": [
+     1100,
+     "EPCI"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   },
+   "E5": {
+    "dispo": true,
+    "niveau": "bas",
+    "maison": [
+     1568,
+     "commune"
+    ],
+    "appart": [
+     1100,
+     "EPCI"
+    ],
+    "location": [
+     "bas",
+     8.7,
+     7.2,
+     "estimee"
+    ]
+   }
+  }
+ }
+}
