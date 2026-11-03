@@ -1,116 +1,130 @@
-# FUT-138 · Les ventes à proximité de l'adresse, dans « Autour » (03/11/2026)
+# FUT-138 · Les ventes à proximité de l'adresse, dans « Autour » (03/11/2026, mis à jour pour la contre-revue)
 
-Dossier de contre-revue. Preuves jointes :
-- `2026-11-03-fut138-ventes-autour-recette.json` : 13 contextes réels, avec contre-épreuve sur les fichiers bruts ;
-- `2026-11-03-fut138-ventes-autour-diagnostic.json` : mesures de la géolocalisation et du volume des tuiles.
+Preuves jointes (même dossier) :
+- `…-recette.json` : 13 contextes réels, contre-épreuve sur les fichiers DVF bruts, référence communale vs index ;
+- `…-diagnostic.json` : géolocalisation, volumes, découpage ;
+- `…-lecture.json` : coût et latence d'une lecture à froid et à chaud ;
+- `…-voisins.json` : interrogations répétées de carrés voisins ;
+- `…-captures/` : rendu réel du module Autour, bureau (1 280 px) et mobile (390 px), 7 états chacun.
 
 ## 1. Décisions du porteur appliquées
 
-| Échelle | Ce qu'elle dit des prix | Question du lecteur |
+| Échelle | Prix affichés | Question |
 |---|---|---|
-| Territoire | prix de vente et loyers de la commune, maille réelle, effectifs, limites (inchangé, PR du 02/11) | « Combien coûtent les logements dans cette ville ? » |
-| **Autour** | **les ventes à proximité de l'adresse, leur dispersion, leur écart avec la commune** | « Les logements se vendent-ils plus cher dans ce secteur que dans le reste de la ville ? » |
-| Logement | **aucun prix** : la section « Le marché immobilier de la commune » est retirée (elle répétait Territoire) | « Que dois-je savoir sur ce logement lui-même ? » |
+| Territoire | marché de la commune (inchangé) | « Combien coûtent les logements dans cette ville ? » |
+| **Autour** | **ventes à proximité** : médiane, fourchette, écart observé avec la commune | « Ce secteur se vend-il plus cher que le reste de la ville ? » |
+| Logement | **aucun** (module identique à `main`) | « Que dois-je savoir sur ce logement ? » |
 
-Conventions (porteur, 03/11) : périmètre principal 500 m ; 1 km puis 2 km seulement s'il manque des ventes, **avec mention explicite** que ces ventes décrivent un secteur plus large que le voisinage immédiat ; 10 ventes pour une médiane ; avertissement sous 20 ; écart à la commune qualifié à partir de 20 ; quartiles à partir de 30 ; moins de 10 ventes à 2 km : **pas de médiane locale, sans revenir au chiffre communal**. Visible dans le dossier d'adresse payant seulement (la page Autour exige un dossier).
+- Périmètre principal 500 m ; 1 km puis 2 km seulement s'il manque des ventes, **dit en premier** (« ces ventes décrivent un secteur plus large que le voisinage immédiat »).
+- Médiane à partir de 10 ventes ; avertissement sous 20 ; écart avec la commune à partir de 20 ; quartiles à partir de 30 ; sous 10 ventes à 2 km, « pas de médiane locale », sans repli communal.
+- **Écart OBSERVÉ, jamais qualifié** (décision du 03/11) : « Écart observé avec la médiane de La Rochelle (5 000 €/m², échelle : commune, 3 707 ventes) : +350 €/m², soit +7 %. » La méthode précise : « un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent ». L'intervalle de confiance a été retiré du code.
+- Type filtré si le diagnostic **confirmé** dit explicitement maison ou appartement au grain du logement ; sinon **les deux marchés séparés** (validé par le porteur).
+- Dossier d'adresse payant seulement.
 
-Le type de logement **filtre** les ventes quand le diagnostic énergétique **confirmé** dit explicitement « maison » ou « appartement » au grain du logement. Sinon (pas de diagnostic confirmé, diagnostic d'immeuble, type ambigu ou contradictoire), **les deux marchés sont présentés séparément**, titrés, sans rien deviner. *Choix à valider par le porteur* : on aurait pu ne rien afficher ; présenter les deux marchés ne déduit aucun type et reste une information de secteur.
+## 2. Corrections de cette passe
 
-## 2. Ce qui est construit
+1. **Phrase des 100 m** : « deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes » (la condition est le carré, pas la distance). Code, méthode affichée et ce document.
+2. **Écart observé** au lieu de « plus cher / proche / net » (ci-dessus).
+3. **Lecture à froid allégée** : le manifeste national (2,4 Mo) et le fichier communal (572 Ko) sont découpés. Le manifeste ne liste plus que 260 blocs (~50 km, 40 Ko) ; chaque bloc liste ses tuiles (~11 Ko) ; la référence communale est par département (96 fichiers, ~6 Ko).
+4. **Lecture différée** : le bloc est rendu par un composant serveur dans sa propre frontière de Suspense (`VentesAutourServeur`) ; la page Autour ne l'attend plus. Au-delà de 6 s, il dit l'indisponibilité.
+5. **Défaut trouvé par la recette visuelle, aussi présent dans la PR du 02/11** : l'« espace insécable » des nombres était une espace ordinaire, dans `prix-autour-texte.ts` et dans `prix-immobiliers.ts` (carte Territoire, ligne du comparateur) ; sur mobile, « 4 507 €/m² » se coupait en « 4 » / « 507 €/m² ». Corrigé (U+00A0), et deux tests vérifient désormais le caractère réel (les tests précédents normalisaient les espaces, d'où l'angle mort).
 
-| Fichier | Rôle |
-|---|---|
-| `src/lib/prix-autour.ts` | pur : carrés de ~100 m, classes de prix de 2 %, rayon progressif, médiane, quartiles, marge d'incertitude, validation des tuiles |
-| `src/lib/prix-autour-texte.ts` | pur : type du logement (ou abstention), phrases du bloc |
-| `src/lib/server/prix-autour-tuiles.ts` | lecture des tuiles et de la référence communale sur Supabase Storage (bucket privé), pointeur + manifeste + SHA-256, mémoire d'instance ; ne lève jamais |
-| `src/components/report/VentesAutourBloc.tsx` | le bloc « Les ventes à proximité » du module Autour, écrit dans le Relevé (grain « secteur ») |
-| `src/app/(account)/rapport/autour/page.tsx` | lit les ventes à la position **enregistrée** du dossier, le type depuis le diagnostic **enregistré et confirmé** |
-| `scripts/dvf-autour/construire.mjs` | construit les tuiles depuis le **même ensemble de ventes** que l'index des communes (`agregerDvf`, fichiers épinglés), et `communes.json.gz`, la référence communale recopiée de l'index (refus si l'index n'est pas de la même livraison) |
-| `scripts/dvf-autour/publier.mjs` | publication (bucket privé, sans écrasement, bascule par pointeur) ; **non exécuté** |
-| `scripts/dvf-autour/recette.mjs`, `serveur-local.mjs` | recette réelle et contre-épreuve ; imitation locale du stockage pour `next dev` |
-| `src/app/dev/fut138/page.tsx` | banc visuel (404 en production) |
+## 3. Coût et latence d'une lecture Supabase à froid (point 2 du porteur)
 
-`scripts/lib/dvf-prix.mjs` rend en plus la position de la parcelle (`lon`, `lat`) ; `agregerDvf` accepte un rappel par vente retenue. **L'index des communes ne change pas** (aucune ligne de calcul touchée).
+Le vrai lecteur (`lireVentesAutour`) contre une imitation locale du stockage, sur les 12 points distincts de la recette :
 
-## 3. Données
+| | À froid (instance neuve) | À chaud |
+|---|---|---|
+| Requêtes | 3 à 8 | 0 (déjà vu) |
+| Octets | 45 à 130 Ko | 0 |
+| Calcul | — | 1,7 ms (médiane), 2,5 ms (max) |
+| Étapes réseau successives | 4 : pointeur → manifeste → index de bloc + fichier communal → tuiles | — |
 
-- 3 297 971 ventes retenues (identique à l'index), dont **3 275 379 géolocalisées (99,31 %)** ; 22 589 sans position sont exclues de la lecture à proximité (elles restent dans la médiane communale) ; 3 positions hors métropole écartées.
-- **Aucun empilement suspect** : aucun point où 5 ventes ou plus sont sur des parcelles différentes. La géolocalisation n'a donc pas de repli « centre de commune ».
-- Distance d'une vente au centre de sa commune : médiane 1,3 km, 99 % sous 6,9 km, une seule au-delà de 20 km.
-- Tuiles : **21 130 fichiers, 11,6 Mo au total**, médiane 312 octets, maximum 32 Ko. Un rayon de 2 km lit au plus 4 tuiles.
-- Référence communale : `communes.json.gz`, 572 Ko, 34 788 communes, **identique à l'index pour 34 788 sur 34 788** (vérifié par la recette).
-- **Reproductible** : deux constructions successives donnent le même manifeste, `3f142a593dbf6a4d893ae4d672f5196f31306c083cadfd8775e4f9ee4f89efcd`.
+Avant le découpage : environ 3 Mo à froid (manifeste 2,4 Mo + communes 572 Ko).
 
-## 4. Les conditions du porteur, une par une
+Latence réseau réelle de Supabase Storage, mesurée en **lecture seule** sur le bucket privé déjà en production `debroussaillement` (objets de tailles comparables), depuis un poste en France, 12 séries : petite requête fraîche 130 ms (médiane), tuile non encore en cache 318 ms, quatre tuiles en parallèle 302 ms (médiane), 726 ms (9e décile). **Lecture à froid estimée : environ 1,0 s en médiane, 2,0 s au 9e décile.** Les fonctions tournent à Paris (`cdg1`) ; l'ordre de grandeur devrait être comparable ou meilleur. Grâce au point 4, cette latence ne retarde pas la page.
 
-1. **Ventes au-delà des frontières communales** : les tuiles ne connaissent pas les communes. Prouvé par la contre-épreuve : à la limite La Rochelle / Aytré, 50 des 74 maisons comptées sont à Aytré ; Lyon 3e compte 48 ventes du 6e ; porte de Bagnolet, 2 ventes de Bagnolet.
-2. **Imprécision de la géolocalisation** : position = parcelle (Etalab), ramenée au centre d'un carré d'environ 100 m ; une vente est comptée si le centre de son carré est dans le rayon, donc jamais à plus de rayon + 71 m. Le texte dit « environ », la méthode le dit en clair. Mesures ci-dessus.
-3. **Type non déduit d'un diagnostic ambigu** : statut confirmé exigé (`auto_confirmed`, `user_confirmed`), grain logement (`dpe-grain.ts`), `type_batiment` explicite ; la méthode seule ne suffit pas ; contradiction = abstention. Testé.
-4. **Aucune estimation** : ni surface, ni montant total, ni « votre logement » ; tests de doctrine sur toutes les sorties (aucun « € » qui ne soit pas « €/m² », aucun « 100 m² », aucun « vaut », « estimation »…). Logement n'affiche plus aucun prix.
-5. **Réidentification et requêtes successives** :
-   - les tuiles ne gardent aucune vente : un histogramme par carré et par type, classes de 2 % ; ni date, ni surface, ni adresse, ni parcelle, ni prix exact ;
-   - le centre de lecture est le centre du carré de l'adresse : deux adresses à moins de 100 m lisent les mêmes ventes (testé) ;
-   - les chiffres publiés sont arrondis à 50 €/m², jamais sous 10 ventes, aucune vente montrée seule ;
-   - le calcul est fait par la page serveur, sur la position enregistrée d'un dossier payé : **aucune route n'accepte de coordonnées** venues du navigateur ;
-   - bucket privé, lu avec la clé serveur ; **aucune tuile réelle dans le dépôt public** (les tests utilisent des tuiles fabriquées) ;
-   - limite assumée : deux dossiers payés sur deux carrés voisins voient deux ensembles qui diffèrent d'une couronne de carrés. La différence de deux médianes arrondies, sur des classes de 2 %, ne restitue pas le prix d'une vente.
-6. **Rien dans les fonctions Vercel** : aucun fichier de ventes dans `outputFileTracingIncludes`, le lecteur ne lit pas le disque ; mesure de compilation en section 6.
-7. **Contextes testés** : section 5.
+Coût : quelques dizaines de Ko de sortie de stockage par dossier ouvert à froid, rien à chaud. Mille ouvertures à froid représentent environ 130 Mo, négligeable au regard du quota Supabase. Stockage : 12,3 Mo par édition.
 
-## 5. Recette réelle (tuiles construites) et contre-épreuve brute
+## 4. Interrogations répétées de carrés voisins (point 3)
 
-Pour chaque point, le nombre de ventes lu dans les tuiles est **identique** au recomptage direct dans les fichiers DVF, avec la même règle d'appartenance. L'écart de médiane, dû aux classes de 2 % et à l'arrondi à 50 €/m², reste sous 2 %.
+Mesure sur les tuiles réelles : grilles de 41 × 41 carrés (~4 km) autour de trois points ; pour chaque paire de carrés voisins, on cherche les paires « isolantes », où l'ensemble lu par l'un contient exactement celui de l'autre plus **une seule** vente.
 
-| Contexte | Rayon | Ventes | Médiane (tuiles / exacte) | Lecture |
+| Zone | Paires voisines | Isolantes | Dont un chiffre publié change | Écart max de médiane |
 |---|---|---|---|---|
-| La Rochelle, Vieux-Port, appart. | 500 m | 543 | 5 350 / 5 317 | +7 % que la commune (net) |
-| La Rochelle, Laleu, maison | 500 m | 62 | 3 000 / 2 973 | −33 % (net) |
-| Lyon 3e, Part-Dieu, appart. (dense) | 500 m | 317 | 4 750 / 4 787 | proche (non net) |
-| Paris 11e, appart. | 500 m | 2 573 | 10 300 / 10 218 | proche (non net) |
-| Paris 11e, maison | **2 km** (élargi, dit) | 85 | 12 050 / 12 071 | proche de toute la ville de Paris |
-| Limite Paris 20e / Bagnolet | 500 m | 478 | 8 250 / 8 333 | −5 % (net) |
-| Limite La Rochelle / Aytré, maison | 500 m | 74 | 3 800 / 3 820 | −16 % (net) |
-| Rural, Royère-de-Vassivière, maison | 500 m | 17 | 950 / 933 | avertissement, non comparé |
-| Rural, Royère, appart. | 2 km | 2 | — | pas de médiane locale |
-| Montagne, Saint-Christophe-en-Oisans | 2 km | 3 | — | pas de médiane locale |
-| Strasbourg (hors DVF) | — | 0 | — | raison dite (livre foncier) |
-| L'Oie, appart. | 2 km | 2 | — | pas de médiane locale |
-| Diagnostic d'immeuble (type inconnu) | 500 m | 543 + 34 | — | deux marchés séparés |
+| La Rochelle, centre | 6 312 | 104 (1,6 %) | 69 | 550 €/m² |
+| Paris 11e | 6 038 | 430 (7,1 %) | 378 | 1 500 €/m² |
+| Royère-de-Vassivière (rural) | 2 622 | 464 (17,7 %) | 206 | 350 €/m² |
 
-« Net » : la médiane de la commune sort de la marge d'incertitude de la médiane locale (intervalle de confiance à 95 %, par les rangs). **Convention à valider par le porteur** : elle évite un seuil arbitraire en pourcentage, mais à Paris un écart de quelques pourcents peut être net avec des milliers de ventes ; le pourcentage est alors affiché pour que le lecteur juge de son ampleur.
+**Constat honnête : la protection n'est pas absolue.** Deux dossiers payés sur deux carrés voisins bien choisis peuvent situer une vente par rapport à la médiane, et, quand l'effectif est petit et impair, approcher son prix à la classe et à l'arrondi près (environ ±2 % et ±50 €/m²).
 
-## 6. Function Storage (compilation locale, aucun déploiement)
+Ce qui limite le risque :
+- il faut deux dossiers payés (2 × 39 €) par vente visée, sur des adresses réelles ;
+- aucune route n'accepte de coordonnées ;
+- le stockage ne contient ni adresse, ni date, ni surface, ni parcelle ;
+- la base source publie déjà chaque vente avec son adresse et son prix (DVF Etalab, consultable sur une carte publique). L'information obtenue n'est donc pas nouvelle ; la restriction DVF vise la réidentification des **personnes**, qu'aucune donnée de futur•e ne permet.
 
-`next build` local (aucun déploiement), fichiers que Vercel embarque par fonction (`page.js.nft.json`) :
+Parade mesurée, **non appliquée** (choix porteur) : un centre de lecture par bloc de 300 m au lieu de 100 m fait tomber les paires isolantes à 0,8 % (La Rochelle) et 1,4 % (Paris), mais seulement à 15,7 % en rural, au prix d'un « 500 m » moins centré sur l'adresse (jusqu'à environ 210 m d'écart).
 
-| Fonction | Avant (tête de PR du 02/11, `d31e894d`) | Après | Fichiers de ventes |
+## 5. Droits d'accès (point 3)
+
+- Un dossier d'adresse n'est créé que par le webhook Stripe après paiement (`address_dossiers`, upsert sur le PaymentIntent) ou par la route d'administration (démonstrations).
+- `/rapport/autour` exige une session (`requireCurrentUser`), n'ouvre que `getDossier(supabase, user.id, id)` (compte connecté, dossier non révoqué), sinon redirige ; la position lue est celle du dossier.
+- Verrouillé par `src/lib/prix-autour-acces.test.ts` :
+  - le lecteur des tuiles n'est importé que par `VentesAutourServeur` et le banc de recette, qui renvoie une 404 en production ;
+  - `VentesAutourServeur` n'est monté que par la page Autour et le banc ;
+  - aucune `route.ts` ne touche aux ventes ;
+  - le module client ne lit rien.
+- Le Pass territoire (14 €) ne crée pas de dossier : il ne donne pas accès au bloc.
+
+## 6. Recette du rendu réel (point 4)
+
+Le **vrai** `AutourModule`, avec le bloc rendu par `VentesAutourServeur` en Suspense (comme en production), contre l'imitation locale du stockage, via `next dev` et Chrome sans fenêtre. Captures dans `…-captures/`, à 1 280 px et 390 px :
+
+| État | Bureau | Mobile |
+|---|---|---|
+| La Rochelle, appartement (écart, fourchette) | ✓ | ✓ |
+| Paris 11e, maison (périmètre élargi à 2 km, dit) | ✓ | ✓ |
+| Limite La Rochelle / Aytré (74 maisons, dont 50 à Aytré) | ✓ | ✓ |
+| Montagne, pas de médiane locale | ✓ | ✓ |
+| Strasbourg, hors DVF | ✓ | ✓ |
+| Type inconnu, deux marchés | ✓ | ✓ |
+| Lecture en panne (« n'ont pas pu être lues ») | ✓ | ✓ |
+
+Aucun débordement horizontal dans les 14 cas. Secteurs à plusieurs communes : la contre-épreuve brute ventile les ventes par commune (Aytré 50 / La Rochelle 24 ; Lyon 3e 269 / 6e 48 ; Paris 20e 476 / Bagnolet 2). Le bloc ne nomme pas les communes voisines ; la méthode dit qu'elles comptent.
+
+## 7. Données, reproductibilité, recette réelle
+
+- 3 297 971 ventes (le même ensemble que l'index), dont 99,31 % géolocalisées ; aucun empilement de parcelles différentes au même point ; 21 130 tuiles.
+- Deux constructions successives donnent le même manifeste (empreinte dans `…-diagnostic.json` et section 9).
+- Référence communale publiée identique à l'index pour 34 788 communes sur 34 788.
+- Recette sur 13 contextes : effectifs identiques au recomptage brut, médiane à moins de 2 % de la médiane exacte.
+
+## 8. Function Storage (`next build` local, aucun déploiement)
+
+| Fonction | Avant la PR (`d31e894d`) | Maintenant | Fichiers de ventes |
 |---|---|---|---|
-| `/rapport/autour` | 178 fichiers, 21,7 Mo | 179 fichiers, 21,7 Mo (un fichier de code) | **aucun** |
-| `/rapport/logement` | inchangée par rapport à `main` (module Logement remis à l'identique) | 85,3 Mo | **aucun** |
+| `/rapport/autour` | 178 fichiers, 21,7 Mo | 181 fichiers, 21 739 206 octets | aucun |
+| `/rapport/logement` | — | 85,3 Mo, module identique à `main` | aucun |
 
-Une première version lisait la référence communale dans l'index national : la fonction Autour passait à **35,8 Mo (+14,1 Mo)**, à cause de l'index (12,2 Mo) et des fichiers qu'il entraîne. Corrigé avant livraison : la référence voyage avec les tuiles dans le stockage privé. Côté stockage : 12,2 Mo par édition (tuiles + référence), lus à la demande (une à quatre tuiles et la référence, une fois par instance).
+## 9. Livraison unique en production (sur GO final, dans cet ordre)
 
-## 7. Tests
+1. Supabase (production), à la main : créer le bucket **privé** `prix-autour`.
+2. Construire l'édition (reproductible) : `node --max-old-space-size=8192 scripts/dvf-autour/construire.mjs`.
+3. Publier puis basculer, avec `PRIX_AUTOUR_SUPABASE_URL` et `PRIX_AUTOUR_SUPABASE_CLE` du projet de production :
+   - `node scripts/dvf-autour/publier.mjs envoyer --cible production --confirmer-production --source data/cache-logement/dvf-autour/2026-10-20` ;
+   - `node scripts/dvf-autour/publier.mjs basculer --cible production --confirmer-production --edition 2026-10-20` ;
+   - `node scripts/dvf-autour/publier.mjs etat --cible production` doit afficher le pointeur sur `2026-10-20`.
+4. Vercel, variables de **Production** : ajouter `PRIX_AUTOUR_BUCKET=prix-autour`.
+5. Fusionner la PR #125 sur `main` : un seul déploiement de production, aucune Preview.
+6. Contrôle après mise en ligne : ouvrir `/rapport/autour` d'un dossier payé et vérifier que le bloc apparaît, puis comparer ses chiffres avec ceux de la recette pour le même secteur.
 
-- `src/lib/prix-autour.test.ts` (8) : classes, carrés, rayon progressif, type seul, seuils 10/20/30, arrondis, même carré = mêmes ventes, validation des tuiles.
-- `src/lib/prix-autour-texte.test.ts` (13) : type (confirmé, grain, explicite), phrases de chaque cas, périmètre élargi dit en premier, pas de repli communal, deux marchés, panne, doctrine.
-- `src/lib/prix-autour-serveur.test.ts` (4) : lecteur (non activé, mémoire, tuiles absentes jamais demandées, empreintes des tuiles, de la référence et du pointeur, panne = indisponible) et rendu du bloc.
-- `scripts/dvf-autour/publier.test.mjs` (3) : garde de production, envoi puis bascule, reprise idempotente, refus d'un autre contenu sous la même édition.
-- Suite complète : **4 290 tests, 0 échec** ; `tsc` sans erreur ; cliquet de la charte (K1) respecté.
-- Rendu réel vérifié dans `next dev` (banc `/dev/fut138`) contre l'imitation locale du stockage, par le même chemin serveur que la page.
-- `scripts/lib/dvf-prix.test.mjs` (+1) : position de la parcelle.
+Retour arrière :
+- retirer `PRIX_AUTOUR_BUCKET` : le bloc disparaît, sans autre effet ;
+- ou basculer le pointeur sur une autre édition.
 
-## 8. Ce qui reste, et qui exige le GO final
+## 10. Réserves
 
-Tant que rien n'est fait, la production n'affiche **rien de nouveau** : sans la variable `PRIX_AUTOUR_BUCKET`, le bloc ne s'affiche pas, et Logement n'a plus de section prix.
-
-1. Créer à la main le bucket **privé** `prix-autour` dans le projet Supabase de production.
-2. `node --max-old-space-size=8192 scripts/dvf-autour/construire.mjs` (reproductible), puis `node scripts/dvf-autour/publier.mjs envoyer --cible production --confirmer-production --source data/cache-logement/dvf-autour/2026-10-20`, puis `basculer --cible production --confirmer-production --edition 2026-10-20`.
-3. Ajouter `PRIX_AUTOUR_BUCKET=prix-autour` aux variables Vercel de **Production**.
-4. Fusionner la PR #125.
-
-## 9. Points soumis au porteur
-
-1. **Type inconnu ou ambigu : deux marchés séparés** plutôt que rien (section 1).
-2. **« Écart net »** par l'intervalle de confiance à 95 % de la médiane, sans seuil en pourcentage (section 5).
-3. Une nouvelle livraison DVF exige de régénérer l'index (`populate-logement.mjs`) **puis** les tuiles, publiées sous une nouvelle édition : la construction refuse un index d'une autre livraison.
+1. Interrogations de carrés voisins : risque résiduel décrit en section 4, à accepter ou à réduire par la lecture par bloc de 300 m.
+2. Latence à froid : environ 1 s en médiane, sans effet sur l'affichage de la page.
+3. Une nouvelle livraison DVF exige de régénérer l'index puis les tuiles, sous une nouvelle édition ; la construction refuse un index d'une autre livraison.

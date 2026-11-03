@@ -8,9 +8,16 @@
 // Les ventes à proximité exigent le serveur local de recette (rien n'est publié) :
 //   node scripts/dvf-autour/serveur-local.mjs
 //   PRIX_AUTOUR_BUCKET=prix-autour PRIX_AUTOUR_STORAGE_URL=http://localhost:54138 npm run dev
-//   /dev/fut138?cas=0 … (les points de scripts/dvf-autour/recette.mjs)
+//   /dev/fut138?cas=0 …           Territoire, bloc Autour seul, ligne comparateur, bloc modèles
+//   /dev/fut138?vue=autour&cas=0  le VRAI module Autour (AutourModule), bloc rendu par VentesAutourServeur en Suspense,
+//                                 comme la page de production ; `etat=panne` : lecture en échec (bloc « indisponible »)
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AutourModule from "@/components/report/AutourModule";
+import { VentesAutourServeur } from "@/components/report/VentesAutourServeur";
+import { SOURCES_VERSION, type AddressDossierRow } from "@/lib/address-dossier-store";
+import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { QuartierAside } from "@/components/report/QuartierClimatData";
 import { VentesAutourBloc } from "@/components/report/VentesAutourBloc";
 import { getLecturePrix } from "@/lib/prix-immobiliers-commune";
@@ -37,8 +44,10 @@ const CAS = [
 
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const i = Math.min(CAS.length - 1, Math.max(0, Number((await searchParams).cas ?? 0) || 0));
+  const sp = await searchParams;
+  const i = Math.min(CAS.length - 1, Math.max(0, Number(sp.cas ?? 0) || 0));
   const c = CAS[i];
+  if (sp.vue === "autour") return <VueAutour c={c} i={i} panne={sp.etat === "panne"} />;
   const lecture = await getLecturePrix(c.insee);
   const autour = await lireVentesAutour({ lat: c.lat, lon: c.lon }, c.insee);
   const type = typeDuLogement(
@@ -70,5 +79,47 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
         </section>
       </div>
     </div>
+  );
+}
+
+/** Le vrai module Autour, monté comme par /rapport/autour (snapshot minimal : seuls les blocs indépendants du snapshot). */
+function VueAutour({ c, i, panne }: { c: (typeof CAS)[number]; i: number; panne: boolean }) {
+  const maintenant = "2026-11-03T12:00:00.000Z";
+  const snapshot = {
+    center: { lat: c.lat, lon: c.lon },
+    bpe: { categories: [] },
+    osm: { potentiallyNoisyInfrastructure: [], nearestMappedGreenSpace: null, bboxRadiusMeters: 1500 },
+    permis: { permis: [], rayonMeters: 300, ancienneteMaxAns: 3, anneeReference: 2026, consulteLe: maintenant },
+    sourceStatus: { bpe: "complete", osmInfrastructure: "complete", osmGreenSpaces: "complete" },
+    sources: { bpeVersion: SOURCES_VERSION, osmFetchedAt: null, osmQueryVersion: "v1", bpeMillesime: "2025" },
+    sourcesVersion: SOURCES_VERSION, computedAt: maintenant,
+  } as unknown as Face3Snapshot;
+  const dpe = c.dpe ? { type_batiment: c.dpe, methode_dpe: c.dpe === "immeuble" ? "dpe immeuble collectif" : `dpe ${c.dpe} individuel` } : null;
+  const dossier = {
+    id: `banc-fut138-${i}`, user_id: "banc", ban_id: `banc-${i}`, insee: c.insee, address_label: c.nom, city: null, postcode: null,
+    latitude: c.lat, longitude: c.lon, parcel_code: null, posture: "residence", place_relation: null, place_objective: null, snapshot,
+    dpe_selection_status: c.dpe ? "user_confirmed" : "pending", selected_dpe_id: null, selected_dpe_snapshot: dpe, selected_dpe_at: null,
+    dpe_selection_at: maintenant, created_at: maintenant, updated_at: maintenant,
+    synthesis_text: null, synthesis_fact_hash: null, synthesis_generated_at: null,
+    stripe_payment_intent_id: null, amount_paid_cents: null, purchased_at: null,
+    replacement_for_dossier_id: null, replacement_reason: null, access_revoked_at: null,
+  } as unknown as AddressDossierRow;
+  const type = typeDuLogement(dossier.dpe_selection_status, dossier.selected_dpe_snapshot);
+  return (
+    <>
+      <nav style={{ position: "relative", zIndex: 10, padding: "12px 16px", fontSize: 12, display: "flex", flexWrap: "wrap", gap: 8, background: "var(--bg-elev)" }}>
+        <strong>Banc FUT-138 · Autour</strong>
+        {CAS.map((x, k) => <Link key={x.nom} href={`?vue=autour&cas=${k}`} style={{ fontWeight: k === i ? 700 : 400 }}>{x.nom}</Link>)}
+        <Link href={`?vue=autour&cas=${i}&etat=panne`}>lecture en panne</Link>
+      </nav>
+      <AutourModule
+        dossier={dossier} defaultCommune={null} initialCarOwnership={{ kind: "unknown" }}
+        blocVentes={panne ? <VentesAutourBloc autour={null} type={type} /> : (
+          <Suspense fallback={null}>
+            <VentesAutourServeur lat={c.lat} lon={c.lon} insee={c.insee} type={type} />
+          </Suspense>
+        )}
+      />
+    </>
   );
 }

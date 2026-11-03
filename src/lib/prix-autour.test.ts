@@ -70,7 +70,7 @@ test("deux adresses du même carré lisent exactement les mêmes ventes (pas de 
 test("rayon progressif : 500 m s'il y a 10 ventes, sinon 1 km, puis 2 km, sinon « trop peu »", () => {
   assert.deepEqual(
     lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 300, type: "a", eur: 5000, n: 10 }]), LA_ROCHELLE, "appart"),
-    { statut: "ventes", type: "appart", rayonM: 500, ventes: 10, mediane: publie(5000), quartiles: null, incertitude: null },
+    { statut: "ventes", type: "appart", rayonM: 500, ventes: 10, mediane: publie(5000), quartiles: null },
   );
   const a1km = lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 300, type: "a", eur: 5000, n: 9 }, { dxM: 800, type: "a", eur: 6000, n: 3 }]), LA_ROCHELLE, "appart");
   assert.equal(a1km.statut === "ventes" && a1km.rayonM, 1000);
@@ -89,25 +89,32 @@ test("seul le type du logement compte : des maisons ne remplacent jamais des app
   assert.equal(lireAutour(t, LA_ROCHELLE, "maison").statut, "ventes");
 });
 
-test("seuils : marge d'incertitude à partir de 20 ventes, quartiles à partir de 30, arrondis à 50 €/m²", () => {
-  const r19 = lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 0, type: "a", eur: 4000, n: 10 }, { dxM: 0, type: "a", eur: 6000, n: 9 }]), LA_ROCHELLE, "appart");
-  assert.ok(r19.statut === "ventes" && r19.incertitude === null && r19.quartiles === null);
-  const r20 = lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 0, type: "a", eur: 4000, n: 10 }, { dxM: 0, type: "a", eur: 6000, n: 10 }]), LA_ROCHELLE, "appart");
-  assert.ok(r20.statut === "ventes" && r20.incertitude !== null && r20.quartiles === null);
+test("seuils : quartiles à partir de 30 ventes seulement, arrondis à 50 €/m²", () => {
+  const r29 = lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 0, type: "a", eur: 4000, n: 15 }, { dxM: 0, type: "a", eur: 6000, n: 14 }]), LA_ROCHELLE, "appart");
+  assert.ok(r29.statut === "ventes" && r29.quartiles === null);
   const r30 = lireAutour(tuilesAvec(LA_ROCHELLE, [{ dxM: 0, type: "a", eur: 4000, n: 10 }, { dxM: 0, type: "a", eur: 5000, n: 10 }, { dxM: 0, type: "a", eur: 6000, n: 10 }]), LA_ROCHELLE, "appart");
   assert.ok(r30.statut === "ventes" && r30.quartiles !== null);
   if (r30.statut === "ventes") {
-    for (const v of [r30.mediane, ...r30.quartiles!, ...r30.incertitude!]) assert.equal(v % 50, 0, String(v));
+    for (const v of [r30.mediane, ...r30.quartiles!]) assert.equal(v % 50, 0, String(v));
     assert.equal(r30.mediane, publie(5000));
     assert.deepEqual(r30.quartiles, [publie(4000), publie(6000)]);
   }
+  assert.throws(() => statistiques([]));
 });
 
-test("la marge d'incertitude se resserre avec le nombre de ventes", () => {
-  const large = statistiques([[classeDe(3000), 10], [classeDe(5000), 10], [classeDe(7000), 10]]);
-  const serree = statistiques([[classeDe(3000), 1000], [classeDe(5000), 1000], [classeDe(7000), 1000]]);
-  assert.ok(large.haut - large.bas > serree.haut - serree.bas);
-  assert.throws(() => statistiques([]));
+test("interrogations de carrés voisins : chaque lecture agrège au moins 10 ventes, arrondies, sans donnée par vente", () => {
+  // Une vente isolée à 5 000 €/m² en bordure, entourée de 20 ventes à 3 000 : deux lectures de carrés voisins dont l'une
+  // l'inclut et l'autre non. La différence des deux médianes publiées ne restitue pas le prix de la vente isolée.
+  const t = tuilesAvec(LA_ROCHELLE, [{ dxM: 0, type: "a", eur: 3000, n: 20 }, { dxM: 540, type: "a", eur: 5000, n: 1 }]);
+  const a = lireAutour(t, LA_ROCHELLE, "appart");
+  const o = centreDe(caseDe(LA_ROCHELLE));
+  const b = lireAutour(t, { lat: o.lat, lon: o.lon + 2 * 0.0013 }, "appart");
+  assert.ok(a.statut === "ventes" && b.statut === "ventes");
+  if (a.statut === "ventes" && b.statut === "ventes") {
+    assert.notEqual(a.ventes, b.ventes, "l'une des lectures inclut la vente isolée");
+    assert.equal(a.mediane, b.mediane, "la médiane arrondie ne bouge pas : le prix isolé n'apparaît pas");
+    assert.deepEqual(Object.keys(a).sort(), ["mediane", "quartiles", "rayonM", "statut", "type", "ventes"]);
+  }
 });
 
 test("une tuile se refuse si elle n'est pas celle attendue ou porte un histogramme invalide", () => {

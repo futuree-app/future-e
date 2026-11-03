@@ -10,8 +10,9 @@ import { MarquerBienActif } from "@/components/report/MarquerBienActif";
 import { communeParent } from "@/lib/plm";
 import { ModuleTracker } from "@/components/ModuleTracker";
 import { buildAutourResponse } from "@/lib/server/autour-response";
-import { lireVentesAutour } from "@/lib/server/prix-autour-tuiles";
+import { Suspense } from "react";
 import { typeDuLogement } from "@/lib/prix-autour-texte";
+import { VentesAutourServeur } from "@/components/report/VentesAutourServeur";
 
 // Module 02 — Autour de l'adresse. Même gabarit de page que /rapport/logement, et pour cause :
 // les deux modules lisent la MÊME ligne `logement` (clé user + identifiant BAN). Une adresse
@@ -92,9 +93,7 @@ export default async function RapportAutourPage({
   // ENREGISTRÉE du dossier : aucune position venue du navigateur. La commune (l'arrondissement à Paris, Lyon,
   // Marseille) sert de référence à l'écart ; elle voyage avec les tuiles, pour ne pas embarquer l'index ici. Le type
   // de logement vient du diagnostic CONFIRMÉ du dossier ; sans type fiable, les deux marchés sont présentés
-  // séparément. Jamais une valeur du bien.
-  const ventesAutour = await lireVentesAutour({ lat: dossier.latitude, lon: dossier.longitude }, dossier.insee);
-  const typeLogement = typeDuLogement(dossier.dpe_selection_status, dossier.selected_dpe_snapshot);
+  // séparément. Jamais une valeur du bien. La lecture est DIFFÉRÉE (Suspense) : la page ne l'attend pas.
 
   // LE CONTEXTE AFFICHÉ VIENT DU DOSSIER, PAS DU PROFIL (revue du 11/08/2026). Le profil porte le
   // dernier bien PERSISTÉ : sur une ouverture directe, les traceurs enregistraient l'ancienne
@@ -119,8 +118,11 @@ export default async function RapportAutourPage({
         initialCarOwnership={initialCarOwnership}
         initialBruitAerien={initialBruitAerien}
         initialDebroussaillement={initialDebroussaillement}
-        ventesAutour={ventesAutour}
-        typeLogement={typeLogement}
+        blocVentes={
+          <Suspense fallback={null}>
+            <VentesAutourServeur lat={dossier.latitude} lon={dossier.longitude} insee={dossier.insee} type={typeDuLogement(dossier.dpe_selection_status, dossier.selected_dpe_snapshot)} />
+          </Suspense>
+        }
       />
     </>
   );

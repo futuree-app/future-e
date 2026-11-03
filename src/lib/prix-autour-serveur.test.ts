@@ -4,7 +4,7 @@ import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
-import { caseDe, cleCase, cleTuileDe, classeDe, FORMAT_PRIX_AUTOUR, tuilesPour, type ManifestePrixAutour } from "./prix-autour.ts";
+import { caseDe, cleBlocDe, cleCase, cleTuileDe, classeDe, FORMAT_PRIX_AUTOUR, tuilesPour, type ManifestePrixAutour } from "./prix-autour.ts";
 import type { LecturePrix } from "./prix-immobiliers.ts";
 
 // FUT-138 · LE LECTEUR SERVEUR DES VENTES AUTOUR (pointeur, manifeste, empreintes, pannes) ET LE RENDU DE LA SECTION.
@@ -65,25 +65,30 @@ const LA_ROCHELLE: LecturePrix = {
 };
 
 /** Un bucket en mémoire : 40 appartements à 5 000 €/m² dans le carré de l'adresse, et un compteur d'appels. */
-function bucket({ casser }: { casser?: "tuile" | "communes" | "pointeur" } = {}) {
+function bucket({ casser }: { casser?: "tuile" | "bloc" | "communes" | "pointeur" } = {}) {
   const c = caseDe(P);
   const kt = cleTuileDe(c);
+  const kb = cleBlocDe(kt);
   const tuile = gzipSync(Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", tuile: kt, cases: { [cleCase(c)]: { a: [classeDe(5000), 40] } } })));
+  const bloc = Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", bloc: kb, tuiles: { [kt]: { octets: tuile.length, sha256: sha(tuile), ventes: 40 } } }));
   const communes = gzipSync(Buffer.from(JSON.stringify({
-    format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", meta: { achat: { periode: { debut: "2022-01-01", fin: "2025-12-31" } } },
+    format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", departement: "17", meta: { achat: { periode: { debut: "2022-01-01", fin: "2025-12-31" } } },
     communes: { "17300": { nom: "La Rochelle", achat: LA_ROCHELLE.logement!.achat } },
   })));
   const m: ManifestePrixAutour = {
     format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", livraison: "2026-10-20", periode: { debut: "2022-01-01", fin: "2025-12-31" },
-    case_m: 100, tuile_cases: 50, pas_classe: 1.02, tuiles: { [kt]: { octets: tuile.length, sha256: sha(tuile), ventes: 40 } },
-    communes: { octets: communes.length, sha256: sha(communes), nombre: 1 },
+    case_m: 100, tuile_cases: 50, bloc_tuiles: 10, pas_classe: 1.02,
+    blocs: { [kb]: { octets: bloc.length, sha256: sha(bloc), tuiles: 1 } },
+    communes: { "17": { octets: communes.length, sha256: sha(communes), nombre: 1 } },
   };
   const manifeste = Buffer.from(JSON.stringify(m));
+  const altere = (b: Buffer, k: string) => (casser === k ? Buffer.concat([b, Buffer.from([0])]) : b);
   const objets = new Map<string, Buffer>([
     ["courant.json", Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition: "2026-10-20", manifeste: casser === "pointeur" ? "0".repeat(64) : sha(manifeste) }))],
     ["2026-10-20/manifest.json", manifeste],
-    [`2026-10-20/t/${kt}.json.gz`, casser === "tuile" ? Buffer.concat([tuile, Buffer.from([0])]) : tuile],
-    ["2026-10-20/communes.json.gz", casser === "communes" ? Buffer.concat([communes, Buffer.from([0])]) : communes],
+    [`2026-10-20/b/${kb}.json`, altere(bloc, "bloc")],
+    [`2026-10-20/t/${kt}.json.gz`, altere(tuile, "tuile")],
+    ["2026-10-20/c/17.json.gz", altere(communes, "communes")],
   ]);
   const appels: string[] = [];
   const f = (async (url: string, init: RequestInit) => {
@@ -112,8 +117,9 @@ test("lecture : pointeur, manifeste, seules les tuiles existantes ; puis la mém
   assert.equal(r!.appart.statut === "ventes" && r!.appart.ventes, 40);
   assert.equal(r!.maison.statut, "trop_peu");
   assert.equal(r!.commune?.nom, "La Rochelle");
-  // les tuiles absentes du manifeste (zones sans vente) ne sont jamais demandées
-  assert.deepEqual(appels.filter((a) => a.includes("/t/")), [`2026-10-20/t/${kt}.json.gz`]);
+  // à froid : pointeur, manifeste, UN index de bloc, le fichier communal du département, la seule tuile qui existe ;
+  // les tuiles absentes de l'index (zones sans vente) ne sont jamais demandées
+  assert.deepEqual(appels.map((a) => a.replace(/\?.*/, "")).sort(), ["2026-10-20/b/" + cleBlocDe(kt) + ".json", "2026-10-20/c/17.json.gz", "2026-10-20/manifest.json", `2026-10-20/t/${kt}.json.gz`, "courant.json"].sort());
   assert.ok(tuilesPour(P).length >= 1);
   const avant = appels.length;
   await lecteur.lireVentesAutour(P, "17300", ENV, f);
@@ -121,7 +127,7 @@ test("lecture : pointeur, manifeste, seules les tuiles existantes ; puis la mém
 });
 
 test("panne : tuile altérée, pointeur faux, réseau coupé => null (indisponible), jamais « trop peu »", async () => {
-  for (const casser of ["tuile", "communes", "pointeur"] as const) {
+  for (const casser of ["tuile", "bloc", "communes", "pointeur"] as const) {
     lecteur.oublierPrixAutour();
     assert.equal(await lecteur.lireVentesAutour(P, "17300", ENV, bucket({ casser }).f), null, casser);
   }

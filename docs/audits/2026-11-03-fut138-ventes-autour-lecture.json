@@ -1,0 +1,278 @@
+{
+ "resume": {
+  "octets_a_froid": {
+   "min": 44882,
+   "max": 130357
+  },
+  "requetes_a_froid": {
+   "min": 3,
+   "max": 8
+  },
+  "requetes_a_chaud": 0,
+  "calcul_ms_a_chaud": {
+   "mediane": 1.7,
+   "max": 2.5
+  },
+  "etapes_sequentielles_a_froid": "4 : pointeur, puis manifeste, puis index de bloc et fichier communal (en parallèle), puis tuiles (en parallèle)"
+ },
+ "reseau": {
+  "origine": "poste local (France) vers Supabase Storage du projet de production, bucket privé « debroussaillement », lecture seule, 03/11/2026",
+  "octets": {
+   "pointeur": 134,
+   "manifeste": 270602,
+   "tuile_exemple": 37805
+  },
+  "ms": {
+   "pointeur": {
+    "mediane": 130,
+    "p90": 219,
+    "max": 231
+   },
+   "manifeste_270ko": {
+    "mediane": 126,
+    "p90": 151,
+    "max": 152
+   },
+   "tuile": {
+    "mediane": 318,
+    "p90": 373,
+    "max": 637
+   },
+   "tuiles_4_en_parallele": {
+    "mediane": 302,
+    "p90": 726,
+    "max": 1716
+   }
+  },
+  "estimation_lecture_a_froid_ms": {
+   "mediane": 1052,
+   "p90": 2044
+  }
+ },
+ "lectures": [
+  {
+   "cas": "La Rochelle, Vieux-Port",
+   "ok": true,
+   "froid": {
+    "ms": 50,
+    "requetes": 7,
+    "octets": 73981,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/17.json.gz",
+     "b/-2_102.json",
+     "t/-18_1027.json.gz",
+     "t/-18_1028.json.gz",
+     "t/-19_1027.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "La Rochelle, maison à Laleu",
+   "ok": true,
+   "froid": {
+    "ms": 21,
+    "requetes": 8,
+    "octets": 74788,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/17.json.gz",
+     "b/-2_102.json",
+     "t/-18_1027.json.gz",
+     "t/-18_1028.json.gz",
+     "t/-19_1027.json.gz",
+     "t/-19_1028.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 2.2,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Centre urbain dense, Lyon 3e (Part-Dieu)",
+   "ok": true,
+   "froid": {
+    "ms": 21,
+    "requetes": 6,
+    "octets": 92791,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/69.json.gz",
+     "b/7_101.json",
+     "t/74_1018.json.gz",
+     "t/74_1019.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 2.5,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Arrondissement parisien, Paris 11e (Oberkampf)",
+   "ok": true,
+   "froid": {
+    "ms": 18,
+    "requetes": 6,
+    "octets": 103818,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/75.json.gz",
+     "b/3_108.json",
+     "t/36_1087.json.gz",
+     "t/36_1088.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1.7,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Limite communale, Paris 20e / Bagnolet (porte de Bagnolet)",
+   "ok": true,
+   "froid": {
+    "ms": 26,
+    "requetes": 8,
+    "octets": 130357,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/75.json.gz",
+     "b/3_108.json",
+     "t/36_1087.json.gz",
+     "t/36_1088.json.gz",
+     "t/37_1087.json.gz",
+     "t/37_1088.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Limite communale, La Rochelle / Aytré",
+   "ok": true,
+   "froid": {
+    "ms": 11,
+    "requetes": 6,
+    "octets": 68625,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/17.json.gz",
+     "b/-2_102.json",
+     "t/-18_1026.json.gz",
+     "t/-18_1027.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 0.5,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Zone rurale, Royère-de-Vassivière (Creuse)",
+   "ok": true,
+   "froid": {
+    "ms": 9,
+    "requetes": 6,
+    "octets": 56562,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/23.json.gz",
+     "b/2_102.json",
+     "t/28_1020.json.gz",
+     "t/29_1020.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1.2,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Absence de ventes, Saint-Christophe-en-Oisans (montagne)",
+   "ok": true,
+   "froid": {
+    "ms": 9,
+    "requetes": 6,
+    "octets": 58287,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/38.json.gz",
+     "b/9_100.json",
+     "t/94_1000.json.gz",
+     "t/94_1001.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1.9,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Absence de ventes, Strasbourg (Alsace-Moselle, hors DVF)",
+   "ok": true,
+   "froid": {
+    "ms": 5,
+    "requetes": 3,
+    "octets": 44882,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/67.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 1.9,
+    "requetes": 0,
+    "octets": 0
+   }
+  },
+  {
+   "cas": "Intercommunalité en référence, L'Oie (appartement)",
+   "ok": true,
+   "froid": {
+    "ms": 11,
+    "requetes": 8,
+    "octets": 58912,
+    "objets": [
+     "courant.json",
+     "manifest.json",
+     "c/85.json.gz",
+     "b/-2_104.json",
+     "t/-17_1041.json.gz",
+     "t/-17_1042.json.gz",
+     "t/-18_1041.json.gz",
+     "t/-18_1042.json.gz"
+    ]
+   },
+   "chaud": {
+    "ms": 0.9,
+    "requetes": 0,
+    "octets": 0
+   }
+  }
+ ]
+}

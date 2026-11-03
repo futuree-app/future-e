@@ -137,3 +137,11 @@ test("Où vivre : un budget ne reçoit plus « futur•e ne mesure pas ce sujet 
   assert.deepEqual(lignes.map((l) => l.phrase), [PHRASE_PRIX, "futur•e ne mesure pas ce sujet : il n'entre dans aucun critère et n'a pas pesé dans le classement."]);
   assert.match(PHRASE_PRIX, /n'a pas classé les communes sur leurs prix/);
 });
+
+test("TYPOGRAPHIE : les prix de la carte Territoire ne se coupent pas (espaces insécables réelles)", () => {
+  const t = textePrix(LA_ROCHELLE);
+  for (const s of [t.valeur, ...t.faits.map((f) => f.value), lignePrixComparateur(LA_ROCHELLE)]) {
+    assert.doesNotMatch(s, /\d (\d{3}\b|€)/, s);
+  }
+  assert.equal(t.valeur, "5 000 €/m²");
+});

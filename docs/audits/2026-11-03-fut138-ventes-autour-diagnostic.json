@@ -18,10 +18,21 @@
   "ventes": 0
  },
  "tuiles": 21130,
- "octets_total": 11636494,
+ "octets_total": 11637342,
  "octets_tuile": {
   "mediane": 312,
   "p99": 4527,
   "max": 32610
+ },
+ "manifeste_octets": 40171,
+ "blocs": 260,
+ "octets_bloc": {
+  "mediane": 11160,
+  "max": 11650
+ },
+ "departements": 96,
+ "octets_communes_departement": {
+  "mediane": 6058,
+  "max": 14552
  }
 }

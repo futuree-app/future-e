@@ -5,7 +5,8 @@
  * débroussaillement (scripts/debroussaillement/publier.mjs, revue indépendante du 29/10/2026), en plus court :
  *
  *   <édition>/t/<tx>_<ty>.json.gz    les tuiles, immuables (dépôt sans écrasement, relues octet par octet)
- *   <édition>/communes.json.gz       la référence communale (champ `achat` de l'index), immuable
+ *   <édition>/c/<dép>.json.gz        la référence communale par département (champ `achat` de l'index), immuable
+ *   <édition>/b/<bx>_<by>.json       les index de bloc (tuiles et empreintes), déposés après leurs tuiles
  *   <édition>/manifest.json          déposé en DERNIER : son absence signale un envoi inachevé, que la reprise complète
  *   courant.json                     LE POINTEUR (édition + SHA-256 du manifeste) : la seule écriture qui remplace,
  *                                    la seule que l'application voit, dans les dix minutes
@@ -26,7 +27,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { FORMAT_PRIX_AUTOUR, manifesteValide } from "../../src/lib/prix-autour.ts";
+import { blocValide, FORMAT_PRIX_AUTOUR, manifesteValide } from "../../src/lib/prix-autour.ts";
 
 // Recopiés de scripts/debroussaillement/publier.mjs plutôt qu'importés : ce module lance son `main` dès que le script
 // exécuté s'appelle « publier.mjs », ce qui serait le cas ici.
@@ -74,15 +75,24 @@ async function parallele(elements, f) {
   await Promise.all(Array.from({ length: PARALLELE }, async () => { while (i < elements.length) await f(elements[i++]); }));
 }
 
-/** Les fichiers de l'édition : les tuiles, et la référence communale. */
-export function fichiersDuManifeste(m) {
-  const tuiles = Object.entries(m.tuiles).map(([cle, t]) => {
-    if (!/^-?\d+_-?\d+$/.test(cle) || !Number.isSafeInteger(t.octets) || t.octets <= 0 || !/^[a-f0-9]{64}$/.test(t.sha256 ?? "")) {
-      throw new Error(`intégrité : tuile ${cle} sans empreinte valide`);
-    }
-    return { chemin: `${m.edition}/t/${cle}.json.gz`, fichier: path.join("t", `${cle}.json.gz`), attendu: t };
-  });
-  return [...tuiles, { chemin: `${m.edition}/communes.json.gz`, fichier: "communes.json.gz", attendu: m.communes }];
+/**
+ * Les fichiers de l'édition, vérifiés : chaque index de bloc est lu (`lireOctets`, local ou distant), contrôlé contre
+ * l'empreinte du manifeste, puis ses tuiles sont listées. Ordre de dépôt : tuiles, fichiers communaux, index de bloc ;
+ * le manifeste vient après tout le reste (dans `envoyer`).
+ */
+export async function fichiersDeLEdition(m, lireOctets) {
+  const tuiles = [], blocs = [], communes = [];
+  for (const [kb, eb] of Object.entries(m.blocs)) {
+    const chemin = `${m.edition}/b/${kb}.json`;
+    const brut = await lireOctets(chemin);
+    verifierOctets(brut, eb, chemin);
+    const b = JSON.parse(brut.toString("utf8"));
+    if (!blocValide(b, { edition: m.edition, bloc: kb })) throw new Error(`intégrité : bloc ${kb} invalide`);
+    blocs.push({ chemin, attendu: eb });
+    for (const [kt, et] of Object.entries(b.tuiles)) tuiles.push({ chemin: `${m.edition}/t/${kt}.json.gz`, attendu: et });
+  }
+  for (const [dep, e] of Object.entries(m.communes)) communes.push({ chemin: `${m.edition}/c/${dep}.json.gz`, attendu: e });
+  return [...tuiles, ...communes, ...blocs];
 }
 
 function verifierOctets(b, attendu, chemin) {
@@ -95,21 +105,26 @@ export async function envoyer(c, source) {
   if (!manifesteValide(m) || !EDITION.test(m.edition)) throw new Error("manifeste local illisible");
   const distant = await c.lire(`${m.edition}/manifest.json`);
   if (distant && !distant.equals(brut)) throw new Error(`${m.edition} : un autre manifeste est déjà en ligne ; reconstruire sous une révision`);
-  const fichiers = fichiersDuManifeste(m);
+  const local = (chemin) => fs.readFile(path.join(source, chemin.slice(m.edition.length + 1)));
+  const fichiers = await fichiersDeLEdition(m, local);
   let envoyes = 0, deja = 0, octets = 0;
-  await parallele(fichiers, async ({ chemin, fichier, attendu }) => {
-    const local = await fs.readFile(path.join(source, fichier));
+  // Les index de bloc en dernier (avant le manifeste) : un bloc en ligne garantit que ses tuiles le sont.
+  const blocs = fichiers.filter((x) => x.chemin.includes("/b/"));
+  await parallele(fichiers.filter((x) => !x.chemin.includes("/b/")), envoyer1);
+  await parallele(blocs, envoyer1);
+  async function envoyer1({ chemin, attendu }) {
+    const local = await fs.readFile(path.join(source, chemin.slice(m.edition.length + 1)));
     verifierOctets(local, attendu, chemin);
     const enLigne = await c.lire(chemin);
     if (enLigne) { verifierOctets(enLigne, attendu, chemin); deja++; return; }
-    await c.deposer(chemin, local, "application/gzip");
+    await c.deposer(chemin, local, chemin.endsWith(".gz") ? "application/gzip" : "application/json");
     verifierOctets(await c.lire(chemin), attendu, chemin);
     envoyes++; octets += local.length;
-  });
+  }
   if (!distant) await c.deposer(`${m.edition}/manifest.json`, brut, "application/json");
   const relu = await c.lire(`${m.edition}/manifest.json`);
   if (!relu?.equals(brut)) throw new Error(`${m.edition} : manifeste relu différent de celui envoyé`);
-  console.log(JSON.stringify({ edition: m.edition, tuiles: fichiers.length, envoyes, deja, octets }));
+  console.log(JSON.stringify({ edition: m.edition, fichiers: fichiers.length, envoyes, deja, octets }));
 }
 
 export async function basculer(c, edition) {
@@ -118,7 +133,8 @@ export async function basculer(c, edition) {
   if (!brut) throw new Error(`${edition} : aucun manifeste en ligne`);
   const m = JSON.parse(brut.toString("utf8"));
   if (!manifesteValide(m) || m.edition !== edition) throw new Error(`${edition} : manifeste invalide`);
-  await parallele(fichiersDuManifeste(m), async ({ chemin, attendu }) => verifierOctets(await c.lire(chemin), attendu, chemin));
+  const fichiers = await fichiersDeLEdition(m, (chemin) => c.lire(chemin));
+  await parallele(fichiers, async ({ chemin, attendu }) => verifierOctets(await c.lire(chemin), attendu, chemin));
   const avant = await c.lire("courant.json");
   await c.deposer("courant.json", Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition, manifeste: sha256(brut) })), "application/json", true);
   console.log(`pointeur : ${avant ? JSON.parse(avant.toString("utf8")).edition : "(aucun)"} -> ${edition}`);

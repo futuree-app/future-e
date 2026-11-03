@@ -1,0 +1,29 @@
+[
+ {
+  "cas": "La Rochelle, centre",
+  "carres": 1681,
+  "paires": 6312,
+  "isolantes": 104,
+  "dont_prix_publie_different": 69,
+  "ecart_max_mediane_eur_m2": 550,
+  "ecart_max_quartiles_eur_m2": 450
+ },
+ {
+  "cas": "Paris 11e",
+  "carres": 1681,
+  "paires": 6038,
+  "isolantes": 430,
+  "dont_prix_publie_different": 378,
+  "ecart_max_mediane_eur_m2": 1500,
+  "ecart_max_quartiles_eur_m2": 1200
+ },
+ {
+  "cas": "Royère-de-Vassivière (rural)",
+  "carres": 1681,
+  "paires": 2622,
+  "isolantes": 464,
+  "dont_prix_publie_different": 206,
+  "ecart_max_mediane_eur_m2": 350,
+  "ecart_max_quartiles_eur_m2": 650
+ }
+]

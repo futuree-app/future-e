@@ -17,7 +17,7 @@
 // aucune parcelle n'est requise.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -28,9 +28,6 @@ import type { LectureBruitAerien } from "@/lib/bruit-aerien";
 import { BruitAerienAutour } from "@/components/report/BruitAerienBlocs";
 import type { LectureDebroussaillement } from "@/lib/debroussaillement";
 import { DebroussaillementAutour } from "@/components/report/DebroussaillementBlocs";
-import type { VentesAutour } from "@/lib/prix-autour";
-import type { TypeDuLogement } from "@/lib/prix-autour-texte";
-import { VentesAutourBloc } from "@/components/report/VentesAutourBloc";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
@@ -65,8 +62,7 @@ export default function AutourModule({
   initialCarOwnership = null,
   initialBruitAerien = null,
   initialDebroussaillement = null,
-  ventesAutour = undefined,
-  typeLogement = { abstention: "sans_diagnostic" },
+  blocVentes = null,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow;
@@ -74,12 +70,10 @@ export default function AutourModule({
   initialBruitAerien?: LectureBruitAerien | null;
   initialDebroussaillement?: LectureDebroussaillement | null;
   /**
-   * FUT-138 : les ventes à proximité et la commune de référence, lues par la page. `undefined` : lecture non activée ;
-   * `null` : en échec.
+   * FUT-138 : le bloc « Les ventes à proximité », rendu CÔTÉ SERVEUR par la page dans sa propre frontière de Suspense
+   * (`VentesAutourServeur`) : la lecture du stockage n'entre pas dans ce composant client et ne retarde pas la page.
    */
-  ventesAutour?: VentesAutour | null;
-  /** FUT-138 : le type du logement d'après son diagnostic confirmé, ou l'abstention. */
-  typeLogement?: TypeDuLogement;
+  blocVentes?: ReactNode;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -389,7 +383,7 @@ export default function AutourModule({
 
             {/* FUT-138 : LES VENTES À PROXIMITÉ. Le marché du secteur (500 m, élargi seulement s'il manque des ventes)
                 et son écart avec la commune ; Territoire dit la commune, Logement n'affiche aucun prix. */}
-            <VentesAutourBloc autour={ventesAutour} type={typeLogement} />
+            {blocVentes}
 
             {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
                 visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six

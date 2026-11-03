@@ -48,7 +48,7 @@ function tuilesLocales(p) {
   const m = JSON.parse(fs.readFileSync(path.join(EDITION, "manifest.json"), "utf8"));
   const out = new Map();
   for (const k of tuilesPour(p)) {
-    if (!m.tuiles[k]) continue;
+    if (!fs.existsSync(path.join(EDITION, "t", `${k}.json.gz`))) continue;
     out.set(k, JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(EDITION, "t", `${k}.json.gz`))).toString("utf8")));
   }
   return { m, tuiles: out };
@@ -80,7 +80,15 @@ async function brut() {
 }
 
 // La référence communale publiée avec les tuiles, et sa vérification contre l'index (Territoire) : identique ?
-const COMMUNES = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(EDITION, "communes.json.gz"))).toString("utf8"));
+const COMMUNES = (() => {
+  const out = { communes: {} };
+  for (const f of fs.readdirSync(path.join(EDITION, "c"))) {
+    const c = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(EDITION, "c", f))).toString("utf8"));
+    Object.assign(out.communes, c.communes);
+    out.meta = c.meta;
+  }
+  return out;
+})();
 async function verifierCommunes() {
   const file = JSON.parse(await fsp.readFile(INDEX_JSON_PATH, "utf8"));
   let identiques = 0;
@@ -139,4 +147,4 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+if (process.argv[1]?.endsWith("recette.mjs")) main().catch((e) => { console.error(e); process.exit(1); });

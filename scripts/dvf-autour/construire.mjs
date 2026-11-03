@@ -13,7 +13,8 @@
  *
  * SORTIE (hors du dépôt, jamais dans un bundle) :
  *   data/cache-logement/dvf-autour/<édition>/t/<tx>_<ty>.json.gz    les tuiles
- *   data/cache-logement/dvf-autour/<édition>/communes.json.gz       la référence communale (champ `achat` de l'index)
+ *   data/cache-logement/dvf-autour/<édition>/b/<bx>_<by>.json       les index de bloc (tuiles et empreintes, ~50 km)
+ *   data/cache-logement/dvf-autour/<édition>/c/<dép>.json.gz        la référence communale par département (champ `achat` de l'index)
  *   data/cache-logement/dvf-autour/<édition>/manifest.json          couverture, empreintes
  *   data/cache-logement/dvf-autour/<édition>/diagnostic.json        mesures de la géolocalisation
  * Publication : scripts/dvf-autour/publier.mjs (Supabase Storage, bucket privé), sur GO seulement.
@@ -33,7 +34,7 @@ import {
   agregerDvf, ANNEES_PRODUCTION, CACHE, fichiersDvf, LIVRAISON_PRODUCTION, LIVRAISONS_DVF, mouvementsCog, verifierGeographieCompatible,
 } from "../lib/logement-index.mjs";
 import {
-  CASE_M, caseDe, classeDe, cleCase, cleTuileDe, FORMAT_PRIX_AUTOUR, PAS_CLASSE, TUILE_CASES,
+  BLOC_TUILES, CASE_M, caseDe, classeDe, cleBlocDe, cleCase, cleTuileDe, departementDe, FORMAT_PRIX_AUTOUR, PAS_CLASSE, TUILE_CASES,
 } from "../../src/lib/prix-autour.ts";
 import { haversineM } from "../../src/lib/geo-distance.ts";
 
@@ -108,6 +109,9 @@ async function main() {
 
   await fsp.rm(SORTIE, { recursive: true, force: true });
   await fsp.mkdir(path.join(SORTIE, "t"), { recursive: true });
+  const empreinte = (b) => ({ octets: b.length, sha256: createHash("sha256").update(b).digest("hex") });
+  await fsp.mkdir(path.join(SORTIE, "b"), { recursive: true });
+  await fsp.mkdir(path.join(SORTIE, "c"), { recursive: true });
   const manifeste = {
     format: FORMAT_PRIX_AUTOUR,
     edition: EDITION,
@@ -115,11 +119,14 @@ async function main() {
     periode: { debut: `${ANNEES_PRODUCTION[0]}-01-01`, fin: `${ANNEES_PRODUCTION[ANNEES_PRODUCTION.length - 1]}-12-31` },
     case_m: CASE_M,
     tuile_cases: TUILE_CASES,
+    bloc_tuiles: BLOC_TUILES,
     pas_classe: PAS_CLASSE,
-    tuiles: {},
+    blocs: {},
+    communes: {},
   };
   const aplatir = (h) => [...h.entries()].sort((x, y) => x[0] - y[0]).flat();
   const tailles = [];
+  const blocs = new Map(); // bloc -> { tuile: empreinte + ventes }
   for (const kt of [...tuiles.keys()].sort()) {
     const t = tuiles.get(kt);
     const cases = {};
@@ -135,25 +142,42 @@ async function main() {
     const brut = Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition: EDITION, tuile: kt, cases }));
     const gz = zlib.gzipSync(brut, { level: 9 }); // l'en-tête gzip de Node ne porte pas d'horodatage : reproductible
     await fsp.writeFile(path.join(SORTIE, "t", `${kt}.json.gz`), gz);
-    manifeste.tuiles[kt] = { octets: gz.length, sha256: createHash("sha256").update(gz).digest("hex"), ventes };
+    const kb = cleBlocDe(kt);
+    if (!blocs.has(kb)) blocs.set(kb, {});
+    blocs.get(kb)[kt] = { ...empreinte(gz), ventes };
     tailles.push(gz.length);
   }
-  // LA RÉFÉRENCE COMMUNALE, recopiée de l'index (le champ `achat` de chaque commune, sans le niveau du comparateur). Elle
-  // voyage avec les tuiles pour que la fonction Autour n'embarque pas l'index national (12 Mo) pour deux nombres.
-  const communes = {};
+  // LES INDEX DE BLOC : la liste des tuiles d'un bloc (~50 km) et leurs empreintes. Le manifeste ne liste que les blocs.
+  const taillesBlocs = [];
+  for (const kb of [...blocs.keys()].sort()) {
+    const b = Buffer.from(JSON.stringify({ format: FORMAT_PRIX_AUTOUR, edition: EDITION, bloc: kb, tuiles: blocs.get(kb) }));
+    await fsp.writeFile(path.join(SORTIE, "b", `${kb}.json`), b);
+    manifeste.blocs[kb] = { ...empreinte(b), tuiles: Object.keys(blocs.get(kb)).length };
+    taillesBlocs.push(b.length);
+  }
+  // LA RÉFÉRENCE COMMUNALE, recopiée de l'index (le champ `achat` de chaque commune, sans le niveau du comparateur), par
+  // département. Elle voyage avec les tuiles pour que la fonction Autour n'embarque pas l'index national (12 Mo).
+  const parDep = new Map();
   for (const c of [...file.communes].sort((x, y) => x.insee.localeCompare(y.insee))) {
     if (!c.logement?.achat) continue;
     const { niveau: _niveau, ...achat } = c.logement.achat; void _niveau;
-    communes[c.insee] = { nom: c.nom, achat };
+    const dep = departementDe(c.insee);
+    if (!parDep.has(dep)) parDep.set(dep, {});
+    parDep.get(dep)[c.insee] = { nom: c.nom, achat };
   }
-  const gzCommunes = zlib.gzipSync(Buffer.from(JSON.stringify({
-    format: FORMAT_PRIX_AUTOUR, edition: EDITION,
-    meta: { achat: { periode: metaAchat.periode, livraison: metaAchat.livraison, source: metaAchat.source } },
-    communes,
-  })), { level: 9 });
-  await fsp.writeFile(path.join(SORTIE, "communes.json.gz"), gzCommunes);
-  manifeste.communes = { octets: gzCommunes.length, sha256: createHash("sha256").update(gzCommunes).digest("hex"), nombre: Object.keys(communes).length };
-  await fsp.writeFile(path.join(SORTIE, "manifest.json"), JSON.stringify(manifeste));
+  const taillesCommunes = [];
+  for (const dep of [...parDep.keys()].sort()) {
+    const gz = zlib.gzipSync(Buffer.from(JSON.stringify({
+      format: FORMAT_PRIX_AUTOUR, edition: EDITION, departement: dep,
+      meta: { achat: { periode: metaAchat.periode, livraison: metaAchat.livraison, source: metaAchat.source } },
+      communes: parDep.get(dep),
+    })), { level: 9 });
+    await fsp.writeFile(path.join(SORTIE, "c", `${dep}.json.gz`), gz);
+    manifeste.communes[dep] = { ...empreinte(gz), nombre: Object.keys(parDep.get(dep)).length };
+    taillesCommunes.push(gz.length);
+  }
+  const brutManifeste = Buffer.from(JSON.stringify(manifeste));
+  await fsp.writeFile(path.join(SORTIE, "manifest.json"), brutManifeste);
 
   // ── Diagnostic de la géolocalisation ─────────────────────────────────────────────────────
   const d = diag.distancesKm.sort((x, y) => x - y);
@@ -176,6 +200,11 @@ async function main() {
     tuiles: tailles.length,
     octets_total: tailles.reduce((s, x) => s + x, 0),
     octets_tuile: { mediane: centile(tailles, 0.5), p99: centile(tailles, 0.99), max: tailles[tailles.length - 1] },
+    manifeste_octets: brutManifeste.length,
+    blocs: taillesBlocs.length,
+    octets_bloc: { mediane: centile(taillesBlocs.sort((x, y) => x - y), 0.5), max: taillesBlocs[taillesBlocs.length - 1] },
+    departements: taillesCommunes.length,
+    octets_communes_departement: { mediane: centile(taillesCommunes.sort((x, y) => x - y), 0.5), max: taillesCommunes[taillesCommunes.length - 1] },
   };
   await fsp.writeFile(path.join(SORTIE, "diagnostic.json"), JSON.stringify(diagnostic, null, 1));
   console.log(JSON.stringify(diagnostic, null, 1));

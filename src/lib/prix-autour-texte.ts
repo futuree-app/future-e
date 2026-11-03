@@ -12,8 +12,8 @@
 //   - 500 m est le périmètre principal, celui des autres lectures d'Autour ; 1 km puis 2 km seulement s'il manque
 //     des ventes, et c'est dit : ces ventes décrivent un secteur plus large que le voisinage immédiat ;
 //   - moins de 10 ventes à 2 km : pas de médiane locale, sans revenir au chiffre communal (il est dans Territoire) ;
-//   - avertissement sous 20 ventes, écart à la commune qualifié à partir de 20 (et seulement s'il est net), quartiles
-//     à partir de 30 ;
+//   - avertissement sous 20 ventes ; à partir de 20, l'écart OBSERVÉ avec la commune (€/m², %, échelle, effectif),
+//     jamais qualifié de net ni de « plus cher » ; quartiles à partir de 30 ;
 //   - le type de logement FILTRE les ventes quand le diagnostic confirmé le dit sans ambiguïté ; sinon les deux
 //     marchés sont présentés séparément, sans rien deviner ;
 //   - jamais d'estimation du bien : ni surface, ni montant, ni « votre logement ».
@@ -22,7 +22,7 @@
 import { bindOrphans } from "./typography.ts";
 import { grainDpe } from "./dpe-grain.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
-import { eurM2, lieuDuPrix, periodeVentes, raisonSansPrix, SOURCE_ACHAT_COURTE, type LecturePrix, type PrixDuType } from "./prix-immobiliers.ts";
+import { eurM2, lieuDuPrix, mailleLisible, periodeVentes, raisonSansPrix, SOURCE_ACHAT_COURTE, type LecturePrix, type PrixDuType } from "./prix-immobiliers.ts";
 import {
   ARRONDI_EUR_M2, RAYONS_M, SEUIL_COMPARAISON, SEUIL_MEDIANE, SEUIL_QUARTILES,
   type ResultatAutour, type TypeVente, type VentesAutour,
@@ -75,13 +75,13 @@ export type TexteVentesAutour = {
   source: string;
 };
 
-const NBSP = " ";
+const NBSP = "\u00a0";
 const MOTS: Record<TypeVente, { titre: string; pluriel: string; vendus: string; de: string }> = {
   appart: { titre: "Appartements", pluriel: "appartements", vendus: "vendus", de: "d'appartements" },
   maison: { titre: "Maisons", pluriel: "maisons", vendus: "vendues", de: "de maisons" },
 };
 const distance = (m: number) => (m >= 1000 ? `${m / 1000}${NBSP}km` : `${m}${NBSP}m`);
-const entier = (n: number) => n.toLocaleString("fr-FR").replace(/[   ]/g, NBSP);
+const entier = (n: number) => n.toLocaleString("fr-FR").replace(/[\u00a0\u202f ]/g, NBSP);
 const PERIMETRE = RAYONS_M[0];
 
 function referenceDuType(l: LecturePrix, type: TypeVente): { de: string; prix: PrixDuType } | null {
@@ -90,19 +90,21 @@ function referenceDuType(l: LecturePrix, type: TypeVente): { de: string; prix: P
   return p ? { de: lieuDuPrix(p, l).de, prix: p } : null;
 }
 
-/** La comparaison à la commune, à partir de 20 ventes. Nette seulement si la médiane de la commune sort de la marge. */
-function comparaison(r: Extract<ResultatAutour, { statut: "ventes" }>, ref: { de: string; prix: PrixDuType }): string {
+/**
+ * L'ÉCART OBSERVÉ avec la commune, à partir de 20 ventes : en €/m² et en pourcentage, avec l'échelle et l'effectif de
+ * la référence. Un constat entre deux médianes, jamais qualifié (« plus cher », « net ») : il ne prétend pas qu'une
+ * différence entre les deux marchés est établie (décision du porteur, 03/11/2026).
+ */
+function ecartObserve(r: Extract<ResultatAutour, { statut: "ventes" }>, ref: { de: string; prix: PrixDuType }, commune: LecturePrix): string {
   const c = ref.prix.eur_m2;
-  const [bas, haut] = r.incertitude!;
-  const mots = MOTS[r.type];
-  const ecart = Math.round(((r.mediane - c) / c) * 100);
-  if (c < bas && ecart > 0) {
-    return `C'est plus que la médiane ${ref.de} (${eurM2(c)}) : dans ce secteur, les ${mots.pluriel} se sont ${mots.vendus} ${ecart}${NBSP}% plus cher.`;
-  }
-  if (c > haut && ecart < 0) {
-    return `C'est moins que la médiane ${ref.de} (${eurM2(c)}) : dans ce secteur, les ${mots.pluriel} se sont ${mots.vendus} ${-ecart}${NBSP}% moins cher.`;
-  }
-  return `C'est proche de la médiane ${ref.de} (${eurM2(c)}) : au vu du nombre de ventes, l'écart n'est pas assez net pour dire que les ${mots.pluriel} se sont ${mots.vendus} plus cher ou moins cher dans ce secteur.`;
+  const d = r.mediane - c;
+  const pct = Math.round((d / c) * 100);
+  const signe = (x: number) => (x > 0 ? "+" : x < 0 ? "−" : "");
+  const echelle = `${mailleLisible(ref.prix, commune)}${ref.prix.ventes ? `, ${entier(ref.prix.ventes)}${NBSP}ventes` : ""}`;
+  const ecart = Math.round(d) === 0
+    ? "aucun écart entre les deux médianes"
+    : `${signe(d)}${eurM2(Math.abs(d))}, soit ${signe(pct)}${Math.abs(pct)}${NBSP}%`;
+  return `Écart observé avec la médiane ${ref.de} (${eurM2(c)}, échelle : ${echelle}) : ${ecart}.`;
 }
 
 function bloc(commune: LecturePrix, r: ResultatAutour, periode: string | null): BlocVentesType {
@@ -123,8 +125,8 @@ function bloc(commune: LecturePrix, r: ResultatAutour, periode: string | null): 
   let avertissement: string | null = null;
   if (r.ventes < SEUIL_COMPARAISON) {
     avertissement = `Avec moins de ${SEUIL_COMPARAISON} ventes, une ou deux ventes de plus ou de moins peuvent déplacer ce chiffre : il n'est pas comparé à la commune.`;
-  } else if (ref && r.incertitude) {
-    phrases.push(comparaison(r, ref));
+  } else if (ref) {
+    phrases.push(ecartObserve(r, ref, commune));
   } else if (!ref) {
     phrases.push(`Aucune médiane des ${mots.pluriel} n'est publiée pour ${commune.nom} ni pour son intercommunalité : ces ventes ne sont comparées à rien.`);
   }
@@ -148,8 +150,8 @@ function methode(livraison: string | null, periode: string | null): string[] {
     `Les ventes comptées sont celles d'un seul logement${periode ? `, de ${periode}` : ""}, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.`,
     `Le périmètre est de 500${NBSP}m, comme les autres lectures de ce module. Il passe à 1${NBSP}km puis 2${NBSP}km seulement s'il réunit moins de ${SEUIL_MEDIANE} ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.`,
     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
-    `Un écart avec la commune n'est qualifié qu'à partir de ${SEUIL_COMPARAISON} ventes, et seulement s'il dépasse la marge d'incertitude de la médiane (à 95${NBSP}%). La fourchette n'est donnée qu'à partir de ${SEUIL_QUARTILES} ventes.`,
-    `Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à ${ARRONDI_EUR_M2}${NBSP}€/m², et deux adresses distantes de moins de 100${NBSP}m lisent les mêmes ventes.`,
+    `L'écart avec la commune n'est donné qu'à partir de ${SEUIL_COMPARAISON} ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de ${SEUIL_QUARTILES} ventes.`,
+    `Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à ${ARRONDI_EUR_M2}${NBSP}€/m², et deux adresses situées dans le même carré d'environ 100${NBSP}m lisent exactement les mêmes ventes.`,
     `Source : DVF (DGFiP), version géolocalisée Etalab${livraison ? `, livraison du ${livraison.split("-").reverse().join("/")}` : ""}.`,
   ].map(bindOrphans);
 }

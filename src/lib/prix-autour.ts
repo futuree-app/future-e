@@ -17,8 +17,9 @@
 // CE QUI PROTÈGE LES PERSONNES (restrictions de réidentification DVF) :
 //   - les tuiles ne gardent AUCUNE vente : par carré d'environ 100 m et par type, un histogramme de prix au m²
 //     par classes de 2 %. Ni date, ni surface, ni adresse, ni parcelle, ni prix exact ;
-//   - le centre de lecture est le centre du carré de l'adresse : deux adresses du même carré lisent exactement
-//     les mêmes ventes, et un déplacement de quelques mètres ne change rien ;
+//   - le centre de lecture est le centre du carré de l'adresse : deux adresses situées dans le MÊME carré (environ
+//     100 m de côté) lisent exactement les mêmes ventes. Deux adresses proches mais de part et d'autre d'une limite
+//     de carré peuvent lire des ensembles différents (une couronne de carrés) ;
 //   - les chiffres publiés sont arrondis à 50 €/m², et jamais en dessous de 10 ventes ;
 //   - le calcul n'est appelé que par la page du dossier d'adresse payant, sur la position enregistrée du
 //     dossier : aucune route n'accepte des coordonnées choisies par le navigateur.
@@ -30,7 +31,7 @@
 import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { LecturePrix, LogementIndex } from "./prix-immobiliers.ts";
 
-export const FORMAT_PRIX_AUTOUR = "prix-autour-1";
+export const FORMAT_PRIX_AUTOUR = "prix-autour-2";
 
 /** Le carré : environ 100 m de côté (la largeur varie de 91 à 108 m entre le nord et le sud de la France). */
 export const CASE_M = 100;
@@ -40,6 +41,12 @@ export const DLAT = CASE_M / M_PAR_DEGRE;
 export const DLON = CASE_M / (M_PAR_DEGRE * Math.cos((LAT_REFERENCE * Math.PI) / 180));
 /** Une tuile : 50 × 50 carrés, environ 5 km. Un rayon de 2 km lit au plus quatre tuiles. */
 export const TUILE_CASES = 50;
+/**
+ * Un bloc : 10 × 10 tuiles, environ 50 km. Le manifeste ne liste que les blocs ; chaque bloc liste ses tuiles et leurs
+ * empreintes. Une lecture à froid télécharge le manifeste (quelques dizaines de Ko), un à quatre index de bloc et le
+ * fichier communal de son département, au lieu d'un manifeste national de 2,4 Mo (mesuré le 03/11/2026).
+ */
+export const BLOC_TUILES = 10;
 
 export const RAYONS_M = [500, 1000, 2000] as const;
 export type RayonM = (typeof RAYONS_M)[number];
@@ -65,6 +72,12 @@ export function centreDe(c: Case): LngLat {
 }
 export const cleCase = (c: Case) => `${c.ix}_${c.iy}`;
 export const cleTuileDe = (c: Case) => `${Math.floor(c.ix / TUILE_CASES)}_${Math.floor(c.iy / TUILE_CASES)}`;
+export const cleBlocDe = (cleTuile: string) => {
+  const [tx, ty] = cleTuile.split("_").map(Number);
+  return `${Math.floor(tx / BLOC_TUILES)}_${Math.floor(ty / BLOC_TUILES)}`;
+};
+/** Le département d'un code INSEE (« 17 », « 2A », « 974 ») : le découpage du fichier communal. */
+export const departementDe = (insee: string) => (insee.startsWith("97") ? insee.slice(0, 3) : insee.slice(0, 2));
 
 export function classeDe(eurM2: number): number {
   const b = Math.floor(Math.log(eurM2 / BORNE_BASSE) / Math.log(PAS_CLASSE));
@@ -101,6 +114,12 @@ export type Histogramme = number[];
 export type CaseVentes = { a?: Histogramme; m?: Histogramme };
 export type TuilePrixAutour = { format: string; edition: string; tuile: string; cases: Record<string, CaseVentes> };
 
+export type Empreinte = { octets: number; sha256: string };
+
+/**
+ * `<édition>/manifest.json` : les blocs (`b/<bloc>.json`) et les fichiers communaux par département
+ * (`c/<dép>.json.gz`), avec leurs empreintes. Un bloc ou un département absent n'a aucune vente, ou aucune commune.
+ */
 export type ManifestePrixAutour = {
   format: string;
   edition: string;
@@ -108,27 +127,44 @@ export type ManifestePrixAutour = {
   periode: { debut: string; fin: string };
   case_m: number;
   tuile_cases: number;
+  bloc_tuiles: number;
   pas_classe: number;
-  tuiles: Record<string, { octets: number; sha256: string; ventes: number }>;
-  /** La référence communale (`communes.json.gz`), recopiée de l'index à la construction. */
-  communes: { octets: number; sha256: string; nombre: number };
+  blocs: Record<string, Empreinte & { tuiles: number }>;
+  communes: Record<string, Empreinte & { nombre: number }>;
 };
 
-/** `communes.json.gz` : le champ `achat` de l'index pour chaque commune, et sa provenance. */
+/** `<édition>/b/<bloc>.json` : les tuiles d'un bloc et leurs empreintes. Une tuile absente n'a aucune vente. */
+export type BlocPrixAutour = { format: string; edition: string; bloc: string; tuiles: Record<string, Empreinte & { ventes: number }> };
+
+/** `<édition>/c/<dép>.json.gz` : le champ `achat` de l'index pour chaque commune du département, et sa provenance. */
 export type CommunesPrixAutour = {
   format: string;
   edition: string;
+  departement: string;
   meta: { achat: { periode: { debut: string; fin: string }; livraison?: string; source?: string } };
   communes: Record<string, { nom: string; achat: LogementIndex["achat"] }>;
 };
 
+const empreinteValide = (e: unknown) => {
+  const x = e as Empreinte;
+  return Boolean(x) && Number.isSafeInteger(x.octets) && x.octets > 0 && /^[a-f0-9]{64}$/.test(x.sha256 ?? "");
+};
+const toutesValides = (r: unknown, cle: RegExp) =>
+  typeof r === "object" && r !== null && Object.entries(r).every(([k, e]) => cle.test(k) && empreinteValide(e));
+const CLE_GRILLE = /^-?\d+_-?\d+$/;
+
 export function manifesteValide(m: unknown): m is ManifestePrixAutour {
   const x = m as ManifestePrixAutour;
   return Boolean(x) && x.format === FORMAT_PRIX_AUTOUR && typeof x.edition === "string" && typeof x.livraison === "string"
-    && x.case_m === CASE_M && x.tuile_cases === TUILE_CASES && x.pas_classe === PAS_CLASSE
+    && x.case_m === CASE_M && x.tuile_cases === TUILE_CASES && x.bloc_tuiles === BLOC_TUILES && x.pas_classe === PAS_CLASSE
     && typeof x.periode?.debut === "string" && typeof x.periode?.fin === "string"
-    && typeof x.tuiles === "object" && x.tuiles !== null
-    && Number.isSafeInteger(x.communes?.octets) && /^[a-f0-9]{64}$/.test(x.communes?.sha256 ?? "");
+    && toutesValides(x.blocs, CLE_GRILLE) && toutesValides(x.communes, /^(\d[\dAB]|97\d)$/);
+}
+
+export function blocValide(b: unknown, attendu: { edition: string; bloc: string }): b is BlocPrixAutour {
+  const x = b as BlocPrixAutour;
+  return Boolean(x) && x.format === FORMAT_PRIX_AUTOUR && x.edition === attendu.edition && x.bloc === attendu.bloc
+    && toutesValides(x.tuiles, CLE_GRILLE) && Object.keys(x.tuiles).every((k) => cleBlocDe(k) === attendu.bloc);
 }
 
 const histogrammeValide = (h: unknown) =>
@@ -161,11 +197,6 @@ export type ResultatAutour =
     mediane: number;
     /** Premier et troisième quartiles, à partir de 30 ventes seulement ; arrondis à 50 €/m². */
     quartiles: [number, number] | null;
-    /**
-     * La marge d'incertitude de la médiane (intervalle de confiance à 95 %, par les rangs), à partir de 20 ventes
-     * seulement : c'est elle qui décide si l'écart à la commune est net. Arrondie à 50 €/m².
-     */
-    incertitude: [number, number] | null;
   }
   | { statut: "trop_peu"; type: TypeVente; rayonM: RayonM };
 
@@ -180,10 +211,11 @@ export type VentesAutour = {
   commune: LecturePrix | null;
 };
 
-export function communesValides(c: unknown, edition: string): c is CommunesPrixAutour {
+export function communesValides(c: unknown, attendu: { edition: string; departement: string }): c is CommunesPrixAutour {
   const x = c as CommunesPrixAutour;
-  return Boolean(x) && x.format === FORMAT_PRIX_AUTOUR && x.edition === edition
-    && typeof x.meta?.achat?.periode?.debut === "string" && typeof x.communes === "object" && x.communes !== null;
+  return Boolean(x) && x.format === FORMAT_PRIX_AUTOUR && x.edition === attendu.edition && x.departement === attendu.departement
+    && typeof x.meta?.achat?.periode?.debut === "string" && typeof x.communes === "object" && x.communes !== null
+    && Object.keys(x.communes).every((k) => departementDe(k) === attendu.departement);
 }
 
 /** La lecture des prix d'une commune, à partir de la référence publiée avec les tuiles. */
@@ -204,18 +236,14 @@ function auRang(classes: [number, number][], k: number): number {
   return valeurDeClasse(classes[classes.length - 1][0]);
 }
 
-/** Médiane, quartiles et marge d'incertitude d'un histogramme fusionné NON VIDE. */
+/** Médiane et quartiles d'un histogramme fusionné NON VIDE. */
 export function statistiques(classes: [number, number][]) {
   const n = classes.reduce((s, [, c]) => s + c, 0);
   if (n === 0) throw new Error("statistiques : histogramme vide");
   const mediane = n % 2 ? auRang(classes, (n + 1) / 2) : (auRang(classes, n / 2) + auRang(classes, n / 2 + 1)) / 2;
   const q1 = auRang(classes, Math.ceil(0.25 * n));
   const q3 = auRang(classes, Math.ceil(0.75 * n));
-  // Intervalle de confiance de la médiane sans hypothèse sur la distribution : rangs n/2 ± 1,96·√n/2.
-  const demi = 0.98 * Math.sqrt(n);
-  const bas = auRang(classes, Math.max(1, Math.floor(n / 2 - demi)));
-  const haut = auRang(classes, Math.min(n, Math.ceil(1 + n / 2 + demi)));
-  return { n, mediane, q1, q3, bas, haut };
+  return { n, mediane, q1, q3 };
 }
 
 function fusionner(cases: CaseVentes[], type: TypeVente): [number, number][] {
@@ -249,7 +277,6 @@ export function lireAutour(tuiles: Map<string, TuilePrixAutour>, p: LngLat, type
       ventes: s.n,
       mediane: arrondir(s.mediane),
       quartiles: s.n >= SEUIL_QUARTILES ? [arrondir(s.q1), arrondir(s.q3)] : null,
-      incertitude: s.n >= SEUIL_COMPARAISON ? [arrondir(s.bas), arrondir(s.haut)] : null,
     };
   }
   return { statut: "trop_peu", type, rayonM: RAYONS_M[RAYONS_M.length - 1] };

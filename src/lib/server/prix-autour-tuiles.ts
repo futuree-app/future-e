@@ -2,31 +2,32 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import {
-  communesValides, FORMAT_PRIX_AUTOUR, lecturePrixDe, lireAutour, manifesteValide, tuilesPour, tuileValide,
-  type CommunesPrixAutour, type ManifestePrixAutour, type TuilePrixAutour, type VentesAutour,
+  blocValide, cleBlocDe, communesValides, departementDe, FORMAT_PRIX_AUTOUR, lecturePrixDe, lireAutour, manifesteValide,
+  tuilesPour, tuileValide,
+  type BlocPrixAutour, type CommunesPrixAutour, type Empreinte, type ManifestePrixAutour, type TuilePrixAutour, type VentesAutour,
 } from "@/lib/prix-autour";
 import type { LngLat } from "@/lib/geo-distance";
 
-// LES VENTES AUTOUR D'UNE ADRESSE (FUT-138), lues dans les tuiles publiées sur Supabase Storage (bucket privé,
-// `scripts/dvf-autour/publier.mjs`). Même patron que le débroussaillement (FUT-149) et la fibre (FUT-156).
+// LES VENTES À PROXIMITÉ D'UNE ADRESSE (FUT-138), lues sur Supabase Storage (bucket privé, `scripts/dvf-autour/publier.mjs`).
+// Même patron que le débroussaillement (FUT-149) et la fibre (FUT-156).
 //
-// LE JEU NATIONAL N'ENTRE DANS AUCUNE FONCTION. Aucun fichier de ventes n'est inclus dans le déploiement
-// (`outputFileTracingIncludes` n'en cite aucun, et ce module ne lit pas le disque) : une lecture télécharge une à
-// quatre tuiles de quelques kilo-octets (médiane 312 octets compressés, maximum 32 Ko, édition du 20/10/2026).
+// LE JEU NATIONAL N'ENTRE DANS AUCUNE FONCTION. Aucun fichier de ventes n'est inclus dans le déploiement (ce module ne lit
+// pas le disque) ; la référence communale voyage avec les tuiles (lire l'index national ici ajoutait 14 Mo à la fonction).
 //
-// LA RÉFÉRENCE COMMUNALE VOYAGE AVEC LES TUILES (`communes.json.gz`, 572 Ko, recopiée de l'index à la construction) :
-// lire l'index national ici aurait ajouté 14 Mo à la fonction Autour (mesuré le 03/11/2026) pour deux nombres.
-//
-// Ce que l'instance garde en mémoire : le pointeur `courant.json` (relu à l'origine toutes les dix minutes), le
-// manifeste et la référence communale désignés par leur empreinte, et au plus 256 tuiles immuables.
+// CE QU'UNE LECTURE TÉLÉCHARGE (édition du 20/10/2026, mesuré le 03/11/2026, voir docs/audits) :
+//   - à froid : le pointeur, le manifeste (blocs et départements), un à quatre index de bloc, le fichier communal du
+//     département, une à quatre tuiles ; quelques dizaines de Ko, et non plus 3 Mo (manifeste national + communes) ;
+//   - à chaud : seulement les tuiles et index jamais vus par l'instance ; le pointeur est relu toutes les dix minutes.
+// Tout objet autre que le pointeur est immuable et vérifié par son empreinte (taille et SHA-256) avant usage ; la
+// mémoire est indexée par l'empreinte, jamais par le seul chemin.
 //
 // Accès serveur seulement, par la clé de service ; rien n'est exposé au navigateur sauf le résultat agrégé.
-// Désactivé tant que `PRIX_AUTOUR_BUCKET` n'est pas défini : `undefined`, et l'écran garde la référence communale.
-// Ne lève jamais : une panne rend `null` (« indisponible »), jamais « trop peu de ventes ».
+// Désactivé tant que `PRIX_AUTOUR_BUCKET` n'est pas défini : `undefined`, et le bloc ne s'affiche pas.
+// Ne lève jamais : une panne rend `null` (« indisponible »), jamais « pas de médiane locale ».
 
 const DELAI_MS = 4_000;
 const DUREE_POINTEUR_MS = 10 * 60_000;
-const TUILES_EN_MEMOIRE = 256;
+const OBJETS_EN_MEMOIRE = 512;
 
 type Config = { url: string; cle: string; bucket: string };
 
@@ -57,9 +58,27 @@ const sha256 = (b: Buffer) => createHash("sha256").update(b).digest("hex");
 const EDITION = /^\d{4}-\d{2}-\d{2}(\.\d+)?$/;
 
 let pointeur: { edition: string; manifeste: string; jusqua: number } | null = null;
-let manifeste: { sha256: string; promesse: Promise<ManifestePrixAutour> } | null = null;
-let communes: { sha256: string; promesse: Promise<CommunesPrixAutour> } | null = null;
-const tuiles = new Map<string, TuilePrixAutour>();
+/** Les objets immuables (manifeste, index de bloc, fichiers communaux, tuiles), par chemin ET empreinte. */
+const memoire = new Map<string, Promise<unknown>>();
+
+/** Lit, vérifie, décode et garde un objet immuable. Un échec n'est pas gardé : la lecture suivante réessaie. */
+function objet<T>(lire: Lecteur, chemin: string, attendu: Empreinte | { sha256: string }, decoder: (b: Buffer) => T, frais = false): Promise<T> {
+  const cle = `${chemin}#${attendu.sha256}`;
+  const deja = memoire.get(cle);
+  if (deja) return deja as Promise<T>;
+  const promesse = (async () => {
+    const octets = await lire(chemin, frais);
+    if (("octets" in attendu && octets.length !== attendu.octets) || sha256(octets) !== attendu.sha256) throw new Error(`${chemin} : empreinte différente`);
+    return decoder(octets);
+  })();
+  if (memoire.size >= OBJETS_EN_MEMOIRE) memoire.delete(memoire.keys().next().value!);
+  memoire.set(cle, promesse);
+  promesse.catch(() => { if (memoire.get(cle) === promesse) memoire.delete(cle); });
+  return promesse;
+}
+
+const json = (b: Buffer): unknown => JSON.parse(b.toString("utf8"));
+const jsonGz = (b: Buffer): unknown => JSON.parse(gunzipSync(b).toString("utf8"));
 
 async function manifesteCourant(lire: Lecteur): Promise<ManifestePrixAutour> {
   if (!pointeur || pointeur.jusqua <= Date.now()) {
@@ -67,53 +86,47 @@ async function manifesteCourant(lire: Lecteur): Promise<ManifestePrixAutour> {
     if (p?.format !== FORMAT_PRIX_AUTOUR || !EDITION.test(p.edition ?? "") || !/^[a-f0-9]{64}$/.test(p.manifeste ?? "")) throw new Error("pointeur illisible");
     pointeur = { edition: p.edition!, manifeste: p.manifeste!, jusqua: Date.now() + DUREE_POINTEUR_MS };
   }
-  const { edition, manifeste: attendu } = pointeur;
-  if (manifeste?.sha256 !== attendu) {
-    const promesse = (async () => {
-      const octets = await lire(`${edition}/manifest.json`, true);
-      if (sha256(octets) !== attendu) throw new Error("manifeste : empreinte différente du pointeur");
-      const m: unknown = JSON.parse(octets.toString("utf8"));
-      if (!manifesteValide(m) || m.edition !== edition) throw new Error("manifeste illisible");
-      return m;
-    })();
-    manifeste = { sha256: attendu, promesse };
-    promesse.catch(() => { if (manifeste?.promesse === promesse) manifeste = null; });
-  }
-  return manifeste!.promesse;
+  const { edition, manifeste } = pointeur;
+  // Le manifeste est relu à l'origine (frais) : une copie en cache d'un manifeste republié ferait échouer l'empreinte.
+  return objet(lire, `${edition}/manifest.json`, { sha256: manifeste }, (b) => {
+    const m = json(b);
+    if (!manifesteValide(m) || m.edition !== edition) throw new Error("manifeste illisible");
+    return m;
+  }, true);
 }
 
 async function tuile(lire: Lecteur, m: ManifestePrixAutour, cle: string): Promise<TuilePrixAutour | null> {
-  const attendu = m.tuiles[cle];
-  // Une tuile absente du manifeste est une zone SANS AUCUNE VENTE : ce n'est pas une panne.
-  if (!attendu) return null;
-  const memo = tuiles.get(`${cle}/${attendu.sha256}`);
-  if (memo) return memo;
-  const octets = await lire(`${m.edition}/t/${cle}.json.gz`);
-  if (octets.length !== attendu.octets || sha256(octets) !== attendu.sha256) throw new Error(`${cle} : empreinte différente`);
-  const t: unknown = JSON.parse(gunzipSync(octets).toString("utf8"));
-  if (!tuileValide(t, { edition: m.edition, tuile: cle })) throw new Error(`${cle} : tuile illisible`);
-  if (tuiles.size >= TUILES_EN_MEMOIRE) tuiles.delete(tuiles.keys().next().value!);
-  tuiles.set(`${cle}/${attendu.sha256}`, t);
-  return t;
+  const b = cleBlocDe(cle);
+  const eb = m.blocs[b];
+  // Un bloc ou une tuile absents du manifeste sont des zones SANS AUCUNE VENTE : ce n'est pas une panne.
+  if (!eb) return null;
+  const bloc = await objet<BlocPrixAutour>(lire, `${m.edition}/b/${b}.json`, eb, (o) => {
+    const x = json(o);
+    if (!blocValide(x, { edition: m.edition, bloc: b })) throw new Error(`bloc ${b} illisible`);
+    return x;
+  });
+  const et = bloc.tuiles[cle];
+  if (!et) return null;
+  return objet<TuilePrixAutour>(lire, `${m.edition}/t/${cle}.json.gz`, et, (o) => {
+    const x = jsonGz(o);
+    if (!tuileValide(x, { edition: m.edition, tuile: cle })) throw new Error(`${cle} : tuile illisible`);
+    return x;
+  });
 }
 
-function referenceCommunale(lire: Lecteur, m: ManifestePrixAutour): Promise<CommunesPrixAutour> {
-  if (communes?.sha256 !== m.communes.sha256) {
-    const promesse = (async () => {
-      const octets = await lire(`${m.edition}/communes.json.gz`);
-      if (octets.length !== m.communes.octets || sha256(octets) !== m.communes.sha256) throw new Error("communes : empreinte différente");
-      const c: unknown = JSON.parse(gunzipSync(octets).toString("utf8"));
-      if (!communesValides(c, m.edition)) throw new Error("communes illisibles");
-      return c;
-    })();
-    communes = { sha256: m.communes.sha256, promesse };
-    promesse.catch(() => { if (communes?.promesse === promesse) communes = null; });
-  }
-  return communes!.promesse;
+async function communes(lire: Lecteur, m: ManifestePrixAutour, insee: string): Promise<CommunesPrixAutour | null> {
+  const dep = departementDe(insee);
+  const e = m.communes[dep];
+  if (!e) return null;
+  return objet<CommunesPrixAutour>(lire, `${m.edition}/c/${dep}.json.gz`, e, (o) => {
+    const x = jsonGz(o);
+    if (!communesValides(x, { edition: m.edition, departement: dep })) throw new Error(`communes ${dep} illisibles`);
+    return x;
+  });
 }
 
-/** Pour les tests : oublie le pointeur, le manifeste, la référence communale et les tuiles gardés en mémoire. */
-export function oublierPrixAutour() { pointeur = null; manifeste = null; communes = null; tuiles.clear(); }
+/** Pour les tests et la mesure : oublie le pointeur et tous les objets gardés en mémoire (une instance à froid). */
+export function oublierPrixAutour() { pointeur = null; memoire.clear(); }
 
 /**
  * Les ventes des deux types autour de la position ENREGISTRÉE d'un dossier, et la commune de l'adresse (`insee`, code
@@ -131,7 +144,7 @@ export async function lireVentesAutour(
     const m = await manifesteCourant(lire);
     const chargees = new Map<string, TuilePrixAutour>();
     const [ref] = await Promise.all([
-      referenceCommunale(lire, m),
+      communes(lire, m, insee.trim()),
       ...tuilesPour(p).map(async (k) => {
         const t = await tuile(lire, m, k);
         if (t) chargees.set(k, t);
@@ -143,7 +156,7 @@ export async function lireVentesAutour(
       periode: m.periode,
       appart: lireAutour(chargees, p, "appart"),
       maison: lireAutour(chargees, p, "maison"),
-      commune: lecturePrixDe(ref, insee.trim()),
+      commune: ref ? lecturePrixDe(ref, insee.trim()) : null,
     };
   } catch (err) {
     console.error("[prix-autour] lecture échouée", String(err).slice(0, 160));

@@ -48,8 +48,8 @@ export type LecturePrix = {
   meta: MetaPrix | null;
 };
 
-const NBSP = " ";
-const entier = (n: number) => Math.round(n).toLocaleString("fr-FR").replace(/[   ]/g, NBSP);
+const NBSP = "\u00a0";
+const entier = (n: number) => Math.round(n).toLocaleString("fr-FR").replace(/[\u00a0\u202f ]/g, NBSP);
 const decimal = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 export const eurM2 = (n: number) => `${entier(n)}${NBSP}€/m²`;
 const loyerM2 = (n: number) => `${decimal(n)}${NBSP}€/m²`;
