@@ -25,8 +25,6 @@ import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySe
 import { FibreAdresseSection } from "@/components/report/logement/FibreAdresseSection";
 import { IndustrieAdresseSection } from "@/components/report/logement/IndustrieAdresseSection";
 import { SitesSolsSection } from "@/components/report/logement/SitesSolsSection";
-import { MarcheLocalSection } from "@/components/report/logement/MarcheLocalSection";
-import type { TextePrix } from "@/lib/prix-immobiliers";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
@@ -87,13 +85,7 @@ export default function LogementModule({
   catnatInondation = null,
   climatProjete = null,
   versionInitiale = null,
-  marcheLocal = null,
 }: {
-  /**
-   * FUT-138 : le marché immobilier de la commune (prix de vente DVF, loyers d'annonce ANIL), déjà rédigé par
-   * `textePrix` côté serveur. Un contexte communal, jamais la valeur du bien. Absent : pas de section.
-   */
-  marcheLocal?: TextePrix | null;
   /**
    * LE SIGNAL CLIMAT DU DOSSIER, dérivé par la page comme le fait la route de synthèse (FUT-60). Sans lui,
    * l'empreinte calculée ici différerait de celle du serveur pour les communes les plus chaudes, et une
@@ -733,10 +725,6 @@ export default function LogementModule({
                 lectureInondationRendue={Boolean(lectureInondation)}
               />
             )}
-
-            {/* FUT-138 : le marché immobilier de la COMMUNE, après ce qui touche le bien. Un contexte, posé
-                sous son grain : la section dit elle-même qu'elle ne donne pas la valeur de ce logement. */}
-            <MarcheLocalSection texte={marcheLocal} />
           </div>
 
           {/* Beat 4 — Le relais vers l'échelle du dessus. L'entourage de l'adresse était rendu ici

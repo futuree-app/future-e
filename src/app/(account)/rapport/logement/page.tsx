@@ -17,8 +17,6 @@ import { getCommuneEntry } from "@/lib/comparateur-vie";
 import { lireDerniereVersion } from "@/lib/server/logement-report-versions";
 import { deriveClimatProjete } from "@/lib/drias-json";
 import { metaDe, syntheseCompatible } from "@/lib/logement-report-version";
-import { getLecturePrix } from "@/lib/prix-immobiliers-commune";
-import { textePrix } from "@/lib/prix-immobiliers";
 
 export default async function RapportLogementPage({
   searchParams,
@@ -128,11 +126,6 @@ export default async function RapportLogementPage({
   // INSEE du dossier, local et sans réseau). Le module le reçoit pour calculer la MÊME empreinte que le
   // serveur, et ne réafficher une synthèse enregistrée que si elle a lu les faits courants.
   const climatProjete = loadable ? await deriveClimatProjete(dossier.insee).catch(() => null) : null;
-  // FUT-138 : le marché immobilier de la commune de l'adresse (l'arrondissement à Paris, Lyon, Marseille),
-  // lu dans l'index comme sur la carte Territoire. Jamais une valeur du bien.
-  const marcheLocal = loadable
-    ? textePrix(await getLecturePrix(dossier.insee, entreeIndex?.insee === dossier.insee ? entreeIndex.nom : dossier.city))
-    : null;
 
   return (
     <>
@@ -149,7 +142,6 @@ export default async function RapportLogementPage({
         project={userProject}
         catnatInondation={catnatInondation}
         climatProjete={climatProjete}
-        marcheLocal={marcheLocal}
         versionInitiale={versionLogement ? {
           ...versionLogement.report,
           version: {

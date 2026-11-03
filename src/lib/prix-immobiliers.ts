@@ -15,7 +15,7 @@
 //     n'est pas connu ;
 //   - un manque se dit avec sa raison (Alsace-Moselle hors DVF, trop peu de ventes), jamais « moyen ».
 // ════════════════════════════════════════════════════════════════════════════════════════════
-import { bindOrphans } from "./typography.ts";
+import { bindOrphans, deCommune } from "./typography.ts";
 
 export type NiveauPrix = "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
 export type PrixDuType = { eur_m2: number; maille: string; ventes?: number };
@@ -100,6 +100,21 @@ export function mailleLisible(p: PrixDuType, l: LecturePrix): string {
   return estArrondissement(l.code) ? "arrondissement" : "commune";
 }
 const estRepli = (p: PrixDuType) => p.maille === "EPCI" || p.maille === "ville";
+
+/**
+ * OÙ UN PRIX A ÉTÉ MESURÉ, dans une phrase. CHAQUE CHIFFRE À SON ÉCHELLE : un prix d'intercommunalité ou de ville
+ * entière n'est jamais dit « à L'Oie ». `ou` : « à La Rochelle », « dans Paris 11e Arrondissement »,
+ * « dans l'intercommunalité de L'Oie », « dans toute la ville de Paris ». `de` : « de La Rochelle »,
+ * « de l'intercommunalité de L'Oie », « de toute la ville de Paris ».
+ */
+export function lieuDuPrix(p: PrixDuType, l: LecturePrix): { ou: string; de: string } {
+  if (p.maille === "EPCI") return { ou: `dans l'intercommunalité de ${l.nom}`, de: `de l'intercommunalité de ${l.nom}` };
+  if (p.maille === "ville") {
+    const v = villeDe(l.code) ?? l.nom;
+    return { ou: `dans toute la ville de ${v}`, de: `de toute la ville de ${v}` };
+  }
+  return { ou: `${estArrondissement(l.code) ? "dans" : "à"} ${l.nom}`, de: deCommune(l.nom) };
+}
 
 /** Pourquoi il n'y a pas de prix de vente, en une phrase. null si des prix existent. */
 export function raisonSansPrix(l: LecturePrix): string | null {
@@ -194,11 +209,7 @@ export function textePrix(l: LecturePrix): TextePrix {
     };
   }
 
-  // CHAQUE CHIFFRE À SON ÉCHELLE : un prix d'intercommunalité ou de ville entière n'est jamais dit « à L'Oie ».
-  const ou = (x: Ligne) =>
-    x.prix.maille === "EPCI" ? `dans l'intercommunalité de ${l.nom}`
-      : x.prix.maille === "ville" ? `dans toute la ville de ${villeDe(l.code) ?? l.nom}`
-        : `${estArrondissement(l.code) ? "dans" : "à"} ${l.nom}`;
+  const ou = (x: Ligne) => lieuDuPrix(x.prix, l).ou;
   const vendus = (x: Ligne) => `${x.pluriel} vendu${x.type === "maison" ? "e" : ""}s ${ou(x)}`;
   const debut = periode ? `De ${periode}, l` : "L";
   const phrase = ventes.length === 2

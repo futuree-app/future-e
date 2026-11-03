@@ -47,7 +47,7 @@ export function lireLigneCsv(l) {
 export const COLONNES = {
   id: "id_mutation", date: "date_mutation", nature: "nature_mutation", valeur: "valeur_fonciere",
   code: "code_commune", ancien: "ancien_code_commune", type: "type_local", surface: "surface_reelle_bati",
-  longitude: "longitude", parcelle: "id_parcelle", pieces: "nombre_pieces_principales", culture: "nature_culture",
+  longitude: "longitude", latitude: "latitude", parcelle: "id_parcelle", pieces: "nombre_pieces_principales", culture: "nature_culture",
   lot1: "lot1_numero", lot2: "lot2_numero", lot3: "lot3_numero", lot4: "lot4_numero", lot5: "lot5_numero",
 };
 
@@ -93,7 +93,9 @@ export function locauxDistincts(logements, I) {
  * `valeur_fonciere` porte sur la MUTATION entière. Un logement + ses dépendances (garage, cave) : on garde,
  * c'est la convention du marché. PLUSIEURS logements : la valeur ne se rapporte à aucun m², on écarte.
  * `repetitions: "ef77afdd"` rejoue la règle d'avant FUT-138 (chaque ligne = un logement), pour la mesure.
- * @returns {{ type: "maison"|"appart", eurM2: number, code: string, ancien: string, date: string, geocodee: boolean } | { rejet: string }}
+ * `lon`, `lat` : la position de la PARCELLE du logement (Etalab), `null` si la vente n'est pas géocodée. Seule la
+ * lecture « autour de l'adresse » s'en sert (scripts/dvf-autour) ; l'index des communes ne les lit pas.
+ * @returns {{ type: "maison"|"appart", eurM2: number, code: string, ancien: string, date: string, geocodee: boolean, lon: number|null, lat: number|null } | { rejet: string }}
  */
 export function retenirMutation(lignes, I, { repetitions = "local" } = {}) {
   if (lignes[0][I.nature] !== "Vente") return { rejet: "pas_une_vente" };
@@ -114,6 +116,8 @@ export function retenirMutation(lignes, I, { repetitions = "local" } = {}) {
     ancien: seul[I.ancien] ?? "",
     date: seul[I.date],
     geocodee: Boolean(seul[I.longitude]),
+    lon: seul[I.longitude] && seul[I.latitude] ? Number(seul[I.longitude]) : null,
+    lat: seul[I.longitude] && seul[I.latitude] ? Number(seul[I.latitude]) : null,
   };
 }
 

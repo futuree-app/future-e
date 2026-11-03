@@ -54,7 +54,7 @@ Couverture : 33 196 communes avec un prix d'achat avant et après (0 perte). Les
 - **Où vivre** et **comparateur** : une ligne factuelle par carte, posée après le classement (ventes 2022-2025 DVF, loyers ANIL). Aucun score, aucun tri, aucune sélection ne lit les prix (les gardes FUT-147 rejouent communes, scores et ordres à l'identique). Un budget tapé dans Où vivre ne reçoit plus « futur•e ne mesure pas ce sujet ».
 - **Réponses du comparateur** : la route relit les prix dans l'index à partir du code INSEE (aucun chiffre venu du navigateur) ; la question de prix n'est plus renvoyée hors sujet.
 - **AskFuture** : bloc « Prix immobiliers » dans le prompt, consignes (médiane, pas d'estimation d'un bien, pas de prix futur).
-- **Dossier Logement** : section « Le marché immobilier de la commune », qui dit ne pas donner la valeur du logement.
+- **Autour** (dossier d'adresse payant) : les ventes à proximité de l'adresse, voir `2026-11-03-fut138-ventes-autour.md`. **Logement** n'affiche aucun prix (la section communale prévue le 02/11 a été retirée : elle répétait Territoire).
 - **Accueil** : la réponse à « Mon logement va-t-il perdre de la valeur ? » cite ce que le rapport montre, sans prédiction.
 - Trait distinctif du comparateur : « le marché immobilier le plus accessible » devient « les prix de vente les plus bas » (fait, pas abordabilité).
 

@@ -131,8 +131,10 @@ export function verifierGeographieCompatible(mouvements, apres = "2025-01-01") {
  *   - vente    : mesure. Le code de l'année de la vente (`ancien_code_commune` sinon `code_commune`), sans suite.
  *   - brute    : mesure. `code_commune` tel quel (le comportement d'avant FUT-138).
  * @param {"local"|"ef77afdd"} repetitions lignes répétées d'un même local (cf. locauxDistincts) ; "ef77afdd" pour la mesure.
+ * @param {(m: object, code: string, lignes: string[][], I: Record<string, number>) => void} [surVente] appelé pour CHAQUE vente retenue dans l'index,
+ *   avec sa commune : la lecture autour de l'adresse (scripts/dvf-autour) part exactement du même ensemble de ventes.
  */
-export async function agregerDvf(fichiers, { geographie, referentiel, mouvements, repetitions = "local" }) {
+export async function agregerDvf(fichiers, { geographie, referentiel, mouvements, repetitions = "local", surVente = null }) {
   const rattacher = geographie === "actuelle"
     ? rattacheur({ referentiel, mouvements, resoudre: resolveurCog(referentiel, mouvements) })
     : null;
@@ -156,6 +158,7 @@ export async function agregerDvf(fichiers, { geographie, referentiel, mouvements
       }
       bilan.retenues++;
       (achat[code] ??= { maison: [], appart: [] })[m.type].push(m.eurM2);
+      surVente?.(m, code, lignes, I);
     };
     for await (const l of rl) {
       if (I === null) { I = indexColonnes(l.split(",")); g = grouperMutations(I); continue; }

@@ -1,0 +1,27 @@
+{
+ "edition": "2026-10-20",
+ "ventes_index": 3297971,
+ "ventes_retenues_vues": 3297971,
+ "geocodees": 3275379,
+ "sans_position": 22589,
+ "hors_metropole": 3,
+ "part_geocodee": 0.9931,
+ "distance_au_centre_de_la_commune_km": {
+  "mediane": 1.33,
+  "p90": 3.3,
+  "p99": 6.87,
+  "au_dela_de_10_km": 6557,
+  "au_dela_de_20_km": 1
+ },
+ "points_ou_au_moins_5_ventes_sont_sur_une_autre_parcelle": {
+  "points": 0,
+  "ventes": 0
+ },
+ "tuiles": 21130,
+ "octets_total": 11636494,
+ "octets_tuile": {
+  "mediane": 312,
+  "p99": 4527,
+  "max": 32610
+ }
+}

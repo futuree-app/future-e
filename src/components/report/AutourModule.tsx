@@ -28,6 +28,9 @@ import type { LectureBruitAerien } from "@/lib/bruit-aerien";
 import { BruitAerienAutour } from "@/components/report/BruitAerienBlocs";
 import type { LectureDebroussaillement } from "@/lib/debroussaillement";
 import { DebroussaillementAutour } from "@/components/report/DebroussaillementBlocs";
+import type { VentesAutour } from "@/lib/prix-autour";
+import type { TypeDuLogement } from "@/lib/prix-autour-texte";
+import { VentesAutourBloc } from "@/components/report/VentesAutourBloc";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
 import { IcuExposure } from "@/components/report/logement/IcuExposure";
@@ -62,12 +65,21 @@ export default function AutourModule({
   initialCarOwnership = null,
   initialBruitAerien = null,
   initialDebroussaillement = null,
+  ventesAutour = undefined,
+  typeLogement = { abstention: "sans_diagnostic" },
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow;
   initialCarOwnership?: CarOwnership | null;
   initialBruitAerien?: LectureBruitAerien | null;
   initialDebroussaillement?: LectureDebroussaillement | null;
+  /**
+   * FUT-138 : les ventes à proximité et la commune de référence, lues par la page. `undefined` : lecture non activée ;
+   * `null` : en échec.
+   */
+  ventesAutour?: VentesAutour | null;
+  /** FUT-138 : le type du logement d'après son diagnostic confirmé, ou l'abstention. */
+  typeLogement?: TypeDuLogement;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -374,6 +386,10 @@ export default function AutourModule({
                 dans le zonage publié ?), pas une mesure du feu : le danger d'incendie se lit dans Territoire. La
                 parcelle et les documents de la transaction sont dans Logement. */}
             <DebroussaillementAutour lecture={debroussaillement} />
+
+            {/* FUT-138 : LES VENTES À PROXIMITÉ. Le marché du secteur (500 m, élargi seulement s'il manque des ventes)
+                et son écart avec la commune ; Territoire dit la commune, Logement n'affiche aucun prix. */}
+            <VentesAutourBloc autour={ventesAutour} type={typeLogement} />
 
             {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
                 visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six

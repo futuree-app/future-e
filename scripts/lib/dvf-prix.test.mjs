@@ -6,15 +6,25 @@ import {
 import { resolveurCog } from "../../src/lib/data/bdiff-incendies.ts";
 import { verifierGeographieCompatible } from "./logement-index.mjs";
 
-const ENTETE = "id_mutation,date_mutation,numero_disposition,nature_mutation,valeur_fonciere,code_commune,ancien_code_commune,type_local,surface_reelle_bati,longitude,id_parcelle,nombre_pieces_principales,nature_culture,lot1_numero,lot2_numero,lot3_numero,lot4_numero,lot5_numero";
+const ENTETE = "id_mutation,date_mutation,numero_disposition,nature_mutation,valeur_fonciere,code_commune,ancien_code_commune,type_local,surface_reelle_bati,longitude,latitude,id_parcelle,nombre_pieces_principales,nature_culture,lot1_numero,lot2_numero,lot3_numero,lot4_numero,lot5_numero";
 const I = indexColonnes(ENTETE.split(","));
-const ligne = ({ id = "m1", date = "2022-05-01", nature = "Vente", valeur = "200000", code = "17300", ancien = "", type = "Maison", surface = "100", lon = "-1.15", parcelle = "17300000AB0001", pieces = "4", culture = "sols", lot1 = "" } = {}) =>
-  [id, date, "1", nature, valeur, code, ancien, type, surface, lon, parcelle, pieces, culture, lot1, "", "", "", ""];
+const ligne = ({ id = "m1", date = "2022-05-01", nature = "Vente", valeur = "200000", code = "17300", ancien = "", type = "Maison", surface = "100", lon = "-1.15", lat = "46.16", parcelle = "17300000AB0001", pieces = "4", culture = "sols", lot1 = "" } = {}) =>
+  [id, date, "1", nature, valeur, code, ancien, type, surface, lon, lat, parcelle, pieces, culture, lot1, "", "", "", ""];
 
 test("une vente d'un seul logement avec ses dépendances compte, rapportée à la surface habitable", () => {
   const m = retenirMutation([ligne(), ligne({ type: "Dépendance", surface: "" })], I);
   assert.equal(m.type, "maison");
   assert.equal(m.eurM2, 2000);
+  // la position de la parcelle, pour la lecture autour de l'adresse (scripts/dvf-autour)
+  assert.equal(m.lon, -1.15);
+  assert.equal(m.lat, 46.16);
+});
+
+test("une vente sans coordonnées garde sa place dans l'index des communes, sans position", () => {
+  const m = retenirMutation([ligne({ lon: "", lat: "" })], I);
+  assert.equal(m.geocodee, false);
+  assert.equal(m.lon, null);
+  assert.equal(m.lat, null);
 });
 
 test("une vente de plusieurs logements est écartée (ef77afdd)", () => {
