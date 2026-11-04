@@ -12,11 +12,11 @@ import type { Face3Snapshot } from "./logement-autour-types.ts";
 // ou d'espace vert) et propose de vérifier à nouveau. Le serveur, lui, ne sollicite pas Overpass à
 // chaque reprise : un échec récent est mémorisé dans le cache de tuile (cf. `logement-osm.ts`).
 //
-// Délais : une tuile froide se remplit d'ordinaire en moins de 10 s ; la dernière reprise tombe
-// environ 35 s après l'ouverture, au-delà de ce qu'une recherche Overpass saine demande. Ce sont
-// des conventions, pas des mesures.
+// Délais : deux reprises, à 4,5 s puis 10 s (arbitrage du porteur, 04/11/2026). Une tuile froide
+// se remplit d'ordinaire en moins de 10 s ; la dernière reprise tombe environ 15 s après
+// l'ouverture. Ce sont des conventions, pas des mesures.
 // ════════════════════════════════════════════════════════════════════════════════════════════
-export const DELAIS_REPRISE_OSM_MS = [4_500, 10_000, 20_000] as const;
+export const DELAIS_REPRISE_OSM_MS = [4_500, 10_000] as const;
 
 function osmEnAttente(s: Face3Snapshot): boolean {
   return s.sourceStatus.osmInfrastructure === "pending" || s.sourceStatus.osmGreenSpaces === "pending";

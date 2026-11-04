@@ -22,8 +22,8 @@ const snap = (statut: "complete" | "pending" | "failed") =>
     computedAt: "2026-11-04T00:00:00.000Z",
   }) satisfies Face3Snapshot;
 
-test("le nombre de reprises est borné", () => {
-  assert.ok(DELAIS_REPRISE_OSM_MS.length >= 2 && DELAIS_REPRISE_OSM_MS.length <= 4);
+test("deux reprises, à 4,5 s puis 10 s, et pas davantage", () => {
+  assert.deepEqual([...DELAIS_REPRISE_OSM_MS], [4_500, 10_000]);
   for (let i = 1; i < DELAIS_REPRISE_OSM_MS.length; i++) {
     assert.ok(DELAIS_REPRISE_OSM_MS[i] >= DELAIS_REPRISE_OSM_MS[i - 1], "les délais s'allongent");
   }

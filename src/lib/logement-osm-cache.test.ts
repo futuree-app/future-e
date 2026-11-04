@@ -168,3 +168,28 @@ test("deux demandes simultanées sur la même cellule : une seule recherche Over
     assert.equal(compte(), 1);
   });
 });
+
+test("tuile complète d'une version de requête antérieure (dossier ancien en attente) : redemandée, puis réécrite complète", async () => {
+  const { sb, appels } = fauxSupabase({ geometries: [], status: "complete", query_version: "osm-v3-ancienne", fetched_at: "2026-08-18T00:00:00Z" });
+  await avecFetch(ok, async (compte) => {
+    const r = await getTileGeoms(sb, centre());
+    assert.equal(r.status, "complete");
+    assert.equal(compte(), 1);
+  });
+  const ecrit = appels.find((a) => a.op === "upsert");
+  assert.equal((ecrit?.payload as { query_version: string }).query_version, OSM_QUERY_VERSION);
+});
+
+test("une demande qui suit une recherche terminée en échec ne repart pas d'une promesse figée", async () => {
+  const { sb } = fauxSupabase(null);
+  const c = centre();
+  await avecErreursCapturees(async () => {
+    await avecFetch(sature, async () => assert.equal((await getTileGeoms(sb, c)).status, "failed"));
+  });
+  // La recherche terminée a quitté la table des recherches en cours : la suivante interroge à nouveau
+  // (le faux cache ne garde pas l'échec ; en production, c'est lui qui retient pendant 10 minutes).
+  await avecFetch(ok, async (compte) => {
+    assert.equal((await getTileGeoms(sb, c)).status, "complete");
+    assert.equal(compte(), 1);
+  });
+});
