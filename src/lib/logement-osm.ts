@@ -390,7 +390,11 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
 
 export async function fetchOverpass(bbox: { s: number; w: number; n: number; e: number }): Promise<unknown[]> {
   const body = new URLSearchParams({ data: overpassQuery(bbox.s, bbox.w, bbox.n, bbox.e) });
+  // LE MOTIF DE CHAQUE REFUS EST GARDÉ (04/11/2026). Ils étaient tous avalés : la panne du
+  // 31/10 (liste blanche, serveur saturé, délai dépassé) ne laissait aucune trace exploitable.
+  const motifs: string[] = [];
   for (const url of MIRRORS) {
+    const hote = new URL(url).host;
     try {
       // Les miroirs Overpass rejettent (403/406/429) les requêtes sans User-Agent identifiable.
       const r = await fetch(url, {
@@ -399,14 +403,18 @@ export async function fetchOverpass(bbox: { s: number; w: number; n: number; e: 
         headers: { "User-Agent": "futur-e/logement-autour (contact: futur-e.app)", Accept: "application/json" },
         signal: AbortSignal.timeout(25_000),
       });
-      if (!r.ok) continue;
+      if (!r.ok) {
+        motifs.push(`${hote} ${r.status}`);
+        continue;
+      }
       const doc = (await r.json()) as { elements?: unknown[] };
       if (Array.isArray(doc.elements)) return doc.elements;
-    } catch {
-      /* miroir suivant */
+      motifs.push(`${hote} réponse sans elements`);
+    } catch (e) {
+      motifs.push(`${hote} ${e instanceof Error ? e.name : "erreur"}`);
     }
   }
-  throw new Error("Overpass indisponible");
+  throw new Error(`Overpass indisponible (${motifs.join(", ")})`);
 }
 
 /**
@@ -425,32 +433,118 @@ export function tileFetchBBox(key: string): { s: number; w: number; n: number; e
   return expandBBoxM(cellBBox(key, OSM_CELL_DEG), OSM_BBOX_RADIUS_M);
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UNE PANNE OVERPASS SE CONSTATE, SE MÉMORISE, ET NE SE MARTÈLE PAS (04/11/2026).
+//
+// Constaté en production : depuis le 31/10, les trois miroirs refusaient (403 « white-listed
+// usages », 502 « at capacity », délai de 25 s dépassé). Une recherche ratée durait ainsi jusqu'à
+// trois fois 25 s, bien plus que l'attente de la page (3,5 s) : l'échec n'était JAMAIS constaté au
+// moment où le dossier s'écrivait, qui restait `pending`. Et comme `pending` se recalcule à chaque
+// ouverture, chaque visite relançait deux chaînes complètes (celle de la page, et une seconde dans
+// `after()`), dont l'échec était avalé sans trace. Rien ne s'arrêtait, rien ne se savait.
+//
+// Trois règles :
+//   — L'ÉCHEC EST ÉCRIT dans le cache, sous le statut `failed` que le schéma prévoyait (migration 18)
+//     et que rien n'écrivait. Pendant `OSM_ECHEC_DELAI_MS`, la cellule répond `failed` sans
+//     solliciter Overpass ; au-delà, elle redemande. Jamais par-dessus une tuile complète à jour :
+//     une autre instance a pu réussir entre-temps.
+//   — UNE SEULE RECHERCHE PAR CELLULE et par instance à la fois : les demandes simultanées (reprise
+//     du client, page du dossier) attendent celle qui court.
+//   — LES ERREURS SUPABASE SONT JOURNALISÉES. Une lecture impossible rend `failed` sans interroger
+//     Overpass à l'aveugle ; une écriture refusée n'empêche pas de servir la donnée obtenue.
+//
+// Ce délai est une CONVENTION, pas une mesure : assez long pour ne pas solliciter une source en
+// panne à chaque ouverture, assez court pour qu'un dossier rouvert dans l'heure se revérifie.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+export const OSM_ECHEC_DELAI_MS = 10 * 60_000;
+
+const TABLE = "osm_tile_cache";
+const enCours = new Map<string, Promise<{ geoms: OsmGeom[]; status: "complete" | "failed" }>>();
+
+async function memoriserEchec(sb: SupabaseClient, key: string): Promise<void> {
+  const ligne = {
+    tile_key: key,
+    geometries: [],
+    query_version: OSM_QUERY_VERSION,
+    status: "failed",
+    fetched_at: new Date().toISOString(),
+  };
+  // Mise à jour de la ligne existante, SAUF si elle est une tuile complète à jour.
+  const maj = await sb
+    .from(TABLE)
+    .update(ligne)
+    .eq("tile_key", key)
+    .or(`status.neq.complete,query_version.neq."${OSM_QUERY_VERSION}"`)
+    .select("tile_key");
+  if (maj.error) {
+    console.error("[osm] écriture de l'échec dans le cache refusée", { key, message: maj.error.message });
+    return;
+  }
+  if ((maj.data?.length ?? 0) > 0) return;
+  // Aucune ligne mise à jour : soit la cellule n'existe pas (on l'insère), soit elle est complète
+  // et à jour (l'insertion ne remplace rien).
+  const ins = await sb.from(TABLE).upsert(ligne, { onConflict: "tile_key", ignoreDuplicates: true });
+  if (ins.error) {
+    console.error("[osm] écriture de l'échec dans le cache refusée", { key, message: ins.error.message });
+  }
+}
+
+async function chercherTuile(
+  sb: SupabaseClient,
+  key: string,
+): Promise<{ geoms: OsmGeom[]; status: "complete" | "failed" }> {
+  const lu = await sb
+    .from(TABLE)
+    .select("geometries,status,query_version,fetched_at")
+    .eq("tile_key", key)
+    .maybeSingle();
+  if (lu.error) {
+    console.error("[osm] lecture du cache de tuile impossible", { key, message: lu.error.message });
+    return { geoms: [], status: "failed" };
+  }
+  const data = lu.data as { geometries: unknown; status: string; query_version: string; fetched_at: string } | null;
+  if (data && data.query_version === OSM_QUERY_VERSION) {
+    if (data.status === "complete") return { geoms: data.geometries as OsmGeom[], status: "complete" };
+    if (data.status === "failed" && Date.now() - Date.parse(data.fetched_at) < OSM_ECHEC_DELAI_MS) {
+      return { geoms: [], status: "failed" };
+    }
+  }
+  const bbox = tileFetchBBox(key);
+  let geoms: OsmGeom[];
+  try {
+    geoms = parseOverpass(await fetchOverpass(bbox));
+  } catch (e) {
+    console.error("[osm] recherche de tuile échouée", { key, message: String(e instanceof Error ? e.message : e).slice(0, 300) });
+    await memoriserEchec(sb, key);
+    return { geoms: [], status: "failed" };
+  }
+  const ecrit = await sb.from(TABLE).upsert({
+    tile_key: key,
+    geometries: geoms,
+    query_version: OSM_QUERY_VERSION,
+    status: "complete",
+    fetched_at: new Date().toISOString(),
+  });
+  if (ecrit.error) {
+    console.error("[osm] écriture de la tuile dans le cache refusée", { key, message: ecrit.error.message });
+  }
+  return { geoms, status: "complete" };
+}
+
 // Cache de cellule : emprise = cellule + marge (>= OSM_BBOX_RADIUS_M autour de tout point).
-export async function getTileGeoms(
+export function getTileGeoms(
   sb: SupabaseClient,
   center: LngLat,
 ): Promise<{ geoms: OsmGeom[]; status: "complete" | "failed" }> {
   const key = cellKey(center.lat, center.lon, OSM_CELL_DEG);
-  const { data } = await sb
-    .from("osm_tile_cache")
-    .select("geometries,status,query_version")
-    .eq("tile_key", key)
-    .maybeSingle();
-  if (data && data.query_version === OSM_QUERY_VERSION && data.status === "complete") {
-    return { geoms: data.geometries as OsmGeom[], status: "complete" };
-  }
-  const bbox = tileFetchBBox(key);
-  try {
-    const geoms = parseOverpass(await fetchOverpass(bbox));
-    await sb.from("osm_tile_cache").upsert({
-      tile_key: key,
-      geometries: geoms,
-      query_version: OSM_QUERY_VERSION,
-      status: "complete",
-      fetched_at: new Date().toISOString(),
-    });
-    return { geoms, status: "complete" };
-  } catch {
-    return { geoms: [], status: "failed" };
-  }
+  const deja = enCours.get(key);
+  if (deja) return deja;
+  const p = chercherTuile(sb, key)
+    .catch((e) => {
+      console.error("[osm] cache de tuile en erreur", { key, message: String(e).slice(0, 300) });
+      return { geoms: [] as OsmGeom[], status: "failed" as const };
+    })
+    .finally(() => enCours.delete(key));
+  enCours.set(key, p);
+  return p;
 }

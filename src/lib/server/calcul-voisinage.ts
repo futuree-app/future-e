@@ -56,8 +56,13 @@ export async function calculerVoisinage(
   let osm = null;
   let osmStatus: "complete" | "pending" | "failed" = "pending";
   try {
+    // LA MÊME RECHERCHE, ATTENDUE PUIS POURSUIVIE (04/11/2026). Le délai écoulé, on en lançait une
+    // SECONDE dans `after()`, pendant que la première courait encore : deux chaînes Overpass pour une
+    // seule ouverture. On garde la promesse en cours et c'est elle que `after()` laisse finir, pour
+    // qu'elle remplisse le cache (ou y écrive l'échec) avant la reprise de la page.
+    const recherche = getTileGeoms(admin, center);
     const tile = await Promise.race([
-      getTileGeoms(admin, center),
+      recherche,
       new Promise<{ geoms: never[]; status: "pending" }>((res) =>
         setTimeout(() => res({ geoms: [], status: "pending" }), attenteOsmMs),
       ),
@@ -68,9 +73,8 @@ export async function calculerVoisinage(
     } else if (tile.status === "failed") {
       osmStatus = "failed";
     } else {
-      // Timeout : poursuivre le remplissage du cache après réponse (tuile chaude au retry).
       after(async () => {
-        await getTileGeoms(admin, center).catch(() => {});
+        await recherche;
       });
     }
   } catch {

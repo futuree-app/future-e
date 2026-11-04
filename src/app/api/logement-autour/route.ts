@@ -5,6 +5,8 @@ import { calculerVoisinage, rafraichirVoisinageSiPerime, voisinagePerime } from 
 import { buildAutourResponse } from "@/lib/server/autour-response";
 import { getDossier, needsRecompute, SOURCES_VERSION } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
+import { fusionnerRafraichissement } from "@/lib/logement-autour";
+import { haversineM } from "@/lib/geo-distance";
 
 export const dynamic = "force-dynamic";
 
@@ -98,12 +100,21 @@ export async function POST(req: Request) {
     );
   }
 
-  const snapshot = await calculerVoisinage(center, existing.insee);
+  const calcule = await calculerVoisinage(center, existing.insee);
+
+  // UN VOISINAGE INACHEVÉ SE COMPLÈTE SANS RIEN PERDRE (04/11/2026). On arrive ici, au même point,
+  // pour une cartographie en attente ou en échec ancien. Le recalcul peut tomber à son tour sur une
+  // source en panne (permis, îlot de chaleur) : il ne doit pas effacer ce que le dossier avait
+  // déjà obtenu, ni sa date. Même règle que le rafraîchissement (`fusionnerRafraichissement`).
+  // Un point déplacé, lui, repart de zéro : l'ancien voisinage décrit une autre adresse.
+  const ancien = existing.snapshot;
+  const memePoint = ancien != null && haversineM(center, ancien.center) <= 10;
+  const snapshot = memePoint ? (fusionnerRafraichissement(ancien, calcule) ?? ancien) : calcule;
 
   // Le patch ne porte QUE ce que ce module produit. L'identité de l'adresse et la parcelle ne
   // sont plus dans la portée d'écriture : la question « ne jamais dégrader la parcelle », qui
   // occupait ce site, ne se pose plus, puisque ce module ne peut plus y toucher.
-  await updateOwnedAddressDossier(user.id, existing.id, { snapshot });
+  if (snapshot !== ancien) await updateOwnedAddressDossier(user.id, existing.id, { snapshot });
 
   return Response.json(
     await buildAutourResponse({ snapshot, lat: center.lat, lon: center.lon, insee: existing.insee }),

@@ -36,6 +36,7 @@ import { buildInfraLecture } from "@/lib/decision/autour-infrastructures";
 import { buildPermisLecture } from "@/lib/decision/autour-permis";
 import { EchelleVisual } from "@/components/report/EchelleVisual";
 import { bindOrphans } from "@/lib/typography";
+import { prochaineRepriseOsm, snapshotAffiche } from "@/lib/autour-osm-reprise";
 
 // Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
 // l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
@@ -84,7 +85,10 @@ export default function AutourModule({
   const [carOwnership, setCarOwnership] = useState<CarOwnership | null>(null);
   const [bruitAerien, setBruitAerien] = useState<LectureBruitAerien | null>(null);
   const [debroussaillement, setDebroussaillement] = useState<LectureDebroussaillement | null>(null);
-  const autourRetriedRef = useRef(false);
+  // Reprises de la cartographie déjà faites (bornées, cf. `autour-osm-reprise.ts`), et garde
+  // contre une seconde reprise programmée pendant qu'une première attend encore sa réponse.
+  const [osmTentatives, setOsmTentatives] = useState(0);
+  const repriseEnVolRef = useRef(false);
   const rehydratedRef = useRef(false);
   const posthog = usePostHog();
 
@@ -136,18 +140,47 @@ export default function AutourModule({
     }
   }
 
-  // Remplissage asynchrone minimal : si l'OSM est revenu `pending` (tuile froide, Overpass lent),
-  // on re-demande UNE fois après un court délai (la tuile est alors chaude grâce au after()
-  // serveur). Au-delà = incrément futur. Même règle que dans LogementModule.
+  // LA CARTOGRAPHIE EN ATTENTE SE REDEMANDE, UN NOMBRE BORNÉ DE FOIS (04/11/2026). Il n'y avait
+  // qu'UNE reprise, à 4,5 s : passé ce délai, l'écran restait « en cours de récupération » sans que
+  // rien ne la récupère. Les reprises sont SILENCIEUSES : elles complètent un écran déjà affiché, et
+  // une erreur réseau ne doit pas effacer ce qui y est. Épuisées, `snapshotAffiche` montre le volet
+  // comme indisponible, et le lecteur peut vérifier à nouveau.
   useEffect(() => {
-    if (!autour || !analyzed || autourRetriedRef.current) return;
-    if (autour.sourceStatus.osmInfrastructure !== "pending") return;
-    autourRetriedRef.current = true;
+    if (!analyzed || repriseEnVolRef.current) return;
+    const delai = prochaineRepriseOsm(autour, osmTentatives);
+    if (delai === null) return;
     const target = analyzed;
-    const t = setTimeout(() => void requestAutour(target), 4500);
+    const t = setTimeout(() => {
+      repriseEnVolRef.current = true;
+      void requestAutour(target, true).finally(() => {
+        repriseEnVolRef.current = false;
+        setOsmTentatives((n) => n + 1);
+      });
+    }, delai);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autour, analyzed]);
+  }, [autour, analyzed, osmTentatives]);
+
+  // VÉRIFIER À NOUVEAU, à la demande du lecteur, quand la cartographie n'a pas répondu. Une seule
+  // demande par geste ; si le serveur a mémorisé une panne récente, il répond sans solliciter la
+  // source (cf. `getTileGeoms`), donc cliquer ne martèle rien.
+  const [verification, setVerification] = useState(false);
+  async function verifierCartographie() {
+    if (!analyzed || verification) return;
+    setVerification(true);
+    try {
+      await requestAutour(analyzed, true);
+    } finally {
+      // Une demande revenue encore en attente relance un cycle de reprises borné.
+      setOsmTentatives(0);
+      setVerification(false);
+    }
+  }
+
+  const affiche = snapshotAffiche(autour, osmTentatives);
+  const cartographieIndisponible =
+    affiche != null &&
+    (affiche.sourceStatus.osmInfrastructure === "failed" || affiche.sourceStatus.osmGreenSpaces === "failed");
 
   // Au montage : si la page serveur a résolu une adresse déjà analysée, on l'affiche telle
   // quelle. Le snapshot est FIGÉ (historique) ; l'équipement automobile, lui, a été relu au
@@ -276,7 +309,7 @@ export default function AutourModule({
           )}
         </section>
 
-        {autour && (
+        {affiche && (
           <section style={{ padding: "40px 0 96px", display: "grid", gap: 36 }}>
             {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré (`buildAutourConclusion`).
                 FUT-67 : EN TÊTE, et non plus après les faits. Le lecteur d'un dossier payé doit saisir
@@ -288,7 +321,7 @@ export default function AutourModule({
                 sous lui. Elle est rendue DANS le bloc « Ce qui est autorisé autour », juste après la
                 date de consultation. Sans ce bloc (registre non consulté), elle ne s'affiche pas. */}
             {(() => {
-              const c = buildAutourConclusion(autour);
+              const c = buildAutourConclusion(affiche);
               if (!c) return null;
               return (
                 <ReportSection eyebrow="Ce que ce secteur met à portée" tone="green">
@@ -320,7 +353,7 @@ export default function AutourModule({
               </div>
             )}
 
-            <Face3Block s={autour} car={carOwnership} />
+            <Face3Block s={affiche} car={carOwnership} />
 
             {/* L'îlot de chaleur est REVENU dans ce module le 29/07/2026. Il en était sorti quand
                 l'« autour » n'était qu'un beat du module Logement : l'entourage y était le bloc
@@ -328,10 +361,10 @@ export default function AutourModule({
                 rejoint « les risques du bâti ». Ce module-ci n'a plus ce problème — il décrit
                 l'environnement proche, en bien comme en mal, et la chaleur du quartier EST une
                 caractéristique de l'environnement proche, pas des murs. */}
-            {autour.icu && (
+            {affiche.icu && (
               <ReportSection eyebrow="Chaleur de l'environnement proche" tone="orange">
                 <GlassCard>
-                  <IcuExposure icu={autour.icu} />
+                  <IcuExposure icu={affiche.icu} />
                 </GlassCard>
               </ReportSection>
             )}
@@ -342,15 +375,29 @@ export default function AutourModule({
                 niveau de bruit. Elle se lève de la même façon que pour l'équipement automobile du
                 secteur : on donne le fait, et on dit dans la foulée ce qu'il n'établit pas. */}
             {(() => {
-              const infra = buildInfraLecture(autour);
+              const infra = buildInfraLecture(affiche);
               if (!infra) return null;
               return (
                 <ReportSection eyebrow="Les abords de l'adresse" tone="neutral">
                   <GlassCard>
                     {infra.indisponible ? (
-                      <p style={{ fontSize: 14, color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
-                        {infra.indisponible}
-                      </p>
+                      <div style={{ display: "grid", gap: 12, justifyItems: "start" }}>
+                        <p style={{ fontSize: 14, color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
+                          {infra.indisponible}
+                        </p>
+                        {/* La cartographie n'a pas répondu (ou plus de reprise automatique) : le lecteur
+                            peut redemander. Le même échec couvre les espaces verts, plus haut. */}
+                        {cartographieIndisponible && (
+                          <button
+                            type="button"
+                            onClick={() => void verifierCartographie()}
+                            disabled={verification}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] border border-[var(--border-1)] disabled:opacity-60"
+                          >
+                            {verification ? "Vérification…" : "Vérifier à nouveau"}
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <div style={{ display: "grid", gap: 10 }}>
                         {infra.lignes.map((l) => (
@@ -393,7 +440,7 @@ export default function AutourModule({
                 cas de trois adresses sur quatre, parce que l'absence EST une réponse dès lors que
                 le périmètre et l'objet du registre sont nommés. */}
             {(() => {
-              const p = buildPermisLecture(autour);
+              const p = buildPermisLecture(affiche);
               if (!p) return null;
               return (
                 <ReportSection eyebrow="Ce qui est autorisé autour" tone="neutral">
@@ -426,7 +473,7 @@ export default function AutourModule({
                       {/* Revue FUT-67 : sans date de consultation affichée (illisible ou absente), la phrase
                           ne s'affiche pas : elle n'aurait plus ce qui la borne dans le temps. */}
                       {p.consultation && (() => {
-                        const mouvement = buildAutourConclusion(autour)?.mouvement;
+                        const mouvement = buildAutourConclusion(affiche)?.mouvement;
                         return mouvement ? (
                           <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{mouvement}</p>
                         ) : null;
