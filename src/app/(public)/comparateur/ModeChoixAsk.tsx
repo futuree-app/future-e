@@ -90,6 +90,7 @@ export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {
               territoires: trio.map((r, i) => ({
                 rang: i + 1,
                 nom: r.nom,
+                insee: r.insee,
                 region: null,
                 raisons: [],
                 compromis: r.compromis,

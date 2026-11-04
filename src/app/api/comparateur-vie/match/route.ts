@@ -10,6 +10,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { matchProjects, type ParsedProject } from "@/lib/comparateur-vie";
 import { getFibreCommunes } from "@/lib/fibre-commune";
 import { ligneComparateur, projetEvoqueLaConnexion } from "@/lib/fibre-texte";
+import { getLecturesPrix } from "@/lib/prix-immobiliers-commune";
+import { lignePrixComparateur } from "@/lib/prix-immobiliers";
 
 export const runtime = "nodejs";
 
@@ -35,7 +37,10 @@ export async function POST(request: NextRequest) {
     // au top 3 (la CompareView gratuite n'affiche que le trio).
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { comparaisonComplete: _cc, pistes: _p, ...safe } = outcome;
-    const results = outcome.results.slice(0, 3);
+    // FUT-138 : LES PRIX IMMOBILIERS, UN FAIT POSÉ APRÈS LE CLASSEMENT, sur chaque carte. Lus dans l'index
+    // (aucun appel externe) ; ils ne changent ni l'ordre ni la sélection.
+    const lectures = await getLecturesPrix(outcome.results.slice(0, 3).map((r) => ({ insee: r.insee, nom: r.nom }))).catch(() => ({} as Record<string, never>));
+    const results = outcome.results.slice(0, 3).map((r) => (lectures[r.insee] ? { ...r, prix: { ligne: lignePrixComparateur(lectures[r.insee]) } } : r));
     // FUT-148 : LA FIBRE, UN FAIT POSÉ APRÈS LE CLASSEMENT. Seulement pour un lecteur qui en a parlé, en ses
     // mots (`horsMesure`). Un fichier embarqué, aucun appel externe : la route reste instantanée.
     if (projetEvoqueLaConnexion(parsed)) {

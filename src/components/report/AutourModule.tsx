@@ -17,7 +17,7 @@
 // aucune parcelle n'est requise.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -62,12 +62,18 @@ export default function AutourModule({
   initialCarOwnership = null,
   initialBruitAerien = null,
   initialDebroussaillement = null,
+  blocVentes = null,
 }: {
   defaultCommune?: string | null;
   dossier: AddressDossierRow;
   initialCarOwnership?: CarOwnership | null;
   initialBruitAerien?: LectureBruitAerien | null;
   initialDebroussaillement?: LectureDebroussaillement | null;
+  /**
+   * FUT-138 : le bloc « Les ventes à proximité », rendu CÔTÉ SERVEUR par la page dans sa propre frontière de Suspense
+   * (`VentesAutourServeur`) : la lecture du stockage n'entre pas dans ce composant client et ne retarde pas la page.
+   */
+  blocVentes?: ReactNode;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -374,6 +380,10 @@ export default function AutourModule({
                 dans le zonage publié ?), pas une mesure du feu : le danger d'incendie se lit dans Territoire. La
                 parcelle et les documents de la transaction sont dans Logement. */}
             <DebroussaillementAutour lecture={debroussaillement} />
+
+            {/* FUT-138 : LES VENTES À PROXIMITÉ. Le marché du secteur (500 m, élargi seulement s'il manque des ventes)
+                et son écart avec la commune ; Territoire dit la commune, Logement n'affiche aucun prix. */}
+            {blocVentes}
 
             {/* CE QUI EST AUTORISÉ AUTOUR. La seule question qu'aucune visite ne tranche : on
                 visite un dimanche matin, on ne voit pas le terrain voisin autorisé depuis six

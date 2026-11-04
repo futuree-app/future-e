@@ -49,7 +49,12 @@ before(async () => {
   L = await import("./comparateur/lecture-ask.ts");
 });
 
-const REF = JSON.parse(readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8"));
+// FUT-138 : le trait distinctif des prix dit un fait (« les prix de vente les plus bas »), plus une accessibilité
+// (« le marché immobilier le plus accessible ») : seul ce libellé change dans la référence, ni commune, ni score, ni ordre.
+const REF = JSON.parse(
+  readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8")
+    .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas"),
+);
 const BASE = [{ key: "eviter_isolement", weight: 0.5, baseline: true }, { key: "viabilite_emploi", weight: 0.5, baseline: true }];
 // Les mêmes entrées que la capture (scripts/fut147/capturer-reference.mjs), recopiées : la référence ne
 // dépend pas du code testé.
@@ -224,6 +229,50 @@ test("IA : le prompt de l'assistant n'a changé que de son bloc eau (FUT-164), e
 // (cf. `fut155-frontiere-confiance.test.ts`). Passe 2 : corps borné à 32 Kio (413) et sortie de la synthèse bornée.
 // Passe 3 : question AskFuture bornée à 1 000 caractères (400 question_trop_longue).
 // Rien d'autre n'a changé : seules ces lignes, et aucune ne parle des feux.
+// FUT-138 (02/11/2026) : les prix immobiliers relus par la route /ask dans l'index (le navigateur n'envoie que le
+// code INSEE de chaque carte), et la consigne qui permet enfin de répondre à une question de prix. Aucune ne
+// parle des feux ; la synthèse rédigée n'a pas changé.
+const LIGNES_FUT138 = [
+  "+import { getLecturesPrix } from \"@/lib/prix-immobiliers-commune\";",
+  "+import { blocPrixPourModele, type LecturePrix } from \"@/lib/prix-immobiliers\";",
+  "-sans chiffre, jamais le mot \"abordable\" ni un jugement d'accessibilité (vous ne",
+  "-connaissez pas le budget du lecteur), jamais un verdict. Si la note est absente,",
+  "-ne l'inventez pas (l'absence de donnée d'achat n'est pas un marché \"moyen\").",
+  "+jamais le mot \"abordable\" ni un jugement d'accessibilité (vous ne connaissez pas",
+  "+le budget du lecteur), jamais un verdict. Si la note est absente, ne l'inventez",
+  "+pas (l'absence de donnée d'achat n'est pas un marché \"moyen\").",
+  "+",
+  "+SI LA QUESTION PORTE SUR LES PRIX IMMOBILIERS (achat, prix au m², loyers)",
+  "+Répondez avec le champ \"prix_immobiliers\" de chaque territoire concerné : ce sont",
+  "+les seuls chiffres de prix que vous pouvez citer, avec leur période, leur échelle",
+  "+(commune, arrondissement, ville, intercommunalité) et leur source. Ce sont des",
+  "+médianes de ventes passées et des loyers d'annonce : jamais la valeur d'un",
+  "+logement précis ni une estimation, même si le lecteur donne une surface ; jamais",
+  "+un prix futur ; achat et location séparés. Ces prix n'entrent pas dans l'ordre des",
+  "+cartes : ne dites jamais qu'une commune est classée ou recommandée parce qu'elle",
+  "+est moins chère. Si le champ est absent, dites que le prix n'est pas disponible.",
+  "-Prix de l'immobilier, écoles, vie nocturne, politique : ramenez brièvement vers ce",
+  "+Écoles (au-delà de l'accès), vie nocturne, politique : ramenez brièvement vers ce",
+  "-    \"logement\", \"signaux\", \"littoral\", \"trait_distinctif\", \"pression_climatique_economie\", \"heritage_industriel\",",
+  "+    \"logement\", \"prix_immobiliers\", \"signaux\", \"littoral\", \"trait_distinctif\", \"pression_climatique_economie\", \"heritage_industriel\",",
+  "+// FUT-138 : un code INSEE de commune ou d'arrondissement (métropole, Corse). Tout le reste est ignoré.",
+  "+const CODE_INSEE = /^(?:\\d{5}|2[AB]\\d{3})$/;",
+  "+  prix: Record<string, string> = {},",
+  "+    // FUT-138 : relus dans l'index par la route, jamais pris dans le corps de la requête.",
+  "+    prix_immobiliers: (t.insee && prix[t.insee]) || null,",
+  "+  // FUT-138 : les prix immobiliers de chaque carte, relus dans l'index à partir de son code (aucun chiffre",
+  "+  // du navigateur). Une lecture locale, sans appel externe.",
+  "+  const codes = (ctx.territoires ?? []).flatMap((t) => (typeof t.insee === \"string\" && CODE_INSEE.test(t.insee) ? [{ insee: t.insee, nom: t.nom }] : []));",
+  "+  const lectures: Record<string, LecturePrix> = codes.length ? await getLecturesPrix(codes).catch(() => ({})) : {};",
+  "+  const prix = Object.fromEntries(Object.entries(lectures).map(([k, l]) => [k, blocPrixPourModele(l)]));",
+  "-    { role: \"user\" as const, content: `${buildContextBlock(ctx, lecture, focusRang, alertes)}\\n\\nQUESTION : ${question}` },",
+  "+    { role: \"user\" as const, content: `${buildContextBlock(ctx, lecture, focusRang, alertes, prix)}\\n\\nQUESTION : ${question}` },",
+  "+  // FUT-138 : le code de la commune. La route relit ELLE-MÊME ses prix immobiliers dans l'index : aucun chiffre",
+  "+  // de prix ne vient du navigateur.",
+  "+  insee?: string;",
+  "+      insee: r.insee,",
+];
+
 test("IA : les routes du comparateur n'ont changé que de la frontière de confiance (FUT-155)", () => {
   const admises = new Set([
     `-import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";`,
@@ -281,6 +330,7 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
     `+export function couvertureGlobaleLue(globale: unknown, nonMesureesParCarte: readonly unknown[]): EtatLu {`,
     `+  const e = etat(globale);`,
     `+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;`,
+    ...LIGNES_FUT138,
   ]);
   for (const f of ["src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts"]) {
     const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });

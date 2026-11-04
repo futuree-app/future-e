@@ -22,6 +22,8 @@ import {
   type ProfileRow,
 } from "@/lib/ask/system-prompt";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
+import { getLecturePrix } from "@/lib/prix-immobiliers-commune";
+import { blocPrixPourModele } from "@/lib/prix-immobiliers";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -240,9 +242,11 @@ export async function POST(request: NextRequest) {
 
     // Les 4 sources tournent en parallèle. Supabase (rapide, déjà ouvert)
     // + ADEME/DRIAS/Hub'Eau (caches framework côté lib).
-    const [referentiel, enrichment] = await Promise.all([
+    const [referentiel, enrichment, lecturePrix] = await Promise.all([
       lireReferentielInterne(communeInsee, supabase),
       gatherCommuneEnrichment(communeInsee, { avecEauPotable: true }),
+      // FUT-138 : les prix immobiliers de la commune, lus dans l'index (aucun appel externe).
+      getLecturePrix(askInsee, communeName).catch(() => null),
     ]);
     const systemPrompt = construireSystemPrompt({
       communeName,
@@ -250,6 +254,7 @@ export async function POST(request: NextRequest) {
       referentiel,
       enrichment,
       profile: profile as ProfileRow,
+      prix: lecturePrix ? blocPrixPourModele(lecturePrix) : null,
     });
 
     // LE BUDGET SE RÉSERVE ICI, et jamais en tête de route : une réponse de cache ne coûte

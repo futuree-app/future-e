@@ -129,8 +129,10 @@ test("exploration inondation (17) : le contexte de la page dit l'exploration et 
   assert.equal(ctx.lecture!.ordre, r.outcome.inondation.ordre);
   assert.ok(ctx.lecture!.transparence_inondation);
   assert.deepEqual(ctx.territoires!.map((t) => t.couverture?.etat), ["sans_priorite", "sans_priorite", "sans_priorite"]);
-  // Le contrat reste qualitatif : ni INSEE, ni score, ni compatibilité.
-  assert.doesNotMatch(JSON.stringify(ctx), /"insee"|compatibility|"score"/);
+  // Le contrat reste qualitatif : ni score, ni compatibilité. Le code INSEE n'y est qu'un IDENTIFIANT (FUT-138) :
+  // la route s'en sert pour relire les prix dans l'index, et ne le transmet jamais au modèle (test FUT-138 ci-dessous).
+  assert.doesNotMatch(JSON.stringify(ctx), /compatibility|"score"/);
+  assert.deepEqual(ctx.territoires!.map((t) => t.insee), r.top.map((t: M) => t.insee));
   assert.equal(lectureDuContexte(ctx).mode, "exploration_inondation");
 });
 
@@ -750,4 +752,45 @@ test("couverture contradictoire en exploration inondation : le mode exploration 
   const { json, contexte } = await poser(corps(c, QUESTION_LR));
   assert.equal(contexte.lecture.mode, "exploration_inondation");
   assert.match(json.answer, /^Les communes de La Rochelle, Saintes et Rochefort sont proposées pour être examinées, pas classées/);
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// FUT-138 · Les prix immobiliers : relus par la route dans l'index, jamais pris dans le corps de la requête
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+
+test("FUT-138 : « Quel est le prix moyen au m² ici ? » : le modèle reçoit les médianes de l'index, période, échelle et source", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  const { res, contexte, modele } = await poser(corps(contexteDePage(r), "Quel est le prix moyen au m² à La Rochelle ?"));
+  assert.equal(res.status, 200);
+  const lr = contexte.territoires.find((t: M) => t.commune === "La Rochelle");
+  const prix = String(lr.prix_immobiliers).replace(/[\u00a0\u202f]/g, " ");
+  assert.match(prix, /appartements : 5 000 €\/m² \(échelle : commune, 3 707 ventes\)/);
+  assert.match(prix, /maisons : 4 507 €\/m² \(échelle : commune, 2 033 ventes\)/);
+  assert.match(prix, /ventes de 2022 à 2025 \(Source : DGFiP, DVF\)/);
+  assert.match(prix, /appartement 14,7 €\/m², maison 14,6 €\/m²/);
+  // Le code n'est qu'un identifiant : il ne part pas chez le modèle.
+  assert.doesNotMatch(JSON.stringify(contexte), /"insee"/);
+  // Le prompt dit comment répondre : médiane, jamais une estimation, jamais un classement par le prix.
+  assert.match(modele.system, /SI LA QUESTION PORTE SUR LES PRIX IMMOBILIERS/);
+  assert.match(modele.system, /jamais la valeur d'un\s+logement précis ni une estimation/);
+  assert.doesNotMatch(modele.system, /Prix de l'immobilier, écoles/);
+});
+
+test("FUT-138 : des prix glissés dans le contexte par le navigateur ne sont jamais repris", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  const ctx = contexteDePage(r) as M;
+  ctx.territoires[0].prix_immobiliers = "appartements : 900 €/m²";
+  ctx.territoires[0].logement = "appartements à 900 €/m²";
+  const { contexte } = await poser(corps(ctx, "Combien coûte un appartement ici ?"));
+  const lr = contexte.territoires[0];
+  assert.match(String(lr.prix_immobiliers).replace(/[\u00a0\u202f]/g, " "), /5 000 €\/m²/);
+  assert.doesNotMatch(String(lr.prix_immobiliers), /900/);
+});
+
+test("FUT-138 : un code INSEE forgé n'ouvre aucune lecture ; la carte part sans prix", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  const ctx = contexteDePage(r) as M;
+  ctx.territoires[1].insee = "../../etc";
+  const { contexte } = await poser(corps(ctx, "Et les loyers ?"));
+  assert.equal(contexte.territoires[1].prix_immobiliers, null);
 });

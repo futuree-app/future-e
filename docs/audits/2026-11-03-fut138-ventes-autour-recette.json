@@ -1,0 +1,811 @@
+{
+ "reference_communale_vs_index": {
+  "communes_index": 34788,
+  "identiques": 34788,
+  "ecarts": []
+ },
+ "cas": [
+  {
+   "cas": "La Rochelle, Vieux-Port",
+   "point": {
+    "lat": 46.158,
+    "lon": -1.153
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "ventes",
+    "type": "appart",
+    "rayonM": 500,
+    "ventes": 543,
+    "mediane": 5350,
+    "quartiles": [
+     4550,
+     6150
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "5 350 €/m² · 543 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "4 550 €/m² et 6 150 €/m²"
+       },
+       {
+        "label": "Médiane de La Rochelle",
+        "value": "5 000 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 543 appartements se sont vendus à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 5 350 €/m².",
+       "Écart observé avec la médiane de La Rochelle (5 000 €/m², échelle : commune, 3 707 ventes) : +350 €/m², soit +7 %.",
+       "Un quart de ces ventes s'est fait à moins de 4 550 €/m², un quart à plus de 6 150 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 5350,
+    "mediane_exacte": 5317,
+    "ecart_pct": 0.62,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "17300 La Rochelle": 543
+    }
+   }
+  },
+  {
+   "cas": "La Rochelle, maison à Laleu",
+   "point": {
+    "lat": 46.1712,
+    "lon": -1.1912
+   },
+   "type_diagnostic": "maison",
+   "lecture": {
+    "statut": "ventes",
+    "type": "maison",
+    "rayonM": 500,
+    "ventes": 62,
+    "mediane": 3000,
+    "quartiles": [
+     2600,
+     3750
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes de maisons, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "3 000 €/m² · 62 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "2 600 €/m² et 3 750 €/m²"
+       },
+       {
+        "label": "Médiane de La Rochelle",
+        "value": "4 507 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 62 maisons se sont vendues à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 3 000 €/m².",
+       "Écart observé avec la médiane de La Rochelle (4 507 €/m², échelle : commune, 2 033 ventes) : −1 507 €/m², soit −33 %.",
+       "Un quart de ces ventes s'est fait à moins de 2 600 €/m², un quart à plus de 3 750 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 3000,
+    "mediane_exacte": 2973,
+    "ecart_pct": 0.91,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "17300 La Rochelle": 62
+    }
+   }
+  },
+  {
+   "cas": "Centre urbain dense, Lyon 3e (Part-Dieu)",
+   "point": {
+    "lat": 45.7605,
+    "lon": 4.857
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "ventes",
+    "type": "appart",
+    "rayonM": 500,
+    "ventes": 317,
+    "mediane": 4750,
+    "quartiles": [
+     4150,
+     5450
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "4 750 €/m² · 317 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "4 150 €/m² et 5 450 €/m²"
+       },
+       {
+        "label": "Médiane de Lyon 3e Arrondissement",
+        "value": "4 750 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 317 appartements se sont vendus à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 4 750 €/m².",
+       "Écart observé avec la médiane de Lyon 3e Arrondissement (4 750 €/m², échelle : arrondissement, 5 507 ventes) : aucun écart entre les deux médianes.",
+       "Un quart de ces ventes s'est fait à moins de 4 150 €/m², un quart à plus de 5 450 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 4750,
+    "mediane_exacte": 4787,
+    "ecart_pct": -0.77,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "69383 Lyon 3e Arrondissement": 269,
+     "69386 Lyon 6e Arrondissement": 48
+    }
+   }
+  },
+  {
+   "cas": "Arrondissement parisien, Paris 11e (Oberkampf)",
+   "point": {
+    "lat": 48.865,
+    "lon": 2.378
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "ventes",
+    "type": "appart",
+    "rayonM": 500,
+    "ventes": 2573,
+    "mediane": 10300,
+    "quartiles": [
+     8950,
+     11350
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "10 300 €/m² · 2 573 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "8 950 €/m² et 11 350 €/m²"
+       },
+       {
+        "label": "Médiane de Paris 11e Arrondissement",
+        "value": "10 237 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 2 573 appartements se sont vendus à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 10 300 €/m².",
+       "Écart observé avec la médiane de Paris 11e Arrondissement (10 237 €/m², échelle : arrondissement, 9 620 ventes) : +63 €/m², soit +1 %.",
+       "Un quart de ces ventes s'est fait à moins de 8 950 €/m², un quart à plus de 11 350 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 10300,
+    "mediane_exacte": 10218,
+    "ecart_pct": 0.8,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "75120 Paris 20e Arrondissement": 73,
+     "75111 Paris 11e Arrondissement": 2500
+    }
+   }
+  },
+  {
+   "cas": "Arrondissement parisien, maison à Paris 11e",
+   "point": {
+    "lat": 48.865,
+    "lon": 2.378
+   },
+   "type_diagnostic": "maison",
+   "lecture": {
+    "statut": "ventes",
+    "type": "maison",
+    "rayonM": 2000,
+    "ventes": 85,
+    "mediane": 12050,
+    "quartiles": [
+     10100,
+     15600
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes de maisons, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "chiffres": [
+       {
+        "label": "Médiane à 2 km",
+        "value": "12 050 €/m² · 85 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "10 100 €/m² et 15 600 €/m²"
+       },
+       {
+        "label": "Médiane de toute la ville de Paris",
+        "value": "12 557 €/m²"
+       }
+      ],
+      "phrases": [
+       "Moins de 10 ventes de maisons à 1 km : le périmètre est élargi à 2 km. Ces ventes décrivent un secteur plus large que le voisinage immédiat.",
+       "De 2022 à 2025, 85 maisons se sont vendues à moins de 2 km environ de l'adresse. La moitié l'ont été à plus de 12 050 €/m².",
+       "Écart observé avec la médiane de toute la ville de Paris (12 557 €/m², échelle : ville de Paris, 462 ventes) : −507 €/m², soit −4 %.",
+       "Un quart de ces ventes s'est fait à moins de 10 100 €/m², un quart à plus de 15 600 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 12050,
+    "mediane_exacte": 12071,
+    "ecart_pct": -0.17,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "75119 Paris 19e Arrondissement": 40,
+     "75120 Paris 20e Arrondissement": 40,
+     "75111 Paris 11e Arrondissement": 3,
+     "75112 Paris 12e Arrondissement": 1,
+     "75103 Paris 3e Arrondissement": 1
+    }
+   }
+  },
+  {
+   "cas": "Limite communale, Paris 20e / Bagnolet (porte de Bagnolet)",
+   "point": {
+    "lat": 48.8636,
+    "lon": 2.41
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "ventes",
+    "type": "appart",
+    "rayonM": 500,
+    "ventes": 478,
+    "mediane": 8250,
+    "quartiles": [
+     7200,
+     9300
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "8 250 €/m² · 478 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "7 200 €/m² et 9 300 €/m²"
+       },
+       {
+        "label": "Médiane de Paris 20e Arrondissement",
+        "value": "8 690 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 478 appartements se sont vendus à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 8 250 €/m².",
+       "Écart observé avec la médiane de Paris 20e Arrondissement (8 690 €/m², échelle : arrondissement, 7 819 ventes) : −440 €/m², soit −5 %.",
+       "Un quart de ces ventes s'est fait à moins de 7 200 €/m², un quart à plus de 9 300 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 8250,
+    "mediane_exacte": 8333,
+    "ecart_pct": -1,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "93006 Bagnolet": 2,
+     "75120 Paris 20e Arrondissement": 476
+    }
+   }
+  },
+  {
+   "cas": "Limite communale, La Rochelle / Aytré",
+   "point": {
+    "lat": 46.1395,
+    "lon": -1.135
+   },
+   "type_diagnostic": "maison",
+   "lecture": {
+    "statut": "ventes",
+    "type": "maison",
+    "rayonM": 500,
+    "ventes": 74,
+    "mediane": 3800,
+    "quartiles": [
+     3200,
+     4550
+    ]
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes de maisons, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "3 800 €/m² · 74 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "3 200 €/m² et 4 550 €/m²"
+       },
+       {
+        "label": "Médiane de La Rochelle",
+        "value": "4 507 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 74 maisons se sont vendues à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 3 800 €/m².",
+       "Écart observé avec la médiane de La Rochelle (4 507 €/m², échelle : commune, 2 033 ventes) : −707 €/m², soit −16 %.",
+       "Un quart de ces ventes s'est fait à moins de 3 200 €/m², un quart à plus de 4 550 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 3800,
+    "mediane_exacte": 3820,
+    "ecart_pct": -0.52,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "17028 Aytré": 50,
+     "17300 La Rochelle": 24
+    }
+   }
+  },
+  {
+   "cas": "Zone rurale, Royère-de-Vassivière (Creuse)",
+   "point": {
+    "lat": 45.84,
+    "lon": 1.91
+   },
+   "type_diagnostic": "maison",
+   "lecture": {
+    "statut": "ventes",
+    "type": "maison",
+    "rayonM": 500,
+    "ventes": 17,
+    "mediane": 950,
+    "quartiles": null
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes de maisons, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "950 €/m² · 17 ventes"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 17 maisons se sont vendues à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 950 €/m²."
+      ],
+      "avertissement": "Avec moins de 20 ventes, une ou deux ventes de plus ou de moins peuvent déplacer ce chiffre : il n'est pas comparé à la commune."
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "meme_effectif": true,
+    "mediane_tuiles": 950,
+    "mediane_exacte": 933,
+    "ecart_pct": 1.82,
+    "rayons_plus_petits_sous_10": true,
+    "par_commune": {
+     "23165 Royère-de-Vassivière": 17
+    }
+   }
+  },
+  {
+   "cas": "Zone rurale, appartement à Royère-de-Vassivière",
+   "point": {
+    "lat": 45.84,
+    "lon": 1.91
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "trop_peu",
+    "type": "appart",
+    "rayonM": 2000
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "avertissement": null,
+      "chiffres": [],
+      "phrases": [
+       "Moins de 10 ventes d'appartements de 2022 à 2025 à moins de 2 km : pas de médiane locale."
+      ]
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "moins_de_10_a_2_km": true,
+    "ventes_brutes_2_km": 2
+   }
+  },
+  {
+   "cas": "Absence de ventes, Saint-Christophe-en-Oisans (montagne)",
+   "point": {
+    "lat": 44.956,
+    "lon": 6.178
+   },
+   "type_diagnostic": "maison",
+   "lecture": {
+    "statut": "trop_peu",
+    "type": "maison",
+    "rayonM": 2000
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes de maisons, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "avertissement": null,
+      "chiffres": [],
+      "phrases": [
+       "Moins de 10 ventes de maisons de 2022 à 2025 à moins de 2 km : pas de médiane locale."
+      ]
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "moins_de_10_a_2_km": true,
+    "ventes_brutes_2_km": 3
+   }
+  },
+  {
+   "cas": "Absence de ventes, Strasbourg (Alsace-Moselle, hors DVF)",
+   "point": {
+    "lat": 48.5839,
+    "lon": 7.7455
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "trop_peu",
+    "type": "appart",
+    "rayonM": 2000
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "",
+    "blocs": [],
+    "limite": "",
+    "absence": "En Alsace-Moselle, les ventes sont enregistrées au livre foncier et ne figurent pas dans la base publique des valeurs foncières (DVF) : aucun prix de vente n'est publié dans ce secteur."
+   },
+   "contre_epreuve": {
+    "moins_de_10_a_2_km": true,
+    "ventes_brutes_2_km": 0
+   }
+  },
+  {
+   "cas": "Intercommunalité en référence, L'Oie (appartement)",
+   "point": {
+    "lat": 46.7975,
+    "lon": -1.13
+   },
+   "type_diagnostic": "appartement",
+   "lecture": {
+    "statut": "trop_peu",
+    "type": "appart",
+    "rayonM": 2000
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Ventes d'appartements, le type de ce logement d'après son diagnostic énergétique.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "avertissement": null,
+      "chiffres": [],
+      "phrases": [
+       "Moins de 10 ventes d'appartements de 2022 à 2025 à moins de 2 km : pas de médiane locale."
+      ]
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   },
+   "contre_epreuve": {
+    "moins_de_10_a_2_km": true,
+    "ventes_brutes_2_km": 2
+   }
+  },
+  {
+   "cas": "Type inconnu : diagnostic d'immeuble, les deux marchés",
+   "point": {
+    "lat": 46.158,
+    "lon": -1.153
+   },
+   "type_diagnostic": "immeuble",
+   "lecture": {
+    "appart": {
+     "statut": "ventes",
+     "type": "appart",
+     "rayonM": 500,
+     "ventes": 543,
+     "mediane": 5350,
+     "quartiles": [
+      4550,
+      6150
+     ]
+    },
+    "maison": {
+     "statut": "ventes",
+     "type": "maison",
+     "rayonM": 500,
+     "ventes": 34,
+     "mediane": 5750,
+     "quartiles": [
+      4500,
+      7050
+     ]
+    }
+   },
+   "texte": {
+    "methode": [
+     "Les ventes comptées sont celles d'un seul logement, de 2022 à 2025, dépendances comprises, avec les mêmes règles que la médiane de la commune dans Territoire.",
+     "Le périmètre est de 500 m, comme les autres lectures de ce module. Il passe à 1 km puis 2 km seulement s'il réunit moins de 10 ventes, et c'est alors indiqué. Une vente située au-delà des limites de la commune compte si elle est dans le périmètre.",
+     "La position d'une vente est celle de sa parcelle cadastrale, ramenée à un carré d'environ 100 m : une distance est juste à une centaine de mètres près, davantage pour une grande parcelle.",
+     "L'écart avec la commune n'est donné qu'à partir de 20 ventes. C'est un écart observé entre deux médianes, pas la preuve que les deux marchés diffèrent. La fourchette n'est donnée qu'à partir de 30 ventes.",
+     "Pour protéger les personnes qui ont vendu ou acheté, aucune vente n'est montrée seule, les prix sont arrondis à 50 €/m², et deux adresses situées dans le même carré d'environ 100 m lisent exactement les mêmes ventes.",
+     "Source : DVF (DGFiP), version géolocalisée Etalab, livraison du 20/10/2026."
+    ],
+    "source": "DGFiP, DVF, géolocalisation Etalab",
+    "lead": "Le diagnostic retenu porte sur l'immeuble entier : il ne dit pas le type de ce logement, et les deux marchés sont présentés séparément.",
+    "blocs": [
+     {
+      "type": "appart",
+      "titre": "Appartements",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "5 350 €/m² · 543 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "4 550 €/m² et 6 150 €/m²"
+       },
+       {
+        "label": "Médiane de La Rochelle",
+        "value": "5 000 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 543 appartements se sont vendus à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 5 350 €/m².",
+       "Écart observé avec la médiane de La Rochelle (5 000 €/m², échelle : commune, 3 707 ventes) : +350 €/m², soit +7 %.",
+       "Un quart de ces ventes s'est fait à moins de 4 550 €/m², un quart à plus de 6 150 €/m²."
+      ],
+      "avertissement": null
+     },
+     {
+      "type": "maison",
+      "titre": "Maisons",
+      "chiffres": [
+       {
+        "label": "Médiane à 500 m",
+        "value": "5 750 €/m² · 34 ventes"
+       },
+       {
+        "label": "Un quart sous, un quart au-dessus de",
+        "value": "4 500 €/m² et 7 050 €/m²"
+       },
+       {
+        "label": "Médiane de La Rochelle",
+        "value": "4 507 €/m²"
+       }
+      ],
+      "phrases": [
+       "De 2022 à 2025, 34 maisons se sont vendues à moins de 500 m environ de l'adresse. La moitié l'ont été à plus de 5 750 €/m².",
+       "Écart observé avec la médiane de La Rochelle (4 507 €/m², échelle : commune, 2 033 ventes) : +1 243 €/m², soit +28 %.",
+       "Un quart de ces ventes s'est fait à moins de 4 500 €/m², un quart à plus de 7 050 €/m²."
+      ],
+      "avertissement": null
+     }
+    ],
+    "absence": null,
+    "limite": "Ce sont des prix de ventes passées, tous états et toutes surfaces confondus : ils décrivent le marché du secteur, ils ne donnent pas la valeur d'un logement précis."
+   }
+  }
+ ]
+}

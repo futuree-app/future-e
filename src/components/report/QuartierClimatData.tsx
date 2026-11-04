@@ -20,6 +20,7 @@ import type { Era5Trend } from "@/lib/era5-trend";
 import type { MemoireIncendies } from "@/lib/data/bdiff-incendies";
 import { texteTerritoire } from "@/lib/incendies-observes";
 import { LIEN_VERIFICATION, type TexteFibre } from "@/lib/fibre-texte";
+import type { TextePrix } from "@/lib/prix-immobiliers";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -135,6 +136,11 @@ type SharedProps = {
    */
   fibre?: { texte: TexteFibre; pourLeProjet: boolean };
   /**
+   * FUT-138 : les prix immobiliers de la commune (ventes DVF, loyers d'annonce ANIL), déjà rédigés par
+   * `textePrix` côté serveur. Lus dans l'index, hors du snapshot (comme la fibre). Absents : pas de carte.
+   */
+  prix?: TextePrix;
+  /**
    * FUT-167 · LA CARTE « SANTÉ ENVIRONNEMENTALE », lue à côté du snapshot, jamais dedans (comme les incendies
    * et la fibre) : air de fond, sites industriels, bruit des infrastructures, radon. Absente : pas de carte.
    */
@@ -179,7 +185,7 @@ function themeOf(label: string): ThemeKey {
 }
 // Ordre de lecture au sein de chaque thème (le décor avant l'aléa, le légible avant le pointu).
 const CARD_ORDER: string[] = [
-  "Trajectoire de population", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires", "Fibre optique",
+  "Trajectoire de population", "Prix immobiliers", "Logements inoccupés", "Accès aux services", "Espaces naturels", "Taux de boisement", "Résidences secondaires", "Fibre optique",
   // Climat alterné mouvement/niveau pour le rythme (évite un mur de « +X »).
   "Températures moyennes", "Sécheresse des sols", "Chaleurs estivales", "Nuits tropicales", "Jours de pluie intense",
   "Mémoire des catastrophes", "Inondation fluviale", "Submersion marine", "Conditions favorables au feu", "Érosion du littoral",
@@ -1284,6 +1290,31 @@ function facteurFibre(t: TexteFibre): Factor {
   };
 }
 
+// ── Carte « Prix immobiliers » (DVF, ANIL, FUT-138) ────────────────────────────────────────────
+// Le marché de la commune : prix de vente observés et loyers d'annonce, chacun avec sa maille, sa période et
+// sa source. Jamais la valeur d'un logement. Les phrases viennent de `prix-immobiliers.ts` (pur, testé).
+function facteurPrix(t: TextePrix): Factor {
+  return {
+    label: "Prix immobiliers",
+    val: t.valeur,
+    sub: t.sousTitre,
+    col: "var(--accent)",
+    src: t.source,
+    missing: t.manquant,
+    detail: {
+      eyebrow: "Le marché immobilier de la commune",
+      title: "Prix immobiliers",
+      headline: t.titreVolet,
+      subhead: t.manquant ? undefined : t.phrase || undefined,
+      accent: "var(--accent)",
+      facts: t.faits.length > 0 ? t.faits : undefined,
+      why: t.limites.join(" "),
+      whyLabel: "Ce que ces prix ne disent pas",
+      sources: t.methode,
+    },
+  };
+}
+
 // ─── FUT-167 : la carte « Santé environnementale » ─────────────────────────────────────────────
 // Quatre lectures que le dossier fait déjà (air, industrie, bruit, radon), une ligne chacune. Le texte vient
 // tout entier de `lib/sante-environnementale.ts` (pur, testé) ; ce composant ne fait que le disposer. Les
@@ -1326,11 +1357,12 @@ function facteurSante(c: CarteSante): Factor {
   };
 }
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre, sante }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre, prix, sante }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
   const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null, droughtIndisponible ?? false);
   if (fibre) factors.push(facteurFibre(fibre.texte));
+  if (prix) factors.push(facteurPrix(prix));
   if (sante) factors.push(facteurSante(sante));
   // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
   // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.

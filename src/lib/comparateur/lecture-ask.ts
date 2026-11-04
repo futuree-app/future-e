@@ -40,6 +40,9 @@ export function avisRefusAsk(status: number, code?: unknown): string | null {
 export type TerritoireAsk = {
   rang: number; // position d'affichage (1 à 3), pas un rang de mérite hors mode classé
   nom: string;
+  // FUT-138 : le code de la commune. La route relit ELLE-MÊME ses prix immobiliers dans l'index : aucun chiffre
+  // de prix ne vient du navigateur.
+  insee?: string;
   region: string | null;
   raisons: string[];
   compromis: string | null;
@@ -98,6 +101,7 @@ export function contexteAsk(a: {
     territoires: a.top.map((r, i) => ({
       rang: i + 1,
       nom: r.nom,
+      insee: r.insee,
       region: r.region,
       raisons: r.reasons,
       compromis: r.tradeoff,
