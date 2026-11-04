@@ -9,7 +9,7 @@ import {
 import { hydrateHardConstraints, annuaireNecessaire } from "../hard-constraints-hydrate.ts";
 import { resolveExternalReferences } from "../hard-constraints-external.ts";
 import {
-  PRODUCT_CONVENTIONS_VERSION, ROUTABLE_MODES,
+  PRODUCT_CONVENTIONS_VERSION, ROUTABLE_MODES, retenirDuree, routeCourteUtile,
   type EvaluationContext, type EvaluationPoint, type NormalizedHardConstraints,
   type TravelTimeEstimate, type MerAuPoint,
 } from "../hard-constraints.ts";
@@ -190,16 +190,24 @@ export async function estimateTravelTimeAt(
     mode: mode as "car" | "walk",
     direction: "to_reference" as const,
   };
-  const minutes = await estimateTravelMinutes(request, reachabilityStore());
-  if (minutes == null) return { status: "unavailable" }; // une panne, jamais un verdict
+  const store = reachabilityStore();
+  const fastest = await estimateTravelMinutes(request, store);
+  if (fastest == null) return { status: "unavailable" }; // une panne, jamais un verdict
+  // FUT-98 : au-delà de la limite, on demande au même moteur sa route courte, avant de conclure à une
+  // incompatibilité (cf. retenirDuree). Si elle échoue, repli sur « fastest » : le verdict d'avant, jamais pire.
+  const max = np.threshold.maxMinutes;
+  const courte = routeCourteUtile(fastest, max) ? { ...request, optimization: "shortest" as const } : null;
+  const shortest = courte ? await estimateTravelMinutes(courte, store) : null;
+  const d = retenirDuree(fastest, max, shortest);
   return {
     status: "estimated",
-    minutes,
+    minutes: d.minutes,
     mode,
     from: { lat: point.lat, lon: point.lon },
     to: { lat: ref.lat, lon: ref.lon },
     direction: "to_reference",
-    requestHash: routeRequestHash(request),
+    requestHash: routeRequestHash(d.route === "shortest" && courte ? courte : request),
+    route: d.route,
   };
 }
 

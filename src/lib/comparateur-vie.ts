@@ -37,7 +37,7 @@ import {
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
 import { etalerResultats } from "@/lib/comparateur-etalement";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
-import { travelThresholdLabel, ROUTABLE_MODES, kmLisible, estArrondissementPLM } from "@/lib/hard-constraints";
+import { travelThresholdLabel, ROUTABLE_MODES, kmLisible, estArrondissementPLM, retenirDuree, routeCourteUtile, type DureeRetenue } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
@@ -2835,7 +2835,8 @@ const REFINE_BAND_CAP = 24; // les meilleures candidates par score : elles reço
 const REFINE_SHOWN_CAP = 6; // les communes affichées, pour leur donner une durée
 const REFINE_DEADLINE_MS = 6_000;
 
-async function refineTravelTimes(
+// Exportée pour les tests (FUT-98) : le filtre « à moins de N minutes » se vérifie sur réponses simulées.
+export async function refineTravelTimes(
   cs: IndexCommune[],
   constraints: NormalizedHardConstraints,
 ): Promise<Map<string, RefineOutcome>> {
@@ -2850,22 +2851,27 @@ async function refineTravelTimes(
   const max = np.threshold.maxMinutes;
   const store = reachabilityStore();
 
+  const issue = (d: DureeRetenue): RefineOutcome =>
+    d.within ? { status: "within", minutes: d.minutes } : { status: "over", minutes: d.minutes };
+
   const tasks = cs.map(async (c) => {
-    const minutes = await estimateTravelMinutes(
-      {
-        fromLat: c.lat, fromLon: c.lon, toLat: ref.lat, toLon: ref.lon,
-        mode: mode as "car" | "walk", direction: "to_reference",
-      },
-      store,
-    );
-    out.set(
-      c.insee,
-      minutes == null
-        ? { status: "unavailable" }
-        : minutes <= max
-          ? { status: "within", minutes }
-          : { status: "over", minutes },
-    );
+    const request = {
+      fromLat: c.lat, fromLon: c.lon, toLat: ref.lat, toLon: ref.lon,
+      mode: mode as "car" | "walk", direction: "to_reference" as const,
+    };
+    const fastest = await estimateTravelMinutes(request, store);
+    if (fastest == null) {
+      out.set(c.insee, { status: "unavailable" });
+      return;
+    }
+    // Le verdict de « fastest » est posé AUSSITÔT : c'est le repli si la route courte échoue ou n'arrive pas
+    // avant l'échéance (le comportement d'avant FUT-98, jamais pire).
+    out.set(c.insee, issue(retenirDuree(fastest, max)));
+    if (!routeCourteUtile(fastest, max)) return;
+    // FUT-98 : au-delà de la limite, le même moteur peut connaître une route courte plus rapide. Une commune
+    // n'est pas exclue sur une durée que le moteur contredit lui-même (cf. retenirDuree).
+    const shortest = await estimateTravelMinutes({ ...request, optimization: "shortest" }, store);
+    out.set(c.insee, issue(retenirDuree(fastest, max, shortest)));
   });
 
   // Le limiteur GLOBAL sérialise déjà à 3 : on peut tout lancer sans craindre le 429.
@@ -2873,7 +2879,8 @@ async function refineTravelTimes(
     Promise.all(tasks),
     new Promise((r) => setTimeout(r, REFINE_DEADLINE_MS)),
   ]);
-  return out; // ce qui manque à l'appel n'a pas abouti à temps : not_refined
+  // UNE COPIE, figée à l'échéance : une route courte qui arriverait après ne réécrit pas un verdict déjà lu.
+  return new Map(out); // ce qui manque à l'appel n'a pas abouti à temps : not_refined
 }
 
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS (50 km autour d'un lieu, 30 km de la mer) ne peuvent plus

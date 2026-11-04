@@ -87,9 +87,46 @@ export type TravelTimeEstimate =
       from: { lat: number; lon: number };
       to: { lat: number; lon: number };
       direction: "to_reference";
-      requestHash: string;
+      requestHash: string; // le hash de la demande qui a produit `minutes` (celle de `route`)
+      // FUT-98 : l'itinéraire qui a établi la durée retenue (cf. retenirDuree). Absent = « fastest ».
+      route?: RouteOptimization;
     }
   | { status: "unavailable" };
+
+// ── FUT-98 : QUELLE DURÉE RETENIR quand le moteur en connaît deux ─────────────────────────────────────
+//
+// Le moteur IGN (Valhalla) minimise un coût interne, pas exactement la durée qu'il rend : pour les mêmes points,
+// sa route « shortest » est parfois annoncée PLUS RAPIDE que sa route « fastest » (place de l'Europe -> gare de
+// La Rochelle : 22,7 min contre 24,1 ; Clavette -> gare : 23,9 contre 24,3). Exclure Clavette d'une recherche
+// « à 24 minutes au plus » sur la foi de 24,3 serait affirmer une incompatibilité que le moteur lui-même contredit.
+//
+// LA RÈGLE, partagée par le comparateur et le dossier (ils n'ont pas le droit de trancher différemment) :
+//   fastest <= max                   -> fastest, dans la limite (aucun second appel)
+//   fastest >  max, shortest <= max  -> shortest, dans la limite
+//   fastest >  max, shortest >  max  -> la plus courte des deux, au-delà de la limite
+//   fastest >  max, shortest absent  -> fastest, au-delà (REPLI : le comportement d'avant FUT-98, jamais pire)
+//
+// L'asymétrie est voulue : une route plus courte ne peut que CONFIRMER une commune, jamais en retirer une. On ne
+// préfère pas « shortest » en général (il optimise la distance), on ne moyenne rien, on n'invente aucune
+// fourchette : on retient une durée que le même moteur a réellement calculée, sur les mêmes points. Elle reste
+// une ESTIMATION (« environ »), sans trafic ni garantie de circulation.
+export type RouteOptimization = "fastest" | "shortest";
+
+export type DureeRetenue = { minutes: number; route: RouteOptimization; within: boolean };
+
+export function retenirDuree(fastest: number, maxMinutes: number, shortest?: number | null): DureeRetenue {
+  if (fastest <= maxMinutes) return { minutes: fastest, route: "fastest", within: true };
+  if (shortest == null) return { minutes: fastest, route: "fastest", within: false };
+  if (shortest <= maxMinutes) return { minutes: shortest, route: "shortest", within: true };
+  return shortest < fastest
+    ? { minutes: shortest, route: "shortest", within: false }
+    : { minutes: fastest, route: "fastest", within: false };
+}
+
+// Le second appel n'a lieu que dans ce cas : sur le chemin nominal, rien ne change, pas même le coût IGN.
+export function routeCourteUtile(fastest: number, maxMinutes: number): boolean {
+  return fastest > maxMinutes;
+}
 
 const MODE_LABEL: Record<PlaceMode, string> = { car: "en voiture", walk: "à pied", bike: "à vélo" };
 
