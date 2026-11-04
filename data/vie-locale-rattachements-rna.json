@@ -1,0 +1,4664 @@
+{
+ "description": "FUT-137 · associations actives du RNA : rattachées à une commune de l'index (directement ou sous un code disparu, table des successeurs du COG) ou non rattachées, par motif. total = direct + rattachees + somme(nonRattachees).",
+ "direct": 1837059,
+ "nonRattachees": {
+  "code_inconnu_du_cog": 29805,
+  "commune_hors_index": 75705,
+  "sans_successeur": 242
+ },
+ "parCodeDisparu": {
+  "01039": {
+   "associations": 7,
+   "commune": "01138"
+  },
+  "01059": {
+   "associations": 3,
+   "commune": "01453"
+  },
+  "01091": {
+   "associations": 46,
+   "commune": "01033"
+  },
+  "01097": {
+   "associations": 4,
+   "commune": "01453"
+  },
+  "01122": {
+   "associations": 17,
+   "commune": "01185"
+  },
+  "01144": {
+   "associations": 22,
+   "commune": "01025"
+  },
+  "01154": {
+   "associations": 19,
+   "commune": "01130"
+  },
+  "01172": {
+   "associations": 3,
+   "commune": "01095"
+  },
+  "01186": {
+   "associations": 2,
+   "commune": "01185"
+  },
+  "01205": {
+   "associations": 12,
+   "commune": "01033"
+  },
+  "01218": {
+   "associations": 1,
+   "commune": "01453"
+  },
+  "01221": {
+   "associations": 5,
+   "commune": "01036"
+  },
+  "01316": {
+   "associations": 4,
+   "commune": "01098"
+  },
+  "01330": {
+   "associations": 8,
+   "commune": "01187"
+  },
+  "01341": {
+   "associations": 4,
+   "commune": "01227"
+  },
+  "01413": {
+   "associations": 2,
+   "commune": "01215"
+  },
+  "01414": {
+   "associations": 6,
+   "commune": "01036"
+  },
+  "01417": {
+   "associations": 14,
+   "commune": "01185"
+  },
+  "01442": {
+   "associations": 6,
+   "commune": "01036"
+  },
+  "02077": {
+   "associations": 3,
+   "commune": "02564"
+  },
+  "02300": {
+   "associations": 1,
+   "commune": "02738"
+  },
+  "02301": {
+   "associations": 6,
+   "commune": "02018"
+  },
+  "02311": {
+   "associations": 3,
+   "commune": "02589"
+  },
+  "02344": {
+   "associations": 1,
+   "commune": "51171"
+  },
+  "02434": {
+   "associations": 3,
+   "commune": "02018"
+  },
+  "02475": {
+   "associations": 6,
+   "commune": "02360"
+  },
+  "02733": {
+   "associations": 6,
+   "commune": "02153"
+  },
+  "03318": {
+   "associations": 6,
+   "commune": "03168"
+  },
+  "04198": {
+   "associations": 17,
+   "commune": "04033"
+  },
+  "05002": {
+   "associations": 4,
+   "commune": "05139"
+  },
+  "05020": {
+   "associations": 6,
+   "commune": "05132"
+  },
+  "05042": {
+   "associations": 3,
+   "commune": "05139"
+  },
+  "05043": {
+   "associations": 6,
+   "commune": "05039"
+  },
+  "05088": {
+   "associations": 4,
+   "commune": "05024"
+  },
+  "05120": {
+   "associations": 6,
+   "commune": "05001"
+  },
+  "05125": {
+   "associations": 1,
+   "commune": "05061"
+  },
+  "05138": {
+   "associations": 4,
+   "commune": "05139"
+  },
+  "05141": {
+   "associations": 4,
+   "commune": "05039"
+  },
+  "05150": {
+   "associations": 3,
+   "commune": "05024"
+  },
+  "05175": {
+   "associations": 27,
+   "commune": "05101"
+  },
+  "07016": {
+   "associations": 9,
+   "commune": "07011"
+  },
+  "07135": {
+   "associations": 6,
+   "commune": "07262"
+  },
+  "07252": {
+   "associations": 2,
+   "commune": "07103"
+  },
+  "07256": {
+   "associations": 14,
+   "commune": "07165"
+  },
+  "08042": {
+   "associations": 3,
+   "commune": "08173"
+  },
+  "08072": {
+   "associations": 10,
+   "commune": "08491"
+  },
+  "08079": {
+   "associations": 2,
+   "commune": "08173"
+  },
+  "08152": {
+   "associations": 5,
+   "commune": "08173"
+  },
+  "08266": {
+   "associations": 1,
+   "commune": "08366"
+  },
+  "08294": {
+   "associations": 3,
+   "commune": "08053"
+  },
+  "08371": {
+   "associations": 1,
+   "commune": "08053"
+  },
+  "08443": {
+   "associations": 4,
+   "commune": "08490"
+  },
+  "08475": {
+   "associations": 3,
+   "commune": "08053"
+  },
+  "08493": {
+   "associations": 10,
+   "commune": "08490"
+  },
+  "08495": {
+   "associations": 1,
+   "commune": "08113"
+  },
+  "09028": {
+   "associations": 3,
+   "commune": "09296"
+  },
+  "09135": {
+   "associations": 8,
+   "commune": "09334"
+  },
+  "09255": {
+   "associations": 4,
+   "commune": "09056"
+  },
+  "09286": {
+   "associations": 3,
+   "commune": "09334"
+  },
+  "09287": {
+   "associations": 2,
+   "commune": "09088"
+  },
+  "09302": {
+   "associations": 4,
+   "commune": "09334"
+  },
+  "09317": {
+   "associations": 4,
+   "commune": "09062"
+  },
+  "11097": {
+   "associations": 3,
+   "commune": "11323"
+  },
+  "11298": {
+   "associations": 4,
+   "commune": "11251"
+  },
+  "11329": {
+   "associations": 12,
+   "commune": "11131"
+  },
+  "12020": {
+   "associations": 13,
+   "commune": "12090"
+  },
+  "12076": {
+   "associations": 78,
+   "commune": "12218"
+  },
+  "14002": {
+   "associations": 2,
+   "commune": "14150"
+  },
+  "14004": {
+   "associations": 2,
+   "commune": "14281"
+  },
+  "14008": {
+   "associations": 6,
+   "commune": "14355"
+  },
+  "14011": {
+   "associations": 22,
+   "commune": "14581"
+  },
+  "14056": {
+   "associations": 2,
+   "commune": "14027"
+  },
+  "14074": {
+   "associations": 4,
+   "commune": "14005"
+  },
+  "14075": {
+   "associations": 2,
+   "commune": "14410"
+  },
+  "14081": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14099": {
+   "associations": 3,
+   "commune": "14654"
+  },
+  "14109": {
+   "associations": 5,
+   "commune": "14098"
+  },
+  "14128": {
+   "associations": 1,
+   "commune": "14027"
+  },
+  "14142": {
+   "associations": 4,
+   "commune": "14342"
+  },
+  "14151": {
+   "associations": 10,
+   "commune": "14658"
+  },
+  "14157": {
+   "associations": 18,
+   "commune": "14098"
+  },
+  "14158": {
+   "associations": 6,
+   "commune": "14456"
+  },
+  "14164": {
+   "associations": 9,
+   "commune": "14349"
+  },
+  "14176": {
+   "associations": 1,
+   "commune": "14005"
+  },
+  "14185": {
+   "associations": 4,
+   "commune": "14514"
+  },
+  "14186": {
+   "associations": 3,
+   "commune": "14406"
+  },
+  "14188": {
+   "associations": 1,
+   "commune": "14579"
+  },
+  "14192": {
+   "associations": 4,
+   "commune": "14658"
+  },
+  "14201": {
+   "associations": 10,
+   "commune": "14431"
+  },
+  "14208": {
+   "associations": 3,
+   "commune": "14431"
+  },
+  "14212": {
+   "associations": 2,
+   "commune": "14406"
+  },
+  "14217": {
+   "associations": 3,
+   "commune": "14672"
+  },
+  "14219": {
+   "associations": 2,
+   "commune": "14027"
+  },
+  "14235": {
+   "associations": 8,
+   "commune": "14281"
+  },
+  "14268": {
+   "associations": 4,
+   "commune": "14005"
+  },
+  "14279": {
+   "associations": 2,
+   "commune": "14658"
+  },
+  "14294": {
+   "associations": 10,
+   "commune": "14554"
+  },
+  "14296": {
+   "associations": 3,
+   "commune": "14658"
+  },
+  "14307": {
+   "associations": 4,
+   "commune": "14713"
+  },
+  "14313": {
+   "associations": 1,
+   "commune": "14431"
+  },
+  "14339": {
+   "associations": 5,
+   "commune": "14538"
+  },
+  "14359": {
+   "associations": 1,
+   "commune": "14431"
+  },
+  "14363": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14372": {
+   "associations": 13,
+   "commune": "14143"
+  },
+  "14373": {
+   "associations": 5,
+   "commune": "14475"
+  },
+  "14376": {
+   "associations": 2,
+   "commune": "14581"
+  },
+  "14382": {
+   "associations": 1,
+   "commune": "14281"
+  },
+  "14386": {
+   "associations": 5,
+   "commune": "14431"
+  },
+  "14387": {
+   "associations": 2,
+   "commune": "14431"
+  },
+  "14413": {
+   "associations": 1,
+   "commune": "14347"
+  },
+  "14417": {
+   "associations": 13,
+   "commune": "14658"
+  },
+  "14422": {
+   "associations": 12,
+   "commune": "14431"
+  },
+  "14423": {
+   "associations": 1,
+   "commune": "14098"
+  },
+  "14429": {
+   "associations": 2,
+   "commune": "14371"
+  },
+  "14433": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14444": {
+   "associations": 1,
+   "commune": "14431"
+  },
+  "14450": {
+   "associations": 5,
+   "commune": "14654"
+  },
+  "14462": {
+   "associations": 6,
+   "commune": "14342"
+  },
+  "14477": {
+   "associations": 5,
+   "commune": "14027"
+  },
+  "14481": {
+   "associations": 6,
+   "commune": "14342"
+  },
+  "14489": {
+   "associations": 4,
+   "commune": "14654"
+  },
+  "14493": {
+   "associations": 5,
+   "commune": "14431"
+  },
+  "14505": {
+   "associations": 4,
+   "commune": "14150"
+  },
+  "14508": {
+   "associations": 9,
+   "commune": "14027"
+  },
+  "14513": {
+   "associations": 6,
+   "commune": "50592"
+  },
+  "14525": {
+   "associations": 4,
+   "commune": "14098"
+  },
+  "14537": {
+   "associations": 2,
+   "commune": "14046"
+  },
+  "14544": {
+   "associations": 4,
+   "commune": "14027"
+  },
+  "14548": {
+   "associations": 2,
+   "commune": "14406"
+  },
+  "14551": {
+   "associations": 3,
+   "commune": "14591"
+  },
+  "14560": {
+   "associations": 1,
+   "commune": "14231"
+  },
+  "14568": {
+   "associations": 3,
+   "commune": "14098"
+  },
+  "14577": {
+   "associations": 10,
+   "commune": "14200"
+  },
+  "14580": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14597": {
+   "associations": 6,
+   "commune": "14357"
+  },
+  "14600": {
+   "associations": 14,
+   "commune": "14431"
+  },
+  "14611": {
+   "associations": 9,
+   "commune": "14658"
+  },
+  "14616": {
+   "associations": 9,
+   "commune": "14654"
+  },
+  "14623": {
+   "associations": 31,
+   "commune": "14408"
+  },
+  "14653": {
+   "associations": 4,
+   "commune": "14174"
+  },
+  "14662": {
+   "associations": 4,
+   "commune": "14357"
+  },
+  "14671": {
+   "associations": 4,
+   "commune": "14658"
+  },
+  "14688": {
+   "associations": 1,
+   "commune": "14654"
+  },
+  "14691": {
+   "associations": 3,
+   "commune": "14538"
+  },
+  "14695": {
+   "associations": 5,
+   "commune": "14581"
+  },
+  "14697": {
+   "associations": 18,
+   "commune": "14654"
+  },
+  "14702": {
+   "associations": 8,
+   "commune": "14475"
+  },
+  "14703": {
+   "associations": 6,
+   "commune": "14150"
+  },
+  "14717": {
+   "associations": 1,
+   "commune": "14762"
+  },
+  "14722": {
+   "associations": 5,
+   "commune": "14143"
+  },
+  "14725": {
+   "associations": 1,
+   "commune": "14333"
+  },
+  "14729": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14749": {
+   "associations": 2,
+   "commune": "14431"
+  },
+  "14750": {
+   "associations": 2,
+   "commune": "14654"
+  },
+  "14757": {
+   "associations": 3,
+   "commune": "14200"
+  },
+  "14763": {
+   "associations": 3,
+   "commune": "14342"
+  },
+  "15044": {
+   "associations": 1,
+   "commune": "15138"
+  },
+  "15099": {
+   "associations": 2,
+   "commune": "15142"
+  },
+  "15136": {
+   "associations": 9,
+   "commune": "15027"
+  },
+  "15145": {
+   "associations": 4,
+   "commune": "15142"
+  },
+  "15227": {
+   "associations": 4,
+   "commune": "15142"
+  },
+  "16004": {
+   "associations": 5,
+   "commune": "16230"
+  },
+  "16010": {
+   "associations": 5,
+   "commune": "16186"
+  },
+  "16017": {
+   "associations": 2,
+   "commune": "16339"
+  },
+  "16033": {
+   "associations": 2,
+   "commune": "16023"
+  },
+  "16051": {
+   "associations": 6,
+   "commune": "16339"
+  },
+  "16094": {
+   "associations": 4,
+   "commune": "16023"
+  },
+  "16115": {
+   "associations": 1,
+   "commune": "16046"
+  },
+  "16129": {
+   "associations": 5,
+   "commune": "16204"
+  },
+  "16140": {
+   "associations": 8,
+   "commune": "16206"
+  },
+  "16147": {
+   "associations": 7,
+   "commune": "16198"
+  },
+  "16149": {
+   "associations": 11,
+   "commune": "16192"
+  },
+  "16156": {
+   "associations": 12,
+   "commune": "16286"
+  },
+  "16202": {
+   "associations": 9,
+   "commune": "16153"
+  },
+  "16214": {
+   "associations": 2,
+   "commune": "16192"
+  },
+  "16226": {
+   "associations": 18,
+   "commune": "16393"
+  },
+  "16228": {
+   "associations": 4,
+   "commune": "16339"
+  },
+  "16238": {
+   "associations": 2,
+   "commune": "16023"
+  },
+  "16247": {
+   "associations": 2,
+   "commune": "16204"
+  },
+  "16259": {
+   "associations": 6,
+   "commune": "16192"
+  },
+  "16274": {
+   "associations": 4,
+   "commune": "16406"
+  },
+  "16294": {
+   "associations": 13,
+   "commune": "16230"
+  },
+  "16296": {
+   "associations": 10,
+   "commune": "16300"
+  },
+  "16309": {
+   "associations": 2,
+   "commune": "16300"
+  },
+  "16328": {
+   "associations": 6,
+   "commune": "16230"
+  },
+  "16332": {
+   "associations": 1,
+   "commune": "16046"
+  },
+  "16344": {
+   "associations": 9,
+   "commune": "16281"
+  },
+  "16351": {
+   "associations": 12,
+   "commune": "16233"
+  },
+  "16355": {
+   "associations": 30,
+   "commune": "16097"
+  },
+  "16376": {
+   "associations": 6,
+   "commune": "16192"
+  },
+  "16386": {
+   "associations": 12,
+   "commune": "16204"
+  },
+  "16391": {
+   "associations": 3,
+   "commune": "16110"
+  },
+  "16410": {
+   "associations": 4,
+   "commune": "16110"
+  },
+  "16411": {
+   "associations": 16,
+   "commune": "16005"
+  },
+  "16417": {
+   "associations": 2,
+   "commune": "16204"
+  },
+  "17103": {
+   "associations": 2,
+   "commune": "17457"
+  },
+  "17169": {
+   "associations": 3,
+   "commune": "17344"
+  },
+  "17189": {
+   "associations": 20,
+   "commune": "17219"
+  },
+  "17272": {
+   "associations": 6,
+   "commune": "17340"
+  },
+  "17334": {
+   "associations": 3,
+   "commune": "17268"
+  },
+  "17392": {
+   "associations": 1,
+   "commune": "17160"
+  },
+  "18123": {
+   "associations": 1,
+   "commune": "18023"
+  },
+  "18239": {
+   "associations": 2,
+   "commune": "18023"
+  },
+  "19032": {
+   "associations": 9,
+   "commune": "19019"
+  },
+  "19092": {
+   "associations": 4,
+   "commune": "19143"
+  },
+  "19127": {
+   "associations": 3,
+   "commune": "19098"
+  },
+  "19183": {
+   "associations": 3,
+   "commune": "19010"
+  },
+  "19185": {
+   "associations": 5,
+   "commune": "19101"
+  },
+  "19218": {
+   "associations": 6,
+   "commune": "19252"
+  },
+  "19223": {
+   "associations": 7,
+   "commune": "19248"
+  },
+  "19230": {
+   "associations": 13,
+   "commune": "19248"
+  },
+  "21073": {
+   "associations": 8,
+   "commune": "21272"
+  },
+  "21213": {
+   "associations": 11,
+   "commune": "21452"
+  },
+  "21486": {
+   "associations": 9,
+   "commune": "21352"
+  },
+  "21507": {
+   "associations": 3,
+   "commune": "21183"
+  },
+  "21513": {
+   "associations": 5,
+   "commune": "21178"
+  },
+  "21621": {
+   "associations": 2,
+   "commune": "21623"
+  },
+  "21658": {
+   "associations": 1,
+   "commune": "21195"
+  },
+  "22007": {
+   "associations": 141,
+   "commune": "22055"
+  },
+  "22027": {
+   "associations": 12,
+   "commune": "22241"
+  },
+  "22038": {
+   "associations": 10,
+   "commune": "22206"
+  },
+  "22043": {
+   "associations": 6,
+   "commune": "22241"
+  },
+  "22078": {
+   "associations": 5,
+   "commune": "22264"
+  },
+  "22100": {
+   "associations": 10,
+   "commune": "22219"
+  },
+  "22123": {
+   "associations": 30,
+   "commune": "22050"
+  },
+  "22154": {
+   "associations": 18,
+   "commune": "22093"
+  },
+  "22167": {
+   "associations": 3,
+   "commune": "22107"
+  },
+  "22173": {
+   "associations": 23,
+   "commune": "22093"
+  },
+  "22192": {
+   "associations": 2,
+   "commune": "22209"
+  },
+  "22200": {
+   "associations": 14,
+   "commune": "22237"
+  },
+  "22247": {
+   "associations": 16,
+   "commune": "22264"
+  },
+  "22253": {
+   "associations": 4,
+   "commune": "22264"
+  },
+  "22290": {
+   "associations": 7,
+   "commune": "22107"
+  },
+  "22298": {
+   "associations": 8,
+   "commune": "22158"
+  },
+  "22309": {
+   "associations": 3,
+   "commune": "22147"
+  },
+  "22357": {
+   "associations": 2,
+   "commune": "22209"
+  },
+  "23023": {
+   "associations": 4,
+   "commune": "23149"
+  },
+  "23121": {
+   "associations": 1,
+   "commune": "23109"
+  },
+  "23126": {
+   "associations": 4,
+   "commune": "23189"
+  },
+  "23231": {
+   "associations": 2,
+   "commune": "23192"
+  },
+  "24013": {
+   "associations": 1,
+   "commune": "24053"
+  },
+  "24033": {
+   "associations": 7,
+   "commune": "24253"
+  },
+  "24041": {
+   "associations": 5,
+   "commune": "24087"
+  },
+  "24044": {
+   "associations": 12,
+   "commune": "24026"
+  },
+  "24047": {
+   "associations": 2,
+   "commune": "24147"
+  },
+  "24065": {
+   "associations": 6,
+   "commune": "24312"
+  },
+  "24079": {
+   "associations": 3,
+   "commune": "24064"
+  },
+  "24089": {
+   "associations": 14,
+   "commune": "24325"
+  },
+  "24092": {
+   "associations": 14,
+   "commune": "24362"
+  },
+  "24093": {
+   "associations": 4,
+   "commune": "24554"
+  },
+  "24099": {
+   "associations": 4,
+   "commune": "24253"
+  },
+  "24103": {
+   "associations": 13,
+   "commune": "24026"
+  },
+  "24127": {
+   "associations": 8,
+   "commune": "24364"
+  },
+  "24166": {
+   "associations": 9,
+   "commune": "24026"
+  },
+  "24170": {
+   "associations": 6,
+   "commune": "24064"
+  },
+  "24178": {
+   "associations": 4,
+   "commune": "24490"
+  },
+  "24181": {
+   "associations": 3,
+   "commune": "24534"
+  },
+  "24198": {
+   "associations": 8,
+   "commune": "24064"
+  },
+  "24203": {
+   "associations": 3,
+   "commune": "24253"
+  },
+  "24204": {
+   "associations": 4,
+   "commune": "24117"
+  },
+  "24233": {
+   "associations": 4,
+   "commune": "24259"
+  },
+  "24235": {
+   "associations": 13,
+   "commune": "24253"
+  },
+  "24249": {
+   "associations": 9,
+   "commune": "24172"
+  },
+  "24258": {
+   "associations": 13,
+   "commune": "24312"
+  },
+  "24270": {
+   "associations": 15,
+   "commune": "24026"
+  },
+  "24283": {
+   "associations": 9,
+   "commune": "24253"
+  },
+  "24314": {
+   "associations": 3,
+   "commune": "24325"
+  },
+  "24333": {
+   "associations": 2,
+   "commune": "24216"
+  },
+  "24368": {
+   "associations": 7,
+   "commune": "24490"
+  },
+  "24369": {
+   "associations": 3,
+   "commune": "24026"
+  },
+  "24389": {
+   "associations": 6,
+   "commune": "24172"
+  },
+  "24391": {
+   "associations": 11,
+   "commune": "24064"
+  },
+  "24402": {
+   "associations": 3,
+   "commune": "24423"
+  },
+  "24427": {
+   "associations": 4,
+   "commune": "24259"
+  },
+  "24431": {
+   "associations": 4,
+   "commune": "24259"
+  },
+  "24433": {
+   "associations": 2,
+   "commune": "24423"
+  },
+  "24447": {
+   "associations": 7,
+   "commune": "24053"
+  },
+  "24475": {
+   "associations": 4,
+   "commune": "24147"
+  },
+  "24503": {
+   "associations": 6,
+   "commune": "24253"
+  },
+  "24530": {
+   "associations": 5,
+   "commune": "24064"
+  },
+  "24561": {
+   "associations": 7,
+   "commune": "24064"
+  },
+  "24579": {
+   "associations": 13,
+   "commune": "24253"
+  },
+  "25027": {
+   "associations": 2,
+   "commune": "25245"
+  },
+  "25028": {
+   "associations": 1,
+   "commune": "25424"
+  },
+  "25034": {
+   "associations": 8,
+   "commune": "25035"
+  },
+  "25123": {
+   "associations": 1,
+   "commune": "25222"
+  },
+  "25137": {
+   "associations": 1,
+   "commune": "25368"
+  },
+  "25140": {
+   "associations": 2,
+   "commune": "25156"
+  },
+  "25250": {
+   "associations": 6,
+   "commune": "25558"
+  },
+  "25282": {
+   "associations": 12,
+   "commune": "25060"
+  },
+  "25297": {
+   "associations": 2,
+   "commune": "25364"
+  },
+  "25303": {
+   "associations": 5,
+   "commune": "25390"
+  },
+  "25347": {
+   "associations": 20,
+   "commune": "25390"
+  },
+  "25398": {
+   "associations": 1,
+   "commune": "25390"
+  },
+  "25533": {
+   "associations": 1,
+   "commune": "25223"
+  },
+  "25549": {
+   "associations": 10,
+   "commune": "25060"
+  },
+  "25576": {
+   "associations": 2,
+   "commune": "25575"
+  },
+  "25587": {
+   "associations": 2,
+   "commune": "25078"
+  },
+  "25593": {
+   "associations": 2,
+   "commune": "25147"
+  },
+  "25620": {
+   "associations": 2,
+   "commune": "25390"
+  },
+  "25628": {
+   "associations": 3,
+   "commune": "25375"
+  },
+  "26184": {
+   "associations": 7,
+   "commune": "26210"
+  },
+  "26219": {
+   "associations": 7,
+   "commune": "26216"
+  },
+  "26297": {
+   "associations": 2,
+   "commune": "26210"
+  },
+  "26354": {
+   "associations": 5,
+   "commune": "26086"
+  },
+  "26371": {
+   "associations": 3,
+   "commune": "26289"
+  },
+  "27041": {
+   "associations": 1,
+   "commune": "27049"
+  },
+  "27058": {
+   "associations": 5,
+   "commune": "27676"
+  },
+  "27092": {
+   "associations": 7,
+   "commune": "27062"
+  },
+  "27093": {
+   "associations": 2,
+   "commune": "27090"
+  },
+  "27131": {
+   "associations": 1,
+   "commune": "27425"
+  },
+  "27143": {
+   "associations": 1,
+   "commune": "27685"
+  },
+  "27150": {
+   "associations": 7,
+   "commune": "27554"
+  },
+  "27159": {
+   "associations": 1,
+   "commune": "27112"
+  },
+  "27172": {
+   "associations": 1,
+   "commune": "27032"
+  },
+  "27175": {
+   "associations": 8,
+   "commune": "27070"
+  },
+  "27253": {
+   "associations": 4,
+   "commune": "27425"
+  },
+  "27265": {
+   "associations": 10,
+   "commune": "27679"
+  },
+  "27268": {
+   "associations": 6,
+   "commune": "27447"
+  },
+  "27270": {
+   "associations": 5,
+   "commune": "27070"
+  },
+  "27274": {
+   "associations": 7,
+   "commune": "27294"
+  },
+  "27292": {
+   "associations": 1,
+   "commune": "27049"
+  },
+  "27297": {
+   "associations": 7,
+   "commune": "27198"
+  },
+  "27402": {
+   "associations": 1,
+   "commune": "27447"
+  },
+  "27416": {
+   "associations": 10,
+   "commune": "27198"
+  },
+  "27452": {
+   "associations": 1,
+   "commune": "27425"
+  },
+  "27491": {
+   "associations": 2,
+   "commune": "27198"
+  },
+  "27510": {
+   "associations": 8,
+   "commune": "27448"
+  },
+  "27523": {
+   "associations": 2,
+   "commune": "27516"
+  },
+  "27532": {
+   "associations": 1,
+   "commune": "27157"
+  },
+  "27549": {
+   "associations": 8,
+   "commune": "27467"
+  },
+  "27551": {
+   "associations": 2,
+   "commune": "27541"
+  },
+  "27573": {
+   "associations": 1,
+   "commune": "27578"
+  },
+  "27581": {
+   "associations": 4,
+   "commune": "27263"
+  },
+  "27588": {
+   "associations": 8,
+   "commune": "27554"
+  },
+  "27600": {
+   "associations": 3,
+   "commune": "27516"
+  },
+  "27626": {
+   "associations": 2,
+   "commune": "27089"
+  },
+  "27628": {
+   "associations": 1,
+   "commune": "27049"
+  },
+  "27642": {
+   "associations": 9,
+   "commune": "27290"
+  },
+  "27647": {
+   "associations": 5,
+   "commune": "27676"
+  },
+  "27648": {
+   "associations": 5,
+   "commune": "27412"
+  },
+  "27651": {
+   "associations": 2,
+   "commune": "27471"
+  },
+  "27653": {
+   "associations": 1,
+   "commune": "27213"
+  },
+  "27657": {
+   "associations": 1,
+   "commune": "27089"
+  },
+  "28002": {
+   "associations": 10,
+   "commune": "28199"
+  },
+  "28017": {
+   "associations": 5,
+   "commune": "28103"
+  },
+  "28025": {
+   "associations": 2,
+   "commune": "28319"
+  },
+  "28042": {
+   "associations": 8,
+   "commune": "28015"
+  },
+  "28043": {
+   "associations": 1,
+   "commune": "28226"
+  },
+  "28044": {
+   "associations": 3,
+   "commune": "28012"
+  },
+  "28063": {
+   "associations": 10,
+   "commune": "28236"
+  },
+  "28069": {
+   "associations": 3,
+   "commune": "28185"
+  },
+  "28083": {
+   "associations": 2,
+   "commune": "28103"
+  },
+  "28093": {
+   "associations": 8,
+   "commune": "28012"
+  },
+  "28101": {
+   "associations": 3,
+   "commune": "28330"
+  },
+  "28112": {
+   "associations": 5,
+   "commune": "28236"
+  },
+  "28115": {
+   "associations": 8,
+   "commune": "28012"
+  },
+  "28133": {
+   "associations": 3,
+   "commune": "28103"
+  },
+  "28150": {
+   "associations": 1,
+   "commune": "28103"
+  },
+  "28165": {
+   "associations": 11,
+   "commune": "28331"
+  },
+  "28204": {
+   "associations": 4,
+   "commune": "28012"
+  },
+  "28205": {
+   "associations": 7,
+   "commune": "28334"
+  },
+  "28224": {
+   "associations": 7,
+   "commune": "28330"
+  },
+  "28241": {
+   "associations": 3,
+   "commune": "28103"
+  },
+  "28250": {
+   "associations": 1,
+   "commune": "28127"
+  },
+  "28262": {
+   "associations": 2,
+   "commune": "28103"
+  },
+  "28266": {
+   "associations": 1,
+   "commune": "28168"
+  },
+  "28276": {
+   "associations": 3,
+   "commune": "28319"
+  },
+  "28311": {
+   "associations": 10,
+   "commune": "28199"
+  },
+  "28318": {
+   "associations": 6,
+   "commune": "28103"
+  },
+  "28328": {
+   "associations": 1,
+   "commune": "28393"
+  },
+  "28340": {
+   "associations": 7,
+   "commune": "28103"
+  },
+  "28356": {
+   "associations": 4,
+   "commune": "28012"
+  },
+  "28376": {
+   "associations": 2,
+   "commune": "28018"
+  },
+  "28412": {
+   "associations": 7,
+   "commune": "28406"
+  },
+  "29052": {
+   "associations": 1,
+   "commune": "29003"
+  },
+  "29129": {
+   "associations": 23,
+   "commune": "29227"
+  },
+  "29149": {
+   "associations": 42,
+   "commune": "29076"
+  },
+  "29203": {
+   "associations": 16,
+   "commune": "29021"
+  },
+  "29219": {
+   "associations": 2,
+   "commune": "29199"
+  },
+  "30094": {
+   "associations": 12,
+   "commune": "30329"
+  },
+  "30157": {
+   "associations": 10,
+   "commune": "30052"
+  },
+  "30190": {
+   "associations": 23,
+   "commune": "30339"
+  },
+  "31298": {
+   "associations": 1,
+   "commune": "31471"
+  },
+  "31307": {
+   "associations": 1,
+   "commune": "31412"
+  },
+  "31438": {
+   "associations": 3,
+   "commune": "31277"
+  },
+  "32067": {
+   "associations": 1,
+   "commune": "32365"
+  },
+  "32074": {
+   "associations": 3,
+   "commune": "32344"
+  },
+  "32260": {
+   "associations": 7,
+   "commune": "32365"
+  },
+  "32413": {
+   "associations": 8,
+   "commune": "32365"
+  },
+  "33091": {
+   "associations": 13,
+   "commune": "33268"
+  },
+  "33092": {
+   "associations": 2,
+   "commune": "33008"
+  },
+  "33107": {
+   "associations": 9,
+   "commune": "33106"
+  },
+  "33267": {
+   "associations": 17,
+   "commune": "33380"
+  },
+  "33338": {
+   "associations": 3,
+   "commune": "33055"
+  },
+  "33409": {
+   "associations": 2,
+   "commune": "33008"
+  },
+  "34093": {
+   "associations": 16,
+   "commune": "34144"
+  },
+  "34330": {
+   "associations": 13,
+   "commune": "34246"
+  },
+  "35011": {
+   "associations": 3,
+   "commune": "35292"
+  },
+  "35048": {
+   "associations": 8,
+   "commune": "35168"
+  },
+  "35053": {
+   "associations": 2,
+   "commune": "35220"
+  },
+  "35083": {
+   "associations": 6,
+   "commune": "35191"
+  },
+  "35100": {
+   "associations": 9,
+   "commune": "35163"
+  },
+  "35112": {
+   "associations": 25,
+   "commune": "35062"
+  },
+  "35113": {
+   "associations": 6,
+   "commune": "35004"
+  },
+  "35147": {
+   "associations": 10,
+   "commune": "35308"
+  },
+  "35209": {
+   "associations": 17,
+   "commune": "35069"
+  },
+  "35213": {
+   "associations": 1,
+   "commune": "35288"
+  },
+  "35254": {
+   "associations": 16,
+   "commune": "35069"
+  },
+  "35267": {
+   "associations": 38,
+   "commune": "35257"
+  },
+  "35269": {
+   "associations": 7,
+   "commune": "35282"
+  },
+  "35293": {
+   "associations": 8,
+   "commune": "35282"
+  },
+  "35301": {
+   "associations": 9,
+   "commune": "35184"
+  },
+  "35303": {
+   "associations": 8,
+   "commune": "35004"
+  },
+  "35323": {
+   "associations": 4,
+   "commune": "35191"
+  },
+  "35341": {
+   "associations": 25,
+   "commune": "35004"
+  },
+  "35344": {
+   "associations": 4,
+   "commune": "35308"
+  },
+  "35348": {
+   "associations": 6,
+   "commune": "35282"
+  },
+  "36072": {
+   "associations": 18,
+   "commune": "36244"
+  },
+  "36206": {
+   "associations": 3,
+   "commune": "36093"
+  },
+  "37102": {
+   "associations": 7,
+   "commune": "37123"
+  },
+  "37120": {
+   "associations": 9,
+   "commune": "37232"
+  },
+  "37135": {
+   "associations": 14,
+   "commune": "37021"
+  },
+  "37209": {
+   "associations": 6,
+   "commune": "37254"
+  },
+  "37227": {
+   "associations": 10,
+   "commune": "37232"
+  },
+  "38014": {
+   "associations": 7,
+   "commune": "38297"
+  },
+  "38016": {
+   "associations": 5,
+   "commune": "38479"
+  },
+  "38024": {
+   "associations": 10,
+   "commune": "38152"
+  },
+  "38025": {
+   "associations": 9,
+   "commune": "38284"
+  },
+  "38121": {
+   "associations": 16,
+   "commune": "38479"
+  },
+  "38125": {
+   "associations": 3,
+   "commune": "38456"
+  },
+  "38274": {
+   "associations": 14,
+   "commune": "38479"
+  },
+  "38293": {
+   "associations": 6,
+   "commune": "38560"
+  },
+  "38302": {
+   "associations": 3,
+   "commune": "38073"
+  },
+  "38305": {
+   "associations": 19,
+   "commune": "38292"
+  },
+  "38306": {
+   "associations": 8,
+   "commune": "38163"
+  },
+  "38312": {
+   "associations": 8,
+   "commune": "38407"
+  },
+  "38367": {
+   "associations": 20,
+   "commune": "38395"
+  },
+  "38435": {
+   "associations": 16,
+   "commune": "38395"
+  },
+  "38534": {
+   "associations": 12,
+   "commune": "38253"
+  },
+  "39005": {
+   "associations": 1,
+   "commune": "39385"
+  },
+  "39023": {
+   "associations": 2,
+   "commune": "39378"
+  },
+  "39036": {
+   "associations": 3,
+   "commune": "39209"
+  },
+  "39064": {
+   "associations": 1,
+   "commune": "39576"
+  },
+  "39069": {
+   "associations": 2,
+   "commune": "39485"
+  },
+  "39075": {
+   "associations": 3,
+   "commune": "39199"
+  },
+  "39087": {
+   "associations": 1,
+   "commune": "39370"
+  },
+  "39113": {
+   "associations": 15,
+   "commune": "39339"
+  },
+  "39115": {
+   "associations": 7,
+   "commune": "39258"
+  },
+  "39123": {
+   "associations": 1,
+   "commune": "39290"
+  },
+  "39135": {
+   "associations": 2,
+   "commune": "39378"
+  },
+  "39148": {
+   "associations": 2,
+   "commune": "39016"
+  },
+  "39158": {
+   "associations": 2,
+   "commune": "39530"
+  },
+  "39186": {
+   "associations": 4,
+   "commune": "39491"
+  },
+  "39195": {
+   "associations": 2,
+   "commune": "39273"
+  },
+  "39224": {
+   "associations": 3,
+   "commune": "39290"
+  },
+  "39243": {
+   "associations": 2,
+   "commune": "39577"
+  },
+  "39264": {
+   "associations": 3,
+   "commune": "39576"
+  },
+  "39287": {
+   "associations": 2,
+   "commune": "39137"
+  },
+  "39303": {
+   "associations": 3,
+   "commune": "39485"
+  },
+  "39309": {
+   "associations": 1,
+   "commune": "39537"
+  },
+  "39341": {
+   "associations": 1,
+   "commune": "39510"
+  },
+  "39347": {
+   "associations": 4,
+   "commune": "39273"
+  },
+  "39395": {
+   "associations": 3,
+   "commune": "39043"
+  },
+  "39414": {
+   "associations": 4,
+   "commune": "39190"
+  },
+  "39417": {
+   "associations": 3,
+   "commune": "39130"
+  },
+  "39440": {
+   "associations": 7,
+   "commune": "39286"
+  },
+  "39474": {
+   "associations": 6,
+   "commune": "39576"
+  },
+  "39484": {
+   "associations": 2,
+   "commune": "39378"
+  },
+  "39506": {
+   "associations": 3,
+   "commune": "39290"
+  },
+  "39542": {
+   "associations": 1,
+   "commune": "39583"
+  },
+  "39548": {
+   "associations": 6,
+   "commune": "39434"
+  },
+  "39549": {
+   "associations": 5,
+   "commune": "39576"
+  },
+  "39562": {
+   "associations": 3,
+   "commune": "39130"
+  },
+  "39564": {
+   "associations": 4,
+   "commune": "39485"
+  },
+  "39566": {
+   "associations": 2,
+   "commune": "39018"
+  },
+  "40009": {
+   "associations": 12,
+   "commune": "40197"
+  },
+  "40048": {
+   "associations": 9,
+   "commune": "40243"
+  },
+  "40107": {
+   "associations": 7,
+   "commune": "40197"
+  },
+  "40302": {
+   "associations": 5,
+   "commune": "40197"
+  },
+  "41015": {
+   "associations": 1,
+   "commune": "41171"
+  },
+  "41033": {
+   "associations": 10,
+   "commune": "41142"
+  },
+  "41064": {
+   "associations": 2,
+   "commune": "41055"
+  },
+  "41082": {
+   "associations": 10,
+   "commune": "41059"
+  },
+  "41092": {
+   "associations": 15,
+   "commune": "41059"
+  },
+  "41170": {
+   "associations": 13,
+   "commune": "41059"
+  },
+  "41197": {
+   "associations": 1,
+   "commune": "41248"
+  },
+  "41210": {
+   "associations": 1,
+   "commune": "41171"
+  },
+  "41257": {
+   "associations": 12,
+   "commune": "41059"
+  },
+  "41263": {
+   "associations": 3,
+   "commune": "41070"
+  },
+  "41272": {
+   "associations": 4,
+   "commune": "41167"
+  },
+  "42004": {
+   "associations": 7,
+   "commune": "42268"
+  },
+  "42072": {
+   "associations": 2,
+   "commune": "42217"
+  },
+  "42082": {
+   "associations": 6,
+   "commune": "42268"
+  },
+  "42109": {
+   "associations": 8,
+   "commune": "42084"
+  },
+  "42252": {
+   "associations": 14,
+   "commune": "42084"
+  },
+  "42291": {
+   "associations": 6,
+   "commune": "42245"
+  },
+  "44017": {
+   "associations": 8,
+   "commune": "44180"
+  },
+  "44034": {
+   "associations": 1,
+   "commune": "44213"
+  },
+  "44040": {
+   "associations": 2,
+   "commune": "44005"
+  },
+  "44093": {
+   "associations": 8,
+   "commune": "44180"
+  },
+  "44160": {
+   "associations": 27,
+   "commune": "44003"
+  },
+  "44191": {
+   "associations": 8,
+   "commune": "44180"
+  },
+  "44219": {
+   "associations": 6,
+   "commune": "44180"
+  },
+  "45267": {
+   "associations": 6,
+   "commune": "45051"
+  },
+  "46014": {
+   "associations": 9,
+   "commune": "46263"
+  },
+  "46067": {
+   "associations": 9,
+   "commune": "46232"
+  },
+  "46077": {
+   "associations": 12,
+   "commune": "46156"
+  },
+  "46099": {
+   "associations": 5,
+   "commune": "46033"
+  },
+  "46158": {
+   "associations": 15,
+   "commune": "46262"
+  },
+  "46217": {
+   "associations": 23,
+   "commune": "46172"
+  },
+  "46248": {
+   "associations": 5,
+   "commune": "46063"
+  },
+  "46274": {
+   "associations": 4,
+   "commune": "46262"
+  },
+  "46278": {
+   "associations": 13,
+   "commune": "46033"
+  },
+  "46285": {
+   "associations": 5,
+   "commune": "46263"
+  },
+  "46298": {
+   "associations": 11,
+   "commune": "46083"
+  },
+  "46300": {
+   "associations": 6,
+   "commune": "46033"
+  },
+  "46326": {
+   "associations": 3,
+   "commune": "46201"
+  },
+  "46327": {
+   "associations": 5,
+   "commune": "46156"
+  },
+  "46331": {
+   "associations": 13,
+   "commune": "46268"
+  },
+  "47166": {
+   "associations": 3,
+   "commune": "47302"
+  },
+  "48014": {
+   "associations": 12,
+   "commune": "48027"
+  },
+  "48023": {
+   "associations": 3,
+   "commune": "48027"
+  },
+  "48040": {
+   "associations": 8,
+   "commune": "48027"
+  },
+  "48047": {
+   "associations": 4,
+   "commune": "48009"
+  },
+  "48049": {
+   "associations": 2,
+   "commune": "48099"
+  },
+  "48057": {
+   "associations": 2,
+   "commune": "48127"
+  },
+  "48060": {
+   "associations": 4,
+   "commune": "48009"
+  },
+  "48076": {
+   "associations": 11,
+   "commune": "48009"
+  },
+  "48078": {
+   "associations": 2,
+   "commune": "48126"
+  },
+  "48084": {
+   "associations": 2,
+   "commune": "48139"
+  },
+  "48093": {
+   "associations": 7,
+   "commune": "48027"
+  },
+  "48101": {
+   "associations": 2,
+   "commune": "48146"
+  },
+  "48120": {
+   "associations": 4,
+   "commune": "48087"
+  },
+  "48122": {
+   "associations": 12,
+   "commune": "48146"
+  },
+  "48125": {
+   "associations": 5,
+   "commune": "48094"
+  },
+  "48133": {
+   "associations": 8,
+   "commune": "48127"
+  },
+  "48142": {
+   "associations": 7,
+   "commune": "48009"
+  },
+  "48154": {
+   "associations": 7,
+   "commune": "48094"
+  },
+  "48164": {
+   "associations": 4,
+   "commune": "48027"
+  },
+  "48180": {
+   "associations": 5,
+   "commune": "48094"
+  },
+  "48183": {
+   "associations": 9,
+   "commune": "48009"
+  },
+  "48184": {
+   "associations": 5,
+   "commune": "48038"
+  },
+  "48189": {
+   "associations": 2,
+   "commune": "48127"
+  },
+  "48195": {
+   "associations": 3,
+   "commune": "48094"
+  },
+  "48197": {
+   "associations": 2,
+   "commune": "48127"
+  },
+  "49001": {
+   "associations": 13,
+   "commune": "49050"
+  },
+  "49013": {
+   "associations": 2,
+   "commune": "49228"
+  },
+  "49016": {
+   "associations": 2,
+   "commune": "49328"
+  },
+  "49037": {
+   "associations": 6,
+   "commune": "49331"
+  },
+  "49044": {
+   "associations": 5,
+   "commune": "49228"
+  },
+  "49046": {
+   "associations": 9,
+   "commune": "49060"
+  },
+  "49047": {
+   "associations": 3,
+   "commune": "49125"
+  },
+  "49051": {
+   "associations": 7,
+   "commune": "49080"
+  },
+  "49052": {
+   "associations": 3,
+   "commune": "49228"
+  },
+  "49062": {
+   "associations": 1,
+   "commune": "49228"
+  },
+  "49065": {
+   "associations": 107,
+   "commune": "49080"
+  },
+  "49069": {
+   "associations": 511,
+   "commune": "49126"
+  },
+  "49073": {
+   "associations": 2,
+   "commune": "49248"
+  },
+  "49077": {
+   "associations": 2,
+   "commune": "49331"
+  },
+  "49078": {
+   "associations": 17,
+   "commune": "49050"
+  },
+  "49081": {
+   "associations": 3,
+   "commune": "49331"
+  },
+  "49087": {
+   "associations": 2,
+   "commune": "49228"
+  },
+  "49088": {
+   "associations": 8,
+   "commune": "49248"
+  },
+  "49091": {
+   "associations": 9,
+   "commune": "49050"
+  },
+  "49096": {
+   "associations": 4,
+   "commune": "49080"
+  },
+  "49097": {
+   "associations": 1,
+   "commune": "49018"
+  },
+  "49098": {
+   "associations": 8,
+   "commune": "49228"
+  },
+  "49103": {
+   "associations": 25,
+   "commune": "49248"
+  },
+  "49104": {
+   "associations": 1,
+   "commune": "49125"
+  },
+  "49105": {
+   "associations": 7,
+   "commune": "49080"
+  },
+  "49108": {
+   "associations": 16,
+   "commune": "49183"
+  },
+  "49115": {
+   "associations": 8,
+   "commune": "49050"
+  },
+  "49119": {
+   "associations": 32,
+   "commune": "49220"
+  },
+  "49122": {
+   "associations": 2,
+   "commune": "49228"
+  },
+  "49136": {
+   "associations": 5,
+   "commune": "49331"
+  },
+  "49141": {
+   "associations": 2,
+   "commune": "49125"
+  },
+  "49144": {
+   "associations": 13,
+   "commune": "44180"
+  },
+  "49149": {
+   "associations": 281,
+   "commune": "49261"
+  },
+  "49150": {
+   "associations": 5,
+   "commune": "49228"
+  },
+  "49156": {
+   "associations": 4,
+   "commune": "49248"
+  },
+  "49158": {
+   "associations": 4,
+   "commune": "49331"
+  },
+  "49159": {
+   "associations": 15,
+   "commune": "49174"
+  },
+  "49169": {
+   "associations": 2,
+   "commune": "49092"
+  },
+  "49173": {
+   "associations": 4,
+   "commune": "49228"
+  },
+  "49175": {
+   "associations": 1,
+   "commune": "49228"
+  },
+  "49184": {
+   "associations": 6,
+   "commune": "49331"
+  },
+  "49186": {
+   "associations": 9,
+   "commune": "49050"
+  },
+  "49187": {
+   "associations": 4,
+   "commune": "49331"
+  },
+  "49189": {
+   "associations": 5,
+   "commune": "49080"
+  },
+  "49191": {
+   "associations": 21,
+   "commune": "49086"
+  },
+  "49197": {
+   "associations": 2,
+   "commune": "49228"
+  },
+  "49198": {
+   "associations": 2,
+   "commune": "49125"
+  },
+  "49199": {
+   "associations": 23,
+   "commune": "49092"
+  },
+  "49202": {
+   "associations": 4,
+   "commune": "49228"
+  },
+  "49207": {
+   "associations": 1,
+   "commune": "49125"
+  },
+  "49208": {
+   "associations": 1,
+   "commune": "49331"
+  },
+  "49213": {
+   "associations": 2,
+   "commune": "49018"
+  },
+  "49226": {
+   "associations": 5,
+   "commune": "49248"
+  },
+  "49227": {
+   "associations": 11,
+   "commune": "49086"
+  },
+  "49229": {
+   "associations": 16,
+   "commune": "49331"
+  },
+  "49233": {
+   "associations": 12,
+   "commune": "49331"
+  },
+  "49234": {
+   "associations": 7,
+   "commune": "49228"
+  },
+  "49245": {
+   "associations": 7,
+   "commune": "49018"
+  },
+  "49250": {
+   "associations": 2,
+   "commune": "49248"
+  },
+  "49254": {
+   "associations": 3,
+   "commune": "49080"
+  },
+  "49270": {
+   "associations": 2,
+   "commune": "49126"
+  },
+  "49274": {
+   "associations": 11,
+   "commune": "49060"
+  },
+  "49277": {
+   "associations": 11,
+   "commune": "49331"
+  },
+  "49282": {
+   "associations": 8,
+   "commune": "49125"
+  },
+  "49287": {
+   "associations": 2,
+   "commune": "49328"
+  },
+  "49289": {
+   "associations": 43,
+   "commune": "49298"
+  },
+  "49290": {
+   "associations": 35,
+   "commune": "49167"
+  },
+  "49293": {
+   "associations": 2,
+   "commune": "49328"
+  },
+  "49296": {
+   "associations": 1,
+   "commune": "49126"
+  },
+  "49303": {
+   "associations": 7,
+   "commune": "49018"
+  },
+  "49304": {
+   "associations": 26,
+   "commune": "49261"
+  },
+  "49305": {
+   "associations": 9,
+   "commune": "49331"
+  },
+  "49309": {
+   "associations": 6,
+   "commune": "49248"
+  },
+  "49317": {
+   "associations": 29,
+   "commune": "49050"
+  },
+  "49318": {
+   "associations": 43,
+   "commune": "49050"
+  },
+  "49319": {
+   "associations": 3,
+   "commune": "49331"
+  },
+  "49321": {
+   "associations": 8,
+   "commune": "49160"
+  },
+  "49327": {
+   "associations": 21,
+   "commune": "49050"
+  },
+  "49335": {
+   "associations": 4,
+   "commune": "49080"
+  },
+  "49337": {
+   "associations": 61,
+   "commune": "49377"
+  },
+  "49354": {
+   "associations": 3,
+   "commune": "49248"
+  },
+  "49360": {
+   "associations": 1,
+   "commune": "49126"
+  },
+  "49363": {
+   "associations": 19,
+   "commune": "49050"
+  },
+  "49365": {
+   "associations": 11,
+   "commune": "49125"
+  },
+  "49366": {
+   "associations": 3,
+   "commune": "49248"
+  },
+  "49372": {
+   "associations": 16,
+   "commune": "49018"
+  },
+  "49376": {
+   "associations": 4,
+   "commune": "49183"
+  },
+  "49380": {
+   "associations": 4,
+   "commune": "49018"
+  },
+  "50001": {
+   "associations": 8,
+   "commune": "50041"
+  },
+  "50007": {
+   "associations": 5,
+   "commune": "50550"
+  },
+  "50014": {
+   "associations": 9,
+   "commune": "50215"
+  },
+  "50015": {
+   "associations": 15,
+   "commune": "50272"
+  },
+  "50018": {
+   "associations": 7,
+   "commune": "50487"
+  },
+  "50020": {
+   "associations": 11,
+   "commune": "50041"
+  },
+  "50037": {
+   "associations": 10,
+   "commune": "50260"
+  },
+  "50043": {
+   "associations": 4,
+   "commune": "50260"
+  },
+  "50057": {
+   "associations": 6,
+   "commune": "50041"
+  },
+  "50073": {
+   "associations": 1,
+   "commune": "50041"
+  },
+  "50080": {
+   "associations": 7,
+   "commune": "50099"
+  },
+  "50089": {
+   "associations": 2,
+   "commune": "50099"
+  },
+  "50100": {
+   "associations": 7,
+   "commune": "50487"
+  },
+  "50103": {
+   "associations": 6,
+   "commune": "50523"
+  },
+  "50107": {
+   "associations": 3,
+   "commune": "50099"
+  },
+  "50119": {
+   "associations": 9,
+   "commune": "50431"
+  },
+  "50123": {
+   "associations": 1,
+   "commune": "50239"
+  },
+  "50131": {
+   "associations": 7,
+   "commune": "50260"
+  },
+  "50140": {
+   "associations": 11,
+   "commune": "50419"
+  },
+  "50154": {
+   "associations": 7,
+   "commune": "50487"
+  },
+  "50160": {
+   "associations": 13,
+   "commune": "50412"
+  },
+  "50163": {
+   "associations": 11,
+   "commune": "50041"
+  },
+  "50171": {
+   "associations": 2,
+   "commune": "50041"
+  },
+  "50173": {
+   "associations": 1,
+   "commune": "50129"
+  },
+  "50187": {
+   "associations": 14,
+   "commune": "50041"
+  },
+  "50220": {
+   "associations": 24,
+   "commune": "50041"
+  },
+  "50223": {
+   "associations": 2,
+   "commune": "50419"
+  },
+  "50242": {
+   "associations": 5,
+   "commune": "50041"
+  },
+  "50244": {
+   "associations": 1,
+   "commune": "50419"
+  },
+  "50248": {
+   "associations": 10,
+   "commune": "50409"
+  },
+  "50257": {
+   "associations": 8,
+   "commune": "50041"
+  },
+  "50301": {
+   "associations": 2,
+   "commune": "50197"
+  },
+  "50303": {
+   "associations": 1,
+   "commune": "50216"
+  },
+  "50308": {
+   "associations": 7,
+   "commune": "50550"
+  },
+  "50313": {
+   "associations": 1,
+   "commune": "50546"
+  },
+  "50318": {
+   "associations": 8,
+   "commune": "50260"
+  },
+  "50320": {
+   "associations": 4,
+   "commune": "50197"
+  },
+  "50323": {
+   "associations": 2,
+   "commune": "50260"
+  },
+  "50325": {
+   "associations": 7,
+   "commune": "50431"
+  },
+  "50333": {
+   "associations": 3,
+   "commune": "50400"
+  },
+  "50337": {
+   "associations": 6,
+   "commune": "50487"
+  },
+  "50348": {
+   "associations": 12,
+   "commune": "50099"
+  },
+  "50354": {
+   "associations": 17,
+   "commune": "50215"
+  },
+  "50385": {
+   "associations": 4,
+   "commune": "50041"
+  },
+  "50386": {
+   "associations": 18,
+   "commune": "50041"
+  },
+  "50404": {
+   "associations": 4,
+   "commune": "50444"
+  },
+  "50416": {
+   "associations": 2,
+   "commune": "50129"
+  },
+  "50427": {
+   "associations": 10,
+   "commune": "50523"
+  },
+  "50438": {
+   "associations": 7,
+   "commune": "50550"
+  },
+  "50441": {
+   "associations": 1,
+   "commune": "50492"
+  },
+  "50449": {
+   "associations": 6,
+   "commune": "50550"
+  },
+  "50460": {
+   "associations": 13,
+   "commune": "50041"
+  },
+  "50465": {
+   "associations": 7,
+   "commune": "50095"
+  },
+  "50477": {
+   "associations": 20,
+   "commune": "50041"
+  },
+  "50485": {
+   "associations": 27,
+   "commune": "50099"
+  },
+  "50503": {
+   "associations": 20,
+   "commune": "50412"
+  },
+  "50516": {
+   "associations": 43,
+   "commune": "50025"
+  },
+  "50524": {
+   "associations": 5,
+   "commune": "50550"
+  },
+  "50534": {
+   "associations": 4,
+   "commune": "50099"
+  },
+  "50573": {
+   "associations": 9,
+   "commune": "50215"
+  },
+  "50581": {
+   "associations": 5,
+   "commune": "50546"
+  },
+  "50583": {
+   "associations": 5,
+   "commune": "50197"
+  },
+  "50600": {
+   "associations": 17,
+   "commune": "50041"
+  },
+  "50602": {
+   "associations": 1,
+   "commune": "50129"
+  },
+  "50605": {
+   "associations": 13,
+   "commune": "50419"
+  },
+  "50608": {
+   "associations": 12,
+   "commune": "50139"
+  },
+  "50611": {
+   "associations": 54,
+   "commune": "50041"
+  },
+  "50620": {
+   "associations": 25,
+   "commune": "50041"
+  },
+  "50622": {
+   "associations": 6,
+   "commune": "50550"
+  },
+  "50623": {
+   "associations": 19,
+   "commune": "50041"
+  },
+  "50627": {
+   "associations": 6,
+   "commune": "50487"
+  },
+  "50631": {
+   "associations": 11,
+   "commune": "50099"
+  },
+  "50636": {
+   "associations": 1,
+   "commune": "50099"
+  },
+  "50640": {
+   "associations": 2,
+   "commune": "50487"
+  },
+  "51021": {
+   "associations": 2,
+   "commune": "51158"
+  },
+  "51063": {
+   "associations": 1,
+   "commune": "51457"
+  },
+  "51205": {
+   "associations": 9,
+   "commune": "51485"
+  },
+  "51261": {
+   "associations": 3,
+   "commune": "51075"
+  },
+  "51271": {
+   "associations": 5,
+   "commune": "51612"
+  },
+  "51331": {
+   "associations": 1,
+   "commune": "51564"
+  },
+  "51411": {
+   "associations": 11,
+   "commune": "51612"
+  },
+  "51637": {
+   "associations": 5,
+   "commune": "51457"
+  },
+  "51651": {
+   "associations": 3,
+   "commune": "51612"
+  },
+  "52018": {
+   "associations": 1,
+   "commune": "52140"
+  },
+  "52049": {
+   "associations": 1,
+   "commune": "52140"
+  },
+  "52078": {
+   "associations": 1,
+   "commune": "52121"
+  },
+  "52100": {
+   "associations": 1,
+   "commune": "52140"
+  },
+  "52139": {
+   "associations": 1,
+   "commune": "52074"
+  },
+  "52154": {
+   "associations": 1,
+   "commune": "52205"
+  },
+  "52191": {
+   "associations": 2,
+   "commune": "52353"
+  },
+  "52225": {
+   "associations": 9,
+   "commune": "52064"
+  },
+  "52262": {
+   "associations": 3,
+   "commune": "52140"
+  },
+  "52351": {
+   "associations": 2,
+   "commune": "52064"
+  },
+  "52379": {
+   "associations": 1,
+   "commune": "52187"
+  },
+  "52409": {
+   "associations": 1,
+   "commune": "52211"
+  },
+  "52412": {
+   "associations": 3,
+   "commune": "52050"
+  },
+  "52434": {
+   "associations": 1,
+   "commune": "52058"
+  },
+  "52527": {
+   "associations": 1,
+   "commune": "52060"
+  },
+  "53004": {
+   "associations": 18,
+   "commune": "53124"
+  },
+  "53006": {
+   "associations": 4,
+   "commune": "53029"
+  },
+  "53014": {
+   "associations": 32,
+   "commune": "53062"
+  },
+  "53032": {
+   "associations": 4,
+   "commune": "53228"
+  },
+  "53065": {
+   "associations": 7,
+   "commune": "53097"
+  },
+  "53092": {
+   "associations": 2,
+   "commune": "53161"
+  },
+  "53095": {
+   "associations": 2,
+   "commune": "53017"
+  },
+  "53138": {
+   "associations": 12,
+   "commune": "53104"
+  },
+  "53159": {
+   "associations": 8,
+   "commune": "53161"
+  },
+  "53205": {
+   "associations": 9,
+   "commune": "53161"
+  },
+  "53207": {
+   "associations": 9,
+   "commune": "53097"
+  },
+  "53215": {
+   "associations": 23,
+   "commune": "53062"
+  },
+  "53231": {
+   "associations": 2,
+   "commune": "53029"
+  },
+  "53239": {
+   "associations": 6,
+   "commune": "53249"
+  },
+  "53241": {
+   "associations": 6,
+   "commune": "53029"
+  },
+  "53244": {
+   "associations": 1,
+   "commune": "53161"
+  },
+  "53254": {
+   "associations": 4,
+   "commune": "53136"
+  },
+  "53274": {
+   "associations": 6,
+   "commune": "53249"
+  },
+  "54341": {
+   "associations": 4,
+   "commune": "54099"
+  },
+  "54342": {
+   "associations": 13,
+   "commune": "54099"
+  },
+  "54506": {
+   "associations": 8,
+   "commune": "54557"
+  },
+  "55030": {
+   "associations": 2,
+   "commune": "55150"
+  },
+  "55486": {
+   "associations": 1,
+   "commune": "55040"
+  },
+  "56016": {
+   "associations": 18,
+   "commune": "56173"
+  },
+  "56037": {
+   "associations": 1,
+   "commune": "56197"
+  },
+  "56038": {
+   "associations": 22,
+   "commune": "56061"
+  },
+  "56049": {
+   "associations": 4,
+   "commune": "56213"
+  },
+  "56059": {
+   "associations": 16,
+   "commune": "56102"
+  },
+  "56064": {
+   "associations": 14,
+   "commune": "56061"
+  },
+  "56138": {
+   "associations": 12,
+   "commune": "56165"
+  },
+  "56142": {
+   "associations": 1,
+   "commune": "56144"
+  },
+  "56183": {
+   "associations": 17,
+   "commune": "56033"
+  },
+  "56187": {
+   "associations": 1,
+   "commune": "56197"
+  },
+  "58022": {
+   "associations": 6,
+   "commune": "58204"
+  },
+  "59070": {
+   "associations": 7,
+   "commune": "59006"
+  },
+  "59154": {
+   "associations": 1,
+   "commune": "59588"
+  },
+  "59248": {
+   "associations": 61,
+   "commune": "59183"
+  },
+  "59298": {
+   "associations": 138,
+   "commune": "59350"
+  },
+  "59355": {
+   "associations": 167,
+   "commune": "59350"
+  },
+  "59380": {
+   "associations": 9,
+   "commune": "59183"
+  },
+  "59404": {
+   "associations": 3,
+   "commune": "59260"
+  },
+  "59510": {
+   "associations": 1,
+   "commune": "59183"
+  },
+  "59540": {
+   "associations": 216,
+   "commune": "59183"
+  },
+  "60018": {
+   "associations": 1,
+   "commune": "60088"
+  },
+  "60038": {
+   "associations": 7,
+   "commune": "60256"
+  },
+  "60080": {
+   "associations": 4,
+   "commune": "60209"
+  },
+  "60096": {
+   "associations": 2,
+   "commune": "60245"
+  },
+  "60300": {
+   "associations": 1,
+   "commune": "60209"
+  },
+  "60417": {
+   "associations": 2,
+   "commune": "60570"
+  },
+  "60453": {
+   "associations": 5,
+   "commune": "60196"
+  },
+  "60455": {
+   "associations": 4,
+   "commune": "60694"
+  },
+  "60475": {
+   "associations": 2,
+   "commune": "60682"
+  },
+  "60532": {
+   "associations": 2,
+   "commune": "60196"
+  },
+  "60649": {
+   "associations": 4,
+   "commune": "60029"
+  },
+  "60690": {
+   "associations": 2,
+   "commune": "60644"
+  },
+  "61004": {
+   "associations": 1,
+   "commune": "61168"
+  },
+  "61009": {
+   "associations": 4,
+   "commune": "61474"
+  },
+  "61016": {
+   "associations": 1,
+   "commune": "61491"
+  },
+  "61017": {
+   "associations": 1,
+   "commune": "61275"
+  },
+  "61025": {
+   "associations": 1,
+   "commune": "61211"
+  },
+  "61031": {
+   "associations": 2,
+   "commune": "61486"
+  },
+  "61057": {
+   "associations": 8,
+   "commune": "61474"
+  },
+  "61083": {
+   "associations": 6,
+   "commune": "61474"
+  },
+  "61110": {
+   "associations": 3,
+   "commune": "61474"
+  },
+  "61131": {
+   "associations": 3,
+   "commune": "61474"
+  },
+  "61157": {
+   "associations": 10,
+   "commune": "61474"
+  },
+  "61161": {
+   "associations": 3,
+   "commune": "61474"
+  },
+  "61172": {
+   "associations": 6,
+   "commune": "61228"
+  },
+  "61173": {
+   "associations": 5,
+   "commune": "61153"
+  },
+  "61177": {
+   "associations": 8,
+   "commune": "61486"
+  },
+  "61188": {
+   "associations": 3,
+   "commune": "61275"
+  },
+  "61192": {
+   "associations": 1,
+   "commune": "61275"
+  },
+  "61223": {
+   "associations": 3,
+   "commune": "61486"
+  },
+  "61231": {
+   "associations": 4,
+   "commune": "61228"
+  },
+  "61249": {
+   "associations": 2,
+   "commune": "61375"
+  },
+  "61285": {
+   "associations": 8,
+   "commune": "61194"
+  },
+  "61299": {
+   "associations": 6,
+   "commune": "61429"
+  },
+  "61310": {
+   "associations": 24,
+   "commune": "61275"
+  },
+  "61311": {
+   "associations": 1,
+   "commune": "61429"
+  },
+  "61315": {
+   "associations": 3,
+   "commune": "61474"
+  },
+  "61318": {
+   "associations": 2,
+   "commune": "61196"
+  },
+  "61325": {
+   "associations": 13,
+   "commune": "61196"
+  },
+  "61337": {
+   "associations": 1,
+   "commune": "61309"
+  },
+  "61377": {
+   "associations": 9,
+   "commune": "61486"
+  },
+  "61383": {
+   "associations": 2,
+   "commune": "61228"
+  },
+  "61403": {
+   "associations": 2,
+   "commune": "61294"
+  },
+  "61410": {
+   "associations": 3,
+   "commune": "61486"
+  },
+  "61417": {
+   "associations": 2,
+   "commune": "61375"
+  },
+  "61437": {
+   "associations": 1,
+   "commune": "61196"
+  },
+  "61449": {
+   "associations": 2,
+   "commune": "61474"
+  },
+  "61468": {
+   "associations": 7,
+   "commune": "61194"
+  },
+  "61471": {
+   "associations": 4,
+   "commune": "61196"
+  },
+  "61477": {
+   "associations": 1,
+   "commune": "61474"
+  },
+  "61496": {
+   "associations": 10,
+   "commune": "61474"
+  },
+  "61504": {
+   "associations": 4,
+   "commune": "61474"
+  },
+  "61511": {
+   "associations": 2,
+   "commune": "61375"
+  },
+  "61513": {
+   "associations": 3,
+   "commune": "61486"
+  },
+  "62294": {
+   "associations": 5,
+   "commune": "62295"
+  },
+  "62431": {
+   "associations": 12,
+   "commune": "62471"
+  },
+  "62461": {
+   "associations": 21,
+   "commune": "62447"
+  },
+  "62549": {
+   "associations": 35,
+   "commune": "62447"
+  },
+  "62743": {
+   "associations": 9,
+   "commune": "62447"
+  },
+  "63078": {
+   "associations": 6,
+   "commune": "63448"
+  },
+  "63127": {
+   "associations": 1,
+   "commune": "63335"
+  },
+  "63133": {
+   "associations": 16,
+   "commune": "63226"
+  },
+  "63330": {
+   "associations": 5,
+   "commune": "63109"
+  },
+  "64020": {
+   "associations": 5,
+   "commune": "64225"
+  },
+  "64030": {
+   "associations": 2,
+   "commune": "64396"
+  },
+  "64402": {
+   "associations": 1,
+   "commune": "64440"
+  },
+  "64541": {
+   "associations": 5,
+   "commune": "64300"
+  },
+  "65312": {
+   "associations": 1,
+   "commune": "65081"
+  },
+  "65480": {
+   "associations": 1,
+   "commune": "65399"
+  },
+  "69015": {
+   "associations": 4,
+   "commune": "69135"
+  },
+  "69025": {
+   "associations": 26,
+   "commune": "69248"
+  },
+  "69041": {
+   "associations": 7,
+   "commune": "69248"
+  },
+  "69048": {
+   "associations": 12,
+   "commune": "69179"
+  },
+  "69073": {
+   "associations": 14,
+   "commune": "69157"
+  },
+  "69101": {
+   "associations": 23,
+   "commune": "69114"
+  },
+  "69128": {
+   "associations": 5,
+   "commune": "69248"
+  },
+  "69129": {
+   "associations": 3,
+   "commune": "69248"
+  },
+  "69144": {
+   "associations": 5,
+   "commune": "69208"
+  },
+  "69146": {
+   "associations": 15,
+   "commune": "69024"
+  },
+  "69147": {
+   "associations": 28,
+   "commune": "69157"
+  },
+  "69150": {
+   "associations": 19,
+   "commune": "69135"
+  },
+  "69152": {
+   "associations": 252,
+   "commune": "69149"
+  },
+  "69159": {
+   "associations": 97,
+   "commune": "69114"
+  },
+  "69185": {
+   "associations": 10,
+   "commune": "69135"
+  },
+  "69195": {
+   "associations": 14,
+   "commune": "69228"
+  },
+  "69210": {
+   "associations": 4,
+   "commune": "69135"
+  },
+  "69211": {
+   "associations": 54,
+   "commune": "69019"
+  },
+  "69213": {
+   "associations": 13,
+   "commune": "69179"
+  },
+  "69221": {
+   "associations": 3,
+   "commune": "69255"
+  },
+  "69222": {
+   "associations": 14,
+   "commune": "69024"
+  },
+  "69223": {
+   "associations": 18,
+   "commune": "69157"
+  },
+  "69224": {
+   "associations": 2,
+   "commune": "69135"
+  },
+  "69237": {
+   "associations": 6,
+   "commune": "69228"
+  },
+  "69251": {
+   "associations": 5,
+   "commune": "69135"
+  },
+  "70264": {
+   "associations": 3,
+   "commune": "70180"
+  },
+  "70345": {
+   "associations": 3,
+   "commune": "70489"
+  },
+  "70375": {
+   "associations": 3,
+   "commune": "70491"
+  },
+  "70475": {
+   "associations": 11,
+   "commune": "70245"
+  },
+  "70497": {
+   "associations": 10,
+   "commune": "70285"
+  },
+  "70530": {
+   "associations": 5,
+   "commune": "70180"
+  },
+  "70557": {
+   "associations": 1,
+   "commune": "70152"
+  },
+  "71055": {
+   "associations": 7,
+   "commune": "71134"
+  },
+  "71131": {
+   "associations": 13,
+   "commune": "71566"
+  },
+  "71138": {
+   "associations": 1,
+   "commune": "71578"
+  },
+  "71180": {
+   "associations": 10,
+   "commune": "71582"
+  },
+  "71304": {
+   "associations": 3,
+   "commune": "71134"
+  },
+  "71492": {
+   "associations": 11,
+   "commune": "71042"
+  },
+  "71511": {
+   "associations": 1,
+   "commune": "71270"
+  },
+  "71587": {
+   "associations": 1,
+   "commune": "71582"
+  },
+  "72033": {
+   "associations": 14,
+   "commune": "72219"
+  },
+  "72063": {
+   "associations": 8,
+   "commune": "72262"
+  },
+  "72069": {
+   "associations": 2,
+   "commune": "72137"
+  },
+  "72081": {
+   "associations": 14,
+   "commune": "72080"
+  },
+  "72082": {
+   "associations": 9,
+   "commune": "72308"
+  },
+  "72097": {
+   "associations": 6,
+   "commune": "72138"
+  },
+  "72108": {
+   "associations": 21,
+   "commune": "72025"
+  },
+  "72116": {
+   "associations": 1,
+   "commune": "72189"
+  },
+  "72117": {
+   "associations": 21,
+   "commune": "72176"
+  },
+  "72159": {
+   "associations": 7,
+   "commune": "72262"
+  },
+  "72162": {
+   "associations": 7,
+   "commune": "72137"
+  },
+  "72203": {
+   "associations": 8,
+   "commune": "72071"
+  },
+  "72240": {
+   "associations": 19,
+   "commune": "72262"
+  },
+  "72258": {
+   "associations": 12,
+   "commune": "72137"
+  },
+  "72284": {
+   "associations": 9,
+   "commune": "72138"
+  },
+  "72287": {
+   "associations": 43,
+   "commune": "72155"
+  },
+  "72298": {
+   "associations": 18,
+   "commune": "72382"
+  },
+  "72304": {
+   "associations": 4,
+   "commune": "72128"
+  },
+  "72318": {
+   "associations": 12,
+   "commune": "72137"
+  },
+  "72384": {
+   "associations": 16,
+   "commune": "72071"
+  },
+  "73002": {
+   "associations": 34,
+   "commune": "73212"
+  },
+  "73045": {
+   "associations": 7,
+   "commune": "73003"
+  },
+  "73046": {
+   "associations": 4,
+   "commune": "73187"
+  },
+  "73056": {
+   "associations": 15,
+   "commune": "73290"
+  },
+  "73080": {
+   "associations": 2,
+   "commune": "73135"
+  },
+  "73111": {
+   "associations": 6,
+   "commune": "73215"
+  },
+  "73112": {
+   "associations": 14,
+   "commune": "73187"
+  },
+  "73118": {
+   "associations": 26,
+   "commune": "73151"
+  },
+  "73127": {
+   "associations": 4,
+   "commune": "73236"
+  },
+  "73143": {
+   "associations": 17,
+   "commune": "73290"
+  },
+  "73144": {
+   "associations": 21,
+   "commune": "73290"
+  },
+  "73163": {
+   "associations": 4,
+   "commune": "73235"
+  },
+  "73167": {
+   "associations": 1,
+   "commune": "73235"
+  },
+  "73198": {
+   "associations": 5,
+   "commune": "73227"
+  },
+  "73203": {
+   "associations": 7,
+   "commune": "73135"
+  },
+  "73209": {
+   "associations": 1,
+   "commune": "73187"
+  },
+  "73244": {
+   "associations": 9,
+   "commune": "73257"
+  },
+  "73260": {
+   "associations": 5,
+   "commune": "73236"
+  },
+  "73264": {
+   "associations": 3,
+   "commune": "73263"
+  },
+  "73266": {
+   "associations": 6,
+   "commune": "73003"
+  },
+  "73287": {
+   "associations": 7,
+   "commune": "73290"
+  },
+  "74011": {
+   "associations": 209,
+   "commune": "74010"
+  },
+  "74022": {
+   "associations": 12,
+   "commune": "74282"
+  },
+  "74093": {
+   "associations": 150,
+   "commune": "74010"
+  },
+  "74110": {
+   "associations": 16,
+   "commune": "74212"
+  },
+  "74120": {
+   "associations": 8,
+   "commune": "74282"
+  },
+  "74182": {
+   "associations": 77,
+   "commune": "74010"
+  },
+  "74204": {
+   "associations": 9,
+   "commune": "74282"
+  },
+  "74217": {
+   "associations": 49,
+   "commune": "74010"
+  },
+  "74245": {
+   "associations": 27,
+   "commune": "74282"
+  },
+  "74268": {
+   "associations": 175,
+   "commune": "74010"
+  },
+  "74270": {
+   "associations": 1,
+   "commune": "74123"
+  },
+  "74274": {
+   "associations": 7,
+   "commune": "74289"
+  },
+  "75020": {
+   "associations": 1,
+   "commune": "92020"
+  },
+  "76044": {
+   "associations": 4,
+   "commune": "76258"
+  },
+  "76078": {
+   "associations": 3,
+   "commune": "76258"
+  },
+  "76080": {
+   "associations": 10,
+   "commune": "76258"
+  },
+  "76127": {
+   "associations": 1,
+   "commune": "76146"
+  },
+  "76191": {
+   "associations": 5,
+   "commune": "76034"
+  },
+  "76248": {
+   "associations": 6,
+   "commune": "76146"
+  },
+  "76358": {
+   "associations": 8,
+   "commune": "76455"
+  },
+  "76525": {
+   "associations": 3,
+   "commune": "76258"
+  },
+  "76607": {
+   "associations": 6,
+   "commune": "76258"
+  },
+  "76639": {
+   "associations": 3,
+   "commune": "76258"
+  },
+  "76659": {
+   "associations": 1,
+   "commune": "76164"
+  },
+  "76674": {
+   "associations": 3,
+   "commune": "76034"
+  },
+  "76729": {
+   "associations": 13,
+   "commune": "76041"
+  },
+  "76742": {
+   "associations": 1,
+   "commune": "76164"
+  },
+  "77028": {
+   "associations": 18,
+   "commune": "77433"
+  },
+  "77149": {
+   "associations": 2,
+   "commune": "77109"
+  },
+  "77166": {
+   "associations": 45,
+   "commune": "77316"
+  },
+  "77399": {
+   "associations": 11,
+   "commune": "77504"
+  },
+  "77491": {
+   "associations": 135,
+   "commune": "77316"
+  },
+  "78251": {
+   "associations": 57,
+   "commune": "78551"
+  },
+  "78503": {
+   "associations": 1,
+   "commune": "78320"
+  },
+  "78524": {
+   "associations": 29,
+   "commune": "78158"
+  },
+  "79004": {
+   "associations": 7,
+   "commune": "79185"
+  },
+  "79006": {
+   "associations": 5,
+   "commune": "79136"
+  },
+  "79011": {
+   "associations": 3,
+   "commune": "79140"
+  },
+  "79027": {
+   "associations": 1,
+   "commune": "79083"
+  },
+  "79033": {
+   "associations": 1,
+   "commune": "79078"
+  },
+  "79035": {
+   "associations": 11,
+   "commune": "79077"
+  },
+  "79041": {
+   "associations": 2,
+   "commune": "79005"
+  },
+  "79043": {
+   "associations": 25,
+   "commune": "79014"
+  },
+  "79044": {
+   "associations": 8,
+   "commune": "79063"
+  },
+  "79045": {
+   "associations": 2,
+   "commune": "79140"
+  },
+  "79051": {
+   "associations": 7,
+   "commune": "79179"
+  },
+  "79060": {
+   "associations": 3,
+   "commune": "79307"
+  },
+  "79068": {
+   "associations": 3,
+   "commune": "79105"
+  },
+  "79075": {
+   "associations": 9,
+   "commune": "79179"
+  },
+  "79098": {
+   "associations": 6,
+   "commune": "79217"
+  },
+  "79168": {
+   "associations": 18,
+   "commune": "79063"
+  },
+  "79171": {
+   "associations": 32,
+   "commune": "79329"
+  },
+  "79173": {
+   "associations": 5,
+   "commune": "79174"
+  },
+  "79178": {
+   "associations": 13,
+   "commune": "79329"
+  },
+  "79180": {
+   "associations": 7,
+   "commune": "79307"
+  },
+  "79188": {
+   "associations": 13,
+   "commune": "79179"
+  },
+  "79199": {
+   "associations": 4,
+   "commune": "79174"
+  },
+  "79205": {
+   "associations": 1,
+   "commune": "79307"
+  },
+  "79211": {
+   "associations": 4,
+   "commune": "79140"
+  },
+  "79212": {
+   "associations": 5,
+   "commune": "79307"
+  },
+  "79214": {
+   "associations": 2,
+   "commune": "79251"
+  },
+  "79219": {
+   "associations": 2,
+   "commune": "79334"
+  },
+  "79222": {
+   "associations": 8,
+   "commune": "79179"
+  },
+  "79240": {
+   "associations": 6,
+   "commune": "79185"
+  },
+  "79260": {
+   "associations": 10,
+   "commune": "79196"
+  },
+  "79264": {
+   "associations": 14,
+   "commune": "79174"
+  },
+  "79275": {
+   "associations": 1,
+   "commune": "79122"
+  },
+  "79279": {
+   "associations": 9,
+   "commune": "79174"
+  },
+  "79282": {
+   "associations": 2,
+   "commune": "79061"
+  },
+  "79292": {
+   "associations": 2,
+   "commune": "79329"
+  },
+  "79305": {
+   "associations": 2,
+   "commune": "79013"
+  },
+  "79314": {
+   "associations": 4,
+   "commune": "79064"
+  },
+  "79318": {
+   "associations": 3,
+   "commune": "79285"
+  },
+  "79321": {
+   "associations": 13,
+   "commune": "79196"
+  },
+  "79325": {
+   "associations": 6,
+   "commune": "79005"
+  },
+  "79327": {
+   "associations": 8,
+   "commune": "79185"
+  },
+  "79328": {
+   "associations": 1,
+   "commune": "79334"
+  },
+  "79330": {
+   "associations": 1,
+   "commune": "79083"
+  },
+  "79344": {
+   "associations": 1,
+   "commune": "79061"
+  },
+  "79353": {
+   "associations": 7,
+   "commune": "79030"
+  },
+  "79356": {
+   "associations": 4,
+   "commune": "79242"
+  },
+  "80175": {
+   "associations": 2,
+   "commune": "80505"
+  },
+  "80209": {
+   "associations": 7,
+   "commune": "80625"
+  },
+  "80370": {
+   "associations": 2,
+   "commune": "80369"
+  },
+  "80419": {
+   "associations": 9,
+   "commune": "80625"
+  },
+  "80447": {
+   "associations": 2,
+   "commune": "80621"
+  },
+  "80454": {
+   "associations": 1,
+   "commune": "80456"
+  },
+  "80532": {
+   "associations": 12,
+   "commune": "80295"
+  },
+  "80551": {
+   "associations": 2,
+   "commune": "80509"
+  },
+  "80594": {
+   "associations": 5,
+   "commune": "80485"
+  },
+  "80608": {
+   "associations": 3,
+   "commune": "80621"
+  },
+  "80761": {
+   "associations": 13,
+   "commune": "80485"
+  },
+  "80830": {
+   "associations": 10,
+   "commune": "80155"
+  },
+  "81107": {
+   "associations": 11,
+   "commune": "81132"
+  },
+  "81113": {
+   "associations": 10,
+   "commune": "81218"
+  },
+  "81226": {
+   "associations": 7,
+   "commune": "81233"
+  },
+  "81241": {
+   "associations": 8,
+   "commune": "81233"
+  },
+  "81260": {
+   "associations": 7,
+   "commune": "81233"
+  },
+  "81296": {
+   "associations": 5,
+   "commune": "81233"
+  },
+  "81301": {
+   "associations": 1,
+   "commune": "81233"
+  },
+  "85021": {
+   "associations": 35,
+   "commune": "85076"
+  },
+  "85027": {
+   "associations": 57,
+   "commune": "85146"
+  },
+  "85037": {
+   "associations": 19,
+   "commune": "85289"
+  },
+  "85041": {
+   "associations": 6,
+   "commune": "85292"
+  },
+  "85043": {
+   "associations": 1,
+   "commune": "85213"
+  },
+  "85044": {
+   "associations": 6,
+   "commune": "85009"
+  },
+  "85048": {
+   "associations": 36,
+   "commune": "85302"
+  },
+  "85052": {
+   "associations": 10,
+   "commune": "85152"
+  },
+  "85053": {
+   "associations": 8,
+   "commune": "85289"
+  },
+  "85060": {
+   "associations": 90,
+   "commune": "85194"
+  },
+  "85069": {
+   "associations": 1,
+   "commune": "85008"
+  },
+  "85107": {
+   "associations": 42,
+   "commune": "85146"
+  },
+  "85166": {
+   "associations": 108,
+   "commune": "85194"
+  },
+  "85168": {
+   "associations": 14,
+   "commune": "85162"
+  },
+  "85217": {
+   "associations": 88,
+   "commune": "85146"
+  },
+  "85224": {
+   "associations": 87,
+   "commune": "85146"
+  },
+  "85233": {
+   "associations": 10,
+   "commune": "85223"
+  },
+  "85271": {
+   "associations": 4,
+   "commune": "85292"
+  },
+  "85299": {
+   "associations": 9,
+   "commune": "85177"
+  },
+  "85307": {
+   "associations": 38,
+   "commune": "85001"
+  },
+  "86021": {
+   "associations": 19,
+   "commune": "86123"
+  },
+  "86030": {
+   "associations": 12,
+   "commune": "86281"
+  },
+  "86043": {
+   "associations": 17,
+   "commune": "86082"
+  },
+  "86056": {
+   "associations": 12,
+   "commune": "86123"
+  },
+  "86060": {
+   "associations": 8,
+   "commune": "86281"
+  },
+  "86067": {
+   "associations": 4,
+   "commune": "86082"
+  },
+  "86071": {
+   "associations": 10,
+   "commune": "86281"
+  },
+  "86101": {
+   "associations": 1,
+   "commune": "86225"
+  },
+  "86146": {
+   "associations": 24,
+   "commune": "86115"
+  },
+  "86155": {
+   "associations": 1,
+   "commune": "86161"
+  },
+  "86166": {
+   "associations": 15,
+   "commune": "86123"
+  },
+  "86179": {
+   "associations": 1,
+   "commune": "86108"
+  },
+  "86185": {
+   "associations": 1,
+   "commune": "86161"
+  },
+  "86188": {
+   "associations": 15,
+   "commune": "86082"
+  },
+  "86208": {
+   "associations": 9,
+   "commune": "86053"
+  },
+  "86212": {
+   "associations": 1,
+   "commune": "86137"
+  },
+  "86216": {
+   "associations": 2,
+   "commune": "86161"
+  },
+  "86219": {
+   "associations": 22,
+   "commune": "86019"
+  },
+  "86231": {
+   "associations": 8,
+   "commune": "86247"
+  },
+  "86267": {
+   "associations": 3,
+   "commune": "86066"
+  },
+  "86277": {
+   "associations": 7,
+   "commune": "86281"
+  },
+  "86278": {
+   "associations": 19,
+   "commune": "86082"
+  },
+  "87055": {
+   "associations": 7,
+   "commune": "87028"
+  },
+  "87136": {
+   "associations": 8,
+   "commune": "87028"
+  },
+  "87173": {
+   "associations": 23,
+   "commune": "87128"
+  },
+  "87184": {
+   "associations": 5,
+   "commune": "87128"
+  },
+  "87196": {
+   "associations": 9,
+   "commune": "87028"
+  },
+  "88234": {
+   "associations": 10,
+   "commune": "88029"
+  },
+  "88235": {
+   "associations": 2,
+   "commune": "88029"
+  },
+  "88282": {
+   "associations": 1,
+   "commune": "88176"
+  },
+  "88392": {
+   "associations": 1,
+   "commune": "88475"
+  },
+  "88393": {
+   "associations": 12,
+   "commune": "88321"
+  },
+  "89001": {
+   "associations": 7,
+   "commune": "89130"
+  },
+  "89047": {
+   "associations": 1,
+   "commune": "89055"
+  },
+  "89078": {
+   "associations": 9,
+   "commune": "89003"
+  },
+  "89109": {
+   "associations": 1,
+   "commune": "89197"
+  },
+  "89174": {
+   "associations": 2,
+   "commune": "89405"
+  },
+  "89260": {
+   "associations": 4,
+   "commune": "89405"
+  },
+  "89340": {
+   "associations": 3,
+   "commune": "89420"
+  },
+  "89358": {
+   "associations": 1,
+   "commune": "89086"
+  },
+  "89381": {
+   "associations": 1,
+   "commune": "89197"
+  },
+  "89421": {
+   "associations": 1,
+   "commune": "89197"
+  },
+  "89429": {
+   "associations": 1,
+   "commune": "89411"
+  },
+  "89435": {
+   "associations": 10,
+   "commune": "89024"
+  },
+  "89448": {
+   "associations": 1,
+   "commune": "89197"
+  },
+  "89473": {
+   "associations": 10,
+   "commune": "89003"
+  },
+  "89484": {
+   "associations": 4,
+   "commune": "89003"
+  },
+  "90073": {
+   "associations": 4,
+   "commune": "90068"
+  },
+  "91182": {
+   "associations": 253,
+   "commune": "91228"
+  },
+  "91222": {
+   "associations": 6,
+   "commune": "91390"
+  },
+  "93059": {
+   "associations": 538,
+   "commune": "93066"
+  },
+  "95259": {
+   "associations": 4,
+   "commune": "95040"
+  },
+  "95282": {
+   "associations": 5,
+   "commune": "95169"
+  }
+ },
+ "parMotif": {
+  "code_inconnu_du_cog": {
+   "": 121,
+   "0": 50,
+   "06921": 1,
+   "13915": 1,
+   "13955": 2,
+   "13974": 1,
+   "29929": 1,
+   "2B963": 1,
+   "33000": 1,
+   "38913": 1,
+   "63907": 1,
+   "74926": 1,
+   "75000": 1,
+   "77900": 1,
+   "80000": 1,
+   "97442": 1,
+   "97473": 2,
+   "97489": 1,
+   "97499": 3,
+   "97501": 50,
+   "97502": 330,
+   "97622": 11,
+   "97701": 254,
+   "97801": 1806,
+   "98515": 1,
+   "98611": 118,
+   "98612": 140,
+   "98613": 496,
+   "98711": 61,
+   "98712": 370,
+   "98713": 76,
+   "98714": 394,
+   "98715": 874,
+   "98716": 99,
+   "98717": 11,
+   "98718": 77,
+   "98719": 65,
+   "98720": 76,
+   "98721": 25,
+   "98722": 427,
+   "98723": 126,
+   "98724": 374,
+   "98725": 433,
+   "98726": 124,
+   "98727": 54,
+   "98728": 51,
+   "98729": 689,
+   "98730": 22,
+   "98731": 232,
+   "98732": 42,
+   "98733": 378,
+   "98734": 408,
+   "98735": 1313,
+   "98736": 520,
+   "98737": 9,
+   "98738": 765,
+   "98739": 74,
+   "98740": 180,
+   "98741": 34,
+   "98742": 20,
+   "98743": 79,
+   "98744": 338,
+   "98745": 329,
+   "98746": 37,
+   "98747": 542,
+   "98748": 313,
+   "98749": 66,
+   "98750": 210,
+   "98751": 27,
+   "98752": 366,
+   "98753": 141,
+   "98754": 181,
+   "98755": 21,
+   "98756": 47,
+   "98757": 135,
+   "98758": 274,
+   "98801": 72,
+   "98802": 157,
+   "98803": 239,
+   "98804": 215,
+   "98805": 1353,
+   "98806": 26,
+   "98807": 113,
+   "98808": 215,
+   "98809": 162,
+   "98810": 101,
+   "98811": 336,
+   "98812": 167,
+   "98813": 202,
+   "98814": 854,
+   "98815": 439,
+   "98816": 44,
+   "98817": 1187,
+   "98818": 6312,
+   "98819": 121,
+   "98820": 302,
+   "98821": 826,
+   "98822": 197,
+   "98823": 147,
+   "98824": 96,
+   "98825": 119,
+   "98826": 86,
+   "98827": 141,
+   "98828": 27,
+   "98829": 112,
+   "98830": 105,
+   "98831": 154,
+   "98832": 183,
+   "98833": 87,
+   "INSEE": 1
+  },
+  "commune_hors_index": {
+   "97101": 3790,
+   "97102": 322,
+   "97103": 1839,
+   "97104": 207,
+   "97105": 868,
+   "97106": 349,
+   "97107": 636,
+   "97108": 202,
+   "97109": 305,
+   "97110": 125,
+   "97111": 205,
+   "97112": 376,
+   "97113": 1458,
+   "97114": 361,
+   "97115": 642,
+   "97116": 812,
+   "97117": 1044,
+   "97118": 910,
+   "97119": 355,
+   "97120": 2907,
+   "97121": 218,
+   "97122": 304,
+   "97124": 510,
+   "97125": 996,
+   "97126": 177,
+   "97128": 995,
+   "97129": 751,
+   "97130": 45,
+   "97131": 59,
+   "97132": 328,
+   "97133": 67,
+   "97134": 290,
+   "97201": 49,
+   "97202": 118,
+   "97203": 95,
+   "97204": 223,
+   "97205": 198,
+   "97206": 181,
+   "97207": 546,
+   "97208": 43,
+   "97209": 5104,
+   "97210": 453,
+   "97211": 36,
+   "97212": 278,
+   "97213": 1763,
+   "97214": 187,
+   "97215": 24,
+   "97216": 84,
+   "97217": 257,
+   "97218": 216,
+   "97219": 83,
+   "97220": 254,
+   "97221": 338,
+   "97222": 631,
+   "97223": 224,
+   "97224": 546,
+   "97225": 188,
+   "97226": 178,
+   "97227": 289,
+   "97228": 356,
+   "97229": 1124,
+   "97230": 376,
+   "97231": 288,
+   "97232": 261,
+   "97233": 73,
+   "97234": 114,
+   "97301": 36,
+   "97302": 2443,
+   "97303": 69,
+   "97304": 825,
+   "97305": 503,
+   "97306": 192,
+   "97307": 953,
+   "97308": 123,
+   "97309": 1109,
+   "97310": 125,
+   "97311": 886,
+   "97312": 106,
+   "97313": 90,
+   "97314": 2,
+   "97352": 8,
+   "97353": 117,
+   "97356": 31,
+   "97357": 43,
+   "97358": 3,
+   "97360": 89,
+   "97361": 25,
+   "97362": 59,
+   "97401": 331,
+   "97402": 387,
+   "97403": 232,
+   "97404": 485,
+   "97405": 300,
+   "97406": 217,
+   "97407": 790,
+   "97408": 938,
+   "97409": 1320,
+   "97410": 1048,
+   "97411": 5242,
+   "97412": 736,
+   "97413": 1171,
+   "97414": 1212,
+   "97415": 3454,
+   "97416": 2609,
+   "97417": 160,
+   "97418": 938,
+   "97419": 183,
+   "97420": 636,
+   "97421": 169,
+   "97422": 1782,
+   "97423": 212,
+   "97424": 126,
+   "97601": 127,
+   "97602": 224,
+   "97603": 250,
+   "97604": 252,
+   "97605": 203,
+   "97606": 236,
+   "97607": 298,
+   "97608": 313,
+   "97609": 189,
+   "97610": 461,
+   "97611": 1682,
+   "97612": 219,
+   "97613": 120,
+   "97614": 160,
+   "97615": 283,
+   "97616": 243,
+   "97617": 299
+  },
+  "sans_successeur": {
+   "97123": 35,
+   "97127": 207
+  }
+ },
+ "rattachees": 11843,
+ "sources": {
+  "rna": {
+   "sha256": "f641be11b9073a8467aa0f22dc0615c905890d4a72299ece4f1c652cdeba9523",
+   "url": "https://media.interieur.gouv.fr/rna/rna_waldec_20260601.zip"
+  },
+  "successeurs": {
+   "fichier": "data/successeurs-cog2026.json",
+   "sha256": "c5e3efd7af1977effebb1ccd14fd7a5fdf3295c5c8d2be03beed73ae8cf7dff2"
+  }
+ },
+ "total": 1954654
+}

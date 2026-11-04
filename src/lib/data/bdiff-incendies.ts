@@ -177,11 +177,15 @@ export type MouvementCog = { MOD: string; DATE_EFF: string; TYPECOM_AV: string; 
 // 2006-2025 (23 ou 24 rétablissements ; 7 à 10 fiches selon la méthode de comptage, recompté le 28/10/2026).
 const MOUVEMENTS_RATTACHANTS = new Set(["31", "32", "33", "34", "41", "50"]);
 
+/** Une commune d'arrivée de la chaîne, et la date à laquelle le code y est entré. */
+export type EtapeCog = { code: string; date: string };
+
 /**
- * Le code ACTUEL (COG du référentiel) d'un code de fiche. Suit la chaîne des mouvements jusqu'à une
- * commune existante ; `null` quand le code n'y mène pas (« 83999 Commune inconnue »).
+ * La chaîne des mouvements d'un code jusqu'à une commune existante : le code ACTUEL et les communes
+ * d'arrivée successives, datées (FUT-137 : une commune d'arrivée découpée APRÈS l'arrivée rend le
+ * rattachement ambigu). `null` quand le code n'y mène pas, ou au-delà de 20 pas (chaîne circulaire).
  */
-export function resolveurCog(communes: ReadonlySet<string>, mouvements: MouvementCog[]): (code: string) => string | null {
+export function chaineCog(communes: ReadonlySet<string>, mouvements: MouvementCog[]): (code: string) => { actuel: string; etapes: EtapeCog[] } | null {
   const suivant = new Map<string, { date: string; ap: string }>();
   for (const m of mouvements) {
     if (m.TYPECOM_AV !== "COM" || m.TYPECOM_AP !== "COM" || m.COM_AV === m.COM_AP || !MOUVEMENTS_RATTACHANTS.has(m.MOD)) continue;
@@ -190,14 +194,25 @@ export function resolveurCog(communes: ReadonlySet<string>, mouvements: Mouvemen
   }
   return (code) => {
     let c = code;
+    const etapes: EtapeCog[] = [];
     for (let pas = 0; pas < 20; pas++) {
-      if (communes.has(c)) return c;
+      if (communes.has(c)) return { actuel: c, etapes };
       const s = suivant.get(c);
       if (!s) return null;
+      etapes.push({ code: s.ap, date: s.date });
       c = s.ap;
     }
     return null;
   };
+}
+
+/**
+ * Le code ACTUEL (COG du référentiel) d'un code de fiche. Suit la chaîne des mouvements jusqu'à une
+ * commune existante ; `null` quand le code n'y mène pas (« 83999 Commune inconnue »).
+ */
+export function resolveurCog(communes: ReadonlySet<string>, mouvements: MouvementCog[]): (code: string) => string | null {
+  const chaine = chaineCog(communes, mouvements);
+  return (code) => chaine(code)?.actuel ?? null;
 }
 
 const cle = (n: string): string => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");

@@ -13,8 +13,15 @@ adresse, souvent un code disparu depuis : une association rangée sous une commu
 code d'un transfert de chef-lieu est comptée dans la commune qui l'a repris (`codesRepris`). Un rétablissement,
 lui, partage un territoire que le code ne répartit pas (les associations de L'Oie restent rangées sous
 Essarts-en-Bocage) : la commune rétablie et sa commune d'origine ne sont pas notées (abstention, `null`).
+
+FUT-137 : le rattachement s'étend à TOUS les codes disparus du COG, par la table des successeurs
+data/successeurs-cog2026.json (scripts/fut137/construire-successeurs.mjs, règle dans scripts/lib/successeurs-cog.mjs).
+Un code dont la commune d'arrivée a été découpée APRÈS son arrivée, sans commune de rattachement officielle, n'est
+rattaché nulle part : ses associations sont comptées comme non rattachées, jamais réparties. Chaque association
+active va à une seule commune ou à un seul motif ; la somme est vérifiée (refus sinon) et le bilan est écrit dans
+data/vie-locale-rattachements-rna.json.
 """
-import json, os, sys, csv, io, math, argparse, bisect, zipfile, urllib.request, urllib.parse
+import json, os, sys, csv, io, math, argparse, bisect, zipfile, hashlib, urllib.request, urllib.parse
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +31,9 @@ OSM_TILE_DIR = os.path.join(CACHE, "osm-social-tiles")
 OUT_CACHE = os.path.join(CACHE, "communes-vie-locale.json")
 RNA_WALDEC_ZIP = os.path.join(CACHE, "rna_waldec.zip")
 RNA_WALDEC_URL = "https://media.interieur.gouv.fr/rna/rna_waldec_20260601.zip"
+# FUT-137 : empreinte du fichier qui a produit l'index de main (rejoué à l'identique le 04/11/2026). Un autre fichier
+# sous le même nom est refusé : une nouvelle édition du RNA s'ajoute explicitement, jamais en silence.
+RNA_WALDEC_SHA256 = "f641be11b9073a8467aa0f22dc0615c905890d4a72299ece4f1c652cdeba9523"
 AMALIA = {  # dept -> URL data.gouv (CSV ; ETAT_ASSOCIATION, COMMUNE, CODE_POSTAL)
     "67": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-du-bas-rhin-67/20260602-153021/67-opendatas.csv",
     "68": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-du-haut-rhin-68/20260602-152943/68-opendatas.csv",
@@ -31,6 +41,8 @@ AMALIA = {  # dept -> URL data.gouv (CSV ; ETAT_ASSOCIATION, COMMUNE, CODE_POSTA
 }
 AMALIA_CACHE = os.path.join(CACHE, "amalia")
 REFERENTIEL = os.path.join(ROOT, "data", "population-referentiel-cog2025.json")
+SUCCESSEURS = os.path.join(ROOT, "data", "successeurs-cog2026.json")
+BILAN_RNA = os.path.join(ROOT, "data", "vie-locale-rattachements-rna.json")
 
 OVERPASS_MIRRORS = [
     "https://overpass.openstreetmap.fr/api/interpreter",
@@ -231,12 +243,62 @@ def load_referentiel(path=REFERENTIEL):
     return repris, {k for k, c in ref.items() if c["retablissement"]}
 
 
-def load_rna(valid_insee):
-    """RNA waldec : associations ACTIVES (position == 'A') par INSEE (adrs_codeinsee), codes disparus repris."""
+def sha256_fichier(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for bloc in iter(lambda: f.read(1 << 20), b""):
+            h.update(bloc)
+    return h.hexdigest()
+
+
+def load_successeurs(path=SUCCESSEURS):
+    """FUT-137 : la table des successeurs du COG (code disparu -> commune de l'index, abstentions motivées)."""
+    t = json.load(open(path))
+    return t
+
+
+def rattacher_comptes(comptes, table, valid):
+    """Range chaque compte brut (code RNA -> nombre) dans UNE commune de l'index ou sous UN motif de
+    non-rattachement. Retourne (par_commune, par_code_disparu, bilan). REFUSE si la somme ne se conserve pas."""
+    rattaches, abstentions = table["rattaches"], table["abstentions"]
+    hors_index = set(table["communesHorsIndex"])
+    par_commune, par_code, bilan = {}, {}, {"total": 0, "direct": 0, "rattachees": 0, "nonRattachees": {}}
+    non_rattachees = {}
+    for code in sorted(comptes):
+        n = comptes[code]
+        bilan["total"] += n
+        if code in valid:
+            cible = code
+            bilan["direct"] += n
+        elif code in rattaches:
+            cible = rattaches[code]
+            if cible not in valid:
+                raise ValueError(f"{code} -> {cible} : la table des successeurs sort de l'index")
+            bilan["rattachees"] += n
+            par_code[code] = n
+        else:
+            motif = abstentions[code]["motif"] if code in abstentions else (
+                "commune_hors_index" if code in hors_index else "code_inconnu_du_cog")
+            bilan["nonRattachees"][motif] = bilan["nonRattachees"].get(motif, 0) + n
+            non_rattachees.setdefault(motif, {})[code] = n
+            continue
+        par_commune[cible] = par_commune.get(cible, 0) + n
+    sortie = bilan["direct"] + bilan["rattachees"] + sum(bilan["nonRattachees"].values())
+    if sortie != bilan["total"] or sum(par_commune.values()) != bilan["direct"] + bilan["rattachees"]:
+        raise ValueError(f"conservation rompue : {bilan}")
+    bilan["parMotif"] = non_rattachees
+    return par_commune, par_code, bilan
+
+
+def load_rna(valid_insee, table=None):
+    """RNA waldec : associations ACTIVES (position == 'A') par INSEE (adrs_codeinsee), codes disparus rattachés par
+    la table des successeurs du COG (FUT-137). Retourne (comptes par commune, bilan)."""
     download(RNA_WALDEC_URL, RNA_WALDEC_ZIP)
-    repris, _ = load_referentiel()
-    counts = {}
-    nrepris = 0
+    empreinte = sha256_fichier(RNA_WALDEC_ZIP)
+    if empreinte != RNA_WALDEC_SHA256:
+        raise SystemExit(f"REFUS: {RNA_WALDEC_ZIP} : empreinte {empreinte}, attendue {RNA_WALDEC_SHA256}")
+    table = table or load_successeurs()
+    bruts = {}
     z = zipfile.ZipFile(RNA_WALDEC_ZIP)
     for name in [n for n in z.namelist() if n.lower().endswith(".csv")]:
         with z.open(name) as f:
@@ -245,12 +307,16 @@ def load_rna(valid_insee):
                 if (row.get("position") or "").strip().upper() != "A":
                     continue
                 ins = (row.get("adrs_codeinsee") or "").strip()
-                if ins in repris:
-                    ins = repris[ins]; nrepris += 1
-                if ins in valid_insee:
-                    counts[ins] = counts.get(ins, 0) + 1
-    print(f"RNA actives géocodées : {sum(counts.values())} sur {len(counts)} communes ({nrepris} sous un code repris)", file=sys.stderr)
-    return counts
+                bruts[ins] = bruts.get(ins, 0) + 1
+    counts, par_code, bilan = rattacher_comptes(bruts, table, valid_insee)
+    nr = sum(bilan["nonRattachees"].values())
+    print(f"RNA actives : {bilan['total']} ; rattachées {bilan['direct'] + bilan['rattachees']} sur {len(counts)} communes "
+          f"({bilan['rattachees']} sous un code disparu) ; non rattachées {nr} {json.dumps({k: v for k, v in bilan['nonRattachees'].items()})}",
+          file=sys.stderr)
+    bilan["sources"] = {"rna": {"url": RNA_WALDEC_URL, "sha256": empreinte},
+                        "successeurs": {"fichier": os.path.relpath(SUCCESSEURS, ROOT), "sha256": sha256_fichier(SUCCESSEURS)}}
+    bilan["parCodeDisparu"] = {k: {"associations": v, "commune": table["rattaches"][k]} for k, v in par_code.items()}
+    return counts, bilan
 
 
 def normalize_nom(s):
@@ -293,9 +359,11 @@ def load_amalia(communes, valid_insee):
     return counts
 
 
-def load_assos(communes):
+def load_assos(communes, bilans=None):
     valid = {c["insee"] for c in communes}
-    rna = load_rna(valid)
+    rna, bilan = load_rna(valid)
+    if bilans is not None:
+        bilans["rna"] = bilan
     amalia = load_amalia(communes, valid)
     out = dict(rna)
     for ins, v in amalia.items():
@@ -322,6 +390,30 @@ def selftest():
     repris, retablies = load_referentiel()
     assert repris["93059"] == "93066" and repris["49069"] == "49126"   # Pierrefitte -> Saint-Denis, Orée d'Anjou
     assert {"85084", "85165", "85212", "60054", "60694"} <= retablies and "93066" not in retablies
+    # FUT-137 : la table des successeurs, sur des territoires réels.
+    t = load_successeurs()
+    r, ab = t["rattaches"], t["abstentions"]
+    assert all(r[a] == k for a, k in repris.items())                       # les codes repris de FUT-109, inchangés
+    assert r["01221"] == r["01414"] == r["01442"] == "01036"               # Valromey-sur-Séran : fusions de 2016 et 2019
+    assert r["14363"] == "14654"                                           # Lieury : 1973, 1990, 2014, 2017 -> Saint-Pierre-en-Auge
+    assert r["49144"] == "44180"                                           # Freigné : changement de département (41) puis fusion
+    assert r["12076"] == "12218"                                           # Conques : changement de code seul (50)
+    assert r["60455"] == "60694"                                           # La Neuville-Garnier : pas 60054, qui n'a gardé que le code
+    assert ab["24149"]["motif"] == "retablissement_posterieur" and "24149" not in r   # Cussac : arrivée 1960, découpage 1989
+    assert "01036" not in r and "01036" not in ab                          # une commune en vigueur n'est pas un code disparu
+    # Le rattachement des comptes : un compte, une destination ; rien ne se crée ni ne se perd.
+    tt = {"rattaches": {"x1": "a", "x2": "a", "y": "b"}, "abstentions": {"z": {"motif": "retablissement_posterieur"}},
+          "communesHorsIndex": ["97101"]}
+    pc, par_code, bil = rattacher_comptes({"a": 10, "b": 1, "x1": 3, "x2": 4, "y": 2, "z": 7, "97101": 5, "": 1}, tt, {"a", "b", "c"})
+    assert pc == {"a": 17, "b": 3} and par_code == {"x1": 3, "x2": 4, "y": 2}
+    assert (bil["total"], bil["direct"], bil["rattachees"]) == (33, 11, 9)
+    assert bil["nonRattachees"] == {"retablissement_posterieur": 7, "commune_hors_index": 5, "code_inconnu_du_cog": 1}
+    assert bil["parMotif"]["retablissement_posterieur"] == {"z": 7}      # un code ambigu est compté, jamais réparti
+    try:
+        rattacher_comptes({"y": 1}, {"rattaches": {"y": "q"}, "abstentions": {}, "communesHorsIndex": []}, {"a"})
+        raise AssertionError("une destination hors de l'index doit être refusée")
+    except ValueError:
+        pass
     print("✓ selftest OK", file=sys.stderr)
 
 
@@ -363,7 +455,8 @@ def main():
     idx, communes = load_communes()
     plat, plon = load_social_pois()
     lieux = assign_to_communes(communes, plat, plon)
-    assos = load_assos(communes)
+    bilans = {}
+    assos = load_assos(communes, bilans)
     _, retablies = load_referentiel()
     scores = compute_scores(communes, lieux, assos, K, abstentions=retablies)
     rec = {}
@@ -397,6 +490,13 @@ def main():
             c["vieLocale"] = rec.get(c["insee"])
         json.dump(idx, open(INDEX, "w"))
         print("✓ index patché (vieLocale)", file=sys.stderr)
+        with open(BILAN_RNA, "w") as f:
+            json.dump({"description": "FUT-137 · associations actives du RNA : rattachées à une commune de l'index (directement "
+                       "ou sous un code disparu, table des successeurs du COG) ou non rattachées, par motif. "
+                       "total = direct + rattachees + somme(nonRattachees).", **bilans["rna"]},
+                      f, ensure_ascii=False, indent=1, sort_keys=True)
+            f.write("\n")
+        print(f"✓ bilan écrit : {os.path.relpath(BILAN_RNA, ROOT)}", file=sys.stderr)
 
 
 if __name__ == "__main__":

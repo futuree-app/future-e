@@ -77,7 +77,7 @@ async function telecharger(url, dest) {
 }
 
 /** Le fichier en cache, téléchargé s'il manque, REFUSÉ si son empreinte n'est pas celle épinglée. */
-async function fichierEpingle(dest, url, attendu, { telechargerSiAbsent = true } = {}) {
+export async function fichierEpingle(dest, url, attendu, { telechargerSiAbsent = true } = {}) {
   if (!fs.existsSync(dest)) {
     if (!telechargerSiAbsent) throw new Error(`${dest} absent`);
     await telecharger(url, dest);
