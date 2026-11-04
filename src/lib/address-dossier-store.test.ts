@@ -8,6 +8,7 @@ import {
   type AddressDossierRow,
 } from "./address-dossier-store.ts";
 import type { Face3Snapshot } from "./logement-autour-types.ts";
+import { OSM_ECHEC_DELAI_MS } from "./logement-osm.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 function row(id: string, updatedAt: string): AddressDossierRow {
@@ -106,15 +107,30 @@ test("un seul des deux volets OSM en attente suffit à recalculer", () => {
   assert.equal(needsRecompute({ snapshot: half }, center, SOURCES_VERSION), true);
 });
 
-test("un OSM en ÉCHEC ne relance pas : `failed` est un résultat, `pending` est une absence", () => {
-  // Distinction volontaire. `pending` dit « pas encore », donc on redemande. `failed` dit
-  // « Overpass a répondu une erreur » : le relancer à chaque ouverture martèlerait une source en
-  // panne, alors que l'écran sait déjà dire honnêtement que la donnée est indisponible.
+test("un OSM en ÉCHEC RÉCENT ne relance pas : la source en panne ne se martèle pas", () => {
+  // `pending` dit « pas encore », donc on redemande. `failed` dit « la source n'a pas répondu » :
+  // le relancer à chaque ouverture martèlerait une source en panne, alors que l'écran sait déjà
+  // dire honnêtement que la donnée est indisponible.
+  const maintenant = Date.parse("2026-11-04T12:00:00.000Z");
   const failed = {
     ...okSnap,
+    computedAt: new Date(maintenant - 60_000).toISOString(),
     sourceStatus: { bpe: "complete", osmInfrastructure: "failed", osmGreenSpaces: "failed" },
   } satisfies Face3Snapshot;
-  assert.equal(needsRecompute({ snapshot: failed }, center, SOURCES_VERSION), false);
+  assert.equal(needsRecompute({ snapshot: failed }, center, SOURCES_VERSION, maintenant), false);
+});
+
+test("un OSM en ÉCHEC ANCIEN se revérifie : l'indisponibilité n'est jamais définitive (04/11/2026)", () => {
+  // Avant, `failed` n'était JAMAIS recalculé : une panne de quelques minutes figeait le dossier
+  // payé sur « donnée indisponible » jusqu'au prochain changement de version. Le délai protège la
+  // source ; au-delà, l'ouverture suivante redemande (et le cache de tuile dit vite si la panne dure).
+  const maintenant = Date.parse("2026-11-04T12:00:00.000Z");
+  const failed = {
+    ...okSnap,
+    computedAt: new Date(maintenant - OSM_ECHEC_DELAI_MS - 1000).toISOString(),
+    sourceStatus: { bpe: "complete", osmInfrastructure: "failed", osmGreenSpaces: "failed" },
+  } satisfies Face3Snapshot;
+  assert.equal(needsRecompute({ snapshot: failed }, center, SOURCES_VERSION, maintenant), true);
 });
 
 const dpe = { id_dpe: "d1", etiquette_dpe: "D" } as unknown as DpeRecord;

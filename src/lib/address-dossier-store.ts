@@ -3,6 +3,7 @@ import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
 import type { AddressObjective, AddressRelation } from "./relation-au-lieu.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
+import { OSM_ECHEC_DELAI_MS } from "./logement-osm.ts";
 
 // bump = invalidation de tous les snapshots Autour.
 //   d : ajout du signal îlot de chaleur urbain (icu) au snapshot.
@@ -127,6 +128,7 @@ export function needsRecompute(
   row: { snapshot: Face3Snapshot | null } | null,
   center: LngLat,
   sourcesVersion: string,
+  maintenant: number = Date.now(),
 ): boolean {
   const s = row?.snapshot;
   if (!s) return true;
@@ -139,11 +141,20 @@ export function needsRecompute(
   // une seconde plus tard, et l'écran répétait « environnement en cours de récupération » alors que
   // la donnée attendue était disponible juste à côté. Constaté en production le 29/07/2026.
   //
-  // `failed` ne relance PAS, et la distinction est volontaire : `pending` dit « pas encore », donc
-  // on redemande ; `failed` dit « Overpass a répondu une erreur », et le relancer à chaque ouverture
-  // martèlerait une source en panne alors que l'écran sait déjà dire que la donnée est indisponible.
+  // `failed` ne relance pas TOUT DE SUITE : `pending` dit « pas encore », donc on redemande ;
+  // `failed` dit « la source n'a pas répondu », et le relancer à chaque ouverture martèlerait une
+  // source en panne alors que l'écran sait déjà dire que la donnée est indisponible.
+  //
+  // MAIS PAS POUR TOUJOURS (04/11/2026). `failed` n'était jamais recalculé : une panne de quelques
+  // minutes figeait un dossier payé sur « indisponible » jusqu'au prochain changement de version.
+  // Passé `OSM_ECHEC_DELAI_MS`, l'ouverture suivante redemande ; si la panne dure, le cache de tuile
+  // répond `failed` sans solliciter Overpass.
   if (s.sourceStatus.osmInfrastructure === "pending" || s.sourceStatus.osmGreenSpaces === "pending") {
     return true;
+  }
+  if (s.sourceStatus.osmInfrastructure === "failed" || s.sourceStatus.osmGreenSpaces === "failed") {
+    const calcule = Date.parse(s.computedAt);
+    if (!Number.isFinite(calcule) || maintenant - calcule >= OSM_ECHEC_DELAI_MS) return true;
   }
 
   // même position à ~10 m près (le géocodage a pu bouger)

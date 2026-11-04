@@ -107,7 +107,7 @@ test("F1. les valeurs du logement s'écrivent à la française", () => {
 test("U1. Autour : l'essentiel d'abord, la phrase sur les autorisations sous la date qui la borne", () => {
   const m = code("src/components/report/AutourModule.tsx");
   const conclusion = m.indexOf('eyebrow="Ce que ce secteur met à portée"');
-  const faits = m.indexOf("<Face3Block s={autour} car={carOwnership} />");
+  const faits = m.indexOf("<Face3Block s={affiche} car={carOwnership} />");
   const permis = m.indexOf('eyebrow="Ce qui est autorisé autour"');
   assert.ok(conclusion > 0 && faits > 0 && permis > 0, "blocs trouvés");
   assert.ok(conclusion < faits, "la conclusion précède les faits qu'elle résume");
@@ -115,10 +115,10 @@ test("U1. Autour : l'essentiel d'abord, la phrase sur les autorisations sous la 
   // de consultation du registre, dans le bloc des autorisations.
   const blocPermis = m.slice(permis, m.indexOf("</ReportSection>", permis));
   const consultation = blocPermis.indexOf("{p.consultation}");
-  const mouvement = blocPermis.indexOf("buildAutourConclusion(autour)?.mouvement");
+  const mouvement = blocPermis.indexOf("buildAutourConclusion(affiche)?.mouvement");
   assert.ok(consultation > 0 && mouvement > consultation, "le mouvement suit la date de consultation");
   // Revue : la phrase dépend de la date AFFICHÉE. Sans date lisible, elle ne s'affiche pas.
-  contient(blocPermis, /\{p\.consultation && \(\(\) => \{\s*const mouvement = buildAutourConclusion\(autour\)\?\.mouvement;/, "bloc des permis");
+  contient(blocPermis, /\{p\.consultation && \(\(\) => \{\s*const mouvement = buildAutourConclusion\(affiche\)\?\.mouvement;/, "bloc des permis");
   const blocConclusion = m.slice(conclusion, m.indexOf("</ReportSection>", conclusion));
   neContientPas(blocConclusion, /c\.mouvement/, "conclusion en tête");
   // L'adresse n'est plus répétée, et l'encadré vide autour du seul lien a disparu.
