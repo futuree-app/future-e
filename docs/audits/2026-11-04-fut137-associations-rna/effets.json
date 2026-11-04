@@ -1,0 +1,13089 @@
+{
+ "description": "FUT-137 · avant/après mesuré par scripts/fut137/mesurer-effets.mjs : index de main 37a10815 -> index de la branche. 'regleDuDiagnostic' : la même mesure avec la règle d'ambiguïté du 24/10/2026 (abstention dès qu'une commune d'arrivée a un jour été découpée), sur les mêmes sources.",
+ "associations": {
+  "total": 1954654,
+  "rattacheesAvant": 1838871,
+  "rattacheesApres": 1848902,
+  "nonRattacheesAvant": 115783,
+  "nonRattacheesApres": 105752,
+  "nonRattacheesParMotif": {
+   "code_inconnu_du_cog": 29805,
+   "commune_hors_index": 75705,
+   "sans_successeur": 242
+  },
+  "communesDontLeNombreChange": 570,
+  "codesNouvellementRattaches": 1032
+ },
+ "effets": {
+  "notes": 2088,
+  "notesPlusDunPoint": 334,
+  "ecartMax": 17,
+  "nullVersValeur": 0,
+  "valeurVersNull": 0,
+  "assosPct": 6015,
+  "lieuxPct": 0,
+  "paliers": 69,
+  "raisons": 30,
+  "raisonsGagnees": 13,
+  "raisonsPerdues": 17,
+  "seuilIdentite60": 34,
+  "identites": 16,
+  "categoriesFaible": 39,
+  "categoriesGagnees": 19,
+  "categoriesPerdues": 20,
+  "verdicts": 56,
+  "bandesRang": 31015,
+  "verdictsDetail": {
+   "neutral -> satisfied": 11,
+   "neutral -> mismatch": 17,
+   "satisfied -> neutral": 17,
+   "mismatch -> neutral": 11
+  }
+ },
+ "recoiventSansChanger": 61,
+ "changentSansRecevoir": 5506,
+ "regleDuDiagnostic": {
+  "associationsRattachees": 1848844,
+  "effets": {
+   "notes": 2072,
+   "notesPlusDunPoint": 332,
+   "ecartMax": 17,
+   "nullVersValeur": 0,
+   "valeurVersNull": 0,
+   "assosPct": 5957,
+   "lieuxPct": 0,
+   "paliers": 69,
+   "raisons": 30,
+   "raisonsGagnees": 13,
+   "raisonsPerdues": 17,
+   "seuilIdentite60": 32,
+   "identites": 15,
+   "categoriesFaible": 39,
+   "categoriesGagnees": 19,
+   "categoriesPerdues": 20,
+   "verdicts": 0,
+   "bandesRang": 0,
+   "verdictsDetail": {}
+  }
+ },
+ "plusAffectees": [
+  {
+   "insee": "49261",
+   "nom": "Gennes-Val-de-Loire",
+   "population": 8464,
+   "associationsAjoutees": 307,
+   "score": [
+    64,
+    81
+   ],
+   "assosPct": [
+    44,
+    99
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "73212",
+   "nom": "Val-d'Arc",
+   "population": 2012,
+   "associationsAjoutees": 34,
+   "score": [
+    42,
+    58
+   ],
+   "assosPct": [
+    25,
+    78
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "46033",
+   "nom": "Porte-du-Quercy",
+   "population": 547,
+   "associationsAjoutees": 24,
+   "score": [
+    13,
+    28
+   ],
+   "assosPct": [
+    44,
+    92
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "49080",
+   "nom": "Les Hauts-d'Anjou",
+   "population": 8727,
+   "associationsAjoutees": 137,
+   "score": [
+    15,
+    30
+   ],
+   "assosPct": [
+    40,
+    89
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "07165",
+   "nom": "Belsentes",
+   "population": 547,
+   "associationsAjoutees": 14,
+   "score": [
+    53,
+    65
+   ],
+   "assosPct": [
+    40,
+    78
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ]
+  },
+  {
+   "insee": "24325",
+   "nom": "Pechs-de-l'Espérance",
+   "population": 772,
+   "associationsAjoutees": 17,
+   "score": [
+    24,
+    36
+   ],
+   "assosPct": [
+    44,
+    81
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "50041",
+   "nom": "La Hague",
+   "population": 11223,
+   "associationsAjoutees": 260,
+   "score": [
+    57,
+    69
+   ],
+   "assosPct": [
+    56,
+    98
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ]
+  },
+  {
+   "insee": "21272",
+   "nom": "Le Val-Larrey",
+   "population": 270,
+   "associationsAjoutees": 8,
+   "score": [
+    31,
+    42
+   ],
+   "assosPct": [
+    22,
+    57
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "22055",
+   "nom": "Binic-Étables-sur-Mer",
+   "population": 6881,
+   "associationsAjoutees": 141,
+   "score": [
+    49,
+    60
+   ],
+   "assosPct": [
+    60,
+    97
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "36244",
+   "nom": "Villentrois-Faverolles-en-Berry",
+   "population": 874,
+   "associationsAjoutees": 18,
+   "score": [
+    69,
+    80
+   ],
+   "assosPct": [
+    48,
+    83
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "38479",
+   "nom": "Porte-des-Bonnevaux",
+   "population": 2071,
+   "associationsAjoutees": 35,
+   "score": [
+    31,
+    42
+   ],
+   "assosPct": [
+    49,
+    88
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "46263",
+   "nom": "Barguelonne-en-Quercy",
+   "population": 702,
+   "associationsAjoutees": 14,
+   "score": [
+    61,
+    72
+   ],
+   "assosPct": [
+    36,
+    73
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "87028",
+   "nom": "Val-d'Oire-et-Gartempe",
+   "population": 1691,
+   "associationsAjoutees": 24,
+   "score": [
+    33,
+    44
+   ],
+   "assosPct": [
+    39,
+    77
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "16204",
+   "nom": "Bellevigne",
+   "population": 1278,
+   "associationsAjoutees": 21,
+   "score": [
+    16,
+    26
+   ],
+   "assosPct": [
+    55,
+    85
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "25060",
+   "nom": "Val-d'Usiers",
+   "population": 2114,
+   "associationsAjoutees": 22,
+   "score": [
+    14,
+    24
+   ],
+   "assosPct": [
+    38,
+    70
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "35062",
+   "nom": "La Chapelle-Fleurigné",
+   "population": 2409,
+   "associationsAjoutees": 25,
+   "score": [
+    12,
+    22
+   ],
+   "assosPct": [
+    40,
+    72
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "42268",
+   "nom": "Vézelin-sur-Loire",
+   "population": 809,
+   "associationsAjoutees": 13,
+   "score": [
+    23,
+    33
+   ],
+   "assosPct": [
+    43,
+    74
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "46262",
+   "nom": "Lendou-en-Quercy",
+   "population": 624,
+   "associationsAjoutees": 19,
+   "score": [
+    17,
+    27
+   ],
+   "assosPct": [
+    57,
+    91
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "61194",
+   "nom": "Monts-sur-Orne",
+   "population": 873,
+   "associationsAjoutees": 15,
+   "score": [
+    49,
+    59
+   ],
+   "assosPct": [
+    42,
+    76
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "61474",
+   "nom": "Gouffern en Auge",
+   "population": 3660,
+   "associationsAjoutees": 57,
+   "score": [
+    24,
+    34
+   ],
+   "assosPct": [
+    62,
+    93
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "71042",
+   "nom": "Bonnay-Saint-Ythaire",
+   "population": 437,
+   "associationsAjoutees": 11,
+   "score": [
+    76,
+    86
+   ],
+   "assosPct": [
+    44,
+    76
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "81132",
+   "nom": "Guitalens-L'Albarède",
+   "population": 829,
+   "associationsAjoutees": 11,
+   "score": [
+    45,
+    55
+   ],
+   "assosPct": [
+    26,
+    59
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "05024",
+   "nom": "Valdoule",
+   "population": 213,
+   "associationsAjoutees": 7,
+   "score": [
+    35,
+    44
+   ],
+   "assosPct": [
+    28,
+    59
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "14357",
+   "nom": "Terres de Druance",
+   "population": 895,
+   "associationsAjoutees": 10,
+   "score": [
+    17,
+    26
+   ],
+   "assosPct": [
+    25,
+    55
+   ],
+   "verdict": null
+  },
+  {
+   "insee": "14658",
+   "nom": "Noues de Sienne",
+   "population": 4285,
+   "associationsAjoutees": 45,
+   "score": [
+    50,
+    59
+   ],
+   "assosPct": [
+    56,
+    85
+   ],
+   "verdict": null
+  }
+ ],
+ "communesQuiRecoivent": [
+  {
+   "insee": "74010",
+   "nom": "Annecy",
+   "population": 131715,
+   "associationsAjoutees": 660,
+   "codes": [
+    "74011",
+    "74093",
+    "74182",
+    "74217",
+    "74268"
+   ],
+   "score": [
+    74,
+    76
+   ],
+   "assosPct": [
+    87,
+    94
+   ]
+  },
+  {
+   "insee": "49261",
+   "nom": "Gennes-Val-de-Loire",
+   "population": 8464,
+   "associationsAjoutees": 307,
+   "codes": [
+    "49149",
+    "49304"
+   ],
+   "score": [
+    64,
+    81
+   ],
+   "assosPct": [
+    44,
+    99
+   ]
+  },
+  {
+   "insee": "59350",
+   "nom": "Lille",
+   "population": 236710,
+   "associationsAjoutees": 305,
+   "codes": [
+    "59298",
+    "59355"
+   ],
+   "score": [
+    92,
+    92
+   ],
+   "assosPct": [
+    100,
+    100
+   ]
+  },
+  {
+   "insee": "59183",
+   "nom": "Dunkerque",
+   "population": 86788,
+   "associationsAjoutees": 287,
+   "codes": [
+    "59248",
+    "59380",
+    "59510",
+    "59540"
+   ],
+   "score": [
+    36,
+    37
+   ],
+   "assosPct": [
+    92,
+    95
+   ]
+  },
+  {
+   "insee": "85146",
+   "nom": "Montaigu-Vendée",
+   "population": 20605,
+   "associationsAjoutees": 274,
+   "codes": [
+    "85027",
+    "85107",
+    "85217",
+    "85224"
+   ],
+   "score": [
+    37,
+    40
+   ],
+   "assosPct": [
+    87,
+    98
+   ]
+  },
+  {
+   "insee": "50041",
+   "nom": "La Hague",
+   "population": 11223,
+   "associationsAjoutees": 260,
+   "codes": [
+    "50001",
+    "50020",
+    "50057",
+    "50073",
+    "50163",
+    "50171",
+    "50187",
+    "50220",
+    "50242",
+    "50257",
+    "50385",
+    "50386",
+    "50460",
+    "50477",
+    "50600",
+    "50611",
+    "50620",
+    "50623"
+   ],
+   "score": [
+    57,
+    69
+   ],
+   "assosPct": [
+    56,
+    98
+   ]
+  },
+  {
+   "insee": "91228",
+   "nom": "Évry-Courcouronnes",
+   "population": 66177,
+   "associationsAjoutees": 253,
+   "codes": [
+    "91182"
+   ],
+   "score": [
+    64,
+    64
+   ],
+   "assosPct": [
+    96,
+    98
+   ]
+  },
+  {
+   "insee": "69149",
+   "nom": "Oullins-Pierre-Bénite",
+   "population": 37628,
+   "associationsAjoutees": 252,
+   "codes": [
+    "69152"
+   ],
+   "score": [
+    66,
+    70
+   ],
+   "assosPct": [
+    77,
+    91
+   ]
+  },
+  {
+   "insee": "85194",
+   "nom": "Les Sables-d'Olonne",
+   "population": 48402,
+   "associationsAjoutees": 198,
+   "codes": [
+    "85060",
+    "85166"
+   ],
+   "score": [
+    87,
+    90
+   ],
+   "assosPct": [
+    80,
+    89
+   ]
+  },
+  {
+   "insee": "77316",
+   "nom": "Moret-Loing-et-Orvanne",
+   "population": 12581,
+   "associationsAjoutees": 180,
+   "codes": [
+    "77166",
+    "77491"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    95,
+    99
+   ]
+  },
+  {
+   "insee": "49050",
+   "nom": "Brissac Loire Aubance",
+   "population": 10895,
+   "associationsAjoutees": 168,
+   "codes": [
+    "49001",
+    "49078",
+    "49091",
+    "49115",
+    "49186",
+    "49317",
+    "49318",
+    "49327",
+    "49363"
+   ],
+   "score": [
+    64,
+    68
+   ],
+   "assosPct": [
+    85,
+    98
+   ]
+  },
+  {
+   "insee": "22055",
+   "nom": "Binic-Étables-sur-Mer",
+   "population": 6881,
+   "associationsAjoutees": 141,
+   "codes": [
+    "22007"
+   ],
+   "score": [
+    49,
+    60
+   ],
+   "assosPct": [
+    60,
+    97
+   ]
+  },
+  {
+   "insee": "49080",
+   "nom": "Les Hauts-d'Anjou",
+   "population": 8727,
+   "associationsAjoutees": 137,
+   "codes": [
+    "49051",
+    "49065",
+    "49096",
+    "49105",
+    "49189",
+    "49254",
+    "49335"
+   ],
+   "score": [
+    15,
+    30
+   ],
+   "assosPct": [
+    40,
+    89
+   ]
+  },
+  {
+   "insee": "49331",
+   "nom": "Segré-en-Anjou Bleu",
+   "population": 17699,
+   "associationsAjoutees": 82,
+   "codes": [
+    "49037",
+    "49077",
+    "49081",
+    "49136",
+    "49158",
+    "49184",
+    "49187",
+    "49208",
+    "49229",
+    "49233",
+    "49277",
+    "49305",
+    "49319"
+   ],
+   "score": [
+    26,
+    28
+   ],
+   "assosPct": [
+    87,
+    93
+   ]
+  },
+  {
+   "insee": "50099",
+   "nom": "Carentan-les-Marais",
+   "population": 10220,
+   "associationsAjoutees": 67,
+   "codes": [
+    "50080",
+    "50089",
+    "50107",
+    "50348",
+    "50485",
+    "50534",
+    "50631",
+    "50636"
+   ],
+   "score": [
+    74,
+    76
+   ],
+   "assosPct": [
+    87,
+    95
+   ]
+  },
+  {
+   "insee": "49377",
+   "nom": "Rives-du-Loir-en-Anjou",
+   "population": 5641,
+   "associationsAjoutees": 61,
+   "codes": [
+    "49337"
+   ],
+   "score": [
+    54,
+    59
+   ],
+   "assosPct": [
+    76,
+    93
+   ]
+  },
+  {
+   "insee": "69157",
+   "nom": "Vindry-sur-Turdine",
+   "population": 5282,
+   "associationsAjoutees": 60,
+   "codes": [
+    "69073",
+    "69147",
+    "69223"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    91,
+    98
+   ]
+  },
+  {
+   "insee": "73290",
+   "nom": "Val-Cenis",
+   "population": 2067,
+   "associationsAjoutees": 60,
+   "codes": [
+    "73056",
+    "73143",
+    "73144",
+    "73287"
+   ],
+   "score": [
+    94,
+    99
+   ],
+   "assosPct": [
+    84,
+    99
+   ]
+  },
+  {
+   "insee": "01033",
+   "nom": "Valserhône",
+   "population": 16295,
+   "associationsAjoutees": 58,
+   "codes": [
+    "01091",
+    "01205"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    76,
+    85
+   ]
+  },
+  {
+   "insee": "49248",
+   "nom": "Ombrée d'Anjou",
+   "population": 8859,
+   "associationsAjoutees": 58,
+   "codes": [
+    "49073",
+    "49088",
+    "49103",
+    "49156",
+    "49226",
+    "49250",
+    "49309",
+    "49354",
+    "49366"
+   ],
+   "score": [
+    21,
+    26
+   ],
+   "assosPct": [
+    67,
+    85
+   ]
+  },
+  {
+   "insee": "61474",
+   "nom": "Gouffern en Auge",
+   "population": 3660,
+   "associationsAjoutees": 57,
+   "codes": [
+    "61009",
+    "61057",
+    "61083",
+    "61110",
+    "61131",
+    "61157",
+    "61161",
+    "61315",
+    "61449",
+    "61477",
+    "61496",
+    "61504"
+   ],
+   "score": [
+    24,
+    34
+   ],
+   "assosPct": [
+    62,
+    93
+   ]
+  },
+  {
+   "insee": "78551",
+   "nom": "Saint-Germain-en-Laye",
+   "population": 44380,
+   "associationsAjoutees": 57,
+   "codes": [
+    "78251"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    88,
+    90
+   ]
+  },
+  {
+   "insee": "14431",
+   "nom": "Mézidon Vallée d'Auge",
+   "population": 9579,
+   "associationsAjoutees": 56,
+   "codes": [
+    "14201",
+    "14208",
+    "14313",
+    "14359",
+    "14386",
+    "14387",
+    "14422",
+    "14444",
+    "14493",
+    "14600",
+    "14749"
+   ],
+   "score": [
+    34,
+    40
+   ],
+   "assosPct": [
+    58,
+    77
+   ]
+  },
+  {
+   "insee": "74282",
+   "nom": "Fillière",
+   "population": 9547,
+   "associationsAjoutees": 56,
+   "codes": [
+    "74022",
+    "74120",
+    "74204",
+    "74245"
+   ],
+   "score": [
+    25,
+    28
+   ],
+   "assosPct": [
+    82,
+    92
+   ]
+  },
+  {
+   "insee": "24253",
+   "nom": "Mareuil en Périgord",
+   "population": 2303,
+   "associationsAjoutees": 55,
+   "codes": [
+    "24033",
+    "24099",
+    "24203",
+    "24235",
+    "24283",
+    "24503",
+    "24579"
+   ],
+   "score": [
+    28,
+    32
+   ],
+   "assosPct": [
+    87,
+    99
+   ]
+  },
+  {
+   "insee": "53062",
+   "nom": "Château-Gontier-sur-Mayenne",
+   "population": 16710,
+   "associationsAjoutees": 55,
+   "codes": [
+    "53014",
+    "53215"
+   ],
+   "score": [
+    65,
+    66
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "86082",
+   "nom": "Valence-en-Poitou",
+   "population": 4368,
+   "associationsAjoutees": 55,
+   "codes": [
+    "86043",
+    "86067",
+    "86188",
+    "86278"
+   ],
+   "score": [
+    25,
+    29
+   ],
+   "assosPct": [
+    83,
+    96
+   ]
+  },
+  {
+   "insee": "69019",
+   "nom": "Belleville-en-Beaujolais",
+   "population": 13542,
+   "associationsAjoutees": 54,
+   "codes": [
+    "69211"
+   ],
+   "score": [
+    81,
+    82
+   ],
+   "assosPct": [
+    90,
+    94
+   ]
+  },
+  {
+   "insee": "14654",
+   "nom": "Saint-Pierre-en-Auge",
+   "population": 7288,
+   "associationsAjoutees": 52,
+   "codes": [
+    "14081",
+    "14099",
+    "14363",
+    "14433",
+    "14450",
+    "14489",
+    "14580",
+    "14616",
+    "14688",
+    "14697",
+    "14729",
+    "14750"
+   ],
+   "score": [
+    22,
+    27
+   ],
+   "assosPct": [
+    69,
+    86
+   ]
+  },
+  {
+   "insee": "24026",
+   "nom": "Bassillac et Auberoche",
+   "population": 4363,
+   "associationsAjoutees": 52,
+   "codes": [
+    "24044",
+    "24103",
+    "24166",
+    "24270",
+    "24369"
+   ],
+   "score": [
+    26,
+    29
+   ],
+   "assosPct": [
+    88,
+    97
+   ]
+  },
+  {
+   "insee": "41059",
+   "nom": "Le Controis-en-Sologne",
+   "population": 6719,
+   "associationsAjoutees": 50,
+   "codes": [
+    "41082",
+    "41092",
+    "41170",
+    "41257"
+   ],
+   "score": [
+    29,
+    32
+   ],
+   "assosPct": [
+    84,
+    94
+   ]
+  },
+  {
+   "insee": "79329",
+   "nom": "Thouars",
+   "population": 14000,
+   "associationsAjoutees": 47,
+   "codes": [
+    "79171",
+    "79178",
+    "79292"
+   ],
+   "score": [
+    31,
+    32
+   ],
+   "assosPct": [
+    94,
+    96
+   ]
+  },
+  {
+   "insee": "49228",
+   "nom": "Noyant-Villages",
+   "population": 5501,
+   "associationsAjoutees": 46,
+   "codes": [
+    "49013",
+    "49044",
+    "49052",
+    "49062",
+    "49087",
+    "49098",
+    "49122",
+    "49150",
+    "49173",
+    "49175",
+    "49197",
+    "49202",
+    "49234"
+   ],
+   "score": [
+    87,
+    87
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "86123",
+   "nom": "Boivre-la-Vallée",
+   "population": 3058,
+   "associationsAjoutees": 46,
+   "codes": [
+    "86021",
+    "86056",
+    "86166"
+   ],
+   "score": [
+    53,
+    62
+   ],
+   "assosPct": [
+    59,
+    91
+   ]
+  },
+  {
+   "insee": "14658",
+   "nom": "Noues de Sienne",
+   "population": 4285,
+   "associationsAjoutees": 45,
+   "codes": [
+    "14151",
+    "14192",
+    "14279",
+    "14296",
+    "14417",
+    "14611",
+    "14671"
+   ],
+   "score": [
+    50,
+    59
+   ],
+   "assosPct": [
+    56,
+    85
+   ]
+  },
+  {
+   "insee": "69135",
+   "nom": "Deux-Grosnes",
+   "population": 1914,
+   "associationsAjoutees": 44,
+   "codes": [
+    "69015",
+    "69150",
+    "69185",
+    "69210",
+    "69224",
+    "69251"
+   ],
+   "score": [
+    77,
+    79
+   ],
+   "assosPct": [
+    92,
+    99
+   ]
+  },
+  {
+   "insee": "44180",
+   "nom": "Vallons-de-l'Erdre",
+   "population": 6559,
+   "associationsAjoutees": 43,
+   "codes": [
+    "44017",
+    "44093",
+    "44191",
+    "44219",
+    "49144"
+   ],
+   "score": [
+    42,
+    45
+   ],
+   "assosPct": [
+    84,
+    93
+   ]
+  },
+  {
+   "insee": "49298",
+   "nom": "Saint-Léger-de-Linières",
+   "population": 3804,
+   "associationsAjoutees": 43,
+   "codes": [
+    "49289"
+   ],
+   "score": [
+    21,
+    28
+   ],
+   "assosPct": [
+    67,
+    90
+   ]
+  },
+  {
+   "insee": "50025",
+   "nom": "Avranches",
+   "population": 10240,
+   "associationsAjoutees": 43,
+   "codes": [
+    "50516"
+   ],
+   "score": [
+    90,
+    91
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "29076",
+   "nom": "Milizac-Guipronvel",
+   "population": 4649,
+   "associationsAjoutees": 42,
+   "codes": [
+    "29149"
+   ],
+   "score": [
+    72,
+    76
+   ],
+   "assosPct": [
+    83,
+    94
+   ]
+  },
+  {
+   "insee": "22093",
+   "nom": "Lamballe-Armor",
+   "population": 16845,
+   "associationsAjoutees": 41,
+   "codes": [
+    "22154",
+    "22173"
+   ],
+   "score": [
+    79,
+    80
+   ],
+   "assosPct": [
+    92,
+    94
+   ]
+  },
+  {
+   "insee": "69248",
+   "nom": "Thizy-les-Bourgs",
+   "population": 5869,
+   "associationsAjoutees": 41,
+   "codes": [
+    "69025",
+    "69041",
+    "69128",
+    "69129"
+   ],
+   "score": [
+    91,
+    91
+   ],
+   "assosPct": [
+    97,
+    98
+   ]
+  },
+  {
+   "insee": "24064",
+   "nom": "Brantôme en Périgord",
+   "population": 3721,
+   "associationsAjoutees": 40,
+   "codes": [
+    "24079",
+    "24170",
+    "24198",
+    "24391",
+    "24530",
+    "24561"
+   ],
+   "score": [
+    93,
+    94
+   ],
+   "assosPct": [
+    93,
+    98
+   ]
+  },
+  {
+   "insee": "35004",
+   "nom": "Val-Couesnon",
+   "population": 4102,
+   "associationsAjoutees": 39,
+   "codes": [
+    "35113",
+    "35303",
+    "35341"
+   ],
+   "score": [
+    34,
+    40
+   ],
+   "assosPct": [
+    72,
+    90
+   ]
+  },
+  {
+   "insee": "35257",
+   "nom": "Maen Roch",
+   "population": 5097,
+   "associationsAjoutees": 38,
+   "codes": [
+    "35267"
+   ],
+   "score": [
+    23,
+    27
+   ],
+   "assosPct": [
+    78,
+    91
+   ]
+  },
+  {
+   "insee": "85001",
+   "nom": "L'Aiguillon-la-Presqu'île",
+   "population": 2772,
+   "associationsAjoutees": 38,
+   "codes": [
+    "85307"
+   ],
+   "score": [
+    30,
+    37
+   ],
+   "assosPct": [
+    66,
+    91
+   ]
+  },
+  {
+   "insee": "49018",
+   "nom": "Baugé-en-Anjou",
+   "population": 11757,
+   "associationsAjoutees": 37,
+   "codes": [
+    "49097",
+    "49213",
+    "49245",
+    "49303",
+    "49372",
+    "49380"
+   ],
+   "score": [
+    40,
+    40
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "79179",
+   "nom": "Moncoutant-sur-Sèvre",
+   "population": 5085,
+   "associationsAjoutees": 37,
+   "codes": [
+    "79051",
+    "79075",
+    "79188",
+    "79222"
+   ],
+   "score": [
+    76,
+    80
+   ],
+   "assosPct": [
+    76,
+    90
+   ]
+  },
+  {
+   "insee": "86281",
+   "nom": "Saint-Martin-la-Pallu",
+   "population": 5620,
+   "associationsAjoutees": 37,
+   "codes": [
+    "86030",
+    "86060",
+    "86071",
+    "86277"
+   ],
+   "score": [
+    19,
+    25
+   ],
+   "assosPct": [
+    55,
+    76
+   ]
+  },
+  {
+   "insee": "38395",
+   "nom": "Plateau-des-Petites-Roches",
+   "population": 2415,
+   "associationsAjoutees": 36,
+   "codes": [
+    "38367",
+    "38435"
+   ],
+   "score": [
+    92,
+    93
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "50550",
+   "nom": "Saint-Sauveur-Villages",
+   "population": 3362,
+   "associationsAjoutees": 36,
+   "codes": [
+    "50007",
+    "50308",
+    "50438",
+    "50449",
+    "50524",
+    "50622"
+   ],
+   "score": [
+    28,
+    34
+   ],
+   "assosPct": [
+    70,
+    90
+   ]
+  },
+  {
+   "insee": "56061",
+   "nom": "La Gacilly",
+   "population": 3993,
+   "associationsAjoutees": 36,
+   "codes": [
+    "56038",
+    "56064"
+   ],
+   "score": [
+    92,
+    93
+   ],
+   "assosPct": [
+    96,
+    99
+   ]
+  },
+  {
+   "insee": "85302",
+   "nom": "Chanverrie",
+   "population": 5506,
+   "associationsAjoutees": 36,
+   "codes": [
+    "85048"
+   ],
+   "score": [
+    34,
+    36
+   ],
+   "assosPct": [
+    89,
+    95
+   ]
+  },
+  {
+   "insee": "38479",
+   "nom": "Porte-des-Bonnevaux",
+   "population": 2071,
+   "associationsAjoutees": 35,
+   "codes": [
+    "38016",
+    "38121",
+    "38274"
+   ],
+   "score": [
+    31,
+    42
+   ],
+   "assosPct": [
+    49,
+    88
+   ]
+  },
+  {
+   "insee": "48009",
+   "nom": "Peyre en Aubrac",
+   "population": 2300,
+   "associationsAjoutees": 35,
+   "codes": [
+    "48047",
+    "48060",
+    "48076",
+    "48142",
+    "48183"
+   ],
+   "score": [
+    23,
+    28
+   ],
+   "assosPct": [
+    77,
+    95
+   ]
+  },
+  {
+   "insee": "49167",
+   "nom": "Les Garennes sur Loire",
+   "population": 4631,
+   "associationsAjoutees": 35,
+   "codes": [
+    "49290"
+   ],
+   "score": [
+    57,
+    59
+   ],
+   "assosPct": [
+    86,
+    94
+   ]
+  },
+  {
+   "insee": "50215",
+   "nom": "Gouville-sur-Mer",
+   "population": 3254,
+   "associationsAjoutees": 35,
+   "codes": [
+    "50014",
+    "50354",
+    "50573"
+   ],
+   "score": [
+    25,
+    28
+   ],
+   "assosPct": [
+    82,
+    95
+   ]
+  },
+  {
+   "insee": "50487",
+   "nom": "Saint-James",
+   "population": 4890,
+   "associationsAjoutees": 35,
+   "codes": [
+    "50018",
+    "50100",
+    "50154",
+    "50337",
+    "50627",
+    "50640"
+   ],
+   "score": [
+    71,
+    74
+   ],
+   "assosPct": [
+    84,
+    93
+   ]
+  },
+  {
+   "insee": "48027",
+   "nom": "Mont Lozère et Goulet",
+   "population": 1085,
+   "associationsAjoutees": 34,
+   "codes": [
+    "48014",
+    "48023",
+    "48040",
+    "48093",
+    "48164"
+   ],
+   "score": [
+    22,
+    29
+   ],
+   "assosPct": [
+    74,
+    98
+   ]
+  },
+  {
+   "insee": "72262",
+   "nom": "Loir en Vallée",
+   "population": 2086,
+   "associationsAjoutees": 34,
+   "codes": [
+    "72063",
+    "72159",
+    "72240"
+   ],
+   "score": [
+    23,
+    28
+   ],
+   "assosPct": [
+    77,
+    95
+   ]
+  },
+  {
+   "insee": "73212",
+   "nom": "Val-d'Arc",
+   "population": 2012,
+   "associationsAjoutees": 34,
+   "codes": [
+    "73002"
+   ],
+   "score": [
+    42,
+    58
+   ],
+   "assosPct": [
+    25,
+    78
+   ]
+  },
+  {
+   "insee": "01185",
+   "nom": "Plateau d'Hauteville",
+   "population": 4807,
+   "associationsAjoutees": 33,
+   "codes": [
+    "01122",
+    "01186",
+    "01417"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    95,
+    98
+   ]
+  },
+  {
+   "insee": "35069",
+   "nom": "Châteaugiron",
+   "population": 10518,
+   "associationsAjoutees": 33,
+   "codes": [
+    "35209",
+    "35254"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    74,
+    82
+   ]
+  },
+  {
+   "insee": "50412",
+   "nom": "Port-Bail-sur-Mer",
+   "population": 2534,
+   "associationsAjoutees": 33,
+   "codes": [
+    "50160",
+    "50503"
+   ],
+   "score": [
+    81,
+    83
+   ],
+   "assosPct": [
+    94,
+    98
+   ]
+  },
+  {
+   "insee": "72137",
+   "nom": "Villeneuve-en-Perseigne",
+   "population": 2203,
+   "associationsAjoutees": 33,
+   "codes": [
+    "72069",
+    "72162",
+    "72258",
+    "72318"
+   ],
+   "score": [
+    31,
+    40
+   ],
+   "assosPct": [
+    57,
+    88
+   ]
+  },
+  {
+   "insee": "49086",
+   "nom": "Terranjou",
+   "population": 3918,
+   "associationsAjoutees": 32,
+   "codes": [
+    "49191",
+    "49227"
+   ],
+   "score": [
+    22,
+    26
+   ],
+   "assosPct": [
+    72,
+    88
+   ]
+  },
+  {
+   "insee": "49220",
+   "nom": "Morannes sur Sarthe-Daumeray",
+   "population": 3682,
+   "associationsAjoutees": 32,
+   "codes": [
+    "49119"
+   ],
+   "score": [
+    31,
+    34
+   ],
+   "assosPct": [
+    84,
+    94
+   ]
+  },
+  {
+   "insee": "79174",
+   "nom": "Melle",
+   "population": 5904,
+   "associationsAjoutees": 32,
+   "codes": [
+    "79173",
+    "79199",
+    "79264",
+    "79279"
+   ],
+   "score": [
+    74,
+    74
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "14098",
+   "nom": "Thue et Mue",
+   "population": 6169,
+   "associationsAjoutees": 31,
+   "codes": [
+    "14109",
+    "14157",
+    "14423",
+    "14525",
+    "14568"
+   ],
+   "score": [
+    20,
+    25
+   ],
+   "assosPct": [
+    59,
+    75
+   ]
+  },
+  {
+   "insee": "50260",
+   "nom": "Juvigny les Vallées",
+   "population": 1681,
+   "associationsAjoutees": 31,
+   "codes": [
+    "50037",
+    "50043",
+    "50131",
+    "50318",
+    "50323"
+   ],
+   "score": [
+    21,
+    28
+   ],
+   "assosPct": [
+    70,
+    94
+   ]
+  },
+  {
+   "insee": "16097",
+   "nom": "Val-de-Cognac",
+   "population": 3468,
+   "associationsAjoutees": 30,
+   "codes": [
+    "16355"
+   ],
+   "score": [
+    24,
+    28
+   ],
+   "assosPct": [
+    75,
+    90
+   ]
+  },
+  {
+   "insee": "22050",
+   "nom": "Dinan",
+   "population": 14675,
+   "associationsAjoutees": 30,
+   "codes": [
+    "22123"
+   ],
+   "score": [
+    97,
+    97
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "28103",
+   "nom": "Cloyes-les-Trois-Rivières",
+   "population": 5609,
+   "associationsAjoutees": 29,
+   "codes": [
+    "28017",
+    "28083",
+    "28133",
+    "28150",
+    "28241",
+    "28262",
+    "28318",
+    "28340"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    85,
+    92
+   ]
+  },
+  {
+   "insee": "69024",
+   "nom": "Val d'Oingt",
+   "population": 4155,
+   "associationsAjoutees": 29,
+   "codes": [
+    "69146",
+    "69222"
+   ],
+   "score": [
+    67,
+    68
+   ],
+   "assosPct": [
+    96,
+    98
+   ]
+  },
+  {
+   "insee": "76258",
+   "nom": "Terres-de-Caux",
+   "population": 4208,
+   "associationsAjoutees": 29,
+   "codes": [
+    "76044",
+    "76078",
+    "76080",
+    "76525",
+    "76607",
+    "76639"
+   ],
+   "score": [
+    16,
+    23
+   ],
+   "assosPct": [
+    51,
+    74
+   ]
+  },
+  {
+   "insee": "78158",
+   "nom": "Le Chesnay-Rocquencourt",
+   "population": 30924,
+   "associationsAjoutees": 29,
+   "codes": [
+    "78524"
+   ],
+   "score": [
+    66,
+    67
+   ],
+   "assosPct": [
+    71,
+    74
+   ]
+  },
+  {
+   "insee": "49125",
+   "nom": "Doué-en-Anjou",
+   "population": 11228,
+   "associationsAjoutees": 28,
+   "codes": [
+    "49047",
+    "49104",
+    "49141",
+    "49198",
+    "49207",
+    "49282",
+    "49365"
+   ],
+   "score": [
+    30,
+    31
+   ],
+   "assosPct": [
+    97,
+    98
+   ]
+  },
+  {
+   "insee": "61486",
+   "nom": "Tinchebray-Bocage",
+   "population": 4884,
+   "associationsAjoutees": 28,
+   "codes": [
+    "61031",
+    "61177",
+    "61223",
+    "61377",
+    "61410",
+    "61513"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    78,
+    89
+   ]
+  },
+  {
+   "insee": "81233",
+   "nom": "Terre-de-Bancalié",
+   "population": 1732,
+   "associationsAjoutees": 28,
+   "codes": [
+    "81226",
+    "81241",
+    "81260",
+    "81296",
+    "81301"
+   ],
+   "score": [
+    19,
+    27
+   ],
+   "assosPct": [
+    63,
+    90
+   ]
+  },
+  {
+   "insee": "87128",
+   "nom": "Saint-Pardoux-le-Lac",
+   "population": 1347,
+   "associationsAjoutees": 28,
+   "codes": [
+    "87173",
+    "87184"
+   ],
+   "score": [
+    61,
+    69
+   ],
+   "assosPct": [
+    65,
+    93
+   ]
+  },
+  {
+   "insee": "05101",
+   "nom": "Vallouise-Pelvoux",
+   "population": 1132,
+   "associationsAjoutees": 27,
+   "codes": [
+    "05175"
+   ],
+   "score": [
+    90,
+    94
+   ],
+   "assosPct": [
+    83,
+    97
+   ]
+  },
+  {
+   "insee": "28012",
+   "nom": "Vald'Yerre",
+   "population": 3577,
+   "associationsAjoutees": 27,
+   "codes": [
+    "28044",
+    "28093",
+    "28115",
+    "28204",
+    "28356"
+   ],
+   "score": [
+    28,
+    33
+   ],
+   "assosPct": [
+    74,
+    88
+   ]
+  },
+  {
+   "insee": "44003",
+   "nom": "Ancenis-Saint-Géréon",
+   "population": 11099,
+   "associationsAjoutees": 27,
+   "codes": [
+    "44160"
+   ],
+   "score": [
+    94,
+    94
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "50419",
+   "nom": "Quettreville-sur-Sienne",
+   "population": 3188,
+   "associationsAjoutees": 27,
+   "codes": [
+    "50140",
+    "50223",
+    "50244",
+    "50605"
+   ],
+   "score": [
+    26,
+    33
+   ],
+   "assosPct": [
+    62,
+    83
+   ]
+  },
+  {
+   "insee": "85289",
+   "nom": "Terval",
+   "population": 2168,
+   "associationsAjoutees": 27,
+   "codes": [
+    "85037",
+    "85053"
+   ],
+   "score": [
+    34,
+    41
+   ],
+   "assosPct": [
+    65,
+    89
+   ]
+  },
+  {
+   "insee": "73151",
+   "nom": "Porte-de-Savoie",
+   "population": 3887,
+   "associationsAjoutees": 26,
+   "codes": [
+    "73118"
+   ],
+   "score": [
+    32,
+    38
+   ],
+   "assosPct": [
+    61,
+    79
+   ]
+  },
+  {
+   "insee": "79063",
+   "nom": "Val en Vignes",
+   "population": 2027,
+   "associationsAjoutees": 26,
+   "codes": [
+    "79044",
+    "79168"
+   ],
+   "score": [
+    32,
+    41
+   ],
+   "assosPct": [
+    53,
+    83
+   ]
+  },
+  {
+   "insee": "16192",
+   "nom": "Terres-de-Haute-Charente",
+   "population": 3829,
+   "associationsAjoutees": 25,
+   "codes": [
+    "16149",
+    "16214",
+    "16259",
+    "16376"
+   ],
+   "score": [
+    37,
+    40
+   ],
+   "assosPct": [
+    76,
+    88
+   ]
+  },
+  {
+   "insee": "22264",
+   "nom": "La Roche-Jaudy",
+   "population": 2657,
+   "associationsAjoutees": 25,
+   "codes": [
+    "22078",
+    "22247",
+    "22253"
+   ],
+   "score": [
+    81,
+    86
+   ],
+   "assosPct": [
+    71,
+    88
+   ]
+  },
+  {
+   "insee": "35062",
+   "nom": "La Chapelle-Fleurigné",
+   "population": 2409,
+   "associationsAjoutees": 25,
+   "codes": [
+    "35112"
+   ],
+   "score": [
+    12,
+    22
+   ],
+   "assosPct": [
+    40,
+    72
+   ]
+  },
+  {
+   "insee": "49092",
+   "nom": "Chemillé-en-Anjou",
+   "population": 21386,
+   "associationsAjoutees": 25,
+   "codes": [
+    "49169",
+    "49199"
+   ],
+   "score": [
+    30,
+    30
+   ],
+   "assosPct": [
+    97,
+    97
+   ]
+  },
+  {
+   "insee": "69179",
+   "nom": "Beauvallon",
+   "population": 4135,
+   "associationsAjoutees": 25,
+   "codes": [
+    "69048",
+    "69213"
+   ],
+   "score": [
+    21,
+    25
+   ],
+   "assosPct": [
+    71,
+    84
+   ]
+  },
+  {
+   "insee": "79014",
+   "nom": "Loretz-d'Argenton",
+   "population": 2599,
+   "associationsAjoutees": 25,
+   "codes": [
+    "79043"
+   ],
+   "score": [
+    22,
+    28
+   ],
+   "assosPct": [
+    67,
+    87
+   ]
+  },
+  {
+   "insee": "16230",
+   "nom": "Montmoreau",
+   "population": 2468,
+   "associationsAjoutees": 24,
+   "codes": [
+    "16004",
+    "16294",
+    "16328"
+   ],
+   "score": [
+    20,
+    26
+   ],
+   "assosPct": [
+    65,
+    86
+   ]
+  },
+  {
+   "insee": "40197",
+   "nom": "Morcenx-la-Nouvelle",
+   "population": 4989,
+   "associationsAjoutees": 24,
+   "codes": [
+    "40009",
+    "40107",
+    "40302"
+   ],
+   "score": [
+    80,
+    82
+   ],
+   "assosPct": [
+    87,
+    92
+   ]
+  },
+  {
+   "insee": "46033",
+   "nom": "Porte-du-Quercy",
+   "population": 547,
+   "associationsAjoutees": 24,
+   "codes": [
+    "46099",
+    "46278",
+    "46300"
+   ],
+   "score": [
+    13,
+    28
+   ],
+   "assosPct": [
+    44,
+    92
+   ]
+  },
+  {
+   "insee": "72071",
+   "nom": "Montval-sur-Loir",
+   "population": 5805,
+   "associationsAjoutees": 24,
+   "codes": [
+    "72203",
+    "72384"
+   ],
+   "score": [
+    88,
+    88
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "86115",
+   "nom": "Jaunay-Marigny",
+   "population": 7687,
+   "associationsAjoutees": 24,
+   "codes": [
+    "86146"
+   ],
+   "score": [
+    32,
+    33
+   ],
+   "assosPct": [
+    83,
+    88
+   ]
+  },
+  {
+   "insee": "87028",
+   "nom": "Val-d'Oire-et-Gartempe",
+   "population": 1691,
+   "associationsAjoutees": 24,
+   "codes": [
+    "87055",
+    "87136",
+    "87196"
+   ],
+   "score": [
+    33,
+    44
+   ],
+   "assosPct": [
+    39,
+    77
+   ]
+  },
+  {
+   "insee": "14027",
+   "nom": "Les Monts d'Aunay",
+   "population": 4554,
+   "associationsAjoutees": 23,
+   "codes": [
+    "14056",
+    "14128",
+    "14219",
+    "14477",
+    "14508",
+    "14544"
+   ],
+   "score": [
+    27,
+    30
+   ],
+   "assosPct": [
+    77,
+    87
+   ]
+  },
+  {
+   "insee": "29227",
+   "nom": "Poullaouen",
+   "population": 1462,
+   "associationsAjoutees": 23,
+   "codes": [
+    "29129"
+   ],
+   "score": [
+    89,
+    90
+   ],
+   "assosPct": [
+    97,
+    99
+   ]
+  },
+  {
+   "insee": "30339",
+   "nom": "Val-d'Aigoual",
+   "population": 1418,
+   "associationsAjoutees": 23,
+   "codes": [
+    "30190"
+   ],
+   "score": [
+    85,
+    85
+   ],
+   "assosPct": [
+    100,
+    100
+   ]
+  },
+  {
+   "insee": "69114",
+   "nom": "Porte des Pierres Dorées",
+   "population": 4185,
+   "associationsAjoutees": 23,
+   "codes": [
+    "69101"
+   ],
+   "score": [
+    70,
+    71
+   ],
+   "assosPct": [
+    91,
+    95
+   ]
+  },
+  {
+   "insee": "79196",
+   "nom": "Plaine-et-Vallées",
+   "population": 2351,
+   "associationsAjoutees": 23,
+   "codes": [
+    "79260",
+    "79321"
+   ],
+   "score": [
+    16,
+    24
+   ],
+   "assosPct": [
+    53,
+    79
+   ]
+  },
+  {
+   "insee": "89003",
+   "nom": "Montholon",
+   "population": 2772,
+   "associationsAjoutees": 23,
+   "codes": [
+    "89078",
+    "89473",
+    "89484"
+   ],
+   "score": [
+    29,
+    29
+   ],
+   "assosPct": [
+    96,
+    98
+   ]
+  },
+  {
+   "insee": "01025",
+   "nom": "Bâgé-Dommartin",
+   "population": 4065,
+   "associationsAjoutees": 22,
+   "codes": [
+    "01144"
+   ],
+   "score": [
+    26,
+    29
+   ],
+   "assosPct": [
+    86,
+    93
+   ]
+  },
+  {
+   "insee": "25060",
+   "nom": "Val-d'Usiers",
+   "population": 2114,
+   "associationsAjoutees": 22,
+   "codes": [
+    "25282",
+    "25549"
+   ],
+   "score": [
+    14,
+    24
+   ],
+   "assosPct": [
+    38,
+    70
+   ]
+  },
+  {
+   "insee": "86019",
+   "nom": "Beaumont Saint-Cyr",
+   "population": 2947,
+   "associationsAjoutees": 22,
+   "codes": [
+    "86219"
+   ],
+   "score": [
+    84,
+    88
+   ],
+   "assosPct": [
+    72,
+    86
+   ]
+  },
+  {
+   "insee": "16204",
+   "nom": "Bellevigne",
+   "population": 1278,
+   "associationsAjoutees": 21,
+   "codes": [
+    "16129",
+    "16247",
+    "16386",
+    "16417"
+   ],
+   "score": [
+    16,
+    26
+   ],
+   "assosPct": [
+    55,
+    85
+   ]
+  },
+  {
+   "insee": "35282",
+   "nom": "Rives-du-Couesnon",
+   "population": 2911,
+   "associationsAjoutees": 21,
+   "codes": [
+    "35269",
+    "35293",
+    "35348"
+   ],
+   "score": [
+    80,
+    86
+   ],
+   "assosPct": [
+    53,
+    74
+   ]
+  },
+  {
+   "insee": "72025",
+   "nom": "Bazouges Cré sur Loir",
+   "population": 1951,
+   "associationsAjoutees": 21,
+   "codes": [
+    "72108"
+   ],
+   "score": [
+    78,
+    82
+   ],
+   "assosPct": [
+    81,
+    93
+   ]
+  },
+  {
+   "insee": "72176",
+   "nom": "Le Lude",
+   "population": 4048,
+   "associationsAjoutees": 21,
+   "codes": [
+    "72117"
+   ],
+   "score": [
+    86,
+    86
+   ],
+   "assosPct": [
+    97,
+    98
+   ]
+  },
+  {
+   "insee": "79185",
+   "nom": "Aigondigné",
+   "population": 4660,
+   "associationsAjoutees": 21,
+   "codes": [
+    "79004",
+    "79240",
+    "79327"
+   ],
+   "score": [
+    22,
+    26
+   ],
+   "assosPct": [
+    62,
+    75
+   ]
+  },
+  {
+   "insee": "17219",
+   "nom": "Marennes-Hiers-Brouage",
+   "population": 6175,
+   "associationsAjoutees": 20,
+   "codes": [
+    "17189"
+   ],
+   "score": [
+    56,
+    56
+   ],
+   "assosPct": [
+    95,
+    97
+   ]
+  },
+  {
+   "insee": "28199",
+   "nom": "Janville-en-Beauce",
+   "population": 2512,
+   "associationsAjoutees": 20,
+   "codes": [
+    "28002",
+    "28311"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    79,
+    91
+   ]
+  },
+  {
+   "insee": "48094",
+   "nom": "Massegros Causses Gorges",
+   "population": 936,
+   "associationsAjoutees": 20,
+   "codes": [
+    "48125",
+    "48154",
+    "48180",
+    "48195"
+   ],
+   "score": [
+    88,
+    93
+   ],
+   "assosPct": [
+    80,
+    96
+   ]
+  },
+  {
+   "insee": "49060",
+   "nom": "Bellevigne-les-Châteaux",
+   "population": 3463,
+   "associationsAjoutees": 20,
+   "codes": [
+    "49046",
+    "49274"
+   ],
+   "score": [
+    52,
+    56
+   ],
+   "assosPct": [
+    69,
+    82
+   ]
+  },
+  {
+   "insee": "49183",
+   "nom": "Val d'Erdre-Auxence",
+   "population": 4946,
+   "associationsAjoutees": 20,
+   "codes": [
+    "49108",
+    "49376"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    84,
+    90
+   ]
+  },
+  {
+   "insee": "53161",
+   "nom": "Montsûrs",
+   "population": 3193,
+   "associationsAjoutees": 20,
+   "codes": [
+    "53092",
+    "53159",
+    "53205",
+    "53244"
+   ],
+   "score": [
+    28,
+    32
+   ],
+   "assosPct": [
+    66,
+    81
+   ]
+  },
+  {
+   "insee": "61196",
+   "nom": "Belforêt-en-Perche",
+   "population": 1491,
+   "associationsAjoutees": 20,
+   "codes": [
+    "61318",
+    "61325",
+    "61437",
+    "61471"
+   ],
+   "score": [
+    17,
+    25
+   ],
+   "assosPct": [
+    58,
+    84
+   ]
+  },
+  {
+   "insee": "69228",
+   "nom": "Chabanière",
+   "population": 4249,
+   "associationsAjoutees": 20,
+   "codes": [
+    "69195",
+    "69237"
+   ],
+   "score": [
+    38,
+    40
+   ],
+   "assosPct": [
+    86,
+    92
+   ]
+  },
+  {
+   "insee": "01130",
+   "nom": "Bresse Vallons",
+   "population": 2380,
+   "associationsAjoutees": 19,
+   "codes": [
+    "01154"
+   ],
+   "score": [
+    26,
+    28
+   ],
+   "assosPct": [
+    85,
+    93
+   ]
+  },
+  {
+   "insee": "14342",
+   "nom": "Isigny-sur-Mer",
+   "population": 3570,
+   "associationsAjoutees": 19,
+   "codes": [
+    "14142",
+    "14462",
+    "14481",
+    "14763"
+   ],
+   "score": [
+    26,
+    30
+   ],
+   "assosPct": [
+    65,
+    79
+   ]
+  },
+  {
+   "insee": "24312",
+   "nom": "Sanilhac",
+   "population": 4674,
+   "associationsAjoutees": 19,
+   "codes": [
+    "24065",
+    "24258"
+   ],
+   "score": [
+    25,
+    27
+   ],
+   "assosPct": [
+    80,
+    87
+   ]
+  },
+  {
+   "insee": "27198",
+   "nom": "Mesnils-sur-Iton",
+   "population": 6145,
+   "associationsAjoutees": 19,
+   "codes": [
+    "27297",
+    "27416",
+    "27491"
+   ],
+   "score": [
+    65,
+    67
+   ],
+   "assosPct": [
+    81,
+    87
+   ]
+  },
+  {
+   "insee": "37232",
+   "nom": "Coteaux-sur-Loire",
+   "population": 1879,
+   "associationsAjoutees": 19,
+   "codes": [
+    "37120",
+    "37227"
+   ],
+   "score": [
+    32,
+    40
+   ],
+   "assosPct": [
+    46,
+    73
+   ]
+  },
+  {
+   "insee": "38292",
+   "nom": "Villages du Lac de Paladru",
+   "population": 2586,
+   "associationsAjoutees": 19,
+   "codes": [
+    "38305"
+   ],
+   "score": [
+    50,
+    54
+   ],
+   "assosPct": [
+    75,
+    88
+   ]
+  },
+  {
+   "insee": "46262",
+   "nom": "Lendou-en-Quercy",
+   "population": 624,
+   "associationsAjoutees": 19,
+   "codes": [
+    "46158",
+    "46274"
+   ],
+   "score": [
+    17,
+    27
+   ],
+   "assosPct": [
+    57,
+    91
+   ]
+  },
+  {
+   "insee": "51612",
+   "nom": "Blancs-Coteaux",
+   "population": 3182,
+   "associationsAjoutees": 19,
+   "codes": [
+    "51271",
+    "51411",
+    "51651"
+   ],
+   "score": [
+    25,
+    28
+   ],
+   "assosPct": [
+    78,
+    88
+   ]
+  },
+  {
+   "insee": "73187",
+   "nom": "La Léchère",
+   "population": 2569,
+   "associationsAjoutees": 19,
+   "codes": [
+    "73046",
+    "73112",
+    "73209"
+   ],
+   "score": [
+    63,
+    65
+   ],
+   "assosPct": [
+    83,
+    92
+   ]
+  },
+  {
+   "insee": "14143",
+   "nom": "Caumont-sur-Aure",
+   "population": 2417,
+   "associationsAjoutees": 18,
+   "codes": [
+    "14372",
+    "14722"
+   ],
+   "score": [
+    20,
+    25
+   ],
+   "assosPct": [
+    65,
+    82
+   ]
+  },
+  {
+   "insee": "36244",
+   "nom": "Villentrois-Faverolles-en-Berry",
+   "population": 874,
+   "associationsAjoutees": 18,
+   "codes": [
+    "36072"
+   ],
+   "score": [
+    69,
+    80
+   ],
+   "assosPct": [
+    48,
+    83
+   ]
+  },
+  {
+   "insee": "53124",
+   "nom": "Prée-d'Anjou",
+   "population": 1380,
+   "associationsAjoutees": 18,
+   "codes": [
+    "53004"
+   ],
+   "score": [
+    23,
+    28
+   ],
+   "assosPct": [
+    77,
+    92
+   ]
+  },
+  {
+   "insee": "56173",
+   "nom": "Pluméliau-Bieuzy",
+   "population": 4438,
+   "associationsAjoutees": 18,
+   "codes": [
+    "56016"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    87,
+    92
+   ]
+  },
+  {
+   "insee": "77433",
+   "nom": "Beautheil-Saints",
+   "population": 2035,
+   "associationsAjoutees": 18,
+   "codes": [
+    "77028"
+   ],
+   "score": [
+    22,
+    27
+   ],
+   "assosPct": [
+    75,
+    89
+   ]
+  },
+  {
+   "insee": "80485",
+   "nom": "Ô-de-Selle",
+   "population": 1159,
+   "associationsAjoutees": 18,
+   "codes": [
+    "80594",
+    "80761"
+   ],
+   "score": [
+    31,
+    35
+   ],
+   "assosPct": [
+    81,
+    94
+   ]
+  },
+  {
+   "insee": "01036",
+   "nom": "Valromey-sur-Séran",
+   "population": 1342,
+   "associationsAjoutees": 17,
+   "codes": [
+    "01221",
+    "01414",
+    "01442"
+   ],
+   "score": [
+    79,
+    86
+   ],
+   "assosPct": [
+    59,
+    83
+   ]
+  },
+  {
+   "insee": "04033",
+   "nom": "Ubaye-Serre-Ponçon",
+   "population": 788,
+   "associationsAjoutees": 17,
+   "codes": [
+    "04198"
+   ],
+   "score": [
+    82,
+    90
+   ],
+   "assosPct": [
+    60,
+    88
+   ]
+  },
+  {
+   "insee": "24325",
+   "nom": "Pechs-de-l'Espérance",
+   "population": 772,
+   "associationsAjoutees": 17,
+   "codes": [
+    "24089",
+    "24314"
+   ],
+   "score": [
+    24,
+    36
+   ],
+   "assosPct": [
+    44,
+    81
+   ]
+  },
+  {
+   "insee": "33380",
+   "nom": "Val-de-Livenne",
+   "population": 1793,
+   "associationsAjoutees": 17,
+   "codes": [
+    "33267"
+   ],
+   "score": [
+    13,
+    21
+   ],
+   "assosPct": [
+    43,
+    70
+   ]
+  },
+  {
+   "insee": "46156",
+   "nom": "Bellefont-La Rauze",
+   "population": 1201,
+   "associationsAjoutees": 17,
+   "codes": [
+    "46077",
+    "46327"
+   ],
+   "score": [
+    26,
+    33
+   ],
+   "assosPct": [
+    66,
+    88
+   ]
+  },
+  {
+   "insee": "54099",
+   "nom": "Val de Briey",
+   "population": 7996,
+   "associationsAjoutees": 17,
+   "codes": [
+    "54341",
+    "54342"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    85,
+    88
+   ]
+  },
+  {
+   "insee": "56033",
+   "nom": "Carentoir",
+   "population": 3043,
+   "associationsAjoutees": 17,
+   "codes": [
+    "56183"
+   ],
+   "score": [
+    37,
+    38
+   ],
+   "assosPct": [
+    94,
+    97
+   ]
+  },
+  {
+   "insee": "16005",
+   "nom": "Aigre",
+   "population": 1597,
+   "associationsAjoutees": 16,
+   "codes": [
+    "16411"
+   ],
+   "score": [
+    46,
+    50
+   ],
+   "assosPct": [
+    78,
+    91
+   ]
+  },
+  {
+   "insee": "29021",
+   "nom": "Plounéour-Brignogan-plages",
+   "population": 1940,
+   "associationsAjoutees": 16,
+   "codes": [
+    "29203"
+   ],
+   "score": [
+    93,
+    94
+   ],
+   "assosPct": [
+    93,
+    97
+   ]
+  },
+  {
+   "insee": "50431",
+   "nom": "Remilly Les Marais",
+   "population": 1058,
+   "associationsAjoutees": 16,
+   "codes": [
+    "50119",
+    "50325"
+   ],
+   "score": [
+    55,
+    61
+   ],
+   "assosPct": [
+    69,
+    89
+   ]
+  },
+  {
+   "insee": "50523",
+   "nom": "Sainte-Mère-Église",
+   "population": 2965,
+   "associationsAjoutees": 16,
+   "codes": [
+    "50103",
+    "50427"
+   ],
+   "score": [
+    25,
+    27
+   ],
+   "assosPct": [
+    83,
+    90
+   ]
+  },
+  {
+   "insee": "53097",
+   "nom": "Évron",
+   "population": 8508,
+   "associationsAjoutees": 16,
+   "codes": [
+    "53065",
+    "53207"
+   ],
+   "score": [
+    64,
+    65
+   ],
+   "assosPct": [
+    86,
+    88
+   ]
+  },
+  {
+   "insee": "56102",
+   "nom": "Forges de Lanouée",
+   "population": 2130,
+   "associationsAjoutees": 16,
+   "codes": [
+    "56059"
+   ],
+   "score": [
+    36,
+    40
+   ],
+   "assosPct": [
+    72,
+    86
+   ]
+  },
+  {
+   "insee": "63226",
+   "nom": "Mur-sur-Allier",
+   "population": 3208,
+   "associationsAjoutees": 16,
+   "codes": [
+    "63133"
+   ],
+   "score": [
+    27,
+    30
+   ],
+   "assosPct": [
+    63,
+    76
+   ]
+  },
+  {
+   "insee": "74212",
+   "nom": "Glières-Val-de-Borne",
+   "population": 1827,
+   "associationsAjoutees": 16,
+   "codes": [
+    "74110"
+   ],
+   "score": [
+    71,
+    73
+   ],
+   "assosPct": [
+    91,
+    96
+   ]
+  },
+  {
+   "insee": "80625",
+   "nom": "Trois-Rivières",
+   "population": 1495,
+   "associationsAjoutees": 16,
+   "codes": [
+    "80209",
+    "80419"
+   ],
+   "score": [
+    16,
+    23
+   ],
+   "assosPct": [
+    52,
+    77
+   ]
+  },
+  {
+   "insee": "09334",
+   "nom": "Val-de-Sos",
+   "population": 543,
+   "associationsAjoutees": 15,
+   "codes": [
+    "09135",
+    "09286",
+    "09302"
+   ],
+   "score": [
+    91,
+    96
+   ],
+   "assosPct": [
+    79,
+    95
+   ]
+  },
+  {
+   "insee": "24172",
+   "nom": "Les Eyzies",
+   "population": 1121,
+   "associationsAjoutees": 15,
+   "codes": [
+    "24249",
+    "24389"
+   ],
+   "score": [
+    98,
+    98
+   ],
+   "assosPct": [
+    99,
+    100
+   ]
+  },
+  {
+   "insee": "27554",
+   "nom": "La Chapelle-Longueville",
+   "population": 3290,
+   "associationsAjoutees": 15,
+   "codes": [
+    "27150",
+    "27588"
+   ],
+   "score": [
+    21,
+    26
+   ],
+   "assosPct": [
+    48,
+    64
+   ]
+  },
+  {
+   "insee": "28236",
+   "nom": "Arcisses",
+   "population": 2200,
+   "associationsAjoutees": 15,
+   "codes": [
+    "28063",
+    "28112"
+   ],
+   "score": [
+    25,
+    27
+   ],
+   "assosPct": [
+    83,
+    91
+   ]
+  },
+  {
+   "insee": "39339",
+   "nom": "Chassal-Molinges",
+   "population": 1128,
+   "associationsAjoutees": 15,
+   "codes": [
+    "39113"
+   ],
+   "score": [
+    56,
+    65
+   ],
+   "assosPct": [
+    42,
+    73
+   ]
+  },
+  {
+   "insee": "49174",
+   "nom": "Huillé-Lézigné",
+   "population": 1311,
+   "associationsAjoutees": 15,
+   "codes": [
+    "49159"
+   ],
+   "score": [
+    20,
+    28
+   ],
+   "assosPct": [
+    48,
+    74
+   ]
+  },
+  {
+   "insee": "50272",
+   "nom": "Tourneville-sur-Mer",
+   "population": 1663,
+   "associationsAjoutees": 15,
+   "codes": [
+    "50015"
+   ],
+   "score": [
+    18,
+    24
+   ],
+   "assosPct": [
+    61,
+    80
+   ]
+  },
+  {
+   "insee": "61194",
+   "nom": "Monts-sur-Orne",
+   "population": 873,
+   "associationsAjoutees": 15,
+   "codes": [
+    "61285",
+    "61468"
+   ],
+   "score": [
+    49,
+    59
+   ],
+   "assosPct": [
+    42,
+    76
+   ]
+  },
+  {
+   "insee": "72138",
+   "nom": "Fresnay-sur-Sarthe",
+   "population": 2889,
+   "associationsAjoutees": 15,
+   "codes": [
+    "72097",
+    "72284"
+   ],
+   "score": [
+    30,
+    30
+   ],
+   "assosPct": [
+    94,
+    97
+   ]
+  },
+  {
+   "insee": "07165",
+   "nom": "Belsentes",
+   "population": 547,
+   "associationsAjoutees": 14,
+   "codes": [
+    "07256"
+   ],
+   "score": [
+    53,
+    65
+   ],
+   "assosPct": [
+    40,
+    78
+   ]
+  },
+  {
+   "insee": "08490",
+   "nom": "Vouziers",
+   "population": 4016,
+   "associationsAjoutees": 14,
+   "codes": [
+    "08443",
+    "08493"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    95,
+    96
+   ]
+  },
+  {
+   "insee": "24362",
+   "nom": "Val de Louyre et Caudeau",
+   "population": 1590,
+   "associationsAjoutees": 14,
+   "codes": [
+    "24092"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    90,
+    95
+   ]
+  },
+  {
+   "insee": "35308",
+   "nom": "Mesnil-Roc'h",
+   "population": 4422,
+   "associationsAjoutees": 14,
+   "codes": [
+    "35147",
+    "35344"
+   ],
+   "score": [
+    20,
+    23
+   ],
+   "assosPct": [
+    67,
+    76
+   ]
+  },
+  {
+   "insee": "37021",
+   "nom": "Beaumont-Louestault",
+   "population": 1765,
+   "associationsAjoutees": 14,
+   "codes": [
+    "37135"
+   ],
+   "score": [
+    47,
+    49
+   ],
+   "assosPct": [
+    89,
+    95
+   ]
+  },
+  {
+   "insee": "46263",
+   "nom": "Barguelonne-en-Quercy",
+   "population": 702,
+   "associationsAjoutees": 14,
+   "codes": [
+    "46014",
+    "46285"
+   ],
+   "score": [
+    61,
+    72
+   ],
+   "assosPct": [
+    36,
+    73
+   ]
+  },
+  {
+   "insee": "48127",
+   "nom": "Monts-de-Randon",
+   "population": 1236,
+   "associationsAjoutees": 14,
+   "codes": [
+    "48057",
+    "48133",
+    "48189",
+    "48197"
+   ],
+   "score": [
+    69,
+    71
+   ],
+   "assosPct": [
+    88,
+    95
+   ]
+  },
+  {
+   "insee": "48146",
+   "nom": "Gorges du Tarn Causses",
+   "population": 901,
+   "associationsAjoutees": 14,
+   "codes": [
+    "48101",
+    "48122"
+   ],
+   "score": [
+    94,
+    97
+   ],
+   "assosPct": [
+    85,
+    95
+   ]
+  },
+  {
+   "insee": "72080",
+   "nom": "Cherré-Au",
+   "population": 2735,
+   "associationsAjoutees": 14,
+   "codes": [
+    "72081"
+   ],
+   "score": [
+    73,
+    78
+   ],
+   "assosPct": [
+    45,
+    62
+   ]
+  },
+  {
+   "insee": "72219",
+   "nom": "Bernay-Neuvy-en-Champagne",
+   "population": 794,
+   "associationsAjoutees": 14,
+   "codes": [
+    "72033"
+   ],
+   "score": [
+    29,
+    36
+   ],
+   "assosPct": [
+    58,
+    84
+   ]
+  },
+  {
+   "insee": "85162",
+   "nom": "Rives-d'Autise",
+   "population": 2068,
+   "associationsAjoutees": 14,
+   "codes": [
+    "85168"
+   ],
+   "score": [
+    60,
+    65
+   ],
+   "assosPct": [
+    63,
+    78
+   ]
+  },
+  {
+   "insee": "12090",
+   "nom": "Druelle Balsac",
+   "population": 3188,
+   "associationsAjoutees": 13,
+   "codes": [
+    "12020"
+   ],
+   "score": [
+    22,
+    25
+   ],
+   "assosPct": [
+    75,
+    83
+   ]
+  },
+  {
+   "insee": "14200",
+   "nom": "Creully sur Seulles",
+   "population": 2266,
+   "associationsAjoutees": 13,
+   "codes": [
+    "14577",
+    "14757"
+   ],
+   "score": [
+    76,
+    79
+   ],
+   "assosPct": [
+    71,
+    82
+   ]
+  },
+  {
+   "insee": "14475",
+   "nom": "Val d'Arry",
+   "population": 2420,
+   "associationsAjoutees": 13,
+   "codes": [
+    "14373",
+    "14702"
+   ],
+   "score": [
+    28,
+    33
+   ],
+   "assosPct": [
+    53,
+    69
+   ]
+  },
+  {
+   "insee": "27070",
+   "nom": "Frenelles-en-Vexin",
+   "population": 1702,
+   "associationsAjoutees": 13,
+   "codes": [
+    "27175",
+    "27270"
+   ],
+   "score": [
+    4,
+    13
+   ],
+   "assosPct": [
+    12,
+    42
+   ]
+  },
+  {
+   "insee": "33268",
+   "nom": "Margaux-Cantenac",
+   "population": 2831,
+   "associationsAjoutees": 13,
+   "codes": [
+    "33091"
+   ],
+   "score": [
+    61,
+    64
+   ],
+   "assosPct": [
+    66,
+    77
+   ]
+  },
+  {
+   "insee": "34246",
+   "nom": "Entre-Vignes",
+   "population": 2160,
+   "associationsAjoutees": 13,
+   "codes": [
+    "34330"
+   ],
+   "score": [
+    57,
+    60
+   ],
+   "assosPct": [
+    79,
+    88
+   ]
+  },
+  {
+   "insee": "42268",
+   "nom": "Vézelin-sur-Loire",
+   "population": 809,
+   "associationsAjoutees": 13,
+   "codes": [
+    "42004",
+    "42082"
+   ],
+   "score": [
+    23,
+    33
+   ],
+   "assosPct": [
+    43,
+    74
+   ]
+  },
+  {
+   "insee": "46268",
+   "nom": "Saint Géry-Vers",
+   "population": 909,
+   "associationsAjoutees": 13,
+   "codes": [
+    "46331"
+   ],
+   "score": [
+    81,
+    86
+   ],
+   "assosPct": [
+    73,
+    89
+   ]
+  },
+  {
+   "insee": "73003",
+   "nom": "Grand-Aigueblanche",
+   "population": 3809,
+   "associationsAjoutees": 13,
+   "codes": [
+    "73045",
+    "73266"
+   ],
+   "score": [
+    59,
+    61
+   ],
+   "assosPct": [
+    77,
+    84
+   ]
+  },
+  {
+   "insee": "76041",
+   "nom": "Les Hauts-de-Caux",
+   "population": 1344,
+   "associationsAjoutees": 13,
+   "codes": [
+    "76729"
+   ],
+   "score": [
+    14,
+    21
+   ],
+   "assosPct": [
+    47,
+    71
+   ]
+  },
+  {
+   "insee": "11131",
+   "nom": "Val-du-Faby",
+   "population": 582,
+   "associationsAjoutees": 12,
+   "codes": [
+    "11329"
+   ],
+   "score": [
+    67,
+    69
+   ],
+   "assosPct": [
+    89,
+    96
+   ]
+  },
+  {
+   "insee": "14150",
+   "nom": "Cesny-les-Sources",
+   "population": 1390,
+   "associationsAjoutees": 12,
+   "codes": [
+    "14002",
+    "14505",
+    "14703"
+   ],
+   "score": [
+    22,
+    28
+   ],
+   "assosPct": [
+    53,
+    73
+   ]
+  },
+  {
+   "insee": "16233",
+   "nom": "Mosnac-Saint-Simeux",
+   "population": 985,
+   "associationsAjoutees": 12,
+   "codes": [
+    "16351"
+   ],
+   "score": [
+    21,
+    29
+   ],
+   "assosPct": [
+    42,
+    69
+   ]
+  },
+  {
+   "insee": "16286",
+   "nom": "Rouillac",
+   "population": 2925,
+   "associationsAjoutees": 12,
+   "codes": [
+    "16156"
+   ],
+   "score": [
+    80,
+    82
+   ],
+   "assosPct": [
+    88,
+    92
+   ]
+  },
+  {
+   "insee": "16300",
+   "nom": "Val-de-Bonnieure",
+   "population": 1329,
+   "associationsAjoutees": 12,
+   "codes": [
+    "16296",
+    "16309"
+   ],
+   "score": [
+    47,
+    52
+   ],
+   "assosPct": [
+    60,
+    78
+   ]
+  },
+  {
+   "insee": "16339",
+   "nom": "Val-d'Auge",
+   "population": 796,
+   "associationsAjoutees": 12,
+   "codes": [
+    "16017",
+    "16051",
+    "16228"
+   ],
+   "score": [
+    15,
+    23
+   ],
+   "assosPct": [
+    50,
+    76
+   ]
+  },
+  {
+   "insee": "24259",
+   "nom": "Eyraud-Crempse-Maurens",
+   "population": 1629,
+   "associationsAjoutees": 12,
+   "codes": [
+    "24233",
+    "24427",
+    "24431"
+   ],
+   "score": [
+    26,
+    30
+   ],
+   "assosPct": [
+    73,
+    86
+   ]
+  },
+  {
+   "insee": "38253",
+   "nom": "Les Deux Alpes",
+   "population": 1933,
+   "associationsAjoutees": 12,
+   "codes": [
+    "38534"
+   ],
+   "score": [
+    90,
+    91
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "50139",
+   "nom": "Condé-sur-Vire",
+   "population": 4106,
+   "associationsAjoutees": 12,
+   "codes": [
+    "50608"
+   ],
+   "score": [
+    36,
+    38
+   ],
+   "assosPct": [
+    77,
+    83
+   ]
+  },
+  {
+   "insee": "53029",
+   "nom": "Bierné-les-Villages",
+   "population": 1263,
+   "associationsAjoutees": 12,
+   "codes": [
+    "53006",
+    "53231",
+    "53241"
+   ],
+   "score": [
+    76,
+    78
+   ],
+   "assosPct": [
+    85,
+    93
+   ]
+  },
+  {
+   "insee": "53104",
+   "nom": "Gennes-Longuefuye",
+   "population": 1344,
+   "associationsAjoutees": 12,
+   "codes": [
+    "53138"
+   ],
+   "score": [
+    21,
+    25
+   ],
+   "assosPct": [
+    69,
+    84
+   ]
+  },
+  {
+   "insee": "53249",
+   "nom": "Vimartin-sur-Orthe",
+   "population": 1118,
+   "associationsAjoutees": 12,
+   "codes": [
+    "53239",
+    "53274"
+   ],
+   "score": [
+    22,
+    29
+   ],
+   "assosPct": [
+    49,
+    73
+   ]
+  },
+  {
+   "insee": "56165",
+   "nom": "Ploërmel",
+   "population": 9879,
+   "associationsAjoutees": 12,
+   "codes": [
+    "56138"
+   ],
+   "score": [
+    76,
+    76
+   ],
+   "assosPct": [
+    96,
+    96
+   ]
+  },
+  {
+   "insee": "61228",
+   "nom": "L'Orée-d'Écouves",
+   "population": 752,
+   "associationsAjoutees": 12,
+   "codes": [
+    "61172",
+    "61231",
+    "61383"
+   ],
+   "score": [
+    14,
+    22
+   ],
+   "assosPct": [
+    45,
+    74
+   ]
+  },
+  {
+   "insee": "62471",
+   "nom": "Bellinghem",
+   "population": 1087,
+   "associationsAjoutees": 12,
+   "codes": [
+    "62431"
+   ],
+   "score": [
+    24,
+    30
+   ],
+   "assosPct": [
+    53,
+    75
+   ]
+  },
+  {
+   "insee": "80295",
+   "nom": "Étinehem-Méricourt",
+   "population": 595,
+   "associationsAjoutees": 12,
+   "codes": [
+    "80532"
+   ],
+   "score": [
+    14,
+    23
+   ],
+   "assosPct": [
+    46,
+    77
+   ]
+  },
+  {
+   "insee": "88029",
+   "nom": "La Vôge-les-Bains",
+   "population": 1572,
+   "associationsAjoutees": 12,
+   "codes": [
+    "88234",
+    "88235"
+   ],
+   "score": [
+    50,
+    52
+   ],
+   "assosPct": [
+    88,
+    94
+   ]
+  },
+  {
+   "insee": "05139",
+   "nom": "Dévoluy",
+   "population": 895,
+   "associationsAjoutees": 11,
+   "codes": [
+    "05002",
+    "05042",
+    "05138"
+   ],
+   "score": [
+    96,
+    98
+   ],
+   "assosPct": [
+    93,
+    97
+   ]
+  },
+  {
+   "insee": "14281",
+   "nom": "Formigny La Bataille",
+   "population": 752,
+   "associationsAjoutees": 11,
+   "codes": [
+    "14004",
+    "14235",
+    "14382"
+   ],
+   "score": [
+    12,
+    20
+   ],
+   "assosPct": [
+    39,
+    68
+   ]
+  },
+  {
+   "insee": "21452",
+   "nom": "Neuilly-Crimolois",
+   "population": 3146,
+   "associationsAjoutees": 11,
+   "codes": [
+    "21213"
+   ],
+   "score": [
+    37,
+    40
+   ],
+   "assosPct": [
+    56,
+    67
+   ]
+  },
+  {
+   "insee": "24490",
+   "nom": "Saint Privat en Périgord",
+   "population": 1120,
+   "associationsAjoutees": 11,
+   "codes": [
+    "24178",
+    "24368"
+   ],
+   "score": [
+    17,
+    23
+   ],
+   "assosPct": [
+    56,
+    76
+   ]
+  },
+  {
+   "insee": "28331",
+   "nom": "Saintigny",
+   "population": 934,
+   "associationsAjoutees": 11,
+   "codes": [
+    "28165"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    79,
+    91
+   ]
+  },
+  {
+   "insee": "46083",
+   "nom": "Cressensac-Sarrazac",
+   "population": 1140,
+   "associationsAjoutees": 11,
+   "codes": [
+    "46298"
+   ],
+   "score": [
+    81,
+    85
+   ],
+   "assosPct": [
+    69,
+    84
+   ]
+  },
+  {
+   "insee": "50197",
+   "nom": "Gavray-sur-Sienne",
+   "population": 2004,
+   "associationsAjoutees": 11,
+   "codes": [
+    "50301",
+    "50320",
+    "50583"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    91,
+    95
+   ]
+  },
+  {
+   "insee": "52064",
+   "nom": "Bourmont-entre-Meuse-et-Mouzon",
+   "population": 760,
+   "associationsAjoutees": 11,
+   "codes": [
+    "52225",
+    "52351"
+   ],
+   "score": [
+    25,
+    28
+   ],
+   "assosPct": [
+    83,
+    93
+   ]
+  },
+  {
+   "insee": "70245",
+   "nom": "Fougerolles-Saint-Valbert",
+   "population": 3780,
+   "associationsAjoutees": 11,
+   "codes": [
+    "70475"
+   ],
+   "score": [
+    29,
+    30
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "71042",
+   "nom": "Bonnay-Saint-Ythaire",
+   "population": 437,
+   "associationsAjoutees": 11,
+   "codes": [
+    "71492"
+   ],
+   "score": [
+    76,
+    86
+   ],
+   "assosPct": [
+    44,
+    76
+   ]
+  },
+  {
+   "insee": "71582",
+   "nom": "La Vineuse sur Fregande",
+   "population": 652,
+   "associationsAjoutees": 11,
+   "codes": [
+    "71180",
+    "71587"
+   ],
+   "score": [
+    62,
+    66
+   ],
+   "assosPct": [
+    75,
+    90
+   ]
+  },
+  {
+   "insee": "77504",
+   "nom": "Villemaréchal",
+   "population": 1082,
+   "associationsAjoutees": 11,
+   "codes": [
+    "77399"
+   ],
+   "score": [
+    26,
+    28
+   ],
+   "assosPct": [
+    85,
+    93
+   ]
+  },
+  {
+   "insee": "79077",
+   "nom": "Beugnon-Thireuil",
+   "population": 734,
+   "associationsAjoutees": 11,
+   "codes": [
+    "79035"
+   ],
+   "score": [
+    14,
+    22
+   ],
+   "assosPct": [
+    45,
+    72
+   ]
+  },
+  {
+   "insee": "81132",
+   "nom": "Guitalens-L'Albarède",
+   "population": 829,
+   "associationsAjoutees": 11,
+   "codes": [
+    "81107"
+   ],
+   "score": [
+    45,
+    55
+   ],
+   "assosPct": [
+    26,
+    59
+   ]
+  },
+  {
+   "insee": "05039",
+   "nom": "Aubessagne",
+   "population": 730,
+   "associationsAjoutees": 10,
+   "codes": [
+    "05043",
+    "05141"
+   ],
+   "score": [
+    17,
+    23
+   ],
+   "assosPct": [
+    57,
+    78
+   ]
+  },
+  {
+   "insee": "08173",
+   "nom": "Flize",
+   "population": 1695,
+   "associationsAjoutees": 10,
+   "codes": [
+    "08042",
+    "08079",
+    "08152"
+   ],
+   "score": [
+    10,
+    16
+   ],
+   "assosPct": [
+    32,
+    52
+   ]
+  },
+  {
+   "insee": "08491",
+   "nom": "Vrigne aux Bois",
+   "population": 3540,
+   "associationsAjoutees": 10,
+   "codes": [
+    "08072"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    66,
+    74
+   ]
+  },
+  {
+   "insee": "14357",
+   "nom": "Terres de Druance",
+   "population": 895,
+   "associationsAjoutees": 10,
+   "codes": [
+    "14597",
+    "14662"
+   ],
+   "score": [
+    17,
+    26
+   ],
+   "assosPct": [
+    25,
+    55
+   ]
+  },
+  {
+   "insee": "14554",
+   "nom": "Le Castelet",
+   "population": 1772,
+   "associationsAjoutees": 10,
+   "codes": [
+    "14294"
+   ],
+   "score": [
+    14,
+    20
+   ],
+   "assosPct": [
+    35,
+    54
+   ]
+  },
+  {
+   "insee": "15142",
+   "nom": "Neuvéglise-sur-Truyère",
+   "population": 1704,
+   "associationsAjoutees": 10,
+   "codes": [
+    "15099",
+    "15145",
+    "15227"
+   ],
+   "score": [
+    30,
+    32
+   ],
+   "assosPct": [
+    85,
+    91
+   ]
+  },
+  {
+   "insee": "22107",
+   "nom": "Bon Repos sur Blavet",
+   "population": 1241,
+   "associationsAjoutees": 10,
+   "codes": [
+    "22167",
+    "22290"
+   ],
+   "score": [
+    63,
+    67
+   ],
+   "assosPct": [
+    67,
+    81
+   ]
+  },
+  {
+   "insee": "22206",
+   "nom": "Châtelaudren-Plouagat",
+   "population": 3961,
+   "associationsAjoutees": 10,
+   "codes": [
+    "22038"
+   ],
+   "score": [
+    81,
+    83
+   ],
+   "assosPct": [
+    75,
+    81
+   ]
+  },
+  {
+   "insee": "22219",
+   "nom": "Plouguenast-Langast",
+   "population": 2406,
+   "associationsAjoutees": 10,
+   "codes": [
+    "22100"
+   ],
+   "score": [
+    23,
+    26
+   ],
+   "assosPct": [
+    77,
+    85
+   ]
+  },
+  {
+   "insee": "27676",
+   "nom": "Les Trois Lacs",
+   "population": 1742,
+   "associationsAjoutees": 10,
+   "codes": [
+    "27058",
+    "27647"
+   ],
+   "score": [
+    16,
+    20
+   ],
+   "assosPct": [
+    52,
+    67
+   ]
+  },
+  {
+   "insee": "27679",
+   "nom": "Verneuil d'Avre et d'Iton",
+   "population": 7305,
+   "associationsAjoutees": 10,
+   "codes": [
+    "27265"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    87,
+    89
+   ]
+  },
+  {
+   "insee": "28330",
+   "nom": "Villemaury",
+   "population": 1325,
+   "associationsAjoutees": 10,
+   "codes": [
+    "28101",
+    "28224"
+   ],
+   "score": [
+    16,
+    21
+   ],
+   "assosPct": [
+    54,
+    71
+   ]
+  },
+  {
+   "insee": "30052",
+   "nom": "Bréau-Mars",
+   "population": 666,
+   "associationsAjoutees": 10,
+   "codes": [
+    "30157"
+   ],
+   "score": [
+    69,
+    69
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "35191",
+   "nom": "Les Portes du Coglais",
+   "population": 2256,
+   "associationsAjoutees": 10,
+   "codes": [
+    "35083",
+    "35323"
+   ],
+   "score": [
+    70,
+    74
+   ],
+   "assosPct": [
+    48,
+    62
+   ]
+  },
+  {
+   "insee": "38152",
+   "nom": "Eclose-Badinières",
+   "population": 1487,
+   "associationsAjoutees": 10,
+   "codes": [
+    "38024"
+   ],
+   "score": [
+    26,
+    30
+   ],
+   "assosPct": [
+    72,
+    84
+   ]
+  },
+  {
+   "insee": "41142",
+   "nom": "Valencisse",
+   "population": 2315,
+   "associationsAjoutees": 10,
+   "codes": [
+    "41033"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    91,
+    94
+   ]
+  },
+  {
+   "insee": "50409",
+   "nom": "Pont-Hébert",
+   "population": 1907,
+   "associationsAjoutees": 10,
+   "codes": [
+    "50248"
+   ],
+   "score": [
+    20,
+    23
+   ],
+   "assosPct": [
+    67,
+    78
+   ]
+  },
+  {
+   "insee": "70285",
+   "nom": "Héricourt",
+   "population": 10478,
+   "associationsAjoutees": 10,
+   "codes": [
+    "70497"
+   ],
+   "score": [
+    52,
+    52
+   ],
+   "assosPct": [
+    93,
+    94
+   ]
+  },
+  {
+   "insee": "71134",
+   "nom": "Navour-sur-Grosne",
+   "population": 658,
+   "associationsAjoutees": 10,
+   "codes": [
+    "71055",
+    "71304"
+   ],
+   "score": [
+    17,
+    23
+   ],
+   "assosPct": [
+    56,
+    78
+   ]
+  },
+  {
+   "insee": "81218",
+   "nom": "Puygouzon",
+   "population": 3540,
+   "associationsAjoutees": 10,
+   "codes": [
+    "81113"
+   ],
+   "score": [
+    42,
+    43
+   ],
+   "assosPct": [
+    88,
+    91
+   ]
+  },
+  {
+   "insee": "85152",
+   "nom": "Les Achards",
+   "population": 5391,
+   "associationsAjoutees": 10,
+   "codes": [
+    "85052"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    86,
+    89
+   ]
+  },
+  {
+   "insee": "85292",
+   "nom": "Rives-du-Fougerais",
+   "population": 1507,
+   "associationsAjoutees": 10,
+   "codes": [
+    "85041",
+    "85271"
+   ],
+   "score": [
+    39,
+    44
+   ],
+   "assosPct": [
+    46,
+    64
+   ]
+  },
+  {
+   "insee": "89024",
+   "nom": "Auxerre",
+   "population": 34778,
+   "associationsAjoutees": 10,
+   "codes": [
+    "89435"
+   ],
+   "score": [
+    93,
+    93
+   ],
+   "assosPct": [
+    100,
+    100
+   ]
+  },
+  {
+   "insee": "02018",
+   "nom": "Anizy-le-Grand",
+   "population": 2549,
+   "associationsAjoutees": 9,
+   "codes": [
+    "02301",
+    "02434"
+   ],
+   "score": [
+    24,
+    26
+   ],
+   "assosPct": [
+    72,
+    79
+   ]
+  },
+  {
+   "insee": "07011",
+   "nom": "Vallées-d'Antraigues-Asperjoc",
+   "population": 858,
+   "associationsAjoutees": 9,
+   "codes": [
+    "07016"
+   ],
+   "score": [
+    89,
+    91
+   ],
+   "assosPct": [
+    85,
+    92
+   ]
+  },
+  {
+   "insee": "14005",
+   "nom": "Valambray",
+   "population": 1682,
+   "associationsAjoutees": 9,
+   "codes": [
+    "14074",
+    "14176",
+    "14268"
+   ],
+   "score": [
+    13,
+    18
+   ],
+   "assosPct": [
+    43,
+    59
+   ]
+  },
+  {
+   "insee": "14349",
+   "nom": "Laize-Clinchamps",
+   "population": 2140,
+   "associationsAjoutees": 9,
+   "codes": [
+    "14164"
+   ],
+   "score": [
+    51,
+    56
+   ],
+   "assosPct": [
+    36,
+    51
+   ]
+  },
+  {
+   "insee": "15027",
+   "nom": "Puycapel",
+   "population": 732,
+   "associationsAjoutees": 9,
+   "codes": [
+    "15136"
+   ],
+   "score": [
+    33,
+    37
+   ],
+   "assosPct": [
+    71,
+    85
+   ]
+  },
+  {
+   "insee": "16153",
+   "nom": "Mainxe-Gondeville",
+   "population": 1174,
+   "associationsAjoutees": 9,
+   "codes": [
+    "16202"
+   ],
+   "score": [
+    16,
+    23
+   ],
+   "assosPct": [
+    29,
+    53
+   ]
+  },
+  {
+   "insee": "16281",
+   "nom": "La Rochefoucauld-en-Angoumois",
+   "population": 4002,
+   "associationsAjoutees": 9,
+   "codes": [
+    "16344"
+   ],
+   "score": [
+    88,
+    88
+   ],
+   "assosPct": [
+    91,
+    93
+   ]
+  },
+  {
+   "insee": "19019",
+   "nom": "Beaulieu-sur-Dordogne",
+   "population": 1300,
+   "associationsAjoutees": 9,
+   "codes": [
+    "19032"
+   ],
+   "score": [
+    95,
+    95
+   ],
+   "assosPct": [
+    96,
+    98
+   ]
+  },
+  {
+   "insee": "21352",
+   "nom": "Longeault-Pluvault",
+   "population": 1148,
+   "associationsAjoutees": 9,
+   "codes": [
+    "21486"
+   ],
+   "score": [
+    18,
+    24
+   ],
+   "assosPct": [
+    36,
+    58
+   ]
+  },
+  {
+   "insee": "26210",
+   "nom": "Valherbasse",
+   "population": 1021,
+   "associationsAjoutees": 9,
+   "codes": [
+    "26184",
+    "26297"
+   ],
+   "score": [
+    22,
+    26
+   ],
+   "assosPct": [
+    72,
+    85
+   ]
+  },
+  {
+   "insee": "27290",
+   "nom": "Goupil-Othon",
+   "population": 1254,
+   "associationsAjoutees": 9,
+   "codes": [
+    "27642"
+   ],
+   "score": [
+    7,
+    14
+   ],
+   "assosPct": [
+    23,
+    46
+   ]
+  },
+  {
+   "insee": "33106",
+   "nom": "Castets et Castillon",
+   "population": 1513,
+   "associationsAjoutees": 9,
+   "codes": [
+    "33107"
+   ],
+   "score": [
+    21,
+    24
+   ],
+   "assosPct": [
+    70,
+    81
+   ]
+  },
+  {
+   "insee": "35163",
+   "nom": "Luitré-Dompierre",
+   "population": 1818,
+   "associationsAjoutees": 9,
+   "codes": [
+    "35100"
+   ],
+   "score": [
+    63,
+    64
+   ],
+   "assosPct": [
+    89,
+    93
+   ]
+  },
+  {
+   "insee": "35184",
+   "nom": "Montauban-de-Bretagne",
+   "population": 6410,
+   "associationsAjoutees": 9,
+   "codes": [
+    "35301"
+   ],
+   "score": [
+    59,
+    59
+   ],
+   "assosPct": [
+    84,
+    86
+   ]
+  },
+  {
+   "insee": "38284",
+   "nom": "Ornacieux-Balbins",
+   "population": 868,
+   "associationsAjoutees": 9,
+   "codes": [
+    "38025"
+   ],
+   "score": [
+    29,
+    34
+   ],
+   "assosPct": [
+    63,
+    79
+   ]
+  },
+  {
+   "insee": "39485",
+   "nom": "Val Suran",
+   "population": 782,
+   "associationsAjoutees": 9,
+   "codes": [
+    "39069",
+    "39303",
+    "39564"
+   ],
+   "score": [
+    64,
+    66
+   ],
+   "assosPct": [
+    86,
+    93
+   ]
+  },
+  {
+   "insee": "39576",
+   "nom": "Val-Sonnette",
+   "population": 1318,
+   "associationsAjoutees": 9,
+   "codes": [
+    "39064",
+    "39264",
+    "39549"
+   ],
+   "score": [
+    18,
+    22
+   ],
+   "assosPct": [
+    60,
+    74
+   ]
+  },
+  {
+   "insee": "40243",
+   "nom": "Rion-des-Landes",
+   "population": 3084,
+   "associationsAjoutees": 9,
+   "codes": [
+    "40048"
+   ],
+   "score": [
+    61,
+    62
+   ],
+   "assosPct": [
+    90,
+    93
+   ]
+  },
+  {
+   "insee": "46232",
+   "nom": "Le Vignon-en-Quercy",
+   "population": 970,
+   "associationsAjoutees": 9,
+   "codes": [
+    "46067"
+   ],
+   "score": [
+    22,
+    25
+   ],
+   "assosPct": [
+    72,
+    84
+   ]
+  },
+  {
+   "insee": "72308",
+   "nom": "Saint-Paterne - Le Chevain",
+   "population": 2096,
+   "associationsAjoutees": 9,
+   "codes": [
+    "72082"
+   ],
+   "score": [
+    21,
+    25
+   ],
+   "assosPct": [
+    62,
+    73
+   ]
+  },
+  {
+   "insee": "73135",
+   "nom": "La Tour-en-Maurienne",
+   "population": 1087,
+   "associationsAjoutees": 9,
+   "codes": [
+    "73080",
+    "73203"
+   ],
+   "score": [
+    50,
+    55
+   ],
+   "assosPct": [
+    55,
+    72
+   ]
+  },
+  {
+   "insee": "73236",
+   "nom": "Saint-Genix-les-Villages",
+   "population": 2962,
+   "associationsAjoutees": 9,
+   "codes": [
+    "73127",
+    "73260"
+   ],
+   "score": [
+    23,
+    25
+   ],
+   "assosPct": [
+    76,
+    82
+   ]
+  },
+  {
+   "insee": "73257",
+   "nom": "Les Belleville",
+   "population": 3472,
+   "associationsAjoutees": 9,
+   "codes": [
+    "73244"
+   ],
+   "score": [
+    97,
+    97
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "79140",
+   "nom": "Valdelaume",
+   "population": 810,
+   "associationsAjoutees": 9,
+   "codes": [
+    "79011",
+    "79045",
+    "79211"
+   ],
+   "score": [
+    9,
+    17
+   ],
+   "assosPct": [
+    30,
+    57
+   ]
+  },
+  {
+   "insee": "85177",
+   "nom": "Les Velluire-sur-Vendée",
+   "population": 1372,
+   "associationsAjoutees": 9,
+   "codes": [
+    "85299"
+   ],
+   "score": [
+    19,
+    23
+   ],
+   "assosPct": [
+    64,
+    77
+   ]
+  },
+  {
+   "insee": "86053",
+   "nom": "Champigny en Rochereau",
+   "population": 1914,
+   "associationsAjoutees": 9,
+   "codes": [
+    "86208"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    68,
+    78
+   ]
+  },
+  {
+   "insee": "01453",
+   "nom": "Arvière-en-Valromey",
+   "population": 713,
+   "associationsAjoutees": 8,
+   "codes": [
+    "01059",
+    "01097",
+    "01218"
+   ],
+   "score": [
+    58,
+    66
+   ],
+   "assosPct": [
+    25,
+    52
+   ]
+  },
+  {
+   "insee": "14538",
+   "nom": "Castine-en-Plaine",
+   "population": 1707,
+   "associationsAjoutees": 8,
+   "codes": [
+    "14339",
+    "14691"
+   ],
+   "score": [
+    13,
+    18
+   ],
+   "assosPct": [
+    29,
+    46
+   ]
+  },
+  {
+   "insee": "16206",
+   "nom": "Mansle-les-Fontaines",
+   "population": 2105,
+   "associationsAjoutees": 8,
+   "codes": [
+    "16140"
+   ],
+   "score": [
+    69,
+    70
+   ],
+   "assosPct": [
+    92,
+    94
+   ]
+  },
+  {
+   "insee": "21272",
+   "nom": "Le Val-Larrey",
+   "population": 270,
+   "associationsAjoutees": 8,
+   "codes": [
+    "21073"
+   ],
+   "score": [
+    31,
+    42
+   ],
+   "assosPct": [
+    22,
+    57
+   ]
+  },
+  {
+   "insee": "22158",
+   "nom": "Guerlédan",
+   "population": 2498,
+   "associationsAjoutees": 8,
+   "codes": [
+    "22298"
+   ],
+   "score": [
+    30,
+    31
+   ],
+   "assosPct": [
+    94,
+    96
+   ]
+  },
+  {
+   "insee": "24053",
+   "nom": "Boulazac Isle Manoire",
+   "population": 10697,
+   "associationsAjoutees": 8,
+   "codes": [
+    "24013",
+    "24447"
+   ],
+   "score": [
+    44,
+    44
+   ],
+   "assosPct": [
+    89,
+    90
+   ]
+  },
+  {
+   "insee": "24364",
+   "nom": "Coly-Saint-Amand",
+   "population": 608,
+   "associationsAjoutees": 8,
+   "codes": [
+    "24127"
+   ],
+   "score": [
+    84,
+    86
+   ],
+   "assosPct": [
+    85,
+    92
+   ]
+  },
+  {
+   "insee": "25035",
+   "nom": "Les Auxons",
+   "population": 2510,
+   "associationsAjoutees": 8,
+   "codes": [
+    "25034"
+   ],
+   "score": [
+    41,
+    45
+   ],
+   "assosPct": [
+    42,
+    53
+   ]
+  },
+  {
+   "insee": "27448",
+   "nom": "Pacy-sur-Eure",
+   "population": 5001,
+   "associationsAjoutees": 8,
+   "codes": [
+    "27510"
+   ],
+   "score": [
+    80,
+    81
+   ],
+   "assosPct": [
+    72,
+    76
+   ]
+  },
+  {
+   "insee": "27467",
+   "nom": "Pont-Audemer",
+   "population": 9848,
+   "associationsAjoutees": 8,
+   "codes": [
+    "27549"
+   ],
+   "score": [
+    89,
+    89
+   ],
+   "assosPct": [
+    88,
+    89
+   ]
+  },
+  {
+   "insee": "28015",
+   "nom": "Auneau-Bleury-Saint-Symphorien",
+   "population": 6288,
+   "associationsAjoutees": 8,
+   "codes": [
+    "28042"
+   ],
+   "score": [
+    32,
+    33
+   ],
+   "assosPct": [
+    92,
+    93
+   ]
+  },
+  {
+   "insee": "35168",
+   "nom": "Val d'Anast",
+   "population": 3932,
+   "associationsAjoutees": 8,
+   "codes": [
+    "35048"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    90,
+    92
+   ]
+  },
+  {
+   "insee": "38163",
+   "nom": "Le Haut-Bréda",
+   "population": 435,
+   "associationsAjoutees": 8,
+   "codes": [
+    "38306"
+   ],
+   "score": [
+    23,
+    27
+   ],
+   "assosPct": [
+    76,
+    89
+   ]
+  },
+  {
+   "insee": "38407",
+   "nom": "La Sure en Chartreuse",
+   "population": 1058,
+   "associationsAjoutees": 8,
+   "codes": [
+    "38312"
+   ],
+   "score": [
+    31,
+    34
+   ],
+   "assosPct": [
+    79,
+    88
+   ]
+  },
+  {
+   "insee": "49160",
+   "nom": "Ingrandes-le-Fresne-sur-Loire",
+   "population": 3070,
+   "associationsAjoutees": 8,
+   "codes": [
+    "49321"
+   ],
+   "score": [
+    78,
+    78
+   ],
+   "assosPct": [
+    94,
+    96
+   ]
+  },
+  {
+   "insee": "54557",
+   "nom": "Bois-de-Haye",
+   "population": 2350,
+   "associationsAjoutees": 8,
+   "codes": [
+    "54506"
+   ],
+   "score": [
+    25,
+    26
+   ],
+   "assosPct": [
+    82,
+    87
+   ]
+  },
+  {
+   "insee": "76034",
+   "nom": "Val-de-Scie",
+   "population": 2526,
+   "associationsAjoutees": 8,
+   "codes": [
+    "76191",
+    "76674"
+   ],
+   "score": [
+    36,
+    37
+   ],
+   "assosPct": [
+    82,
+    87
+   ]
+  },
+  {
+   "insee": "79005",
+   "nom": "Airvault",
+   "population": 3287,
+   "associationsAjoutees": 8,
+   "codes": [
+    "79041",
+    "79325"
+   ],
+   "score": [
+    34,
+    35
+   ],
+   "assosPct": [
+    90,
+    92
+   ]
+  },
+  {
+   "insee": "86247",
+   "nom": "Val-de-Comporté",
+   "population": 1014,
+   "associationsAjoutees": 8,
+   "codes": [
+    "86231"
+   ],
+   "score": [
+    6,
+    13
+   ],
+   "assosPct": [
+    20,
+    44
+   ]
+  },
+  {
+   "insee": "01138",
+   "nom": "Culoz-Béon",
+   "population": 3426,
+   "associationsAjoutees": 7,
+   "codes": [
+    "01039"
+   ],
+   "score": [
+    84,
+    84
+   ],
+   "assosPct": [
+    88,
+    90
+   ]
+  },
+  {
+   "insee": "05024",
+   "nom": "Valdoule",
+   "population": 213,
+   "associationsAjoutees": 7,
+   "codes": [
+    "05088",
+    "05150"
+   ],
+   "score": [
+    35,
+    44
+   ],
+   "assosPct": [
+    28,
+    59
+   ]
+  },
+  {
+   "insee": "08053",
+   "nom": "Bazeilles",
+   "population": 2502,
+   "associationsAjoutees": 7,
+   "codes": [
+    "08294",
+    "08371",
+    "08475"
+   ],
+   "score": [
+    22,
+    24
+   ],
+   "assosPct": [
+    73,
+    79
+   ]
+  },
+  {
+   "insee": "14406",
+   "nom": "Moulins-en-Bessin",
+   "population": 1088,
+   "associationsAjoutees": 7,
+   "codes": [
+    "14186",
+    "14212",
+    "14548"
+   ],
+   "score": [
+    66,
+    71
+   ],
+   "assosPct": [
+    45,
+    61
+   ]
+  },
+  {
+   "insee": "14581",
+   "nom": "Aurseulles",
+   "population": 1896,
+   "associationsAjoutees": 7,
+   "codes": [
+    "14376",
+    "14695"
+   ],
+   "score": [
+    16,
+    19
+   ],
+   "assosPct": [
+    54,
+    64
+   ]
+  },
+  {
+   "insee": "16110",
+   "nom": "Courcôme",
+   "population": 789,
+   "associationsAjoutees": 7,
+   "codes": [
+    "16391",
+    "16410"
+   ],
+   "score": [
+    24,
+    29
+   ],
+   "assosPct": [
+    41,
+    60
+   ]
+  },
+  {
+   "insee": "26216",
+   "nom": "Saint-Jean-de-Galaure",
+   "population": 1265,
+   "associationsAjoutees": 7,
+   "codes": [
+    "26219"
+   ],
+   "score": [
+    50,
+    53
+   ],
+   "assosPct": [
+    63,
+    74
+   ]
+  },
+  {
+   "insee": "27062",
+   "nom": "Les Monts du Roumois",
+   "population": 1571,
+   "associationsAjoutees": 7,
+   "codes": [
+    "27092"
+   ],
+   "score": [
+    70,
+    73
+   ],
+   "assosPct": [
+    56,
+    67
+   ]
+  },
+  {
+   "insee": "27294",
+   "nom": "Val d'Orger",
+   "population": 992,
+   "associationsAjoutees": 7,
+   "codes": [
+    "27274"
+   ],
+   "score": [
+    10,
+    17
+   ],
+   "assosPct": [
+    7,
+    30
+   ]
+  },
+  {
+   "insee": "27447",
+   "nom": "Le Val-Doré",
+   "population": 885,
+   "associationsAjoutees": 7,
+   "codes": [
+    "27268",
+    "27402"
+   ],
+   "score": [
+    8,
+    14
+   ],
+   "assosPct": [
+    25,
+    47
+   ]
+  },
+  {
+   "insee": "28334",
+   "nom": "Saint-Denis-Lanneray",
+   "population": 2129,
+   "associationsAjoutees": 7,
+   "codes": [
+    "28205"
+   ],
+   "score": [
+    16,
+    19
+   ],
+   "assosPct": [
+    55,
+    64
+   ]
+  },
+  {
+   "insee": "28406",
+   "nom": "Éole-en-Beauce",
+   "population": 1242,
+   "associationsAjoutees": 7,
+   "codes": [
+    "28412"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    89,
+    93
+   ]
+  },
+  {
+   "insee": "37123",
+   "nom": "Langeais",
+   "population": 4335,
+   "associationsAjoutees": 7,
+   "codes": [
+    "37102"
+   ],
+   "score": [
+    29,
+    30
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "38297",
+   "nom": "Arandon-Passins",
+   "population": 1861,
+   "associationsAjoutees": 7,
+   "codes": [
+    "38014"
+   ],
+   "score": [
+    40,
+    42
+   ],
+   "assosPct": [
+    70,
+    78
+   ]
+  },
+  {
+   "insee": "39258",
+   "nom": "Grande-Rivière Château",
+   "population": 632,
+   "associationsAjoutees": 7,
+   "codes": [
+    "39115"
+   ],
+   "score": [
+    54,
+    60
+   ],
+   "assosPct": [
+    48,
+    67
+   ]
+  },
+  {
+   "insee": "39286",
+   "nom": "Lavans-lès-Saint-Claude",
+   "population": 2333,
+   "associationsAjoutees": 7,
+   "codes": [
+    "39440"
+   ],
+   "score": [
+    67,
+    69
+   ],
+   "assosPct": [
+    73,
+    79
+   ]
+  },
+  {
+   "insee": "39290",
+   "nom": "Valzin en Petite Montagne",
+   "population": 456,
+   "associationsAjoutees": 7,
+   "codes": [
+    "39123",
+    "39224",
+    "39506"
+   ],
+   "score": [
+    18,
+    23
+   ],
+   "assosPct": [
+    60,
+    77
+   ]
+  },
+  {
+   "insee": "50095",
+   "nom": "Canisy",
+   "population": 1734,
+   "associationsAjoutees": 7,
+   "codes": [
+    "50465"
+   ],
+   "score": [
+    27,
+    29
+   ],
+   "assosPct": [
+    77,
+    84
+   ]
+  },
+  {
+   "insee": "60196",
+   "nom": "La Drenne",
+   "population": 1058,
+   "associationsAjoutees": 7,
+   "codes": [
+    "60453",
+    "60532"
+   ],
+   "score": [
+    12,
+    17
+   ],
+   "assosPct": [
+    40,
+    58
+   ]
+  },
+  {
+   "insee": "60256",
+   "nom": "Montchevreuil",
+   "population": 1328,
+   "associationsAjoutees": 7,
+   "codes": [
+    "60038"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    65,
+    75
+   ]
+  },
+  {
+   "insee": "61429",
+   "nom": "Charencey",
+   "population": 762,
+   "associationsAjoutees": 7,
+   "codes": [
+    "61299",
+    "61311"
+   ],
+   "score": [
+    25,
+    30
+   ],
+   "assosPct": [
+    45,
+    63
+   ]
+  },
+  {
+   "insee": "74289",
+   "nom": "Vallières-sur-Fier",
+   "population": 2618,
+   "associationsAjoutees": 7,
+   "codes": [
+    "74274"
+   ],
+   "score": [
+    25,
+    28
+   ],
+   "assosPct": [
+    49,
+    58
+   ]
+  },
+  {
+   "insee": "76146",
+   "nom": "Buchy",
+   "population": 2805,
+   "associationsAjoutees": 7,
+   "codes": [
+    "76127",
+    "76248"
+   ],
+   "score": [
+    24,
+    25
+   ],
+   "assosPct": [
+    74,
+    79
+   ]
+  },
+  {
+   "insee": "79030",
+   "nom": "Beaussais-Vitré",
+   "population": 954,
+   "associationsAjoutees": 7,
+   "codes": [
+    "79353"
+   ],
+   "score": [
+    4,
+    11
+   ],
+   "assosPct": [
+    14,
+    37
+   ]
+  },
+  {
+   "insee": "89130",
+   "nom": "Deux Rivières",
+   "population": 1266,
+   "associationsAjoutees": 7,
+   "codes": [
+    "89001"
+   ],
+   "score": [
+    91,
+    93
+   ],
+   "assosPct": [
+    85,
+    90
+   ]
+  },
+  {
+   "insee": "02153",
+   "nom": "Cessières-Suzy",
+   "population": 785,
+   "associationsAjoutees": 6,
+   "codes": [
+    "02733"
+   ],
+   "score": [
+    17,
+    24
+   ],
+   "assosPct": [
+    20,
+    41
+   ]
+  },
+  {
+   "insee": "02360",
+   "nom": "Villeneuve-sur-Aisne",
+   "population": 2784,
+   "associationsAjoutees": 6,
+   "codes": [
+    "02475"
+   ],
+   "score": [
+    31,
+    33
+   ],
+   "assosPct": [
+    72,
+    77
+   ]
+  },
+  {
+   "insee": "03168",
+   "nom": "Meaulne-Vitray",
+   "population": 901,
+   "associationsAjoutees": 6,
+   "codes": [
+    "03318"
+   ],
+   "score": [
+    25,
+    27
+   ],
+   "assosPct": [
+    84,
+    90
+   ]
+  },
+  {
+   "insee": "05001",
+   "nom": "Abriès-Ristolas",
+   "population": 382,
+   "associationsAjoutees": 6,
+   "codes": [
+    "05120"
+   ],
+   "score": [
+    97,
+    98
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "05132",
+   "nom": "Saint-Bonnet-en-Champsaur",
+   "population": 2080,
+   "associationsAjoutees": 6,
+   "codes": [
+    "05020"
+   ],
+   "score": [
+    78,
+    78
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "07262",
+   "nom": "Saint-Laurent-les-Bains-Laval-d'Aurelle",
+   "population": 180,
+   "associationsAjoutees": 6,
+   "codes": [
+    "07135"
+   ],
+   "score": [
+    79,
+    85
+   ],
+   "assosPct": [
+    57,
+    76
+   ]
+  },
+  {
+   "insee": "14355",
+   "nom": "Ponts sur Seulles",
+   "population": 1209,
+   "associationsAjoutees": 6,
+   "codes": [
+    "14008"
+   ],
+   "score": [
+    22,
+    26
+   ],
+   "assosPct": [
+    52,
+    64
+   ]
+  },
+  {
+   "insee": "14456",
+   "nom": "Moult-Chicheboville",
+   "population": 3378,
+   "associationsAjoutees": 6,
+   "codes": [
+    "14158"
+   ],
+   "score": [
+    50,
+    51
+   ],
+   "assosPct": [
+    59,
+    64
+   ]
+  },
+  {
+   "insee": "16023",
+   "nom": "Aunac-sur-Charente",
+   "population": 647,
+   "associationsAjoutees": 6,
+   "codes": [
+    "16033",
+    "16094"
+   ],
+   "score": [
+    72,
+    76
+   ],
+   "assosPct": [
+    69,
+    80
+   ]
+  },
+  {
+   "insee": "17340",
+   "nom": "Saint-Pierre-La-Noue",
+   "population": 1508,
+   "associationsAjoutees": 6,
+   "codes": [
+    "17272"
+   ],
+   "score": [
+    24,
+    26
+   ],
+   "assosPct": [
+    80,
+    86
+   ]
+  },
+  {
+   "insee": "19252",
+   "nom": "Sarroux - Saint Julien",
+   "population": 860,
+   "associationsAjoutees": 6,
+   "codes": [
+    "19218"
+   ],
+   "score": [
+    82,
+    86
+   ],
+   "assosPct": [
+    53,
+    67
+   ]
+  },
+  {
+   "insee": "24147",
+   "nom": "Cubjac-Auvézère-Val d'Ans",
+   "population": 1104,
+   "associationsAjoutees": 6,
+   "codes": [
+    "24047",
+    "24475"
+   ],
+   "score": [
+    32,
+    34
+   ],
+   "assosPct": [
+    82,
+    88
+   ]
+  },
+  {
+   "insee": "25558",
+   "nom": "Tarcenay-Foucherans",
+   "population": 1508,
+   "associationsAjoutees": 6,
+   "codes": [
+    "25250"
+   ],
+   "score": [
+    12,
+    17
+   ],
+   "assosPct": [
+    24,
+    39
+   ]
+  },
+  {
+   "insee": "27425",
+   "nom": "Nassandres sur Risle",
+   "population": 2329,
+   "associationsAjoutees": 6,
+   "codes": [
+    "27131",
+    "27253",
+    "27452"
+   ],
+   "score": [
+    46,
+    49
+   ],
+   "assosPct": [
+    50,
+    59
+   ]
+  },
+  {
+   "insee": "37254",
+   "nom": "Tauxigny-Saint-Bauld",
+   "population": 1693,
+   "associationsAjoutees": 6,
+   "codes": [
+    "37209"
+   ],
+   "score": [
+    31,
+    32
+   ],
+   "assosPct": [
+    90,
+    93
+   ]
+  },
+  {
+   "insee": "38560",
+   "nom": "Val-de-Virieu",
+   "population": 1535,
+   "associationsAjoutees": 6,
+   "codes": [
+    "38293"
+   ],
+   "score": [
+    71,
+    73
+   ],
+   "assosPct": [
+    81,
+    86
+   ]
+  },
+  {
+   "insee": "39130",
+   "nom": "Nanchez",
+   "population": 775,
+   "associationsAjoutees": 6,
+   "codes": [
+    "39417",
+    "39562"
+   ],
+   "score": [
+    56,
+    60
+   ],
+   "assosPct": [
+    61,
+    73
+   ]
+  },
+  {
+   "insee": "39273",
+   "nom": "Montlainsia",
+   "population": 222,
+   "associationsAjoutees": 6,
+   "codes": [
+    "39195",
+    "39347"
+   ],
+   "score": [
+    2,
+    11
+   ],
+   "assosPct": [
+    7,
+    38
+   ]
+  },
+  {
+   "insee": "39378",
+   "nom": "Les Trois-Châteaux",
+   "population": 765,
+   "associationsAjoutees": 6,
+   "codes": [
+    "39023",
+    "39135",
+    "39484"
+   ],
+   "score": [
+    26,
+    30
+   ],
+   "assosPct": [
+    48,
+    63
+   ]
+  },
+  {
+   "insee": "42245",
+   "nom": "Vêtre-sur-Anzon",
+   "population": 572,
+   "associationsAjoutees": 6,
+   "codes": [
+    "42291"
+   ],
+   "score": [
+    15,
+    20
+   ],
+   "assosPct": [
+    50,
+    66
+   ]
+  },
+  {
+   "insee": "45051",
+   "nom": "Bray-Saint-Aignan",
+   "population": 1746,
+   "associationsAjoutees": 6,
+   "codes": [
+    "45267"
+   ],
+   "score": [
+    24,
+    27
+   ],
+   "assosPct": [
+    70,
+    77
+   ]
+  },
+  {
+   "insee": "49328",
+   "nom": "Saumur",
+   "population": 26215,
+   "associationsAjoutees": 6,
+   "codes": [
+    "49016",
+    "49287",
+    "49293"
+   ],
+   "score": [
+    90,
+    90
+   ],
+   "assosPct": [
+    100,
+    100
+   ]
+  },
+  {
+   "insee": "50546",
+   "nom": "Bourgvallées",
+   "population": 3312,
+   "associationsAjoutees": 6,
+   "codes": [
+    "50313",
+    "50581"
+   ],
+   "score": [
+    71,
+    72
+   ],
+   "assosPct": [
+    77,
+    80
+   ]
+  },
+  {
+   "insee": "50592",
+   "nom": "Tessy-Bocage",
+   "population": 2223,
+   "associationsAjoutees": 6,
+   "codes": [
+    "14513"
+   ],
+   "score": [
+    81,
+    81
+   ],
+   "assosPct": [
+    96,
+    97
+   ]
+  },
+  {
+   "insee": "51457",
+   "nom": "Cœur-de-la-Vallée",
+   "population": 648,
+   "associationsAjoutees": 6,
+   "codes": [
+    "51063",
+    "51637"
+   ],
+   "score": [
+    7,
+    13
+   ],
+   "assosPct": [
+    23,
+    44
+   ]
+  },
+  {
+   "insee": "52140",
+   "nom": "Colombey les Deux Églises",
+   "population": 679,
+   "associationsAjoutees": 6,
+   "codes": [
+    "52018",
+    "52049",
+    "52100",
+    "52262"
+   ],
+   "score": [
+    29,
+    29
+   ],
+   "assosPct": [
+    96,
+    98
+   ]
+  },
+  {
+   "insee": "58204",
+   "nom": "Vaux d'Amognes",
+   "population": 532,
+   "associationsAjoutees": 6,
+   "codes": [
+    "58022"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    94,
+    97
+   ]
+  },
+  {
+   "insee": "61375",
+   "nom": "Boischampré",
+   "population": 1181,
+   "associationsAjoutees": 6,
+   "codes": [
+    "61249",
+    "61417",
+    "61511"
+   ],
+   "score": [
+    16,
+    20
+   ],
+   "assosPct": [
+    53,
+    65
+   ]
+  },
+  {
+   "insee": "63448",
+   "nom": "Le Vernet-Chaméane",
+   "population": 786,
+   "associationsAjoutees": 6,
+   "codes": [
+    "63078"
+   ],
+   "score": [
+    83,
+    85
+   ],
+   "assosPct": [
+    75,
+    84
+   ]
+  },
+  {
+   "insee": "73215",
+   "nom": "Valgelon-La Rochette",
+   "population": 4180,
+   "associationsAjoutees": 6,
+   "codes": [
+    "73111"
+   ],
+   "score": [
+    77,
+    78
+   ],
+   "assosPct": [
+    89,
+    91
+   ]
+  },
+  {
+   "insee": "79217",
+   "nom": "Prailles-La Couarde",
+   "population": 945,
+   "associationsAjoutees": 6,
+   "codes": [
+    "79098"
+   ],
+   "score": [
+    29,
+    32
+   ],
+   "assosPct": [
+    65,
+    75
+   ]
+  },
+  {
+   "insee": "85009",
+   "nom": "Auchay-sur-Vendée",
+   "population": 1134,
+   "associationsAjoutees": 6,
+   "codes": [
+    "85044"
+   ],
+   "score": [
+    56,
+    60
+   ],
+   "assosPct": [
+    42,
+    56
+   ]
+  },
+  {
+   "insee": "89405",
+   "nom": "Les Hauts de Forterre",
+   "population": 499,
+   "associationsAjoutees": 6,
+   "codes": [
+    "89174",
+    "89260"
+   ],
+   "score": [
+    62,
+    66
+   ],
+   "assosPct": [
+    67,
+    80
+   ]
+  },
+  {
+   "insee": "91390",
+   "nom": "Le Mérévillois",
+   "population": 3364,
+   "associationsAjoutees": 6,
+   "codes": [
+    "91222"
+   ],
+   "score": [
+    59,
+    60
+   ],
+   "assosPct": [
+    90,
+    92
+   ]
+  },
+  {
+   "insee": "16186",
+   "nom": "Lignières-Ambleville",
+   "population": 705,
+   "associationsAjoutees": 5,
+   "codes": [
+    "16010"
+   ],
+   "score": [
+    47,
+    52
+   ],
+   "assosPct": [
+    29,
+    46
+   ]
+  },
+  {
+   "insee": "19101",
+   "nom": "Laguenne-sur-Avalouze",
+   "population": 1553,
+   "associationsAjoutees": 5,
+   "codes": [
+    "19185"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    68,
+    75
+   ]
+  },
+  {
+   "insee": "21178",
+   "nom": "Valforêt",
+   "population": 312,
+   "associationsAjoutees": 5,
+   "codes": [
+    "21513"
+   ],
+   "score": [
+    10,
+    16
+   ],
+   "assosPct": [
+    35,
+    55
+   ]
+  },
+  {
+   "insee": "24087",
+   "nom": "Castels et Bézenac",
+   "population": 808,
+   "associationsAjoutees": 5,
+   "codes": [
+    "24041"
+   ],
+   "score": [
+    33,
+    35
+   ],
+   "assosPct": [
+    74,
+    82
+   ]
+  },
+  {
+   "insee": "24423",
+   "nom": "Saint-Julien-Innocence-Eulalie",
+   "population": 311,
+   "associationsAjoutees": 5,
+   "codes": [
+    "24402",
+    "24433"
+   ],
+   "score": [
+    10,
+    16
+   ],
+   "assosPct": [
+    35,
+    55
+   ]
+  },
+  {
+   "insee": "26086",
+   "nom": "Châtillon-en-Diois",
+   "population": 650,
+   "associationsAjoutees": 5,
+   "codes": [
+    "26354"
+   ],
+   "score": [
+    69,
+    70
+   ],
+   "assosPct": [
+    98,
+    99
+   ]
+  },
+  {
+   "insee": "27412",
+   "nom": "Terres de Bord",
+   "population": 1548,
+   "associationsAjoutees": 5,
+   "codes": [
+    "27648"
+   ],
+   "score": [
+    14,
+    17
+   ],
+   "assosPct": [
+    47,
+    57
+   ]
+  },
+  {
+   "insee": "27516",
+   "nom": "Treis-Sants-en-Ouche",
+   "population": 1360,
+   "associationsAjoutees": 5,
+   "codes": [
+    "27523",
+    "27600"
+   ],
+   "score": [
+    73,
+    76
+   ],
+   "assosPct": [
+    51,
+    61
+   ]
+  },
+  {
+   "insee": "46063",
+   "nom": "Castelnau-Montratier",
+   "population": 1835,
+   "associationsAjoutees": 5,
+   "codes": [
+    "46248"
+   ],
+   "score": [
+    66,
+    66
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "48038",
+   "nom": "Bel-Air-Val-d'Ance",
+   "population": 547,
+   "associationsAjoutees": 5,
+   "codes": [
+    "48184"
+   ],
+   "score": [
+    21,
+    27
+   ],
+   "assosPct": [
+    20,
+    40
+   ]
+  },
+  {
+   "insee": "60209",
+   "nom": "La Corne-en-Vexin",
+   "population": 544,
+   "associationsAjoutees": 5,
+   "codes": [
+    "60080",
+    "60300"
+   ],
+   "score": [
+    50,
+    55
+   ],
+   "assosPct": [
+    29,
+    47
+   ]
+  },
+  {
+   "insee": "61153",
+   "nom": "Écouché-les-Vallées",
+   "population": 2197,
+   "associationsAjoutees": 5,
+   "codes": [
+    "61173"
+   ],
+   "score": [
+    67,
+    68
+   ],
+   "assosPct": [
+    89,
+    91
+   ]
+  },
+  {
+   "insee": "62295",
+   "nom": "Enquin-lez-Guinegatte",
+   "population": 1607,
+   "associationsAjoutees": 5,
+   "codes": [
+    "62294"
+   ],
+   "score": [
+    24,
+    25
+   ],
+   "assosPct": [
+    79,
+    83
+   ]
+  },
+  {
+   "insee": "64225",
+   "nom": "Ance Féas",
+   "population": 614,
+   "associationsAjoutees": 5,
+   "codes": [
+    "64020"
+   ],
+   "score": [
+    62,
+    67
+   ],
+   "assosPct": [
+    35,
+    52
+   ]
+  },
+  {
+   "insee": "64300",
+   "nom": "Lacq",
+   "population": 1035,
+   "associationsAjoutees": 5,
+   "codes": [
+    "64541"
+   ],
+   "score": [
+    80,
+    82
+   ],
+   "assosPct": [
+    63,
+    72
+   ]
+  },
+  {
+   "insee": "69208",
+   "nom": "Saint-Germain-Nuelles",
+   "population": 2245,
+   "associationsAjoutees": 5,
+   "codes": [
+    "69144"
+   ],
+   "score": [
+    60,
+    60
+   ],
+   "assosPct": [
+    89,
+    91
+   ]
+  },
+  {
+   "insee": "73227",
+   "nom": "Courchevel",
+   "population": 2311,
+   "associationsAjoutees": 5,
+   "codes": [
+    "73198"
+   ],
+   "score": [
+    81,
+    81
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "73235",
+   "nom": "Saint François Longchamp",
+   "population": 544,
+   "associationsAjoutees": 5,
+   "codes": [
+    "73163",
+    "73167"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    86,
+    91
+   ]
+  },
+  {
+   "insee": "79136",
+   "nom": "Alloinay",
+   "population": 903,
+   "associationsAjoutees": 5,
+   "codes": [
+    "79006"
+   ],
+   "score": [
+    16,
+    19
+   ],
+   "assosPct": [
+    52,
+    64
+   ]
+  },
+  {
+   "insee": "80621",
+   "nom": "Hypercourt",
+   "population": 695,
+   "associationsAjoutees": 5,
+   "codes": [
+    "80447",
+    "80608"
+   ],
+   "score": [
+    26,
+    30
+   ],
+   "assosPct": [
+    43,
+    58
+   ]
+  },
+  {
+   "insee": "95169",
+   "nom": "Commeny",
+   "population": 653,
+   "associationsAjoutees": 5,
+   "codes": [
+    "95282"
+   ],
+   "score": [
+    8,
+    13
+   ],
+   "assosPct": [
+    26,
+    44
+   ]
+  },
+  {
+   "insee": "01098",
+   "nom": "Chazey-Bons",
+   "population": 1188,
+   "associationsAjoutees": 4,
+   "codes": [
+    "01316"
+   ],
+   "score": [
+    25,
+    27
+   ],
+   "assosPct": [
+    59,
+    66
+   ]
+  },
+  {
+   "insee": "01227",
+   "nom": "Magnieu",
+   "population": 655,
+   "associationsAjoutees": 4,
+   "codes": [
+    "01341"
+   ],
+   "score": [
+    62,
+    66
+   ],
+   "assosPct": [
+    37,
+    50
+   ]
+  },
+  {
+   "insee": "09056",
+   "nom": "Bézac",
+   "population": 467,
+   "associationsAjoutees": 4,
+   "codes": [
+    "09255"
+   ],
+   "score": [
+    14,
+    18
+   ],
+   "assosPct": [
+    46,
+    59
+   ]
+  },
+  {
+   "insee": "09062",
+   "nom": "Bordes-Uchentein",
+   "population": 213,
+   "associationsAjoutees": 4,
+   "codes": [
+    "09317"
+   ],
+   "score": [
+    13,
+    18
+   ],
+   "assosPct": [
+    43,
+    59
+   ]
+  },
+  {
+   "insee": "11251",
+   "nom": "Val-de-Dagne",
+   "population": 734,
+   "associationsAjoutees": 4,
+   "codes": [
+    "11298"
+   ],
+   "score": [
+    36,
+    37
+   ],
+   "assosPct": [
+    80,
+    85
+   ]
+  },
+  {
+   "insee": "14174",
+   "nom": "Condé-en-Normandie",
+   "population": 6157,
+   "associationsAjoutees": 4,
+   "codes": [
+    "14653"
+   ],
+   "score": [
+    27,
+    27
+   ],
+   "assosPct": [
+    90,
+    91
+   ]
+  },
+  {
+   "insee": "14514",
+   "nom": "Pont-l'Évêque",
+   "population": 4953,
+   "associationsAjoutees": 4,
+   "codes": [
+    "14185"
+   ],
+   "score": [
+    87,
+    88
+   ],
+   "assosPct": [
+    79,
+    80
+   ]
+  },
+  {
+   "insee": "14713",
+   "nom": "Montillières-sur-Orne",
+   "population": 566,
+   "associationsAjoutees": 4,
+   "codes": [
+    "14307"
+   ],
+   "score": [
+    48,
+    53
+   ],
+   "assosPct": [
+    24,
+    40
+   ]
+  },
+  {
+   "insee": "16406",
+   "nom": "Moulins-sur-Tardoire",
+   "population": 793,
+   "associationsAjoutees": 4,
+   "codes": [
+    "16274"
+   ],
+   "score": [
+    9,
+    13
+   ],
+   "assosPct": [
+    31,
+    44
+   ]
+  },
+  {
+   "insee": "19143",
+   "nom": "Montaignac-sur-Doustre",
+   "population": 636,
+   "associationsAjoutees": 4,
+   "codes": [
+    "19092"
+   ],
+   "score": [
+    32,
+    35
+   ],
+   "assosPct": [
+    62,
+    71
+   ]
+  },
+  {
+   "insee": "22209",
+   "nom": "Beaussais-sur-Mer",
+   "population": 4168,
+   "associationsAjoutees": 4,
+   "codes": [
+    "22192",
+    "22357"
+   ],
+   "score": [
+    84,
+    85
+   ],
+   "assosPct": [
+    77,
+    79
+   ]
+  },
+  {
+   "insee": "23189",
+   "nom": "Saint-Dizier-Masbaraud",
+   "population": 1125,
+   "associationsAjoutees": 4,
+   "codes": [
+    "23126"
+   ],
+   "score": [
+    16,
+    18
+   ],
+   "assosPct": [
+    52,
+    60
+   ]
+  },
+  {
+   "insee": "24117",
+   "nom": "Les Coteaux Périgourdins",
+   "population": 556,
+   "associationsAjoutees": 4,
+   "codes": [
+    "24204"
+   ],
+   "score": [
+    61,
+    64
+   ],
+   "assosPct": [
+    65,
+    74
+   ]
+  },
+  {
+   "insee": "24554",
+   "nom": "La Tour-Blanche-Cercles",
+   "population": 555,
+   "associationsAjoutees": 4,
+   "codes": [
+    "24093"
+   ],
+   "score": [
+    33,
+    36
+   ],
+   "assosPct": [
+    59,
+    69
+   ]
+  },
+  {
+   "insee": "27263",
+   "nom": "Le Perrey",
+   "population": 1229,
+   "associationsAjoutees": 4,
+   "codes": [
+    "27581"
+   ],
+   "score": [
+    9,
+    12
+   ],
+   "assosPct": [
+    29,
+    40
+   ]
+  },
+  {
+   "insee": "39190",
+   "nom": "Dampierre",
+   "population": 1319,
+   "associationsAjoutees": 4,
+   "codes": [
+    "39414"
+   ],
+   "score": [
+    31,
+    32
+   ],
+   "assosPct": [
+    84,
+    87
+   ]
+  },
+  {
+   "insee": "39491",
+   "nom": "Coteaux du Lizon",
+   "population": 2168,
+   "associationsAjoutees": 4,
+   "codes": [
+    "39186"
+   ],
+   "score": [
+    30,
+    31
+   ],
+   "assosPct": [
+    92,
+    93
+   ]
+  },
+  {
+   "insee": "41167",
+   "nom": "Veuzain-sur-Loire",
+   "population": 3364,
+   "associationsAjoutees": 4,
+   "codes": [
+    "41272"
+   ],
+   "score": [
+    71,
+    72
+   ],
+   "assosPct": [
+    93,
+    94
+   ]
+  },
+  {
+   "insee": "48087",
+   "nom": "Prinsuéjols-Malbouzon",
+   "population": 255,
+   "associationsAjoutees": 4,
+   "codes": [
+    "48120"
+   ],
+   "score": [
+    5,
+    11
+   ],
+   "assosPct": [
+    17,
+    37
+   ]
+  },
+  {
+   "insee": "49126",
+   "nom": "Orée d'Anjou",
+   "population": 17162,
+   "associationsAjoutees": 4,
+   "codes": [
+    "49270",
+    "49296",
+    "49360"
+   ],
+   "score": [
+    31,
+    31
+   ],
+   "assosPct": [
+    96,
+    96
+   ]
+  },
+  {
+   "insee": "50129",
+   "nom": "Cherbourg-en-Cotentin",
+   "population": 77808,
+   "associationsAjoutees": 4,
+   "codes": [
+    "50173",
+    "50416",
+    "50602"
+   ],
+   "score": [
+    78,
+    78
+   ],
+   "assosPct": [
+    94,
+    94
+   ]
+  },
+  {
+   "insee": "50444",
+   "nom": "Saint-Amand-Villages",
+   "population": 2520,
+   "associationsAjoutees": 4,
+   "codes": [
+    "50404"
+   ],
+   "score": [
+    56,
+    57
+   ],
+   "assosPct": [
+    59,
+    63
+   ]
+  },
+  {
+   "insee": "53136",
+   "nom": "La Roche-Neuville",
+   "population": 1214,
+   "associationsAjoutees": 4,
+   "codes": [
+    "53254"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    66,
+    72
+   ]
+  },
+  {
+   "insee": "53228",
+   "nom": "Blandouet-Saint Jean",
+   "population": 559,
+   "associationsAjoutees": 4,
+   "codes": [
+    "53032"
+   ],
+   "score": [
+    15,
+    19
+   ],
+   "assosPct": [
+    50,
+    62
+   ]
+  },
+  {
+   "insee": "56213",
+   "nom": "Saint-Gérand-Croixanvec",
+   "population": 1312,
+   "associationsAjoutees": 4,
+   "codes": [
+    "56049"
+   ],
+   "score": [
+    25,
+    26
+   ],
+   "assosPct": [
+    83,
+    87
+   ]
+  },
+  {
+   "insee": "60029",
+   "nom": "Auneuil",
+   "population": 2875,
+   "associationsAjoutees": 4,
+   "codes": [
+    "60649"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    87,
+    89
+   ]
+  },
+  {
+   "insee": "60694",
+   "nom": "Les Hauts-Talican",
+   "population": 542,
+   "associationsAjoutees": 4,
+   "codes": [
+    "60455"
+   ],
+   "score": [
+    null,
+    null
+   ],
+   "assosPct": [
+    null,
+    null
+   ]
+  },
+  {
+   "insee": "72128",
+   "nom": "Val-d'Étangson",
+   "population": 522,
+   "associationsAjoutees": 4,
+   "codes": [
+    "72304"
+   ],
+   "score": [
+    38,
+    40
+   ],
+   "assosPct": [
+    73,
+    81
+   ]
+  },
+  {
+   "insee": "79064",
+   "nom": "Fontivillié",
+   "population": 793,
+   "associationsAjoutees": 4,
+   "codes": [
+    "79314"
+   ],
+   "score": [
+    10,
+    14
+   ],
+   "assosPct": [
+    34,
+    47
+   ]
+  },
+  {
+   "insee": "79242",
+   "nom": "Voulmentin",
+   "population": 1124,
+   "associationsAjoutees": 4,
+   "codes": [
+    "79356"
+   ],
+   "score": [
+    69,
+    71
+   ],
+   "assosPct": [
+    54,
+    62
+   ]
+  },
+  {
+   "insee": "86161",
+   "nom": "Moncontour",
+   "population": 987,
+   "associationsAjoutees": 4,
+   "codes": [
+    "86155",
+    "86185",
+    "86216"
+   ],
+   "score": [
+    29,
+    29
+   ],
+   "assosPct": [
+    97,
+    97
+   ]
+  },
+  {
+   "insee": "89197",
+   "nom": "Guillon-Terre-Plaine",
+   "population": 724,
+   "associationsAjoutees": 4,
+   "codes": [
+    "89109",
+    "89381",
+    "89421",
+    "89448"
+   ],
+   "score": [
+    85,
+    86
+   ],
+   "assosPct": [
+    94,
+    96
+   ]
+  },
+  {
+   "insee": "90068",
+   "nom": "Meroux-Moval",
+   "population": 1405,
+   "associationsAjoutees": 4,
+   "codes": [
+    "90073"
+   ],
+   "score": [
+    22,
+    23
+   ],
+   "assosPct": [
+    73,
+    78
+   ]
+  },
+  {
+   "insee": "95040",
+   "nom": "Avernes",
+   "population": 865,
+   "associationsAjoutees": 4,
+   "codes": [
+    "95259"
+   ],
+   "score": [
+    27,
+    30
+   ],
+   "assosPct": [
+    58,
+    67
+   ]
+  },
+  {
+   "insee": "01095",
+   "nom": "Nivigne et Suran",
+   "population": 832,
+   "associationsAjoutees": 3,
+   "codes": [
+    "01172"
+   ],
+   "score": [
+    34,
+    35
+   ],
+   "assosPct": [
+    77,
+    81
+   ]
+  },
+  {
+   "insee": "02564",
+   "nom": "Bernoy-le-Château",
+   "population": 855,
+   "associationsAjoutees": 3,
+   "codes": [
+    "02077"
+   ],
+   "score": [
+    14,
+    16
+   ],
+   "assosPct": [
+    45,
+    53
+   ]
+  },
+  {
+   "insee": "09296",
+   "nom": "Aulos-Sinsat",
+   "population": 153,
+   "associationsAjoutees": 3,
+   "codes": [
+    "09028"
+   ],
+   "score": [
+    2,
+    8
+   ],
+   "assosPct": [
+    7,
+    25
+   ]
+  },
+  {
+   "insee": "11323",
+   "nom": "Roquetaillade-et-Conilhac",
+   "population": 271,
+   "associationsAjoutees": 3,
+   "codes": [
+    "11097"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    67,
+    75
+   ]
+  },
+  {
+   "insee": "14591",
+   "nom": "Aure sur Mer",
+   "population": 709,
+   "associationsAjoutees": 3,
+   "codes": [
+    "14551"
+   ],
+   "score": [
+    26,
+    28
+   ],
+   "assosPct": [
+    43,
+    52
+   ]
+  },
+  {
+   "insee": "14672",
+   "nom": "Val de Drôme",
+   "population": 888,
+   "associationsAjoutees": 3,
+   "codes": [
+    "14217"
+   ],
+   "score": [
+    57,
+    60
+   ],
+   "assosPct": [
+    32,
+    41
+   ]
+  },
+  {
+   "insee": "17344",
+   "nom": "Saint-Hilaire-de-Villefranche",
+   "population": 1339,
+   "associationsAjoutees": 3,
+   "codes": [
+    "17169"
+   ],
+   "score": [
+    68,
+    69
+   ],
+   "assosPct": [
+    89,
+    91
+   ]
+  },
+  {
+   "insee": "18023",
+   "nom": "Baugy",
+   "population": 1625,
+   "associationsAjoutees": 3,
+   "codes": [
+    "18123",
+    "18239"
+   ],
+   "score": [
+    22,
+    23
+   ],
+   "assosPct": [
+    75,
+    78
+   ]
+  },
+  {
+   "insee": "19010",
+   "nom": "Argentat-sur-Dordogne",
+   "population": 2869,
+   "associationsAjoutees": 3,
+   "codes": [
+    "19183"
+   ],
+   "score": [
+    31,
+    31
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "19098",
+   "nom": "Lagarde-Marc-la-Tour",
+   "population": 946,
+   "associationsAjoutees": 3,
+   "codes": [
+    "19127"
+   ],
+   "score": [
+    18,
+    20
+   ],
+   "assosPct": [
+    61,
+    66
+   ]
+  },
+  {
+   "insee": "21183",
+   "nom": "Collonges-et-Premières",
+   "population": 1062,
+   "associationsAjoutees": 3,
+   "codes": [
+    "21507"
+   ],
+   "score": [
+    10,
+    13
+   ],
+   "assosPct": [
+    35,
+    43
+   ]
+  },
+  {
+   "insee": "24534",
+   "nom": "Sigoulès-et-Flaugeac",
+   "population": 1221,
+   "associationsAjoutees": 3,
+   "codes": [
+    "24181"
+   ],
+   "score": [
+    56,
+    57
+   ],
+   "assosPct": [
+    82,
+    85
+   ]
+  },
+  {
+   "insee": "25375",
+   "nom": "Les Monts-Ronds",
+   "population": 668,
+   "associationsAjoutees": 3,
+   "codes": [
+    "25628"
+   ],
+   "score": [
+    12,
+    15
+   ],
+   "assosPct": [
+    41,
+    50
+   ]
+  },
+  {
+   "insee": "27049",
+   "nom": "Mesnil-en-Ouche",
+   "population": 4452,
+   "associationsAjoutees": 3,
+   "codes": [
+    "27041",
+    "27292",
+    "27628"
+   ],
+   "score": [
+    28,
+    28
+   ],
+   "assosPct": [
+    95,
+    95
+   ]
+  },
+  {
+   "insee": "27089",
+   "nom": "Thénouville",
+   "population": 1009,
+   "associationsAjoutees": 3,
+   "codes": [
+    "27626",
+    "27657"
+   ],
+   "score": [
+    10,
+    12
+   ],
+   "assosPct": [
+    33,
+    41
+   ]
+  },
+  {
+   "insee": "28185",
+   "nom": "Goussainville",
+   "population": 1309,
+   "associationsAjoutees": 3,
+   "codes": [
+    "28069"
+   ],
+   "score": [
+    11,
+    13
+   ],
+   "assosPct": [
+    36,
+    43
+   ]
+  },
+  {
+   "insee": "31277",
+   "nom": "Lasserre-Pradère",
+   "population": 1606,
+   "associationsAjoutees": 3,
+   "codes": [
+    "31438"
+   ],
+   "score": [
+    21,
+    22
+   ],
+   "assosPct": [
+    70,
+    74
+   ]
+  },
+  {
+   "insee": "32344",
+   "nom": "Riscle",
+   "population": 1702,
+   "associationsAjoutees": 3,
+   "codes": [
+    "32074"
+   ],
+   "score": [
+    50,
+    50
+   ],
+   "assosPct": [
+    98,
+    98
+   ]
+  },
+  {
+   "insee": "33055",
+   "nom": "Blaignan-Prignac",
+   "population": 454,
+   "associationsAjoutees": 3,
+   "codes": [
+    "33338"
+   ],
+   "score": [
+    63,
+    66
+   ],
+   "assosPct": [
+    27,
+    39
+   ]
+  },
+  {
+   "insee": "35292",
+   "nom": "Saint-Marc-le-Blanc",
+   "population": 1588,
+   "associationsAjoutees": 3,
+   "codes": [
+    "35011"
+   ],
+   "score": [
+    17,
+    18
+   ],
+   "assosPct": [
+    56,
+    61
+   ]
+  },
+  {
+   "insee": "36093",
+   "nom": "Levroux",
+   "population": 2842,
+   "associationsAjoutees": 3,
+   "codes": [
+    "36206"
+   ],
+   "score": [
+    76,
+    76
+   ],
+   "assosPct": [
+    96,
+    96
+   ]
+  },
+  {
+   "insee": "38073",
+   "nom": "Chantepérier",
+   "population": 206,
+   "associationsAjoutees": 3,
+   "codes": [
+    "38302"
+   ],
+   "score": [
+    63,
+    67
+   ],
+   "assosPct": [
+    48,
+    59
+   ]
+  },
+  {
+   "insee": "38456",
+   "nom": "Châtel-en-Trièves",
+   "population": 491,
+   "associationsAjoutees": 3,
+   "codes": [
+    "38125"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    85,
+    89
+   ]
+  },
+  {
+   "insee": "39043",
+   "nom": "Beaufort-Orbagna",
+   "population": 1444,
+   "associationsAjoutees": 3,
+   "codes": [
+    "39395"
+   ],
+   "score": [
+    72,
+    73
+   ],
+   "assosPct": [
+    78,
+    81
+   ]
+  },
+  {
+   "insee": "39199",
+   "nom": "Domblans",
+   "population": 1207,
+   "associationsAjoutees": 3,
+   "codes": [
+    "39075"
+   ],
+   "score": [
+    69,
+    71
+   ],
+   "assosPct": [
+    60,
+    66
+   ]
+  },
+  {
+   "insee": "39209",
+   "nom": "Val-d'Épy",
+   "population": 310,
+   "associationsAjoutees": 3,
+   "codes": [
+    "39036"
+   ],
+   "score": [
+    14,
+    18
+   ],
+   "assosPct": [
+    48,
+    59
+   ]
+  },
+  {
+   "insee": "41070",
+   "nom": "Vallée-de-Ronsard",
+   "population": 519,
+   "associationsAjoutees": 3,
+   "codes": [
+    "41263"
+   ],
+   "score": [
+    65,
+    67
+   ],
+   "assosPct": [
+    77,
+    82
+   ]
+  },
+  {
+   "insee": "46201",
+   "nom": "Montcuq-en-Quercy-Blanc",
+   "population": 1812,
+   "associationsAjoutees": 3,
+   "codes": [
+    "46326"
+   ],
+   "score": [
+    33,
+    33
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "47302",
+   "nom": "Sos",
+   "population": 656,
+   "associationsAjoutees": 3,
+   "codes": [
+    "47166"
+   ],
+   "score": [
+    64,
+    65
+   ],
+   "assosPct": [
+    83,
+    87
+   ]
+  },
+  {
+   "insee": "50400",
+   "nom": "Picauville",
+   "population": 3237,
+   "associationsAjoutees": 3,
+   "codes": [
+    "50333"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    81,
+    82
+   ]
+  },
+  {
+   "insee": "51075",
+   "nom": "Bourgogne-Fresne",
+   "population": 1442,
+   "associationsAjoutees": 3,
+   "codes": [
+    "51261"
+   ],
+   "score": [
+    21,
+    23
+   ],
+   "assosPct": [
+    55,
+    61
+   ]
+  },
+  {
+   "insee": "52050",
+   "nom": "Biesles",
+   "population": 1325,
+   "associationsAjoutees": 3,
+   "codes": [
+    "52412"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    90,
+    92
+   ]
+  },
+  {
+   "insee": "59260",
+   "nom": "Ghyvelde",
+   "population": 4119,
+   "associationsAjoutees": 3,
+   "codes": [
+    "59404"
+   ],
+   "score": [
+    35,
+    36
+   ],
+   "assosPct": [
+    75,
+    77
+   ]
+  },
+  {
+   "insee": "69255",
+   "nom": "Vaugneray",
+   "population": 6091,
+   "associationsAjoutees": 3,
+   "codes": [
+    "69221"
+   ],
+   "score": [
+    47,
+    47
+   ],
+   "assosPct": [
+    93,
+    93
+   ]
+  },
+  {
+   "insee": "70489",
+   "nom": "Servance-Miellin",
+   "population": 767,
+   "associationsAjoutees": 3,
+   "codes": [
+    "70345"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    68,
+    73
+   ]
+  },
+  {
+   "insee": "70491",
+   "nom": "Seveux-Motey",
+   "population": 471,
+   "associationsAjoutees": 3,
+   "codes": [
+    "70375"
+   ],
+   "score": [
+    35,
+    38
+   ],
+   "assosPct": [
+    59,
+    67
+   ]
+  },
+  {
+   "insee": "73263",
+   "nom": "Saint-Offenge",
+   "population": 1157,
+   "associationsAjoutees": 3,
+   "codes": [
+    "73264"
+   ],
+   "score": [
+    28,
+    30
+   ],
+   "assosPct": [
+    71,
+    75
+   ]
+  },
+  {
+   "insee": "79061",
+   "nom": "Celles-sur-Belle",
+   "population": 3858,
+   "associationsAjoutees": 3,
+   "codes": [
+    "79282",
+    "79344"
+   ],
+   "score": [
+    53,
+    53
+   ],
+   "assosPct": [
+    87,
+    88
+   ]
+  },
+  {
+   "insee": "79105",
+   "nom": "Les Châteliers",
+   "population": 459,
+   "associationsAjoutees": 3,
+   "codes": [
+    "79068"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    68,
+    75
+   ]
+  },
+  {
+   "insee": "79285",
+   "nom": "Saint-Pardoux-Soutiers",
+   "population": 1867,
+   "associationsAjoutees": 3,
+   "codes": [
+    "79318"
+   ],
+   "score": [
+    27,
+    28
+   ],
+   "assosPct": [
+    78,
+    81
+   ]
+  },
+  {
+   "insee": "79334",
+   "nom": "Val-du-Mignon",
+   "population": 1082,
+   "associationsAjoutees": 3,
+   "codes": [
+    "79219",
+    "79328"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    67,
+    72
+   ]
+  },
+  {
+   "insee": "86066",
+   "nom": "Châtellerault",
+   "population": 31284,
+   "associationsAjoutees": 3,
+   "codes": [
+    "86267"
+   ],
+   "score": [
+    82,
+    82
+   ],
+   "assosPct": [
+    98,
+    98
+   ]
+  },
+  {
+   "insee": "89420",
+   "nom": "Treigny-Perreuse-Sainte-Colombe",
+   "population": 1042,
+   "associationsAjoutees": 3,
+   "codes": [
+    "89340"
+   ],
+   "score": [
+    90,
+    90
+   ],
+   "assosPct": [
+    98,
+    98
+   ]
+  },
+  {
+   "insee": "01215",
+   "nom": "Surjoux-Lhopital",
+   "population": 141,
+   "associationsAjoutees": 2,
+   "codes": [
+    "01413"
+   ],
+   "score": [
+    64,
+    67
+   ],
+   "assosPct": [
+    3,
+    13
+   ]
+  },
+  {
+   "insee": "07103",
+   "nom": "Saint-Julien-d'Intres",
+   "population": 308,
+   "associationsAjoutees": 2,
+   "codes": [
+    "07252"
+   ],
+   "score": [
+    55,
+    58
+   ],
+   "assosPct": [
+    30,
+    40
+   ]
+  },
+  {
+   "insee": "14046",
+   "nom": "Bavent",
+   "population": 1940,
+   "associationsAjoutees": 2,
+   "codes": [
+    "14537"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    74,
+    76
+   ]
+  },
+  {
+   "insee": "14371",
+   "nom": "Livarot-Pays-d'Auge",
+   "population": 6158,
+   "associationsAjoutees": 2,
+   "codes": [
+    "14429"
+   ],
+   "score": [
+    28,
+    28
+   ],
+   "assosPct": [
+    92,
+    92
+   ]
+  },
+  {
+   "insee": "14410",
+   "nom": "Méry-Bissières-en-Auge",
+   "population": 1080,
+   "associationsAjoutees": 2,
+   "codes": [
+    "14075"
+   ],
+   "score": [
+    19,
+    21
+   ],
+   "assosPct": [
+    37,
+    43
+   ]
+  },
+  {
+   "insee": "16046",
+   "nom": "Coteaux-du-Blanzacais",
+   "population": 985,
+   "associationsAjoutees": 2,
+   "codes": [
+    "16115",
+    "16332"
+   ],
+   "score": [
+    61,
+    62
+   ],
+   "assosPct": [
+    88,
+    89
+   ]
+  },
+  {
+   "insee": "17457",
+   "nom": "La Devise",
+   "population": 1194,
+   "associationsAjoutees": 2,
+   "codes": [
+    "17103"
+   ],
+   "score": [
+    62,
+    62
+   ],
+   "assosPct": [
+    63,
+    66
+   ]
+  },
+  {
+   "insee": "21623",
+   "nom": "Tart",
+   "population": 1548,
+   "associationsAjoutees": 2,
+   "codes": [
+    "21621"
+   ],
+   "score": [
+    18,
+    19
+   ],
+   "assosPct": [
+    59,
+    62
+   ]
+  },
+  {
+   "insee": "23192",
+   "nom": "Fursac",
+   "population": 1437,
+   "associationsAjoutees": 2,
+   "codes": [
+    "23231"
+   ],
+   "score": [
+    26,
+    27
+   ],
+   "assosPct": [
+    72,
+    74
+   ]
+  },
+  {
+   "insee": "24216",
+   "nom": "La Jemaye-Ponteyraud",
+   "population": 150,
+   "associationsAjoutees": 2,
+   "codes": [
+    "24333"
+   ],
+   "score": [
+    44,
+    47
+   ],
+   "assosPct": [
+    50,
+    58
+   ]
+  },
+  {
+   "insee": "25078",
+   "nom": "Bouclans",
+   "population": 1060,
+   "associationsAjoutees": 2,
+   "codes": [
+    "25587"
+   ],
+   "score": [
+    46,
+    48
+   ],
+   "assosPct": [
+    40,
+    46
+   ]
+  },
+  {
+   "insee": "25147",
+   "nom": "Chemaudin et Vaux",
+   "population": 2114,
+   "associationsAjoutees": 2,
+   "codes": [
+    "25593"
+   ],
+   "score": [
+    18,
+    19
+   ],
+   "assosPct": [
+    50,
+    53
+   ]
+  },
+  {
+   "insee": "25156",
+   "nom": "Pays-de-Clerval",
+   "population": 1146,
+   "associationsAjoutees": 2,
+   "codes": [
+    "25140"
+   ],
+   "score": [
+    25,
+    25
+   ],
+   "assosPct": [
+    82,
+    84
+   ]
+  },
+  {
+   "insee": "25245",
+   "nom": "Fontain",
+   "population": 1211,
+   "associationsAjoutees": 2,
+   "codes": [
+    "25027"
+   ],
+   "score": [
+    22,
+    23
+   ],
+   "assosPct": [
+    52,
+    56
+   ]
+  },
+  {
+   "insee": "25575",
+   "nom": "Vaire",
+   "population": 800,
+   "associationsAjoutees": 2,
+   "codes": [
+    "25576"
+   ],
+   "score": [
+    19,
+    21
+   ],
+   "assosPct": [
+    27,
+    34
+   ]
+  },
+  {
+   "insee": "27090",
+   "nom": "Bosroumois",
+   "population": 3786,
+   "associationsAjoutees": 2,
+   "codes": [
+    "27093"
+   ],
+   "score": [
+    68,
+    68
+   ],
+   "assosPct": [
+    76,
+    77
+   ]
+  },
+  {
+   "insee": "27471",
+   "nom": "Porte-de-Seine",
+   "population": 208,
+   "associationsAjoutees": 2,
+   "codes": [
+    "27651"
+   ],
+   "score": [
+    4,
+    7
+   ],
+   "assosPct": [
+    12,
+    23
+   ]
+  },
+  {
+   "insee": "27541",
+   "nom": "Le Mesnil-Saint-Jean",
+   "population": 184,
+   "associationsAjoutees": 2,
+   "codes": [
+    "27551"
+   ],
+   "score": [
+    0,
+    2
+   ],
+   "assosPct": [
+    1,
+    7
+   ]
+  },
+  {
+   "insee": "28018",
+   "nom": "Authon-du-Perche",
+   "population": 1484,
+   "associationsAjoutees": 2,
+   "codes": [
+    "28376"
+   ],
+   "score": [
+    30,
+    30
+   ],
+   "assosPct": [
+    83,
+    85
+   ]
+  },
+  {
+   "insee": "29199",
+   "nom": "Plouigneau",
+   "population": 5057,
+   "associationsAjoutees": 2,
+   "codes": [
+    "29219"
+   ],
+   "score": [
+    36,
+    36
+   ],
+   "assosPct": [
+    92,
+    92
+   ]
+  },
+  {
+   "insee": "33008",
+   "nom": "Porte-de-Benauge",
+   "population": 602,
+   "associationsAjoutees": 2,
+   "codes": [
+    "33092"
+   ],
+   "score": [
+    20,
+    22
+   ],
+   "assosPct": [
+    68,
+    72
+   ]
+  },
+  {
+   "insee": "35220",
+   "nom": "Piré-Chancé",
+   "population": 3120,
+   "associationsAjoutees": 2,
+   "codes": [
+    "35053"
+   ],
+   "score": [
+    55,
+    55
+   ],
+   "assosPct": [
+    69,
+    70
+   ]
+  },
+  {
+   "insee": "39016",
+   "nom": "Arinthod",
+   "population": 1131,
+   "associationsAjoutees": 2,
+   "codes": [
+    "39148"
+   ],
+   "score": [
+    69,
+    69
+   ],
+   "assosPct": [
+    84,
+    85
+   ]
+  },
+  {
+   "insee": "39018",
+   "nom": "Aromas",
+   "population": 609,
+   "associationsAjoutees": 2,
+   "codes": [
+    "39566"
+   ],
+   "score": [
+    23,
+    24
+   ],
+   "assosPct": [
+    76,
+    80
+   ]
+  },
+  {
+   "insee": "39137",
+   "nom": "Saint-Hymetière-sur-Valouse",
+   "population": 423,
+   "associationsAjoutees": 2,
+   "codes": [
+    "39287"
+   ],
+   "score": [
+    5,
+    8
+   ],
+   "assosPct": [
+    18,
+    27
+   ]
+  },
+  {
+   "insee": "39530",
+   "nom": "Thoirette-Coisia",
+   "population": 831,
+   "associationsAjoutees": 2,
+   "codes": [
+    "39158"
+   ],
+   "score": [
+    22,
+    23
+   ],
+   "assosPct": [
+    74,
+    77
+   ]
+  },
+  {
+   "insee": "39577",
+   "nom": "Vincent-Froideville",
+   "population": 392,
+   "associationsAjoutees": 2,
+   "codes": [
+    "39243"
+   ],
+   "score": [
+    17,
+    19
+   ],
+   "assosPct": [
+    56,
+    62
+   ]
+  },
+  {
+   "insee": "41055",
+   "nom": "Valloire-sur-Cisse",
+   "population": 2418,
+   "associationsAjoutees": 2,
+   "codes": [
+    "41064"
+   ],
+   "score": [
+    38,
+    38
+   ],
+   "assosPct": [
+    84,
+    85
+   ]
+  },
+  {
+   "insee": "41171",
+   "nom": "Oucques La Nouvelle",
+   "population": 1674,
+   "associationsAjoutees": 2,
+   "codes": [
+    "41015",
+    "41210"
+   ],
+   "score": [
+    48,
+    48
+   ],
+   "assosPct": [
+    88,
+    89
+   ]
+  },
+  {
+   "insee": "44005",
+   "nom": "Chaumes-en-Retz",
+   "population": 7184,
+   "associationsAjoutees": 2,
+   "codes": [
+    "44040"
+   ],
+   "score": [
+    61,
+    62
+   ],
+   "assosPct": [
+    71,
+    72
+   ]
+  },
+  {
+   "insee": "48099",
+   "nom": "Bourgs sur Colagne",
+   "population": 2078,
+   "associationsAjoutees": 2,
+   "codes": [
+    "48049"
+   ],
+   "score": [
+    31,
+    31
+   ],
+   "assosPct": [
+    93,
+    93
+   ]
+  },
+  {
+   "insee": "48126",
+   "nom": "Lachamp-Ribennes",
+   "population": 369,
+   "associationsAjoutees": 2,
+   "codes": [
+    "48078"
+   ],
+   "score": [
+    1,
+    3
+   ],
+   "assosPct": [
+    2,
+    11
+   ]
+  },
+  {
+   "insee": "48139",
+   "nom": "Saint Bonnet-Laval",
+   "population": 256,
+   "associationsAjoutees": 2,
+   "codes": [
+    "48084"
+   ],
+   "score": [
+    8,
+    11
+   ],
+   "assosPct": [
+    27,
+    37
+   ]
+  },
+  {
+   "insee": "51158",
+   "nom": "Val-des-Marais",
+   "population": 572,
+   "associationsAjoutees": 2,
+   "codes": [
+    "51021"
+   ],
+   "score": [
+    29,
+    31
+   ],
+   "assosPct": [
+    47,
+    53
+   ]
+  },
+  {
+   "insee": "52353",
+   "nom": "Nogent",
+   "population": 3548,
+   "associationsAjoutees": 2,
+   "codes": [
+    "52191"
+   ],
+   "score": [
+    81,
+    81
+   ],
+   "assosPct": [
+    94,
+    94
+   ]
+  },
+  {
+   "insee": "53017",
+   "nom": "Val-du-Maine",
+   "population": 967,
+   "associationsAjoutees": 2,
+   "codes": [
+    "53095"
+   ],
+   "score": [
+    22,
+    22
+   ],
+   "assosPct": [
+    72,
+    75
+   ]
+  },
+  {
+   "insee": "55150",
+   "nom": "Demange-Baudignécourt",
+   "population": 509,
+   "associationsAjoutees": 2,
+   "codes": [
+    "55030"
+   ],
+   "score": [
+    63,
+    64
+   ],
+   "assosPct": [
+    69,
+    73
+   ]
+  },
+  {
+   "insee": "56197",
+   "nom": "Val d'Oust",
+   "population": 2790,
+   "associationsAjoutees": 2,
+   "codes": [
+    "56037",
+    "56187"
+   ],
+   "score": [
+    82,
+    82
+   ],
+   "assosPct": [
+    90,
+    91
+   ]
+  },
+  {
+   "insee": "60245",
+   "nom": "Formerie",
+   "population": 2105,
+   "associationsAjoutees": 2,
+   "codes": [
+    "60096"
+   ],
+   "score": [
+    71,
+    72
+   ],
+   "assosPct": [
+    78,
+    80
+   ]
+  },
+  {
+   "insee": "60570",
+   "nom": "Saint-Crépin-Ibouvillers",
+   "population": 1586,
+   "associationsAjoutees": 2,
+   "codes": [
+    "60417"
+   ],
+   "score": [
+    13,
+    14
+   ],
+   "assosPct": [
+    42,
+    47
+   ]
+  },
+  {
+   "insee": "60644",
+   "nom": "Trie-Château",
+   "population": 1896,
+   "associationsAjoutees": 2,
+   "codes": [
+    "60690"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    75,
+    76
+   ]
+  },
+  {
+   "insee": "60682",
+   "nom": "Villers-Saint-Frambourg-Ognon",
+   "population": 719,
+   "associationsAjoutees": 2,
+   "codes": [
+    "60475"
+   ],
+   "score": [
+    12,
+    14
+   ],
+   "assosPct": [
+    39,
+    46
+   ]
+  },
+  {
+   "insee": "61294",
+   "nom": "Mortrée",
+   "population": 1134,
+   "associationsAjoutees": 2,
+   "codes": [
+    "61403"
+   ],
+   "score": [
+    67,
+    68
+   ],
+   "assosPct": [
+    79,
+    81
+   ]
+  },
+  {
+   "insee": "64396",
+   "nom": "Mont",
+   "population": 1124,
+   "associationsAjoutees": 2,
+   "codes": [
+    "64030"
+   ],
+   "score": [
+    20,
+    21
+   ],
+   "assosPct": [
+    68,
+    71
+   ]
+  },
+  {
+   "insee": "76164",
+   "nom": "Rives-en-Seine",
+   "population": 4078,
+   "associationsAjoutees": 2,
+   "codes": [
+    "76659",
+    "76742"
+   ],
+   "score": [
+    91,
+    91
+   ],
+   "assosPct": [
+    92,
+    92
+   ]
+  },
+  {
+   "insee": "77109",
+   "nom": "Chenoise-Cucharmoy",
+   "population": 1654,
+   "associationsAjoutees": 2,
+   "codes": [
+    "77149"
+   ],
+   "score": [
+    38,
+    39
+   ],
+   "assosPct": [
+    55,
+    58
+   ]
+  },
+  {
+   "insee": "79013",
+   "nom": "Argentonnay",
+   "population": 3213,
+   "associationsAjoutees": 2,
+   "codes": [
+    "79305"
+   ],
+   "score": [
+    82,
+    82
+   ],
+   "assosPct": [
+    97,
+    97
+   ]
+  },
+  {
+   "insee": "79083",
+   "nom": "Chef-Boutonne",
+   "population": 2390,
+   "associationsAjoutees": 2,
+   "codes": [
+    "79027",
+    "79330"
+   ],
+   "score": [
+    41,
+    41
+   ],
+   "assosPct": [
+    94,
+    95
+   ]
+  },
+  {
+   "insee": "79251",
+   "nom": "Marcillé",
+   "population": 728,
+   "associationsAjoutees": 2,
+   "codes": [
+    "79214"
+   ],
+   "score": [
+    48,
+    50
+   ],
+   "assosPct": [
+    32,
+    39
+   ]
+  },
+  {
+   "insee": "80369",
+   "nom": "Frohen-sur-Authie",
+   "population": 240,
+   "associationsAjoutees": 2,
+   "codes": [
+    "80370"
+   ],
+   "score": [
+    5,
+    8
+   ],
+   "assosPct": [
+    17,
+    27
+   ]
+  },
+  {
+   "insee": "80505",
+   "nom": "Carnoy-Mametz",
+   "population": 280,
+   "associationsAjoutees": 2,
+   "codes": [
+    "80175"
+   ],
+   "score": [
+    8,
+    11
+   ],
+   "assosPct": [
+    26,
+    36
+   ]
+  },
+  {
+   "insee": "80509",
+   "nom": "Marchélepot-Misery",
+   "population": 585,
+   "associationsAjoutees": 2,
+   "codes": [
+    "80551"
+   ],
+   "score": [
+    14,
+    16
+   ],
+   "assosPct": [
+    46,
+    53
+   ]
+  },
+  {
+   "insee": "02738",
+   "nom": "Tergnier",
+   "population": 13431,
+   "associationsAjoutees": 1,
+   "codes": [
+    "02300"
+   ],
+   "score": [
+    57,
+    57
+   ],
+   "assosPct": [
+    70,
+    70
+   ]
+  },
+  {
+   "insee": "05061",
+   "nom": "Gap",
+   "population": 40500,
+   "associationsAjoutees": 1,
+   "codes": [
+    "05125"
+   ],
+   "score": [
+    83,
+    83
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "08113",
+   "nom": "Chaumont-Porcien",
+   "population": 509,
+   "associationsAjoutees": 1,
+   "codes": [
+    "08495"
+   ],
+   "score": [
+    42,
+    42
+   ],
+   "assosPct": [
+    83,
+    84
+   ]
+  },
+  {
+   "insee": "08366",
+   "nom": "Rocquigny",
+   "population": 662,
+   "associationsAjoutees": 1,
+   "codes": [
+    "08266"
+   ],
+   "score": [
+    35,
+    35
+   ],
+   "assosPct": [
+    71,
+    73
+   ]
+  },
+  {
+   "insee": "14231",
+   "nom": "Beaufour-Druval",
+   "population": 435,
+   "associationsAjoutees": 1,
+   "codes": [
+    "14560"
+   ],
+   "score": [
+    23,
+    24
+   ],
+   "assosPct": [
+    13,
+    18
+   ]
+  },
+  {
+   "insee": "14333",
+   "nom": "Honfleur",
+   "population": 6761,
+   "associationsAjoutees": 1,
+   "codes": [
+    "14725"
+   ],
+   "score": [
+    98,
+    98
+   ],
+   "assosPct": [
+    95,
+    95
+   ]
+  },
+  {
+   "insee": "14347",
+   "nom": "Dialan sur Chaîne",
+   "population": 1012,
+   "associationsAjoutees": 1,
+   "codes": [
+    "14413"
+   ],
+   "score": [
+    45,
+    46
+   ],
+   "assosPct": [
+    33,
+    36
+   ]
+  },
+  {
+   "insee": "14579",
+   "nom": "Seulline",
+   "population": 1304,
+   "associationsAjoutees": 1,
+   "codes": [
+    "14188"
+   ],
+   "score": [
+    16,
+    17
+   ],
+   "assosPct": [
+    54,
+    56
+   ]
+  },
+  {
+   "insee": "14762",
+   "nom": "Vire Normandie",
+   "population": 17135,
+   "associationsAjoutees": 1,
+   "codes": [
+    "14717"
+   ],
+   "score": [
+    81,
+    81
+   ],
+   "assosPct": [
+    86,
+    86
+   ]
+  },
+  {
+   "insee": "15138",
+   "nom": "Murat",
+   "population": 1792,
+   "associationsAjoutees": 1,
+   "codes": [
+    "15044"
+   ],
+   "score": [
+    97,
+    97
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "17160",
+   "nom": "Floirac",
+   "population": 427,
+   "associationsAjoutees": 1,
+   "codes": [
+    "17392"
+   ],
+   "score": [
+    5,
+    7
+   ],
+   "assosPct": [
+    18,
+    23
+   ]
+  },
+  {
+   "insee": "21195",
+   "nom": "Cormot-Vauchignon",
+   "population": 213,
+   "associationsAjoutees": 1,
+   "codes": [
+    "21658"
+   ],
+   "score": [
+    60,
+    61
+   ],
+   "assosPct": [
+    39,
+    43
+   ]
+  },
+  {
+   "insee": "23109",
+   "nom": "Linard-Malval",
+   "population": 208,
+   "associationsAjoutees": 1,
+   "codes": [
+    "23121"
+   ],
+   "score": [
+    2,
+    4
+   ],
+   "assosPct": [
+    7,
+    12
+   ]
+  },
+  {
+   "insee": "25222",
+   "nom": "Étalans",
+   "population": 1618,
+   "associationsAjoutees": 1,
+   "codes": [
+    "25123"
+   ],
+   "score": [
+    21,
+    21
+   ],
+   "assosPct": [
+    56,
+    57
+   ]
+  },
+  {
+   "insee": "25368",
+   "nom": "Marchaux-Chaudefontaine",
+   "population": 1446,
+   "associationsAjoutees": 1,
+   "codes": [
+    "25137"
+   ],
+   "score": [
+    61,
+    61
+   ],
+   "assosPct": [
+    70,
+    71
+   ]
+  },
+  {
+   "insee": "25424",
+   "nom": "Les Premiers Sapins",
+   "population": 1560,
+   "associationsAjoutees": 1,
+   "codes": [
+    "25028"
+   ],
+   "score": [
+    25,
+    25
+   ],
+   "assosPct": [
+    69,
+    70
+   ]
+  },
+  {
+   "insee": "27032",
+   "nom": "Chambois",
+   "population": 1373,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27172"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    67,
+    68
+   ]
+  },
+  {
+   "insee": "27112",
+   "nom": "Breteuil",
+   "population": 4287,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27159"
+   ],
+   "score": [
+    20,
+    20
+   ],
+   "assosPct": [
+    67,
+    67
+   ]
+  },
+  {
+   "insee": "27157",
+   "nom": "Marbois",
+   "population": 1308,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27532"
+   ],
+   "score": [
+    77,
+    78
+   ],
+   "assosPct": [
+    54,
+    56
+   ]
+  },
+  {
+   "insee": "27213",
+   "nom": "Vexin-sur-Epte",
+   "population": 5990,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27653"
+   ],
+   "score": [
+    28,
+    28
+   ],
+   "assosPct": [
+    87,
+    87
+   ]
+  },
+  {
+   "insee": "27578",
+   "nom": "Sainte-Marie-d'Attez",
+   "population": 585,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27573"
+   ],
+   "score": [
+    79,
+    80
+   ],
+   "assosPct": [
+    39,
+    43
+   ]
+  },
+  {
+   "insee": "27685",
+   "nom": "La Vieille-Lyre",
+   "population": 658,
+   "associationsAjoutees": 1,
+   "codes": [
+    "27143"
+   ],
+   "score": [
+    15,
+    16
+   ],
+   "assosPct": [
+    51,
+    53
+   ]
+  },
+  {
+   "insee": "28127",
+   "nom": "Dangeau",
+   "population": 1247,
+   "associationsAjoutees": 1,
+   "codes": [
+    "28250"
+   ],
+   "score": [
+    49,
+    50
+   ],
+   "assosPct": [
+    61,
+    63
+   ]
+  },
+  {
+   "insee": "28168",
+   "nom": "Gallardon",
+   "population": 3589,
+   "associationsAjoutees": 1,
+   "codes": [
+    "28266"
+   ],
+   "score": [
+    56,
+    56
+   ],
+   "assosPct": [
+    90,
+    90
+   ]
+  },
+  {
+   "insee": "28226",
+   "nom": "Maillebois",
+   "population": 911,
+   "associationsAjoutees": 1,
+   "codes": [
+    "28043"
+   ],
+   "score": [
+    22,
+    22
+   ],
+   "assosPct": [
+    73,
+    75
+   ]
+  },
+  {
+   "insee": "28393",
+   "nom": "Tremblay-les-Villages",
+   "population": 2209,
+   "associationsAjoutees": 1,
+   "codes": [
+    "28328"
+   ],
+   "score": [
+    27,
+    27
+   ],
+   "assosPct": [
+    91,
+    91
+   ]
+  },
+  {
+   "insee": "29003",
+   "nom": "Audierne",
+   "population": 3697,
+   "associationsAjoutees": 1,
+   "codes": [
+    "29052"
+   ],
+   "score": [
+    97,
+    97
+   ],
+   "assosPct": [
+    94,
+    94
+   ]
+  },
+  {
+   "insee": "31412",
+   "nom": "Péguilhan",
+   "population": 258,
+   "associationsAjoutees": 1,
+   "codes": [
+    "31307"
+   ],
+   "score": [
+    19,
+    20
+   ],
+   "assosPct": [
+    64,
+    67
+   ]
+  },
+  {
+   "insee": "31471",
+   "nom": "Saint-Béat-Lez",
+   "population": 384,
+   "associationsAjoutees": 1,
+   "codes": [
+    "31298"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    85,
+    86
+   ]
+  },
+  {
+   "insee": "35288",
+   "nom": "Saint-Malo",
+   "population": 47323,
+   "associationsAjoutees": 1,
+   "codes": [
+    "35213"
+   ],
+   "score": [
+    95,
+    95
+   ],
+   "assosPct": [
+    96,
+    96
+   ]
+  },
+  {
+   "insee": "39370",
+   "nom": "Mouchard",
+   "population": 1093,
+   "associationsAjoutees": 1,
+   "codes": [
+    "39087"
+   ],
+   "score": [
+    90,
+    90
+   ],
+   "assosPct": [
+    91,
+    92
+   ]
+  },
+  {
+   "insee": "39385",
+   "nom": "Neublans-Abergement",
+   "population": 542,
+   "associationsAjoutees": 1,
+   "codes": [
+    "39005"
+   ],
+   "score": [
+    40,
+    40
+   ],
+   "assosPct": [
+    82,
+    83
+   ]
+  },
+  {
+   "insee": "39510",
+   "nom": "Septmoncel les Molunes",
+   "population": 809,
+   "associationsAjoutees": 1,
+   "codes": [
+    "39341"
+   ],
+   "score": [
+    87,
+    87
+   ],
+   "assosPct": [
+    71,
+    72
+   ]
+  },
+  {
+   "insee": "39537",
+   "nom": "Trenal",
+   "population": 466,
+   "associationsAjoutees": 1,
+   "codes": [
+    "39309"
+   ],
+   "score": [
+    9,
+    10
+   ],
+   "assosPct": [
+    31,
+    35
+   ]
+  },
+  {
+   "insee": "39583",
+   "nom": "Vosbles-Valfin",
+   "population": 185,
+   "associationsAjoutees": 1,
+   "codes": [
+    "39542"
+   ],
+   "score": [
+    35,
+    37
+   ],
+   "assosPct": [
+    24,
+    29
+   ]
+  },
+  {
+   "insee": "41248",
+   "nom": "Couëtron-au-Perche",
+   "population": 1028,
+   "associationsAjoutees": 1,
+   "codes": [
+    "41197"
+   ],
+   "score": [
+    29,
+    29
+   ],
+   "assosPct": [
+    98,
+    98
+   ]
+  },
+  {
+   "insee": "44213",
+   "nom": "Loireauxence",
+   "population": 7517,
+   "associationsAjoutees": 1,
+   "codes": [
+    "44034"
+   ],
+   "score": [
+    40,
+    40
+   ],
+   "assosPct": [
+    91,
+    91
+   ]
+  },
+  {
+   "insee": "50216",
+   "nom": "Graignes-Mesnil-Angot",
+   "population": 798,
+   "associationsAjoutees": 1,
+   "codes": [
+    "50303"
+   ],
+   "score": [
+    28,
+    29
+   ],
+   "assosPct": [
+    60,
+    62
+   ]
+  },
+  {
+   "insee": "50239",
+   "nom": "Thèreval",
+   "population": 1787,
+   "associationsAjoutees": 1,
+   "codes": [
+    "50123"
+   ],
+   "score": [
+    60,
+    61
+   ],
+   "assosPct": [
+    80,
+    81
+   ]
+  },
+  {
+   "insee": "50492",
+   "nom": "Saint-Jean-d'Elle",
+   "population": 2532,
+   "associationsAjoutees": 1,
+   "codes": [
+    "50441"
+   ],
+   "score": [
+    32,
+    32
+   ],
+   "assosPct": [
+    70,
+    70
+   ]
+  },
+  {
+   "insee": "51171",
+   "nom": "Cormicy",
+   "population": 1509,
+   "associationsAjoutees": 1,
+   "codes": [
+    "02344"
+   ],
+   "score": [
+    17,
+    18
+   ],
+   "assosPct": [
+    58,
+    59
+   ]
+  },
+  {
+   "insee": "51564",
+   "nom": "Val de Livre",
+   "population": 598,
+   "associationsAjoutees": 1,
+   "codes": [
+    "51331"
+   ],
+   "score": [
+    59,
+    59
+   ],
+   "assosPct": [
+    61,
+    63
+   ]
+  },
+  {
+   "insee": "52058",
+   "nom": "Bologne",
+   "population": 1821,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52434"
+   ],
+   "score": [
+    44,
+    44
+   ],
+   "assosPct": [
+    80,
+    81
+   ]
+  },
+  {
+   "insee": "52060",
+   "nom": "Bourbonne-les-Bains",
+   "population": 1969,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52527"
+   ],
+   "score": [
+    78,
+    78
+   ],
+   "assosPct": [
+    97,
+    97
+   ]
+  },
+  {
+   "insee": "52074",
+   "nom": "Breuvannes-en-Bassigny",
+   "population": 672,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52139"
+   ],
+   "score": [
+    17,
+    17
+   ],
+   "assosPct": [
+    56,
+    58
+   ]
+  },
+  {
+   "insee": "52121",
+   "nom": "Chaumont",
+   "population": 21699,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52078"
+   ],
+   "score": [
+    35,
+    35
+   ],
+   "assosPct": [
+    100,
+    100
+   ]
+  },
+  {
+   "insee": "52187",
+   "nom": "Épizon",
+   "population": 158,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52379"
+   ],
+   "score": [
+    6,
+    7
+   ],
+   "assosPct": [
+    19,
+    24
+   ]
+  },
+  {
+   "insee": "52205",
+   "nom": "Foulain",
+   "population": 689,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52154"
+   ],
+   "score": [
+    14,
+    15
+   ],
+   "assosPct": [
+    47,
+    49
+   ]
+  },
+  {
+   "insee": "52211",
+   "nom": "Froncles",
+   "population": 1387,
+   "associationsAjoutees": 1,
+   "codes": [
+    "52409"
+   ],
+   "score": [
+    27,
+    27
+   ],
+   "assosPct": [
+    89,
+    89
+   ]
+  },
+  {
+   "insee": "55040",
+   "nom": "Beausite",
+   "population": 255,
+   "associationsAjoutees": 1,
+   "codes": [
+    "55486"
+   ],
+   "score": [
+    10,
+    11
+   ],
+   "assosPct": [
+    32,
+    37
+   ]
+  },
+  {
+   "insee": "56144",
+   "nom": "Évellys",
+   "population": 3415,
+   "associationsAjoutees": 1,
+   "codes": [
+    "56142"
+   ],
+   "score": [
+    31,
+    31
+   ],
+   "assosPct": [
+    83,
+    83
+   ]
+  },
+  {
+   "insee": "59588",
+   "nom": "Téteghem-Coudekerque-Village",
+   "population": 8384,
+   "associationsAjoutees": 1,
+   "codes": [
+    "59154"
+   ],
+   "score": [
+    30,
+    30
+   ],
+   "assosPct": [
+    83,
+    83
+   ]
+  },
+  {
+   "insee": "60088",
+   "nom": "Bornel",
+   "population": 4785,
+   "associationsAjoutees": 1,
+   "codes": [
+    "60018"
+   ],
+   "score": [
+    25,
+    25
+   ],
+   "assosPct": [
+    73,
+    73
+   ]
+  },
+  {
+   "insee": "61168",
+   "nom": "La Ferté Macé",
+   "population": 5116,
+   "associationsAjoutees": 1,
+   "codes": [
+    "61004"
+   ],
+   "score": [
+    73,
+    73
+   ],
+   "assosPct": [
+    94,
+    94
+   ]
+  },
+  {
+   "insee": "61211",
+   "nom": "Juvigny Val d'Andaine",
+   "population": 2114,
+   "associationsAjoutees": 1,
+   "codes": [
+    "61025"
+   ],
+   "score": [
+    65,
+    65
+   ],
+   "assosPct": [
+    80,
+    80
+   ]
+  },
+  {
+   "insee": "61309",
+   "nom": "Perche en Nocé",
+   "population": 2001,
+   "associationsAjoutees": 1,
+   "codes": [
+    "61337"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    87,
+    87
+   ]
+  },
+  {
+   "insee": "61491",
+   "nom": "Tourouvre au Perche",
+   "population": 3023,
+   "associationsAjoutees": 1,
+   "codes": [
+    "61016"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    87,
+    88
+   ]
+  },
+  {
+   "insee": "63335",
+   "nom": "Saint-Diéry",
+   "population": 536,
+   "associationsAjoutees": 1,
+   "codes": [
+    "63127"
+   ],
+   "score": [
+    16,
+    17
+   ],
+   "assosPct": [
+    54,
+    57
+   ]
+  },
+  {
+   "insee": "64440",
+   "nom": "Ozenx-Montestrucq",
+   "population": 383,
+   "associationsAjoutees": 1,
+   "codes": [
+    "64402"
+   ],
+   "score": [
+    16,
+    17
+   ],
+   "assosPct": [
+    53,
+    56
+   ]
+  },
+  {
+   "insee": "65081",
+   "nom": "Benqué-Molère",
+   "population": 136,
+   "associationsAjoutees": 1,
+   "codes": [
+    "65312"
+   ],
+   "score": [
+    15,
+    16
+   ],
+   "assosPct": [
+    51,
+    55
+   ]
+  },
+  {
+   "insee": "65399",
+   "nom": "Saligos",
+   "population": 93,
+   "associationsAjoutees": 1,
+   "codes": [
+    "65480"
+   ],
+   "score": [
+    4,
+    6
+   ],
+   "assosPct": [
+    15,
+    21
+   ]
+  },
+  {
+   "insee": "71270",
+   "nom": "Mâcon",
+   "population": 34448,
+   "associationsAjoutees": 1,
+   "codes": [
+    "71511"
+   ],
+   "score": [
+    30,
+    30
+   ],
+   "assosPct": [
+    97,
+    97
+   ]
+  },
+  {
+   "insee": "71578",
+   "nom": "Clux-Villeneuve",
+   "population": 305,
+   "associationsAjoutees": 1,
+   "codes": [
+    "71138"
+   ],
+   "score": [
+    35,
+    36
+   ],
+   "assosPct": [
+    40,
+    44
+   ]
+  },
+  {
+   "insee": "72189",
+   "nom": "Marolles-les-Braults",
+   "population": 2061,
+   "associationsAjoutees": 1,
+   "codes": [
+    "72116"
+   ],
+   "score": [
+    67,
+    67
+   ],
+   "assosPct": [
+    87,
+    87
+   ]
+  },
+  {
+   "insee": "74123",
+   "nom": "Faverges-Seythenex",
+   "population": 7581,
+   "associationsAjoutees": 1,
+   "codes": [
+    "74270"
+   ],
+   "score": [
+    63,
+    63
+   ],
+   "assosPct": [
+    92,
+    92
+   ]
+  },
+  {
+   "insee": "78320",
+   "nom": "Notre-Dame-de-la-Mer",
+   "population": 707,
+   "associationsAjoutees": 1,
+   "codes": [
+    "78503"
+   ],
+   "score": [
+    13,
+    14
+   ],
+   "assosPct": [
+    43,
+    46
+   ]
+  },
+  {
+   "insee": "79078",
+   "nom": "Plaine-d'Argenson",
+   "population": 984,
+   "associationsAjoutees": 1,
+   "codes": [
+    "79033"
+   ],
+   "score": [
+    25,
+    25
+   ],
+   "assosPct": [
+    55,
+    57
+   ]
+  },
+  {
+   "insee": "79122",
+   "nom": "Fontenille-Saint-Martin-d'Entraigues",
+   "population": 534,
+   "associationsAjoutees": 1,
+   "codes": [
+    "79275"
+   ],
+   "score": [
+    6,
+    8
+   ],
+   "assosPct": [
+    21,
+    25
+   ]
+  },
+  {
+   "insee": "80456",
+   "nom": "Lafresguimont-Saint-Martin",
+   "population": 555,
+   "associationsAjoutees": 1,
+   "codes": [
+    "80454"
+   ],
+   "score": [
+    18,
+    19
+   ],
+   "assosPct": [
+    59,
+    62
+   ]
+  },
+  {
+   "insee": "85008",
+   "nom": "Aubigny-Les Clouzeaux",
+   "population": 7069,
+   "associationsAjoutees": 1,
+   "codes": [
+    "85069"
+   ],
+   "score": [
+    26,
+    26
+   ],
+   "assosPct": [
+    87,
+    87
+   ]
+  },
+  {
+   "insee": "85213",
+   "nom": "Rives de l'Yon",
+   "population": 4245,
+   "associationsAjoutees": 1,
+   "codes": [
+    "85043"
+   ],
+   "score": [
+    62,
+    62
+   ],
+   "assosPct": [
+    94,
+    94
+   ]
+  },
+  {
+   "insee": "86108",
+   "nom": "La Grimaudière",
+   "population": 401,
+   "associationsAjoutees": 1,
+   "codes": [
+    "86179"
+   ],
+   "score": [
+    78,
+    79
+   ],
+   "assosPct": [
+    79,
+    81
+   ]
+  },
+  {
+   "insee": "86137",
+   "nom": "Loudun",
+   "population": 6743,
+   "associationsAjoutees": 1,
+   "codes": [
+    "86212"
+   ],
+   "score": [
+    31,
+    31
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "86225",
+   "nom": "Saint-Jean-de-Sauves",
+   "population": 1331,
+   "associationsAjoutees": 1,
+   "codes": [
+    "86101"
+   ],
+   "score": [
+    64,
+    64
+   ],
+   "assosPct": [
+    76,
+    77
+   ]
+  },
+  {
+   "insee": "88176",
+   "nom": "Fontenoy-le-Château",
+   "population": 498,
+   "associationsAjoutees": 1,
+   "codes": [
+    "88282"
+   ],
+   "score": [
+    79,
+    79
+   ],
+   "assosPct": [
+    83,
+    85
+   ]
+  },
+  {
+   "insee": "88475",
+   "nom": "Tollaincourt",
+   "population": 118,
+   "associationsAjoutees": 1,
+   "codes": [
+    "88392"
+   ],
+   "score": [
+    2,
+    4
+   ],
+   "assosPct": [
+    8,
+    14
+   ]
+  },
+  {
+   "insee": "89055",
+   "nom": "Brienon-sur-Armançon",
+   "population": 3110,
+   "associationsAjoutees": 1,
+   "codes": [
+    "89047"
+   ],
+   "score": [
+    28,
+    28
+   ],
+   "assosPct": [
+    95,
+    95
+   ]
+  },
+  {
+   "insee": "89086",
+   "nom": "Charny Orée de Puisaye",
+   "population": 4807,
+   "associationsAjoutees": 1,
+   "codes": [
+    "89358"
+   ],
+   "score": [
+    33,
+    33
+   ],
+   "assosPct": [
+    99,
+    99
+   ]
+  },
+  {
+   "insee": "89411",
+   "nom": "Les Vallées de la Vanne",
+   "population": 1003,
+   "associationsAjoutees": 1,
+   "codes": [
+    "89429"
+   ],
+   "score": [
+    60,
+    61
+   ],
+   "assosPct": [
+    85,
+    86
+   ]
+  },
+  {
+   "insee": "92020",
+   "nom": "Châtillon",
+   "population": 36777,
+   "associationsAjoutees": 1,
+   "codes": [
+    "75020"
+   ],
+   "score": [
+    72,
+    72
+   ],
+   "assosPct": [
+    71,
+    71
+   ]
+  }
+ ],
+ "derivesModifies": [
+  {
+   "insee": "01145",
+   "nom": "Dompierre-sur-Veyle",
+   "population": 1207,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "01215",
+   "nom": "Surjoux-Lhopital",
+   "population": 141,
+   "associationsAjoutees": 2,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    64,
+    67
+   ]
+  },
+  {
+   "insee": "01227",
+   "nom": "Magnieu",
+   "population": 655,
+   "associationsAjoutees": 4,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    62,
+    66
+   ]
+  },
+  {
+   "insee": "01235",
+   "nom": "Marlieux",
+   "population": 1182,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "01453",
+   "nom": "Arvière-en-Valromey",
+   "population": 713,
+   "associationsAjoutees": 8,
+   "palier": [
+    1,
+    0
+   ],
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    58,
+    66
+   ]
+  },
+  {
+   "insee": "02308",
+   "nom": "Fesmy-le-Sart",
+   "population": 503,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "03089",
+   "nom": "Coutansouze",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "03114",
+   "nom": "La Ferté-Hauterive",
+   "population": 265,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "03315",
+   "nom": "Villefranche-d'Allier",
+   "population": 1268,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "07165",
+   "nom": "Belsentes",
+   "population": 547,
+   "associationsAjoutees": 14,
+   "raison": "gagnée",
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    53,
+    65
+   ]
+  },
+  {
+   "insee": "09230",
+   "nom": "Le Pla",
+   "population": 62,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "09296",
+   "nom": "Aulos-Sinsat",
+   "population": 153,
+   "associationsAjoutees": 3,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    2,
+    8
+   ]
+  },
+  {
+   "insee": "10083",
+   "nom": "Chappes",
+   "population": 350,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "10139",
+   "nom": "Épothémont",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "10144",
+   "nom": "Étrelles-sur-Aube",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "11220",
+   "nom": "Marseillette",
+   "population": 700,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "14288",
+   "nom": "Le Fresne-Camilly",
+   "population": 947,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "14349",
+   "nom": "Laize-Clinchamps",
+   "population": 2140,
+   "associationsAjoutees": 9,
+   "raison": "gagnée",
+   "score": [
+    51,
+    56
+   ]
+  },
+  {
+   "insee": "14475",
+   "nom": "Val d'Arry",
+   "population": 2420,
+   "associationsAjoutees": 13,
+   "faible": "perdue",
+   "score": [
+    28,
+    33
+   ]
+  },
+  {
+   "insee": "14658",
+   "nom": "Noues de Sienne",
+   "population": 4285,
+   "associationsAjoutees": 45,
+   "raison": "gagnée",
+   "score": [
+    50,
+    59
+   ]
+  },
+  {
+   "insee": "15027",
+   "nom": "Puycapel",
+   "population": 732,
+   "associationsAjoutees": 9,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    33,
+    37
+   ]
+  },
+  {
+   "insee": "15142",
+   "nom": "Neuvéglise-sur-Truyère",
+   "population": 1704,
+   "associationsAjoutees": 10,
+   "faible": "perdue",
+   "score": [
+    30,
+    32
+   ]
+  },
+  {
+   "insee": "17052",
+   "nom": "Boisredon",
+   "population": 706,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "17255",
+   "nom": "Nancras",
+   "population": 795,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "17317",
+   "nom": "Saint-Ciers-du-Taillon",
+   "population": 574,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "17418",
+   "nom": "Salignac-sur-Charente",
+   "population": 608,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "18125",
+   "nom": "Léré",
+   "population": 1067,
+   "identites": [
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ],
+    []
+   ],
+   "score": [
+    60,
+    59
+   ]
+  },
+  {
+   "insee": "18149",
+   "nom": "Méry-ès-Bois",
+   "population": 550,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "18184",
+   "nom": "Précy",
+   "population": 350,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "19143",
+   "nom": "Montaignac-sur-Doustre",
+   "population": 636,
+   "associationsAjoutees": 4,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    32,
+    35
+   ]
+  },
+  {
+   "insee": "21195",
+   "nom": "Cormot-Vauchignon",
+   "population": 213,
+   "associationsAjoutees": 1,
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    60,
+    61
+   ]
+  },
+  {
+   "insee": "21272",
+   "nom": "Le Val-Larrey",
+   "population": 270,
+   "associationsAjoutees": 8,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    42
+   ]
+  },
+  {
+   "insee": "22055",
+   "nom": "Binic-Étables-sur-Mer",
+   "population": 6881,
+   "associationsAjoutees": 141,
+   "raison": "gagnée",
+   "identites": [
+    [],
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "score": [
+    49,
+    60
+   ]
+  },
+  {
+   "insee": "22057",
+   "nom": "Le Faouët",
+   "population": 410,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "22107",
+   "nom": "Bon Repos sur Blavet",
+   "population": 1241,
+   "associationsAjoutees": 10,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    63,
+    67
+   ]
+  },
+  {
+   "insee": "22158",
+   "nom": "Guerlédan",
+   "population": 2498,
+   "associationsAjoutees": 8,
+   "faible": "perdue",
+   "score": [
+    30,
+    31
+   ]
+  },
+  {
+   "insee": "24087",
+   "nom": "Castels et Bézenac",
+   "population": 808,
+   "associationsAjoutees": 5,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    33,
+    35
+   ]
+  },
+  {
+   "insee": "24147",
+   "nom": "Cubjac-Auvézère-Val d'Ans",
+   "population": 1104,
+   "associationsAjoutees": 6,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    32,
+    34
+   ]
+  },
+  {
+   "insee": "24253",
+   "nom": "Mareuil en Périgord",
+   "population": 2303,
+   "associationsAjoutees": 55,
+   "faible": "perdue",
+   "score": [
+    28,
+    32
+   ]
+  },
+  {
+   "insee": "24260",
+   "nom": "Mauzac-et-Grand-Castang",
+   "population": 873,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "24325",
+   "nom": "Pechs-de-l'Espérance",
+   "population": 772,
+   "associationsAjoutees": 17,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    24,
+    36
+   ]
+  },
+  {
+   "insee": "24382",
+   "nom": "Saint-Capraise-de-Lalinde",
+   "population": 524,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "24554",
+   "nom": "La Tour-Blanche-Cercles",
+   "population": 555,
+   "associationsAjoutees": 4,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    33,
+    36
+   ]
+  },
+  {
+   "insee": "25285",
+   "nom": "Grand'Combe-Châteleu",
+   "population": 1506,
+   "identites": [
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ],
+    []
+   ],
+   "score": [
+    60,
+    59
+   ]
+  },
+  {
+   "insee": "25301",
+   "nom": "Guyans-Vennes",
+   "population": 856,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "25354",
+   "nom": "Luxiol",
+   "population": 157,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "25374",
+   "nom": "Mercey-le-Grand",
+   "population": 542,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "25477",
+   "nom": "Rancenay",
+   "population": 412,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "27070",
+   "nom": "Frenelles-en-Vexin",
+   "population": 1702,
+   "associationsAjoutees": 13,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    4,
+    13
+   ]
+  },
+  {
+   "insee": "27198",
+   "nom": "Mesnils-sur-Iton",
+   "population": 6145,
+   "associationsAjoutees": 19,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    65,
+    67
+   ]
+  },
+  {
+   "insee": "27290",
+   "nom": "Goupil-Othon",
+   "population": 1254,
+   "associationsAjoutees": 9,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    7,
+    14
+   ]
+  },
+  {
+   "insee": "28012",
+   "nom": "Vald'Yerre",
+   "population": 3577,
+   "associationsAjoutees": 27,
+   "faible": "perdue",
+   "score": [
+    28,
+    33
+   ]
+  },
+  {
+   "insee": "2B236",
+   "nom": "Poggio-di-Nazza",
+   "population": 184,
+   "identites": [
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ],
+    []
+   ],
+   "score": [
+    60,
+    59
+   ]
+  },
+  {
+   "insee": "30015",
+   "nom": "Arphy",
+   "population": 140,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "30256",
+   "nom": "Saint-Gervais",
+   "population": 792,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "31114",
+   "nom": "Castelbiague",
+   "population": 241,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "31165",
+   "nom": "Eaunes",
+   "population": 6510,
+   "identites": [
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ],
+    []
+   ],
+   "score": [
+    60,
+    59
+   ]
+  },
+  {
+   "insee": "33055",
+   "nom": "Blaignan-Prignac",
+   "population": 454,
+   "associationsAjoutees": 3,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    63,
+    66
+   ]
+  },
+  {
+   "insee": "33073",
+   "nom": "Braud-et-Saint-Louis",
+   "population": 1510,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "33078",
+   "nom": "Cabara",
+   "population": 494,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "33205",
+   "nom": "Illats",
+   "population": 1387,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "33254",
+   "nom": "Loupiac-de-la-Réole",
+   "population": 542,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "34118",
+   "nom": "Guzargues",
+   "population": 492,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "34246",
+   "nom": "Entre-Vignes",
+   "population": 2160,
+   "associationsAjoutees": 13,
+   "identites": [
+    [],
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "score": [
+    57,
+    60
+   ]
+  },
+  {
+   "insee": "36047",
+   "nom": "La Châtre-Langlin",
+   "population": 496,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "37232",
+   "nom": "Coteaux-sur-Loire",
+   "population": 1879,
+   "associationsAjoutees": 19,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    32,
+    40
+   ]
+  },
+  {
+   "insee": "38064",
+   "nom": "Cessieu",
+   "population": 3244,
+   "identites": [
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ],
+    []
+   ],
+   "score": [
+    60,
+    59
+   ]
+  },
+  {
+   "insee": "38073",
+   "nom": "Chantepérier",
+   "population": 206,
+   "associationsAjoutees": 3,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    63,
+    67
+   ]
+  },
+  {
+   "insee": "38176",
+   "nom": "Frontonas",
+   "population": 2109,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "38259",
+   "nom": "Montseveroux",
+   "population": 996,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "38284",
+   "nom": "Ornacieux-Balbins",
+   "population": 868,
+   "associationsAjoutees": 9,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    29,
+    34
+   ]
+  },
+  {
+   "insee": "38402",
+   "nom": "Saint-Jean-de-Vaulx",
+   "population": 529,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "38407",
+   "nom": "La Sure en Chartreuse",
+   "population": 1058,
+   "associationsAjoutees": 8,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    34
+   ]
+  },
+  {
+   "insee": "38479",
+   "nom": "Porte-des-Bonnevaux",
+   "population": 2071,
+   "associationsAjoutees": 35,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    42
+   ]
+  },
+  {
+   "insee": "39130",
+   "nom": "Nanchez",
+   "population": 775,
+   "associationsAjoutees": 6,
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ]
+   ],
+   "score": [
+    56,
+    60
+   ]
+  },
+  {
+   "insee": "39137",
+   "nom": "Saint-Hymetière-sur-Valouse",
+   "population": 423,
+   "associationsAjoutees": 2,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    5,
+    8
+   ]
+  },
+  {
+   "insee": "39251",
+   "nom": "Gevingey",
+   "population": 439,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "39258",
+   "nom": "Grande-Rivière Château",
+   "population": 632,
+   "associationsAjoutees": 7,
+   "raison": "gagnée",
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ]
+   ],
+   "score": [
+    54,
+    60
+   ]
+  },
+  {
+   "insee": "39273",
+   "nom": "Montlainsia",
+   "population": 222,
+   "associationsAjoutees": 6,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    2,
+    11
+   ]
+  },
+  {
+   "insee": "39339",
+   "nom": "Chassal-Molinges",
+   "population": 1128,
+   "associationsAjoutees": 15,
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    56,
+    65
+   ]
+  },
+  {
+   "insee": "39396",
+   "nom": "Orchamps",
+   "population": 1076,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "39485",
+   "nom": "Val Suran",
+   "population": 782,
+   "associationsAjoutees": 9,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    64,
+    66
+   ]
+  },
+  {
+   "insee": "39491",
+   "nom": "Coteaux du Lizon",
+   "population": 2168,
+   "associationsAjoutees": 4,
+   "faible": "perdue",
+   "score": [
+    30,
+    31
+   ]
+  },
+  {
+   "insee": "40166",
+   "nom": "Lussagnet",
+   "population": 75,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "40309",
+   "nom": "Souprosse",
+   "population": 1128,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "41059",
+   "nom": "Le Controis-en-Sologne",
+   "population": 6719,
+   "associationsAjoutees": 50,
+   "faible": "perdue",
+   "score": [
+    29,
+    32
+   ]
+  },
+  {
+   "insee": "41070",
+   "nom": "Vallée-de-Ronsard",
+   "population": 519,
+   "associationsAjoutees": 3,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    65,
+    67
+   ]
+  },
+  {
+   "insee": "41074",
+   "nom": "Dhuizon",
+   "population": 1204,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "42108",
+   "nom": "L'Hôpital-le-Grand",
+   "population": 1092,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "42268",
+   "nom": "Vézelin-sur-Loire",
+   "population": 809,
+   "associationsAjoutees": 13,
+   "faible": "perdue",
+   "score": [
+    23,
+    33
+   ]
+  },
+  {
+   "insee": "45212",
+   "nom": "Montcresson",
+   "population": 1252,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "46088",
+   "nom": "Douelle",
+   "population": 829,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "46089",
+   "nom": "Duravel",
+   "population": 942,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "46156",
+   "nom": "Bellefont-La Rauze",
+   "population": 1201,
+   "associationsAjoutees": 17,
+   "faible": "perdue",
+   "score": [
+    26,
+    33
+   ]
+  },
+  {
+   "insee": "46263",
+   "nom": "Barguelonne-en-Quercy",
+   "population": 702,
+   "associationsAjoutees": 14,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    61,
+    72
+   ]
+  },
+  {
+   "insee": "48087",
+   "nom": "Prinsuéjols-Malbouzon",
+   "population": 255,
+   "associationsAjoutees": 4,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    5,
+    11
+   ]
+  },
+  {
+   "insee": "49050",
+   "nom": "Brissac Loire Aubance",
+   "population": 10895,
+   "associationsAjoutees": 168,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    64,
+    68
+   ]
+  },
+  {
+   "insee": "49060",
+   "nom": "Bellevigne-les-Châteaux",
+   "population": 3463,
+   "associationsAjoutees": 20,
+   "raison": "gagnée",
+   "score": [
+    52,
+    56
+   ]
+  },
+  {
+   "insee": "49125",
+   "nom": "Doué-en-Anjou",
+   "population": 11228,
+   "associationsAjoutees": 28,
+   "faible": "perdue",
+   "score": [
+    30,
+    31
+   ]
+  },
+  {
+   "insee": "49220",
+   "nom": "Morannes sur Sarthe-Daumeray",
+   "population": 3682,
+   "associationsAjoutees": 32,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    34
+   ]
+  },
+  {
+   "insee": "49261",
+   "nom": "Gennes-Val-de-Loire",
+   "population": 8464,
+   "associationsAjoutees": 307,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    64,
+    81
+   ]
+  },
+  {
+   "insee": "49377",
+   "nom": "Rives-du-Loir-en-Anjou",
+   "population": 5641,
+   "associationsAjoutees": 61,
+   "raison": "gagnée",
+   "score": [
+    54,
+    59
+   ]
+  },
+  {
+   "insee": "50041",
+   "nom": "La Hague",
+   "population": 11223,
+   "associationsAjoutees": 260,
+   "palier": [
+    1,
+    0
+   ],
+   "identites": [
+    [],
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    57,
+    69
+   ]
+  },
+  {
+   "insee": "50108",
+   "nom": "Céaux",
+   "population": 412,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "50228",
+   "nom": "Hambye",
+   "population": 1077,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "50239",
+   "nom": "Thèreval",
+   "population": 1787,
+   "associationsAjoutees": 1,
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    60,
+    61
+   ]
+  },
+  {
+   "insee": "50419",
+   "nom": "Quettreville-sur-Sienne",
+   "population": 3188,
+   "associationsAjoutees": 27,
+   "faible": "perdue",
+   "score": [
+    26,
+    33
+   ]
+  },
+  {
+   "insee": "50431",
+   "nom": "Remilly Les Marais",
+   "population": 1058,
+   "associationsAjoutees": 16,
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    55,
+    61
+   ]
+  },
+  {
+   "insee": "50500",
+   "nom": "Saint-Laurent-de-Terregatte",
+   "population": 654,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "50550",
+   "nom": "Saint-Sauveur-Villages",
+   "population": 3362,
+   "associationsAjoutees": 36,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    28,
+    34
+   ]
+  },
+  {
+   "insee": "51158",
+   "nom": "Val-des-Marais",
+   "population": 572,
+   "associationsAjoutees": 2,
+   "faible": "perdue",
+   "score": [
+    29,
+    31
+   ]
+  },
+  {
+   "insee": "51457",
+   "nom": "Cœur-de-la-Vallée",
+   "population": 648,
+   "associationsAjoutees": 6,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    7,
+    13
+   ]
+  },
+  {
+   "insee": "51499",
+   "nom": "Saint-Mard-lès-Rouffy",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "52400",
+   "nom": "Le Châtelet-sur-Meuse",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "53062",
+   "nom": "Château-Gontier-sur-Mayenne",
+   "population": 16710,
+   "associationsAjoutees": 55,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    65,
+    66
+   ]
+  },
+  {
+   "insee": "53161",
+   "nom": "Montsûrs",
+   "population": 3193,
+   "associationsAjoutees": 20,
+   "faible": "perdue",
+   "score": [
+    28,
+    32
+   ]
+  },
+  {
+   "insee": "53258",
+   "nom": "La Selle-Craonnaise",
+   "population": 905,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "54189",
+   "nom": "Favières",
+   "population": 590,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "57530",
+   "nom": "Ottonville",
+   "population": 447,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "57546",
+   "nom": "Plesnois",
+   "population": 792,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "59193",
+   "nom": "Emmerin",
+   "population": 3053,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "59275",
+   "nom": "Gruson",
+   "population": 1237,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "59626",
+   "nom": "Villers-Pol",
+   "population": 1262,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "59653",
+   "nom": "Wavrin",
+   "population": 7773,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "60151",
+   "nom": "Choisy-au-Bac",
+   "population": 3322,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "60209",
+   "nom": "La Corne-en-Vexin",
+   "population": 544,
+   "associationsAjoutees": 5,
+   "raison": "gagnée",
+   "score": [
+    50,
+    55
+   ]
+  },
+  {
+   "insee": "60274",
+   "nom": "Glaignes",
+   "population": 371,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "60578",
+   "nom": "Saintines",
+   "population": 1064,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "61149",
+   "nom": "Échalou",
+   "population": 350,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "61194",
+   "nom": "Monts-sur-Orne",
+   "population": 873,
+   "associationsAjoutees": 15,
+   "raison": "gagnée",
+   "score": [
+    49,
+    59
+   ]
+  },
+  {
+   "insee": "61474",
+   "nom": "Gouffern en Auge",
+   "population": 3660,
+   "associationsAjoutees": 57,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    24,
+    34
+   ]
+  },
+  {
+   "insee": "62256",
+   "nom": "Crépy",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "63197",
+   "nom": "Lisseuil",
+   "population": 114,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "64225",
+   "nom": "Ance Féas",
+   "population": 614,
+   "associationsAjoutees": 5,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    62,
+    67
+   ]
+  },
+  {
+   "insee": "65197",
+   "nom": "Ger",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "67047",
+   "nom": "Bissert",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "67067",
+   "nom": "Brumath",
+   "population": 10238,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "67236",
+   "nom": "Kienheim",
+   "population": 542,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "67343",
+   "nom": "Oberhausbergen",
+   "population": 5556,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "67362",
+   "nom": "Orschwiller",
+   "population": 615,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "68259",
+   "nom": "Raedersdorf",
+   "population": 492,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "69088",
+   "nom": "Fontaines-sur-Saône",
+   "population": 7047,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "69097",
+   "nom": "Les Haies",
+   "population": 756,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "69268",
+   "nom": "Vourles",
+   "population": 3374,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "70339",
+   "nom": "Mélisey",
+   "population": 1662,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "71283",
+   "nom": "Marnay",
+   "population": 526,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "71346",
+   "nom": "Perrecy-les-Forges",
+   "population": 1547,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "71378",
+   "nom": "Rully",
+   "population": 1558,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "71582",
+   "nom": "La Vineuse sur Fregande",
+   "population": 652,
+   "associationsAjoutees": 11,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    62,
+    66
+   ]
+  },
+  {
+   "insee": "72118",
+   "nom": "Dollon",
+   "population": 1439,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "72137",
+   "nom": "Villeneuve-en-Perseigne",
+   "population": 2203,
+   "associationsAjoutees": 33,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    40
+   ]
+  },
+  {
+   "insee": "72219",
+   "nom": "Bernay-Neuvy-en-Champagne",
+   "population": 794,
+   "associationsAjoutees": 14,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    29,
+    36
+   ]
+  },
+  {
+   "insee": "73003",
+   "nom": "Grand-Aigueblanche",
+   "population": 3809,
+   "associationsAjoutees": 13,
+   "identites": [
+    [],
+    [
+     "Pour vivre en montagne dans une commune qui reste animée.",
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    59,
+    61
+   ]
+  },
+  {
+   "insee": "73135",
+   "nom": "La Tour-en-Maurienne",
+   "population": 1087,
+   "associationsAjoutees": 9,
+   "raison": "gagnée",
+   "score": [
+    50,
+    55
+   ]
+  },
+  {
+   "insee": "73145",
+   "nom": "Lépin-le-Lac",
+   "population": 465,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "73151",
+   "nom": "Porte-de-Savoie",
+   "population": 3887,
+   "associationsAjoutees": 26,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    32,
+    38
+   ]
+  },
+  {
+   "insee": "73212",
+   "nom": "Val-d'Arc",
+   "population": 2012,
+   "associationsAjoutees": 34,
+   "raison": "gagnée",
+   "score": [
+    42,
+    58
+   ]
+  },
+  {
+   "insee": "74035",
+   "nom": "Bloye",
+   "population": 579,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "74307",
+   "nom": "Villy-le-Pelloux",
+   "population": 996,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "76179",
+   "nom": "Clères",
+   "population": 1380,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "76390",
+   "nom": "Les Loges",
+   "population": 1119,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "77307",
+   "nom": "Montévrain",
+   "population": 13934,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "79030",
+   "nom": "Beaussais-Vitré",
+   "population": 954,
+   "associationsAjoutees": 7,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    4,
+    11
+   ]
+  },
+  {
+   "insee": "79063",
+   "nom": "Val en Vignes",
+   "population": 2027,
+   "associationsAjoutees": 26,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    32,
+    41
+   ]
+  },
+  {
+   "insee": "79122",
+   "nom": "Fontenille-Saint-Martin-d'Entraigues",
+   "population": 534,
+   "associationsAjoutees": 1,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    6,
+    8
+   ]
+  },
+  {
+   "insee": "79128",
+   "nom": "François",
+   "population": 953,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "79148",
+   "nom": "Lezay",
+   "population": 2003,
+   "verdict": [
+    "satisfied",
+    "neutral"
+   ],
+   "score": [
+    61,
+    60
+   ]
+  },
+  {
+   "insee": "79153",
+   "nom": "Loubigné",
+   "population": 156,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "79217",
+   "nom": "Prailles-La Couarde",
+   "population": 945,
+   "associationsAjoutees": 6,
+   "faible": "perdue",
+   "score": [
+    29,
+    32
+   ]
+  },
+  {
+   "insee": "80173",
+   "nom": "Cardonnette",
+   "population": 522,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "80327",
+   "nom": "Fontaine-sur-Maye",
+   "population": 157,
+   "verdict": [
+    "neutral",
+    "mismatch"
+   ],
+   "score": [
+    8,
+    7
+   ]
+  },
+  {
+   "insee": "80369",
+   "nom": "Frohen-sur-Authie",
+   "population": 240,
+   "associationsAjoutees": 2,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    5,
+    8
+   ]
+  },
+  {
+   "insee": "80485",
+   "nom": "Ô-de-Selle",
+   "population": 1159,
+   "associationsAjoutees": 18,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    31,
+    35
+   ]
+  },
+  {
+   "insee": "81132",
+   "nom": "Guitalens-L'Albarède",
+   "population": 829,
+   "associationsAjoutees": 11,
+   "raison": "gagnée",
+   "score": [
+    45,
+    55
+   ]
+  },
+  {
+   "insee": "85001",
+   "nom": "L'Aiguillon-la-Presqu'île",
+   "population": 2772,
+   "associationsAjoutees": 38,
+   "palier": [
+    2,
+    1
+   ],
+   "faible": "perdue",
+   "score": [
+    30,
+    37
+   ]
+  },
+  {
+   "insee": "85162",
+   "nom": "Rives-d'Autise",
+   "population": 2068,
+   "associationsAjoutees": 14,
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    60,
+    65
+   ]
+  },
+  {
+   "insee": "85287",
+   "nom": "Tallud-Sainte-Gemme",
+   "population": 450,
+   "palier": [
+    1,
+    2
+   ],
+   "score": [
+    34,
+    33
+   ]
+  },
+  {
+   "insee": "86123",
+   "nom": "Boivre-la-Vallée",
+   "population": 3058,
+   "associationsAjoutees": 46,
+   "raison": "gagnée",
+   "identites": [
+    [],
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    53,
+    62
+   ]
+  },
+  {
+   "insee": "86174",
+   "nom": "Naintré",
+   "population": 5944,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "86186",
+   "nom": "Oyré",
+   "population": 960,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "86247",
+   "nom": "Val-de-Comporté",
+   "population": 1014,
+   "associationsAjoutees": 8,
+   "verdict": [
+    "mismatch",
+    "neutral"
+   ],
+   "score": [
+    6,
+    13
+   ]
+  },
+  {
+   "insee": "87028",
+   "nom": "Val-d'Oire-et-Gartempe",
+   "population": 1691,
+   "associationsAjoutees": 24,
+   "palier": [
+    2,
+    1
+   ],
+   "score": [
+    33,
+    44
+   ]
+  },
+  {
+   "insee": "87071",
+   "nom": "Glandon",
+   "population": 798,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "87128",
+   "nom": "Saint-Pardoux-le-Lac",
+   "population": 1347,
+   "associationsAjoutees": 28,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    61,
+    69
+   ]
+  },
+  {
+   "insee": "87152",
+   "nom": "Saint-Jouvent",
+   "population": 1659,
+   "faible": "gagnée",
+   "score": [
+    31,
+    30
+   ]
+  },
+  {
+   "insee": "88134",
+   "nom": "Dinozé",
+   "population": 643,
+   "palier": [
+    0,
+    1
+   ],
+   "score": [
+    66,
+    65
+   ]
+  },
+  {
+   "insee": "89124",
+   "nom": "Courlon-sur-Yonne",
+   "population": 1177,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "89405",
+   "nom": "Les Hauts de Forterre",
+   "population": 499,
+   "associationsAjoutees": 6,
+   "palier": [
+    1,
+    0
+   ],
+   "score": [
+    62,
+    66
+   ]
+  },
+  {
+   "insee": "89411",
+   "nom": "Les Vallées de la Vanne",
+   "population": 1003,
+   "associationsAjoutees": 1,
+   "verdict": [
+    "neutral",
+    "satisfied"
+   ],
+   "score": [
+    60,
+    61
+   ]
+  },
+  {
+   "insee": "90017",
+   "nom": "Bourogne",
+   "population": 1792,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "91132",
+   "nom": "Chamarande",
+   "population": 1119,
+   "raison": "perdue",
+   "score": [
+    55,
+    54
+   ]
+  },
+  {
+   "insee": "91390",
+   "nom": "Le Mérévillois",
+   "population": 3364,
+   "associationsAjoutees": 6,
+   "identites": [
+    [],
+    [
+     "Pour une petite ville qui reste vraiment vivante."
+    ]
+   ],
+   "score": [
+    59,
+    60
+   ]
+  }
+ ]
+}
