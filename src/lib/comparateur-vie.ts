@@ -19,6 +19,7 @@ import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
 import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale, communeLittoraleMer, categorieDeFacade, presDuRivage } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
+import { communeParent } from "@/lib/plm";
 import { populationHorsGrain } from "@/lib/population-millesime";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
@@ -1107,8 +1108,13 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   const relief = c.relief_proximite ?? 0;
   // Montagne : altitude propre élevée, ou massif vraiment à portée et déjà en hauteur.
   const montagne = altitude >= 600 || (relief >= 60 && altitude >= 350);
+  // FUT-140 : un arrondissement de Paris, Lyon ou Marseille n'est pas une commune de la périphérie. Sa population
+  // est celle d'une portion de la ville-centre : Paris 1er (15 919 habitants) passait sous les 25 000 et recevait
+  // « aux portes d'une grande ville, sans en habiter le centre ». La règle reste celle des communes ; seul
+  // l'arrondissement en est exclu. Narratif seulement : population, taille de ville et scores ne changent pas.
+  const arrondissementPLM = communeParent(c.insee) !== c.insee;
   const periurbain =
-    c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
+    !arrondissementPLM && c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
   // « Grande ville » : la COMMUNE elle-même est grande (pas l'UU), sinon un village
   // dans une grande agglo serait mal étiqueté (Espelette).
   const grandeVille = c.population != null && c.population >= 50000;
