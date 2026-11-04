@@ -15,7 +15,7 @@
  * À enchaîner, car ils dérivent de la population (l'ordre compte, chaque étape lit la précédente) :
  *   node scripts/populate-emploi-arrondissements.mjs    emploi des 45 arrondissements PLM (zone de leur ville)
  *   node scripts/populate-uu-pop.mjs                    uu_pop / uu_count / hors_uu
- *   .venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     vieLocale (dénominateur, codes repris)
+ *   .venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     vieLocale (dénominateur, codes disparus rattachés)
  *   .venv-bpe/bin/python scripts/populate-demographie.py --write-index    demographie (abstentions, codes rattachés)
  *   .venv-bpe/bin/python scripts/populate-mobilite.py --write-index       mobilite (fusions sommées, codes rattachés)
  *   .venv-bpe/bin/python scripts/populate-etudiants.py --write-index      etudes_dyn (bassins sommés, rentrée figée)
@@ -58,7 +58,7 @@ async function main() {
     conventions: {
       communes: `population ${SOURCE_PRINCIPALE.millesime} pour toutes les communes, sauf les communes du référentiel (${SOURCE_GRAIN.millesime}) ; le millésime affiché suit la commune (src/lib/population-millesime.ts), jamais « ${SOURCE_PRINCIPALE.millesime} » pour toute la France`,
       unitesUrbaines: `uu_pop somme les populations communales de l'index : une unité urbaine qui compte une commune du référentiel mêle ${SOURCE_PRINCIPALE.millesime} et ${SOURCE_GRAIN.millesime}`,
-      scoresDependants: "vieLocale : associations des codes disparus comptées dans la commune qui les a repris ; non notée (null) pour un rétablissement, territoire partagé que le code RNA ne répartit pas. demographie : non notée (null) pour un territoire modifié depuis la géographie de la base RP 2021, rattachée depuis l'ancien code pour un changement de code seul. mobilite : RP 2022 (géographie au 01/01/2024), communes fusionnées depuis sommées, codes rattachés, rétablissements postérieurs non notés. Rangs (rankBands) recalculés pour vie_locale, croissance_demographique, acces_soins et faible_dependance_auto",
+      scoresDependants: "vieLocale : associations rangées sous un code disparu comptées dans la commune actuelle qui porte son territoire (FUT-137 : table des successeurs du COG 2026, data/successeurs-cog2026.json ; bilan data/vie-locale-rattachements-rna.json), jamais réparties quand la succession est ambiguë ; non notée (null) pour un rétablissement, territoire partagé que le code RNA ne répartit pas. demographie : non notée (null) pour un territoire modifié depuis la géographie de la base RP 2021, rattachée depuis l'ancien code pour un changement de code seul. mobilite : RP 2022 (géographie au 01/01/2024), communes fusionnées depuis sommées, codes rattachés, rétablissements postérieurs non notés. Rangs (rankBands) recalculés pour vie_locale, croissance_demographique, acces_soins et faible_dependance_auto",
       indicateursAdeme: "ADEME data_communes mêle deux géographies (data/perimetre-ademe-cog2025.json) : densité, éloignement, centralité, nombre de logements sociaux au 01/01/2025, gardés ; APL, air, pression agricole, taux de logements sociaux au 01/01/2024, non lus (null) pour une commune au territoire modifié depuis, rattachés depuis l'ancien code pour un changement de code seul ; sans ligne ADEME, pas de niveau de centralité (clé absente, non noté)",
       absences: "six villages détruits de la Meuse absents de la source sans mouvement : population null (non lue), pas 0",
     },

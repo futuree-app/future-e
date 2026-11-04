@@ -32,7 +32,7 @@ type Commune = IndexCommune & { rankBands?: Record<string, [number, number]> };
 const communes: Commune[] = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8")).communes;
 const parInsee = new Map(communes.map((c) => [c.insee, c]));
 
-const RECALCULEES: PreferenceKey[] = ["acces_services", "acces_ecoles", "acces_culture"];
+const RECALCULEES: PreferenceKey[] = ["acces_services", "acces_ecoles", "acces_culture", "vie_locale"];
 const HISTORIQUES = MISMATCH_RANK_KEYS.filter((k) => !RECALCULEES.includes(k));
 
 // L'empreinte d'une distribution publiée : les lignes `insee \t bas \t haut` des communes classées, triées.
@@ -71,19 +71,20 @@ test("registre : par critère, une identité désigne une seule distribution, et
   }
 });
 
-test("les trois critères recalculés ont chacun une identité propre ; les dix autres gardent l'identité historique", () => {
+test("les critères recalculés (FUT-136, FUT-137) ont chacun une identité propre ; les autres gardent l'identité historique", () => {
   for (const k of HISTORIQUES) assert.equal(distributionVersionDe(k), MISMATCH_DISTRIBUTION_VERSION, k);
   assert.equal(MISMATCH_DISTRIBUTION_VERSION, "mismatch-dist-2026-07-15");
   const nouvelles = RECALCULEES.map(distributionVersionDe);
   assert.deepEqual(nouvelles, [
     "mismatch-dist-2026-10-26-acces_services", "mismatch-dist-2026-10-26-acces_ecoles", "mismatch-dist-2026-10-26-acces_culture",
+    "mismatch-dist-2026-11-04-vie_locale",
   ]);
   // Une identité nouvelle n'est portée que par son critère (aucune clé non concernée ne la reçoit).
   for (const k of MISMATCH_RANK_KEYS) {
     for (const [i, id] of nouvelles.entries()) if (k !== RECALCULEES[i]) assert.notEqual(distributionVersionDe(k), id, `${k} porte ${id}`);
   }
-  // L'identité historique désignait, pour ces trois critères, les bandes périmées : elle reste au registre pour
-  // les dossiers vendus avant FUT-136, et ne désigne plus la distribution publiée.
+  // L'identité historique désignait, pour ces critères, des bandes remplacées depuis : elle reste au registre pour
+  // les dossiers vendus avant FUT-136 (FUT-137 pour la vie locale), et ne désigne plus la distribution publiée.
   for (const k of RECALCULEES) {
     const ancienne = DISTRIBUTIONS_PUBLIEES[k]!.find((d) => d.identite === MISMATCH_DISTRIBUTION_VERSION);
     assert.ok(ancienne, k);
