@@ -1,0 +1,59 @@
+{
+ "_source": "Réponses IGN /navigation/itineraire, place de l'Europe (46.166611,-1.179682) -> gare de La Rochelle, point BPE (46.1527,-1.14529), voiture. 13/10/2026 : étude ade5e42e (resultats/controle_routage/europe_gare_car.json, eg_car_short.json). 04/11/2026 : rejeu FUT-98. Géométrie et étapes retirées ; champs de tête inchangés.",
+ "fastest_2026_10_13": {
+  "resource": "bdtopo-valhalla",
+  "resourceVersion": "2026-10-05",
+  "start": "-1.180534,46.1667",
+  "end": "-1.146135,46.153333",
+  "profile": "car",
+  "optimization": "fastest",
+  "crs": "EPSG:4326",
+  "distanceUnit": "meter",
+  "timeUnit": "minute",
+  "distance": 10960.283,
+  "duration": 24.094683333333332,
+  "constraints": []
+ },
+ "shortest_2026_10_13": {
+  "resource": "bdtopo-valhalla",
+  "resourceVersion": "2026-10-07",
+  "start": "-1.180534,46.1667",
+  "end": "-1.146135,46.153333",
+  "profile": "car",
+  "optimization": "shortest",
+  "crs": "EPSG:4326",
+  "distanceUnit": "meter",
+  "timeUnit": "minute",
+  "distance": 4381.281,
+  "duration": 22.697533333333336,
+  "constraints": []
+ },
+ "fastest_2026_11_04": {
+  "resource": "bdtopo-valhalla",
+  "resourceVersion": "2026-11-03",
+  "start": "-1.180534,46.1667",
+  "end": "-1.146068,46.15333",
+  "profile": "car",
+  "optimization": "fastest",
+  "crs": "EPSG:4326",
+  "distanceUnit": "meter",
+  "timeUnit": "minute",
+  "distance": 4395.921,
+  "duration": 15.271016666666666,
+  "constraints": []
+ },
+ "shortest_2026_11_04": {
+  "resource": "bdtopo-valhalla",
+  "resourceVersion": "2026-11-04",
+  "start": "-1.180534,46.1667",
+  "end": "-1.146068,46.15333",
+  "profile": "car",
+  "optimization": "shortest",
+  "crs": "EPSG:4326",
+  "distanceUnit": "meter",
+  "timeUnit": "minute",
+  "distance": 4383.921,
+  "duration": 15.494,
+  "constraints": []
+ }
+}

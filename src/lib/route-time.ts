@@ -15,6 +15,7 @@
 import { createHash } from "node:crypto";
 import { ignFetch } from "./ign-limiter.ts";
 import type { ArtifactStore } from "./reachability-store.ts";
+import type { RouteOptimization } from "./hard-constraints.ts";
 
 const ITINERAIRE_URL = "https://data.geopf.fr/navigation/itineraire";
 const RESOURCE = "bdtopo-valhalla";
@@ -30,20 +31,30 @@ export type RouteRequest = {
   toLon: number;
   mode: "car" | "walk";
   direction: "to_reference"; // le domicile VERS la gare, jamais l'inverse en silence
+  // FUT-98 : ce que le moteur OPTIMISE. « fastest » par défaut, le seul calcul du chemin nominal. « shortest »
+  // n'est demandé qu'en second appel, quand « fastest » dépasse la limite du lecteur : Valhalla minimise un coût
+  // interne, pas exactement la durée qu'il rend, et il lui arrive d'annoncer une route courte PLUS RAPIDE que sa
+  // route « rapide » (place de l'Europe -> gare de La Rochelle : 24,1 min par la rocade, 22,7 min en ville).
+  // C'est la même ressource, les mêmes points, le même mode, la même unité : seule l'optimisation change.
+  optimization?: RouteOptimization;
 };
 
 // LES DEUX POINTS, PAS UN IDENTIFIANT. Une estimation ne vaut que pour le départ et l'arrivée qui l'ont
 // produite : c'est ce hash qui empêchera une durée calculée depuis le CENTROÏDE d'être resservie pour une
 // ADRESSE.
+//
+// L'optimisation n'entre dans le hash QUE pour « shortest » : les clés « fastest » déjà en mémoire et en table
+// restent celles d'avant FUT-98 (ROUTE_VERSION inchangée), et une durée « shortest » ne peut jamais être resservie
+// pour une demande « fastest », ni l'inverse.
 export function routeRequestHash(r: RouteRequest): string {
+  const parts = [
+    r.fromLat.toFixed(6), r.fromLon.toFixed(6),
+    r.toLat.toFixed(6), r.toLon.toFixed(6),
+    r.mode, r.direction, RESOURCE, ROUTE_VERSION,
+  ];
+  if (r.optimization === "shortest") parts.push("shortest");
   return createHash("sha256")
-    .update(
-      [
-        r.fromLat.toFixed(6), r.fromLon.toFixed(6),
-        r.toLat.toFixed(6), r.toLon.toFixed(6),
-        r.mode, r.direction, RESOURCE, ROUTE_VERSION,
-      ].join("|"),
-    )
+    .update(parts.join("|"))
     .digest("hex")
     .slice(0, 32);
 }
@@ -68,7 +79,7 @@ async function fetchMinutes(r: RouteRequest): Promise<number | null> {
     start: `${r.fromLon},${r.fromLat}`, // l'API attend lon,lat
     end: `${r.toLon},${r.toLat}`,
     profile: PROFILE[r.mode],
-    optimization: "fastest",
+    optimization: r.optimization ?? "fastest",
     timeUnit: "minute",
   })}`;
   const res = await ignFetch(url, TIMEOUT_MS);
@@ -99,7 +110,9 @@ export async function estimateTravelMinutes(
       if (mesure != null && store) {
         await store
           .putMinutes(key, mesure, {
-            engine: "ign-valhalla", resource: RESOURCE, integrationVersion: ROUTE_VERSION,
+            // L'optimisation est portée par le hash (et donc par la clé de la ligne), pas par une colonne.
+            engine: r.optimization === "shortest" ? "ign-valhalla-shortest" : "ign-valhalla",
+            resource: RESOURCE, integrationVersion: ROUTE_VERSION,
           })
           .catch(() => {});
       }
