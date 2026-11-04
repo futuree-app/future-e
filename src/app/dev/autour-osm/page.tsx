@@ -20,7 +20,7 @@ const CAS = {
   disponible: { initial: "complete", reponses: ["complete"] },
   froide: { initial: null, reponses: ["pending", "complete"] },
   panne: { initial: null, reponses: ["failed", "complete"] },
-  delai: { initial: null, reponses: ["pending", "pending", "pending", "pending", "complete"] },
+  delai: { initial: null, reponses: ["pending", "pending", "pending", "complete"] },
   rouvert: { initial: "pending", reponses: ["complete"] },
 } as const;
 
