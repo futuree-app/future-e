@@ -23,6 +23,7 @@
 //   confirmé,             non examiné   -> condition ouverte, sans fait (le registre la porte)
 //   non confirmé,         incompatible  -> ÉCART au projet, visible, jamais éliminatoire
 //   non confirmé,         satisfait     -> silencieux, point favorable (comme avant)
+import { provenanceRivage } from "./provenances.ts";
 import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible, aEnviron, limiteDuLecteur } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
 import type {
@@ -368,6 +369,7 @@ function mesureSansSeuil(
       [{
         factId: mer.evidenceKey, module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
         observedValue: kmLisible(mer.km), grain: mer.grain === "address" ? "adresse" : "commune", relation: "proximite", href: territoireHref,
+        provenance: provenanceRivage(),
       }],
       [mer.evidenceKey, "project.hardConstraints.nearSea"], "la distance au rivage marin");
   }

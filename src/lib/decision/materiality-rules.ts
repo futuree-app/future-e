@@ -8,6 +8,7 @@
 // filtre. Trois règles vivaient ici (mer, taille, département), et l'une d'elles jugeait la taille sur
 // la population COMMUNALE quand le comparateur la jugeait sur l'AGGLOMÉRATION : deux moteurs, deux
 // verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
+import { provenanceCatnat, provenanceDrias, provenancePlanAdresse, provenancePlansCommune } from "./provenances.ts";
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
   VerificationFact, MismatchFact, EvidenceRef, DecisionAction, MaterialityTier,
@@ -157,16 +158,19 @@ function preuveCatnat(f: ModuleFacts): EvidenceRef[] {
     ? [{
         factId: "inondation.catnat", module: "territoire", label: sourceCatnatInondation(c),
         observedValue: libelleCatnatInondation(c), grain: "commune", href: territoireHref, targetKey: "risk.catnat",
+        provenance: provenanceCatnat(),
       }]
     : [];
 }
 
-function preuveZonage(z: Extract<ZonageInondationFait, { etat: "zone" | "alea_inconnu" }>): EvidenceRef {
+function preuveZonage(z: Extract<ZonageInondationFait, { etat: "zone" | "alea_inconnu" }>, consultedAt?: string): EvidenceRef {
   return {
     factId: "logement.zonage-inondation", module: "logement",
     label: `${SOURCES.georisquesGaspar}, ${z.grain === "parcelle" ? "à la parcelle cadastrale" : "au point géocodé"}`,
     observedValue: `${libelleCourtDeZone(z.zone) ?? "zone réglementée"} · ${z.zone.plan ?? "plan de prévention"}`,
     grain: "adresse", href: "/rapport/logement", targetKey: "housing.regulated_zone", sourceMode: "live_fetch",
+    // FUT-12 : la date d'approbation du plan qui porte la zone, et l'instant de la lecture au point.
+    provenance: provenancePlanAdresse({ consultedAt, approuveLe: z.zone.approbation }),
   };
 }
 
@@ -180,6 +184,7 @@ function preuvePlansCommune(f: ModuleFacts, plans: PlansInondationCommune): Evid
     label: `Plans de prévention des risques naturels, base GASPAR (export du ${dateLongue(plans.export) ?? plans.export})`,
     observedValue: `${p.nom}, ${etat}${date ? ` le ${date}` : ""}${autres > 0 ? ` (et ${autres} autre${autres > 1 ? "s" : ""})` : ""}`,
     grain: "commune", href: territoireHref,
+    provenance: provenancePlansCommune({ export: plans.export }),
   };
 }
 
@@ -327,7 +332,7 @@ const ruleInondation: DecisionRule = {
         + (tousPhenomenes.length > 0 ? ` Le plan réglemente ${joinFr(tousPhenomenes)}.` : "")
         + historiqueCatnat(f)
         + ` ${LIMITE_ETAT_DES_RISQUES}`,
-      evidence: [preuveZonage(z), ...preuveCatnat(f)],
+      evidence: [preuveZonage(z, f.logement?.consultations?.pprn), ...preuveCatnat(f)],
       action: gesteZone(code)[b],
     };
     return ret("verification", [fact], "zone inondation établie à l'adresse");
@@ -393,7 +398,7 @@ const ruleInondationLecture: DecisionRule = {
         statement: constat,
         limitation: "Le zonage ne dit pas si ce logement a déjà été inondé.",
         signalConvention: `${precision}${historiqueCatnat(f)} ${LIMITE_ETAT_DES_RISQUES}`,
-        evidence: [preuveZonage(z), ...preuveCatnat(f)],
+        evidence: [preuveZonage(z, f.logement?.consultations?.pprn), ...preuveCatnat(f)],
         action: GESTE_ZONE_A_CONFIRMER[b],
       };
       return ret("verification", [fact], "zonage inondation à confirmer à l'adresse");
@@ -517,6 +522,8 @@ const climatEvidence = (nom: string, key: string, axe: ClimatAxe): EvidenceRef =
   factId: `climat.${key}`,
   module: "territoire",
   label: `Climat · ${nom}`,
+  // FUT-12 : une projection se dit projection, avec sa période de référence.
+  provenance: provenanceDrias(),
   // fmtClimatCount porte le NOM du compte (« 44 nuits », pas « 44 jours ») : hors phrase, la chip doit dire
   // son unité, et « unit » (« jours ») ne distingue pas jour et nuit.
   observedValue:

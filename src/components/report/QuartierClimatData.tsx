@@ -21,6 +21,7 @@ import type { MemoireIncendies } from "@/lib/data/bdiff-incendies";
 import { texteTerritoire } from "@/lib/incendies-observes";
 import { LIEN_VERIFICATION, type TexteFibre } from "@/lib/fibre-texte";
 import type { TextePrix } from "@/lib/prix-immobiliers";
+import { provenanceEnClair, type Provenance } from "@/lib/facts/provenance";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -565,8 +566,9 @@ export function buildFactors(
     // et qui ne se dit pas « en direct ». Le libellé porte donc la date de consultation : c'est le
     // registre des données VIVANTES, distinct de la date de génération du dossier affichée en tête.
     {
+      // FUT-12 : une source muette n'a pas été « consultée » : la tentative est datée, pas l'état.
       label: vigieau?.consultedAt
-        ? `État consulté le ${formatFrDate(vigieau.consultedAt)}`
+        ? `${vigieau.status === "unavailable" ? "Consultation tentée le" : "État consulté le"} ${formatFrDate(vigieau.consultedAt)}`
         : "Aujourd'hui",
       value: todayValue,
     },
@@ -1311,8 +1313,55 @@ function facteurPrix(t: TextePrix): Factor {
       why: t.limites.join(" "),
       whyLabel: "Ce que ces prix ne disent pas",
       sources: t.methode,
+      // FUT-12 : achat et location, chacun sa provenance (période des ventes, édition, repli, estimation).
+      provenance: lignesProvenance(t.provenances.map((x) => x.provenance)),
     },
   };
+}
+
+/** FUT-12 : les lignes « source / fraîcheur » d'une carte, dédupliquées, sans ligne vide. */
+function lignesProvenance(ps: (Provenance | undefined)[]): NonNullable<CardDetail["provenance"]> {
+  const vues = new Set<string>();
+  const out: NonNullable<CardDetail["provenance"]> = [];
+  for (const p of ps) {
+    const l = provenanceEnClair(p);
+    if (!l) continue;
+    const cle = `${l.source}|${l.fraicheur}`;
+    if (vues.has(cle)) continue;
+    vues.add(cle);
+    out.push(l);
+  }
+  return out;
+}
+
+/**
+ * FUT-12 : QUELS FAITS DU REGISTRE NOURRISSENT QUELLE CARTE. La carte se construit à partir des
+ * sources lues, pas du registre ; sa provenance, elle, vient du registre, la même pour toutes les
+ * surfaces. Une carte absente de cette table ne reçoit rien (elle garde ses « Méthodologie et sources »).
+ */
+const FAITS_DE_LA_CARTE: Record<string, string[]> = {
+  "Chaleurs estivales": ["climate.scenarios"],
+  "Nuits tropicales": ["climate.scenarios"],
+  "Conditions favorables au feu": ["climate.scenarios"],
+  "Températures moyennes": ["climate.scenarios", "climate.era5_trend"],
+  "Jours de pluie intense": ["climate.scenarios"],
+  "Sécheresse des sols": ["water.restrictions", "water.river_drought", "climate.scenarios"],
+  "Inondation fluviale": ["risk.georisques"],
+  "Submersion marine": ["risk.georisques"],
+  "Espaces naturels": ["land.composition"],
+  "Taux de boisement": ["land.forest_ademe"],
+  "Trajectoire de population": ["demography.trend"],
+  "Résidences secondaires": ["housing.secondary_share"],
+  "Logements inoccupés": ["housing.vacancy_share"],
+  "Mémoire des catastrophes": ["risk.catnat"],
+  "Érosion du littoral": ["coast.littoral"],
+};
+
+function avecProvenance(f: Factor, provenances: Record<string, Provenance> | undefined): Factor {
+  const cles = FAITS_DE_LA_CARTE[f.label];
+  if (!f.detail || !cles || !provenances || f.detail.provenance) return f;
+  const lignes = lignesProvenance(cles.map((k) => provenances[k]));
+  return lignes.length ? { ...f, detail: { ...f.detail, provenance: lignes } } : f;
 }
 
 // ─── FUT-167 : la carte « Santé environnementale » ─────────────────────────────────────────────
@@ -1357,13 +1406,18 @@ function facteurSante(c: CarteSante): Factor {
   };
 }
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre, prix, sante }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, droughtIndisponible, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, incendies, fibre, prix, sante, provenances }: SharedProps & {
+  registres?: Map<EvidenceTargetKey, Set<RegisterKey>>;
+  /** FUT-12 : la provenance des faits du snapshot Territoire, par clé de fait. */
+  provenances?: Record<string, Provenance>;
+}) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
   const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null, incendies ?? null, droughtIndisponible ?? false);
   if (fibre) factors.push(facteurFibre(fibre.texte));
   if (prix) factors.push(facteurPrix(prix));
   if (sante) factors.push(facteurSante(sante));
+  for (let i = 0; i < factors.length; i++) factors[i] = avecProvenance(factors[i]!, provenances);
   // Le lecteur a parlé de connexion ou de télétravail : la fibre ouvre le groupe « Le territoire ».
   // Seul l'ordre change ; ni la couleur ni le filet, qui disent la relation au dossier de décision.
   const rangPourLeProjet = (label: string) => (fibre?.pourLeProjet && label === "Fibre optique" ? -1 : cardRank(label));

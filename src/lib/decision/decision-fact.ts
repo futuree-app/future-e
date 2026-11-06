@@ -19,6 +19,7 @@ import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
 import type { CriteriaSummary } from "./criteria-registry.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import type { PermisSnapshot } from "../logement-autour-types.ts";
+import type { Provenance } from "../facts/provenance.ts";
 import type {
   CommuneAttributes, EvaluationContext, HardConstraintAssessment, HardConstraintKey,
 } from "../hard-constraints.ts";
@@ -75,6 +76,17 @@ export type EvidenceRef = {
    * dépendre d'un bloc voisin resté à l'écran.
    */
   observedAt?: string;
+  /**
+   * FUT-12 : LA PROVENANCE STRUCTURÉE de la preuve (producteur, jeu, diffuseur, édition, période
+   * mesurée, consultation, nature, repli). Elle s'ajoute à `label`, qui reste le libellé historique :
+   * une preuve produite avant ce contrat n'en porte pas, et se lit par son libellé comme avant.
+   *
+   * `observedAt` reste tel quel, pour les preuves déjà figées. Son sens n'était pas unique (la date
+   * d'un diagnostic DPE pour le confort d'été, la consultation du registre pour les permis) : une
+   * preuve nouvelle dit l'un ou l'autre dans `provenance.period` ou `provenance.consultedAt`, jamais
+   * dans un champ qui les confond.
+   */
+  provenance?: Provenance;
 };
 
 type BaseFact = {
@@ -419,6 +431,16 @@ export type LogementFacts = {
    */
   zonageInondation?: ZonageInondationFait;
   addressLabel: string;
+  /**
+   * FUT-12 : QUAND CHAQUE SOURCE VIVANTE A RÉELLEMENT RÉPONDU (ISO), et ce qu'on sait de la date des
+   * documents. Tout est optionnel : absent d'un artefact antérieur, et alors la preuve ne porte ni
+   * date de consultation ni édition, au lieu d'en recevoir une après coup.
+   */
+  consultations?: { rga?: string; pprn?: string; patrimoine?: string };
+  /** La date d'approbation du plan de prévention retenu (`pprnLabel`), AAAA-MM-JJ. */
+  pprnApprouveLe?: string;
+  /** Le jour du diagnostic retenu (AAAA-MM-JJ), tel que la base l'a publié. */
+  dpeDate?: string;
 };
 
 // ModuleFacts est un SUR-ENSEMBLE de CommuneAttributes : le dossier et le comparateur lisent les mêmes
@@ -531,6 +553,9 @@ export type SecteurFacts = {
     communeShare: number; // % dans la commune entière
     ecart: number;        // points, signé
     irisCode: string;
+    /** FUT-12 : le millésime du recensement lu (2022), et l'entrée de l'artefact dans futur•e. */
+    millesime?: number;
+    chargeLe?: string;
   };
 };
 

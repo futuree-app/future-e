@@ -107,9 +107,10 @@ export type LogementReport = {
     // jamais afficher l'un sans avoir lu ce champ.
     irisScope: IrisScope;
   } | null;
+  // FUT-12 : `consultedAt` (ISO) date la lecture réelle ; absent d'un rapport enregistré avant le 04/11/2026.
   georisques?: {
-    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
-    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; } | null;
+    address?: { risks: { labels: string[] }; pprn: { labels: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; consultedAt?: string; } | null;
+    parcel?: { parcelCode: string; risks: { labels: string[] }; pprn: { labels: string[]; zones: string[] }; regulatoryPlans?: RegulatoryPlan[]; rga: { code: string | null; label: string | null } | null; seismic: { code: string | null; label: string | null } | null; consultedAt?: string; } | null;
     commune?: { communeName: string | null; riskLabels: string[]; seismic: { code: string | null; label: string | null } | null; } | null;
   };
   // Protections patrimoniales au point (AC1/AC2/AC4). Statut réglementaire, comme le PPRN :

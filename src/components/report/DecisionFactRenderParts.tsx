@@ -6,6 +6,7 @@ import type { DecisionFact, VerificationActionType } from "@/lib/decision/decisi
 import { evidenceHref, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
 import type { CompositionSide } from "@/lib/decision/fact-composition";
 import { bindOrphans } from "@/lib/typography";
+import { lignesDeSource } from "@/lib/decision/provenance-preuve";
 
 export function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -92,16 +93,11 @@ function toChips(refs: { label: string; observedValue?: string; href?: string; t
 
 // LES SOURCES SANS VALEUR, pour le dépliable. Dédupliquées : quatre cartes de la même adresse ne
 // répètent pas quatre fois d'où vient la donnée.
+// FUT-12 : une preuve qui porte sa provenance structurée y dit aussi sa fraîcheur, valeur ou non
+// (`lignesDeSource`) ; une preuve historique se lit comme avant.
 export function factSources(fact: DecisionFact): string[] {
   const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const e of refs) {
-    if (e.observedValue || seen.has(e.label)) continue;
-    seen.add(e.label);
-    out.push(`Source : ${e.label}`);
-  }
-  return out;
+  return lignesDeSource(refs);
 }
 
 // L'ÉTAT ÉTABLI, SCANNABLE. Une petite étiquette éditoriale, non cliquable, posée AVANT le constat :

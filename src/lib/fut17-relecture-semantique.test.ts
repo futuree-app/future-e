@@ -329,7 +329,10 @@ test("Nouvelle génération des mêmes entrées : seules les deux formulations c
     const neuf = D.buildDecisionArtifact(d, project, "2026-10-19T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION);
     const fige = FIGES[nom]!.artefact;
     const json = (x: unknown) => JSON.stringify(x);
-    assert.equal(json(neuf.dossier), corrige(json(fige.dossier)), nom);
+    // FUT-12 : un dossier neuf porte la provenance structurée de ses preuves (`EvidenceRef.provenance`),
+    // que le figé n'avait pas. C'est un AJOUT, et le seul : retirée, le reste doit être identique.
+    const sansProvenance = (x: unknown) => JSON.parse(JSON.stringify(x, (k, v) => (k === "provenance" ? undefined : v)));
+    assert.equal(json(sansProvenance(neuf.dossier)), corrige(json(fige.dossier)), nom);
     // Le moteur a changé ce qu'il conclut ailleurs (D7) : le nouvel artefact le dit, le figé garde sa version.
     assert.equal(neuf.engineVersion, D.ENGINE_VERSION, nom);
     assert.equal(fige.engineVersion, "engine-5", nom);

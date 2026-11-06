@@ -19,6 +19,7 @@
 //   - jamais d'estimation du bien : ni surface, ni montant, ni « votre logement ».
 // Les conventions chiffrées sont dans `prix-autour.ts` ; les noms des échelles communales dans `prix-immobiliers.ts`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
+import { dateEnClair, provenance, type Provenance } from "./facts/provenance.ts";
 import { bindOrphans } from "./typography.ts";
 import { grainDpe } from "./dpe-grain.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
@@ -73,6 +74,11 @@ export type TexteVentesAutour = {
   limite: string;
   methode: string[];
   source: string;
+  /**
+   * FUT-12 : la provenance structurée des ventes lues (période des ventes, livraison du fichier).
+   * Absente quand la lecture a échoué : aucune vente n'a été lue, rien n'est daté.
+   */
+  provenance?: Provenance;
 };
 
 const NBSP = "\u00a0";
@@ -182,7 +188,17 @@ export function texteVentesAutour(
   // La commune de l'adresse, référence de l'écart ; inconnue de l'index : aucune comparaison, les ventes restent.
   const commune: LecturePrix = autour.commune ?? { code: "", nom: "la commune", logement: null, meta: { achat: { periode: autour.periode } } };
   const periode = periodeVentes(commune.meta);
-  const base = { methode: methode(autour.livraison, periode), source: SOURCE };
+  const d = autour.periode.debut.slice(0, 4), f = autour.periode.fin.slice(0, 4);
+  const base = {
+    methode: methode(autour.livraison, periode), source: SOURCE,
+    provenance: provenance({
+      producer: "DGFiP", dataset: "Demandes de valeurs foncières (DVF)", distributor: "Etalab, version géolocalisée",
+      // Une médiane calculée par futur•e sur des ventes enregistrées : la période est celle des VENTES.
+      nature: "derive",
+      period: /^\d{4}$/.test(d) && /^\d{4}$/.test(f) ? (d === f ? d : `${d}-${f}`) : null,
+      version: dateEnClair(autour.livraison) ? `Livraison du ${dateEnClair(autour.livraison)!.replace(/^le /, "")}` : null,
+    }),
+  };
 
   // Alsace-Moselle : la base ne couvre pas la commune ; des ventes voisines hors de la zone ne la décriraient pas.
   if (commune.logement?.achat?.dispo === false && commune.logement.achat.motif === "hors_dvf") {

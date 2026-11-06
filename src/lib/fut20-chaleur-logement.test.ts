@@ -594,7 +594,12 @@ test("Artefact engine-5 d'avant FUT-20 : relu et rendu exactement comme avant", 
   assert.equal(c.logement, undefined);
   assert.equal(texte(rendreComposition(c, [])), RENDU_MAIN_CONFORT_ETE);
   const { d: dt } = await dossier("nimes", { chaleur: 3, douceur: true, avant: true });
-  assert.equal(texte(rendreComposition(carteChaleur(dt)!, [])), RENDU_MAIN_COMPROMIS);
+  // FUT-12 : une génération NOUVELLE ajoute la provenance de la projection, et rien d'autre. L'artefact
+  // figé, lui (ci-dessus), se rend toujours mot pour mot comme sur main.
+  assert.equal(
+    texte(rendreComposition(carteChaleur(dt)!, [])),
+    `${RENDU_MAIN_COMPROMIS} Méthode du signal Source : Météo-France · DRIAS, trajectoire de réchauffement de référence (TRACC). Projection, période de référence 1976-2005`,
+  );
   // La carte condition d'avant FUT-20 (sans côté logement) : le rendu de main, à l'identique.
   const { run: rc } = await dossier("nimes", { chaleur: 3, confirme: true, avant: true });
   const cond = rc.facts.find((f: M) => f.id === "30189:condition:faible_chaleur");
