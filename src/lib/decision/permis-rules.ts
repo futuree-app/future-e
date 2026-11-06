@@ -23,6 +23,7 @@
 //
 // Pure, testée sous `node --test`.
 
+import { provenancePermis } from "./provenances.ts";
 import type {
   DecisionRule, RuleEvaluation, VerificationFact, EvidenceRef,
 } from "./decision-fact.ts";
@@ -189,6 +190,8 @@ const permisRule: DecisionRule = {
         // Le fait la porte partout où il est projeté : carte, liste, conclusion, export futur.
         sourceMode: "persisted_snapshot",
         observedAt: p.consulteLe,
+        // FUT-12 : la même date, à sa place (une consultation), et la chaîne d'accès du registre.
+        provenance: provenancePermis(p.consulteLe),
       } satisfies EvidenceRef],
       action: {
         type: "obtenir_document",

@@ -4,7 +4,7 @@ import {
 } from "@/lib/server/logement-decision-data";
 import { buildLogementFacts } from "@/lib/decision/logement-facts";
 import { buildSecteurFacts } from "@/lib/decision/secteur-facts";
-import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
+import { getCarOwnershipAtPoint, getIrisLogementSource } from "@/lib/server/iris-logement-store";
 import { runRules } from "@/lib/decision/materiality-rules";
 import { verificationsMateriellesIndisponibles } from "@/lib/decision/logement-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
@@ -83,8 +83,9 @@ export async function assembleAddressDossier(input: {
     // en panne, elle rend `unknown` et la règle se tait — jamais d'erreur qui coûterait le dossier.
     const car = await getCarOwnershipAtPoint(address.latitude, address.longitude, address.citycode)
       .catch(() => null);
+    const sourceIris = await getIrisLogementSource().catch(() => null);
     const facts: ModuleFacts = {
-      ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
+      ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car, sourceIris),
       // La relation de la COMMUNE ne passe pas à l'adresse : elle est remplacée, même par une inconnue.
       relationAuLieu: input.relation ?? { echelle: "adresse", relation: null },
       // LE REGISTRE ENTRE DANS LE MOTEUR. Aucune I/O : la donnée est déjà gelée dans le snapshot du

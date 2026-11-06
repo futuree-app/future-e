@@ -9,6 +9,8 @@ import { readCarOwnership, type CarOwnership, type IrisLogementRow } from "../ir
 
 type Artefact = {
   dataYear: number;
+  /** FUT-12 : la construction de l'artefact (AAAA-MM-JJ), soit son entrée dans futur•e. */
+  builtAt?: string;
   secteurs: Record<string, IrisLogementRow>;
   communes: Record<string, number>;
 };
@@ -41,6 +43,12 @@ export async function getCarOwnership(irisCode: string | null, insee: string | n
 
 export async function getIrisLogementDataYear(): Promise<number | null> {
   return (await load())?.dataYear ?? null;
+}
+
+/** FUT-12 : le millésime du recensement et la date de construction de l'artefact, tels qu'il les porte. */
+export async function getIrisLogementSource(): Promise<{ annee: number | null; chargeLe: string | null }> {
+  const a = await load();
+  return { annee: a?.dataYear ?? null, chargeLe: a?.builtAt ?? null };
 }
 
 /**

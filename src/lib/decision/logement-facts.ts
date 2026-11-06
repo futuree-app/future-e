@@ -66,5 +66,9 @@ export function buildLogementFacts(data: LogementDecisionData, retenu: DpeRecord
     // FUT-127 : absent d'une donnée antérieure (le champ n'existait pas), présent dès qu'elle est dérivée.
     ...(data.zonageInondation ? { zonageInondation: data.zonageInondation } : {}),
     addressLabel,
+    // FUT-12 : des champs absents plutôt que vides, pour qu'un dossier ne porte que ce qui a été lu.
+    ...(data.consultations ? { consultations: data.consultations } : {}),
+    ...(data.pprn.approuveLe ? { pprnApprouveLe: data.pprn.approuveLe } : {}),
+    ...(savedDpe?.etiquette_dpe && savedDpe.date_dpe ? { dpeDate: savedDpe.date_dpe } : {}),
   };
 }

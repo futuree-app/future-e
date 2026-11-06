@@ -5,6 +5,7 @@
 // d'aujourd'hui. Le prototype FUT-87 l'omettait.
 import { evidenceHref } from "../../lib/decision/evidence-targets.ts";
 import { dateFr } from "../../lib/decision/autour-permis.ts";
+import { provenanceEnClair } from "../../lib/facts/provenance.ts";
 import type { EntreeLue, PreuveLue, GrainLu, SectionLue } from "./lecture-dossier.ts";
 import type { ElementDeMarge, GrainCle } from "./primitives.tsx";
 
@@ -30,6 +31,18 @@ const GRAIN_EN_MARGE: Record<GrainLu, string> = {
 const observee = (p: PreuveLue) => (p.date && dateFr(p.date) ? `observée le ${dateFr(p.date)}` : undefined);
 
 /**
+ * FUT-12 : LA SOURCE ET SA FRAÎCHEUR, depuis la provenance structurée. La date affichée est alors
+ * celle que la provenance qualifie (« Données observées en 2022 », « Source consultée le … ») et non
+ * plus le seul `observedAt`, dont le sens variait d'une règle à l'autre. Sans provenance : `null`, et
+ * la preuve historique se rend comme avant.
+ */
+function sourceStructuree(p: PreuveLue): { texte: string; date?: string } | null {
+  const l = provenanceEnClair(p.provenance);
+  if (!l || (!l.source && !l.fraicheur)) return null;
+  return { texte: `Source : ${l.source ?? p.libelle}`, ...(l.fraicheur ? { date: l.fraicheur } : {}) };
+}
+
+/**
  * LA MARGE D'UNE CARTE : tous ses grains, puis ses preuves chiffrées, puis ses sources nommées. Une
  * source sans valeur reste un lien quand elle en a un ; une carte à grains mêlés donne à chaque preuve
  * son propre glyphe. Rien n'est fabriqué : une marge sans preuve reste vide.
@@ -42,13 +55,21 @@ export function margeDe(
   const propre = (p: PreuveLue) => (grainParPreuve ? { grain: p.grain as GrainCle } : {});
   return [
     ...e.grains.map((g) => ({ type: "grain" as const, grain: g as GrainCle, libelle: GRAIN_EN_MARGE[g] })),
-    ...e.preuves.map((p) => ({
-      type: "valeur" as const, libelle: p.href ? "Preuve" : p.libelle, valeur: p.valeur ?? p.libelle,
-      href: lien(p), date: observee(p), ...propre(p),
-    })),
-    ...e.sources.map((p) => ({
-      type: "source" as const, texte: `Source : ${p.libelle}`, href: lien(p), date: observee(p), ...propre(p),
-    })),
+    ...e.preuves.flatMap((p): ElementDeMarge[] => {
+      const valeur: ElementDeMarge = {
+        type: "valeur" as const, libelle: p.href ? "Preuve" : p.libelle, valeur: p.valeur ?? p.libelle,
+        href: lien(p), date: observee(p), ...propre(p),
+      };
+      // Une valeur dont la provenance est connue dit, juste dessous, d'où elle vient et de quand.
+      const s = sourceStructuree(p);
+      return s ? [{ ...valeur, date: undefined }, { type: "source" as const, ...s, ...propre(p) }] : [valeur];
+    }),
+    ...e.sources.map((p): ElementDeMarge => {
+      const s = sourceStructuree(p);
+      return s
+        ? { type: "source" as const, ...s, href: lien(p), ...propre(p) }
+        : { type: "source" as const, texte: `Source : ${p.libelle}`, href: lien(p), date: observee(p), ...propre(p) };
+    }),
   ];
 }
 

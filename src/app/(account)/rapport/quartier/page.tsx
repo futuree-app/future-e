@@ -216,6 +216,10 @@ export default async function RapportQuartierPage(
 
   // Sources mobilisées par horizon, lues dans le MÊME snapshot que le texte. Ligne discrète sous la
   // synthèse : elle porte des affirmations chiffrées, elle garde un renvoi de provenance.
+  // FUT-12 : la provenance de chaque fait du snapshot, que les volets des cartes affichent.
+  const provenances = snapshot
+    ? Object.fromEntries(snapshot.facts.flatMap((f) => (f.provenance ? [[f.key, f.provenance] as const] : [])))
+    : undefined;
   const sourcesByHorizon = Object.fromEntries(
     HORIZONS.map((h) => [h, snapshot ? sourcesFromSnapshot(snapshot, h) : []]),
   ) as Record<HorizonKey, ReturnType<typeof sourcesFromSnapshot>>;
@@ -337,7 +341,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} droughtIndisponible={droughtIndisponible} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} prix={prix} sante={sante} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} droughtIndisponible={droughtIndisponible} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} incendies={incendies} fibre={fibre} prix={prix} sante={sante} provenances={provenances} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

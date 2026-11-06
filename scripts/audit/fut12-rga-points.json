@@ -1,0 +1,206 @@
+{
+ "constateLe": "2026-11-04",
+ "methode": "Points tirés au hasard dans l'emprise départementale, retenus là où la classe (niveau 0-3, 0 = hors zone) diffère entre AleaRG{dep}_L93.zip (2019) et AleaRG_2025_{dep}_L93.zip (2026), fichiers files.georisques.fr. Classes lues par inclusion point-polygone (pyshp + shapely, Lambert 93 → WGS84 pyproj).",
+ "fichiers": {
+  "2019": "https://files.georisques.fr/argiles/AleaRG{dep}_L93.zip (Last-Modified 11/06/2019)",
+  "2026": "https://files.georisques.fr/argiles/2025/AleaRG_2025_{dep}_L93.zip (Last-Modified 28/11/2025)"
+ },
+ "points": [
+  {
+   "dep": "17",
+   "lat": 45.885199,
+   "lon": -1.042176,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.772845,
+   "lon": -1.01447,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 46.032675,
+   "lon": -0.659492,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.751102,
+   "lon": -1.107219,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.986062,
+   "lon": -1.329466,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.987334,
+   "lon": -0.678061,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.170242,
+   "lon": -0.287739,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.676715,
+   "lon": -1.076017,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 46.328551,
+   "lon": -1.074378,
+   "carte2026": 2,
+   "carte2019": 0
+  },
+  {
+   "dep": "17",
+   "lat": 45.200892,
+   "lon": -0.119969,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.766933,
+   "lon": -1.126249,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.315063,
+   "lon": -0.643581,
+   "carte2026": 3,
+   "carte2019": 0
+  },
+  {
+   "dep": "17",
+   "lat": 45.987888,
+   "lon": -1.33936,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 45.850483,
+   "lon": -1.208355,
+   "carte2026": 0,
+   "carte2019": 2
+  },
+  {
+   "dep": "17",
+   "lat": 45.254835,
+   "lon": -0.175437,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "17",
+   "lat": 46.335901,
+   "lon": -0.822245,
+   "carte2026": 2,
+   "carte2019": 0
+  },
+  {
+   "dep": "31",
+   "lat": 43.557648,
+   "lon": 1.494031,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "31",
+   "lat": 43.631244,
+   "lon": 1.460234,
+   "carte2026": 3,
+   "carte2019": 2
+  },
+  {
+   "dep": "31",
+   "lat": 43.624099,
+   "lon": 1.425989,
+   "carte2026": 3,
+   "carte2019": 2
+  },
+  {
+   "dep": "31",
+   "lat": 43.574507,
+   "lon": 1.479186,
+   "carte2026": 3,
+   "carte2019": 2
+  },
+  {
+   "dep": "31",
+   "lat": 43.613473,
+   "lon": 1.412766,
+   "carte2026": 3,
+   "carte2019": 2
+  },
+  {
+   "dep": "31",
+   "lat": 43.266804,
+   "lon": 1.598221,
+   "carte2026": 3,
+   "carte2019": 0
+  },
+  {
+   "dep": "31",
+   "lat": 43.104366,
+   "lon": 1.004216,
+   "carte2026": 3,
+   "carte2019": 0
+  },
+  {
+   "dep": "31",
+   "lat": 43.576288,
+   "lon": 1.457682,
+   "carte2026": 3,
+   "carte2019": 2
+  },
+  {
+   "dep": "31",
+   "lat": 43.637655,
+   "lon": 1.470953,
+   "carte2026": 2,
+   "carte2019": 3
+  },
+  {
+   "dep": "31",
+   "lat": 43.564774,
+   "lon": 1.45237,
+   "carte2026": 0,
+   "carte2019": 3
+  },
+  {
+   "dep": "31",
+   "lat": 43.032636,
+   "lon": 0.706139,
+   "carte2026": 2,
+   "carte2019": 1
+  },
+  {
+   "dep": "31",
+   "lat": 43.589403,
+   "lon": 1.461619,
+   "carte2026": 3,
+   "carte2019": 2
+  }
+ ]
+}

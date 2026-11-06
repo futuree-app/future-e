@@ -347,7 +347,7 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // et seules ces lignes ajoutées.
 // FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
 // `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
-test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165)", () => {
+test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), et l'application de la provenance (FUT-12)", () => {
   const f = "src/lib/territoire/facts.ts";
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
   const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
@@ -360,6 +360,9 @@ test("IA : le registre des faits Territoire n'a changé que des statuts de panne
     /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
     /^\+ {2}droughtIndisponible\?: boolean;$/,
     /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
+    // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
+    /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
+    /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
   ];
   for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
 });

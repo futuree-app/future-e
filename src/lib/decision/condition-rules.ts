@@ -20,6 +20,7 @@
 // constat retournait la carte d'une commune parmi les 20 % les plus favorables en « plutôt défavorable ».
 // Désormais, seules les règles d'exposition orientent le signal ; les constats à confirmer restent dans la
 // carte, nommés à leur échelle, avec leur geste et leur limite, sans peser dans un sens ni dans l'autre.
+import { provenanceRivage } from "./provenances.ts";
 import type {
   DecisionFact, ModuleFacts, RuleEvaluation, ConditionCheckFact, ConditionSignal, EvidenceRef, DecisionAction,
   VerificationFact,
@@ -215,6 +216,7 @@ function mesureMer(f: ModuleFacts): { statement: string; evidence: EvidenceRef }
     evidence: {
       factId: "commune.merCentreKm", module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
       observedValue: `point de référence ${aEnviron(km)} du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
+      provenance: provenanceRivage(),
     },
   };
 }

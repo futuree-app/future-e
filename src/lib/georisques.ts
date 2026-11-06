@@ -112,6 +112,11 @@ export type GeorisquesAddressSummary = {
     label: string | null;
   } | null;
   granularity: "point";
+  /**
+   * FUT-12 : L'INSTANT DE LA LECTURE RÉELLE (ISO). Le résumé vit ensuite dans un cache de process :
+   * l'heure où il est RELU n'est pas celle où Géorisques a répondu, et c'est celle-ci qui date la preuve.
+   */
+  consultedAt?: string;
 };
 
 export type GeorisquesParcelSummary = {
@@ -135,6 +140,11 @@ export type GeorisquesParcelSummary = {
     label: string | null;
   } | null;
   granularity: "parcel";
+  /**
+   * FUT-12 : L'INSTANT DE LA LECTURE RÉELLE (ISO). Le résumé vit ensuite dans un cache de process :
+   * l'heure où il est RELU n'est pas celle où Géorisques a répondu, et c'est celle-ci qui date la preuve.
+   */
+  consultedAt?: string;
 };
 
 const GEORISQUES_BASE_URL = "https://georisques.gouv.fr/api/v1";
@@ -287,6 +297,7 @@ async function loadGeorisquesAddressSummary(
   longitude: number,
   codeInsee: string | null,
 ): Promise<GeorisquesAddressSummary> {
+  const consultedAt = new Date().toISOString();
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
@@ -364,12 +375,14 @@ async function loadGeorisquesAddressSummary(
         }
       : null,
     granularity: "point",
+    consultedAt,
   };
 }
 
 async function loadGeorisquesParcelSummary(
   parcelCode: string,
 ): Promise<GeorisquesParcelSummary> {
+  const consultedAt = new Date().toISOString();
   const params = new URLSearchParams({
     codesParcelle: parcelCode,
     pageSize: "10",
@@ -457,6 +470,7 @@ async function loadGeorisquesParcelSummary(
         }
       : null,
     granularity: "parcel",
+    consultedAt,
   };
 }
 

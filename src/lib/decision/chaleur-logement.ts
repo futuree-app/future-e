@@ -20,6 +20,7 @@
 //   - prédire une température intérieure ou un vécu. L'indicateur est conventionnel ;
 //   - lire une évolution climatique. Il ne cite aucun chiffre : la carte qui le porte cite déjà le
 //     constat climatique, avec ses preuves et sa convention.
+import { provenanceDpe } from "./provenances.ts";
 import type { ConfortEteFait, DecisionAction, EvidenceRef, LogementFacts, ModuleFacts, VerificationFact } from "./decision-fact.ts";
 import type { CompositionSide } from "./fact-composition.ts";
 import type { UserProject } from "../user-project.ts";
@@ -192,6 +193,8 @@ function preuvesDe(c: ConfortEteFait): EvidenceRef[] {
     factId: RULE_CONFORT_ETE, module: "logement", label: "Base DPE (ADEME)", grain: "adresse",
     href: "/rapport/logement", sourceMode: "persisted_snapshot", observedValue,
     ...(c.dateDiagnostic ? { observedAt: c.dateDiagnostic } : {}),
+    // FUT-12 : le jour du diagnostic est ce que la preuve DATE (sa période), pas une consultation.
+    provenance: provenanceDpe(c.dateDiagnostic),
   }];
 }
 

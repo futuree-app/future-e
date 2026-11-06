@@ -22,6 +22,7 @@ import type { Era5Trend } from "../era5-trend.ts";
 import type { CatnatInondation } from "../decision/catnat-evidence.ts";
 import type { TerritoryType } from "../territory-mood.ts";
 import { millesimePopulation } from "../population-millesime.ts";
+import { avecProvenances } from "./provenances.ts";
 
 /** Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses. */
 export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@1";
@@ -384,6 +385,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("coast.erosion"), synthesis: INCLUDE,
     }),
   ];
+  facts.splice(0, facts.length, ...avecProvenances(facts, i)); // FUT-12 : provenance affichée, hors empreinte (`provenances.ts`).
 
   const derived: DerivedFact[] = [];
   if (hasOso) {

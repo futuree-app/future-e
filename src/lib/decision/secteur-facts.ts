@@ -32,7 +32,11 @@ export type CarOwnershipLike =
 export const ECART_SECTEUR_NOTABLE = 15;
 
 /** Adaptateur pur : la lecture de l'artefact -> les faits du socle. */
-export function buildSecteurFacts(car: CarOwnershipLike | null | undefined): SecteurFacts {
+export function buildSecteurFacts(
+  car: CarOwnershipLike | null | undefined,
+  /** FUT-12 : le millésime et la construction de l'artefact lu. Absent : la preuve ne date rien. */
+  source?: { annee: number | null; chargeLe: string | null } | null,
+): SecteurFacts {
   if (!car || car.kind !== "secteur" || car.communeShare == null) return {};
   return {
     equipementAuto: {
@@ -40,6 +44,8 @@ export function buildSecteurFacts(car: CarOwnershipLike | null | undefined): Sec
       communeShare: car.communeShare,
       ecart: Math.round((car.share - car.communeShare) * 10) / 10,
       irisCode: car.irisCode,
+      ...(source?.annee ? { millesime: source.annee } : {}),
+      ...(source?.chargeLe ? { chargeLe: source.chargeLe } : {}),
     },
   };
 }

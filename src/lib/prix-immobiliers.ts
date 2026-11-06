@@ -16,6 +16,7 @@
 //   - un manque se dit avec sa raison (Alsace-Moselle hors DVF, trop peu de ventes), jamais « moyen ».
 // ════════════════════════════════════════════════════════════════════════════════════════════
 import { bindOrphans, deCommune } from "./typography.ts";
+import { provenance, type Provenance } from "./facts/provenance.ts";
 
 export type NiveauPrix = "tres_bas" | "bas" | "moyen" | "haut" | "tres_haut";
 export type PrixDuType = { eur_m2: number; maille: string; ventes?: number };
@@ -145,7 +146,55 @@ export type TextePrix = {
   faits: { label: string; value: string }[];
   limites: string[];
   methode: string;
+  /**
+   * FUT-12 : LA PROVENANCE STRUCTURÉE de l'achat et de la location, chacun la sienne. La période des
+   * ventes vient de `meta.achat.periode`, jamais de la livraison : une édition d'octobre 2026 ne
+   * contient pas de ventes de 2026. Le repli (intercommunalité, ville entière, communes voisines
+   * pour un loyer) y est dit comme une maille, pas deviné.
+   */
+  provenances: { cle: "achat" | "location"; provenance: Provenance }[];
 };
+
+/** Achat : une médiane calculée par futur•e sur des ventes enregistrées par la DGFiP. */
+function provenanceAchat(l: LecturePrix, principal: Ligne | null): Provenance {
+  const d = anneeDe(l.meta?.achat?.periode?.debut), f = anneeDe(l.meta?.achat?.periode?.fin);
+  return provenance({
+    producer: "DGFiP",
+    dataset: "Demandes de valeurs foncières (DVF)",
+    distributor: "Etalab, version géolocalisée",
+    nature: "derive",
+    period: d && f ? (d === f ? d : `${d}-${f}`) : null,
+    // La livraison est recopiée telle que l'index l'écrit, sans en extraire une date par expression
+    // régulière : elle date l'édition du fichier, pas les ventes.
+    version: l.meta?.achat?.livraison ?? null,
+    fallback: principal && estRepli(principal.prix)
+      ? { grain: principal.prix.maille === "EPCI" ? "l'intercommunalité" : `toute la ville de ${villeDe(l.code) ?? l.nom}` }
+      : null,
+    limits: LIMITE_VENTES,
+  });
+}
+
+/** Location : des loyers d'annonce ESTIMÉS par l'ANIL, jamais des loyers observés à une adresse. */
+function provenanceLocation(l: LecturePrix): Provenance | null {
+  const loc = l.logement?.location;
+  if (!loc) return null;
+  return provenance({
+    producer: "ANIL",
+    dataset: "Carte des loyers 2025",
+    nature: "estimation",
+    period: "2025",
+    fallback: loc.fiabilite === "estimee" ? { grain: "communes voisines, faute d'annonces suffisantes ici" } : null,
+    limits: LIMITE_LOYERS,
+  });
+}
+
+function provenancesPrix(l: LecturePrix, principal: Ligne | null): TextePrix["provenances"] {
+  const out: TextePrix["provenances"] = [];
+  if (prixDeVente(l).length) out.push({ cle: "achat", provenance: provenanceAchat(l, principal) });
+  const loc = provenanceLocation(l);
+  if (loc) out.push({ cle: "location", provenance: loc });
+  return out;
+}
 
 function faitVente(x: Ligne, l: LecturePrix): { label: string; value: string } {
   const n = x.prix.ventes;
@@ -206,6 +255,7 @@ export function textePrix(l: LecturePrix): TextePrix {
       faits: loyers,
       limites: limites.filter(Boolean).map(bindOrphans),
       methode,
+      provenances: provenancesPrix(l, null),
     };
   }
 
@@ -226,6 +276,7 @@ export function textePrix(l: LecturePrix): TextePrix {
     faits: [...ventes.map((x) => faitVente(x, l)), ...loyers],
     limites: limites.filter(Boolean).map(bindOrphans),
     methode,
+    provenances: provenancesPrix(l, principal),
   };
 }
 
