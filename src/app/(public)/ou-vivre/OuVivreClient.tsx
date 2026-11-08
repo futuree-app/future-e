@@ -17,7 +17,10 @@ import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
 import { repliSynthese } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
-import { SESSION_OUVIVRE_KEY, lireSessionOuVivre, serialiserSessionOuVivre } from "@/lib/comparateur/session-ou-vivre";
+import {
+  CLE_PACK_LABEL, CLE_PACK_PARSED, CLE_PAYWALL_LABELS, SESSION_OUVIVRE_KEY, lireSessionOuVivre, serialiserSessionOuVivre,
+} from "@/lib/comparateur/session-ou-vivre";
+import { peutEcrireRecherche, purgeRechercheConnue, useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
 import { avisRefusAsk, contexteAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
 import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
 import { libelleCarteSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
@@ -81,7 +84,10 @@ function loadSession(): SessionSnapshot | null {
   if (typeof window === "undefined") return null;
   try {
     // FUT-139 : sans couverture ni mode d'exploration lisibles, la session est rejetée, jamais complétée.
-    return lireSessionOuVivre(window.localStorage.getItem(SESSION_OUVIVRE_KEY), Date.now()) as SessionSnapshot | null;
+    // FUT-27 : une session écrite avant la dernière déconnexion n'est pas réaffichée.
+    return lireSessionOuVivre(
+      window.localStorage.getItem(SESSION_OUVIVRE_KEY), Date.now(), purgeRechercheConnue(),
+    ) as SessionSnapshot | null;
   } catch {
     return null;
   }
@@ -460,6 +466,29 @@ export function OuVivreClient() {
 
   const runSeq = useRef(0); // garde-fou contre les réponses obsolètes (re-submit)
 
+  // FUT-27 : une déconnexion explicite (dans cet onglet ou un autre) efface la recherche du stockage ; cet
+  // écran oublie aussi celle qu'il affiche, et les réponses encore en route. `origineRecherche` date ce que
+  // l'écran tient en mémoire : antérieure à la purge, elle interdit toute écriture (elle recréerait la
+  // recherche effacée). Une recherche lancée après la purge l'avance et s'enregistre normalement.
+  const origineRecherche = useOubliALaPurge(() => {
+    runSeq.current++;
+    setText("");
+    setSubmittedText("");
+    setParsed(null);
+    setOutcome(null);
+    setSynthesis("");
+    setSynthesizing(false);
+    setAskMessages([]);
+    setAskInput("");
+    setAskLoading(false);
+    setAskRemaining(FREE_ASK);
+    setAskLimit(false);
+    setRoutesNudge(false);
+    setAskAvis(null);
+    setErrorMsg(null);
+    setPhase("idle");
+  });
+
   // Ancre vers la zone de sortie : au clic « Explorer », on descend automatiquement
   // à l'interprétation/résultats pour que la réponse soit dans le champ de vision
   // sans scroll manuel. `searchStartedRef` distingue une recherche lancée par
@@ -495,8 +524,9 @@ export function OuVivreClient() {
   // ── Sauvegarde du parcours tant qu'on est en résultats (cartes/comparaison).
   useEffect(() => {
     if (phase !== "results" || !parsed || !outcome?.results?.length) return;
+    if (!peutEcrireRecherche(origineRecherche.current)) return;
     saveSession({ submittedText, parsed, outcome, synthesis, askMessages, askRemaining, askLimit });
-  }, [phase, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, submittedText]);
+  }, [phase, parsed, outcome, synthesis, askMessages, askRemaining, askLimit, submittedText, origineRecherche]);
 
   // ── Synthèse streamée ─────────────────────────────────────────────────────
   const streamSynthesis = useCallback(
@@ -638,6 +668,7 @@ export function OuVivreClient() {
     if (project.length < 3) return;
 
     searchStartedRef.current = true; // autorise l'auto-scroll (recherche utilisateur)
+    origineRecherche.current = Date.now(); // une recherche voulue maintenant, après toute purge passée
     clearSession(); // une nouvelle recherche remplace la session restaurable
 
     const seq = ++runSeq.current;
@@ -678,7 +709,7 @@ export function OuVivreClient() {
       setErrorMsg("Nous n'avons pas réussi à lire ce projet. Reformulez-le en une ou deux phrases.");
       setPhase("error");
     }
-  }, [runMatch]);
+  }, [runMatch, origineRecherche]);
 
   // Affiner : revenir à l'édition du texte sans perdre ce qui est saisi.
   const refine = useCallback(() => {
@@ -694,6 +725,7 @@ export function OuVivreClient() {
   const launchFromAnchor = useCallback(
     (p: ParsedProject, nom: string) => {
       searchStartedRef.current = true; // autorise l'auto-scroll (recherche utilisateur)
+      origineRecherche.current = Date.now();
       setOutcome(null);
       setSynthesis("");
       setAskMessages([]);
@@ -709,7 +741,7 @@ export function OuVivreClient() {
       capture("life_anchor_launched");
       void runMatch({ parsed: p, submittedText: subText });
     },
-    [runMatch],
+    [runMatch, origineRecherche],
   );
 
   // Critères humains détectés (jamais les clés techniques), affichés au gate, avec
@@ -763,6 +795,9 @@ export function OuVivreClient() {
     if (question.length < 3 || askLoading || askLimit || !parsed) return;
     if (longueurQuestion(question) > MAX_QUESTION_ASK) return; // FUT-155 : la ligne sous le champ le dit
     setAskAvis(null);
+    // La réponse n'est rendue qu'à la recherche qui l'a demandée : une déconnexion ou une nouvelle recherche
+    // entre-temps (runSeq avancé) la laisse tomber.
+    const seq = runSeq.current;
 
     const userMsg: AskMessage = { role: "user", content: question };
     const history = askMessages.slice(-6);
@@ -791,6 +826,7 @@ export function OuVivreClient() {
           distinctId: distinctId(),
         }),
       });
+      if (seq !== runSeq.current) return;
 
       if (res.status === 402) {
         setAskLimit(true);
@@ -800,6 +836,7 @@ export function OuVivreClient() {
       }
 
       const data = await res.json().catch(() => ({}));
+      if (seq !== runSeq.current) return;
       // FUT-155 : un refus de taille rend la question, intacte, et dit pourquoi.
       const avis = avisRefusAsk(res.status, data.code);
       if (avis) {
@@ -816,6 +853,7 @@ export function OuVivreClient() {
       setAskRemaining(typeof data.remaining === "number" ? data.remaining : Math.max(0, askRemaining - 1));
       setRoutesNudge(data.routesToReport === true);
     } catch {
+      if (seq !== runSeq.current) return;
       setAskMessages((m) => [
         ...m,
         { role: "assistant", content: "Cette réponse n'a pas pu être générée. Réessayez dans un instant." },
@@ -831,8 +869,8 @@ export function OuVivreClient() {
     // Dépose les priorités du projet (libellés client-safe) pour la touche perso de la paywall.
     try {
       const labels = preferencesToLabels(parsed?.preferences ?? null);
-      if (labels.length > 0) {
-        window.localStorage.setItem("futuree:projet:labels", JSON.stringify(labels));
+      if (labels.length > 0 && peutEcrireRecherche(origineRecherche.current)) {
+        window.localStorage.setItem(CLE_PAYWALL_LABELS, JSON.stringify(labels));
       }
     } catch {
       // best-effort, jamais bloquant
@@ -853,8 +891,10 @@ export function OuVivreClient() {
     // écriture, aucun événement, aucune navigation). Le paiement reste l'ultime garde.
     if (!packReplayProposable(trio.length)) return;
     try {
-      if (parsed) window.localStorage.setItem("futuree:projet:parsed", JSON.stringify(parsed));
-      window.localStorage.setItem("futuree:projet:label", submittedText.slice(0, 200));
+      if (peutEcrireRecherche(origineRecherche.current)) {
+        if (parsed) window.localStorage.setItem(CLE_PACK_PARSED, JSON.stringify(parsed));
+        window.localStorage.setItem(CLE_PACK_LABEL, submittedText.slice(0, 200));
+      }
     } catch {
       // localStorage indisponible : la page de conviction proposera de revenir au comparateur.
     }

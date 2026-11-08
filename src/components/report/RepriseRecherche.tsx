@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { relireLaPage } from "@/components/interaction/relire-la-page";
+import {
+  peutEcrireRecherche, purgeRechercheConnue, useOubliALaPurge,
+} from "@/components/interaction/purge-recherche-navigateur";
 import { createClient } from "@/lib/supabase/client";
 import {
   SESSION_RECHERCHE_KEY, lireRechercheSession, libelleReprise, phraseAbandon,
@@ -23,7 +26,8 @@ type Apercu = ApercuReprise;
 
 function derniereRecherche(): Recherche | null {
   try {
-    return lireRechercheSession(window.localStorage.getItem(SESSION_RECHERCHE_KEY), Date.now());
+    // FUT-27 : une recherche écrite avant la dernière déconnexion appartient au compte parti.
+    return lireRechercheSession(window.localStorage.getItem(SESSION_RECHERCHE_KEY), Date.now(), purgeRechercheConnue());
   } catch {
     return null;
   }
@@ -50,6 +54,18 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
   const [etat, setEtat] = useState<"repos" | "envoi" | "fait">("repos");
   const [erreur, setErreur] = useState<string | null>(null);
 
+  // FUT-27 : une déconnexion (ici ou dans un autre onglet) oublie la recherche, l'aperçu déjà affiché et ceux
+  // encore en route (`generation`). Le geste disparaît ; il ne revient que pour une recherche lancée depuis.
+  const generation = useRef(0);
+  const origine = useOubliALaPurge(() => {
+    generation.current++;
+    setRecherche(null);
+    setApercu(null);
+    setOuvert(false);
+    setErreur(null);
+    setEtat("repos");
+  });
+
   // Lecteur connecté seulement, et seulement s'il y a une recherche à reprendre. L'aperçu est demandé
   // d'emblée : il dit aussi s'il existe déjà un projet (et donc quel libellé montrer).
   useEffect(() => {
@@ -58,12 +74,16 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
     // composant une `key` liée à la recherche, ce qui le remonte avec un état vierge.
     const r = fournie ?? derniereRecherche();
     if (!r) return;
+    const g = generation.current;
+    const perime = () => annule || g !== generation.current;
     createClient().auth.getSession().then(async ({ data }) => {
-      if (annule || !data.session) return;
+      if (perime() || !data.session) return;
       const res = await demander(r, { mode: "apercu" }).catch(() => null);
-      if (annule || !res?.ok) return;
+      if (perime() || !res?.ok) return;
+      const a = (await res.json()) as Apercu;
+      if (perime()) return;
       setRecherche(r);
-      setApercu((await res.json()) as Apercu);
+      setApercu(a);
     });
     return () => { annule = true; };
   }, [fournie]);
@@ -75,6 +95,7 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
 
   async function enregistrer() {
     if (!recherche || !apercu) return;
+    if (!peutEcrireRecherche(origine.current)) return; // la recherche a été effacée entre-temps
     setEtat("envoi");
     setErreur(null);
     const res = await demander(recherche, { mode: "enregistrer", vuUpdatedAt: apercu.remplace?.updatedAt ?? null }).catch(() => null);

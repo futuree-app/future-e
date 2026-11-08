@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CLE_PAYWALL_LABELS } from "@/lib/comparateur/session-ou-vivre";
+import { useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
 
 // Ligne personnalisée optionnelle : reprend les priorités du projet (si l'utilisateur en a
 // tapé un sur /ou-vivre) pour relier l'aperçu à SA décision. Best-effort, jamais bloquant.
 export function PersonalTouch({ commune }: { commune: string }) {
   const [labels, setLabels] = useState<string[]>([]);
+  // FUT-27 : une déconnexion explicite efface ces priorités ; la ligne disparaît aussi de l'écran.
+  useOubliALaPurge(() => setLabels([]));
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem("futuree:projet:labels");
+      const raw = window.localStorage.getItem(CLE_PAYWALL_LABELS);
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {

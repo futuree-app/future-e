@@ -44,7 +44,7 @@ const PROJET: UserProject = normalizeUserProject({
 
 test("session : ce qu'« Où vivre » écrit, /rapport le relit (le défaut v5 ≠ v3)", () => {
   const parsed = parsedDe("Rennes");
-  const r = lireRechercheSession(sessionOuVivre("Une ville comme Rennes", parsed), MAINTENANT);
+  const r = lireRechercheSession(sessionOuVivre("Une ville comme Rennes", parsed), MAINTENANT, null);
   assert.deepEqual(r, { parsed, rawText: "Une ville comme Rennes" });
   assert.equal(SESSION_RECHERCHE_KEY, SESSION_OUVIVRE_KEY, "une seule clé");
 });
@@ -52,17 +52,17 @@ test("session : ce qu'« Où vivre » écrit, /rapport le relit (le défaut v5 �
 test("session : versions anciennes, expirées, datées du futur, illisibles ou non reconstituables → rien n'est proposé", () => {
   const ok = JSON.parse(sessionOuVivre("x", parsedDe("Nantes")));
   const variante = (over: Record<string, unknown>) => JSON.stringify({ ...ok, ...over });
-  for (let v = 2; v < SESSION_OUVIVRE_VERSION; v++) assert.equal(lireRechercheSession(variante({ v }), MAINTENANT), null, `v${v}`);
-  assert.equal(lireRechercheSession(variante({ v: SESSION_OUVIVRE_VERSION + 1 }), MAINTENANT), null, "version inconnue");
-  assert.equal(lireRechercheSession(variante({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS - 1 }), MAINTENANT), null, "expirée");
-  assert.ok(lireRechercheSession(variante({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS }), MAINTENANT), "à la limite du délai");
-  assert.equal(lireRechercheSession(variante({ savedAt: MAINTENANT + 60_000 }), MAINTENANT), null, "datée du futur");
-  assert.equal(lireRechercheSession(variante({ savedAt: "hier" }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(variante({ submittedText: 42 }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(variante({ parsed: null }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(variante({ outcome: { results: [] } }), MAINTENANT), null, "sans résultat");
-  assert.equal(lireRechercheSession(variante({ outcome: { results: [{ insee: "1" }] } }), MAINTENANT), null, "sans couverture (FUT-139)");
-  for (const brut of [null, "", "{", "null", "[]", "42"]) assert.equal(lireRechercheSession(brut, MAINTENANT), null, String(brut));
+  for (let v = 2; v < SESSION_OUVIVRE_VERSION; v++) assert.equal(lireRechercheSession(variante({ v }), MAINTENANT, null), null, `v${v}`);
+  assert.equal(lireRechercheSession(variante({ v: SESSION_OUVIVRE_VERSION + 1 }), MAINTENANT, null), null, "version inconnue");
+  assert.equal(lireRechercheSession(variante({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS - 1 }), MAINTENANT, null), null, "expirée");
+  assert.ok(lireRechercheSession(variante({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS }), MAINTENANT, null), "à la limite du délai");
+  assert.equal(lireRechercheSession(variante({ savedAt: MAINTENANT + 60_000 }), MAINTENANT, null), null, "datée du futur");
+  assert.equal(lireRechercheSession(variante({ savedAt: "hier" }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(variante({ submittedText: 42 }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(variante({ parsed: null }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(variante({ outcome: { results: [] } }), MAINTENANT, null), null, "sans résultat");
+  assert.equal(lireRechercheSession(variante({ outcome: { results: [{ insee: "1" }] } }), MAINTENANT, null), null, "sans couverture (FUT-139)");
+  for (const brut of [null, "", "{", "null", "[]", "42"]) assert.equal(lireRechercheSession(brut, MAINTENANT, null), null, String(brut));
 });
 
 test("session : la restauration d'« Où vivre » et la reprise de /rapport acceptent et refusent les mêmes sessions", () => {
@@ -70,7 +70,7 @@ test("session : la restauration d'« Où vivre » et la reprise de /rapport acce
   const cas = [ok, { ...ok, v: 3 }, { ...ok, v: 4 }, { ...ok, savedAt: 0 }, { ...ok, outcome: null }, { ...ok, parsed: null }];
   for (const s of cas) {
     const brut = JSON.stringify(s);
-    assert.equal(lireSessionOuVivre(brut, MAINTENANT) != null, lireRechercheSession(brut, MAINTENANT) != null, JSON.stringify(s).slice(0, 60));
+    assert.equal(lireSessionOuVivre(brut, MAINTENANT, null) != null, lireRechercheSession(brut, MAINTENANT, null) != null, JSON.stringify(s).slice(0, 60));
   }
 });
 
@@ -118,14 +118,14 @@ test("cas C : Nantes, puis Rennes, puis Bordeaux : chaque recherche remplace la 
   let stockage: string | null = null;
   for (const ville of ["Nantes", "Rennes", "Bordeaux"]) {
     stockage = sessionOuVivre(`Une ville comme ${ville}`, parsedDe(ville));
-    const r = lireRechercheSession(stockage, MAINTENANT)!;
+    const r = lireRechercheSession(stockage, MAINTENANT, null)!;
     const parsed = parsedPourLeProjet(r.parsed as ParsedProject, r.rawText, resoudre);
     const avant = JSON.stringify(PROJET);
     apercuComplet(PROJET, parsed, r.parsed as ParsedProject, r.rawText);
     assert.equal(decisionReprise("apercu", PROJET, null), "apercu");
     assert.equal(JSON.stringify(PROJET), avant, `${ville} : l'aperçu ne touche pas le projet`);
   }
-  assert.equal(lireRechercheSession(stockage, MAINTENANT)!.rawText, "Une ville comme Bordeaux");
+  assert.equal(lireRechercheSession(stockage, MAINTENANT, null)!.rawText, "Une ville comme Bordeaux");
 });
 
 // ── Cas B : reprise volontaire, ce qui change, ce qui reste, ce qui part ────────────────────────────
@@ -222,11 +222,11 @@ test("cas E : la recherche faite sans compte reste reprenable après connexion, 
   // La session ne porte aucun compte : celle d'avant la connexion se relit telle quelle après.
   const stockage = sessionOuVivre("Une ville comme Nantes", parsedDe("Nantes"));
   assert.equal(JSON.parse(stockage).userId, undefined);
-  assert.ok(lireRechercheSession(stockage, MAINTENANT));
+  assert.ok(lireRechercheSession(stockage, MAINTENANT, null));
   // Anonyme : ni aperçu ni geste. Le composant ne demande l'aperçu qu'avec une session Supabase.
-  assert.equal(libelleReprise({ connecte: false, recherche: lireRechercheSession(stockage, MAINTENANT), apercu: null, transfertFait: false }), null);
+  assert.equal(libelleReprise({ connecte: false, recherche: lireRechercheSession(stockage, MAINTENANT, null), apercu: null, transfertFait: false }), null);
   const reprise = lire("../components/report/RepriseRecherche.tsx");
-  assert.match(reprise, /if \(annule \|\| !data\.session\) return;\s*const res = await demander\(r, \{ mode: "apercu" \}\)/);
+  assert.match(reprise, /if \(perime\(\) \|\| !data\.session\) return;\s*const res = await demander\(r, \{ mode: "apercu" \}\)/);
   // Aucun code de connexion ne touche la recherche ni le projet.
   for (const f of ["../app/auth/actions.ts", "../app/auth/callback/route.ts"]) {
     assert.doesNotMatch(lire(f), /ouvivre|from-search|user_project/, f);

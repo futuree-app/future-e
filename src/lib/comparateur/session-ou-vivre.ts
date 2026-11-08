@@ -24,6 +24,31 @@ export const SESSION_OUVIVRE_VERSION = 5;
 // 2 h : on restaure un retour de paywall, on ne ressuscite pas une session d'il y a deux jours.
 export const SESSION_OUVIVRE_TTL_MS = 2 * 60 * 60 * 1000;
 
+// Les copies de la recherche qu'« Où vivre » dépose pour les pages suivantes, sans version ni délai :
+// le texte et la lecture pour la page de conviction du Pack, les priorités pour la touche perso du paywall.
+export const CLE_PACK_PARSED = "futuree:projet:parsed";
+export const CLE_PACK_LABEL = "futuree:projet:label";
+export const CLE_PAYWALL_LABELS = "futuree:projet:labels";
+
+// DÉCONNEXION EXPLICITE (FUT-27, réserve de la contre-revue). La recherche vit dans le navigateur, pas dans
+// le compte : sans purge, la recherche d'un compte déconnecté restait affichée en anonyme et proposée au
+// compte suivant. La déconnexion efface les clés ci-dessus et date la purge ici. Cette date sert de
+// barrière : aucune session écrite avant elle n'est relue, et un onglet dont la mémoire date d'avant elle
+// n'écrit plus (il recréerait la recherche effacée). Une recherche lancée après la purge est intacte.
+export const PURGE_RECHERCHE_KEY = "futuree:recherche:purgee";
+
+/** La date de la dernière purge, ou `null` (jamais purgé, valeur illisible). */
+export function lirePurgeRecherche(raw: string | null): number | null {
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Vrai si ce que l'onglet tient en mémoire depuis `origine` date d'avant la dernière purge. */
+export function anterieurALaPurge(origine: number, purge: number | null): boolean {
+  return purge != null && origine <= purge;
+}
+
 const ETATS_COMMUNE = new Set(["complete", "partielle", "aucune", "sans_priorite"]);
 
 type Brut = Record<string, unknown> | null | undefined;
@@ -59,11 +84,16 @@ export function serialiserSessionOuVivre<T extends object>(contenu: T, maintenan
 }
 
 /**
- * La session telle qu'« Où vivre » la restaurerait, ou `null` : illisible, d'une autre version, expirée, ou
- * impossible à reconstituer. La reprise de /rapport passe par la MÊME porte : une recherche qu'« Où vivre »
- * refuserait de réafficher n'est pas proposée comme projet.
+ * La session telle qu'« Où vivre » la restaurerait, ou `null` : illisible, d'une autre version, expirée,
+ * antérieure à la dernière purge (`purge`), ou impossible à reconstituer. La reprise de /rapport passe par
+ * la MÊME porte : une recherche qu'« Où vivre » refuserait de réafficher n'est pas proposée comme projet.
  */
-export function lireSessionOuVivre(raw: string | null, maintenant: number): Record<string, unknown> | null {
+export function lireSessionOuVivre(
+  raw: string | null,
+  maintenant: number,
+  // Obligatoire : un lecteur qui l'oublierait relirait la recherche d'un compte déconnecté.
+  purge: number | null,
+): Record<string, unknown> | null {
   if (!raw) return null;
   let s: Brut;
   try {
@@ -75,6 +105,8 @@ export function lireSessionOuVivre(raw: string | null, maintenant: number): Reco
   if (typeof s.savedAt !== "number" || !Number.isFinite(s.savedAt)) return null;
   // Une heure à venir (horloge reculée, valeur forgée) ne prolonge pas la session.
   if (s.savedAt > maintenant || maintenant - s.savedAt > SESSION_OUVIVRE_TTL_MS) return null;
+  // Écrite avant une déconnexion explicite : elle appartient au compte qui est parti.
+  if (anterieurALaPurge(s.savedAt, purge)) return null;
   if (typeof s.submittedText !== "string") return null;
   if (!sessionReconstituable(s)) return null;
   return s;

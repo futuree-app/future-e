@@ -56,3 +56,54 @@ Rien n'empêche la suite, mais ces pièces n'existent pas encore :
 - **Shortlist multi-adresses (FUT-41, FUT-22)** : aucun objet « lieux candidats » côté serveur. La recherche est un emplacement unique dans le navigateur ; les candidats devront vivre côté serveur, rattachés au compte (au plus près de `address_dossiers` et de `place_relation`), jamais dans `user_project`.
 - **Pass Recherche (FUT-49)** : aucune recherche n'est persistée côté serveur, et il n'y a pas d'historique. Un droit dans le temps suppose des recherches enregistrées et un octroi ; rien de cela n'a été créé ici.
 - **Fusion** : reprendre une partie d'une recherche (un critère, une zone) dans un projet existant n'est pas possible ; seul le remplacement complet l'est.
+
+## 7. Réserve de la contre-revue : la déconnexion n'effaçait pas la recherche (corrigé le 08/11)
+
+**Constat (Work, recette connectée sur 38ecfb49).** La recherche « Où vivre » restait 2 h dans le `localStorage` après une déconnexion explicite. Elle restait affichée en anonyme. Un second compte connecté sur le même navigateur se la voyait proposer, avec aperçu et enregistrement possibles. Il n'accédait ni au Projet ni aux dossiers du premier compte, mais il voyait le contenu de sa recherche. Le défaut existait déjà dans « Où vivre » ; la reprise depuis /rapport l'exposait davantage.
+
+**Défaut voisin trouvé au passage.** Les réponses du questionnaire (`futur-e:wizard`, sessionStorage) survivaient aussi à la déconnexion. Sur le même onglet, `WizardAnswersSync` les aurait poussées dans le profil du compte suivant (`PATCH /api/profile`), et la « première lecture » de /rapport les aurait affichées. Elles sont purgées avec le reste.
+
+### Correction
+
+- **Où part la purge.** Le formulaire « Se déconnecter » de /compte devient un composant client (`FormulaireDeconnexion`). Juste avant la Server Action, il efface les recherches du navigateur. La Server Action ne change pas : `signOut` Supabase, puis redirection vers `/`. Rien n'est effacé à la connexion ni à l'inscription.
+- **Ce qui est effacé** (`src/lib/purge-recherche.ts`) :
+  - dans le `localStorage`, la session « Où vivre » et ses trois copies `futuree:projet:parsed`, `:label` et `:labels` (Pack et paywall) ;
+  - dans le `sessionStorage` de l'onglet, le questionnaire et la commune choisie sur l'accueil.
+- **Ce qui ne l'est jamais** : le thème, le consentement, l'horizon, le compteur de questions de l'accueil, et toutes les données serveur (Projet, dossiers, factures, droits). Le code ne fait aucun `clear()`, et un test le vérifie.
+- **La barrière.** La purge écrit sa date (`futuree:recherche:purgee`) avant d'effacer. Deux règles en découlent :
+  - aucune session écrite avant cette date n'est relue, ni par « Où vivre », ni par la reprise. Le paramètre `purge` de `lireSessionOuVivre` est obligatoire : un lecteur ne peut pas l'oublier sans erreur TypeScript ;
+  - un écran dont la mémoire date d'avant la purge n'écrit plus. Cela couvre la sauvegarde de session, les priorités du paywall et la copie du Pack. Une recherche lancée après la purge avance la date de l'écran et s'enregistre normalement.
+- **Les autres onglets** (`purge-recherche-navigateur.ts`) apprennent la purge de trois façons :
+  - l'événement `storage`, pour les autres onglets ;
+  - un événement propre au site, pour le même document ;
+  - `pageshow` (page servie par le cache du retour arrière) et `visibilitychange` (onglet qui se réveille).
+
+  À ce signal, « Où vivre » oublie la recherche affichée et le texte saisi. Il abandonne aussi les réponses encore en route (parse, match, synthèse, AskFuture). La reprise oublie la recherche, l'aperçu affiché et les aperçus en cours de chargement. La page de conviction du Pack et la touche perso du paywall oublient ce qu'elles montraient. `EcoutePurgeRecherche` (layout racine) efface le `sessionStorage` de chaque autre onglet.
+- **Pas d'effacement à tort.** Un onglet qui apprend la purge en retard oublie sa mémoire, mais ne touche jamais au stockage. Il ne peut donc pas supprimer une recherche lancée après la déconnexion.
+
+### Scénarios et résultats
+
+Tests : `src/lib/fut27-deconnexion.test.ts`, 12 tests. Ils rejouent le navigateur avec de vrais stockages : un `localStorage` partagé, un `sessionStorage` par onglet. Ils vérifient aussi le branchement dans le code. Par mutation, ils échouent bien quand la barrière est neutralisée (B, C, E) ou quand la purge n'efface plus le `localStorage` (A, B, C, E).
+
+Recette navigateur : `scripts/fut27-deconnexion-recette.mjs`, sur le build local de cette version, en anonyme, sans aucun appel `/api/profile` ni `/api/project`.
+
+| Cas | Résultat |
+|---|---|
+| A · déconnexion simple | Les quatre clés sont effacées. Ni « Où vivre » ni la reprise ne relisent Bordeaux. Thème et consentement sont intacts (test et recette). |
+| B · navigateur partagé | Le compte B ne relit rien. Même si on réinjecte la session de A, elle est refusée, car elle date d'avant la purge. Sans purge, elle se relisait (test témoin). |
+| C · plusieurs onglets | Recette avec deux onglets « Où vivre » ouverts sur Bordeaux et une purge depuis un troisième. Les deux reviennent à un formulaire vide et le questionnaire de l'autre onglet est effacé. L'onglet « endormi », qui ne reçoit pas d'événement, garde Bordeaux affiché : son clic sur une carte n'écrit rien. Le même clic sur Rennes, cherchée après la purge, écrit (témoin). Au réveil, il oublie Bordeaux. Après un retour arrière vers /ou-vivre, la page est vide. |
+| D · anonyme puis connecté | La recherche faite sans compte se relit après la connexion. Passer par /connexion n'efface rien. Aucun code de connexion ou d'inscription n'appelle la purge (test). |
+| E · nouvelle recherche après la purge | Rennes est enregistrée après la purge et restaurée dans un nouvel onglet. Les anciens onglets ne l'effacent pas. Le délai de 2 h s'applique toujours. |
+| F · non-régression | Versions, délai et sessions invalides : tests FUT-27 inchangés et verts. Gardes de concurrence, droits et absence d'écriture implicite du Projet : inchangés. Suite complète : 4 378 tests passent, 0 échec. |
+
+### Ce que la recette n'a pas pu exécuter, et pourquoi
+
+- **Le clic réel sur « Se déconnecter »** suppose un compte connecté. Le seul Supabase joignable depuis ce poste est celui de production, et Docker n'est pas installé, donc aucun Supabase local. Pour ne rien écrire en production, la recette applique la purge comme le fait `purgerRecherchesTemporaires`, depuis un troisième onglet. Les tests vérifient que le formulaire appelle bien la purge avant la Server Action. Il reste à rejouer ce clic avec un compte de test autorisé.
+- **La reprise sur /rapport** n'est visible que connectée. Son oubli à la purge est vérifié par les tests, pas en navigateur.
+- **Le cache du retour arrière** : Chrome en mode automatisé n'a pas servi la page depuis ce cache (`persisted: false`). Le chemin observé est le rechargement, et la page était vide. Le chemin `pageshow` persisté est branché et testé dans le code, pas observé.
+
+### Limites restantes
+
+- La purge part du formulaire client. Un clic avant que la page /compte soit interactive enverrait la Server Action sans purger. La fenêtre est de quelques centaines de millisecondes.
+- Une expiration de session sans déconnexion explicite ne purge rien. Ce n'est pas le périmètre : la règle vise le départ volontaire.
+- Les onglets du compte (/rapport, /compte) gardent la page déjà affichée jusqu'à la prochaine navigation, qui mène alors à la connexion. Seules les recherches et les aperçus sont oubliés sur place.

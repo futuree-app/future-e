@@ -24,10 +24,14 @@ export type ApercuReprise = {
 
 /**
  * La dernière recherche « Où vivre » de ce navigateur, si « Où vivre » la restaurerait encore (même version,
- * dans le délai, reconstituable). Une session qu'« Où vivre » ne réafficherait pas n'est pas proposée.
+ * dans le délai, écrite après la dernière déconnexion, reconstituable). Une session qu'« Où vivre » ne réafficherait pas n'est pas proposée.
  */
-export function lireRechercheSession(raw: string | null, maintenant: number): RechercheAReprendre | null {
-  const s = lireSessionOuVivre(raw, maintenant);
+export function lireRechercheSession(
+  raw: string | null,
+  maintenant: number,
+  purge: number | null,
+): RechercheAReprendre | null {
+  const s = lireSessionOuVivre(raw, maintenant, purge);
   if (!s) return null;
   return { parsed: s.parsed, rawText: s.submittedText as string };
 }

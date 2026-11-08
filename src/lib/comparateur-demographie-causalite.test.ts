@@ -138,12 +138,12 @@ test("D9. les sessions locales d'Où vivre antérieures à FUT-36 ne sont plus r
   const maintenant = Date.parse("2026-11-08T10:00:00.000Z");
   const outcome = { couverture: "complete", results: [{ insee: "29019", couverture: { etat: "complete", nonMesurees: [] } }] };
   const ecrite = JSON.parse(serialiserSessionOuVivre({ submittedText: "x", parsed: { preferences: [] }, outcome }, maintenant));
-  assert.ok(lireSessionOuVivre(JSON.stringify(ecrite), maintenant), "la version courante se relit");
+  assert.ok(lireSessionOuVivre(JSON.stringify(ecrite), maintenant, null), "la version courante se relit");
   for (const v of [3, SESSION_OUVIVRE_VERSION - 1]) {
-    assert.equal(lireSessionOuVivre(JSON.stringify({ ...ecrite, v }), maintenant), null, `v${v} rejetée`);
+    assert.equal(lireSessionOuVivre(JSON.stringify({ ...ecrite, v }), maintenant, null), null, `v${v} rejetée`);
   }
   // Le client lit ce module, sans constante propre.
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
-  assert.match(client, /lireSessionOuVivre\(window\.localStorage\.getItem\(SESSION_OUVIVRE_KEY\)/);
+  assert.match(client, /lireSessionOuVivre\(\s*window\.localStorage\.getItem\(SESSION_OUVIVRE_KEY\), Date\.now\(\), purgeRechercheConnue\(\)/);
   assert.doesNotMatch(client, /const SESSION_(VERSION|KEY|TTL_MS) =/);
 });

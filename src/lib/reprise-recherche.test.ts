@@ -41,13 +41,13 @@ test("3. visiteur anonyme → aucun geste (pas d'aperçu sans session)", () => {
 });
 
 test("4. recherche absente, illisible, d'une autre version ou expirée → aucun geste", () => {
-  assert.equal(lireRechercheSession(null, MAINTENANT), null);
-  assert.equal(lireRechercheSession("pas du json", MAINTENANT), null);
-  assert.equal(lireRechercheSession(session({ v: 2 }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(session({ v: 3 }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(session({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS - 1 }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(session({ parsed: null }), MAINTENANT), null);
-  assert.deepEqual(lireRechercheSession(session(), MAINTENANT), RECHERCHE);
+  assert.equal(lireRechercheSession(null, MAINTENANT, null), null);
+  assert.equal(lireRechercheSession("pas du json", MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(session({ v: 2 }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(session({ v: 3 }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(session({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS - 1 }), MAINTENANT, null), null);
+  assert.equal(lireRechercheSession(session({ parsed: null }), MAINTENANT, null), null);
+  assert.deepEqual(lireRechercheSession(session(), MAINTENANT, null), RECHERCHE);
   assert.equal(libelleReprise({ connecte: true, recherche: null, apercu: APERCU_SANS_PROJET, transfertFait: false }), null);
 });
 
