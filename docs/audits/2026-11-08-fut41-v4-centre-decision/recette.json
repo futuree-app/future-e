@@ -1,0 +1,674 @@
+{
+  "vues": [
+    {
+      "fichier": "01-decision-complet-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "01-decision-complet-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "01-decision-complet-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "01-decision-complet-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "01-decision-complet-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "01-decision-complet-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "02-decision-vide-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "03-decision-un-logement-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "04-s1-location-dont-vente-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "05-s2-meme-commune-face-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "06-s3-trois-communes-ensemble-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "07-s4-analyse-et-annonces-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "08-s5-condition-non-tenue-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "09-s6-projet-modifie-face-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "10-s7-donnees-non-comparables-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "11-s8-fiche-inconnues-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "12-faire-le-point-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "13-releve-sternes-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "fichier": "14-ensemble-lentille-calme-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    }
+  ],
+  "gestes": [
+    {
+      "nom": "un logement : titre au singulier",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "ajout assisté : extrait cité",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "ajout : la fiche du nouveau logement s'ouvre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "ajout : rien n'est conclu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "deux logements : la recherche apparaît",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "face-à-face : URL et titre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "face-à-face : la commune ne se compare pas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "trois logements : bascule en vue d'ensemble",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "condition choisie : les paires et leurs raisons",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "la gare : refus expliqué par le Projet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "vérification : avant / change / reste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "note enregistrée avec sa nature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "écarté : raison et contexte gardés",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "réactivé : historique conservé",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "et si : simulation dite, Projet intact",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "et si : Échap ferme et rend le focus au déclencheur",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "et si : le Projet n'a pas changé",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "adopté : révision 4, gare à 40 min",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "faire le point : provenance au pied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "relevé : même conclusion, mot pour mot",
+      "ok": true,
+      "detail": "12 rue des Sternes répond à votre Projet, avec un compromis : le calme aux abords. / 12 rue des Sternes répond à votre Projet, avec un compromis : le calme aux abords."
+    },
+    {
+      "nom": "relevé : retour à la même fiche",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "bouton retour du navigateur : rouvre le Relevé",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "analyse simulée : trois échelles",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "nom": "mise à jour simulée : la condition tombe, la version 1 reste",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "clavier": [
+    {
+      "tag": "A",
+      "texte": "Aller au contenu",
+      "contour": true
+    },
+    {
+      "tag": "SELECT",
+      "texte": "★ · Toute la recherche0 · Avant tout log",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "à l'unité",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Pass Recherche (hypothèse)",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Réinitialiser",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Ma décision",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Passer au thème clair",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Et si mon Projet changeait ?",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Faire le point",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Comparer mes logements",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Ajouter un logement",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "À examiner maintenant",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Ordre d'ajout",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Loyer ou prix déclaré",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Surface déclarée",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Trajet jusqu'à la gare",
+      "contour": true
+    },
+    {
+      "tag": "INPUT",
+      "texte": "",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "12 rue des Sternes",
+      "contour": true
+    },
+    {
+      "tag": "INPUT",
+      "texte": "",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "5 allée des Goélands",
+      "contour": true
+    },
+    {
+      "tag": "INPUT",
+      "texte": "",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "4 impasse du Lavoir",
+      "contour": true
+    },
+    {
+      "tag": "INPUT",
+      "texte": "",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "31 route de Kervily",
+      "contour": true
+    }
+  ],
+  "mouvement": {
+    "animation": "none",
+    "duree": "0ms"
+  },
+  "erreurs": [],
+  "echecs": []
+}
