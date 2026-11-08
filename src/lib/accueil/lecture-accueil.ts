@@ -23,11 +23,11 @@ import type { IndexCommune } from "../comparateur-vie.ts";
 import { formatTemperature, formatCompte } from "./recits.ts";
 import { indicatorsDepuisScenarios, construireFaitsCommune } from "./faits.ts";
 import { aCommune } from "../typography.ts";
-import { communeLegere, scenariosLegers } from "./donnees-legeres.ts";
+import { communeLegere, scenariosLegers, climatRecentLeger } from "./donnees-legeres.ts";
 import { risquesGaspar } from "./gaspar-accueil.ts";
 import {
   lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse,
-  type CleePastille, type Lieu, type LecturePastille, type EntreesChaleur, type EntreesTaille, type EntreesHivers,
+  type CleePastille, type Lieu, type LecturePastille, type EntreesChaleur, type ClimatRecentChaleur, type EntreesTaille, type EntreesHivers,
 } from "./pastilles.ts";
 import { gasparCouvre, lireAdresseOutremer, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer, SUITE_OUTREMER } from "./outremer.ts";
 
@@ -48,6 +48,8 @@ export type SourcesLecture = {
   scenarios: (insee: string) => Promise<GwlScenarios | null>;
   /** Le dossier du moteur pour un projet, ou `null` si la commune n'a pas de faits. */
   dossier: (insee: string, projet: UserProject) => Promise<{ moduleFacts: ModuleFacts; dossier: Dossier } | null>;
+  /** FUT-170 : le climat récent (réanalyse SAFRAN, même maille que DRIAS), ou `null`. Affichage seul : hors classement. */
+  climatRecent: (insee: string) => Promise<ClimatRecentChaleur | null>;
 };
 
 /**
@@ -79,6 +81,7 @@ export const sourcesLegeres: SourcesLecture = {
     if (!c) return null;
     return dossierDepuisFaits(faitsDepuisCommuneLegere(c, scenariosLegers(insee)), projet);
   },
+  climatRecent: async (insee) => climatRecentLeger(insee),
 };
 
 /** Les sources complètes, chargées seulement si on les demande (mesure « avant », preuves d'équivalence). */
@@ -91,6 +94,8 @@ export async function sourcesCompletes(): Promise<SourcesLecture> {
     nomCommune: async (insee) => (await getCommuneEntry(insee))?.nom ?? null,
     scenarios: async (insee) => (await getClimatDataCommune(insee).catch(() => null))?.commune.s ?? null,
     dossier: (insee, projet) => buildCommuneDossier(insee, projet, { hasAddress: false }).catch(() => null),
+    // Le climat récent n'a qu'une source : le fichier dérivé, déjà léger. Les deux jeux le lisent à l'identique.
+    climatRecent: async (insee) => climatRecentLeger(insee),
   };
 }
 
@@ -121,7 +126,10 @@ export async function communeCanonique(insee: string, sources: SourcesLecture = 
  * `territoire.climat-chaleur`. Même source, mêmes seuils, même verdict.
  */
 export async function entreesChaleur(insee: string, sources: SourcesLecture): Promise<EntreesChaleur> {
-  const sc = await sources.scenarios(insee).catch(() => null);
+  const [sc, recent] = await Promise.all([
+    sources.scenarios(insee).catch(() => null),
+    sources.climatRecent(insee).catch(() => null),
+  ]);
   const f = buildClimatFacts(sc);
   const seuils = { jours: CLIMAT_METRICS.joursTresChauds.threshold, nuits: CLIMAT_METRICS.nuitsTropicales.threshold };
   const referenceTexte = (v: number, nuits: boolean) => formatCompte(v, nuits ? { singulier: "nuit", pluriel: "nuits", feminin: true } : undefined);
@@ -138,6 +146,8 @@ export async function entreesChaleur(insee: string, sources: SourcesLecture): Pr
       const v = sc?.[CLIMAT_HORIZON]?.v?.NORTX30D_yr;
       return { projete: typeof v === "number" && Number.isFinite(v) ? v : null, reference: reconstructReference(sc, "NORTX30D_yr", "ATX30D_yr") };
     })(),
+    // FUT-170 : la comparaison affichée. Le verdict ci-dessus ne le lit pas : il est calculé avant, sur DRIAS seul.
+    recent,
     referenceTexte, limite: LIMITE_CLIMAT, gesteSansAdresse,
   };
 }
