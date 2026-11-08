@@ -1,4 +1,5 @@
 import type { VentesAutour } from "@/lib/prix-autour";
+import { fraicheurEnClair } from "@/lib/facts/provenance";
 import { texteVentesAutour, type TypeDuLogement } from "@/lib/prix-autour-texte";
 import { releve as s, Ligne, Marge, Registre, Surtitre, type ElementDeMarge } from "@/components/releve/primitives";
 
@@ -18,7 +19,8 @@ export function VentesAutourBloc({ autour, type }: { autour: VentesAutour | null
       valeur: c.value,
       ...(/^Médiane (de|d'|du)/.test(c.label) ? { grain: "commune" as const } : {}),
     }))),
-    { type: "source", texte: t.source },
+    // FUT-12 : la source dit aussi la période des ventes et la livraison du fichier, chacune à sa place.
+    { type: "source", texte: t.source, ...(fraicheurEnClair(t.provenance ?? {}) ? { date: fraicheurEnClair(t.provenance!)! } : {}) },
   ];
   return (
     <section aria-labelledby="ventes-autour" style={{ display: "grid", gap: 18, paddingTop: 22, borderTop: "1px solid var(--r-filet)" }}>

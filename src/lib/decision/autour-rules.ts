@@ -23,6 +23,7 @@
 // déclaré, une preuve au grain de l'adresse, une limite qui borne ce que le fait établit, et une
 // action qui dépend de la situation du lecteur. Aucune de ces pièces ne lit la prose du module.
 // ════════════════════════════════════════════════════════════════════════════════════════════
+import { provenanceBpe } from "./provenances.ts";
 import type { DecisionRule, EvidenceRef, RuleEvaluation, VerificationFact } from "./decision-fact.ts";
 import { preferenceSurfaced } from "./conditions.ts";
 import { bucketDuProjet, type Bucket } from "./logement-gestes.ts";
@@ -323,6 +324,7 @@ const accesSoinsRule: DecisionRule = {
           label: `Base permanente des équipements (INSEE), millésime ${f.autour.bpeMillesime}`,
           grain: "adresse",
           relation: "proximite",
+          provenance: provenanceBpe(f.autour.bpeMillesime),
         }
       : null;
 
@@ -390,6 +392,7 @@ function sourceBpeDe(f: { autour?: { bpeMillesime?: string } }, factId: string):
         label: `Base permanente des équipements (INSEE), millésime ${f.autour.bpeMillesime}`,
         grain: "adresse",
         relation: "proximite",
+        provenance: provenanceBpe(f.autour.bpeMillesime),
       }
     : null;
 }

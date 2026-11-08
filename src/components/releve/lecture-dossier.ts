@@ -16,6 +16,7 @@ import type {
   Dossier, DossierCard, DossierSection, DecisionFact, EvidenceRef, VerificationActionType,
 } from "../../lib/decision/decision-fact.ts";
 import type { EvidenceTargetKey } from "../../lib/decision/evidence-targets.ts";
+import type { Provenance } from "../../lib/facts/provenance.ts";
 import type { CompositionSide } from "../../lib/decision/fact-composition.ts";
 import type { ConclusionNarrativePlan } from "../../lib/decision/conclusion-plan.ts";
 import {
@@ -39,6 +40,8 @@ export type PreuveLue = {
   /** La date d'observation de la source (snapshot ou lecture directe). */
   date?: string;
   mode?: EvidenceRef["sourceMode"];
+  /** FUT-12 : la provenance structurée, telle que le moteur l'a émise. Absente d'une preuve historique. */
+  provenance?: Provenance;
 };
 export type GesteLu = { libelle: string; type?: VerificationActionType; detail?: string };
 export type CoteLu = {
@@ -201,6 +204,7 @@ const preuve = (e: EvidenceRef): PreuveLue => ({
   ...(e.targetKey ? { cible: e.targetKey } : {}),
   ...(e.observedAt ? { date: e.observedAt } : {}),
   ...(e.sourceMode ? { mode: e.sourceMode } : {}),
+  ...(e.provenance ? { provenance: e.provenance } : {}),
 });
 
 /**
@@ -213,7 +217,7 @@ function trier(refs: EvidenceRef[]): { preuves: PreuveLue[]; sources: PreuveLue[
   const preuves: PreuveLue[] = [];
   const sources: PreuveLue[] = [];
   for (const e of refs) {
-    const cle = [e.label, e.observedValue ?? "", e.grain, e.href ?? "", e.targetKey ?? "", e.observedAt ?? ""].join("|");
+    const cle = [e.label, e.observedValue ?? "", e.grain, e.href ?? "", e.targetKey ?? "", e.observedAt ?? "", JSON.stringify(e.provenance ?? null)].join("|");
     if (vues.has(cle)) continue;
     vues.add(cle);
     (e.observedValue ? preuves : sources).push(preuve(e));

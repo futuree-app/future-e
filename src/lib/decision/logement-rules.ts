@@ -9,6 +9,10 @@ import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import { GESTES, bucketDuProjet, type Bucket, type ActionCopy } from "./logement-gestes.ts";
 import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import { carteInondationPorteLePlan, libelleCourtDeZone, statutDeZone } from "./zonage-inondation.ts";
+import type { Provenance } from "../facts/provenance.ts";
+import {
+  provenanceArgiles, provenanceCavites, provenanceDpe, provenanceIndemnisations, provenancePlanAdresse, provenanceServitudes,
+} from "./provenances.ts";
 
 // La dérivation vit dans `logement-gestes.ts` : une règle de territoire peut proposer un geste à
 // faire dans le logement (le radon), donc elle en a besoin aussi.
@@ -43,12 +47,11 @@ const bucket = (p: { intent?: string | null }, f: { relationAuLieu?: RelationAuL
 //     des JSON embarqués dans le dépôt (`lib/onrn-sinistralite.ts`) ;
 //   - diagnostic : base DPE de l'ADEME.
 //
-// ── CE QUE CETTE FORME NE FAIT PAS ───────────────────────────────────────────────────────────
-// `EvidenceRef` porte un seul champ de texte pour tout cela. Séparer producteur, jeu de données,
-// diffuseur, millésime et date de consultation est la bonne structure, et c'est un chantier à
-// part : `observedAt` existe déjà et n'est renseigné nulle part ici, `fetchedAt` est connu de
-// `logement-decision-data.ts` et n'est pas transmis. Tant que ce n'est pas fait, le millésime
-// vit dans le libellé quand il est connu, et nulle part quand il ne l'est pas.
+// ── LA PROVENANCE STRUCTURÉE (FUT-12, 04/11/2026) ────────────────────────────────────────────
+// Le libellé ci-dessous reste : c'est lui que portent les dossiers déjà figés, et il continue de
+// servir aux preuves sans provenance. Chaque preuve porte désormais aussi `provenance`
+// (`provenances.ts`) : producteur, jeu, diffuseur, édition, période, et l'instant où la source a
+// RÉELLEMENT répondu (`LogementFacts.consultations`, horodaté à la lecture et non au rendu).
 // ════════════════════════════════════════════════════════════════════════════════════════════
 export const SOURCES = {
   georisquesBrgm: "BRGM, via Géorisques",
@@ -58,8 +61,12 @@ export const SOURCES = {
   ademe: "Base DPE (ADEME)",
 } as const;
 
-function ev(factId: string, source: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string, targetKey?: EvidenceTargetKey): EvidenceRef {
-  return { factId, module: "logement", label: source, observedValue, grain, href: "/rapport/logement", sourceMode: mode, ...(targetKey ? { targetKey } : {}) };
+function ev(factId: string, source: string, mode: "persisted_snapshot" | "live_fetch", grain: "adresse" | "commune" = "adresse", observedValue?: string, targetKey?: EvidenceTargetKey, prov?: Provenance): EvidenceRef {
+  return {
+    factId, module: "logement", label: source, observedValue, grain, href: "/rapport/logement", sourceMode: mode,
+    ...(targetKey ? { targetKey } : {}),
+    ...(prov && Object.keys(prov).length ? { provenance: prov } : {}),
+  };
 }
 function logementVerification(id: string, evidence: EvidenceRef, tier: MaterialityTier, topic: string, statement: string, actionType: VerificationActionType, action: ActionCopy, status?: string, limitation?: string): VerificationFact {
   return { id: `logement:${id}`, ruleId: `logement.${id}`, sourceFactIds: [`logement.${id}`], module: "logement", role: "verification", materialityTier: tier, topic, statement, evidence: [evidence], action: { type: actionType, label: action.label, ...(action.detail ? { detail: action.detail } : {}) }, ...(status ? { status } : {}), ...(limitation ? { limitation } : {}) };
@@ -139,6 +146,12 @@ function coverageRule(cfg: {
   // evidence-targets.ts), il ne promet pas une démonstration qui n'existe pas.
   targetKey?: EvidenceTargetKey;
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
+  /**
+   * FUT-12 : la provenance de la donnée de CETTE famille. Elle reçoit les faits pour y lire ce qui a
+   * été daté à la lecture. Sur une source muette, la preuve garde la provenance SANS date de
+   * consultation : la source n'a pas répondu, aucune lecture n'a eu lieu.
+   */
+  provenance: (l: LogementFacts) => Provenance;
   /** Le nom de la vérification dans une énumération, quand la source ne répond pas. */
   nomVerification: string;
   /** FUT-127 : un autre fait porte déjà ce constat (le même plan, la même adresse) ; la règle se tait. */
@@ -154,12 +167,16 @@ function coverageRule(cfg: {
       const b = bucket(p, f);
       if (cfg.buckets && !cfg.buckets.includes(b)) return na(cfg.id);
       const cov = cfg.coverage(l);
-      if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
+      if (cov === "unavailable") {
+        const { consultedAt: _muette, ...sansLecture } = cfg.provenance(l);
+        void _muette;
+        return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, undefined, cfg.targetKey, sansLecture), cfg.topic(f.nom), cfg.unavailableStatement));
+      }
       if (cov === "present" && cfg.flag(l) && cfg.porteAilleurs?.(f, p)) {
         return { ruleId: `logement.${cfg.id}`, projectKeys: [], outcome: "not_applicable", facts: [], reason: "porté par la carte inondation à l'adresse" };
       }
       if (cov === "present" && cfg.flag(l)) {
-        return out(cfg.id, logementVerification(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
+        return out(cfg.id, logementVerification(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey, cfg.provenance(l)), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
       }
       return na(cfg.id);
     },
@@ -175,7 +192,7 @@ const ruleDpe: DecisionRule = {
     if (!l || (l.dpe !== "passoire" && l.dpe !== "energivore")) return na("dpe-faible");
     const desc = l.dpe === "passoire" ? "une passoire énergétique" : "un logement énergivore";
     const cls = l.dpeLabel ? `${l.dpeLabel}, ${desc}` : desc;
-    const evidence = ev("logement.dpe", SOURCES.ademe, "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined, "housing.energy_label");
+    const evidence = ev("logement.dpe", SOURCES.ademe, "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined, "housing.energy_label", provenanceDpe(l.dpeDate));
     const dpeStatus = l.dpeLabel ? `DPE ${l.dpeLabel}` : (l.dpe === "passoire" ? "Passoire énergétique" : "Logement énergivore");
     return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", GESTES.energie[bucket(p, f)], dpeStatus));
   },
@@ -202,7 +219,7 @@ const ruleConfortEte: DecisionRule = {
     const copy = GESTES.confort[b];
     return out("confort-ete", logementVerification(
       "confort-ete",
-      ev("logement.confort-ete", SOURCES.ademe, "persisted_snapshot"),
+      ev("logement.confort-ete", SOURCES.ademe, "persisted_snapshot", "adresse", undefined, undefined, provenanceDpe(f.dpeDate ?? f.confortEte?.dateDiagnostic)),
       "secondary",
       "le confort d'été de ce logement",
       "Le diagnostic classe l'indicateur réglementaire de confort d'été de ce logement comme insuffisant.",
@@ -230,7 +247,7 @@ const ruleDiagnosticNonAttribue: DecisionRule = {
     if (!l?.diagnosticNonAttribue) return na("diagnostic-non-attribue");
     return out("diagnostic-non-attribue", logementVerification(
       "diagnostic-non-attribue",
-      ev("logement.diagnostic-non-attribue", SOURCES.ademe, "live_fetch"),
+      ev("logement.diagnostic-non-attribue", SOURCES.ademe, "live_fetch", "adresse", undefined, undefined, provenanceDpe(null)),
       "secondary",
       "le diagnostic énergétique de ce logement",
       "À cette adresse, des diagnostics énergétiques existent, mais aucun n'a pu être rattaché à ce logement.",
@@ -249,12 +266,14 @@ export const LOGEMENT_RULES: DecisionRule[] = [
   ruleDiagnosticNonAttribue,
   ruleDpe,
   coverageRule({ id: "exposition-bati", tier: "structuring", source: SOURCES.georisquesBrgm, targetKey: "housing.clay_shrink_swell", topic: () => "le retrait-gonflement des argiles", status: "Aléa moyen ou fort", coverage: (l) => l.rga, flag: (l) => l.expositionBati,
+    provenance: (l) => provenanceArgiles(l.consultations?.rga),
     // La sévérité (« aléa moyen ou fort ») est portée par le StatusTag rendu au-dessus du constat : la
     // recopier ici en parenthèse la disait deux fois à un centimètre d'écart.
     statement: () => "À cette adresse, le sol est exposé au retrait-gonflement des argiles.",
     limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", actionType: "verifier_sur_place", action: GESTES.bati,
     unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse.", nomVerification: "le retrait-gonflement des argiles" }),
   coverageRule({ id: "zone-reglementee", tier: "structuring", source: SOURCES.georisquesGaspar, targetKey: "housing.regulated_zone", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,
+    provenance: (l) => provenancePlanAdresse({ consultedAt: l.consultations?.pprn, approuveLe: l.pprnApprouveLe }),
     // FUT-127 : quand le plan applicable est celui que le zonage inondation a lu, la carte dit sa zone et
     // son régime ; sans eux, « un plan s'applique » taisait une zone rouge submersible.
     statement: (l) => {
@@ -270,13 +289,16 @@ export const LOGEMENT_RULES: DecisionRule[] = [
     actionType: "obtenir_document", action: GESTES.reglementaire,
     unavailableStatement: "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse.", nomVerification: "les plans de prévention" }),
   coverageRule({ id: "cavite", tier: "structuring", source: SOURCES.georisquesBrgm, topic: () => "les cavités souterraines proches", status: "Recensée à moins de 500 m", coverage: (l) => l.cavites, flag: (l) => l.caviteProche,
+    provenance: () => provenanceCavites(),
     statement: () => "À cette adresse, une ou plusieurs cavités souterraines sont recensées à moins de 500 m.",
     limitation: "Recensement d'ouvrages/événements proches, pas une preuve sous ce logement.", actionType: "verifier_sur_place", action: GESTES.cavite,
     unavailableStatement: "Les cavités souterraines n'ont pas pu être vérifiées à cette adresse.", nomVerification: "les cavités souterraines" }),
   coverageRule({ id: "patrimoine", tier: "secondary", source: SOURCES.gpu, buckets: ["neutre", "achat", "reside"], topic: () => "le périmètre patrimonial protégé", status: "Périmètre protégé", coverage: (l) => l.patrimoine, flag: (l) => l.perimetrePatrimonial,
+    provenance: (l) => provenanceServitudes(l.consultations?.patrimoine),
     statement: () => "À cette adresse, le bien est dans un périmètre patrimonial protégé.", actionType: "obtenir_document", action: GESTES.patrimoine,
     unavailableStatement: "Les protections patrimoniales n'ont pas pu être vérifiées à cette adresse.", nomVerification: "le périmètre patrimonial" }),
   coverageRule({ id: "sinistralite", tier: "secondary", source: SOURCES.onrn, sourceMode: "persisted_snapshot", grain: "commune", topic: () => "les indemnisations recensées", status: "Indemnisations recensées", coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
+    provenance: () => provenanceIndemnisations(),
     statement: () => "À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées.",
     limitation: "Ces données ne permettent pas d'établir l'historique de ce logement.", actionType: "obtenir_document", action: GESTES.sinistralite,
     unavailableStatement: "La sinistralité de la commune n'a pas pu être établie.", nomVerification: "les indemnisations de la commune" }),

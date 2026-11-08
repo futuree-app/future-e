@@ -38,6 +38,9 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
   if (address.latitude == null || address.longitude == null) throw new LogementDataUnavailableError("insufficient_address");
   const token = process.env.GEORISQUES_API_TOKEN;
   const parcel = await findCadastreParcelByPoint(address.longitude, address.latitude).catch(() => null);
+  // FUT-12 : les servitudes ne passent par aucun cache (`gpu.ts`, `no-store`) : leur lecture a lieu
+  // maintenant. Les résumés Géorisques portent leur propre instant (cache de process).
+  const lectureDirecte = new Date().toISOString();
   const [gAddr, gParcel, cavites, heritage, sini] = await Promise.all([
     token ? getGeorisquesAddressSummary(address.latitude, address.longitude, address.citycode).catch(() => null) : Promise.resolve(null),
     token && parcel?.parcelCode ? getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null) : Promise.resolve(null),
@@ -51,7 +54,7 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
       georisquesAddress: gAddr,
       georisquesParcel: gParcel,
       cavites,
-      heritage,
+      heritage: { ...heritage, consultedAt: lectureDirecte },
       sinistralite: sini,
       parcelleParRepli: parcel?.rattachement === "repli",
     }),

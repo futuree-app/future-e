@@ -53,6 +53,12 @@ export type CardDetail = {
   askPrefill?: string;
   /** Sources repliées dans un accordéon discret. La narration ne cite jamais les bases ; cet accordéon, oui. */
   sources?: string;
+  /**
+   * FUT-12 : D'OÙ VIENNENT LES DONNÉES DE LA CARTE, et de quand : une ligne par source structurée
+   * (« Insee · Recensement… », puis « Données observées en 2022 · … »). Visible, sobre, sous le récit ;
+   * la méthode détaillée reste repliée dans `sources`.
+   */
+  provenance?: { source: string | null; fraicheur: string | null }[];
   /** Encart « À savoir » fixe, séparé du récit (why) : une information vraie dans tous
    *  les cas, qui ne doit pas teinter le récit (ex. cadre assurantiel). */
   note?: string;
@@ -209,6 +215,18 @@ export function MetricDrawer({
           <a className="metric-drawer-lien" href={detail.lien.href} target="_blank" rel="noopener noreferrer">
             {detail.lien.label} <span aria-hidden>↗</span>
           </a>
+        )}
+
+        {detail.provenance && detail.provenance.length > 0 && (
+          <div className="metric-drawer-provenance">
+            {detail.provenance.map((p, i) => (
+              <p key={i}>
+                {p.source ? <span className="metric-drawer-provenance-source">{p.source}</span> : null}
+                {p.source && p.fraicheur ? <br /> : null}
+                {p.fraicheur ? <span>{p.fraicheur}</span> : null}
+              </p>
+            ))}
+          </div>
         )}
 
         {detail.sources && (
@@ -368,6 +386,14 @@ export function MetricDrawer({
           font-family: inherit; transition: all 0.15s;
         }
         .metric-drawer-ask:hover { background: rgba(200,184,154,0.2); border-color: rgba(200,184,154,0.6); }
+        .metric-drawer-provenance {
+          margin: 4px 0 0; padding-top: 14px;
+          border-top: 1px solid var(--border-1);
+          display: flex; flex-direction: column; gap: 8px;
+        }
+        .metric-drawer-provenance > p { margin: 0; font-size: 12px; line-height: 1.5; color: #9ba3b4; }
+        .metric-drawer-provenance-source { color: var(--label, #c9cfdb); }
+        .metric-drawer-provenance + .metric-drawer-sources { border-top: none; padding-top: 10px; }
         .metric-drawer-sources {
           margin: 4px 0 22px; padding-top: 14px;
           border-top: 1px solid var(--border-1);

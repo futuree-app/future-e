@@ -23,14 +23,14 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import type { RegulatoryPlan } from "../pprn-zonage.ts";
-import { zonageInondationDeLAdresse, type ZonageInondationFait } from "./zonage-inondation.ts";
+import { zonageInondationDeLAdresse, lectureDuZonage, type ZonageInondationFait } from "./zonage-inondation.ts";
 import type { OnrnSinistralite } from "../onrn-sinistralite.ts";
 import { etatSitesSols, type EtatSitesSols, type LectureSitesSols } from "../sites-sols-etat.ts";
 
 export type SourceCoverage = "present" | "none" | "unavailable"; // none = la source a répondu, rien trouvé
 
 /** Ce qu'un résumé Géorisques apporte à la couverture. Structurel : adresse et parcelle le portent. */
-type GeorisquesLike = { regulatoryPlans: RegulatoryPlan[]; rga: { label: string | null } | null } | null;
+type GeorisquesLike = { regulatoryPlans: RegulatoryPlan[]; rga: { label: string | null } | null; consultedAt?: string } | null;
 
 export type LogementCoverageInputs = {
   /** Résumé au point géocodé. `null` = token absent ou panne. */
@@ -39,7 +39,8 @@ export type LogementCoverageInputs = {
   georisquesParcel: GeorisquesLike;
   /** `null` = panne ; `[]` = la source a répondu, aucune cavité. La distinction est tout l'objet. */
   cavites: unknown[] | null;
-  heritage: { items: unknown[]; sourceStatus: "ok" | "unavailable" };
+  /** `consultedAt` : l'instant de la lecture (le service n'est pas mis en cache, cf. `gpu.ts`). */
+  heritage: { items: unknown[]; sourceStatus: "ok" | "unavailable"; consultedAt?: string };
   /** `null` = pas de code commune, ou panne. */
   sinistralite: OnrnSinistralite | null;
   /** FUT-127 : la parcelle vient du repli cadastral (le point ne tombait dans aucune parcelle). */
@@ -53,7 +54,8 @@ export type LogementCoverageInputs = {
 
 export type LogementCoverage = {
   rga: { coverage: SourceCoverage; label: string | null };
-  pprn: { coverage: SourceCoverage; count: number; label: string | null };
+  /** `approuveLe` (FUT-12) : la date d'approbation du plan retenu (`label`), quand le détail l'a donnée. */
+  pprn: { coverage: SourceCoverage; count: number; label: string | null; approuveLe?: string };
   cavites: { coverage: SourceCoverage; count: number };
   patrimoine: { coverage: SourceCoverage; count: number };
   sinistralite: { coverage: SourceCoverage; active: boolean };
@@ -66,6 +68,16 @@ export type LogementCoverage = {
    * Posé seulement quand la lecture est fournie.
    */
   sitesSols?: { coverage: SourceCoverage; etat: EtatSitesSols };
+  /**
+   * FUT-12 : QUAND CHAQUE FAMILLE A RÉELLEMENT ÉTÉ LUE (ISO), quand on le sait. Absent : la lecture
+   * n'est pas datable (cache d'une source sans horodatage, ou donnée antérieure à ce champ). Les
+   * cavités n'y sont pas : leur appel passe par le cache de 24 h de Next, et l'instant de la
+   * réponse réelle n'est pas connu. La sinistralité non plus : ce n'est pas une lecture, c'est un
+   * fichier embarqué.
+   * `pprn` date la lecture qui a fourni la liste des plans ; `zonage`, celle qui a fourni le zonage
+   * inondation retenu (le point quand la parcelle répond sans plan) : les deux peuvent différer.
+   */
+  consultations?: { rga?: string; pprn?: string; zonage?: string; patrimoine?: string };
 };
 
 /** La couverture d'une lecture des sols pollués : seule une absence établie à la parcelle est un « rien trouvé ». */
@@ -117,6 +129,26 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
   // pas toujours tout.
   const rgaLabel = i.georisquesParcel?.rga?.label ?? i.georisquesAddress?.rga?.label ?? null;
   const plans: RegulatoryPlan[] = i.georisquesParcel?.regulatoryPlans ?? i.georisquesAddress?.regulatoryPlans ?? [];
+  // La date d'une famille est celle du résumé qui a FOURNI sa valeur, pas la plus récente des deux.
+  const rgaLu = i.georisquesParcel?.rga?.label ? i.georisquesParcel : i.georisquesAddress?.rga?.label ? i.georisquesAddress : null;
+  const plansLus = i.georisquesParcel ?? i.georisquesAddress;
+  const entreeZonage = {
+    point: i.georisquesAddress ? i.georisquesAddress.regulatoryPlans : null,
+    parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
+    parcelleParRepli: i.parcelleParRepli,
+  };
+  const zonageInondation = zonageInondationDeLAdresse(entreeZonage);
+  // Le zonage inondation se choisit à part (une parcelle sans plan laisse la zone au point) : sa date
+  // est celle de la lecture qui l'a fourni, jamais celle de `plansLus`, et aucune autre ne la remplace.
+  const zonageLu = lectureDuZonage(zonageInondation);
+  const zonageConsulte = zonageLu === "parcelle" ? i.georisquesParcel?.consultedAt
+    : zonageLu === "point" ? i.georisquesAddress?.consultedAt : undefined;
+  const consultations = {
+    ...(rgaLu?.consultedAt ? { rga: rgaLu.consultedAt } : {}),
+    ...(plansLus?.consultedAt ? { pprn: plansLus.consultedAt } : {}),
+    ...(zonageConsulte ? { zonage: zonageConsulte } : {}),
+    ...(i.heritage.sourceStatus === "ok" && i.heritage.consultedAt ? { patrimoine: i.heritage.consultedAt } : {}),
+  };
   const topPlan = plans.length ? plans.reduce((a, b) => (a.topRegimeRank <= b.topRegimeRank ? a : b)) : null;
 
   // LES DEUX RÉSUMÉS SONT UNE SEULE SOURCE. Aucun des deux n'a répondu : Géorisques est muet, donc
@@ -134,6 +166,7 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
       coverage: georisquesMuet ? "unavailable" : plans.length > 0 ? "present" : "none",
       count: plans.length,
       label: topPlan?.plan ?? null,
+      ...(topPlan?.approvedAt ? { approuveLe: topPlan.approvedAt } : {}),
     },
     cavites: {
       coverage: i.cavites == null ? "unavailable" : i.cavites.length > 0 ? "present" : "none",
@@ -144,11 +177,8 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
       count: i.heritage.items.length,
     },
     sinistralite: { coverage: siniMuet ? "unavailable" : siniActive ? "present" : "none", active: siniActive },
-    zonageInondation: zonageInondationDeLAdresse({
-      point: i.georisquesAddress ? i.georisquesAddress.regulatoryPlans : null,
-      parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
-      parcelleParRepli: i.parcelleParRepli,
-    }),
+    zonageInondation,
     ...(i.sitesSols ? { sitesSols: couvertureSitesSols(i.sitesSols) } : {}),
+    ...(Object.keys(consultations).length ? { consultations } : {}),
   };
 }

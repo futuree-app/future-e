@@ -19,6 +19,7 @@
 //
 //  3. ELLE NE DIT NI « DÉPENDANCE » NI « ON PEUT Y VIVRE SANS VOITURE ». Cf. `secteur-facts.ts`.
 
+import { provenanceIrisLogement } from "./provenances.ts";
 import type { DecisionRule, RuleEvaluation, VerificationFact, EvidenceRef } from "./decision-fact.ts";
 import { preferenceSurfaced } from "./conditions.ts";
 import {
@@ -57,6 +58,8 @@ const equipementAutoRule: DecisionRule = {
       grain: "secteur",
       relation: "attribut",
       href: logementHref,
+      // FUT-12 : au grain de l'IRIS, le recensement est une estimation par sondage ; la provenance le dit.
+      provenance: provenanceIrisLogement({ annee: e.millesime, chargeLe: e.chargeLe }),
     };
 
     const fact: VerificationFact = {

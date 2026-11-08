@@ -1,5 +1,6 @@
 // Carte COMPOSÉE : une vue qui relie des constats établis (tradeoff / shared_evidence). Présentationnelle.
 // Les faits absorbés restent lisibles au dépliable, dans leur forme d'origine (audit, invariant 4).
+import { lignesDeSource } from "@/lib/decision/provenance-preuve";
 import type { CSSProperties } from "react";
 import type { FactComposition, CompositionSide, TradeoffComposition } from "@/lib/decision/fact-composition";
 import type { DecisionFact } from "@/lib/decision/decision-fact";
@@ -62,17 +63,12 @@ function compositionConventions(composition: FactComposition): string[] {
   const sides = sidesOf(composition);
   // La convention de seuil, PUIS la provenance des références qui n'établissent aucune valeur : même
   // règle que la carte élémentaire (sans valeur mesurée, pas de pastille sur la face).
-  const seen = new Set<string>();
-  const sources: string[] = [];
   const extraEvidence =
     composition.kind === "shared_evidence" ? composition.sharedEvidence
       : composition.kind === "mismatch_with_action" ? composition.evidence
       : [];
-  for (const e of [...sides.flatMap((s) => s.evidence), ...extraEvidence]) {
-    if (e.observedValue || seen.has(e.label)) continue;
-    seen.add(e.label);
-    sources.push(`Source : ${e.label}`);
-  }
+  // FUT-12 : même règle que la carte élémentaire (`lignesDeSource`).
+  const sources = lignesDeSource([...sides.flatMap((s) => s.evidence), ...extraEvidence]);
   return [...sides.map((s) => s.signalConvention).filter((c): c is string => Boolean(c)), ...sources];
 }
 

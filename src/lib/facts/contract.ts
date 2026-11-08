@@ -15,6 +15,8 @@
 // bundle navigateur et que les composants client importent les TYPES d'ici.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
+import type { Provenance } from "./provenance.ts";
+
 /** L'échelle RÉELLE de la mesure. Une valeur ne se lit jamais à une autre échelle que la sienne. */
 export type FactScale = "commune" | "radius_15km" | "urban_unit" | "department" | "point";
 
@@ -66,6 +68,17 @@ export type Fact<V = unknown> = {
   status: FactStatus;
   /** La limite qui empêche une mauvaise lecture (échelle, définition, couverture). */
   limits?: string;
+  /**
+   * FUT-12 : LA PROVENANCE STRUCTURÉE, ce que les cartes affichent (source, période mesurée, édition,
+   * diffuseur, nature). `source` et `vintage` restent : ils sont le contrat d'origine, et l'empreinte
+   * les porte toujours.
+   *
+   * HORS DE L'EMPREINTE, et c'est mesuré : la synthèse ne lit que les VALEURS des faits
+   * (`projectForSynthesis`), jamais leur provenance. L'y faire entrer régénérerait toutes les
+   * synthèses Territoire pour un texte identique (test : `fut12-provenance.test.ts`). Un changement de
+   * millésime, lui, change `vintage` ou la valeur : l'empreinte bouge alors comme avant.
+   */
+  provenance?: Provenance;
   card: CardPolicy;
   synthesis: SynthesisPolicy;
 };
@@ -122,14 +135,14 @@ export function derivedOf<V extends string = string>(snapshot: FactsSnapshot, ke
 
 /**
  * CE QUI ENTRE DANS L'EMPREINTE : tout ce qui peut changer le sens d'une surface, et rien d'autre.
- * `builtAt` et `observedAt` en sont exclus (voir leur définition). Rendu sous forme d'objet, pour que
+ * `builtAt`, `observedAt` et `provenance` en sont exclus (voir leur définition). Rendu sous forme d'objet, pour que
  * le hachage (serveur) et les tests (partout) partagent exactement la même base.
  */
 export function hashableContent(s: FactsSnapshot): unknown {
   return {
     scope: s.scope,
     registryVersion: s.registryVersion,
-    facts: s.facts.map((f) => ({ ...f, observedAt: undefined })),
+    facts: s.facts.map((f) => ({ ...f, observedAt: undefined, provenance: undefined })),
     derived: s.derived,
   };
 }
