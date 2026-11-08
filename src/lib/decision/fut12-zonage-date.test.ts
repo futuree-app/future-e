@@ -174,6 +174,26 @@ test("aléa inconnu : la date est celle de la lecture qui a fourni le plan (poin
   assert.equal(preuveDuZonage(moteur(deLaParcelle)).preuve.provenance?.consultedAt, LE_4);
 });
 
+test("aléa inconnu : le libellé de la preuve nomme la lecture qui a fourni le plan", () => {
+  const GASPAR = /, (à la parcelle cadastrale|au point géocodé)$/;
+  // Le point fournit le plan ; la parcelle répond, sans plan puis avec un plan étranger à l'inondation.
+  for (const parcelle of [{ plans: [], consultedAt: LE_6 }, { plans: [PLAN_ARGILES], consultedAt: LE_6 }]) {
+    const cov = couverture({ plans: [PLAN_LITTORAL], consultedAt: LE_4 }, parcelle);
+    assert.equal(cov.zonageInondation.etat, "alea_inconnu");
+    assert.equal(cov.zonageInondation.etat === "alea_inconnu" && cov.zonageInondation.zone.plan, "PPR littoral de test");
+    const { fait, preuve } = preuveDuZonage(moteur(cov));
+    assert.equal(preuve.label.match(GASPAR)?.[1], "au point géocodé");
+    assert.equal(preuve.provenance?.consultedAt, LE_4);
+    assert.equal(fait.role === "verification" && fait.status, "Risque concerné à confirmer");
+  }
+  // La parcelle fournit le plan : « à la parcelle cadastrale », à sa date.
+  const cov = couverture({ plans: [], consultedAt: LE_6 }, { plans: [PLAN_LITTORAL], consultedAt: LE_4 });
+  assert.equal(cov.zonageInondation.etat, "alea_inconnu");
+  const { preuve } = preuveDuZonage(moteur(cov));
+  assert.equal(preuve.label.match(GASPAR)?.[1], "à la parcelle cadastrale");
+  assert.equal(preuve.provenance?.consultedAt, LE_4);
+});
+
 test("zonage hors zone ou indisponible : aucune date de zonage n'est posée", () => {
   const hors = couverture({ plans: [], consultedAt: LE_4 }, { plans: [PLAN_ARGILES], consultedAt: LE_6 });
   assert.equal(hors.zonageInondation.etat, "hors_zone");

@@ -140,7 +140,7 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
   const zonageInondation = zonageInondationDeLAdresse(entreeZonage);
   // Le zonage inondation se choisit à part (une parcelle sans plan laisse la zone au point) : sa date
   // est celle de la lecture qui l'a fourni, jamais celle de `plansLus`, et aucune autre ne la remplace.
-  const zonageLu = lectureDuZonage(entreeZonage, zonageInondation);
+  const zonageLu = lectureDuZonage(zonageInondation);
   const zonageConsulte = zonageLu === "parcelle" ? i.georisquesParcel?.consultedAt
     : zonageLu === "point" ? i.georisquesAddress?.consultedAt : undefined;
   const consultations = {

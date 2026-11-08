@@ -214,7 +214,7 @@ Aucun déploiement, aucune Preview, aucune variable d'environnement. Aucun appel
 2. **VigiEau** : `consultedAt` est posé après un `fetch` avec cache Next d'une heure. La date affichée peut donc devancer la lecture réelle d'une heure au plus (et le jour, autour de minuit). Correctif possible : horodater depuis l'en-tête `Date` de la réponse.
 3. **Index du comparateur** : écrire la date de construction (`loadedAt`) et l'édition DVF en champs structurés dans `meta` lors du prochain `populate-logement.mjs`, au lieu d'une phrase.
 4. **Provenance par critère** des positions nationales (index).
-5. **Libellé de la preuve « aléa inconnu »** (constaté pendant le correctif G, non corrigé) : dans l'état `alea_inconnu`, le champ `grain` vaut `parcelle` dès qu'une parcelle a répondu, même quand le plan vient du point. Le libellé de la preuve dit alors « à la parcelle cadastrale » pour un plan lu au point. La date, elle, est désormais juste. Corriger le libellé changerait le fait de zonage, ce que le correctif G s'interdit.
+5. **Libellé de la preuve « aléa inconnu »** : constaté pendant le correctif G, corrigé ensuite (voir G, « Grain de l'aléa inconnu »).
 
 ---
 
@@ -254,3 +254,13 @@ Résultats : suite complète 4 365 réussis, 0 échec, 1 ignoré (préexistant) 
 ### Réserve ergonomique (non traitée ici)
 
 Les provenances longues apparaissent directement dans les volets (`MetricDrawer.tsx`). Elles seront reprises dans la passe de direction artistique : décision au premier plan, source et millésime courts au second, détails dans « Données et limites ».
+
+### Grain de l'aléa inconnu (correctif suivant, 08/11/2026)
+
+Dans l'état `alea_inconnu`, `grain` valait `parcelle` dès qu'une parcelle avait répondu, même quand le plan retenu venait du point. La preuve disait alors « à la parcelle cadastrale » pour un plan lu au point géocodé.
+
+`grain` désigne désormais la lecture qui a fourni le plan retenu (la parcelle quand elle le porte, sinon le point), selon le même choix que le plan lui-même. `lectureDuZonage` lit ce champ, sans refaire le choix.
+
+Consommateur de ce champ pour l'aléa inconnu : le seul libellé de la preuve de zonage (`preuveZonage`). Le hors zone garde son grain d'avant. Le plan retenu, la qualification de l'aléa, les verdicts, les textes et les autres provenances ne changent pas.
+
+Tests : le point fournit le plan, la parcelle répond sans plan ou avec un plan étranger à l'inondation (« au point géocodé », date du point) ; la parcelle fournit le plan (« à la parcelle cadastrale », date de la parcelle). Contre-épreuve : sans le correctif, 2 tests échouent. Suite complète 4 366 réussis, 0 échec ; TypeScript, ESLint sur les fichiers modifiés et build réussis.
