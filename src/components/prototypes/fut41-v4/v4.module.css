@@ -95,7 +95,9 @@ button.navLien { cursor: pointer; }
 .conclusion { margin: 2px 0 0; display: flex; gap: 10px; align-items: baseline; font-size: var(--r-t-dense); line-height: 1.55; color: var(--r-encre); }
 .conclusionMarque { flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--r-teinte); }
 .annonceCourte { margin: 2px 0 0; font-size: var(--r-t-dense); color: var(--r-texte); line-height: 1.6; }
-.alerte { margin: 0; padding-left: 13px; border-left: 3px solid var(--reg-incompatibilite); font-size: var(--r-t-dense); line-height: 1.55; color: var(--r-encre); }
+/* Le trait de registre du Relevé : 3 px devant la première ligne, jamais sur tout le bloc (DESIGN.md). */
+.alerte { margin: 0; display: flex; gap: 10px; align-items: baseline; font-size: var(--r-t-dense); line-height: 1.55; color: var(--r-encre); }
+.alerte::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--reg-incompatibilite); }
 .alerteTexte { color: var(--r-encre); }
 .prochain { margin: 2px 0 0; font-size: var(--r-t-nuance); line-height: 1.55; color: var(--r-texte); }
 .prochainCle { font-weight: 600; color: var(--r-discret); margin-right: 6px; }
@@ -148,7 +150,9 @@ button.navLien { cursor: pointer; }
 .ecarterForm { flex-basis: 100%; display: grid; gap: 14px; padding: 16px 0 4px; border-top: 1px dashed var(--r-filet-fort); }
 @media (min-width: 760px) { .ecarterForm { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .ecarterForm > p, .ecarterForm > .gestes { grid-column: 1 / -1; } }
 .ecarteBandeau { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 0; border-top: 1px solid var(--r-filet-fort); border-bottom: 1px solid var(--r-filet-fort); margin-bottom: 18px; }
-.bandeauAlerte { display: grid; gap: 6px; padding: 14px 0 14px 16px; border-left: 3px solid var(--reg-incompatibilite); margin: 4px 0 18px; }
+.bandeauAlerte { display: grid; gap: 6px; padding: 14px 0; border-top: 1px solid var(--r-filet-fort); border-bottom: 1px solid var(--r-filet-fort); margin: 4px 0 18px; }
+.bandeauAlerte > p:not(:last-child) { display: flex; gap: 10px; align-items: baseline; }
+.bandeauAlerte > p:not(:last-child)::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--reg-incompatibilite); }
 .bandeauAlerte p { margin: 0; font-size: var(--r-t-corps); color: var(--r-encre); line-height: 1.55; }
 .bandeauAlerte p.nuance, .bandeauAlerte p:last-child { font-size: var(--r-t-nuance); color: var(--r-discret); }
 .conclusionPlaque { font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; font-weight: 500; }
