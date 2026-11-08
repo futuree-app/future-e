@@ -147,7 +147,7 @@ Ma décision (#/)                      la recherche : où vous en êtes, à fair
 | Commune avec rapport | Ses conclusions | **Ouvrir le rapport** | Sans appel commercial |
 | Dossier ancien (Projet changé, règles ou données anciennes) | Des conclusions datées | **Mettre à jour avec votre Projet** (gratuit) | « Gratuit : ce dossier répond à une ancienne version de votre Projet. » |
 | Logement analysé (dont sur le Pass) | Trois échelles | **Ouvrir le dossier** ; mention « Pass » sur la ligne | Aucun appel |
-| Pistes déjà comparables | — | **Comparer mes pistes** | Le seul bouton orange de l'accueil |
+| Pistes déjà comparables | aucun | **Comparer mes pistes** | Le seul bouton orange de l'accueil |
 
 **Règles.**
 
