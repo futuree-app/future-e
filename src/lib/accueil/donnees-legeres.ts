@@ -1,10 +1,12 @@
 // FUT-50 · LES DONNÉES LÉGÈRES DE L'ACCUEIL, À LA LECTURE.
 //
-// Deux fichiers compacts, importés comme modules (empaquetés avec la fonction, aucun chemin à tracer) :
+// Trois fichiers compacts, importés comme modules (empaquetés avec la fonction, aucun chemin à tracer) :
 //   - `src/data/accueil-communes.json` (2,7 Mo) : identité et intrants « Petite ville » / « Hivers doux », dérivés
 //     de l'index par `scripts/accueil/donnees-accueil.mjs` ;
 //   - `src/data/apercu-climat-communes.json` (4,6 Mo) : l'extrait DRIAS partagé avec l'aperçu du paywall (FUT-30),
-//     dérivé de `data_climat.json` par `scripts/build-apercu-climat.mjs`.
+//     dérivé de `data_climat.json` par `scripts/build-apercu-climat.mjs` ;
+//   - `src/data/climat-recent-communes.json` (0,8 Mo, FUT-170) : le climat récent (réanalyse SAFRAN, 2016-2025), au
+//     point de grille DRIAS de la commune, dérivé par `scripts/build-climat-recent.mjs`.
 // Ils remplacent, POUR L'ACCUEIL SEULEMENT, l'index du comparateur (67 Mo décompressés) et `data_climat.json`
 // (63 Mo). Le dossier payant lit toujours les sources complètes. Le build refuse des fichiers périmés (prebuild).
 //
@@ -15,6 +17,9 @@ import extraitBrut from "@/data/apercu-climat-communes.json";
 import { DRIAS_CITY_FALLBACK } from "../communes.ts";
 import { scenariosDepuisExtrait, type ExtraitClimat } from "../apercu-territoire.ts";
 import type { GwlScenarios } from "../decision/climat-facts.ts";
+import climatRecentBrut from "@/data/climat-recent-communes.json";
+import { climatRecentDepuisFichier, verifierFichier, type FichierClimatRecent } from "./climat-recent.ts";
+import type { ClimatRecentChaleur } from "./pastilles.ts";
 
 export type CommuneLegere = {
   insee: string;
@@ -64,4 +69,14 @@ export function communeLegere(insee: string): CommuneLegere | null {
 export function scenariosLegers(insee: string): GwlScenarios | null {
   if (/^9[78]/.test(insee)) return null;
   return scenariosDepuisExtrait(extrait, DRIAS_CITY_FALLBACK[insee] ?? insee);
+}
+
+// FUT-170 : le climat récent (SAFRAN), troisième fichier léger (~0,7 Mo), dérivé par `scripts/build-climat-recent.mjs`
+// et vérifié au build. Même repli Paris/Lyon/Marseille que DRIAS : la même maille que la projection.
+const climatRecent = climatRecentBrut as unknown as FichierClimatRecent;
+verifierFichier(climatRecent);
+
+/** Le climat récent de la commune, ou `null` (outre-mer, code inconnu). */
+export function climatRecentLeger(insee: string): ClimatRecentChaleur | null {
+  return climatRecentDepuisFichier(climatRecent, DRIAS_CITY_FALLBACK[insee] ?? insee);
 }
