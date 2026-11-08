@@ -648,7 +648,7 @@ test("FUT-144 — Chaque catégorie nationale a ses mots courants, sans conclusi
   for (const t of [...Object.values(SECTEUR_SIMPLE), ...Object.values(ZONE_SIMPLE).flatMap((z) => [z.un, z.des])]) sansAbus(t, t);
 });
 
-test("FUT-144 — Contre-revue du 09/11 : 16-02 garde l'habitation existante et la zone agricole ou naturelle, même sans zone lue", () => {
+test("FUT-144 — Contre-revue du 09/11 : 16-01/02/03 gardent leur contexte (zone agricole ou naturelle, habitation existante), même sans zone lue", () => {
   // Le contre-exemple de Work : la prescription est lisible, la zone ne l'est pas, le dépliable est fermé.
   const u = lireUrbanisme(synthetique({ zones: [], prescriptions: { surface: [presc(PARCELLE, "16", "02", "Habitation existante en zone A")], ligne: [], point: [] } }));
   assert.deepEqual([u.regime, u.zones.length, u.prescriptions.map((p) => [p.categorie, p.etendue])], ["document", 0, [["16-02", "couvre"]]]);
@@ -657,11 +657,23 @@ test("FUT-144 — Contre-revue du 09/11 : 16-02 garde l'habitation existante et 
   assert.match(t, /Extension ou annexes d'une habitation existante · sur toute la parcelle En zone agricole ou naturelle, le plan les admet ici pour une habitation existante, dans les limites de surface, de hauteur et de distance que fixe le règlement\./);
   assert.doesNotMatch(t, /admises par le plan/, "l'ancienne formule, sans sa condition");
   sansAbus(rendu(u), "16-02 sans zone");
-  // Fidélité à la note nationale : mêmes conditions, rien de plus.
+  // Fidélité à la note nationale : mêmes conditions, rien de plus. Même exigence pour 16-01 et 16-03.
   const note = CATEGORIES["16-02"].note;
-  for (const condition of ["zone agricole ou naturelle", "habitation existante", "limites de surface, de hauteur et de distance"]) {
-    assert.ok(note.includes(condition), `la note dit « ${condition} »`);
-    assert.ok(`${LIBELLES_SIMPLES["16-02"].court} ${LIBELLES_SIMPLES["16-02"].effet}`.replace(/’/g, "'").includes(condition), `le résumé garde « ${condition} »`);
+  const CONDITIONS: Record<string, string[]> = {
+    "16-01": ["zone agricole ou naturelle", "commission départementale", "soumis à autorisation"],
+    "16-02": ["zone agricole ou naturelle", "habitation existante", "limites de surface, de hauteur et de distance"],
+    "16-03": ["zone agricole ou naturelle", "à titre exceptionnel", "constructions limitées"],
+  };
+  for (const [cle, conditions] of Object.entries(CONDITIONS)) {
+    const resume = `${LIBELLES_SIMPLES[cle].court} ${LIBELLES_SIMPLES[cle].effet}`.replace(/’/g, "'");
+    for (const condition of conditions) {
+      assert.ok(CATEGORIES[cle].note.includes(condition), `${cle} : la note dit « ${condition} »`);
+      assert.ok(resume.includes(condition), `${cle} : le résumé garde « ${condition} »`);
+    }
+    // Le même contre-exemple, pour chacune : prescription lisible, aucune zone, dépliable fermé.
+    const v = visible(lireUrbanisme(synthetique({ zones: [], prescriptions: { surface: [presc(PARCELLE, "16", cle.slice(3), "Libellé local")], ligne: [], point: [] } })));
+    assert.ok(v.includes(LIBELLES_SIMPLES[cle].effet.replace(/’/g, "'")), `${cle} : l'effet complet est au premier niveau`);
+    assert.match(v, /zone agricole ou naturelle/, `${cle} : le contexte est visible sans zone lue`);
   }
   assert.match(deplie(u), new RegExp(note.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), "la note complète reste au détail");
 });
