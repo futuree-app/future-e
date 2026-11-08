@@ -23,7 +23,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import type { RegulatoryPlan } from "../pprn-zonage.ts";
-import { zonageInondationDeLAdresse, type ZonageInondationFait } from "./zonage-inondation.ts";
+import { zonageInondationDeLAdresse, lectureDuZonage, type ZonageInondationFait } from "./zonage-inondation.ts";
 import type { OnrnSinistralite } from "../onrn-sinistralite.ts";
 import { etatSitesSols, type EtatSitesSols, type LectureSitesSols } from "../sites-sols-etat.ts";
 
@@ -74,8 +74,10 @@ export type LogementCoverage = {
    * cavités n'y sont pas : leur appel passe par le cache de 24 h de Next, et l'instant de la
    * réponse réelle n'est pas connu. La sinistralité non plus : ce n'est pas une lecture, c'est un
    * fichier embarqué.
+   * `pprn` date la lecture qui a fourni la liste des plans ; `zonage`, celle qui a fourni le zonage
+   * inondation retenu (le point quand la parcelle répond sans plan) : les deux peuvent différer.
    */
-  consultations?: { rga?: string; pprn?: string; patrimoine?: string };
+  consultations?: { rga?: string; pprn?: string; zonage?: string; patrimoine?: string };
 };
 
 /** La couverture d'une lecture des sols pollués : seule une absence établie à la parcelle est un « rien trouvé ». */
@@ -130,9 +132,21 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
   // La date d'une famille est celle du résumé qui a FOURNI sa valeur, pas la plus récente des deux.
   const rgaLu = i.georisquesParcel?.rga?.label ? i.georisquesParcel : i.georisquesAddress?.rga?.label ? i.georisquesAddress : null;
   const plansLus = i.georisquesParcel ?? i.georisquesAddress;
+  const entreeZonage = {
+    point: i.georisquesAddress ? i.georisquesAddress.regulatoryPlans : null,
+    parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
+    parcelleParRepli: i.parcelleParRepli,
+  };
+  const zonageInondation = zonageInondationDeLAdresse(entreeZonage);
+  // Le zonage inondation se choisit à part (une parcelle sans plan laisse la zone au point) : sa date
+  // est celle de la lecture qui l'a fourni, jamais celle de `plansLus`, et aucune autre ne la remplace.
+  const zonageLu = lectureDuZonage(entreeZonage, zonageInondation);
+  const zonageConsulte = zonageLu === "parcelle" ? i.georisquesParcel?.consultedAt
+    : zonageLu === "point" ? i.georisquesAddress?.consultedAt : undefined;
   const consultations = {
     ...(rgaLu?.consultedAt ? { rga: rgaLu.consultedAt } : {}),
     ...(plansLus?.consultedAt ? { pprn: plansLus.consultedAt } : {}),
+    ...(zonageConsulte ? { zonage: zonageConsulte } : {}),
     ...(i.heritage.sourceStatus === "ok" && i.heritage.consultedAt ? { patrimoine: i.heritage.consultedAt } : {}),
   };
   const topPlan = plans.length ? plans.reduce((a, b) => (a.topRegimeRank <= b.topRegimeRank ? a : b)) : null;
@@ -163,11 +177,7 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
       count: i.heritage.items.length,
     },
     sinistralite: { coverage: siniMuet ? "unavailable" : siniActive ? "present" : "none", active: siniActive },
-    zonageInondation: zonageInondationDeLAdresse({
-      point: i.georisquesAddress ? i.georisquesAddress.regulatoryPlans : null,
-      parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
-      parcelleParRepli: i.parcelleParRepli,
-    }),
+    zonageInondation,
     ...(i.sitesSols ? { sitesSols: couvertureSitesSols(i.sitesSols) } : {}),
     ...(Object.keys(consultations).length ? { consultations } : {}),
   };

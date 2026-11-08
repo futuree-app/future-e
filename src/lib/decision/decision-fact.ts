@@ -436,7 +436,7 @@ export type LogementFacts = {
    * documents. Tout est optionnel : absent d'un artefact antérieur, et alors la preuve ne porte ni
    * date de consultation ni édition, au lieu d'en recevoir une après coup.
    */
-  consultations?: { rga?: string; pprn?: string; patrimoine?: string };
+  consultations?: { rga?: string; pprn?: string; zonage?: string; patrimoine?: string };
   /** La date d'approbation du plan de prévention retenu (`pprnLabel`), AAAA-MM-JJ. */
   pprnApprouveLe?: string;
   /** Le jour du diagnostic retenu (AAAA-MM-JJ), tel que la base l'a publié. */

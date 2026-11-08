@@ -148,6 +148,20 @@ export function zonageInondationDeLAdresse(e: EntreeZonage): ZonageInondationFai
   return { etat: "hors_zone", grain };
 }
 
+/**
+ * FUT-12 (correctif du 08/11/2026, NO GO de la contre-revue) : LA LECTURE QUI A RÉELLEMENT FOURNI LE
+ * ZONAGE, pour dater sa preuve. Elle suit pas à pas le choix de `zonageInondationDeLAdresse` : une
+ * zone d'inondation vient de la parcelle quand la parcelle en porte une, sinon du point ; un plan à
+ * l'aléa inconnu, de même. Le champ `grain` de l'état `alea_inconnu` dit seulement qu'une parcelle a
+ * répondu, pas qu'elle a fourni le plan : il ne sert donc pas ici. `null` : aucune zone retenue, rien
+ * à dater.
+ */
+export function lectureDuZonage(e: EntreeZonage, z: ZonageInondationFait): "point" | "parcelle" | null {
+  if (z.etat === "zone") return z.grain;
+  if (z.etat === "alea_inconnu") return meilleurPlan(e.parcelle, "inconnue") ? "parcelle" : "point";
+  return null;
+}
+
 // ── LE POIDS D'UNE ZONE, ARBITRÉ PAR LE PORTEUR LE 22/10/2026 ──────────────────────────────────
 // Interdiction (03), interdiction stricte (04), délaissement ou expropriation possibles (05, 06) :
 // `decision_critical`. Prescriptions (02) ou régime non détaillé : `structuring`. Prescriptions hors

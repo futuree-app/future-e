@@ -214,3 +214,43 @@ Aucun déploiement, aucune Preview, aucune variable d'environnement. Aucun appel
 2. **VigiEau** : `consultedAt` est posé après un `fetch` avec cache Next d'une heure. La date affichée peut donc devancer la lecture réelle d'une heure au plus (et le jour, autour de minuit). Correctif possible : horodater depuis l'en-tête `Date` de la réponse.
 3. **Index du comparateur** : écrire la date de construction (`loadedAt`) et l'édition DVF en champs structurés dans `meta` lors du prochain `populate-logement.mjs`, au lieu d'une phrase.
 4. **Provenance par critère** des positions nationales (index).
+5. **Libellé de la preuve « aléa inconnu »** (constaté pendant le correctif G, non corrigé) : dans l'état `alea_inconnu`, le champ `grain` vaut `parcelle` dès qu'une parcelle a répondu, même quand le plan vient du point. Le libellé de la preuve dit alors « à la parcelle cadastrale » pour un plan lu au point. La date, elle, est désormais juste. Corriger le libellé changerait le fait de zonage, ce que le correctif G s'interdit.
+
+---
+
+## G. Correctif après la contre-revue indépendante (08/11/2026)
+
+### Le défaut démontré (NO GO ciblé sur 48e1b793)
+
+`deriveLogementCoverage` datait la preuve du zonage inondation avec `plansLus` (la parcelle si elle a répondu, sinon le point). Le zonage se choisit pourtant à part, dans `zonageInondationDeLAdresse` : une parcelle qui répond **sans plan inondation** laisse la zone au point.
+
+Scénario reproduit : point lu le 4 novembre (zone trouvée), parcelle lue le 6 novembre (aucun plan). Zonage retenu : celui du point. Date affichée : **le 6 novembre**. La preuve semblait vérifiée deux jours plus tard qu'elle ne l'avait été.
+
+### Correctif
+
+- `zonage-inondation.ts` : `lectureDuZonage(entrée, fait)` dit quelle lecture a fourni le zonage retenu, en suivant pas à pas le choix de `zonageInondationDeLAdresse` (zone : la parcelle si elle porte une zone inondation, sinon le point ; aléa inconnu : de même). Rien à dater hors zone ou en panne.
+- `logement-coverage.ts` : nouvelle date `consultations.zonage`, prise sur la lecture retenue. Date inconnue : champ absent, **sans repli** vers l'autre lecture. `consultations.pprn` ne change pas : elle date toujours la liste des plans (carte « plan applicable »).
+- `decision-fact.ts` : le champ `zonage` dans le type des consultations.
+- `materiality-rules.ts` : les deux preuves de zonage (zone établie, zone à confirmer) lisent `consultations.zonage`.
+
+Le zonage, les régimes, le rattachement (fiable ou ambigu), les verdicts et les textes ne changent pas. Aucune interface n'est touchée. Aucun dossier vendu n'est modifié (FUT-12 n'est pas en production : aucun dossier ne porte encore de `consultations`).
+
+### Avant / après
+
+| Scénario | Avant | Après |
+| --- | --- | --- |
+| Point en zone lu le 4, parcelle sans plan lue le 6 | consultée le 6 novembre | consultée le 4 novembre |
+| Point et parcelle en zone, parcelle lue le 4, point le 6 | le 4 | le 4 (inchangé) |
+| Point en zone sans date connue, parcelle sans plan lue le 6 | consultée le 6 novembre | aucune date |
+
+### Tests (`fut12-zonage-date.test.ts`, 10 tests)
+
+Le scénario exact du NO GO ; la parcelle retenue plus ancienne que le point ; le point retenu face à une parcelle qui répond avec un plan étranger à l'inondation ; une seule lecture ; date absente pour la lecture retenue ; divergence (l'ambiguïté reste signalée) ; aléa inconnu fourni par le point puis par la parcelle ; hors zone et indisponible ; la date de la carte « plan applicable » inchangée ; et, sur quatre scénarios, le dossier entier identique au caractère près une fois les dates de consultation retirées.
+
+Chaque test lit la provenance **portée par l'EvidenceRef** du dossier. Contre-épreuve : sans le correctif, 4 des 10 tests échouent, dont celui du NO GO.
+
+Résultats : suite complète 4 365 réussis, 0 échec, 1 ignoré (préexistant) ; TypeScript propre ; ESLint propre sur les fichiers modifiés (les 7 erreurs restantes de `eslint src` sont dans des fichiers que FUT-12 ne touche pas, et préexistent sur main) ; build réussi.
+
+### Réserve ergonomique (non traitée ici)
+
+Les provenances longues apparaissent directement dans les volets (`MetricDrawer.tsx`). Elles seront reprises dans la passe de direction artistique : décision au premier plan, source et millésime courts au second, détails dans « Données et limites ».

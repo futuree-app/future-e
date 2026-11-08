@@ -169,7 +169,8 @@ function preuveZonage(z: Extract<ZonageInondationFait, { etat: "zone" | "alea_in
     label: `${SOURCES.georisquesGaspar}, ${z.grain === "parcelle" ? "à la parcelle cadastrale" : "au point géocodé"}`,
     observedValue: `${libelleCourtDeZone(z.zone) ?? "zone réglementée"} · ${z.zone.plan ?? "plan de prévention"}`,
     grain: "adresse", href: "/rapport/logement", targetKey: "housing.regulated_zone", sourceMode: "live_fetch",
-    // FUT-12 : la date d'approbation du plan qui porte la zone, et l'instant de la lecture au point.
+    // FUT-12 : la date d'approbation du plan qui porte la zone, et l'instant de la lecture (point ou
+    // parcelle) qui a réellement fourni ce zonage (`consultations.zonage`, jamais `pprn`).
     provenance: provenancePlanAdresse({ consultedAt, approuveLe: z.zone.approbation }),
   };
 }
@@ -332,7 +333,7 @@ const ruleInondation: DecisionRule = {
         + (tousPhenomenes.length > 0 ? ` Le plan réglemente ${joinFr(tousPhenomenes)}.` : "")
         + historiqueCatnat(f)
         + ` ${LIMITE_ETAT_DES_RISQUES}`,
-      evidence: [preuveZonage(z, f.logement?.consultations?.pprn), ...preuveCatnat(f)],
+      evidence: [preuveZonage(z, f.logement?.consultations?.zonage), ...preuveCatnat(f)],
       action: gesteZone(code)[b],
     };
     return ret("verification", [fact], "zone inondation établie à l'adresse");
@@ -398,7 +399,7 @@ const ruleInondationLecture: DecisionRule = {
         statement: constat,
         limitation: "Le zonage ne dit pas si ce logement a déjà été inondé.",
         signalConvention: `${precision}${historiqueCatnat(f)} ${LIMITE_ETAT_DES_RISQUES}`,
-        evidence: [preuveZonage(z, f.logement?.consultations?.pprn), ...preuveCatnat(f)],
+        evidence: [preuveZonage(z, f.logement?.consultations?.zonage), ...preuveCatnat(f)],
         action: GESTE_ZONE_A_CONFIRMER[b],
       };
       return ret("verification", [fact], "zonage inondation à confirmer à l'adresse");
