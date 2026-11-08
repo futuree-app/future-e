@@ -3,7 +3,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { lireRechercheSession, libelleReprise, SESSION_RECHERCHE_TTL_MS, type ApercuReprise } from "./reprise-recherche.ts";
+import { lireRechercheSession, libelleReprise, type ApercuReprise } from "./reprise-recherche.ts";
+import { serialiserSessionOuVivre, SESSION_OUVIVRE_TTL_MS } from "./comparateur/session-ou-vivre.ts";
 import { apercuComplet, decisionReprise, parsedPourLeProjet, rechercheDejaReprise } from "./decision/recherche-vers-projet.ts";
 import { normalizeUserProject, normalizeUserProjectInput, stampUserProject, type UserProject } from "./user-project.ts";
 import type { ParsedProject } from "./comparateur-vie.ts";
@@ -11,7 +12,12 @@ import type { ParsedProject } from "./comparateur-vie.ts";
 const MAINTENANT = Date.parse("2026-10-02T10:00:00.000Z");
 const PARSED = { reformulation: "Une ville comme Brest, plutôt petite, dans le Sud-Ouest.", hardConstraints: { zones: [{ zone: "sud_ouest", strength: "hard" }] }, preferences: [{ key: "eviter_grandes_villes", weight: 2, source: "parse" }], communeAncre: [{ label: "Brest" }] } as unknown as ParsedProject;
 const TEXTE = "Je cherche une ville comme Brest, plutôt petite, dans le Sud-Ouest";
-const session = (over: Record<string, unknown> = {}) => JSON.stringify({ v: 3, savedAt: MAINTENANT - 60_000, submittedText: TEXTE, parsed: PARSED, ...over });
+// FUT-27 : la session est celle qu'« Où vivre » écrit (même sérialiseur), jamais un format recopié à la main.
+const OUTCOME = { couverture: "complete", results: [{ insee: "29019", couverture: { etat: "complete", nonMesurees: [] } }] };
+const session = (over: Record<string, unknown> = {}) => {
+  const s = JSON.parse(serialiserSessionOuVivre({ submittedText: TEXTE, parsed: PARSED, outcome: OUTCOME }, MAINTENANT - 60_000));
+  return JSON.stringify({ ...s, ...over });
+};
 const RECHERCHE = { parsed: PARSED, rawText: TEXTE };
 const APERCU_SANS_PROJET: ApercuReprise = { retenus: ["Vivre dans le Sud-Ouest"], propresALaRecherche: [], remplace: null, abandonnes: null, dejaRepris: false };
 const APERCU_AVEC_PROJET: ApercuReprise = { ...APERCU_SANS_PROJET, remplace: { texte: "En Bretagne", updatedAt: "2026-10-01T00:00:00.000Z" }, abandonnes: { conditions: 1, precisions: 0, adoptions: 0 } };
@@ -38,7 +44,8 @@ test("4. recherche absente, illisible, d'une autre version ou expirée → aucun
   assert.equal(lireRechercheSession(null, MAINTENANT), null);
   assert.equal(lireRechercheSession("pas du json", MAINTENANT), null);
   assert.equal(lireRechercheSession(session({ v: 2 }), MAINTENANT), null);
-  assert.equal(lireRechercheSession(session({ savedAt: MAINTENANT - SESSION_RECHERCHE_TTL_MS - 1 }), MAINTENANT), null);
+  assert.equal(lireRechercheSession(session({ v: 3 }), MAINTENANT), null);
+  assert.equal(lireRechercheSession(session({ savedAt: MAINTENANT - SESSION_OUVIVRE_TTL_MS - 1 }), MAINTENANT), null);
   assert.equal(lireRechercheSession(session({ parsed: null }), MAINTENANT), null);
   assert.deepEqual(lireRechercheSession(session(), MAINTENANT), RECHERCHE);
   assert.equal(libelleReprise({ connecte: true, recherche: null, apercu: APERCU_SANS_PROJET, transfertFait: false }), null);

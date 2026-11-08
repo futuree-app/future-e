@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { relireLaPage } from "@/components/interaction/relire-la-page";
 import { createClient } from "@/lib/supabase/client";
 import {
-  SESSION_RECHERCHE_KEY, lireRechercheSession, libelleReprise,
+  SESSION_RECHERCHE_KEY, lireRechercheSession, libelleReprise, phraseAbandon,
   type ApercuReprise, type RechercheAReprendre,
 } from "@/lib/reprise-recherche";
 
@@ -70,9 +70,8 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
 
   const libelle = libelleReprise({ connecte: apercu != null, recherche, apercu, transfertFait: etat === "fait" });
   if (!libelle || !recherche || !apercu) return null;
-  const perdus = apercu.abandonnes
-    ? apercu.abandonnes.conditions + apercu.abandonnes.precisions + apercu.abandonnes.adoptions
-    : 0;
+  const abandon = phraseAbandon(apercu.abandonnes);
+  const nonMesures = apercu.nonMesures ?? [];
 
   async function enregistrer() {
     if (!recherche || !apercu) return;
@@ -118,6 +117,11 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
       ) : (
         <p className="text-[15px] leading-[1.6] text-muted mb-4">Votre texte, tel que vous l&apos;avez écrit.</p>
       )}
+      {nonMesures.length > 0 && (
+        <p className="text-[14px] leading-[1.6] text-muted mb-4">
+          Ce que futur•e garde sans pouvoir le mesurer, et que vos dossiers nommeront : {nonMesures.join(", ")}.
+        </p>
+      )}
       {apercu.propresALaRecherche.length > 0 && (
         <p className="text-[14px] leading-[1.6] text-muted mb-4">
           Ce qui reste propre à cette recherche : {apercu.propresALaRecherche.join(", ")}.
@@ -126,7 +130,10 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
       {apercu.remplace && (
         <div className="mb-4">
           <p className="text-[14px] leading-[1.6] text-label mb-2">
-            Cela remplacera votre projet actuel.{perdus > 0 ? " Ses conditions et précisions ne seront pas reprises." : ""}
+            Cela remplacera votre projet actuel.{abandon ? ` ${abandon}` : ""}
+            {apercu.intentionConservee
+              ? ` Votre intention ${apercu.intentionConservee === "achat" ? "d'achat" : "de location"} est conservée.`
+              : ""}
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-[var(--border-2)] p-3">

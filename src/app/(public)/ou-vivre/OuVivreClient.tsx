@@ -17,7 +17,7 @@ import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
 import { repliSynthese } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
-import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
+import { SESSION_OUVIVRE_KEY, lireSessionOuVivre, serialiserSessionOuVivre } from "@/lib/comparateur/session-ou-vivre";
 import { avisRefusAsk, contexteAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
 import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
 import { libelleCarteSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
@@ -55,14 +55,7 @@ const FREE_ASK = 2;
 // AskFuture déjà produits. On dépose un instantané complet tant qu'on est en
 // résultats, réhydraté au montage, avec un TTL court : on restaure le retour de
 // paywall, on ne ressuscite pas une session d'il y a deux jours.
-const SESSION_KEY = "futuree:ouvivre:session";
-// v4 (FUT-36) : les sessions v3 peuvent porter « qui attire » (identité, synthèse) ; on les laisse
-// tomber plutôt que de réafficher une causalité retirée.
-// v5 (FUT-129) : une session v4 peut porter l'ancienne lecture de l'inondation (« peu de reconnaissances
-// CatNat inondation », palier « Risque d'inondation faible ») : on ne la réaffiche pas.
-const SESSION_VERSION = 5;
-const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 h
-
+// Clé, version, délai et validité : un seul module (FUT-27), lu aussi par la reprise de /rapport.
 type SessionSnapshot = {
   v: number;
   savedAt: number;
@@ -78,8 +71,7 @@ type SessionSnapshot = {
 function saveSession(s: Omit<SessionSnapshot, "v" | "savedAt">): void {
   if (typeof window === "undefined") return;
   try {
-    const payload: SessionSnapshot = { v: SESSION_VERSION, savedAt: Date.now(), ...s };
-    window.localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    window.localStorage.setItem(SESSION_OUVIVRE_KEY, serialiserSessionOuVivre(s, Date.now()));
   } catch {
     // best-effort : quota plein ou stockage indisponible, jamais bloquant
   }
@@ -88,15 +80,8 @@ function saveSession(s: Omit<SessionSnapshot, "v" | "savedAt">): void {
 function loadSession(): SessionSnapshot | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as SessionSnapshot;
-    if (s.v !== SESSION_VERSION) return null;
-    if (!s.savedAt || Date.now() - s.savedAt > SESSION_TTL_MS) return null;
-    if (!s.parsed || !s.outcome?.results?.length) return null;
     // FUT-139 : sans couverture ni mode d'exploration lisibles, la session est rejetée, jamais complétée.
-    if (!sessionReconstituable(s)) return null;
-    return s;
+    return lireSessionOuVivre(window.localStorage.getItem(SESSION_OUVIVRE_KEY), Date.now()) as SessionSnapshot | null;
   } catch {
     return null;
   }
@@ -105,7 +90,7 @@ function loadSession(): SessionSnapshot | null {
 function clearSession(): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(SESSION_KEY);
+    window.localStorage.removeItem(SESSION_OUVIVRE_KEY);
   } catch {
     // best-effort
   }

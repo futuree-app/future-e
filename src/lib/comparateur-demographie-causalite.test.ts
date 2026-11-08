@@ -19,6 +19,7 @@ import { gunzipSync } from "node:zlib";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { DEMOGRAPHY_PHRASE } from "./territoire/facts.ts";
+import { SESSION_OUVIVRE_VERSION, SESSION_OUVIVRE_TTL_MS, lireSessionOuVivre, serialiserSessionOuVivre } from "./comparateur/session-ou-vivre.ts";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
 const hook = `
@@ -130,13 +131,19 @@ test("D8. le prompt de synthèse interdit la causalité et ne la donne plus en e
 });
 
 test("D9. les sessions locales d'Où vivre antérieures à FUT-36 ne sont plus restaurées", () => {
+  // FUT-27 : clé, version et délai vivent dans un seul module, lu par « Où vivre » ET par la reprise de /rapport.
+  // 4 depuis FUT-36 ; 5 depuis FUT-129. Toute version au moins égale à 4 laisse tomber les sessions antérieures.
+  assert.ok(SESSION_OUVIVRE_VERSION >= 4, `SESSION_OUVIVRE_VERSION = ${SESSION_OUVIVRE_VERSION}`);
+  assert.equal(SESSION_OUVIVRE_TTL_MS, 2 * 60 * 60 * 1000);
+  const maintenant = Date.parse("2026-11-08T10:00:00.000Z");
+  const outcome = { couverture: "complete", results: [{ insee: "29019", couverture: { etat: "complete", nonMesurees: [] } }] };
+  const ecrite = JSON.parse(serialiserSessionOuVivre({ submittedText: "x", parsed: { preferences: [] }, outcome }, maintenant));
+  assert.ok(lireSessionOuVivre(JSON.stringify(ecrite), maintenant), "la version courante se relit");
+  for (const v of [3, SESSION_OUVIVRE_VERSION - 1]) {
+    assert.equal(lireSessionOuVivre(JSON.stringify({ ...ecrite, v }), maintenant), null, `v${v} rejetée`);
+  }
+  // Le client lit ce module, sans constante propre.
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
-  // 4 depuis FUT-36 ; 5 depuis FUT-129 (l'ancienne lecture de l'inondation). Toute version au moins égale à 4
-  // laisse tomber les sessions antérieures à FUT-36.
-  const version = Number(/const SESSION_VERSION = (\d+);/.exec(client)?.[1]);
-  assert.ok(version >= 4, `SESSION_VERSION = ${version}`);
-  // Le mécanisme est inchangé : une version différente n'est pas restaurée.
-  assert.match(client, /if \(s\.v !== SESSION_VERSION\) return null;/);
-  assert.match(client, /const SESSION_KEY = "futuree:ouvivre:session";/);
-  assert.match(client, /const SESSION_TTL_MS = 2 \* 60 \* 60 \* 1000;/);
+  assert.match(client, /lireSessionOuVivre\(window\.localStorage\.getItem\(SESSION_OUVIVRE_KEY\)/);
+  assert.doesNotMatch(client, /const SESSION_(VERSION|KEY|TTL_MS) =/);
 });
