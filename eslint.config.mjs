@@ -27,6 +27,13 @@ const eslintConfig = defineConfig([
     "Futur.e Design System/**",
   ]),
   {
+    // MÊME CIBLE QUE LE PLUGIN `react` DE NEXT. eslint-config-next ne déclare `react` (et
+    // `react-hooks`) que pour `**/*.{js,jsx,mjs,ts,tsx,mts,cts}` : ni `.cjs`, ni rien d'autre. Sans
+    // `files`, cet objet s'appliquait à tout le dépôt ; dès qu'un `.cjs` entrait dans le lint,
+    // ESLint s'arrêtait sur « could not find plugin "react" » et `npm run lint` ne rendait plus
+    // aucun diagnostic (FUT-121). Les `.cjs` gardent les contrôles JavaScript (règles de base et
+    // typescript-eslint), ils ne reçoivent simplement pas une règle JSX qui ne les concerne pas.
+    files: ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
     rules: {
       // L'APOSTROPHE N'EST PAS ÉCHAPPÉE. La règle protège d'un rendu ambigu pour `>`, `"` et `}` ;
       // pour `'`, elle n'apporte aucune correction utile et coûte cher à un produit dont les textes
