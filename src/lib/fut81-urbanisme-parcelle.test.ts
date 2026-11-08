@@ -648,6 +648,24 @@ test("FUT-144 — Chaque catégorie nationale a ses mots courants, sans conclusi
   for (const t of [...Object.values(SECTEUR_SIMPLE), ...Object.values(ZONE_SIMPLE).flatMap((z) => [z.un, z.des])]) sansAbus(t, t);
 });
 
+test("FUT-144 — Contre-revue du 09/11 : 16-02 garde l'habitation existante et la zone agricole ou naturelle, même sans zone lue", () => {
+  // Le contre-exemple de Work : la prescription est lisible, la zone ne l'est pas, le dépliable est fermé.
+  const u = lireUrbanisme(synthetique({ zones: [], prescriptions: { surface: [presc(PARCELLE, "16", "02", "Habitation existante en zone A")], ligne: [], point: [] } }));
+  assert.deepEqual([u.regime, u.zones.length, u.prescriptions.map((p) => [p.categorie, p.etendue])], ["document", 0, [["16-02", "couvre"]]]);
+  const t = visible(u);
+  assert.match(t, /aucune zone n'a pu être lue à cette parcelle/, "le cas sans zone");
+  assert.match(t, /Extension ou annexes d'une habitation existante · sur toute la parcelle En zone agricole ou naturelle, le plan les admet ici pour une habitation existante, dans les limites de surface, de hauteur et de distance que fixe le règlement\./);
+  assert.doesNotMatch(t, /admises par le plan/, "l'ancienne formule, sans sa condition");
+  sansAbus(rendu(u), "16-02 sans zone");
+  // Fidélité à la note nationale : mêmes conditions, rien de plus.
+  const note = CATEGORIES["16-02"].note;
+  for (const condition of ["zone agricole ou naturelle", "habitation existante", "limites de surface, de hauteur et de distance"]) {
+    assert.ok(note.includes(condition), `la note dit « ${condition} »`);
+    assert.ok(`${LIBELLES_SIMPLES["16-02"].court} ${LIBELLES_SIMPLES["16-02"].effet}`.replace(/’/g, "'").includes(condition), `le résumé garde « ${condition} »`);
+  }
+  assert.match(deplie(u), new RegExp(note.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), "la note complète reste au détail");
+});
+
 test("FUT-144 — Premier niveau sans jargon de nomenclature ; les codes, parts et notes restent au détail", () => {
   for (const [nom, u] of casDuBanc()) {
     const t = visible(u);

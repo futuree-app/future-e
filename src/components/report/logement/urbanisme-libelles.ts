@@ -70,7 +70,9 @@ export const LIBELLES_SIMPLES: Record<string, LibelleSimple> = {
   "07-69": { court: "Secteur à règles particulières", effet: PSMV_NON_PROTEGE },
   "08-00": { court: "Terrain à garder non bâti", effet: "Le plan déclare cette partie inconstructible, pour préserver un espace cultivé ou une continuité écologique." },
   "16-01": { court: "Bâtiment pouvant changer de destination", effet: "Par exemple devenir un logement ; le changement reste soumis à autorisation." },
-  "16-02": { court: "Extension ou annexes admises par le plan", effet: "Dans les limites de surface, de hauteur et de distance que fixe le règlement." },
+  // Contre-revue du 09/11/2026 : l'habitation EXISTANTE et la zone agricole ou naturelle sont la condition
+  // même de cette prescription. Le résumé les garde, même quand la zone n'a pas été lue.
+  "16-02": { court: "Extension ou annexes d’une habitation existante", effet: "En zone agricole ou naturelle, le plan les admet ici pour une habitation existante, dans les limites de surface, de hauteur et de distance que fixe le règlement." },
   "16-03": { court: "Secteur de constructions limitées", effet: "Le plan y admet, à titre exceptionnel, des constructions limitées ; les conditions sont dans le règlement." },
   "24-01": { court: "Voie prévue (à créer, modifier ou conserver)", effet: VOIE },
   "24-02": { court: "Voie à modifier", effet: VOIE },
