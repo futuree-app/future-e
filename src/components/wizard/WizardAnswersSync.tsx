@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { readWizardAnswersFromStorage } from "./types";
+import { appliquerPurgeDifferee } from "@/components/interaction/purge-recherche-navigateur";
 
 // Pousse les réponses du wizard (sessionStorage) vers le profil de l'utilisateur
 // connecté, une seule fois, si le serveur ne les a pas encore. Monté sur les
@@ -16,6 +17,8 @@ export function WizardAnswersSync({ hasServerAnswers }: { hasServerAnswers: bool
 
   useEffect(() => {
     if (done.current || hasServerAnswers) return;
+    // FUT-27 : jamais le questionnaire d'un compte déconnecté sans purge dans le profil du compte suivant.
+    appliquerPurgeDifferee();
     const answers = readWizardAnswersFromStorage();
     if (!answers) return;
     done.current = true;

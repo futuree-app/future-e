@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deCommune } from "@/lib/typography";
-import { signOutAction } from "@/app/auth/actions";
+import { FormulaireDeconnexion } from "./FormulaireDeconnexion";
 import Navbar from "@/components/Navbar";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import {
@@ -328,11 +328,11 @@ export default async function ComptePage() {
           <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2">
             Retour au site
           </Link>
-          <form action={signOutAction} className="ml-auto">
+          <FormulaireDeconnexion className="ml-auto">
             <button type="submit" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost bg-transparent border-none cursor-pointer py-2">
               Se déconnecter
             </button>
-          </form>
+          </FormulaireDeconnexion>
         </div>
       </div>
 

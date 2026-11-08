@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { WizardTeaser } from "./WizardTeaser";
 import { hasWizardContent, readWizardAnswersFromStorage, type WizardAnswers } from "./types";
+import { appliquerPurgeDifferee } from "@/components/interaction/purge-recherche-navigateur";
 
 // Vue gratuite de /rapport : la « première lecture » post-wizard.
 // Source des réponses, par ordre de priorité :
@@ -25,6 +26,7 @@ export function RapportPremiereLecture({
   // s'applique qu'après hydratation.
   useEffect(() => {
     if (hasWizardContent(answers)) return;
+    appliquerPurgeDifferee(); // FUT-27 : avant de lire, une déconnexion restée sans purge
     const stored = readWizardAnswersFromStorage();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture ponctuelle d'un store externe au montage
     if (stored) setAnswers(stored);

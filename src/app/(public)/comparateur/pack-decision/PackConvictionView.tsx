@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ComparaisonComplete, ParsedProject } from "@/lib/comparateur-vie";
 import { PackPaymentPanel } from "./PackPaymentPanel";
+import { CLE_PACK_LABEL, CLE_PACK_PARSED } from "@/lib/comparateur/session-ou-vivre";
+import { appliquerPurgeDifferee, useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
 
 type Props = {
   insees: string[];
@@ -27,14 +29,22 @@ export function PackConvictionView({ insees, userEmail, returnUrl, returnPath }:
   const [apercu, setApercu] = useState<Apercu | null>(null);
   const [slow, setSlow] = useState(false);
 
+  // FUT-27 : une déconnexion explicite efface la recherche déposée ; la page oublie celle qu'elle affiche.
+  useOubliALaPurge(() => {
+    setParsed(null);
+    setProjetLabel("");
+    setApercu(null);
+  });
+
   // Le projet vit en localStorage (déposé par le comparateur au clic Pack Décision).
   useEffect(() => {
+    appliquerPurgeDifferee(); // FUT-27 : une déconnexion sans purge du navigateur se rattrape ici, avant de lire
     try {
-      const raw = window.localStorage.getItem("futuree:projet:parsed");
+      const raw = window.localStorage.getItem(CLE_PACK_PARSED);
       // Lecture localStorage post-montage (client-only) : pattern légitime, pas un cascading render.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setParsed(JSON.parse(raw) as ParsedProject);
-      const label = window.localStorage.getItem("futuree:projet:label");
+      const label = window.localStorage.getItem(CLE_PACK_LABEL);
       if (label) setProjetLabel(label);
     } catch {
       // pas de projet en mémoire : l'aperçu restera générique, l'achat indisponible.

@@ -6,16 +6,21 @@
 // que le lecteur n'a pas chiffrée. Ni condition, ni définition, ni adoption : un projet neuf.
 import type { ParsedProject } from "../comparateur-vie.ts";
 import type { UserProject, CriterionRef } from "../user-project.ts";
-import { normalizeUserProject } from "../user-project.ts";
+import { normalizeUserProject, normalizeUserProjectInput, stampUserProject } from "../user-project.ts";
 import { canonique } from "./criterion-value.ts";
 import { assainirParsed } from "../parse-assainir.ts";
 import { projetSansDerivesDAncre, type AncreResolue } from "./ancres-derivees.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys } from "./project-view.ts";
 import { presenterCritere } from "./criterion-labels.ts";
 import { instancesDe, FAMILLES_MULTIPLES } from "./effective-value.ts";
+import { demandesNonMesurees } from "./criteria-registry.ts";
 
 export type ApercuReprise = {
   retenus: string[];
+  // FUT-27 : les demandes comprises que futur•e ne mesure pas, avec les mots du lecteur. Elles passent dans le
+  // projet (la lecture finale les nomme, FUT-45) : l'aperçu le dit, sinon leur absence de la liste des
+  // critères retenus laisserait croire qu'elles sont perdues.
+  nonMesures: string[];
   propresALaRecherche: string[];
 };
 
@@ -49,7 +54,7 @@ export function apercuReprise(parsedProjet: ParsedProject, parsedRecherche: Pars
     `ne pas vous reproposer ${nom}`,
     ...(parsedRecherche.ancreSansTaille || hc.communeSize || hc.sizeRelativeTo ? [] : [`des villes d'une taille proche de ${nom}`]),
   ]);
-  return { retenus, propresALaRecherche };
+  return { retenus, nonMesures: demandesNonMesurees(projet).map((d) => d.terme), propresALaRecherche };
 }
 
 /**
@@ -67,8 +72,11 @@ export function rechercheDejaReprise(actuel: UserProject | null, parsedProjet: P
 /** L'aperçu complet que la feuille montre : ce qui est retenu, ce qui serait remplacé et abandonné. */
 export function apercuComplet(actuel: UserProject | null, parsedProjet: ParsedProject | null, recherche: ParsedProject | null, rawText: string) {
   return {
-    ...(parsedProjet && recherche ? apercuReprise(parsedProjet, recherche) : { retenus: [], propresALaRecherche: [] }),
+    ...(parsedProjet && recherche ? apercuReprise(parsedProjet, recherche) : { retenus: [], nonMesures: [], propresALaRecherche: [] }),
     remplace: actuel ? { texte: actuel.rawText ?? actuel.parsed?.reformulation ?? "", updatedAt: actuel.updatedAt ?? null } : null,
+    // Ce que la route garde du projet actuel (achat ou location) : il décrit la situation du lecteur, pas ses
+    // critères, et la recherche n'en dit rien. L'aperçu le dit avant d'écrire (FUT-27).
+    intentionConservee: actuel?.intent ?? null,
     dejaRepris: rechercheDejaReprise(actuel, parsedProjet, rawText),
     abandonnes: actuel
       ? { conditions: actuel.conditions?.length ?? 0, precisions: actuel.definitions?.length ?? 0, adoptions: (actuel.adoptions?.length ?? 0) + (actuel.rejets?.length ?? 0) }
@@ -85,4 +93,19 @@ export function decisionReprise(mode: unknown, actuel: UserProject | null, vuUpd
   if (mode !== "enregistrer") return "mode_inconnu";
   const vu = typeof vuUpdatedAt === "string" ? vuUpdatedAt : null;
   return (actuel?.updatedAt ?? null) === vu ? "ecrire" : "conflit";
+}
+
+/**
+ * LE PROJET QUE LA REPRISE ÉCRIT (FUT-8, FUT-27). Il est NEUF : aucune condition sans compromis, aucune
+ * précision, aucun choix sur un critère proposé, ni de l'ancien projet (le remplacement les abandonne, l'aperçu
+ * le dit) ni de la recherche (le navigateur ne peut pas en fabriquer). La posture et l'intention du projet
+ * actuel sont gardées : elles décrivent la situation du lecteur, pas ses critères. `null` : rien d'enregistrable.
+ */
+export function projetDepuisRecherche(
+  actuel: UserProject | null, parsedProjet: ParsedProject | null, rawText: string, maintenant: string,
+): UserProject | null {
+  const input = normalizeUserProjectInput({
+    posture: actuel?.posture ?? "recherche", intent: actuel?.intent ?? null, rawText: rawText || null, parsed: parsedProjet,
+  });
+  return input ? stampUserProject(input, maintenant) : null;
 }

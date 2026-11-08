@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { EcoutePurgeRecherche } from "@/components/interaction/EcoutePurgeRecherche";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function RootLayout({
             l'injecte via next/script, c'est le placement attendu. */}
         <GoogleTagManager gtmId="GTM-NZ9TS3ZF" />
         <PostHogProvider>
+          <EcoutePurgeRecherche />
           {children}
         </PostHogProvider>
         <ConsentBanner />

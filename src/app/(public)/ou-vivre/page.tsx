@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { OuVivreClient } from "./OuVivreClient";
+import { SCRIPT_RETOUR_ARRIERE_OUVIVRE } from "@/lib/comparateur/session-ou-vivre";
 
 // Comparateur de vie · /ou-vivre
 // Porte d'entrée « texte libre » du parcours : on décrit un projet de vie, le
@@ -28,11 +29,10 @@ export default function OuVivrePage() {
           OuVivreClient) ne se déclenche pas. Ce script s'exécute au parse, avant
           tout affichage : si on arrive par retour arrière et qu'un instantané de
           session existe, on force un rechargement normal, où l'effet de montage
-          restaure le parcours. La clé est la seule constante dupliquée (SESSION_KEY). */}
+          restaure le parcours. Le script vient du module de la session (FUT-27) : sa clé ne se recopie plus. */}
       <script
         dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{var n=performance.getEntriesByType('navigation')[0];if(n&&n.type==='back_forward'&&localStorage.getItem('futuree:ouvivre:session')){location.reload();}}catch(e){}})();",
+          __html: SCRIPT_RETOUR_ARRIERE_OUVIVRE,
         }}
       />
 

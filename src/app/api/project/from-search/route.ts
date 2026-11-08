@@ -10,9 +10,9 @@
 // lecteur, pas ses critères.
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeUserProject, stampUserProject, normalizeUserProjectInput } from "@/lib/user-project";
+import { normalizeUserProject } from "@/lib/user-project";
 import { placeDirectory, type ParsedProject } from "@/lib/comparateur-vie";
-import { parsedPourLeProjet, apercuComplet, decisionReprise } from "@/lib/decision/recherche-vers-projet";
+import { parsedPourLeProjet, apercuComplet, decisionReprise, projetDepuisRecherche } from "@/lib/decision/recherche-vers-projet";
 import { ecrireProjetSiInchange } from "@/lib/server/projet-ecriture";
 
 export const runtime = "nodejs";
@@ -50,11 +50,8 @@ export async function POST(request: NextRequest) {
   if (decision === "conflit") {
     return NextResponse.json({ error: "Votre projet a changé entre-temps. Rechargez la page." }, { status: 409 });
   }
-  const input = normalizeUserProjectInput({
-    posture: actuel?.posture ?? "recherche", intent: actuel?.intent ?? null, rawText: rawText || null, parsed,
-  });
-  if (!input) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
-  const project = stampUserProject(input, new Date().toISOString());
+  const project = projetDepuisRecherche(actuel, parsed, rawText, new Date().toISOString());
+  if (!project) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
   const r = await ecrireProjetSiInchange(supabase, user.id, project, { existe: actuel != null, updatedAt: actuel?.updatedAt ?? null });
   if (r === "conflit") return NextResponse.json({ error: "Votre projet a changé entre-temps. Rechargez la page." }, { status: 409 });
   if (r === "erreur") return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
