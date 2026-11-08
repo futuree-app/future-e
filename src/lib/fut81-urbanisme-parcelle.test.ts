@@ -12,6 +12,7 @@ import {
   sourcesAbsentes, consulterOuActualiser, issueActualisation, jsonCanonique, pertesUrbanisme, type VersionLogement,
 } from "./logement-report-version.ts";
 import type { LogementReport } from "./logement-report-types.ts";
+import { LIBELLES_SIMPLES, EFFET_NEUTRE, SECTEUR_SIMPLE, ZONE_SIMPLE } from "../components/report/logement/urbanisme-libelles.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // FUT-81 (26/10/2026) : LE PLAN D'URBANISME DE LA PARCELLE, LU SANS DÉPASSER LA PREUVE.
@@ -105,8 +106,10 @@ function entree(c: Cas): EntreeUrbanisme {
 const lire = (c: Cas) => lireUrbanisme(entree(c));
 const rendu = (u: UrbanismeParcelle | undefined, o: { parcelCode?: string | null } = {}) =>
   texte(rendreBloc({ urbanisme: u, parcelCode: o.parcelCode ?? "PARCELLE-X", withDivider: false }));
-/** Ce que le lecteur voit sans rien déplier : tout ce qui précède « Comprendre cette lecture ». */
-const visible = (u: UrbanismeParcelle) => rendu(u).split("▸ Comprendre cette lecture")[0];
+/** Ce que le lecteur voit sans rien déplier : tout ce qui précède « Détails et sources » (FUT-144). */
+const visible = (u: UrbanismeParcelle) => rendu(u).split("▸ Détails et sources")[0];
+/** Ce que le dépliable ajoute : codes, parts, intitulés, notes complètes, provenance, méthode. */
+const deplie = (u: UrbanismeParcelle) => rendu(u).split("▸ Détails et sources")[1] ?? "";
 
 // ── Géométries synthétiques, en MÈTRES autour de 2° E / 46° N (repère de la revue du 27/10/2026) ─────
 const P46 = projectionAutour(2, 46);
@@ -155,21 +158,30 @@ test("Parcelle en zone unique (Moissy-Cramayel) : document en vigueur, zone, rè
   assert.equal(u.zones[0].reglement.statut, "publie");
   assert.match((u.zones[0].reglement as { url: string }).url, /^https:\/\/www\.geoportail-urbanisme\.gouv\.fr\/api\/document\/[0-9a-f]{32}\/files\/77296_reglement_20251215\.pdf$/);
   assert.deepEqual([u.documents[0].type, u.documents[0].vigueur, u.documents[0].approbation], ["PLU", "etablie", "2025-12-15"]);
-  assert.match(visible(u), /Cette parcelle est en zone UC du plan local d'urbanisme \(PLU\)\./);
+  // FUT-144 : le type de zone en mots courants au premier niveau ; le code et la nomenclature au détail.
+  assert.match(visible(u), /Cette parcelle est en zone urbaine du plan local d'urbanisme \(PLU\)\./);
+  assert.match(visible(u), /Le plan la décrit ainsi : « Zone urbaine d'habitat pavillonnaire »\./);
+  assert.match(visible(u), /Lire le règlement de la zone UC \(PDF\)/, "le code reste là où il sert : le chapitre à lire");
+  assert.match(deplie(u), /Zone UC \(toute la parcelle\) : zone urbaine dans la nomenclature nationale/);
+  assert.match(deplie(u), /dernière évolution approuvée le 15 décembre 2025, publiée au Géoportail de l'urbanisme le 25 février 2026/);
 });
 
 test("Parcelle partagée entre deux zones (Mérignac) : aires exactes, un seul règlement, emplacement réservé de voirie", () => {
   const u = lire("merignac-deux-zones");
   assert.deepEqual(u.zones.map((z) => [z.libelle, z.part]), [["US7", 0.617], ["US9", 0.383]]);
   const t = visible(u);
-  assert.match(t, /partagée entre 2 zones du plan local d'urbanisme intercommunal \(PLUi\) : US7 \(environ 62 %\), US9 \(environ 38 %\)\./);
+  assert.match(t, /Cette parcelle est partagée entre 2 zones urbaines du plan local d'urbanisme intercommunal \(PLUi\)\./);
+  assert.match(deplie(u), /Zone US7 \(environ 62 % de la parcelle\).*Zone US9 \(environ 38 % de la parcelle\)/, "les parts restent dites, au détail");
   assert.equal(t.match(/Lire le règlement/g)?.length, 1, "un même fichier : un seul lien");
   assert.match(t, /Lire le règlement des zones US7, US9/);
   const er = u.prescriptions.find((p) => p.categorie === "05-01")!;
   assert.deepEqual([er.code, er.sousCode, er.etendue, er.surfaceM2], ["05", "01", "couvre", 70.9]);
-  assert.match(t, /Emplacement réservé à une voie publique · sur environ 1 % de la parcelle \(≈ 71 m²\)/);
-  assert.match(t, /Patrimoine paysager protégé · sur environ 38 m² de la parcelle/);
-  assert.match(t, /D'autres prescriptions s'appliquent aussi sur la parcelle \(conditions de desserte, stationnement\)/);
+  assert.match(t, /Réservé pour une voie publique · sur environ 1 % de la parcelle \(≈ 71 m²\) Cette partie ne peut pas accueillir une construction contraire à cette destination\. Demandez en mairie le projet et qui le porte\./);
+  assert.match(t, /Paysage protégé · sur environ 38 m² de la parcelle/);
+  assert.match(t, /D'autres règles s'appliquent aussi sur la parcelle \(conditions de desserte, stationnement\)/);
+  // Le détail garde l'intitulé national, le code, l'intitulé du producteur et la note complète.
+  assert.match(deplie(u), /Emplacement réservé à une voie publique \(code national 05-01\) · sur environ 1 % de la parcelle \(≈ 71 m²\)\. Intitulé du plan : « Emplacement réservé - Voirie tertiaire »\. Le plan réserve cette partie du terrain à une voie publique/);
+  assert.match(deplie(u), /Patrimoine paysager protégé \(code national 07-02\).*« Patrimoine paysager - Bois et bosquets intérieurs »/);
   assert.doesNotMatch(t, /autre prescription/, "le code 99 se compte, il ne se nomme pas");
 });
 
@@ -178,8 +190,15 @@ test("Trois zones réelles dont une secondaire de 2,3 % (Sucy-en-Brie), et un li
   assert.deepEqual(u.zones.map((z) => [z.libelle, z.part]), [["UILO1O1O1O1O", 0.531], ["UIO1O1O1O1OO", 0.446], ["UIO2O1O1O2OO", 0.023]]);
   assert.deepEqual(u.zonesEnLimite, [{ libelle: "UILC2C2C3C4C", surfaceM2: 43.4 }]);
   const t = visible(u);
-  assert.match(t, /partagée entre 3 zones/);
-  assert.match(t, /La zone UILC2C2C3C4C recoupe aussi la parcelle, sur environ 43 m², le long de sa limite\. Un liseré aussi mince vient le plus souvent d'un écart de tracé/);
+  assert.match(t, /partagée entre 3 zones urbaines/);
+  assert.match(t, /Le plan les décrit ainsi : « Secteur d'activites »\./, "le libellé long débarrassé de son code, même allongé");
+  assert.match(t, /Une zone voisine recoupe aussi la parcelle sur environ 43 m², le long de sa limite\. C'est le plus souvent un écart de tracé/);
+  assert.match(deplie(u), /Zone en bordure : UILC2C2C3C4C, sur environ 43 m²/);
+  assert.match(deplie(u), /Zone UIO2O1O1O2OO \(environ 2 % de la parcelle\)/);
+  // Deux éléments « préservés pour l'écologie » (zone humide et cours d'eau) : une ligne, les deux étendues.
+  assert.match(t, /Élément naturel préservé pour l'écologie · sur environ 109 m² de la parcelle ; traverse la parcelle sur environ 14 m/);
+  assert.match(deplie(u), /« Zone humide »/);
+  assert.match(deplie(u), /« Cours d'eau »/);
 });
 
 test("Zone voisine qui touche la limite : écartée, citée dans la méthode (Lyon, Six-Fours)", () => {
@@ -188,7 +207,13 @@ test("Zone voisine qui touche la limite : écartée, citée dans la méthode (Ly
   assert.deepEqual(lyon.zonesEnLimite, [{ libelle: "UCe3-p", surfaceM2: 0 }]);
   assert.deepEqual(lire("six-fours-emplacement-reserve").zonesEnLimite, [{ libelle: "UF", surfaceM2: 0.4 }]);
   const t = rendu(lyon);
-  assert.match(t, /Cette parcelle est en zone UCe1a du plan local d'urbanisme intercommunal \(PLUi\)\./);
+  assert.match(t, /Cette parcelle est en zone urbaine du plan local d'urbanisme intercommunal \(PLUi\)\./);
+  assert.match(t, /Lire le règlement de la zone UCe1a/);
+  // Une description longue (190 caractères) passe au détail plutôt que d'alourdir le premier niveau.
+  assert.doesNotMatch(visible(lyon), /Tissu urbain dense/);
+  assert.match(deplie(lyon), /Le plan la décrit ainsi : « Tissu urbain dense/);
+  // Le motif d'une constructibilité limitée reste au premier niveau : c'est lui qui dit le pourquoi.
+  assert.match(visible(lyon), /Constructions limitées · sur toute la parcelle Le plan les interdit ou les soumet à conditions ici ; le motif et les conditions sont dans le règlement\. Intitulé du plan : « Risque d inondation par ruissellement-ZONE PRODUCTION »/);
   assert.match(t, /La zone UCe3-p touche la limite de la parcelle sans la couvrir de façon significative/);
   assert.doesNotMatch(visible(lyon), /UCe3-p/, "un simple contact ne monte pas à l'écran");
 });
@@ -198,9 +223,10 @@ test("Prescription applicable (Six-Fours) : emplacement réservé de 519 m², et
   const er = u.prescriptions.find((p) => p.code === "05")!;
   assert.deepEqual([er.categorie, er.etendue, er.part, er.surfaceM2], ["05-00", "couvre", 0.138, 519]);
   const t = visible(u);
-  assert.match(t, /Emplacement réservé · sur environ 14 % de la parcelle \(≈ 519 m²\)/);
-  assert.match(t, /Demandez en mairie son objet et son bénéficiaire/);
-  assert.match(t, /Patrimoine bâti, paysager|Élément de patrimoine ou de paysage protégé · traverse la parcelle sur environ 27 m/);
+  assert.match(t, /Emplacement réservé · sur environ 14 % de la parcelle \(≈ 519 m²\) Une partie du terrain est réservée à un projet public que le Géoportail ne précise pas : demandez lequel en mairie\./);
+  assert.match(t, /Patrimoine ou paysage protégé · traverse la parcelle sur environ 27 m/);
+  assert.match(deplie(u), /Demandez en mairie son objet et son bénéficiaire/, "la note complète reste au détail");
+  assert.match(deplie(u), /Élément de patrimoine ou de paysage protégé \(code national 07-00\) · traverse la parcelle sur environ 27 m\. Intitulé du plan : « Espaces verts à protéger - alignements »/);
 });
 
 test("Une prescription qui ne fait que border la parcelle concerne le voisin : comptée, jamais attribuée (Lyon)", () => {
@@ -218,9 +244,11 @@ test("Carte communale (Vauquois) : le secteur, sans règlement propre, et le rep
   assert.deepEqual(u.secteurs.map((s) => [s.libelle, s.typesect]), [["C", "01"]]);
   assert.deepEqual([u.statut, u.ambiguites], ["ambigu", ["parcelle_incertaine"]]);
   const t = visible(u);
-  assert.ok(t.indexOf("ne tombe dans aucune parcelle") < t.indexOf("secteur ouvert à la construction"), "la réserve précède le secteur");
-  assert.match(t, /La parcelle retenue est dans un secteur ouvert à la construction de la carte communale \(secteur « C »\)/);
-  assert.match(t, /n'a pas de règlement propre/);
+  assert.ok(t.indexOf("ne tombe dans aucune parcelle") < t.indexOf("secteur de la carte communale"), "la réserve précède le secteur");
+  assert.match(t, /La parcelle retenue est dans un secteur de la carte communale où des constructions peuvent être admises\./);
+  assert.match(t, /n'a pas de règlement propre : chaque projet est instruit selon les règles nationales d'urbanisme/);
+  assert.match(t, /faites confirmer le vôtre par le service urbanisme de la mairie/i);
+  assert.match(deplie(u), /Secteur « C » : secteur ouvert à la construction \(type 01 de la nomenclature nationale\)/);
   sansAbus(t, "carte communale");
 });
 
@@ -256,11 +284,14 @@ test("Plan de sauvegarde (Besançon) : zones superposées, parties protégées e
   assert.equal(parCategorie["07-67"].documentType, "PSMV");
   assert.ok(parCategorie["07-50"], "la partie réellement protégée reste nommée");
   const t = visible(u);
-  assert.match(t, /couverte par 2 zones superposées du plan de sauvegarde et de mise en valeur \(PSMV\)/);
+  assert.match(t, /couverte par 2 zones urbaines superposées du plan de sauvegarde et de mise en valeur \(PSMV\)/);
   assert.doesNotMatch(t, /partagée entre/);
-  assert.match(t, /Immeuble bâti non protégé, soumis à des dispositions particulières · sur environ 11 % de la parcelle/);
-  assert.match(t, /Le plan de sauvegarde identifie cet élément sans le protéger/);
-  assert.match(t, /Immeuble protégé en totalité, intérieurs et extérieurs · sur environ 47 % de la parcelle/);
+  assert.match(t, /Immeuble non protégé, à règles particulières · sur environ 11 % de la parcelle \(≈ 39 m²\) Non protégé, mais des règles particulières du plan de sauvegarde/);
+  assert.match(t, /Immeuble entièrement protégé · sur environ 47 % de la parcelle \(≈ 163 m²\) Travaux soumis à autorisation, avec l'accord de l'architecte des Bâtiments de France/);
+  // Le non-protégé ne se lit jamais « protégé » au premier niveau.
+  assert.doesNotMatch(t, /Immeuble non protégé, à règles particulières[^.]*Travaux soumis à autorisation/);
+  assert.match(deplie(u), /Immeuble bâti non protégé, soumis à des dispositions particulières \(code national 07-67\).*Le plan de sauvegarde identifie cet élément sans le protéger/);
+  assert.match(deplie(u), /Immeuble protégé en totalité, intérieurs et extérieurs \(code national 07-50\)/);
 });
 
 // ═══════════════════════════════════ 2. LES CINQ BLOCAGES DE LA REVUE DU 27/10/2026 ═════════════
@@ -273,7 +304,8 @@ test("Blocage 1 — Bandes étroites : 50 et 30 m² retenus avec leur aire exact
     const p = u.prescriptions[0];
     assert.equal(p.etendue, "couvre");
     assert.ok(Math.abs(p.surfaceM2! - aire) < 0.5, `${aire} m² mesurés ${p.surfaceM2}`);
-    assert.match(visible(u), new RegExp(`Emplacement réservé à une voie publique · sur environ ${aire} m² de la parcelle`));
+    assert.match(visible(u), new RegExp(`Réservé pour une voie publique · sur environ ${aire} m² de la parcelle`));
+    assert.match(deplie(u), new RegExp(`Emplacement réservé à une voie publique \\(code national 05-01\\) · sur environ ${aire} m² de la parcelle`));
   }
   // Petite parcelle (10 × 10 m) et intersection réelle de 1 m² : marginale, mais DITE, pas supprimée.
   const petite = lireUrbanisme(synthetique({
@@ -282,7 +314,8 @@ test("Blocage 1 — Bandes étroites : 50 et 30 m² retenus avec leur aire exact
   }));
   assert.deepEqual(petite.prescriptions.map((p) => [p.etendue, p.surfaceM2]), [["marginale", 1]]);
   assert.match(visible(petite), /recoupe la parcelle sur une très faible surface \(≈ 1 m²\)/);
-  assert.match(visible(petite), /vérifiez sur le plan de zonage si elle concerne bien ce terrain/);
+  assert.match(visible(petite), /À vérifier sur le plan de zonage\./);
+  assert.match(deplie(petite), /écart de tracé entre le plan et le cadastre : vérifiez sur le plan de zonage si elle concerne bien ce terrain/);
 });
 
 test("Blocage 1 — Contacts et recouvrements : symétriques sur les quatre bords, aires exactes", () => {
@@ -358,11 +391,11 @@ test("Blocage 2 — Repli : la parcelle la plus proche MESURÉE, et la réserve 
     }));
     assert.deepEqual([u.statut, u.ambiguites, u.rattachement], ["ambigu", ["parcelle_incertaine"], { mode: "repli", distanceM: 1 }]);
     const t = visible(u);
-    const reserve = t.indexOf("La plus proche (PARCELLE-X), à environ 1 m, a été retenue : elle peut être celle d'un voisin");
+    const reserve = t.indexOf("la lecture porte sur la plus proche (PARCELLE-X), à environ 1 m, qui peut être celle d'un voisin. Tout ce qui suit en dépend.");
     assert.ok(reserve > 0, "la réserve est visible, hors du repli");
-    assert.ok(reserve < t.indexOf("zone UA") && reserve < t.indexOf("Emplacement réservé"), "elle précède zones et prescriptions");
-    assert.match(t, /La parcelle retenue est en zone UA/);
-    assert.match(t, /Prescriptions cartographiées sur la parcelle retenue/);
+    assert.ok(reserve < t.indexOf("zone urbaine") && reserve < t.indexOf("Réservé pour une voie publique"), "elle précède zones et prescriptions");
+    assert.match(t, /La parcelle retenue est en zone urbaine/);
+    assert.match(t, /À vérifier sur la parcelle retenue/);
     assert.doesNotMatch(t, /Cette parcelle est en zone/);
   } finally {
     globalThis.fetch = avant;
@@ -374,13 +407,13 @@ test("Blocage 2 — Repli : la parcelle la plus proche MESURÉE, et la réserve 
     assert.deepEqual([lu.parcel.rattachement, lu.parcel.candidatsAuPoint], ["point", 2]);
     const u = lireUrbanisme(synthetique({ parcelle: { geometry: lu.geometry, contenance: 500, rattachement: "point", candidatsAuPoint: 2 } }));
     assert.deepEqual(u.rattachement.mode, "limite");
-    assert.match(visible(u), /Le point de l'adresse est sur la limite entre plusieurs parcelles/);
+    assert.match(visible(u), /L'adresse est sur la limite entre plusieurs parcelles : la lecture porte sur l'une d'elles \(PARCELLE-X\), peut-être pas celle du logement\. Vérifiez la référence cadastrale/);
   } finally {
     globalThis.fetch = avant;
   }
   // Une distance mesurée nulle ne devient pas « environ 1 m ».
   const zero = lireUrbanisme(synthetique({ parcelle: { geometry: PARCELLE, contenance: 10_000, rattachement: "repli", distanceM: 0 } }));
-  assert.match(visible(zero), /La plus proche \(PARCELLE-X\), à moins d'un mètre, a été retenue/);
+  assert.match(visible(zero), /la plus proche \(PARCELLE-X\), à moins d'un mètre, qui peut être celle d'un voisin/);
 });
 
 test("Blocage 3 — Vigueur en trois états : établie, explicitement hors vigueur, non vérifiée", () => {
@@ -396,7 +429,8 @@ test("Blocage 3 — Vigueur en trois états : établie, explicitement hors vigue
   const panne = lireUrbanisme(synthetique({ details: { [DOC]: null } }));
   assert.deepEqual([panne.statut, panne.ambiguites, panne.documents[0].detailLu], ["ambigu", ["vigueur_non_verifiee"], false]);
   const t = visible(panne);
-  assert.match(t, /D'après le document publié, cette parcelle est en zone UA du plan local d'urbanisme \(PLU\)\. Le statut de ce document, en vigueur ou non, n'a pas pu être vérifié lors de la collecte/);
+  assert.match(t, /D'après le document publié, cette parcelle est en zone urbaine du plan local d'urbanisme \(PLU\)\. Le statut de ce document, en vigueur ou non, n'a pas pu être vérifié : faites confirmer en mairie/);
+  assert.ok(t.indexOf("n'a pas pu être vérifié") < t.indexOf("À vérifier"), "la réserve précède la liste à vérifier");
   const hors = lireUrbanisme(synthetique({ details: { [DOC]: { effectiveStatus: "HORS_VIGUEUR", legalStatus: "APPROVED" } } }));
   assert.deepEqual(hors.ambiguites, ["document_hors_vigueur"]);
   assert.match(visible(hors), /Le Géoportail ne donne pas ce document comme en vigueur/);
@@ -417,7 +451,7 @@ test("Blocage 3 — Besançon et Sucy-en-Brie, détail et pièces en délai dép
     assert.ok(u.zones.length > 0, `${c} : les zones restent lues`);
     assert.ok(u.ambiguites.includes("vigueur_non_verifiee"), c);
     assert.ok(u.documents.every((d) => d.vigueur === "non_verifiee" && !d.detailLu && !d.piecesLues), c);
-    assert.match(visible(u), /n'a pas pu être vérifié lors de la collecte/, c);
+    assert.match(visible(u), /Le statut de ce document, en vigueur ou non, n'a pas pu être vérifié/, c);
   }
 });
 
@@ -429,7 +463,7 @@ test("Blocage 4 — Sous-codes : 07-67/68 non protégés en PSMV, 05-05 et 05-07
   assert.equal(categorieDe("39", "02", "PLU"), null, "la hauteur est une famille générale");
   for (const s of ["67", "68", "65", "66", "69"]) assert.doesNotMatch(CATEGORIES[`07-${s}`].titre + CATEGORIES[`07-${s}`].note, /protège |protégée?s? |à conserver/i, `07-${s}`);
   for (const s of ["50", "52", "57"]) assert.match(CATEGORIES[`07-${s}`].note, /protège cet élément/, `07-${s}`);
-  for (const [sous, attendu] of [["05", /programme de logements/], ["07", /projet d'aménagement d'ensemble/]] as const) {
+  for (const [sous, attendu] of [["05", /programme de logements/], ["07", /projet d'ensemble/]] as const) {
     const u = lireUrbanisme(avecSurface(presc(PARCELLE, "05", sous, "Libellé du producteur")));
     assert.deepEqual(u.prescriptions.map((p) => [p.categorie, p.code, p.sousCode, p.documentType]), [[`05-${sous}`, "05", sous, "PLU"]]);
     const t = visible(u);
@@ -438,8 +472,9 @@ test("Blocage 4 — Sous-codes : 07-67/68 non protégés en PSMV, 05-05 et 05-07
   }
   // Un sous-code inconnu ne reçoit aucune explication d'effet.
   const inconnu = lireUrbanisme(avecSurface(presc(PARCELLE, "07", "99", "Libellé local")));
-  assert.match(visible(inconnu), new RegExp(NOTE_NEUTRE.slice(0, 50).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.doesNotMatch(visible(inconnu), /Le plan protège/);
+  assert.match(visible(inconnu), /Règle du plan : « Libellé local » · sur toute la parcelle Son effet n'est pas établi ici : il se lit dans le règlement/);
+  assert.match(deplie(inconnu), new RegExp(NOTE_NEUTRE.slice(0, 50).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.doesNotMatch(rendu(inconnu), /Le plan protège|Les travaux qui le modifient/);
   // Les catégories légitimes sont préservées.
   assert.equal(lire("six-fours-emplacement-reserve").prescriptions[0].categorie, "05-00");
   for (const s of ["01", "02", "03"]) assert.equal(categorieDe("16", s, "PLU"), `16-${s}`);
@@ -570,6 +605,110 @@ test("La collecte rejoue une réponse réelle (Mérignac) : POST, géométrie de
   }
 });
 
+// ═══════════════════════════════════ FUT-144 : TROIS NIVEAUX, RIEN DE PERDU ═══════════════════
+// Le premier niveau parle la langue du lecteur ; le dépliable « Détails et sources » garde les codes, les
+// parts, les intitulés et les notes complètes. Ces tests vérifient le TEXTE rendu des deux côtés.
+
+/** Les cas du banc `/dev/fut81` qui ne sont pas des relevés bruts : rejoués comme le banc les construit. */
+function casDuBanc(): [string, UrbanismeParcelle][] {
+  const reels = CAS.map((c) => [c, lire(c)] as [string, UrbanismeParcelle]);
+  const besancon = entree("besancon-psmv-non-protege");
+  const g = besancon.parcelle!.geometry as { type: string; coordinates: unknown[] };
+  const parties = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  const invalide = { ...besancon.parcelle!, geometry: { type: "MultiPolygon", coordinates: [...parties, ...parties] } as never };
+  const sixFours = entree("six-fours-emplacement-reserve");
+  const moissy = entree("moissy-zone-unique");
+  const ids = Object.keys(fixture("moissy-zone-unique").details);
+  return [
+    ...reels,
+    ["vigueur", lireUrbanisme({ ...moissy, details: Object.fromEntries(ids.map((id) => [id, null])), fichiers: Object.fromEntries(ids.map((id) => [id, null])) })],
+    ["incertaine", lireUrbanisme({ ...sixFours, prescriptions: { ...sixFours.prescriptions, surface: sixFours.prescriptions.surface!.map((x) => (x.properties?.typepsc === "05" ? { ...x, geometry: { type: "Polygon", coordinates: [] } as never } : x)) } })],
+    ["repli-invalide", lireUrbanisme({ ...besancon, parcelle: invalide, interrogation: "point" })],
+    ["sans-preuve", lireUrbanisme({ ...besancon, parcelle: invalide, interrogation: "parcelle" })],
+  ];
+}
+
+test("FUT-144 — Chaque catégorie nationale a ses mots courants, sans conclusion abusive ni protection inventée", () => {
+  for (const cle of Object.keys(CATEGORIES)) {
+    const l = LIBELLES_SIMPLES[cle];
+    assert.ok(l && l.court && l.effet, `${cle} : étiquette et effet`);
+    sansAbus(`${l.court} ${l.effet}`, `libellé simple ${cle}`);
+  }
+  assert.deepEqual(Object.keys(LIBELLES_SIMPLES).sort(), Object.keys(CATEGORIES).sort(), "aucune entrée orpheline");
+  // Le non-protégé du plan de sauvegarde n'est jamais dit protégé ; le protégé l'est toujours.
+  for (const s of ["65", "66", "67", "68", "69"]) {
+    assert.match(LIBELLES_SIMPLES[`07-${s}`].effet, /^Non protégé/, `07-${s}`);
+    assert.doesNotMatch(LIBELLES_SIMPLES[`07-${s}`].court + LIBELLES_SIMPLES[`07-${s}`].effet, /architecte des Bâtiments de France|Travaux soumis/, `07-${s}`);
+  }
+  for (let s = 50; s <= 64; s++) assert.match(LIBELLES_SIMPLES[`07-${s}`].effet, /accord de l[’']architecte des Bâtiments de France/, `07-${s}`);
+  // L'effet résumé ne dit jamais plus que la note complète : interdit, réservé, protégé restent à leur place.
+  for (const cle of ["02-01", "03-02", "03-03"]) assert.match(LIBELLES_SIMPLES[cle].court, /interdite?s?/i, cle);
+  for (const cle of ["05-01", "05-02", "05-03", "05-04"]) assert.match(LIBELLES_SIMPLES[cle].effet, /contraire à cette destination/, cle);
+  sansAbus(EFFET_NEUTRE, "effet neutre");
+  for (const t of [...Object.values(SECTEUR_SIMPLE), ...Object.values(ZONE_SIMPLE).flatMap((z) => [z.un, z.des])]) sansAbus(t, t);
+});
+
+test("FUT-144 — Premier niveau sans jargon de nomenclature ; les codes, parts et notes restent au détail", () => {
+  for (const [nom, u] of casDuBanc()) {
+    const t = visible(u);
+    const d = deplie(u);
+    sansAbus(rendu(u), nom);
+    assert.doesNotMatch(t, /nomenclature|code national|CNIG|sous-code/i, `${nom} : premier niveau`);
+    if (u.statut === "indisponible") continue;
+    assert.match(d, /Géoportail de l'urbanisme/, `${nom} : la source est au détail`);
+    // Chaque zone retenue est nommée par son code quelque part, et sa part est dite au détail.
+    for (const z of u.zones) {
+      assert.ok(d.includes(`Zone ${z.libelle}`), `${nom} : zone ${z.libelle} au détail`);
+      if (z.part != null) assert.match(d, new RegExp(`Zone ${z.libelle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\((toute la parcelle|environ \\d+ % de la parcelle|moins de 1 % de la parcelle)\\)`), `${nom} : part de ${z.libelle}`);
+    }
+    // Aucune prescription perdue : chacune a son étendue au premier niveau, et son code au détail.
+    for (const p of u.prescriptions) {
+      assert.ok(t.includes((LIBELLES_SIMPLES[p.categorie]?.court ?? "Règle du plan").replace(/’/g, "'")), `${nom} : ${p.categorie} au premier niveau`);
+      assert.ok(d.includes(`(code national ${p.code}-${p.sousCode})`), `${nom} : ${p.categorie} au détail`);
+      if (p.libelle && p.libelle !== CATEGORIES[p.categorie]?.titre) assert.ok(d.includes(`« ${p.libelle.replace(/’/g, "'")} »`), `${nom} : intitulé « ${p.libelle} » au détail`);
+      if (p.etendue !== "couvre") assert.match(t, /non vérifiable|très faible surface|effleure/, `${nom} : l'incertitude reste visible`);
+    }
+    // Le dépliable porte bien les notes complètes des catégories retenues.
+    for (const p of u.prescriptions) assert.ok(d.includes((CATEGORIES[p.categorie]?.note ?? NOTE_NEUTRE).replace(/’/g, "'")), `${nom} : note complète ${p.categorie}`);
+  }
+});
+
+test("FUT-144 — Les réserves restent visibles avant ce qu'elles conditionnent, et plus courtes", () => {
+  for (const [nom, u] of casDuBanc()) {
+    const t = visible(u);
+    if (u.rattachement.mode === "repli" || u.rattachement.mode === "limite") {
+      const reserve = Math.max(t.indexOf("ne tombe dans aucune parcelle"), t.indexOf("sur la limite entre plusieurs parcelles"));
+      assert.ok(reserve > 0, `${nom} : réserve de rattachement visible`);
+      for (const ancre of ["est en zone", "est couverte", "est partagée", "relève de", "est dans un secteur", "aucune zone n'a pu être lue", "À vérifier"]) {
+        const i = t.indexOf(ancre);
+        if (i >= 0) assert.ok(reserve < i, `${nom} : la réserve précède « ${ancre} »`);
+      }
+      assert.match(t, /Vérifiez la référence cadastrale|Demandez en mairie celles qui s'appliquent/, `${nom} : l'action reste dite`);
+    }
+    if (u.documents.some((d) => d.vigueur !== "etablie")) {
+      assert.match(t, /^Plan d'urbanisme de la parcelle (.*)D'après le document publié, /, `${nom} : le zonage n'est pas affirmé`);
+      assert.ok(t.indexOf("faites confirmer en mairie") < t.indexOf("À vérifier"), `${nom} : réserve de vigueur avant la liste`);
+    }
+  }
+});
+
+test("FUT-144 — Plus court : moins de mots au premier niveau, et les liens officiels conservés", () => {
+  // Mesures du rendu d'avant FUT-144 (`origin/main` b818ba5c), en mots, sur le même texte « visible ».
+  const AVANT: Record<string, number> = { "besancon-psmv-non-protege": 456, "sucy-trois-zones": 385, "merignac-deux-zones": 286, "six-fours-emplacement-reserve": 244, "lyon-croix-rousse": 268 };
+  for (const [c, avant] of Object.entries(AVANT)) {
+    const mots = visible(lire(c as Cas)).split(" ").length;
+    assert.ok(mots <= avant * 0.8, `${c} : ${mots} mots, au moins 20 % de moins que ${avant}`);
+  }
+  for (const c of CAS) {
+    const u = lire(c);
+    const html = rendreBloc({ urbanisme: u, parcelCode: null, withDivider: false });
+    for (const d of u.documents) assert.ok(html.includes(`href="${d.url}"`), `${c} : lien vers le document`);
+    for (const z of u.zones) if (z.reglement.statut === "publie") assert.ok(html.includes(`href="${z.reglement.url.replace(/&/g, "&amp;")}"`), `${c} : lien vers le règlement de ${z.libelle}`);
+  }
+  // Le lien vers le règlement reste au premier niveau : c'est l'action principale.
+  assert.match(visible(lire("merignac-deux-zones")), /Lire le règlement des zones US7, US9 \(PDF\) →/);
+});
+
 // ═══════════════════════════════════ 4. CE QUE LE TEXTE NE DIT JAMAIS ══════════════════════════
 
 test("Aucune conclusion abusive sur la constructibilité, sur tous les cas réels et toutes les catégories", () => {
@@ -620,7 +759,7 @@ test("Le bloc réglementaire ne dit plus « aucune règle de construction » à 
     urbanisme: { lecture: lire("moissy-zone-unique"), parcelCode: null },
   }));
   assert.match(t, /Ni plan de prévention des risques ni périmètre patrimonial à cette adresse/);
-  assert.match(t, /Cette parcelle est en zone UC/);
+  assert.match(t, /Cette parcelle est en zone urbaine/);
   assert.doesNotMatch(t, /Aucune règle de construction/);
 });
 
@@ -798,8 +937,9 @@ test("Troisième revue — Reproduction de Work : parcelle invalide, repli à 2 
   assert.deepEqual(u.zones.map((z) => z.libelle), ["UA"], "la zone de l'adresse, jamais celle de la parcelle voisine");
   assert.deepEqual(u.prescriptions, [], "l'emplacement réservé voisin n'est pas attribué");
   const t = visible(u);
-  assert.match(t, /Le point de l'adresse ne tombe dans aucune parcelle, et le tracé de la plus proche \(PARCELLE-X\), à environ 2 m, n'a pas pu être mesuré\. La lecture porte donc sur le point de l'adresse seul/);
-  assert.match(t, /Cette adresse est en zone UA/);
+  assert.match(t, /L'adresse ne tombe dans aucune parcelle, et le tracé de la plus proche \(PARCELLE-X\), à environ 2 m, n'a pas pu être mesuré\. La lecture porte donc sur le point de l'adresse seul/);
+  assert.match(t, /Cette adresse est en zone urbaine/);
+  assert.match(t, /Lire le règlement de la zone UA/);
   assert.doesNotMatch(rendu(u), /UB|Emplacement réservé/);
   sansAbus(rendu(u), "reproduction de Work");
 });
@@ -817,8 +957,10 @@ test("Troisième revue — Une réponse demandée sur la parcelle n'est jamais r
     const t = visible(u);
     assert.match(t, /n'ont donc pas pu être situées : aucune n'est retenue/, nom);
     assert.match(t, /Le Géoportail rend la zone UB pour cette parcelle, sans que sa position par rapport à l'adresse puisse être établie/, nom);
-    assert.match(t, /Sa position par rapport à l'adresse n'a pas pu être établie/, nom);
-    assert.doesNotMatch(t, /géométrie publiée|de des/, `${nom} : jamais « géométrie illisible » quand c'est la parcelle`);
+    // Chaque prescription reste nommée, dite non vérifiable au premier niveau ; la raison est au détail.
+    assert.equal(t.match(/position par rapport à l'adresse non vérifiable/g)?.length, 2, nom);
+    assert.match(deplie(u), /Sa position par rapport à l'adresse n'a pas pu être établie/, nom);
+    assert.doesNotMatch(rendu(u), /géométrie publiée|de des/, `${nom} : jamais « géométrie illisible » quand c'est la parcelle`);
     assert.doesNotMatch(t, /est en zone|Cette adresse est|sur toute la parcelle/, nom);
   }
 });
@@ -831,7 +973,7 @@ test("Troisième revue — Contre-épreuves : parcelle valide, invalide, par pro
   // Parcelle trouvée par proximité, géométrie valide : mesurée, et la réserve de repli reste en tête.
   const proche = await collecter({ geometry: PARCELLE as never, contenance: 10_000, rattachement: "repli", distanceM: 3 }, xy(-3, 50), { parcelle: { "zone-urba": [zone("UA", rect(-500, -500, 500, 500))] }, point: {} });
   assert.deepEqual([proche.u.grain, proche.u.rattachement.mode], ["parcelle", "repli"]);
-  assert.match(visible(proche.u), /^Plan d'urbanisme de la parcelle Le point de l'adresse ne tombe dans aucune parcelle\. La plus proche/);
+  assert.match(visible(proche.u), /^Plan d'urbanisme de la parcelle L'adresse ne tombe dans aucune parcelle : la lecture porte sur la plus proche/);
   // Parcelle invalide, adresse extérieure (15 m) : au point ; le GPU rend AUSSI la zone voisine (réponse
   // trop large) : elle ne contient pas le point, elle n'est pas retenue.
   const exterieure = await collecter({ ...REPLI_WORK, distanceM: 15 }, xy(-15, 10), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT, VOISINE_UB] } });
@@ -840,12 +982,13 @@ test("Troisième revue — Contre-épreuves : parcelle valide, invalide, par pro
   // Adresse sur une limite de parcelles, parcelle invalide : la réserve de limite reste dite.
   const limite = await collecter({ geometry: INVALIDE as never, contenance: 8_400, rattachement: "point", candidatsAuPoint: 2 }, xy(0, 10), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT] } });
   assert.deepEqual([limite.u.rattachement.mode, limite.u.grain], ["limite", "point"]);
-  assert.match(visible(limite.u), /Le point de l'adresse est sur la limite entre plusieurs parcelles, et le tracé de celle retenue \(PARCELLE-X\) n'a pas pu être mesuré/);
+  assert.match(visible(limite.u), /L'adresse est sur la limite entre plusieurs parcelles, et le tracé de celle retenue \(PARCELLE-X\) n'a pas pu être mesuré/);
   // Adresse sur la frontière de deux zones : les deux, sans « partage » ni « limite » (au point, une
   // superposition et une limite ne se distinguent pas : Besançon, PSMV et site patrimonial, au banc).
   const frontiere = await collecter(REPLI_WORK, xy(20, -30), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT, zone("UC", rect(20, -500, 500, 0))] } });
   assert.deepEqual(frontiere.u.zones.map((z) => z.libelle).sort(), ["UA", "UC"]);
-  assert.match(visible(frontiere.u), /Cette adresse relève de 2 zones du plan local d'urbanisme \(PLU\) : (UA, UC|UC, UA)\./);
+  assert.match(visible(frontiere.u), /Cette adresse relève de 2 zones urbaines du plan local d'urbanisme \(PLU\)\./);
+  assert.match(visible(frontiere.u), /Lire le règlement des zones (UA, UC|UC, UA)/);
   assert.doesNotMatch(visible(frontiere.u), /partagée/);
 });
 
@@ -861,8 +1004,11 @@ test("Troisième revue — Au point, seules les prescriptions qui contiennent l'
   ]);
   assert.equal(u.prescriptionsContact, 0, "une prescription ailleurs n'est pas un « contact » de la parcelle");
   const t = visible(u);
-  assert.match(t, /Prescriptions cartographiées à l'adresse/);
-  assert.match(t, /Patrimoine bâti protégé · passe à l'adresse/);
+  assert.match(t, /À vérifier à l'adresse/);
+  assert.match(t, /Bâti protégé · passe à l'adresse/);
+  assert.match(t, /Paysage protégé · à l'adresse/);
+  assert.match(deplie(u), /« Parc protégé autour de l'adresse »/);
+  assert.match(deplie(u), /« Alignement qui passe à l'adresse »/);
   assert.doesNotMatch(t, /Emplacement réservé|Alignement voisin|Arbre voisin|de la parcelle \(≈/);
 });
 
