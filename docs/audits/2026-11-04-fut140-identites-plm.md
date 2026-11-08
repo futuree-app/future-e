@@ -1,10 +1,12 @@
 # FUT-140 · Identités périurbaines des arrondissements PLM
 
-Date : 04/11/2026. Base : `main` à `9866489e`. Branche : `bonjourfuturee/fut-140-identites-plm`.
+Date : 04/11/2026, complété le 08/11/2026 (réserve de la contre-revue, voir la dernière section). Base : `main` à `9866489e`. Branche : `bonjourfuturee/fut-140-identites-plm`.
 
 ## En une phrase
 
 Paris 1er, Paris 2e, Marseille 2e et Marseille 16e recevaient l'identité « Pour vivre aux portes d'une grande ville, sans en habiter le centre ». Dans « Où vivre », la carte « Paris » l'affichait. Ces quatre arrondissements en sont maintenant exclus. Les 1 784 vraies communes périurbaines la gardent. Aucun score, rang, filtre ni donnée ne change.
+
+Le 08/11, la contre-revue a levé une dernière réserve : la phrase étudiante « …à taille humaine » contredisait la taille de Paris et des grandes villes. Elle devient « Pour profiter d'une vie étudiante bien présente. » (voir la dernière section).
 
 ## Diagnostic
 
@@ -28,7 +30,7 @@ const periurbain =
 | Lyon 1er à 9e | toutes ≥ 25 000 | 00760 | non |
 | Les 37 autres | ≥ 25 000 | | non |
 
-**Effet visible.** Dans « Où vivre », le regroupement PLM (`cityKey`) montre une seule carte « Paris », portée par l'arrondissement le mieux classé. Sur les trois projets parisiens rejoués, c'était Paris 1er, et la carte « Paris » disait « aux portes d'une grande ville, sans en habiter le centre ». La même phrase partait aussi dans la synthèse rédigée du mode choix (`synthesize-choix`, champ `identite`).
+**Effet visible.** Dans « Où vivre », le regroupement PLM (`cityKey`) montre une seule carte « Paris », portée par l'arrondissement le mieux classé. Sur les trois projets parisiens rejoués, c'était Paris 1er, et la carte « Paris » disait « aux portes d'une grande ville, sans en habiter le centre ». Rectification du 08/11 : la route `synthesize-choix` transmet bien le champ `identite` au modèle, mais aucune page ne l'appelle plus depuis le retrait du récit généré du mode choix (27/06/2026, `ModeChoixSynthese.tsx`). La phrase n'y partait donc pas en pratique.
 
 ## Correctif
 
@@ -51,6 +53,8 @@ const periurbain =
 Sur les 34 788 territoires de l'index, **exactement 4 listes de candidats changent**. Dans chacune, seul le candidat périurbain disparaît. Le nombre de territoires portant ce candidat passe de 1 788 à 1 784. Aucune identité n'est ajoutée.
 
 ### Identité affichée (niveau 2, après `assignIdentite`)
+
+État au SHA `a5ab4712`, avant la réserve du 08/11. Depuis, partout où ce tableau dit « Pour une ville étudiante à taille humaine. », il faut lire « Pour profiter d'une vie étudiante bien présente. » : les attributions sont les mêmes.
 
 | Territoire | Identité avant | Identité après | Justification |
 |---|---|---|---|
@@ -89,10 +93,53 @@ Projets « Où vivre » rejoués (avant/après, mêmes données) : Paris × 3, p
 - Build Next local (`npm run build`, variables fictives) : réussi, code 0.
 - Aucune Preview, aucun déploiement, aucun accès Supabase, index non régénéré.
 
-**Recette navigateur.** Elle n'est pas nécessaire : les quatre surfaces affichent ou transmettent `r.identite` tel quel. Il s'agit d'« Où vivre » (`OuVivreClient.tsx`), du comparateur (`comparateur/page.tsx`), du pack de décision (`PackUnlockedView.tsx`) et de la synthèse du mode choix (`synthesize-choix/route.ts`). Ce champ vient de `matchProjects`, `seedComparaison` ou `rejouerPack`, et les tests l'assertent à cette sortie.
+**Recette navigateur.** Elle n'est pas nécessaire : les quatre surfaces affichent ou transmettent `r.identite` tel quel. Il s'agit d'« Où vivre » (`OuVivreClient.tsx`), du comparateur (`comparateur/page.tsx`), du pack de décision (`PackUnlockedView.tsx`) et de la synthèse du mode choix (`synthesize-choix/route.ts`, sans appelant aujourd'hui). Ce champ vient de `matchProjects`, `seedComparaison` ou `rejouerPack`, et les tests l'assertent à cette sortie.
 
 ## Autres constats, non corrigés (hors périmètre)
 
-1. **« Pour une ville étudiante à taille humaine » pour Paris, Lyon, Marseille et les grandes villes.** C'est désormais l'identité de la carte « Paris » dans « Où vivre ». Sur `main`, elle était déjà affichée pour Paris 2e, Lyon 1er et d'autres arrondissements. Elle est candidate pour les 45 arrondissements, en tête pour 29. Elle l'est aussi pour 30 communes non PLM de plus de 100 000 habitants : Toulouse, Nice, Nantes, Montpellier, Strasbourg, Bordeaux, Lille, Rennes… « À taille humaine » contredit la taille de ces villes. Mais la règle (FUT-141) ne lit aucune population : ce n'est **pas** le problème de grain PLM, c'est une formulation générale. Cela mérite un ticket dédié (texte de l'identité, ou condition de taille), à arbitrer avec FUT-141.
+1. **Résolu le 08/11, voir la dernière section.** **« Pour une ville étudiante à taille humaine » pour Paris, Lyon, Marseille et les grandes villes.** C'est désormais l'identité de la carte « Paris » dans « Où vivre ». Sur `main`, elle était déjà affichée pour Paris 2e, Lyon 1er et d'autres arrondissements. Elle est candidate pour les 45 arrondissements, en tête pour 29. Elle l'est aussi pour 30 communes non PLM de plus de 100 000 habitants : Toulouse, Nice, Nantes, Montpellier, Strasbourg, Bordeaux, Lille, Rennes… « À taille humaine » contredit la taille de ces villes. Mais la règle (FUT-141) ne lit aucune population : ce n'est **pas** le problème de grain PLM, c'est une formulation générale. Cela mérite un ticket dédié (texte de l'identité, ou condition de taille), à arbitrer avec FUT-141.
 2. **« Grande ville » lit la population de l'arrondissement.** `grandeVille = c.population >= 50000` : Paris 1er–4e et 6e–8e, Lyon 1er, 2e, 4e et 5e, Marseille 1er, 2e, 5e–7e et 16e n'ont donc pas les candidats « Pour la vie d'une grande ville et tous ses services » ni « …au bord de l'eau avec les services d'une vraie ville ». C'est le même problème de grain, mais une **absence** et non une contradiction : aucune phrase fausse n'est affichée. Non corrigé pour ne pas élargir le chantier. À noter : même corrigé, ce candidat viendrait après l'identité étudiante, et ne changerait pas la carte « Paris » seule.
 3. Les autres libellés contrôlés (« petite ville », « commune à taille humaine », « cadre rural préservé ») lisent la taille de l'unité urbaine. Pour un arrondissement, cette taille est celle de la métropole : **aucun arrondissement ne les reçoit**. Rien à corriger.
+
+## Résolution de la réserve de la contre-revue (08/11/2026)
+
+**Verdict de la contre-revue** sur `a5ab4712` : GO sous réserve d'une correction éditoriale. Le correctif PLM est validé (45 arrondissements, 4 candidats retirés, 1 784 périurbaines préservées, résultats inchangés). La réserve : « Pour une ville étudiante à taille humaine » était attribuée à Paris, Bordeaux, Nantes et Toulouse, sans que les données le justifient.
+
+### Libellé
+
+| | Texte |
+|---|---|
+| Avant | Pour une ville étudiante à taille humaine. |
+| Après | Pour profiter d'une vie étudiante bien présente. |
+
+Apostrophe droite `'`, comme les 20 autres identités du fichier (aucune apostrophe typographique dans `comparateur-vie.ts`). Conditions d'attribution, ordre des candidats, déduplication, scores, filtres et règles FUT-135 / FUT-141 : inchangés. « Grande ville » non modifiée (réserve jugée non bloquante).
+
+### Fichiers modifiés
+
+- `src/lib/comparateur-vie.ts` : la seule chaîne du `push` étudiant (1 ligne).
+- `src/lib/__fixtures__/fut147-reference-comparateur.json` : substitution textuelle, une ligne, sans régénération.
+- `src/lib/fut135-vie-etudiante.test.ts`, `src/lib/fut141-vie-etudiante.test.ts` : constante du libellé, et une **sentinelle** dans `before`. Poitiers doit porter le libellé testé, et aucun libellé étudiant ne doit parler de « taille humaine ». Si le texte change encore, tout le fichier échoue, au lieu que les assertions négatives (« … n'a pas l'identité étudiante ») réussissent dans le vide. Contre-épreuve faite avec l'ancien libellé remis dans le moteur : FUT-135 échoue sur ses 25 tests, FUT-141 sur ses 8, et FUT-147 détecte la différence (1 échec).
+- `src/lib/fut140-identites-plm.test.ts` : 5 tests de plus (12 au total).
+
+Les scripts d'audit FUT-135 / FUT-141 (`scripts/fut135/`, `scripts/fut141/`) et les audits datés gardent l'ancien libellé : ce sont des traces historiques, pas du code exécuté par l'application.
+
+### Preuves
+
+- **Sorties complètes inchangées hors libellé.** Les sorties avant/après ont été comparées sur 11 projets « Où vivre » (Paris, petite couronne, Bouches-du-Rhône, Rhône, Gironde, Loire-Atlantique, Haute-Garonne, Vienne, Haute-Corse, France entière) et sur 42 permutations de trios. Toutes les sorties ont été comparées : résultats, pistes, comparaison complète, raisons, compromis, découvertes, traits distinctifs, couverture. Après remplacement de l'ancien libellé par le nouveau, elles sont **identiques octet pour octet**, soit 51 occurrences remplacées et rien d'autre.
+- **Effectif.** 134 territoires portent le libellé, exactement l'effectif FUT-141. L'ancien libellé n'apparaît dans aucun candidat de l'index.
+- **Affichage.** Carte « Paris » d'« Où vivre » ; Bordeaux (2e résultat en Gironde) et Toulouse (3e en Haute-Garonne), avec rangs et scores figés ; Nantes en trio derrière Bordeaux. Témoins : Poitiers (en tête de ses candidats), Corte (garde « montagne », le libellé vient en 4e candidat).
+- **Exclusions FUT-141.** Aucune commune dont la part étudiante du bassin est inconnue (`etudes_dyn` absent) ne porte le libellé. Montluçon, Gap, Vichy et Toulon, à part intermédiaire et score de 68 à 75, restent exclues.
+- **Permutations.** Dans les six ordres de Paris 1er · Sceaux · Écully, Paris 1er a toujours la phrase étudiante, et « aux portes » va à la première des deux vraies périurbaines. Dans les six ordres de Bordeaux · Nantes · Toulouse, la position décide : « hivers doux », puis étudiante, puis croissance. Dans les six ordres de Poitiers · Corte · Paris 15e, Corte garde la montagne. Identités toujours distinctes.
+- **Cohérence des surfaces.** Le Pack rejoué (`rejouerPack`, même trio) porte les mêmes identités que les cartes. Le Pack recomposé porte celles de la comparaison nommée. La route `synthesize-choix` (modèle simulé) transmet le champ tel quel, sans « taille humaine ».
+
+### Constat documenté, non corrigé : repli neutre répété
+
+Dans un trio de trois arrondissements du centre parisien ouvert par Paris 2e (75102 · 75101 · 75103), Paris 1er et Paris 3e n'ont plus de candidat libre. Ils prennent tous deux le repli neutre « Pour un cadre de vie équilibré, sans excès. ». C'est le comportement prévu d'`assignIdentite` : quand tout est pris, il garde le dernier candidat. Le libellé n'y est pour rien. C'est le retrait du candidat périurbain de Paris 1er (premier commit FUT-140) qui rend ce cas possible : sur `main`, Paris 1er prenait « aux portes », une phrase fausse. Seul l'ordre 75102 · 75101 · 75103 est figé dans le test. Une répétition de la phrase neutre reste préférable à une identité inexacte.
+
+### Validation
+
+- Tests ciblés FUT-135, FUT-141, FUT-147 et FUT-140 : 65 / 65.
+- Suite complète, seule, `--test-concurrency=1` : base `a5ab4712` 4 316, **tête 4 321 / 4 321** (+5), 0 échec.
+- **Fusion d'essai avec le `main` actuel** (`c041447c`, qui régénère l'index avec FUT-137, vie locale) : fusion automatique sans conflit. Résultat : 4 366 tests, 4 365 réussis, 0 échec, 1 ignoré. `main` seul donne 4 354 tests, 4 353 réussis, 1 ignoré : 4 354 + 12 = 4 366. Le test ignoré appartient à FUT-137 (cache COG 2026 absent en local) et vient de `main`. Les valeurs figées des tests FUT-140 tiennent sur le nouvel index. La fusion d'essai a été annulée, la branche n'inclut pas `main`.
+- `tsc --noEmit` : 0 erreur. ESLint sur les fichiers modifiés : 0 erreur, et le même avertissement préexistant. Build Next local : réussi, code 0.
+- Aucune Preview, aucun déploiement, aucun accès Supabase, index non régénéré.
