@@ -54,13 +54,18 @@ before(async () => {
   V = await import("./comparateur-vie.ts");
   await V.getCommuneEntry("17300"); // charge l'index du moteur et le cache des unités urbaines (taille de ville)
   INDEX = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8"));
+  // FUT-140 : une assertion négative (« … n'a pas l'identité étudiante ») ne vaut que si le libellé testé est celui que
+  // le moteur produit. Poitiers le porte ; plus aucun libellé étudiant ne parle de « taille humaine ».
+  const poitiers: string[] = V.buildIdentiteCandidates(INDEX.communes.find((c: M) => c.insee === "86194"));
+  assert.ok(poitiers.includes(IDENTITE_ETUDIANTE), "le libellé testé n'est plus celui du moteur");
+  assert.equal(poitiers.some((x) => /étudiant/.test(x) && /taille humaine/.test(x)), false);
 });
 const commune = (insee: string) => INDEX.communes.find((c) => c.insee === insee)!;
 const vie = (c: M) => V.subScore("vie_etudiante", c);
 const PALIER_FORTE = 66; // bandIndex
 const SEUIL_RAISON = 55; // raisons favorables
 const NIVEAU = (s: number) => (s >= 66 ? 0 : s < 34 ? 2 : 1);
-const IDENTITE_ETUDIANTE = "Pour une ville étudiante à taille humaine.";
+const IDENTITE_ETUDIANTE = "Pour profiter d'une vie étudiante bien présente.";
 const LES_487: { insee: string; nom: string; acces: number; dyn: number; vie: number }[] =
   JSON.parse(readFileSync("docs/audits/2026-10-29-fut141-vie-etudiante/les-487-avant.json", "utf8")).communes;
 const ligneEtudiante = (cc: M) => cc.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "vie_etudiante");

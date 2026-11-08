@@ -51,13 +51,18 @@ before(async () => {
   V = await import("./comparateur-vie.ts");
   await V.getCommuneEntry("17300"); // charge l'index du moteur et le cache des unités urbaines (taille de ville)
   INDEX = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8"));
+  // FUT-140 : une assertion négative (« … n'a pas l'identité étudiante ») ne vaut que si le libellé testé est celui que
+  // le moteur produit. Poitiers le porte ; plus aucun libellé étudiant ne parle de « taille humaine ».
+  const poitiers: string[] = V.buildIdentiteCandidates(INDEX.communes.find((c: M) => c.insee === "86194"));
+  assert.ok(poitiers.includes(IDENTITE_ETUDIANTE), "le libellé testé n'est plus celui du moteur");
+  assert.equal(poitiers.some((x) => /étudiant/.test(x) && /taille humaine/.test(x)), false);
 });
 const commune = (insee: string) => INDEX.communes.find((c) => c.insee === insee)!;
 // Le bassin de la part étudiante : l'unité urbaine, sinon la commune (scripts/populate-etudiants.py).
 const bassin = (c: M) => (c.uu ? c.uu_pop : c.population) ?? null;
 const vie = (c: M) => V.subScore("vie_etudiante", c);
 const PALIER_FORTE = 66; // bandIndex
-const SEUIL_RAISON = 55; // raisons favorables et identité « Pour une ville étudiante à taille humaine. »
+const SEUIL_RAISON = 55; // raisons favorables et identité étudiante (IDENTITE_ETUDIANTE)
 
 test("bassin de moins de 5 000 habitants : non mesuré, même avec un accès connu", () => {
   for (const insee of ["54310", "26274"]) { // Leménil-Mitry (2 hab.), Rochefourchat (1 hab.)
@@ -144,7 +149,7 @@ test("une priorité non mesurée n'est pas promue : couverture dite, ni raison, 
     if (vie(c) != null) continue;
     assert.equal(r.couverture.etat, "aucune", r.nom);
     assert.deepEqual(r.reasons, [], r.nom);
-    assert.notEqual(r.identite, "Pour une ville étudiante à taille humaine.", r.nom);
+    assert.notEqual(r.identite, IDENTITE_ETUDIANTE, r.nom);
     assert.doesNotMatch(r.decouverte ?? "", /étudiant/, r.nom);
   }
   const ligne = o.comparaisonComplete.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "vie_etudiante");
@@ -196,7 +201,7 @@ test("comparaison complète : un petit bassin lit « Non mesurée » en vie étu
 // seulement : les scores, paliers numériques, avantages et classements sont ceux de la photographie d'audit.
 const ligneEtudiante = (cc: M) => cc.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "vie_etudiante");
 const PONT_SALOMON = "43153", THURINS = "69249", SAINT_JEAN_DES_VIGNES = "69212", MONDOUZIL = "31352";
-const IDENTITE_ETUDIANTE = "Pour une ville étudiante à taille humaine.";
+const IDENTITE_ETUDIANTE = "Pour profiter d'une vie étudiante bien présente.";
 
 test("revue 1. Pont-Salomon : raison au palier intermédiaire, à l'échelle de l'agglomération, rayon dit", async () => {
   const o = await V.matchProjects({ reformulation: "Recherche de recette auvergne", hardConstraints: { departements: ["03", "15", "43", "63"] }, preferences: [{ key: "vie_etudiante", weight: 2 }, { key: "nature", weight: 2 }] });
