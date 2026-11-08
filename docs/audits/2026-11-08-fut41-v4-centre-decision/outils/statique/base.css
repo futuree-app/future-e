@@ -1,0 +1,11 @@
+/* Remise à zéro équivalente au préambule de Tailwind (utilisé par l'application), puis le corps de page
+   de `globals.css`. Les jetons viennent de `design-tokens.css`, importé tel quel (polices en relatif). */
+*, ::before, ::after { box-sizing: border-box; border: 0 solid; margin: 0; padding: 0; }
+html { line-height: 1.5; -webkit-text-size-adjust: 100%; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+ol, ul, menu { list-style: none; }
+img, svg, video { display: block; vertical-align: middle; }
+button, input, select, textarea { font: inherit; color: inherit; background: transparent; }
+button, [role="button"] { cursor: pointer; }
+a { color: inherit; text-decoration: inherit; }
+body { background: var(--bg); color: var(--fg-1); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }

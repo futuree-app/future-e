@@ -6,7 +6,8 @@ const path = require("path");
 const fs = require("fs");
 const { chromium } = require("/Users/quentinbrache/Desktop/Futur·e/node_modules/playwright-core");
 
-const BASE = "http://localhost:3041/dev/centre-decision";
+// BASE peut viser la version statique : BASE=http://localhost:3042/index.html node recette.cjs
+const BASE = process.env.BASE ?? "http://localhost:3041/dev/centre-decision";
 const SORTIE = process.argv[2] ?? path.join(__dirname, "..", "captures");
 fs.mkdirSync(SORTIE, { recursive: true });
 const resultats = { vues: [], gestes: [], clavier: [], mouvement: null, erreurs: [] };
