@@ -26,8 +26,10 @@ type Apercu = ApercuReprise;
 
 function derniereRecherche(): Recherche | null {
   try {
-    // FUT-27 : une recherche écrite avant la dernière déconnexion appartient au compte parti.
-    return lireRechercheSession(window.localStorage.getItem(SESSION_RECHERCHE_KEY), Date.now(), purgeRechercheConnue());
+    // FUT-27 : une recherche écrite avant la dernière déconnexion appartient au compte parti. La date de purge
+    // se lit d'abord : elle applique une purge différée éventuelle.
+    const purge = purgeRechercheConnue();
+    return lireRechercheSession(window.localStorage.getItem(SESSION_RECHERCHE_KEY), Date.now(), purge);
   } catch {
     return null;
   }

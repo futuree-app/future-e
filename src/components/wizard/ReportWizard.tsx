@@ -15,8 +15,10 @@ const STEP_NAMES = ["landing", "adresse", "profil_foyer", "logement", "mobilite"
 import { WizardStepper } from "./WizardStepper";
 import { WizardStep } from "./WizardStep";
 import { WizardTeaser } from "./WizardTeaser";
+import { appliquerPurgeDifferee } from "@/components/interaction/purge-recherche-navigateur";
 
 function loadFromStorage(): Partial<WizardState> {
+  appliquerPurgeDifferee(); // FUT-27 : avant de lire, une déconnexion restée sans purge
   try {
     const raw = sessionStorage.getItem(WIZARD_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as Partial<WizardState>) : {};

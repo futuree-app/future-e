@@ -27,6 +27,7 @@ import {
 import { construireFaitsCommune } from "@/lib/accueil/faits";
 import { reponseDeRepli } from "@/lib/accueil/reponses";
 import { CLE_LANDING_COMMUNE } from '@/lib/purge-recherche';
+import { appliquerPurgeDifferee } from '@/components/interaction/purge-recherche-navigateur';
 
 const C = {
   bg: 'var(--bg)',
@@ -334,6 +335,7 @@ export default function FutureELanding() {
   useEffect(() => {
     if (didRestoreRef.current || tensionsCatalog.length === 0 || selectedCommune) return;
     let saved: { name?: string; citycode?: string } | null = null;
+    appliquerPurgeDifferee(); // FUT-27 : la redirection de la déconnexion arrive ici, avant de lire
     try {
       const raw = window.sessionStorage.getItem(LANDING_COMMUNE_STORAGE_KEY);
       if (raw) saved = JSON.parse(raw);

@@ -84,10 +84,10 @@ function loadSession(): SessionSnapshot | null {
   if (typeof window === "undefined") return null;
   try {
     // FUT-139 : sans couverture ni mode d'exploration lisibles, la session est rejetée, jamais complétée.
-    // FUT-27 : une session écrite avant la dernière déconnexion n'est pas réaffichée.
-    return lireSessionOuVivre(
-      window.localStorage.getItem(SESSION_OUVIVRE_KEY), Date.now(), purgeRechercheConnue(),
-    ) as SessionSnapshot | null;
+    // FUT-27 : une session écrite avant la dernière déconnexion n'est pas réaffichée. La date de purge se lit
+    // AVANT la session : elle applique d'abord une purge différée (déconnexion envoyée avant l'hydratation).
+    const purge = purgeRechercheConnue();
+    return lireSessionOuVivre(window.localStorage.getItem(SESSION_OUVIVRE_KEY), Date.now(), purge) as SessionSnapshot | null;
   } catch {
     return null;
   }

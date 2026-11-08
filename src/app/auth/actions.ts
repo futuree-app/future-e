@@ -1,12 +1,13 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthActionState } from "@/app/auth/shared";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { destinationApresConnexion } from "@/lib/auth-destination";
+import { CHAMP_PURGE, COOKIE_PURGE_DIFFEREE, purgeFaiteParLeNavigateur } from "@/lib/purge-recherche";
 
 function getStringField(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -187,10 +188,23 @@ export async function signUpWithPasswordAction(
   };
 }
 
-export async function signOutAction() {
+export async function signOutAction(formData?: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   await supabase.auth.signOut();
+
+  // FUT-27 : le formulaire n'a pas purgé les recherches du navigateur (envoyé avant l'hydratation, ou sans
+  // JavaScript). La première page qui exécutera du JavaScript le fera, avant toute lecture
+  // (purge-recherche-navigateur.ts). Lisible par la page, car c'est elle qui l'applique puis l'efface.
+  if (!purgeFaiteParLeNavigateur(formData?.get(CHAMP_PURGE))) {
+    (await cookies()).set(COOKIE_PURGE_DIFFEREE, crypto.randomUUID().replace(/-/g, ""), {
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+  }
 
   if (user?.email) {
     const posthog = getPostHogClient();

@@ -10,6 +10,7 @@ import { purgerOnglet } from "@/lib/purge-recherche";
 // poussé dans le profil du compte suivant connecté sur cet onglet. Ne rend rien.
 export function EcoutePurgeRecherche() {
   useEffect(() => {
+    // Lire la date applique aussi une purge différée (déconnexion envoyée avant l'hydratation, ou sans JS).
     let vue = purgeRechercheConnue();
     return ecouterPurgeRecherche(() => {
       const purge = purgeRechercheConnue();

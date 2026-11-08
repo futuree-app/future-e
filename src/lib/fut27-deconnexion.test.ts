@@ -14,7 +14,8 @@ import {
   anterieurALaPurge, lirePurgeRecherche, lireSessionOuVivre, serialiserSessionOuVivre,
 } from "./comparateur/session-ou-vivre.ts";
 import {
-  CLES_RECHERCHE_NAVIGATEUR, CLES_RECHERCHE_ONGLET, CLE_LANDING_COMMUNE, purgerOnglet, purgerRecherchesTemporaires,
+  CLES_RECHERCHE_NAVIGATEUR, CLES_RECHERCHE_ONGLET, CLE_LANDING_COMMUNE, COOKIE_PURGE_DIFFEREE, PURGE_PAR_LE_NAVIGATEUR,
+  appliquerPurgeDiffereeSur, jetonPurgeDifferee, purgeFaiteParLeNavigateur, purgerOnglet, purgerRecherchesTemporaires,
 } from "./purge-recherche.ts";
 import { lireRechercheSession } from "./reprise-recherche.ts";
 import { WIZARD_STORAGE_KEY } from "../components/wizard/types.ts";
@@ -227,9 +228,14 @@ test("code : la purge part du seul formulaire de déconnexion, jamais de la conn
   assert.match(lire("../app/(account)/compte/page.tsx"), /<FormulaireDeconnexion /);
   // La Server Action ferme toujours la session et redirige.
   const actions = lire("../app/auth/actions.ts");
-  assert.match(actions, /export async function signOutAction\(\) \{[\s\S]*?await supabase\.auth\.signOut\(\);[\s\S]*?redirect\("\/"\);/);
-  for (const f of ["../app/auth/actions.ts", "../app/auth/callback/route.ts"]) {
-    assert.doesNotMatch(lire(f), /purge|removeItem|localStorage/, f);
+  assert.match(actions, /export async function signOutAction\(formData\?: FormData\) \{[\s\S]*?await supabase\.auth\.signOut\(\);[\s\S]*?redirect\("\/"\);/);
+  // Le serveur n'efface rien lui-même ; la connexion ne purge pas.
+  assert.doesNotMatch(actions, /removeItem|localStorage|sessionStorage/);
+  assert.doesNotMatch(lire("../app/auth/callback/route.ts"), /purge|removeItem|localStorage/);
+  for (const nom of ["signInWithPasswordAction", "signUpWithPasswordAction"]) {
+    const debut = actions.indexOf(`export async function ${nom}`);
+    const corps = actions.slice(debut, actions.indexOf("\nexport ", debut + 1));
+    assert.doesNotMatch(corps, /PURGE|purge/, nom);
   }
 });
 
@@ -268,7 +274,7 @@ test("code : chaque écriture d'« Où vivre » passe par la garde de purge", ()
 
 test("code : la reprise oublie recherche et aperçu, et abandonne les aperçus encore en route", () => {
   const reprise = lire("../components/report/RepriseRecherche.tsx");
-  assert.match(reprise, /lireRechercheSession\(window\.localStorage\.getItem\(SESSION_RECHERCHE_KEY\), Date\.now\(\), purgeRechercheConnue\(\)\)/);
+  assert.match(reprise, /const purge = purgeRechercheConnue\(\);\s*return lireRechercheSession\(window\.localStorage\.getItem\(SESSION_RECHERCHE_KEY\), Date\.now\(\), purge\)/);
   const oubli = reprise.slice(reprise.indexOf("useOubliALaPurge(() => {"), reprise.indexOf("});", reprise.indexOf("useOubliALaPurge(() => {")));
   for (const m of [/generation\.current\+\+/, /setRecherche\(null\)/, /setApercu\(null\)/, /setOuvert\(false\)/]) assert.match(oubli, m);
   assert.equal((reprise.match(/if \(perime\(\)/g) ?? []).length, 3, "après la session, après l'aperçu, après sa lecture");
@@ -283,4 +289,86 @@ test("code : la purge est écoutée partout où une recherche est affichée, et 
   assert.match(lire("../app/layout.tsx"), /<EcoutePurgeRecherche \/>/);
   const nav = lire("../components/interaction/purge-recherche-navigateur.ts");
   for (const m of [/"storage"/, /EVENEMENT_PURGE_RECHERCHE/, /"pageshow"/, /e\.persisted/, /"visibilitychange"/]) assert.match(nav, m);
+});
+
+// ── Déconnexion envoyée avant l'hydratation, ou sans JavaScript : la purge différée ───────────────────
+
+test("différée : seul un formulaire qui dit avoir purgé évite le cookie ; tout le reste le demande", () => {
+  assert.equal(purgeFaiteParLeNavigateur(PURGE_PAR_LE_NAVIGATEUR), true);
+  for (const v of [undefined, null, "", "serveur", "NAVIGATEUR", 1, {}]) assert.equal(purgeFaiteParLeNavigateur(v), false, String(v));
+  assert.equal(jetonPurgeDifferee(`a=1; ${COOKIE_PURGE_DIFFEREE}=ab12cd; b=2`), "ab12cd");
+  assert.equal(jetonPurgeDifferee("a=1"), null);
+  assert.equal(jetonPurgeDifferee(`${COOKIE_PURGE_DIFFEREE}=`), null);
+  assert.equal(jetonPurgeDifferee(`${COOKIE_PURGE_DIFFEREE}=<script>`), null);
+});
+
+test("différée : clic avant l'hydratation, puis la page suivante purge avant de lire ; B ne retrouve rien", () => {
+  const local = new Stockage();
+  const onglet = new Stockage();
+  const a = new OngletOuVivre(local, T0);
+  a.chercher("Bordeaux", T0);
+  onglet.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ answers: { projets: "achat" } }));
+  // La Server Action a fermé la session sans purge du navigateur, et a déposé le cookie.
+  const cookies = `futuree-consent=denied; ${COOKIE_PURGE_DIFFEREE}=jeton1`;
+  assert.equal(new OngletOuVivre(local, T0 + 5).relire(T0 + 5).reprise, "Une ville près de Bordeaux", "avant la page suivante");
+  // La page de redirection (ou toute page) applique la purge avant sa première lecture.
+  assert.equal(appliquerPurgeDiffereeSur(cookies, local, onglet, T0 + 10), true);
+  for (const k of CLES_RECHERCHE_NAVIGATEUR) assert.equal(local.getItem(k), null, k);
+  assert.equal(onglet.getItem(WIZARD_STORAGE_KEY), null);
+  // Le compte B se connecte : rien à reprendre, et l'onglet resté ouvert sur Bordeaux n'écrit plus.
+  assert.equal(new OngletOuVivre(local, T0 + 20).relire(T0 + 20).reprise, null);
+  assert.equal(a.enregistrer(T0 + 21), false);
+});
+
+test("différée : le cookie resté en place ne purge qu'une fois ; Rennes, cherchée ensuite, reste", () => {
+  const local = new Stockage();
+  const cookies = `${COOKIE_PURGE_DIFFEREE}=jeton1`;
+  appliquerPurgeDiffereeSur(cookies, local, new Stockage(), T0);
+  const anonyme = new OngletOuVivre(local, T0 + 10);
+  anonyme.chercher("Rennes", T0 + 20);
+  // Le cookie n'a pas pu être effacé : le même jeton ne repurge pas.
+  assert.equal(appliquerPurgeDiffereeSur(cookies, local, new Stockage(), T0 + 30), false);
+  assert.equal(new OngletOuVivre(local, T0 + 40).relire(T0 + 40).reprise, "Une ville près de Rennes");
+  // Une nouvelle déconnexion (nouveau jeton) purge de nouveau.
+  assert.equal(appliquerPurgeDiffereeSur(`${COOKIE_PURGE_DIFFEREE}=jeton2`, local, new Stockage(), T0 + 50), true);
+  assert.equal(new OngletOuVivre(local, T0 + 60).relire(T0 + 60).reprise, null);
+  // Sans cookie, rien ne se passe : la continuité anonyme → connexion est intacte.
+  const local2 = new Stockage();
+  new OngletOuVivre(local2, T0).chercher("Nantes", T0);
+  assert.equal(appliquerPurgeDiffereeSur("futuree-consent=denied", local2, new Stockage(), T0 + 1), false);
+  assert.equal(new OngletOuVivre(local2, T0 + 2).relire(T0 + 2).reprise, "Une ville près de Nantes");
+});
+
+test("code différée : le formulaire dit s'il a purgé, la Server Action dépose le cookie sinon, les lecteurs l'appliquent", () => {
+  const formulaire = lire("../app/(account)/compte/FormulaireDeconnexion.tsx");
+  assert.match(formulaire, /<input type="hidden" name=\{CHAMP_PURGE\} value=\{hydrate \? PURGE_PAR_LE_NAVIGATEUR : "serveur"\} \/>/);
+  assert.doesNotMatch(formulaire, /disabled/, "le bouton reste actif : sans JavaScript, la déconnexion doit rester possible");
+  const actions = lire("../app/auth/actions.ts");
+  const sortie = actions.slice(actions.indexOf("export async function signOutAction"));
+  assert.match(sortie, /await supabase\.auth\.signOut\(\);[\s\S]*if \(!purgeFaiteParLeNavigateur\(formData\?\.get\(CHAMP_PURGE\)\)\) \{\s*\(await cookies\(\)\)\.set\(COOKIE_PURGE_DIFFEREE,/);
+  assert.match(sortie, /httpOnly: false/);
+  assert.match(sortie, /redirect\("\/"\);/);
+  const nav = lire("../components/interaction/purge-recherche-navigateur.ts");
+  assert.match(nav, /export function purgeRechercheConnue\(\): number \| null \{\s*appliquerPurgeDifferee\(\);/);
+  // Les lecteurs qui ne passent pas par la date de purge l'appliquent eux-mêmes, avant de lire.
+  const lecteurs: [string, RegExp][] = [
+    ["../app/(public)/comparateur/pack-decision/PackConvictionView.tsx", /appliquerPurgeDifferee\(\);[^\n]*\n\s*try \{\n\s*const raw = window\.localStorage\.getItem\(CLE_PACK_PARSED\)/],
+    ["../app/(public)/territoire/[insee]/debloquer/PersonalTouch.tsx", /appliquerPurgeDifferee\(\);[^\n]*\n\s*try \{\n\s*const raw = window\.localStorage\.getItem\(CLE_PAYWALL_LABELS\)/],
+    ["../components/wizard/WizardAnswersSync.tsx", /appliquerPurgeDifferee\(\);\s*const answers = readWizardAnswersFromStorage\(\)/],
+    ["../components/wizard/RapportPremiereLecture.tsx", /appliquerPurgeDifferee\(\);[^\n]*\n\s*const stored = readWizardAnswersFromStorage\(\)/],
+    ["../components/wizard/ReportWizard.tsx", /function loadFromStorage\(\): Partial<WizardState> \{\s*appliquerPurgeDifferee\(\);/],
+    ["../components/FutureELanding.tsx", /appliquerPurgeDifferee\(\);[^\n]*\n\s*try \{\n\s*const raw = window\.sessionStorage\.getItem\(LANDING_COMMUNE_STORAGE_KEY\)/],
+  ];
+  for (const [f, m] of lecteurs) assert.match(lire(f), m, f);
+  // Toute autre lecture des clés purgées passe par l'un de ces chemins.
+  const lectures = tousLesFichiers(src).filter((f) => /getItem\((SESSION_OUVIVRE_KEY|SESSION_RECHERCHE_KEY|CLE_PACK_PARSED|CLE_PACK_LABEL|CLE_PAYWALL_LABELS|WIZARD_STORAGE_KEY|LANDING_COMMUNE_STORAGE_KEY)\)/.test(readFileSync(f, "utf8")));
+  assert.deepEqual(lectures.map((f) => f.slice(src.length)).sort(), [
+    "app/(public)/comparateur/pack-decision/PackConvictionView.tsx",
+    "app/(public)/ou-vivre/OuVivreClient.tsx",
+    "app/(public)/territoire/[insee]/debloquer/PersonalTouch.tsx",
+    "components/FutureELanding.tsx",
+    "components/report/RepriseRecherche.tsx",
+    "components/wizard/ReportWizard.tsx",
+    "components/wizard/types.ts",
+  ]);
 });

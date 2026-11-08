@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CLE_PAYWALL_LABELS } from "@/lib/comparateur/session-ou-vivre";
-import { useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
+import { appliquerPurgeDifferee, useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
 
 // Ligne personnalisée optionnelle : reprend les priorités du projet (si l'utilisateur en a
 // tapé un sur /ou-vivre) pour relier l'aperçu à SA décision. Best-effort, jamais bloquant.
@@ -12,6 +12,7 @@ export function PersonalTouch({ commune }: { commune: string }) {
   useOubliALaPurge(() => setLabels([]));
 
   useEffect(() => {
+    appliquerPurgeDifferee(); // FUT-27 : avant de lire, une déconnexion restée sans purge
     try {
       const raw = window.localStorage.getItem(CLE_PAYWALL_LABELS);
       if (!raw) return;

@@ -144,6 +144,6 @@ test("D9. les sessions locales d'Où vivre antérieures à FUT-36 ne sont plus r
   }
   // Le client lit ce module, sans constante propre.
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
-  assert.match(client, /lireSessionOuVivre\(\s*window\.localStorage\.getItem\(SESSION_OUVIVRE_KEY\), Date\.now\(\), purgeRechercheConnue\(\)/);
+  assert.match(client, /const purge = purgeRechercheConnue\(\);\s*return lireSessionOuVivre\(window\.localStorage\.getItem\(SESSION_OUVIVRE_KEY\), Date\.now\(\), purge\)/);
   assert.doesNotMatch(client, /const SESSION_(VERSION|KEY|TTL_MS) =/);
 });

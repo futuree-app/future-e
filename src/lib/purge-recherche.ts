@@ -47,3 +47,51 @@ export function purgerRecherchesTemporaires(local: Stockage | null, onglet: Stoc
   }
   purgerOnglet(onglet);
 }
+
+// ── PURGE DIFFÉRÉE : quand le navigateur n'a pas pu purger lui-même (FUT-27) ──────────────────────────
+//
+// Le formulaire de déconnexion purge dans son `onSubmit`, qui n'existe qu'une fois la page hydratée. Cliqué
+// avant (page encore en chargement) ou sans JavaScript, il part en simple POST : la Server Action ferme la
+// session, et rien n'a été effacé. Le formulaire porte donc un champ qui dit si le navigateur a purgé. S'il
+// ne l'a pas fait, la Server Action dépose un cookie lisible par la page. La première page qui exécute du
+// JavaScript le consomme avant toute lecture des recherches (`purgeRechercheConnue` et les lecteurs directs).
+// Sans JavaScript, rien ne peut lire ces stockages : la purge attend la première page qui le peut.
+export const CHAMP_PURGE = "purge-recherche";
+export const PURGE_PAR_LE_NAVIGATEUR = "navigateur";
+export const COOKIE_PURGE_DIFFEREE = "futuree-purge-recherche";
+// Le jeton de la dernière purge différée appliquée : si le cookie ne s'efface pas, il ne purge qu'une fois,
+// et ne revient pas effacer les recherches lancées depuis.
+export const PURGE_DIFFEREE_VUE_KEY = "futuree:recherche:purge-differee-vue";
+
+/** Vrai seulement si le formulaire dit avoir purgé : un champ absent ou inconnu demande la purge différée. */
+export function purgeFaiteParLeNavigateur(valeur: unknown): boolean {
+  return valeur === PURGE_PAR_LE_NAVIGATEUR;
+}
+
+/** Le jeton du cookie de purge différée, ou `null`. */
+export function jetonPurgeDifferee(cookies: string): string | null {
+  for (const morceau of cookies.split(";")) {
+    const [nom, ...reste] = morceau.trim().split("=");
+    if (nom !== COOKIE_PURGE_DIFFEREE) continue;
+    const valeur = reste.join("=");
+    return /^[a-z0-9]{1,64}$/i.test(valeur) ? valeur : null;
+  }
+  return null;
+}
+
+/** Applique une purge différée pas encore vue. Vrai si elle a purgé. */
+export function appliquerPurgeDiffereeSur(
+  cookies: string,
+  local: (Stockage & Pick<Storage, "getItem">) | null,
+  onglet: Stockage | null,
+  maintenant: number,
+): boolean {
+  const jeton = jetonPurgeDifferee(cookies);
+  if (!jeton || !local) return false;
+  let vue: string | null = null;
+  try { vue = local.getItem(PURGE_DIFFEREE_VUE_KEY); } catch { return false; }
+  if (vue === jeton) return false;
+  sansEchec(() => local.setItem(PURGE_DIFFEREE_VUE_KEY, jeton));
+  purgerRecherchesTemporaires(local, onglet, maintenant);
+  return true;
+}

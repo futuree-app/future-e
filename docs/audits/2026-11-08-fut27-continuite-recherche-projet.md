@@ -104,6 +104,41 @@ Recette navigateur : `scripts/fut27-deconnexion-recette.mjs`, sur le build local
 
 ### Limites restantes
 
-- La purge part du formulaire client. Un clic avant que la page /compte soit interactive enverrait la Server Action sans purger. La fenêtre est de quelques centaines de millisecondes.
+- ~~La purge part du formulaire client. Un clic avant que la page /compte soit interactive enverrait la Server Action sans purger.~~ Corrigé, voir la section 8.
 - Une expiration de session sans déconnexion explicite ne purge rien. Ce n'est pas le périmètre : la règle vise le départ volontaire.
 - Les onglets du compte (/rapport, /compte) gardent la page déjà affichée jusqu'à la prochaine navigation, qui mène alors à la connexion. Seules les recherches et les aperçus sont oubliés sur place.
+
+## 8. Déconnexion envoyée avant l'hydratation, ou sans JavaScript (corrigé le 08/11)
+
+**Constat.** La purge vivait dans le `onSubmit` du formulaire, qui n'existe qu'une fois la page hydratée. Un clic pendant le chargement de /compte, ou un navigateur sans JavaScript, envoyait le formulaire en simple POST : la session était fermée, la recherche restait.
+
+**Choix écarté : un bouton inactif jusqu'à l'hydratation.** Sans JavaScript, le bouton resterait inactif pour toujours et la déconnexion deviendrait impossible. Fermer la session reste prioritaire.
+
+### Correction : le formulaire dit s'il a purgé, sinon le serveur le rappelle
+
+- **Le formulaire** porte un champ caché `purge-recherche`. Il vaut « serveur » dans le HTML, puis « navigateur » une fois la page hydratée, c'est-à-dire quand le `onSubmit` qui purge est en place.
+- **La Server Action** ferme toujours la session et redirige vers `/`, comme avant. Si le champ ne vaut pas « navigateur » (absent, « serveur », autre), elle dépose en plus le cookie `futuree-purge-recherche`. Ce cookie porte un jeton aléatoire, il est lisible par la page et dure 30 jours.
+- **La première page qui exécute du JavaScript** applique la purge avant toute lecture :
+  - `purgeRechercheConnue()`, que lisent « Où vivre », la reprise et les gardes d'écriture, applique d'abord la purge différée. « Où vivre » et la reprise lisent cette date avant la session ;
+  - les lecteurs directs l'appellent aussi avant de lire : Pack, touche perso du paywall, questionnaire (synchronisation, première lecture, reprise du questionnaire) et commune de l'accueil, qui est la page de redirection ;
+  - l'écoute globale du layout l'applique au montage de chaque page.
+- **La purge différée est la même purge** : mêmes clés, même date-barrière, même signal aux autres onglets. Le cookie est effacé et son jeton noté comme vu. Si le cookie ne pouvait pas être effacé, le même jeton ne purge donc qu'une fois, et ne revient pas effacer une recherche lancée depuis. Une nouvelle déconnexion porte un nouveau jeton.
+- **Sans JavaScript**, aucune page ne peut lire ces stockages. La purge attend la première page qui le peut, et s'applique avant que la recherche soit lue.
+
+### Scénarios et résultats
+
+Tests : 4 tests ajoutés dans `fut27-deconnexion.test.ts`, soit 16 au total. Par mutation, ils échouent quand la purge différée est neutralisée, ou quand le jeton déjà vu repurge.
+
+Recette : `scripts/fut27-deconnexion-differee-recette.mjs`, sans compte. L'onglet envoie le POST natif d'un formulaire non hydraté à la vraie Server Action `signOutAction` du build : hors de React, avec le champ à « serveur ».
+
+| Cas | Résultat |
+|---|---|
+| 1 · clic juste après le chargement de /compte (POST natif) | Réponse 303 vers `/` avec le cookie de purge. La page d'arrivée efface la session « Où vivre », le questionnaire et la commune de l'accueil, puis le cookie. La commune n'est pas réaffichée. L'autre onglet, ouvert sur Bordeaux, revient vide. |
+| 2 · déconnexion après hydratation | Champ « navigateur » : aucun cookie, la purge a eu lieu avant l'envoi (`onSubmit`, section 7). Vérifié par POST direct : 303, sans `Set-Cookie`. |
+| 3 · compte A, déconnexion, puis compte B | Après la purge différée, la reprise ne relit rien, et l'onglet resté sur Bordeaux n'écrit plus (test). |
+| 4 · recherche anonyme après la déconnexion, puis connexion | Rennes cherchée après la purge : restaurée dans un nouvel onglet, intacte après /connexion. Même avec le cookie remis à l'identique, elle n'est pas effacée. |
+| 5 · dossiers et Projet serveur | Aucun appel `/api/profile` ni `/api/project` pendant la recette. La Server Action n'écrit qu'un cookie. Sans session, `signOut` n'appelle rien côté Supabase. |
+
+Suite complète : 4 382 tests passent, 0 échec. TypeScript OK. ESLint : 0 erreur. Build OK.
+
+**Non exécuté** : le même clic depuis la vraie page /compte, connecté, qui demande un compte. Aucun Supabase de test n'est disponible et aucun compte de production n'a été utilisé. Le POST envoyé est celui que produit ce formulaire avant hydratation : même action, même champ.

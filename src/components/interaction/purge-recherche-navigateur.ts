@@ -8,7 +8,10 @@
 //     visible : il a pu dormir pendant la purge, il relit la date.
 import { useEffect, useRef } from "react";
 import { anterieurALaPurge, PURGE_RECHERCHE_KEY, lirePurgeRecherche } from "@/lib/comparateur/session-ou-vivre";
-import { EVENEMENT_PURGE_RECHERCHE, purgerRecherchesTemporaires } from "@/lib/purge-recherche";
+import {
+  COOKIE_PURGE_DIFFEREE, EVENEMENT_PURGE_RECHERCHE, appliquerPurgeDiffereeSur, jetonPurgeDifferee,
+  purgerRecherchesTemporaires,
+} from "@/lib/purge-recherche";
 
 function stockage(type: "localStorage" | "sessionStorage"): Storage | null {
   try {
@@ -22,6 +25,10 @@ function stockage(type: "localStorage" | "sessionStorage"): Storage | null {
 export function purgerRecherchesDuNavigateur(): void {
   if (typeof window === "undefined") return;
   purgerRecherchesTemporaires(stockage("localStorage"), stockage("sessionStorage"), Date.now());
+  prevenirLesEcrans();
+}
+
+function prevenirLesEcrans() {
   try {
     window.dispatchEvent(new Event(EVENEMENT_PURGE_RECHERCHE));
   } catch {
@@ -29,8 +36,33 @@ export function purgerRecherchesDuNavigateur(): void {
   }
 }
 
-/** La date de la dernière purge connue de ce navigateur, ou `null`. */
+/**
+ * La déconnexion est partie sans que le navigateur ait purgé (clic avant hydratation, JavaScript désactivé) :
+ * la Server Action a laissé un cookie. À appeler avant toute lecture d'une recherche temporaire ; sans
+ * cookie, ne fait rien.
+ */
+export function appliquerPurgeDifferee(): void {
+  if (typeof document === "undefined") return;
+  let cookies = "";
+  try {
+    cookies = document.cookie;
+  } catch {
+    return;
+  }
+  if (!jetonPurgeDifferee(cookies)) return;
+  try {
+    document.cookie = `${COOKIE_PURGE_DIFFEREE}=; Max-Age=0; path=/; SameSite=Lax`;
+  } catch {
+    // le jeton déjà vu empêche une seconde purge
+  }
+  if (appliquerPurgeDiffereeSur(cookies, stockage("localStorage"), stockage("sessionStorage"), Date.now())) {
+    prevenirLesEcrans();
+  }
+}
+
+/** La date de la dernière purge connue de ce navigateur, ou `null`. Applique d'abord une purge différée. */
 export function purgeRechercheConnue(): number | null {
+  appliquerPurgeDifferee();
   try {
     return lirePurgeRecherche(window.localStorage.getItem(PURGE_RECHERCHE_KEY));
   } catch {
