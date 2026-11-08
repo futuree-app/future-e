@@ -87,7 +87,7 @@ export type LecturePastille = {
      * Le texte complet reste celui du fait, lu par les lecteurs d'écran.
      */
     mesure?: { valeur: string; unite: string; legende: string };
-    /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
+    /** Deux dimensions côte à côte (chaleur : jours à 35 °C ou plus et nuits tropicales). */
     mesures?: MesureChaleur[];
     /** Un détail consultable, replié par défaut (risques : la liste structurée de ce que la source recense). */
     detail?: { resume: string; groupes: GroupeRisques[]; notes?: string[] };
@@ -158,7 +158,7 @@ export type EntreesChaleur = {
   verdict: "unfavorable" | "under_threshold" | "uncertain" | "absent";
   jours: AxeChaleur;
   nuits: AxeChaleur;
-  /** Les journées au-dessus de 30 °C (même horizon, même reconstruction de la référence). Complément de lecture :
+  /** Les journées à 30 °C ou plus (même horizon, même reconstruction de la référence). Complément de lecture :
    *  elles n'entrent JAMAIS dans le classement, qui reste fondé sur 35 °C et les nuits tropicales. */
   jours30?: { projete: number | null; reference: number | null };
   /**
@@ -248,11 +248,18 @@ const hausseLisible = (a: AxeChaleur) => (gain(a) ?? 0) >= ECART_LISIBLE;
  *   classement du moteur     | pastille             | phrase
  *   unfavorable              | Plutôt défavorable   | nomme ce qui atteint le seuil du moteur, et seulement cela
  *   under_threshold, rare    | Plutôt favorable     | les deux mesures sous une par an même en 2050 (palier existant)
+ *     … maille contredite    | À surveiller         | une station du secteur dément cette rareté (`stationContredit`,
+ *                            |                      | 08/11/2026) : la pastille cesse d'être favorable, le classement
+ *                            |                      | du moteur ne change pas
  *   under_threshold, sinon   | À surveiller         | jamais favorable : la chaleur progresse sous les seuils
  *   absent / uncertain       | Donnée indisponible  | (traité dans `lireChaleur`)
  *
  * Chaque qualificatif a sa règle, et une seule :
- *   « peu nombreuses »              → sous le seuil du moteur (8 jours, 25 nuits) ET sans hausse lisible ;
+ *   « resteraient rares »           → moins d'une par an en 2050 (palier existant « moins d'un par an ») ;
+ *   « n'augmenteraient pas nettement » → aucune hausse lisible : une DESCRIPTION de l'évolution, pas un jugement
+ *                                      d'exposition. « Peu nombreuses » n'est plus employé (contre-revue du
+ *                                      08/11/2026) : sans hausse lisible, 23 nuits pour un repère de 25 n'en sont pas
+ *                                      moins nombreuses ; l'exposition, c'est la pastille qui la dit ;
  *   « particulièrement fréquentes » → seuil du moteur atteint (« deviendraient » seulement s'il ne l'est pas déjà
  *                                      sur la période de comparaison) ;
  *   « plus fréquentes »             → hausse lisible : ECART_LISIBLE de plus par an au moins ;
@@ -265,6 +272,9 @@ const double = (a: AxeChaleur) => hausseLisible(a) && a.projete! >= 2 * a.refere
 
 /** « beaucoup plus » / « plus » / `null` (aucune hausse lisible : rien à en dire sans inventer). */
 const evolution = (a: AxeChaleur): string | null => (!hausseLisible(a) ? null : double(a) ? "beaucoup plus" : "plus");
+
+/** Les définitions DRIAS-TRACC : Tx ≥ 35 °C, Tx ≥ 30 °C (inclusives), dites au lecteur « à 35 °C ou plus ». */
+const JOURS_35 = "journées à 35 °C ou plus";
 
 /** Le climat récent, s'il est complet et fini ; sinon `null` (la lecture revient à 1976-2005, sans rien inventer). */
 export function recentUtilisable(e: EntreesChaleur): ClimatRecentChaleur | null {
@@ -289,8 +299,8 @@ function baseComparaison(e: EntreesChaleur): { jours: AxeChaleur; nuits: AxeChal
  * LA MAILLE CONTREDITE PAR LE THERMOMÈTRE (contre-revue du 08/11/2026). Sur l'une des mesures affichées, la maille
  * projette MOINS D'UN jour (ou d'une nuit) par an pour 2050 (l'absence que la phrase présenterait comme un fait),
  * alors qu'une station Météo-France du même secteur en relève déjà au moins ECART_LISIBLE par an sur la période du
- * climat récent. La maille est alors manifestement trop fraîche pour le lieu (Chamonix : 16 journées au-dessus de
- * 30 °C relevées par an, aucune projetée en 2050 ; Briançon : 23 à la station de Villar-Saint-Pancrace, à 2,4 km).
+ * climat récent. La maille est alors manifestement trop fraîche pour le lieu (Chamonix : 16 journées à 30 °C ou
+ * plus relevées par an, aucune projetée en 2050 ; Briançon : 23 à la station de Villar-Saint-Pancrace, à 2,4 km).
  *
  * POURQUOI PAS « LA STATION DÉPASSE LA PROJECTION » TOUT COURT : en plaine, les stations comptent couramment
  * quelques journées à 30 °C de plus que leur maille (2 684 communes l'auraient reçue, mesuré le 08/11/2026) ; c'est
@@ -331,7 +341,7 @@ function reserveMaille(e: EntreesChaleur): string | null {
   const ou = situation(c.station);
   const quoi = c.mesure === "nuits"
     ? tropicales(e.referenceTexte(c.releve, true))
-    : `${e.referenceTexte(c.releve, false)} au-dessus de ${c.mesure === "jours" ? 35 : 30} °C`;
+    : `${e.referenceTexte(c.releve, false)} à ${c.mesure === "jours" ? 35 : 30} °C ou plus`;
   return `La station Météo-France ${nomStation(c.station.nom)} (${ou}) relève pourtant déjà ${quoi} par an en moyenne sur ${periodeRecente(r)}, plus que ce secteur de 8 km n'en prévoit pour 2050 : ces chiffres sous-estiment la chaleur là où elle mesure.`;
 }
 
@@ -339,9 +349,11 @@ export function phraseChaleur(e: EntreesChaleur, commune: string): { signal: Sig
   const { jours, nuits, periode } = baseComparaison(e);
   const reserve = reserveMaille(e);
   if (jours.projete! < 1 && nuits.projete! < 1) {
-    // Le signal reste celui du moteur ; seule la phrase cesse d'affirmer ce que le thermomètre de la commune dément.
+    // Maille contredite (08/11/2026) : la pastille n'est plus « Plutôt favorable » mais « À surveiller ». Le
+    // classement du moteur (`verdict`) et les valeurs ne changent pas : seul le signal d'interface se retient d'affirmer
+    // ce que le thermomètre du secteur dément.
     return reserve
-      ? { signal: "favorable", texte: `Sur le secteur de 8 km qui sert au calcul, les fortes chaleurs resteraient exceptionnelles, même en 2050. ${reserve}` }
+      ? { signal: "sous_seuil", texte: `Sur le secteur de 8 km qui sert au calcul, les fortes chaleurs resteraient exceptionnelles, même en 2050. ${reserve}` }
       : { signal: "favorable", texte: "Les fortes chaleurs resteraient exceptionnelles ici, même en 2050." };
   }
   if (e.verdict === "unfavorable") {
@@ -354,26 +366,41 @@ export function phraseChaleur(e: EntreesChaleur, commune: string): { signal: Sig
       };
     }
     const axe = n ? nuits : jours;
-    const sujet = n ? "Les nuits tropicales" : "Les journées au-dessus de 35 °C";
+    const sujet = n ? "Les nuits tropicales" : `Les ${JOURS_35}`;
     // « deviendraient » dit un changement : faux si la période de comparaison atteint déjà ce niveau (Nîmes, nuits).
     const verbe = axe.reference != null && axe.reference >= axe.seuil ? "seraient" : "deviendraient";
     return { signal: "defavorable", texte: `${sujet} ${verbe} particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.` };
   }
-  // Sous les seuils : l'exposition reste sous les repères (la pastille le dit) ; la phrase dit l'évolution, axe par
-  // axe, et ne réserve « peu nombreuses » qu'à l'axe sans hausse lisible.
-  const ej = evolution(jours), en = evolution(nuits);
-  const qu = `qu'en ${periode}`;
+  // Sous les seuils : l'exposition reste sous les repères (la pastille le dit) ; la phrase DÉCRIT l'évolution, axe
+  // par axe : hausse lisible, rareté (moins d'une par an en 2050), ou absence de hausse nette. La période n'est nommée
+  // qu'une fois.
+  const etat = (a: AxeChaleur) => {
+    const q = evolution(a);
+    return q ? { t: "hausse" as const, q } : a.projete! < 1 ? { t: "rare" as const } : { t: "stable" as const };
+  };
+  const J = etat(jours), N = etat(nuits);
+  const qu = `qu'en ${periode}`, par = `par rapport à ${periode}`;
+  const D = `Les ${JOURS_35}`;
   let texte: string;
-  if (ej && en) {
-    texte = ej === en
-      ? `Les journées au-dessus de 35 °C et les nuits tropicales deviendraient ${ej} fréquentes ${qu}.`
-      : `Les journées au-dessus de 35 °C deviendraient ${ej} fréquentes ${qu}, et les nuits tropicales ${en} fréquentes.`;
-  } else if (ej) {
-    texte = `Les journées au-dessus de 35 °C deviendraient ${ej} fréquentes ${qu} ; les nuits tropicales resteraient peu nombreuses.`;
-  } else if (en) {
-    texte = `Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient ${en} fréquentes ${qu}.`;
+  if (jours.reference == null || nuits.reference == null) {
+    // Sans période de comparaison lisible, aucune évolution n'est dite, ni hausse ni stabilité.
+    texte = "L'évolution de ces deux mesures ne peut pas être établie ici : la période de comparaison manque.";
+  } else if (J.t === "hausse" && N.t === "hausse") {
+    texte = J.q === N.q
+      ? `${D} et les nuits tropicales deviendraient ${J.q} fréquentes ${qu}.`
+      : `${D} deviendraient ${J.q} fréquentes ${qu}, et les nuits tropicales ${N.q} fréquentes.`;
+  } else if (J.t === "hausse") {
+    texte = `${D} deviendraient ${J.q} fréquentes ${qu} ; les nuits tropicales ${N.t === "rare" ? "resteraient rares" : "n'augmenteraient pas nettement"}.`;
+  } else if (N.t === "hausse") {
+    texte = J.t === "rare"
+      ? `${D} resteraient rares, mais les nuits tropicales deviendraient ${N.q} fréquentes ${qu}.`
+      : `${D} n'augmenteraient pas nettement ${par}, mais les nuits tropicales deviendraient ${N.q} fréquentes.`;
+  } else if (J.t === "stable" && N.t === "stable") {
+    texte = `${D} comme les nuits tropicales n'augmenteraient pas nettement ${par}.`;
+  } else if (J.t === "rare") {
+    texte = `${D} resteraient rares, et les nuits tropicales n'augmenteraient pas nettement ${par}.`;
   } else {
-    texte = "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.";
+    texte = `${D} n'augmenteraient pas nettement ${par}, et les nuits tropicales resteraient rares.`;
   }
   return { signal: "sous_seuil", texte: reserve ? `${texte} ${reserve}` : texte };
 }
@@ -384,40 +411,40 @@ export function methodeChaleur(e: EntreesChaleur): string[] {
   const jAtteint = jours.projete! >= jours.seuil, nAtteint = nuits.projete! >= nuits.seuil;
   let ici: string;
   if (jAtteint && nAtteint) ici = "Ici, les deux repères sont atteints.";
-  else if (jAtteint || nAtteint) ici = `Ici, seul le repère ${nAtteint ? "des nuits tropicales" : "des journées au-dessus de 35 °C"} est atteint.`;
+  else if (jAtteint || nAtteint) ici = `Ici, seul le repère ${nAtteint ? "des nuits tropicales" : `des ${JOURS_35}`} est atteint.`;
   else if (jours.projete! < 1 && nuits.projete! < 1) ici = "Ici, aucun des deux repères n'est atteint.";
   else {
     // La mesure la plus proche de son repère, dite par sa valeur exacte : aucun qualificatif, aucun palier nouveau.
     const n = nuits.projete! / nuits.seuil >= jours.projete! / jours.seuil;
     const a = n ? nuits : jours;
-    ici = `Ici, aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des ${n ? "nuits tropicales" : "journées au-dessus de 35 °C"} (${valeurAffichee(a.projete!, a.seuil, "decimale")} pour un repère de ${a.seuil}). Une commune peut se réchauffer beaucoup sans atteindre ces repères.`;
+    ici = `Ici, aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des ${n ? "nuits tropicales" : JOURS_35} (${valeurAffichee(a.projete!, a.seuil, "decimale")} pour un repère de ${a.seuil}). Une commune peut se réchauffer beaucoup sans atteindre ces repères.`;
   }
   const r = recentUtilisable(e);
   const reference = (a: AxeChaleur, n: boolean) => (a.reference != null ? e.referenceTexte(a.reference, n) : null);
   const refJ = reference(jours, false), refN = reference(nuits, true);
   const lecture = r
     ? [
-        `Deux mesures du climat de la commune : les journées où il fait plus de 35 °C, et les nuits tropicales, où la température reste au-dessus de 20 °C. Le grand chiffre est une projection pour 2050, quand la France se serait réchauffée d'environ 2,7 °C. Il est comparé au climat récent : la moyenne des années ${r.periode[0]} à ${r.periode[1]}.`,
+        `Deux mesures du climat de la commune : les journées où il fait 35 °C ou plus, et les nuits tropicales, où la température reste au-dessus de 20 °C. Le grand chiffre est une projection pour 2050, quand la France se serait réchauffée d'environ 2,7 °C. Il est comparé au climat récent : la moyenne des années ${r.periode[0]} à ${r.periode[1]}.`,
         "Les deux viennent de Météo-France et sont calculés sur la même grille de 8 km : le climat récent est reconstitué à partir des observations (réanalyse SAFRAN), et les projections sont ajustées sur ces mêmes données. Ce sont des moyennes de secteur, pas les relevés d'un thermomètre : selon la ville ou le relief, les valeurs locales peuvent s'en écarter. Une année isolée peut aussi s'éloigner nettement de la moyenne.",
         ...(refJ && refN
-          ? [`Référence historique des projections (DRIAS) : sur 1976-2005, ${refJ} au-dessus de 35 °C et ${tropicales(refN)} par an.`]
+          ? [`Référence historique des projections (DRIAS) : sur 1976-2005, ${refJ} à 35 °C ou plus et ${tropicales(refN)} par an.`]
           : []),
       ]
     : [
-        "Deux mesures du climat de la commune : les journées où il fait plus de 35 °C, et les nuits tropicales, où la température reste au-dessus de 20 °C. Elles sont projetées pour 2050, quand la France se serait réchauffée d'environ 2,7 °C, et comparées à la période 1976-2005, qui n'est pas la situation actuelle.",
+        "Deux mesures du climat de la commune : les journées où il fait 35 °C ou plus, et les nuits tropicales, où la température reste au-dessus de 20 °C. Elles sont projetées pour 2050, quand la France se serait réchauffée d'environ 2,7 °C, et comparées à la période 1976-2005, qui n'est pas la situation actuelle.",
       ];
   // La maille contredite (contre-revue du 08/11) : le détail de la réserve dite au premier niveau.
   const c = stationContredit(e);
   const projeteContredit = c && (c.mesure === "jours" ? jours.projete : c.mesure === "nuits" ? nuits.projete : e.jours30?.projete);
   const temoin = c && r && estFini(projeteContredit)
-    ? [`Ici, la station Météo-France ${nomStation(c.station.nom)} (${situation(c.station)}) relève ${c.mesure === "nuits" ? tropicales(e.referenceTexte(c.releve, true)) : `${e.referenceTexte(c.releve, false)} au-dessus de ${c.mesure === "jours" ? 35 : 30} °C`} par an en moyenne (${c.station.annees} années complètes sur ${periodeRecente(r)}), quand le secteur de 8 km en projette ${valeurAffichee(projeteContredit, Infinity, "decimale")} pour 2050. En montagne, le secteur peut être bien plus haut que la vallée habitée. Les chiffres affichés restent ceux du secteur, les seuls calculés de la même façon pour les deux périodes ; à l'emplacement de la station, il fait plus chaud.`]
+    ? [`Ici, la station Météo-France ${nomStation(c.station.nom)} (${situation(c.station)}) relève ${c.mesure === "nuits" ? tropicales(e.referenceTexte(c.releve, true)) : `${e.referenceTexte(c.releve, false)} à ${c.mesure === "jours" ? 35 : 30} °C ou plus`} par an en moyenne (${c.station.annees} années complètes sur ${periodeRecente(r)}), quand le secteur de 8 km en projette ${valeurAffichee(projeteContredit, Infinity, "decimale")} pour 2050. En montagne, le secteur peut être bien plus haut que la vallée habitée. Les chiffres affichés restent ceux du secteur, les seuls calculés de la même façon pour les deux périodes ; à l'emplacement de la station, il fait plus chaud.`]
     : [];
   return [
     ...lecture,
     ...temoin,
-    `futur•e signale une exposition à partir de ${jours.seuil} journées au-dessus de 35 °C, ou de ${nuits.seuil} nuits tropicales par an en 2050. Ce sont des repères propres à futur•e, pas des seuils sanitaires officiels. ${ici}`,
+    `futur•e signale une exposition à partir de ${jours.seuil} ${JOURS_35}, ou de ${nuits.seuil} nuits tropicales par an en 2050. Ce sont des repères propres à futur•e, pas des seuils sanitaires officiels. ${ici}`,
     ...(estFini(e.jours30?.projete)
-      ? ["Les journées au-dessus de 30 °C, à afficher sous le premier chiffre, complètent la lecture : elles comprennent celles au-dessus de 35 °C, et n'entrent pas dans ce résultat."]
+      ? ["Les journées à 30 °C ou plus, à afficher sous le premier chiffre, complètent la lecture : elles comprennent celles à 35 °C ou plus, et n'entrent pas dans ce résultat."]
       : []),
   ];
 }
@@ -448,7 +475,7 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
   const vn = valeurAffichee(nuits.projete, nuits.seuil);
   const uniteJours = (v: number) => (v >= 1 && Math.round(v) > 1 ? "jours par an" : "jour par an");
   const mesures: MesureChaleur[] = [
-    { valeur: vj, unite: uniteJours(jours.projete), legende: `au-dessus de 35 °C à l'horizon 2050, ${compJ}`, texte: `À l'horizon 2050 : ${vj} ${uniteJours(jours.projete)} au-dessus de 35 °C, ${compJ}.` },
+    { valeur: vj, unite: uniteJours(jours.projete), legende: `à 35 °C ou plus à l'horizon 2050, ${compJ}`, texte: `À l'horizon 2050 : ${vj} ${uniteJours(jours.projete)} à 35 °C ou plus, ${compJ}.` },
     { valeur: vn, unite: nuits.projete >= 1 && Math.round(nuits.projete) > 1 ? "nuits tropicales" : "nuit tropicale", legende: `par an à l'horizon 2050, sans tomber à 20 °C, ${compN}` },
   ];
   mesures[1]!.texte = `Et ${vn} ${mesures[1]!.unite} par an, sans tomber à 20 °C, ${compN}.`;
@@ -461,15 +488,15 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
       : j30.reference != null ? `contre ${e.referenceTexte(j30.reference, false)} sur 1976-2005` : "sans comparaison possible avec 1976-2005";
     mesures[0]!.bascule = {
       valeur: v30, unite: uniteJours(j30.projete),
-      legende: `au-dessus de 30 °C à l'horizon 2050, dont ${vj} au-dessus de 35 °C ; ${ref30}`,
-      texte: `À l'horizon 2050 : ${v30} ${uniteJours(j30.projete)} au-dessus de 30 °C, dont ${vj} au-dessus de 35 °C ; ${ref30}.`,
-      ouvrir: "Et au-dessus de 30 °C ?",
+      legende: `à 30 °C ou plus à l'horizon 2050, dont ${vj} à 35 °C ou plus ; ${ref30}`,
+      texte: `À l'horizon 2050 : ${v30} ${uniteJours(j30.projete)} à 30 °C ou plus, dont ${vj} à 35 °C ou plus ; ${ref30}.`,
+      ouvrir: "Et à 30 °C ou plus ?",
       revenir: "Revenir à 35 °C",
     };
   }
   const texte = r
-    ? `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} au-dessus de 35 °C, et ${vn} ${mesures[1]!.unite} par an. Climat récent (${periodeRecente(r)}) : ${e.referenceTexte(r.jours, false)} au-dessus de 35 °C et ${tropicales(e.referenceTexte(r.nuits, true))} par an.`
-    : `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} au-dessus de 35 °C (${compJ}), et ${vn} ${mesures[1]!.unite} par an (${compN}).`;
+    ? `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} à 35 °C ou plus, et ${vn} ${mesures[1]!.unite} par an. Climat récent (${periodeRecente(r)}) : ${e.referenceTexte(r.jours, false)} à 35 °C ou plus et ${tropicales(e.referenceTexte(r.nuits, true))} par an.`
+    : `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} à 35 °C ou plus (${compJ}), et ${vn} ${mesures[1]!.unite} par an (${compN}).`;
   const pourVous = phraseChaleur(e, lieu.commune);
   const methode = methodeChaleur(e);
   // Deux natures de données, deux sources nommées : la projection d'un côté, la réanalyse de l'autre.

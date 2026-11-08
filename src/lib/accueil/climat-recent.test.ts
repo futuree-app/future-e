@@ -111,11 +111,11 @@ test("Rochefort : 2050 en grand, le climat récent en comparaison, ses années d
   const l = lireChaleur(lieu("17299", "Rochefort"), entrees("17299"));
   const [j, n] = l.fait!.mesures!;
   assert.equal(j!.valeur, "3");
-  assert.equal(j!.legende, "au-dessus de 35 °C à l'horizon 2050, contre 2 jours dans le climat récent (2016–2025)");
+  assert.equal(j!.legende, "à 35 °C ou plus à l'horizon 2050, contre 2 jours dans le climat récent (2016–2025)");
   assert.equal(n!.valeur, "24");
   assert.equal(n!.legende, "par an à l'horizon 2050, sans tomber à 20 °C, contre 13 nuits dans le climat récent (2016–2025)");
-  assert.equal(j!.bascule!.legende, "au-dessus de 30 °C à l'horizon 2050, dont 3 au-dessus de 35 °C ; contre 11 jours dans le climat récent (2016–2025)");
-  assert.equal(l.fait!.texte, "À l'horizon 2050 (+2,7 °C en France) : 3 jours par an au-dessus de 35 °C, et 24 nuits tropicales par an. Climat récent (2016–2025) : 2 jours au-dessus de 35 °C et 13 nuits tropicales par an.");
+  assert.equal(j!.bascule!.legende, "à 30 °C ou plus à l'horizon 2050, dont 3 à 35 °C ou plus ; contre 11 jours dans le climat récent (2016–2025)");
+  assert.equal(l.fait!.texte, "À l'horizon 2050 (+2,7 °C en France) : 3 jours par an à 35 °C ou plus, et 24 nuits tropicales par an. Climat récent (2016–2025) : 2 jours à 35 °C ou plus et 13 nuits tropicales par an.");
   assert.match(l.fait!.source, /DRIAS · Météo-France/);
   assert.match(l.fait!.source, /climat récent 2016–2025 : réanalyse SAFRAN · Météo-France/);
 });
@@ -125,7 +125,7 @@ test("Rochefort : la référence 1976-2005 quitte le premier niveau mais reste d
   const premier = [l.fait!.texte, ...l.fait!.mesures!.flatMap((m) => [m.legende, m.texte ?? "", m.bascule?.legende ?? ""])].join(" ");
   assert.doesNotMatch(premier, /1976/);
   const m = l.methode!.join(" ");
-  assert.match(m, /Référence historique des projections \(DRIAS\) : sur 1976-2005, moins d'une journée au-dessus de 35 °C et 5 nuits tropicales par an\./);
+  assert.match(m, /Référence historique des projections \(DRIAS\) : sur 1976-2005, moins d'une journée à 35 °C ou plus et 5 nuits tropicales par an\./);
   assert.match(m, /la moyenne des années 2016 à 2025/);
   assert.match(m, /pas les relevés d'un thermomètre/);
 });
@@ -138,15 +138,26 @@ test("aucune moyenne n'est appelée « aujourd'hui » ni « actuelle », sur tou
   }
 });
 
-test("NON-RÉGRESSION : sur les 34 788 communes, le signal est identique avec et sans climat récent", () => {
-  let changes = 0;
+// Les 45 communes où une station du secteur dément la rareté projetée par la maille : leur pastille passe de
+// « Plutôt favorable » à « À surveiller » (décision du 08/11/2026). Modification VOLONTAIRE du signal d'interface,
+// listée ici une à une : toute autre commune dont le signal bougerait fait échouer le test. Le classement du moteur
+// (`verdict`) ne change pour aucune. Liste : docs/audits/2026-11-08-reference-climatique-recente.md.
+const MAILLE_CONTREDITE = ["04006", "04019", "04057", "04086", "04115", "04222", "05007", "05009", "05023", "05052", "05061", "05064", "05098", "05101", "05109", "05136", "05139", "05142", "05144", "05152", "05182", "05183", "06102", "38112", "38173", "38207", "38237", "38375", "38469", "65192", "65413", "73023", "73026", "73113", "73181", "73253", "73255", "73256", "73259", "73261", "73306", "73322", "74056", "74085", "74143"];
+
+test("NON-RÉGRESSION : sur les 34 788 communes, le signal ne change qu'aux 45 mailles contredites, le classement nulle part", () => {
+  const changes: string[] = [];
   for (const insee of Object.keys(FICHIER.communes)) {
     const avec = entrees(insee), sans = entrees(insee, false);
     if (avec.verdict === "absent" || !Number.isFinite(avec.jours.projete) || !Number.isFinite(avec.nuits.projete)) continue;
     assert.equal(avec.verdict, sans.verdict, insee);
-    if (phraseChaleur(avec, insee).signal !== phraseChaleur(sans, insee).signal) changes++;
+    const a = phraseChaleur(avec, insee).signal, b = phraseChaleur(sans, insee).signal;
+    if (a !== b) {
+      changes.push(insee);
+      assert.deepEqual([b, a], ["favorable", "sous_seuil"], insee);
+      assert.ok(stationContredit(avec), insee);
+    }
   }
-  assert.equal(changes, 0);
+  assert.deepEqual(changes.sort(), MAILLE_CONTREDITE);
 });
 
 test("sans climat récent (null ou incomplet), la lecture d'avant FUT-170, à l'identique", () => {
@@ -164,16 +175,16 @@ test("la phrase mesure sa hausse contre la période AFFICHÉE, pas contre une au
     jours: { projete: 3, reference: 0.3, seuil: 8 }, nuits: { projete: 20, reference: 8, seuil: 25 } };
   assert.match(phraseChaleur({ ...e, recent: null }, "X").texte, /beaucoup plus fréquentes/);
   assert.equal(phraseChaleur({ ...e, recent: { periode: [2016, 2025], jours: 2, jours30: 10, nuits: 12 } }, "X").texte,
-    "Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient plus fréquentes qu'en 2016–2025.");
+    "Les journées à 35 °C ou plus n'augmenteraient pas nettement par rapport à 2016–2025, mais les nuits tropicales deviendraient plus fréquentes.");
   // Climat récent déjà à 19,5 nuits : moins d'une nuit de plus, aucune hausse affirmée.
   assert.equal(phraseChaleur({ ...e, recent: { periode: [2016, 2025], jours: 2.5, jours30: 10, nuits: 19.5 } }, "X").texte,
-    "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.");
+    "Les journées à 35 °C ou plus comme les nuits tropicales n'augmenteraient pas nettement par rapport à 2016–2025.");
 });
 
 test("accord : « moins d'une nuit tropicale », jamais « nuit tropicales »", () => {
   const e = { ...entrees("44109"), recent: { periode: [2016, 2025] as const, jours: 0.2, jours30: 5, nuits: 0.4 } };
   const l = lireChaleur(lieu("44109", "Nantes"), e);
-  assert.match(l.fait!.texte, /moins d'une journée au-dessus de 35 °C et moins d'une nuit tropicale par an\.$/);
+  assert.match(l.fait!.texte, /moins d'une journée à 35 °C ou plus et moins d'une nuit tropicale par an\.$/);
   assert.doesNotMatch([l.fait!.texte, ...l.methode!].join(" "), /nuit tropicales/);
 });
 
@@ -188,21 +199,25 @@ const sousSeuil = (j: [number, number], n: [number, number], recent = true): Ent
 test("évolution : des journées qui se multiplient ne sont plus dites « peu nombreuses » (cas Avignonet)", () => {
   // Les chiffres de la contre-revue : de 0,5 à 5,3 journées à 35 °C, nuits quasi stables.
   assert.equal(phraseChaleur(sousSeuil([0.5, 5.3], [2, 3]), "X").texte,
-    "Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales resteraient peu nombreuses.");
+    "Les journées à 35 °C ou plus deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales n'augmenteraient pas nettement.");
+  assert.equal(phraseChaleur(sousSeuil([0.5, 5.3], [0.2, 0.6]), "X").texte,
+    "Les journées à 35 °C ou plus deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales resteraient rares.");
   assert.equal(phraseChaleur(sousSeuil([0.5, 5.3], [5, 12]), "X").texte,
-    "Les journées au-dessus de 35 °C et les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 2016–2025.");
+    "Les journées à 35 °C ou plus et les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 2016–2025.");
   assert.equal(phraseChaleur(sousSeuil([3, 5.5], [5, 12]), "X").texte,
-    "Les journées au-dessus de 35 °C deviendraient plus fréquentes qu'en 2016–2025, et les nuits tropicales beaucoup plus fréquentes.");
+    "Les journées à 35 °C ou plus deviendraient plus fréquentes qu'en 2016–2025, et les nuits tropicales beaucoup plus fréquentes.");
 });
 
 test("évolution : un écart sous ECART_LISIBLE n'est jamais une hausse, même doublé près de zéro", () => {
   assert.equal(ECART_LISIBLE, 2);
-  for (const [j, n] of [[[0.3, 1.2], [0.2, 0.9]], [[1, 2.9], [10, 11.9]], [[4, 3], [12, 11]]] as [[number, number], [number, number]][]) {
-    assert.equal(phraseChaleur(sousSeuil(j, n), "X").texte, "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.", JSON.stringify([j, n]));
+  for (const [j, n] of [[[1, 2.9], [10, 11.9]], [[4, 3], [12, 11]]] as [[number, number], [number, number]][]) {
+    assert.equal(phraseChaleur(sousSeuil(j, n), "X").texte, "Les journées à 35 °C ou plus comme les nuits tropicales n'augmenteraient pas nettement par rapport à 2016–2025.", JSON.stringify([j, n]));
   }
+  assert.equal(phraseChaleur(sousSeuil([0.3, 1.2], [0.2, 0.9]), "X").texte,
+    "Les journées à 35 °C ou plus n'augmenteraient pas nettement par rapport à 2016–2025, et les nuits tropicales resteraient rares.");
   // 0 → 2 : hausse lisible et doublée (« beaucoup plus ») ; 3 → 5 : lisible sans doubler (« plus »).
-  assert.match(phraseChaleur(sousSeuil([0, 2], [0, 0.5]), "X").texte, /^Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes/);
-  assert.match(phraseChaleur(sousSeuil([3, 5], [0, 0.5]), "X").texte, /^Les journées au-dessus de 35 °C deviendraient plus fréquentes/);
+  assert.match(phraseChaleur(sousSeuil([0, 2], [0, 0.5]), "X").texte, /^Les journées à 35 °C ou plus deviendraient beaucoup plus fréquentes/);
+  assert.match(phraseChaleur(sousSeuil([3, 5], [0, 0.5]), "X").texte, /^Les journées à 35 °C ou plus deviendraient plus fréquentes/);
 });
 
 test("défavorable : « deviendraient » seulement si la période de comparaison n'atteint pas déjà le repère", () => {
@@ -212,16 +227,19 @@ test("défavorable : « deviendraient » seulement si la période de comparaison
     /^Les nuits tropicales deviendraient particulièrement fréquentes/);
 });
 
-test("LA PHRASE DIT VRAI, sur les 34 788 communes : « peu nombreuses » n'est jamais dit d'une mesure en hausse lisible", () => {
+test("LA PHRASE DIT VRAI, sur les 34 788 communes : chaque mot de l'évolution suit son chiffre, jamais « peu nombreuses »", () => {
   let n = 0;
   for (const insee of Object.keys(FICHIER.communes)) {
     const e = entrees(insee);
     if (e.verdict !== "under_threshold" || !Number.isFinite(e.jours.projete) || !Number.isFinite(e.nuits.projete) || !e.recent) continue;
     const t = phraseChaleur(e, insee).texte;
     const gj = e.jours.projete! - e.recent.jours, gn = e.nuits.projete! - e.recent.nuits;
-    if (/^Les journées au-dessus de 35 °C (comme les nuits tropicales )?resteraient peu nombreuses/.test(t)) assert.ok(gj < ECART_LISIBLE, `${insee} : jours +${gj}`);
-    if (/nuits tropicales resteraient peu nombreuses|comme les nuits tropicales resteraient/.test(t)) assert.ok(gn < ECART_LISIBLE, `${insee} : nuits +${gn}`);
-    if (/journées au-dessus de 35 °C (et les nuits tropicales )?deviendraient/.test(t)) assert.ok(gj >= ECART_LISIBLE, `${insee} : jours +${gj}`);
+    assert.doesNotMatch(t, /peu nombreuses/, insee);
+    if (/^Les journées à 35 °C ou plus (comme les nuits tropicales )?n'augmenteraient pas nettement/.test(t)) assert.ok(gj < ECART_LISIBLE && e.jours.projete! >= 1, `${insee} : jours +${gj}`);
+    if (/nuits tropicales n'augmenteraient pas nettement/.test(t)) assert.ok(gn < ECART_LISIBLE && e.nuits.projete! >= 1, `${insee} : nuits +${gn}`);
+    if (/^Les journées à 35 °C ou plus resteraient rares/.test(t)) assert.ok(e.jours.projete! < 1, insee);
+    if (/nuits tropicales resteraient rares/.test(t)) assert.ok(e.nuits.projete! < 1, insee);
+    if (/journées à 35 °C ou plus (et les nuits tropicales )?deviendraient/.test(t)) assert.ok(gj >= ECART_LISIBLE, `${insee} : jours +${gj}`);
     if (/nuits tropicales (deviendraient )?(beaucoup )?plus fréquentes/.test(t)) assert.ok(gn >= ECART_LISIBLE, `${insee} : nuits +${gn}`);
     assert.doesNotMatch(t, /aujourd'hui|actuel/);
     n++;
@@ -236,9 +254,11 @@ test("Chamonix : la station de la commune contredit la maille, la réserve est d
   const c = stationContredit(e);
   assert.ok(c, "Chamonix : la station Météo-France relève plus que la maille n'en projette pour 2050");
   const p = phraseChaleur(e, "Chamonix-Mont-Blanc");
-  assert.equal(p.signal, phraseChaleur({ ...e, recent: { ...e.recent!, stations: [] } }, "X").signal, "le signal du moteur ne bouge pas");
+  assert.equal(e.verdict, "under_threshold", "le classement du moteur ne bouge pas");
+  assert.equal(phraseChaleur({ ...e, recent: { ...e.recent!, stations: [] } }, "X").signal, "favorable", "sans station : la rareté de la maille");
+  assert.equal(p.signal, "sous_seuil", "maille contredite : « À surveiller », plus « Plutôt favorable »");
   assert.doesNotMatch(p.texte, /^Les fortes chaleurs resteraient exceptionnelles ici/);
-  assert.match(p.texte, /La station Météo-France Chamonix \(1\s042 m d'altitude, à 4 km\) relève pourtant déjà 16 jours au-dessus de 30 °C par an en moyenne sur 2016–2025/);
+  assert.match(p.texte, /La station Météo-France Chamonix \(1\s042 m d'altitude, à 4 km\) relève pourtant déjà 16 jours à 30 °C ou plus par an en moyenne sur 2016–2025/);
   assert.match(p.texte, /ces chiffres sous-estiment la chaleur là où elle mesure\.$/);
   const l = lireChaleur(lieu("74056", "Chamonix-Mont-Blanc"), e);
   assert.match(l.methode!.join(" "), /Ici, la station Météo-France Chamonix .* années complètes sur 2016–2025/);

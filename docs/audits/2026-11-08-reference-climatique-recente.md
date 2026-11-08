@@ -20,7 +20,7 @@ Le prototype est implémenté dans la PR (bloc « Éviter les fortes chaleurs »
 - la politique de mise à jour annuelle.
 
 
-> **Contre-revue du 08/11/2026 : trois corrections appliquées, une limite de reproductibilité levée.** Voir la section « Corrections après contre-revue » ci-dessous. Elle **prime** sur le reste du document : nuits tropicales au sens strict de DRIAS (`> 20 °C`), phrase qui juge les journées comme les nuits, réserve de maille au premier niveau pour les cas démontrés en montagne, comparabilité recalculable depuis le dépôt.
+> **Contre-revue du 08/11/2026 : trois corrections appliquées, une limite de reproductibilité levée ; puis trois ajustements avant fusion (section « Dernières corrections avant fusion »).** Voir la section « Corrections après contre-revue » ci-dessous. Elle **prime** sur le reste du document : nuits tropicales au sens strict de DRIAS (`> 20 °C`), phrase qui juge les journées comme les nuits, réserve de maille au premier niveau pour les cas démontrés en montagne, comparabilité recalculable depuis le dépôt.
 
 ## Corrections après contre-revue (08/11/2026)
 
@@ -97,7 +97,7 @@ Dont 9 134 communes avec un écart entre 1 et 2 sur au moins un axe : hier « pl
 
 **Communes touchées : 121** (45 « Plutôt favorable », 76 « À surveiller ») : Savoie 19, Hautes-Alpes 17, Haute-Savoie 16, Hautes-Pyrénées 15, Haute-Garonne (Luchonnais) 12, Isère 7, Alpes-de-Haute-Provence 7, Lozère 4, Bas-Rhin (Val de Villé) 4, Corse 5, et quelques fonds de vallée (Jura, Ain, Drôme, Puy-de-Dôme, Haute-Loire, Corrèze, Pyrénées-Orientales, Eure, Seine-Maritime). Déclencheur : 56 sur les journées à 30 °C, 65 sur les journées à 35 °C. Les valeurs DRIAS et SAFRAN affichées restent celles de la maille, qualifiées comme telles.
 
-**Limite encore ouverte.** La réserve n'existe que là où un thermomètre la démontre : une vallée sans station de ≥ 8 années complètes dans son secteur garde la phrase d'avant. Le signal « Plutôt favorable » des 45 communes concernées est celui du moteur, non modifié (contrainte du chantier) ; la phrase le nuance. Une correction nationale (altitude réelle des mailles contre lieux habités, par croisement avec un MNT et l'occupation du sol) reste une **suite distincte**, non implémentée.
+**Limite encore ouverte.** La réserve n'existe que là où un thermomètre la démontre : une vallée sans station de ≥ 8 années complètes dans son secteur garde la phrase d'avant. *(Le signal « Plutôt favorable » des 45 communes concernées est devenu « À surveiller » : voir « Dernières corrections avant fusion ».)* Une correction nationale (altitude réelle des mailles contre lieux habités, par croisement avec un MNT et l'occupation du sol) reste une **suite distincte**, non implémentée.
 
 ### 4. Reproductibilité des corrélations
 
@@ -118,6 +118,78 @@ Dont 9 134 communes avec un écart entre 1 et 2 sur au moins un axe : hier « pl
 1. **Altitude de maille contre lieux habités** (correction nationale de la montagne), avec un MNT.
 2. **Formulation « ne descend pas sous 20 °C »** ailleurs dans le produit (`recits.ts`, `reponses.ts`, dossier `QuartierClimatData.tsx`) : décrit `>= 20` alors que l'indicateur DRIAS est `> 20`. Écart d'un dixième de degré, hors du bloc FUT-170 ; à harmoniser dans un ticket dédié (« reste au-dessus de 20 °C »).
 3. **Le signal « Plutôt favorable »** des communes à maille contredite : à réexaminer avec le moteur, si l'on veut que la pastille, et pas seulement la phrase, porte la réserve.
+
+
+## Dernières corrections avant fusion (08/11/2026, soir)
+
+*Reprise du SHA `e531338c`. Cette section prime sur « Corrections après contre-revue » pour les points qu'elle traite.*
+
+**Convention validée.** L'écart d'au moins **2 jours ou 2 nuits par an** (`ECART_LISIBLE`) pour qualifier une hausse entre SAFRAN 2016–2025 et DRIAS 2050 est validé par le porteur, **comme convention éditoriale prudente, pas comme seuil scientifique**. Le code et ce document le disent dans ces termes.
+
+### 1. Les 45 communes « Plutôt favorable » à maille contredite : « À surveiller »
+
+**Cause.** La réserve de station (`stationContredit`) nuançait la phrase, mais la pastille restait « Plutôt favorable » : elle affirmait une rareté que le thermomètre du secteur dément.
+
+**Correction.** Dans `phraseChaleur`, une commune dont les deux mesures sont sous une par an en 2050 ET dont la maille est contredite reçoit le signal d'interface `sous_seuil` (« À surveiller ») au lieu de `favorable`. **Le classement du moteur (`verdict`), les valeurs climatiques, les seuils et les dossiers ne changent pas.** Les 76 autres communes à réserve étaient déjà « À surveiller ».
+
+**Les 45 exceptions**, listées une à une dans le test de non-régression (`MAILLE_CONTREDITE`, `climat-recent.test.ts`) : toute autre commune dont le signal bougerait fait échouer le test ; chacune doit passer exactement de `favorable` à `sous_seuil` et être contredite par une station.
+
+Allos (04006), Barcelonnette (04019), Clamensane (04057), Faucon-de-Barcelonnette (04086), Méailles (04115), Turriers (04222), Arvieux (05007), Aspres-lès-Corps (05009), Briançon (05023), Eygliers (05052), Gap (05061), La Chapelle-en-Valgaudémar (05064), Les Orres (05098), Vallouise-Pelvoux (05101), Puy-Saint-Pierre (05109), Saint-Crépin (05136), Dévoluy (05139), Saint-Firmin (05142), Saint-Jacques-en-Valgodemard (05144), Saint-Maurice-en-Valgodemard (05152), Villar-Loubière (05182), Villar-Saint-Pancrace (05183), Rimplas (06102), Clavans-en-Haut-Oisans (38112), Le Freney-d'Oisans (38173), Lavaldens (38207), Mizoën (38237), Saint-Christophe-en-Oisans (38375), La Salette-Fallavaux (38469), Gavarnie-Gèdre (65192), Sazos (65413), Aussois (73023), Avrieux (73026), Feissons-sur-Salins (73113), Moûtiers (73181), Saint-Marcel (73253), Sainte-Marie-de-Cuines (73255), Saint-Martin-d'Arc (73256), Saint-Martin-sur-la-Chambre (73259), Saint-Michel-de-Maurienne (73261), Valloire (73306), Villarodin-Bourget (73322), Chamonix-Mont-Blanc (74056), Les Contamines-Montjoie (74085), Les Houches (74143).
+
+**Rendus réels vérifiés** (build de production, `next start`, route `/api/accueil/lecture`) :
+- Briançon : « À surveiller » ; « Sur le secteur de 8 km qui sert au calcul, les fortes chaleurs resteraient exceptionnelles, même en 2050. La station Météo-France Villar St Pancrace (1 310 m d'altitude, à 2,4 km) relève pourtant déjà 23 jours à 30 °C ou plus par an en moyenne sur 2016–2025, plus que ce secteur de 8 km n'en prévoit pour 2050 : ces chiffres sous-estiment la chaleur là où elle mesure. »
+- Chamonix : « À surveiller » ; station Chamonix (1 042 m, à 4 km), 16 jours à 30 °C ou plus.
+- Gap (station Gap, 885 m, 5 jours à 35 °C ou plus), Moûtiers (480 m, 10 jours à 35 °C ou plus), Barcelonnette (1 155 m, 18 jours à 30 °C ou plus) : « À surveiller », même forme.
+- Témoin sans station contradictoire : La Condamine-Châtelard reste « Plutôt favorable », « Les fortes chaleurs resteraient exceptionnelles ici, même en 2050. »
+
+### 2. Les formulations d'exposition
+
+**Cause.** « Resteraient peu nombreuses » était dit de tout axe sans hausse lisible, quelle que soit sa valeur : un jugement d'exposition tiré d'une absence d'évolution. Près des repères, il trompait : Cercoux, 6,9 journées à 35 °C ou plus en 2050 pour un repère de 8 ; Campestre-et-Luc, 20 nuits tropicales pour 25. Avant correction, 12 818 phrases contenaient « peu nombreuses », dont **27** sur des journées entre 6 et 8 par an et **12** sur des nuits entre 20 et 25.
+
+**Correction : une description, plus un jugement.** Sans hausse lisible, la phrase **décrit l'évolution** : « n'augmenteraient pas nettement par rapport à 2016–2025 ». Elle ne dit « resteraient rares » que sous **une par an** en 2050, le palier « moins d'un par an » déjà en usage (aucun seuil nouveau). « Peu nombreuses » n'est plus employé nulle part ; l'exposition reste dite par la pastille. Sans période de comparaison lisible (référence non reconstructible et pas de climat récent), aucune évolution n'est dite : « L'évolution de ces deux mesures ne peut pas être établie ici : la période de comparaison manque. » (aucune commune réelle concernée aujourd'hui).
+
+**Avant → après :**
+- Cercoux (17077 ; 5,3 → 6,9 jours, 10,7 → 23 nuits) : « Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 2016–2025. » → « Les journées à 35 °C ou plus n'augmenteraient pas nettement par rapport à 2016–2025, mais les nuits tropicales deviendraient beaucoup plus fréquentes. »
+- Arre (30016 ; 23 → 23,2 nuits) : « … ; les nuits tropicales resteraient peu nombreuses. » → « … ; les nuits tropicales n'augmenteraient pas nettement. »
+- Campestre-et-Luc (30064 ; 18,3 → 20 nuits) : « … comme les nuits tropicales resteraient peu nombreuses. » → « Les journées à 35 °C ou plus comme les nuits tropicales n'augmenteraient pas nettement par rapport à 2016–2025. »
+- Avignonet (38023) : « Les journées à 35 °C ou plus deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales n'augmenteraient pas nettement. »
+
+**Définitions officielles.** DRIAS-TRACC définit les indicateurs par `Tmax ≥ 30 °C` et `Tmax ≥ 35 °C` (inclusifs). Tout le bloc chaleur de l'accueil dit désormais « à 35 °C ou plus », « à 30 °C ou plus » (grands chiffres, légendes, bascule « Et à 30 °C ou plus ? », texte des lecteurs d'écran, méthode, réserve de station), au lieu de « au-dessus de ».
+
+**Conséquences, sur les 34 788 communes (et Paris, Lyon, Marseille)** : 30 264 phrases changent par rapport à `e531338c` (la formulation « à 35 °C ou plus » touche toutes celles qui nomment les journées) ; signal changé pour **45** communes exactement, classement pour aucune. Répartition des phrases sous les repères :
+
+| Phrase | Communes |
+|---|---|
+| Journées et nuits « deviendraient beaucoup plus fréquentes qu'en 2016–2025 » | 11 377 |
+| Journées sans hausse nette, nuits en hausse (« beaucoup plus » / « plus ») | 5 449 / 1 504 |
+| Journées « beaucoup plus », nuits « plus » | 4 254 |
+| Journées rares, nuits sans hausse nette | 1 982 |
+| Journées comme nuits sans hausse nette | 1 770 |
+| Journées rares, nuits en hausse (« beaucoup plus » / « plus ») | 1 756 / 128 |
+| Journées « plus », nuits « beaucoup plus » | 410 |
+| Journées et nuits « plus » | 234 |
+| Journées en hausse, nuits sans hausse nette / rares | 224 / 2 |
+| Journées sans hausse nette, nuits rares | 3 |
+| Maille contredite (réserve de station) | 45 |
+
+**Test d'invariant mis à jour** (« LA PHRASE DIT VRAI ») : sur toutes les communes sous les repères, jamais « peu nombreuses » ; « n'augmenteraient pas nettement » seulement si l'écart est sous 2 ET la valeur 2050 d'au moins une par an ; « resteraient rares » seulement sous une par an ; « deviendraient … plus fréquentes » seulement pour une hausse lisible.
+
+### 3. Lint global : préexistant, preuve
+
+Reproduit avec les mêmes versions (Node 25.8.2, ESLint 9.39.4, `node_modules` cloné, `package-lock.json` et `eslint.config.mjs` identiques entre `main` `4c0ebc5b` et la branche) :
+- `npx eslint .` **plante de la même façon sur `main` et sur la branche** : « A configuration object specifies rule "react/no-unescaped-entities", but could not find plugin "react" ». Cause : le dernier objet de `eslint.config.mjs` applique cette règle sans `files`, donc aussi aux fichiers `.cjs` que les configurations Next ne couvrent pas ; le premier rencontré est `docs/audits/2026-10-21-fut41-vos-lieux/outils/recette-compat.cjs` (FUT-41, présent sur `main`, hors PR).
+- En excluant les `.cjs` : **56 problèmes, 23 erreurs sur `main` ; exactement les mêmes 56 sur la branche** (comparaison fichier, règle, ligne) ; **aucun propre à la PR**. Les fichiers de la PR passent le lint sans erreur.
+- Non corrigé ici (hors périmètre, configuration commune) ; correctif probable : restreindre cet objet de règles à `files: ["**/*.{js,jsx,mjs,ts,tsx}"]`, dans un ticket dédié.
+
+### Validation
+- Tests ciblés `climat-recent.test.ts` + `pastilles.test.ts` : 58, 0 échec. Suite complète : 4 373 tests, 4 372 réussis, 1 ignoré, 0 échec.
+- `tsc` sans erreur ; lint des fichiers de la PR sans erreur ; build de production réussi (variables Supabase fictives, aucun appel abouti) ; `build-climat-recent.mjs` : fichier à jour ; `comparer-drias.mjs` : corrélations inchangées.
+- Moteur, seuils scientifiques, classement, architecture SAFRAN, dossiers payants, Supabase : non modifiés. Aucun déploiement, aucune Preview.
+
+### Suites distinctes (mises à jour)
+1. Altitude de maille contre lieux habités (correction nationale de la montagne, MNT).
+2. Harmoniser hors du bloc FUT-170 : « ne descend pas sous 20 °C » (→ « reste au-dessus de 20 °C ») et « au-dessus de 30/35 °C » (→ « à 30/35 °C ou plus ») dans `recits.ts`, `reponses.ts`, la synthèse Territoire, `climat-facts.ts`, le dossier (`QuartierClimatData.tsx`), la page `/chaleur`.
+3. Lint : restreindre l'objet de règles React aux fichiers JS/TS.
 
 ---
 
