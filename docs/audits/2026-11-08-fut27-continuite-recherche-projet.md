@@ -142,3 +142,26 @@ Recette : `scripts/fut27-deconnexion-differee-recette.mjs`, sans compte. L'ongle
 Suite complète : 4 382 tests passent, 0 échec. TypeScript OK. ESLint : 0 erreur. Build OK.
 
 **Non exécuté** : le même clic depuis la vraie page /compte, connecté, qui demande un compte. Aucun Supabase de test n'est disponible et aucun compte de production n'a été utilisé. Le POST envoyé est celui que produit ce formulaire avant hydratation : même action, même champ.
+
+## 9. Onglet qui a manqué la purge puis se recharge (contre-revue sur 6158720b, corrigé le 08/11)
+
+**Constat (Work).** Le `sessionStorage` est propre à chaque onglet : la purge d'un autre onglet ne l'atteint pas, seul le signal le fait. Un onglet qui manque ce signal (endormi, gelé) puis se recharge gardait son questionnaire. `EcoutePurgeRecherche` prenait au montage la purge comme « déjà connue », sans rien effacer. Quand le cookie de purge différée avait été consommé ailleurs, rien ne rattrapait cet onglet. Si le compte B s'y connectait sans réponses enregistrées, `WizardAnswersSync` poussait les réponses de A dans le profil de B.
+
+**Correction : une marque de purge par onglet.**
+- Chaque onglet note dans son `sessionStorage` la dernière purge qu'il a appliquée (`futuree:recherche:purge-vue-onglet`).
+- Avant toute lecture, `alignerOngletSurPurge` compare cette marque à la date de purge du navigateur. Si l'onglet est en retard, ou s'il n'a pas de marque alors qu'une purge existe, il efface le questionnaire et la commune de l'accueil, puis se marque à jour.
+- L'alignement passe par `appliquerPurgeDifferee`, désormais exécutée qu'il y ait un cookie ou non. Les lecteurs l'appelaient déjà : synchronisation et première lecture du questionnaire, reprise du questionnaire, commune de l'accueil, ainsi que `purgeRechercheConnue`. `EcoutePurgeRecherche` aligne l'onglet au montage et à chaque signal.
+- La purge marque à jour l'onglet où elle se fait. Une page ouverte après la déconnexion se marque au montage, avant toute saisie. Les saisies faites après la purge sont donc conservées.
+- Le questionnaire ouvert en mémoire oublie ses réponses à la purge (`RESET`). Un onglet dont la mémoire est antérieure à la purge ne les réécrit plus.
+
+**Tests.** 3 tests de plus dans `fut27-deconnexion.test.ts`, soit 19 au total. L'un rejoue le cas de Work : il constate d'abord le défaut, puis vérifie l'effacement avant la synchronisation. La mutation est vérifiée : les deux tests de comportement échouent si l'alignement est neutralisé.
+
+**Recette** (`fut27-deconnexion-differee-recette.mjs`, sans compte) :
+- l'onglet X porte le questionnaire de A et dort pendant la déconnexion, envoyée en POST natif depuis un autre onglet ;
+- avant le rechargement, X garde le questionnaire : le défaut est reproduit ;
+- après le rechargement, le questionnaire est effacé et la marque d'onglet posée ;
+- une nouvelle saisie survit au rechargement suivant ;
+- Rennes, cherchée après la déconnexion, est conservée ;
+- aucun appel aux routes du profil ou du Projet.
+
+Suite complète : 4 385 tests passent, 0 échec. TypeScript OK. ESLint : 0 erreur. Build OK.

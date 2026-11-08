@@ -15,7 +15,8 @@ import {
 } from "./comparateur/session-ou-vivre.ts";
 import {
   CLES_RECHERCHE_NAVIGATEUR, CLES_RECHERCHE_ONGLET, CLE_LANDING_COMMUNE, COOKIE_PURGE_DIFFEREE, PURGE_PAR_LE_NAVIGATEUR,
-  appliquerPurgeDiffereeSur, jetonPurgeDifferee, purgeFaiteParLeNavigateur, purgerOnglet, purgerRecherchesTemporaires,
+  PURGE_VUE_ONGLET_KEY, alignerOngletSurPurge, appliquerPurgeDiffereeSur, jetonPurgeDifferee, purgeFaiteParLeNavigateur,
+  purgerOnglet, purgerRecherchesTemporaires,
 } from "./purge-recherche.ts";
 import { lireRechercheSession } from "./reprise-recherche.ts";
 import { WIZARD_STORAGE_KEY } from "../components/wizard/types.ts";
@@ -371,4 +372,59 @@ test("code différée : le formulaire dit s'il a purgé, la Server Action dépos
     "components/wizard/ReportWizard.tsx",
     "components/wizard/types.ts",
   ]);
+});
+
+// ── Onglet qui a manqué la purge puis se recharge (contre-revue du 08/11 sur 6158720b) ────────────────
+
+test("onglet en retard : rechargé après une purge faite ailleurs, il efface son questionnaire AVANT la synchro", () => {
+  const local = new Stockage();
+  const ongletA = new Stockage(); // l'onglet de la déconnexion
+  const ongletX = new Stockage(); // ouvert sur le questionnaire de A, il ne reçoit pas le signal
+  ongletX.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ answers: { projets: "achat", metier: "sante" } }));
+  ongletX.setItem(CLE_LANDING_COMMUNE, JSON.stringify({ name: "Bordeaux" }));
+  assert.equal(alignerOngletSurPurge(local, ongletX), false, "rien à aligner tant que personne ne s'est déconnecté");
+  // Déconnexion avant hydratation dans l'onglet A : le cookie y est consommé, ongletX n'en saura rien.
+  assert.equal(appliquerPurgeDiffereeSur(`${COOKIE_PURGE_DIFFEREE}=j1`, local, ongletA, T0 + 10), true);
+  assert.ok(ongletX.getItem(WIZARD_STORAGE_KEY), "le défaut : l'onglet en retard garde le questionnaire de A");
+  // B se connecte dans ongletX et recharge : la première lecture (WizardAnswersSync, accueil) aligne d'abord.
+  assert.equal(alignerOngletSurPurge(local, ongletX), true);
+  assert.equal(ongletX.getItem(WIZARD_STORAGE_KEY), null, "jamais poussé dans le profil de B");
+  assert.equal(ongletX.getItem(CLE_LANDING_COMMUNE), null);
+  assert.equal(lirePurgeRecherche(ongletX.getItem(PURGE_VUE_ONGLET_KEY)), T0 + 10);
+  // Une nouvelle saisie après la purge reste : l'onglet est à jour.
+  ongletX.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ answers: { projets: "retraite" } }));
+  assert.equal(alignerOngletSurPurge(local, ongletX), false);
+  assert.ok(ongletX.getItem(WIZARD_STORAGE_KEY));
+  // L'onglet de la déconnexion est marqué à jour par la purge elle-même : sa saisie suivante reste aussi.
+  ongletA.setItem(WIZARD_STORAGE_KEY, "{}");
+  assert.equal(alignerOngletSurPurge(local, ongletA), false);
+  // Une nouvelle déconnexion met de nouveau l'onglet en retard.
+  purgerRecherchesTemporaires(local, ongletA, T0 + 100);
+  assert.equal(alignerOngletSurPurge(local, ongletX), true);
+  assert.equal(ongletX.getItem(WIZARD_STORAGE_KEY), null);
+});
+
+test("onglet neuf : ouvert après la déconnexion, sa première page le marque à jour ; ses saisies restent", () => {
+  const local = new Stockage();
+  purgerRecherchesTemporaires(local, new Stockage(), T0);
+  const neuf = new Stockage();
+  assert.equal(alignerOngletSurPurge(local, neuf), true); // vide : rien de perdu, la marque est posée
+  neuf.setItem(WIZARD_STORAGE_KEY, JSON.stringify({ answers: { projets: "achat" } }));
+  neuf.setItem(CLE_LANDING_COMMUNE, JSON.stringify({ name: "Nantes" }));
+  assert.equal(alignerOngletSurPurge(local, neuf), false);
+  assert.ok(neuf.getItem(WIZARD_STORAGE_KEY) && neuf.getItem(CLE_LANDING_COMMUNE));
+});
+
+test("code onglet : chaque lecture du questionnaire et de la commune passe par l'alignement ; le questionnaire ouvert ne réécrit pas", () => {
+  const nav = lire("../components/interaction/purge-recherche-navigateur.ts");
+  const fn = nav.slice(nav.indexOf("export function appliquerPurgeDifferee"), nav.indexOf("/** La date de la dernière purge"));
+  // L'alignement s'exécute toujours, cookie ou pas (l'ancien code rendait la main sans cookie).
+  assert.match(fn, /\n  alignerOngletSurPurge\(stockage\("localStorage"\), stockage\("sessionStorage"\)\);\n\}/);
+  assert.doesNotMatch(fn, /if \(!jetonPurgeDifferee\(cookies\)\) return;/);
+  const ecoute = lire("../components/interaction/EcoutePurgeRecherche.tsx");
+  assert.match(ecoute, /useEffect\(\(\) => \{\s*purgeRechercheConnue\(\);/, "au montage : un onglet rechargé s'aligne");
+  assert.doesNotMatch(ecoute, /purge === vue/, "plus de purge « déjà connue » au montage");
+  const wizard = lire("../components/wizard/ReportWizard.tsx");
+  assert.match(wizard, /useOubliALaPurge\(\(\) => dispatch\(\{ type: "RESET" \}\)\)/);
+  assert.match(wizard, /if \(!peutEcrireRecherche\(origine\.current\)\) return;\s*saveToStorage\(state\);/);
 });

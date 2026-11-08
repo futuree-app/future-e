@@ -9,8 +9,8 @@
 import { useEffect, useRef } from "react";
 import { anterieurALaPurge, PURGE_RECHERCHE_KEY, lirePurgeRecherche } from "@/lib/comparateur/session-ou-vivre";
 import {
-  COOKIE_PURGE_DIFFEREE, EVENEMENT_PURGE_RECHERCHE, appliquerPurgeDiffereeSur, jetonPurgeDifferee,
-  purgerRecherchesTemporaires,
+  COOKIE_PURGE_DIFFEREE, EVENEMENT_PURGE_RECHERCHE, alignerOngletSurPurge, appliquerPurgeDiffereeSur,
+  jetonPurgeDifferee, purgerRecherchesTemporaires,
 } from "@/lib/purge-recherche";
 
 function stockage(type: "localStorage" | "sessionStorage"): Storage | null {
@@ -37,9 +37,12 @@ function prevenirLesEcrans() {
 }
 
 /**
- * La déconnexion est partie sans que le navigateur ait purgé (clic avant hydratation, JavaScript désactivé) :
- * la Server Action a laissé un cookie. À appeler avant toute lecture d'une recherche temporaire ; sans
- * cookie, ne fait rien.
+ * À appeler avant toute lecture d'une recherche temporaire. Deux rattrapages, sans effet s'il n'y a rien à
+ * rattraper :
+ *   · la déconnexion est partie sans que le navigateur ait purgé (clic avant hydratation, JavaScript
+ *     désactivé) : la Server Action a laissé un cookie, on applique la purge ;
+ *   · cet onglet a manqué une purge faite ailleurs (fermé, endormi, rechargé après coup) : il efface son
+ *     sessionStorage, que la purge d'un autre onglet ne peut pas atteindre.
  */
 export function appliquerPurgeDifferee(): void {
   if (typeof document === "undefined") return;
@@ -47,17 +50,19 @@ export function appliquerPurgeDifferee(): void {
   try {
     cookies = document.cookie;
   } catch {
-    return;
+    cookies = "";
   }
-  if (!jetonPurgeDifferee(cookies)) return;
-  try {
-    document.cookie = `${COOKIE_PURGE_DIFFEREE}=; Max-Age=0; path=/; SameSite=Lax`;
-  } catch {
-    // le jeton déjà vu empêche une seconde purge
+  if (jetonPurgeDifferee(cookies)) {
+    try {
+      document.cookie = `${COOKIE_PURGE_DIFFEREE}=; Max-Age=0; path=/; SameSite=Lax`;
+    } catch {
+      // le jeton déjà vu empêche une seconde purge
+    }
+    if (appliquerPurgeDiffereeSur(cookies, stockage("localStorage"), stockage("sessionStorage"), Date.now())) {
+      prevenirLesEcrans();
+    }
   }
-  if (appliquerPurgeDiffereeSur(cookies, stockage("localStorage"), stockage("sessionStorage"), Date.now())) {
-    prevenirLesEcrans();
-  }
+  alignerOngletSurPurge(stockage("localStorage"), stockage("sessionStorage"));
 }
 
 /** La date de la dernière purge connue de ce navigateur, ou `null`. Applique d'abord une purge différée. */

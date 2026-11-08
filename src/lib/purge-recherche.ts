@@ -11,7 +11,7 @@
 // La purge ne se fait QU'à la déconnexion : à la connexion ou à l'inscription, la recherche faite sans compte
 // doit rester là pour être reprise (cas E).
 import {
-  CLE_PACK_LABEL, CLE_PACK_PARSED, CLE_PAYWALL_LABELS, PURGE_RECHERCHE_KEY, SESSION_OUVIVRE_KEY,
+  CLE_PACK_LABEL, CLE_PACK_PARSED, CLE_PAYWALL_LABELS, PURGE_RECHERCHE_KEY, SESSION_OUVIVRE_KEY, lirePurgeRecherche,
 } from "./comparateur/session-ou-vivre.ts";
 import { WIZARD_STORAGE_KEY } from "../components/wizard/types.ts";
 
@@ -26,14 +26,45 @@ export const EVENEMENT_PURGE_RECHERCHE = "futuree:recherche-purgee";
 
 type Stockage = Pick<Storage, "setItem" | "removeItem">;
 
+// La dernière purge que CET onglet a appliquée à son sessionStorage. Un onglet qui a manqué le signal (fermé
+// au moment de la déconnexion, endormi, rechargé après coup) se compare à la date du navigateur à sa première
+// lecture, et efface ses clés s'il est en retard. Une saisie faite après la purge garde la marque à jour.
+export const PURGE_VUE_ONGLET_KEY = "futuree:recherche:purge-vue-onglet";
+
 const sansEchec = (f: () => void) => {
   try { f(); } catch { /* stockage indisponible : rien à effacer */ }
 };
 
-/** Efface les clés de cet onglet (sessionStorage). Appelé ici et, à la purge, dans chaque autre onglet. */
-export function purgerOnglet(onglet: Stockage | null): void {
+/**
+ * Efface les clés de cet onglet (sessionStorage) et, si `purge` est donnée, note que l'onglet l'a appliquée.
+ * Appelé à la déconnexion dans son onglet, et par `alignerOngletSurPurge` dans les autres.
+ */
+export function purgerOnglet(onglet: Stockage | null, purge: number | null = null): void {
   if (!onglet) return;
   for (const k of CLES_RECHERCHE_ONGLET) sansEchec(() => onglet.removeItem(k));
+  if (purge != null) sansEchec(() => onglet.setItem(PURGE_VUE_ONGLET_KEY, String(purge)));
+}
+
+/**
+ * Met cet onglet à jour de la dernière purge du navigateur : s'il ne l'a pas encore appliquée, il efface ses
+ * clés avant qu'on les lise. Vrai s'il a effacé. Sans purge connue, rien ne change (anonyme → connexion).
+ */
+export function alignerOngletSurPurge(
+  local: Pick<Storage, "getItem"> | null,
+  onglet: (Stockage & Pick<Storage, "getItem">) | null,
+): boolean {
+  if (!local || !onglet) return false;
+  let purge: number | null;
+  let vue: number | null;
+  try {
+    purge = lirePurgeRecherche(local.getItem(PURGE_RECHERCHE_KEY));
+    vue = lirePurgeRecherche(onglet.getItem(PURGE_VUE_ONGLET_KEY));
+  } catch {
+    return false;
+  }
+  if (purge == null || (vue != null && vue >= purge)) return false;
+  purgerOnglet(onglet, purge);
+  return true;
 }
 
 /**
@@ -45,7 +76,7 @@ export function purgerRecherchesTemporaires(local: Stockage | null, onglet: Stoc
     sansEchec(() => local.setItem(PURGE_RECHERCHE_KEY, String(maintenant)));
     for (const k of CLES_RECHERCHE_NAVIGATEUR) sansEchec(() => local.removeItem(k));
   }
-  purgerOnglet(onglet);
+  purgerOnglet(onglet, maintenant);
 }
 
 // ── PURGE DIFFÉRÉE : quand le navigateur n'a pas pu purger lui-même (FUT-27) ──────────────────────────

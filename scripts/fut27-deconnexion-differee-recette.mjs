@@ -14,7 +14,13 @@ const ACTION_ID = process.env.ACTION_ID ?? Object.entries(JSON.parse(readFileSyn
 const CLES = ["futuree:ouvivre:session", "futuree:projet:parsed", "futuree:projet:label", "futuree:projet:labels"];
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-await ctx.addInitScript(() => { try { localStorage.setItem("futuree-consent", "denied"); } catch {} });
+await ctx.addInitScript(() => {
+  try { localStorage.setItem("futuree-consent", "denied"); } catch {}
+  // Un onglet « endormi » ne reçoit ni `storage` ni `visibilitychange` tant que `__dormir` est vrai.
+  const bloquer = (e) => { if (window.__dormir) e.stopImmediatePropagation(); };
+  window.addEventListener("storage", bloquer, true);
+  document.addEventListener("visibilitychange", bloquer, true);
+});
 const r = {};
 const appels = [];
 ctx.on("request", (q) => { if (q.url().includes("/api/")) appels.push(`${q.method()} ${new URL(q.url()).pathname}`); });
@@ -49,7 +55,15 @@ await onglet1.evaluate(() => {
 const onglet2 = await ctx.newPage();
 await onglet2.goto(`${BASE}/ou-vivre`, { waitUntil: "networkidle" });
 await onglet2.getByText("Territoires à explorer").waitFor({ timeout: 15_000 });
-r.avant = { onglet1: await etat(onglet1), onglet2: await texte(onglet2) };
+// Onglet X : le questionnaire de A, sur une page qui ne lit pas encore le questionnaire, et qui dort
+// pendant la déconnexion (contre-revue du 08/11 sur 6158720b).
+const ongletX = await ctx.newPage();
+await ongletX.goto(`${BASE}/connexion`, { waitUntil: "load" });
+await ongletX.evaluate(() => {
+  sessionStorage.setItem("futur-e:wizard", JSON.stringify({ answers: { projets: "achat", metier: "sante" } }));
+  window.__dormir = true;
+});
+r.avant = { onglet1: await etat(onglet1), onglet2: await texte(onglet2), ongletX: (await etat(ongletX)).onglet };
 
 // ── La déconnexion part en POST natif, sans le gestionnaire React ────────────────────────────────────
 await onglet1.goto(`${BASE}/connexion`, { waitUntil: "load" });
@@ -78,6 +92,15 @@ r.apres = {
   onglet2: { texte: await texte(onglet2), resultats: await onglet2.getByText("Territoires à explorer").count() },
   communeAccueilAffichee: await onglet1.getByText("Bordeaux").count(),
 };
+// L'onglet X n'a rien reçu ; il se recharge (B s'y connecte) : il s'aligne avant toute lecture.
+r.ongletX = { avantRechargement: (await etat(ongletX)).onglet.questionnaire };
+await ongletX.reload({ waitUntil: "load" }); await ongletX.waitForTimeout(1500);
+r.ongletX.apresRechargement = (await etat(ongletX)).onglet.questionnaire;
+r.ongletX.marque = await ongletX.evaluate(() => sessionStorage.getItem("futuree:recherche:purge-vue-onglet"));
+// Une saisie faite après la purge reste, même après un nouveau rechargement.
+await ongletX.evaluate(() => sessionStorage.setItem("futur-e:wizard", JSON.stringify({ answers: { projets: "retraite" } })));
+await ongletX.reload({ waitUntil: "load" }); await ongletX.waitForTimeout(1500);
+r.ongletX.nouvelleSaisieApresRechargement = (await etat(ongletX)).onglet.questionnaire;
 await onglet1.screenshot({ path: "../fut27-recette/fut27-deconnexion-differee-accueil.png" });
 
 // ── Nouvelle recherche anonyme, et un cookie qui n'aurait pas pu être effacé ─────────────────────────

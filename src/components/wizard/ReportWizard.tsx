@@ -15,7 +15,7 @@ const STEP_NAMES = ["landing", "adresse", "profil_foyer", "logement", "mobilite"
 import { WizardStepper } from "./WizardStepper";
 import { WizardStep } from "./WizardStep";
 import { WizardTeaser } from "./WizardTeaser";
-import { appliquerPurgeDifferee } from "@/components/interaction/purge-recherche-navigateur";
+import { appliquerPurgeDifferee, peutEcrireRecherche, useOubliALaPurge } from "@/components/interaction/purge-recherche-navigateur";
 
 function loadFromStorage(): Partial<WizardState> {
   appliquerPurgeDifferee(); // FUT-27 : avant de lire, une déconnexion restée sans purge
@@ -121,11 +121,15 @@ export const ReportWizard = forwardRef<
     setRestored(true);
   }, [restored]);
 
+  // FUT-27 : une déconnexion oublie les réponses en mémoire ; un onglet resté ouvert ne les réécrit pas.
+  const origine = useOubliALaPurge(() => dispatch({ type: "RESET" }));
+
   // Persist to sessionStorage on every state change (client-only)
   useEffect(() => {
     if (!restored) return;
+    if (!peutEcrireRecherche(origine.current)) return;
     saveToStorage(state);
-  }, [state, restored]);
+  }, [state, restored, origine]);
 
   // Pre-fill commune from landing hero when wizard opens
   useEffect(() => {
