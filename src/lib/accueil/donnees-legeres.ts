@@ -5,8 +5,9 @@
 //     de l'index par `scripts/accueil/donnees-accueil.mjs` ;
 //   - `src/data/apercu-climat-communes.json` (4,6 Mo) : l'extrait DRIAS partagé avec l'aperçu du paywall (FUT-30),
 //     dérivé de `data_climat.json` par `scripts/build-apercu-climat.mjs` ;
-//   - `src/data/climat-recent-communes.json` (0,8 Mo, FUT-170) : le climat récent (réanalyse SAFRAN, 2016-2025), au
-//     point de grille DRIAS de la commune, dérivé par `scripts/build-climat-recent.mjs`.
+//   - `src/data/climat-recent-communes.json` (< 1 Mo, FUT-170) : le climat récent (réanalyse SAFRAN, 2016-2025), au
+//     point de grille DRIAS de la commune, et les stations Météo-France de la commune sur la même période (témoins),
+//     dérivé par `scripts/build-climat-recent.mjs`.
 // Ils remplacent, POUR L'ACCUEIL SEULEMENT, l'index du comparateur (67 Mo décompressés) et `data_climat.json`
 // (63 Mo). Le dossier payant lit toujours les sources complètes. Le build refuse des fichiers périmés (prebuild).
 //
@@ -71,12 +72,12 @@ export function scenariosLegers(insee: string): GwlScenarios | null {
   return scenariosDepuisExtrait(extrait, DRIAS_CITY_FALLBACK[insee] ?? insee);
 }
 
-// FUT-170 : le climat récent (SAFRAN), troisième fichier léger (~0,7 Mo), dérivé par `scripts/build-climat-recent.mjs`
+// FUT-170 : le climat récent (SAFRAN), troisième fichier léger (< 1 Mo), dérivé par `scripts/build-climat-recent.mjs`
 // et vérifié au build. Même repli Paris/Lyon/Marseille que DRIAS : la même maille que la projection.
 const climatRecent = climatRecentBrut as unknown as FichierClimatRecent;
 verifierFichier(climatRecent);
 
 /** Le climat récent de la commune, ou `null` (outre-mer, code inconnu). */
 export function climatRecentLeger(insee: string): ClimatRecentChaleur | null {
-  return climatRecentDepuisFichier(climatRecent, DRIAS_CITY_FALLBACK[insee] ?? insee);
+  return climatRecentDepuisFichier(climatRecent, DRIAS_CITY_FALLBACK[insee] ?? insee, insee);
 }

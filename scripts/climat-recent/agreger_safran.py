@@ -6,14 +6,19 @@ calculés sur la réanalyse quotidienne SAFRAN de Météo-France (jeu « Donnée
 quotidienne », Licence Ouverte 2.0) :
   tx35  jours où la température maximale (TSUP_H) atteint 35 °C   (DRIAS : NORTX35D_yr, « Tx >= 35 °C »)
   tx30  jours où elle atteint 30 °C                               (DRIAS : NORTX30D_yr)
-  tr20  nuits où la température minimale (TINF_H) reste à 20 °C ou plus  (DRIAS : NORTR_yr, nuits tropicales)
+  tr20  nuits où la température minimale (TINF_H) reste AU-DESSUS de 20 °C, strictement  (DRIAS : NORTR_yr, « nuits
+        tropicales (température minimale > 20°C) », drias-climat.fr/accompagnement/section/401). SIM2 donne TINF_H au
+        dixième : une nuit à 20,0 °C exactement n'est PAS tropicale. Jusqu'au 08/11/2026 (schéma 1), le script comptait
+        `>= 20` ; corrigé après contre-revue (schéma 2).
 Sortie : data/climat-recent/safran-<debut>-<fin>.json (versionné, ~1 Mo). Rien n'est écrit ailleurs.
 
 POURQUOI SAFRAN, ET POURQUOI C'EST COMPARABLE À DRIAS. Les projections DRIAS-2020 (et donc DRIAS-TRACC) sont
 corrigées de leurs biais par la méthode ADAMONT à partir de SAFRAN, et livrées SUR LA GRILLE SAFRAN de 8 km. Les
 points DRIAS sont les mailles SAFRAN terrestres : le script les apparie par coordonnées et ÉCHOUE si un point ne
 retrouve pas sa maille à moins de 0,002°. Vérifié le 08/11/2026 sur 1976-2005 : SAFRAN retrouve la référence DRIAS
-point par point (corrélations 0,98 à 0,996 ; biais moyen +0,1 jour à 35 °C, +0,7 jour à 30 °C, +0,5 nuit).
+point par point (corrélations 0,98 à 0,996 ; biais moyen +0,1 jour à 35 °C, +0,7 jour à 30 °C, +0,7 nuit avec
+le seuil strict). Reproductible depuis le dépôt : `node scripts/climat-recent/comparer-drias.mjs` (lit
+data/climat-recent/safran-1976-2005.json, produit par ce script, et data/source/).
 
 CE QUE CE N'EST PAS. Une réanalyse : des observations interpolées sur une grille de 8 km, par massif et par tranche
 d'altitude. Ce n'est ni la mesure d'une station, ni une valeur à l'adresse. En vallée de montagne, la maille peut
@@ -94,7 +99,7 @@ def une_annee(annee, mailles):
     attendu = 366 if (annee % 4 == 0 and (annee % 100 != 0 or annee % 400 == 0)) else 365
     if (jours != attendu).any():
         raise SystemExit(f"{annee} : année incomplète pour {int((jours != attendu).sum())} points")
-    g = df.assign(tx35=df.TSUP_H >= 35, tx30=df.TSUP_H >= 30, tr20=df.TINF_H >= 20).groupby("point")[["tx35", "tx30", "tr20"]].sum()
+    g = df.assign(tx35=df.TSUP_H >= 35, tx30=df.TSUP_H >= 30, tr20=df.TINF_H > 20).groupby("point")[["tx35", "tx30", "tr20"]].sum()
     return g.astype(int), {"annee": annee, "url": URL.format(annee), "last_modified": modifie, "sha256": empreinte}
 
 
@@ -121,7 +126,7 @@ def main():
         points[pid] = {k: [int(g.loc[pid, k]) for g in par_annee] for k in ("tx35", "tx30", "tr20")}
 
     sortie = {
-        "schema": 1,
+        "schema": 2,
         "periode": [debut, fin],
         "source": {
             "producteur": "Météo-France",
@@ -135,7 +140,7 @@ def main():
         "definitions": {
             "tx35": "jours avec TSUP_H >= 35 °C (max des 24 températures horaires, 06-06 UTC)",
             "tx30": "jours avec TSUP_H >= 30 °C",
-            "tr20": "nuits avec TINF_H >= 20 °C (min des 24 températures horaires, 18-18 UTC)",
+            "tr20": "nuits avec TINF_H > 20 °C, strictement (min des 24 températures horaires, 18-18 UTC ; DRIAS : Tmin > 20 °C)",
         },
         "grille_drias": {"fichier": fichier_canonique, "points": len(appariement), "ecart_max_deg": ECART_MAX_DEG},
         "points": points,

@@ -19,6 +19,106 @@ Le prototype est implémenté dans la PR (bloc « Éviter les fortes chaleurs »
 - le changement de base des qualificatifs de la phrase ;
 - la politique de mise à jour annuelle.
 
+
+> **Contre-revue du 08/11/2026 : trois corrections appliquées, une limite de reproductibilité levée.** Voir la section « Corrections après contre-revue » ci-dessous. Elle **prime** sur le reste du document : nuits tropicales au sens strict de DRIAS (`> 20 °C`), phrase qui juge les journées comme les nuits, réserve de maille au premier niveau pour les cas démontrés en montagne, comparabilité recalculable depuis le dépôt.
+
+## Corrections après contre-revue (08/11/2026)
+
+Contre-revue indépendante (Work) du SHA `1a8b4025` : **NO GO en l'état** pour trois corrections ciblées, fondations validées (source SAFRAN, période 2016–2025, jointures, contrôle de 2022, 34 788 signaux inchangés). Les corrections portent sur la PR #132, sans changer l'architecture, le moteur, les seuils, le classement ni les dossiers.
+
+### 1. Nuits tropicales : le seuil strict de DRIAS
+
+**Cause.** Le calcul SAFRAN comptait `TINF_H >= 20`. DRIAS définit l'indicateur `TR` comme « Nombre de nuits tropicales (température minimale > 20°C) » ([drias-climat.fr, jeu TRACC, « Les indicateurs »](https://www.drias-climat.fr/accompagnement/section/401)). Les fichiers DRIAS du dépôt ne donnent que « Nombre de nuits tropicales » sans seuil (`data/source/*.txt`, ligne `NORTR_yr`). Les journées chaudes sont bien inclusives des deux côtés (« Tx ≥ 35 °C », « Tx ≥ 30 °C »).
+
+**Correction.** `agreger_safran.py` compte `TINF_H > 20` (schéma 2 des fichiers, contrôlé au build : un fichier au schéma 1 est refusé). SIM2 donne `TINF_H` au dixième : une nuit à 20,0 °C exactement n'est plus tropicale. Les deux sources ont été régénérées (`safran-2016-2025.json`, nouveau `safran-1976-2005.json`, empreintes SHA-256 par année dans le fichier), ainsi que `src/data/climat-recent-communes.json`. Formulation au lecteur : « où la température reste au-dessus de 20 °C », « sans tomber à 20 °C » (au lieu de « sans descendre sous 20 °C », qui décrit `>= 20`).
+
+**Effet sur les valeurs.** −0,43 nuit par an en moyenne par commune (au plus −3,2) ; 30 319 communes changent au dixième, 13 849 au chiffre affiché (arrondi). Pilotes, nuits 2016–2025 (avant → après) : Rochefort 13,1 → **12,5** ; La Rochelle 12,1 → **11,6** ; Nantes 3,4 → **3,3** ; Bordeaux 23,0 → **21,9** ; Nîmes 54,2 → **52,6** ; Marciac 11,8 → **10,6** ; Paris (1er arr.) 14,2 → **13,6** ; Briançon et Chamonix 0 → 0. Journées inchangées.
+
+**Effet sur la concordance historique (non masqué : elle se dégrade légèrement).** SAFRAN 1976–2005 contre la référence DRIAS, 8 981 points :
+
+| Nuits tropicales | Biais DRIAS − SAFRAN | Écart absolu moyen | p95 | Corrélation |
+|---|---|---|---|---|
+| `>= 20` (avant), médiane des références | +0,47 | 0,58 | 2,17 | 0,995 |
+| **`> 20` (définition DRIAS), médiane des références** | **+0,71** | 0,76 | 2,97 | 0,994 |
+| `> 20`, reconstruction de futur•e (méd. NOR − méd. A) | +0,74 | 0,81 | 3,20 | 0,993 |
+
+La forme `>= 20` concordait mieux, mais c'est la définition officielle qui fait foi : DRIAS reste un peu plus « chaud » que SAFRAN sur ses propres nuits de référence (+0,7 nuit en moyenne), écart dans le même sens que pour les journées à 30 °C (+0,7). Une hypothèse plausible, non vérifiée : l'agrégat quotidien sur lequel ADAMONT a été calibré n'est pas exactement `TINF_H`. Cette différence entre dans la convention de bruit ci-dessous (2 nuits).
+
+### 2. La phrase : exposition et évolution, deux questions distinctes
+
+**Cause.** Sous les repères du moteur, `phraseChaleur` ne regardait que l'évolution des **nuits** : les journées à 35 °C étaient toujours dites « peu nombreuses », quelle que soit leur hausse. Avec la comparaison au climat récent (premier passage de FUT-170), 1 103 communes basculaient en « comme les nuits tropicales resteraient peu nombreuses », dont Avignonet (38023) : de **0,5 à 5,3** journées à 35 °C par an. Second défaut : une hausse était dite dès **1** jour ou nuit de plus, écart inférieur au bruit entre deux systèmes de données ; et « beaucoup plus fréquentes » se déclenchait sur un doublement près de zéro.
+
+**Règle éditoriale minimale (implémentée, `pastilles.ts`).**
+- **L'exposition** reste celle du moteur, dite par la pastille (« À surveiller », « Plutôt défavorable »…) : inchangée.
+- **L'évolution** est dite **axe par axe** (journées à 35 °C, nuits tropicales), contre la période affichée et nommée (« qu'en 2016–2025 », ou « qu'en 1976-2005 » sans climat récent) :
+  - hausse **lisible** à partir de `ECART_LISIBLE` = **2** par an → « deviendraient plus fréquentes » ;
+  - hausse lisible **et** doublée → « beaucoup plus fréquentes » (le doublement seul ne suffit plus : 0,3 → 0,8 n'est pas une hausse dite) ;
+  - sinon « resteraient peu nombreuses », pour cet axe seulement.
+- **Justification de 2, et sa nature.** C'est une **convention éditoriale fondée sur le bruit mesuré**, pas un seuil scientifique : erreur type d'une moyenne sur dix ans ≈ 0,9 jour à 35 °C et 1,1 nuit ; écart moyen des deux systèmes sur leur période commune 0,1 à 0,7 (tableau ci-dessus) ; p95 de cet écart 0,4 à 3,0. Elle était déjà écrite dans le verdict (« en dessous de 2 à 3 jours, un écart n'est pas interprétable ») ; la phrase l'applique désormais.
+- **« Particulièrement fréquentes »** (repère atteint) : « deviendraient » seulement si la période de comparaison n'atteint pas déjà le repère ; sinon « seraient » (Nîmes : 52,6 nuits sur 2016–2025 pour un repère de 25). « Augmenteraient de jour comme de nuit » suit la même hausse lisible.
+
+**Les 1 103 communes rejouées** (avant = SHA `1a8b4025` ; après = cette correction ; mêmes entrées réelles) :
+
+| Situation | Communes | Avant | Après |
+|---|---|---|---|
+| Journées en hausse lisible, pas les nuits | **101** | « … comme les nuits tropicales resteraient peu nombreuses. » | « Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales resteraient peu nombreuses. » |
+| Aucune hausse lisible (écarts < 2) | **1 002** | « … comme les nuits tropicales resteraient peu nombreuses. » | inchangé |
+| Nuits en hausse lisible, pas les journées | 0 | (par construction du lot) | — |
+
+Exemples : Avignonet (38023) 0,5 → 5,3 jours, 1,7 → 2,0 nuits : ligne 1. Bétheny (51055) 1,1 → 3,0 jours (+1,9), 4,8 → 6,0 nuits : ligne 2, à la frontière de la convention.
+
+**Sur les 34 788 communes** (et Paris, Lyon, Marseille) : **signal identique partout** (0 changement, testé) ; 28 832 phrases changent par rapport au SHA audité. Communes sous les repères (29 093) :
+
+| Évolution 2016–2025 → 2050 | Communes | Phrase |
+|---|---|---|
+| Journées et nuits en hausse lisible | 16 275 | « Les journées au-dessus de 35 °C et les nuits tropicales deviendraient (beaucoup) plus fréquentes qu'en 2016–2025. » (ou qualificatifs distincts par axe) |
+| Nuits seules | 8 837 | « Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient (beaucoup) plus fréquentes qu'en 2016–2025. » |
+| Journées seules | 226 | « Les journées au-dessus de 35 °C deviendraient (beaucoup) plus fréquentes qu'en 2016–2025 ; les nuits tropicales resteraient peu nombreuses. » |
+| Aucune hausse lisible | 3 755 | « Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses. » |
+
+Dont 9 134 communes avec un écart entre 1 et 2 sur au moins un axe : hier « plus fréquentes », aujourd'hui non qualifiées (évolution faible ou non interprétable). Côté défavorable, 702 phrases changent : 701 passent de « deviendraient » à « seraient particulièrement fréquentes » (repère déjà atteint sur 2016–2025), 1 de « augmenteraient » à « seraient fréquentes ».
+
+**Test d'invariant** (`climat-recent.test.ts`, « LA PHRASE DIT VRAI ») : sur toutes les communes sous les repères, « peu nombreuses » n'est jamais dit d'un axe en hausse lisible, et « deviendraient … plus fréquentes » jamais d'un axe qui ne l'est pas.
+
+### 3. Montagne : la maille contredite par le thermomètre
+
+**Cause.** Briançon et Chamonix lisent 0 sur leur maille, pour 2016–2025 comme pour 2050 ; la phrase affirmait « Les fortes chaleurs resteraient exceptionnelles ici, même en 2050 » alors que les stations de vallée relèvent déjà 16 à 23 journées à 30 °C par an. Les propriétés disponibles ne permettent pas de corriger : `data/communes-altitude.json` donne l'altitude au **centroïde** (IGN RGE ALTI : Chamonix 1 865 m, pour une ville à 1 035 m), et aucune source ouverte du dépôt ne donne l'altitude des mailles SAFRAN.
+
+**Correction (la plus petite démontrable).** Un **témoin**, pas un indicateur d'altitude : les stations Météo-France (« Données climatologiques de base – quotidiennes », Licence Ouverte 2.0), sur 2016–2025, avec **les mêmes définitions** (TX ≥ 35, ≥ 30, TN > 20). `scripts/climat-recent/stations_temoins.py` parcourt les 96 départements (lecture en flux, ~17 Mo chacun, rien de stocké hors une sortie de 0,2 Mo) : 1 392 stations retenues (≥ 8 années complètes, ≥ 90 % des jours de mai à septembre), 1 065 écartées faute de données, 2 sans commune. Chaque commune reçoit les stations de **son secteur** : sa maille (même jointure que les communes), ou à moins d'une demi-maille (4 km) de son point de référence.
+
+**Règle (`stationContredit`).** Sur une mesure affichée, la maille projette **moins d'un** jour (ou d'une nuit) par an pour 2050 — l'absence que la phrase présenterait comme un fait — alors qu'une station du secteur en relève **déjà au moins 2** par an (même convention de bruit). Aucun seuil nouveau : le palier « moins d'un par an » et `ECART_LISIBLE` existent déjà. La règle « la station dépasse la projection » tout court a été mesurée puis **écartée** : 2 684 communes l'auraient reçue, presque toutes en plaine, où une station compte couramment quelques journées à 30 °C de plus que sa maille (écart ordinaire, déjà dit dans « Comment lire ce résultat ? »).
+
+**Ce qui change au premier niveau** (signal du moteur inchangé ; seulement pour les communes présentées comme peu exposées, « Plutôt favorable » ou « À surveiller ») :
+
+- Avant (Chamonix) : « Les fortes chaleurs resteraient exceptionnelles ici, même en 2050. »
+- Après : « Sur le secteur de 8 km qui sert au calcul, les fortes chaleurs resteraient exceptionnelles, même en 2050. La station Météo-France Chamonix (1 042 m d'altitude, à 4 km) relève pourtant déjà 16 jours au-dessus de 30 °C par an en moyenne sur 2016–2025, plus que ce secteur de 8 km n'en prévoit pour 2050 : ces chiffres sous-estiment la chaleur là où elle mesure. »
+- Briançon : même forme, station de Villar-Saint-Pancrace (1 310 m, à 2,4 km), 23 jours au-dessus de 30 °C.
+- « Comment lire ce résultat ? » ajoute le détail (années complètes, valeur projetée de la maille) et précise qu'en montagne le secteur peut être bien plus haut que la vallée habitée.
+
+**Communes touchées : 121** (45 « Plutôt favorable », 76 « À surveiller ») : Savoie 19, Hautes-Alpes 17, Haute-Savoie 16, Hautes-Pyrénées 15, Haute-Garonne (Luchonnais) 12, Isère 7, Alpes-de-Haute-Provence 7, Lozère 4, Bas-Rhin (Val de Villé) 4, Corse 5, et quelques fonds de vallée (Jura, Ain, Drôme, Puy-de-Dôme, Haute-Loire, Corrèze, Pyrénées-Orientales, Eure, Seine-Maritime). Déclencheur : 56 sur les journées à 30 °C, 65 sur les journées à 35 °C. Les valeurs DRIAS et SAFRAN affichées restent celles de la maille, qualifiées comme telles.
+
+**Limite encore ouverte.** La réserve n'existe que là où un thermomètre la démontre : une vallée sans station de ≥ 8 années complètes dans son secteur garde la phrase d'avant. Le signal « Plutôt favorable » des 45 communes concernées est celui du moteur, non modifié (contrainte du chantier) ; la phrase le nuance. Une correction nationale (altitude réelle des mailles contre lieux habités, par croisement avec un MNT et l'occupation du sol) reste une **suite distincte**, non implémentée.
+
+### 4. Reproductibilité des corrélations
+
+**Cause.** Les corrélations de la section B venaient d'une chaîne exploratoire hors dépôt (`~/Documents/futuree-climat-recent/`).
+
+**Correction.** Les trois comptes de chaleur sont recalculables **depuis le dépôt seul** : `python3 -P scripts/climat-recent/agreger_safran.py 1976 2005` (écrit `data/climat-recent/safran-1976-2005.json`, versionné, 2 Mo, empreinte de chaque fichier Météo-France), puis `node scripts/climat-recent/comparer-drias.mjs --ecrire` (lit les 51 fichiers DRIAS de `data/source/`, écrit `data/climat-recent/comparabilite-1976-2005.json`). Recalculé le 08/11 : **identique** aux chiffres exploratoires (35 °C : +0,11, r = 0,980 ; 30 °C : +0,71, r = 0,996 ; nuits strictes : +0,71, r = 0,994).
+
+**Portée réduite.** Les lignes **températures** (moyenne annuelle, hiver, maximale d'été) et **sol sec** du tableau de la section B, ainsi que la comparaison `>= 20` et les colonnes 1991–2020 / 2006–2025 du tableau des pilotes (section C), restent issues de la chaîne exploratoire : elles sont **indicatives, non reproductibles depuis le dépôt**, et ne fondent aucune décision du produit (seuls les trois comptes de chaleur sont affichés). Le contrôle des stations de la section C (rayon 20 km) est remplacé, pour ce qui sert au produit, par `stations_temoins.py`.
+
+### Validation
+
+- Pipeline SAFRAN 2016–2025 et 1976–2005 régénéré ; empreintes vérifiées par les tests (`source.sha256`, `stations_source.sha256`) et par le `prebuild` (vérification octet pour octet).
+- Tests ciblés : 19 dans `climat-recent.test.ts` (dont 8 nouveaux), `pastilles.test.ts` mis à jour (règle des qualificatifs). Suite complète, `tsc`, lint, build : voir le compte rendu de la PR.
+- Moteur, seuils, classement, dossiers payants, Supabase : non modifiés. Aucune Preview déclenchée (déploiements Git désactivés hors `main`).
+
+### Suites distinctes (non implémentées)
+
+1. **Altitude de maille contre lieux habités** (correction nationale de la montagne), avec un MNT.
+2. **Formulation « ne descend pas sous 20 °C »** ailleurs dans le produit (`recits.ts`, `reponses.ts`, dossier `QuartierClimatData.tsx`) : décrit `>= 20` alors que l'indicateur DRIAS est `> 20`. Écart d'un dixième de degré, hors du bloc FUT-170 ; à harmoniser dans un ticket dédié (« reste au-dessus de 20 °C »).
+3. **Le signal « Plutôt favorable »** des communes à maille contredite : à réexaminer avec le moteur, si l'on veut que la pastille, et pas seulement la phrase, porte la réserve.
+
 ---
 
 ## A. Disponibilité des données
@@ -88,7 +188,7 @@ DRIAS-2020, dont DRIAS-TRACC est tiré, est **corrigé de ses biais par la méth
 |---|---|---|
 | Jours ≥ 35 °C | `NORTX35D_yr` « Nombre de jours avec Tx ≥ 35 °C » | `TSUP_H ≥ 35` |
 | Jours ≥ 30 °C | `NORTX30D_yr` | `TSUP_H ≥ 30` |
-| Nuits tropicales | `NORTR_yr` | `TINF_H ≥ 20` (la forme stricte `> 20` s'écarte davantage de DRIAS, voir ci-dessous) |
+| Nuits tropicales | `NORTR_yr`, « température minimale > 20°C » | `TINF_H > 20` **(corrigé le 08/11 : `≥ 20` auparavant, voir « Corrections après contre-revue »)** |
 | Maille | grille SAFRAN 8 km | grille SAFRAN 8 km, **appariée point par point** |
 | Jointure commune → point | `joindreAuPointLePlusProche` | **la même fonction** (`build-drias-median.js`) |
 | Période | 20 ans autour de l'année où le niveau de réchauffement est atteint | 10 années civiles nommées |
@@ -101,8 +201,8 @@ Si DRIAS et SAFRAN parlent du même monde, la référence 1976–2005 des projec
 |---|---|---|---|---|---|---|
 | Jours ≥ 35 °C | 0,67 | 0,56 | **+0,11** | 0,14 | 0,43 | 0,980 |
 | Jours ≥ 30 °C | 8,37 | 7,66 | **+0,71** | 0,72 | 2,30 | 0,996 |
-| Nuits ≥ 20 °C | 4,07 | 3,59 | **+0,47** | 0,58 | 2,17 | 0,995 |
-| Nuits > 20 °C (stricte) | 4,07 | 3,36 | +0,71 | 0,76 | 2,97 | 0,994 |
+| Nuits ≥ 20 °C *(ancienne définition, exploratoire)* | 4,07 | 3,59 | +0,47 | 0,58 | 2,17 | 0,995 |
+| **Nuits > 20 °C (définition DRIAS, retenue)** | 4,07 | 3,36 | **+0,71** | 0,76 | 2,97 | 0,994 |
 | Température moyenne annuelle | 10,80 | 10,61 | +0,18 °C | 0,18 | 0,31 | 0,999 |
 | Température moyenne d'hiver | 3,73 | 3,91 | −0,17 °C | 0,18 | 0,35 | 0,999 |
 | Maximale moyenne d'été | 22,65 | 22,35 | +0,29 °C | 0,30 | 0,52 | 0,999 |
@@ -134,7 +234,7 @@ Sur les communes pilotes, les **évolutions relatives** observées par les stati
 
 ### Les précautions retenues
 
-1. **Pas de soustraction affichée.** Deux repères juxtaposés, chacun avec sa période et sa source. La phrase sous la pastille ne qualifie une hausse qu'à partir d'une nuit de plus par an. Comme avant, elle ne cite aucun chiffre.
+1. **Pas de soustraction affichée.** Deux repères juxtaposés, chacun avec sa période et sa source. La phrase sous la pastille ne qualifie une hausse qu'à partir de **2** jours ou nuits de plus par an (`ECART_LISIBLE`, corrigé le 08/11 : 1 auparavant), axe par axe. Elle ne cite aucun chiffre, sauf la réserve de station en montagne.
 2. **Jamais « aujourd'hui », jamais « actuel »** : « climat récent (2016–2025) ». Un test le vérifie.
 3. **Deux natures, deux sources nommées** : « DRIAS · Météo-France, horizon 2050 » et « réanalyse SAFRAN · Météo-France ».
 4. **La limite de maille** est écrite dans « Comment lire ce résultat ? ».
@@ -152,29 +252,29 @@ Valeurs au **point DRIAS de la commune** (même jointure que futur•e ; Paris p
 |---|---|---|---|---|---|---|---|---|---|
 | Rochefort (17299) | Jours ≥ 35 °C | 0,3 | 0,2 | 0,3 | 0,9 | **1,5** | 1,5 | **2,8** | 0,7 |
 | | Jours ≥ 30 °C | 7,1 | 6,4 | 6,5 | 7,3 | **10,8** | 13,9 | **18,5** | 3,7 |
-| | Nuits tropicales | 5,3 | 4,9 | 7,2 | 9,9 | **13,1** | 13,8 | **23,6** | 6,1 |
+| | Nuits tropicales | 5,3 | 4,9 | 7,2 | 9,9 | **13,1 → 12,5** | 13,8 | **23,6** | 6,1 |
 | La Rochelle (17300) | Jours ≥ 35 °C | 0,3 | 0,2 | 0,3 | 0,9 | **1,5** | 1,2 | **2,8** | 0,7 |
 | | Jours ≥ 30 °C | 6,7 | 6,3 | 6,5 | 7,0 | **10,2** | 13,6 | **18,0** | 3,7 |
-| | Nuits tropicales | 5,3 | 4,7 | 6,7 | 9,0 | **12,1** | 13,6 | **23,4** | 5,9 |
+| | Nuits tropicales | 5,3 | 4,7 | 6,7 | 9,0 | **12,1 → 11,6** | 13,6 | **23,4** | 5,9 |
 | Nantes (44109) | Jours ≥ 35 °C | 0,5 | 0,7 | 0,6 | 0,8 | **1,2** | 2,0 | **4,1** | 1,1 |
 | | Jours ≥ 30 °C | 8,1 | 7,7 | 7,6 | 8,2 | **11,2** | 15,6 | **21,8** | 5,1 |
-| | Nuits tropicales | 2,0 | 1,8 | 1,8 | 2,2 | **3,4** | 6,2 | **11,1** | 2,1 |
+| | Nuits tropicales | 2,0 | 1,8 | 1,8 | 2,2 | **3,4 → 3,3** | 6,2 | **11,1** | 2,1 |
 | Bordeaux (33063) | Jours ≥ 35 °C | 1,5 | 1,2 | 1,6 | 3,2 | **4,8** | 4,6 | **6,3** | 2,4 |
 | | Jours ≥ 30 °C | 16,5 | 15,1 | 18,1 | 20,2 | **25,3** | 27,6 | **35,1** | 7,2 |
-| | Nuits tropicales | 7,3 | 5,5 | 11,7 | 17,2 | **23,0** | 18,5 | **28,1** | 7,9 |
+| | Nuits tropicales | 7,3 | 5,5 | 11,7 | 17,2 | **23,0 → 21,9** | 18,5 | **28,1** | 7,9 |
 | Nîmes (30189) | Jours ≥ 35 °C | 2,7 | 2,1 | 3,4 | 5,5 | **8,0** | 8,7 | **14,4** | 4,7 |
 | | Jours ≥ 30 °C | 36,2 | 33,5 | 41,0 | 45,4 | **53,9** | 56,3 | **67,9** | 13,1 |
-| | Nuits tropicales | 33,0 | 28,4 | 38,6 | 45,0 | **54,2** | 56,5 | **69,1** | 11,9 |
+| | Nuits tropicales | 33,0 | 28,4 | 38,6 | 45,0 | **54,2 → 52,6** | 56,5 | **69,1** | 11,9 |
 | Marciac (32233, rurale, Gers) | Jours ≥ 35 °C | 1,5 | 1,5 | 1,5 | 2,0 | **3,1** | 5,2 | **8,2** | 2,5 |
 | | Jours ≥ 30 °C | 14,5 | 14,8 | 15,5 | 18,0 | **23,1** | 26,9 | **34,2** | 8,6 |
-| | Nuits tropicales | 5,0 | 2,9 | 4,7 | 7,9 | **11,8** | 12,6 | **21,0** | 4,8 |
+| | Nuits tropicales | 5,0 | 2,9 | 4,7 | 7,9 | **11,8 → 10,6** | 12,6 | **21,0** | 4,8 |
 | Briançon (05023, montagne) | les trois | 0,0 | 0,0 | 0,0 | 0,0 | **0,0** | ≤ 0,1 | **≤ 0,6** | 0 |
 | Chamonix (74056, montagne) | les trois | 0,0 | 0,0 | 0,0 | 0,0 | **0,0** | 0,0 | **0,0** | 0 |
 | Paris (75101, contrôle) | Jours ≥ 35 °C | 0,9 | 0,8 | 1,2 | 1,4 | **2,2** | 2,4 | **4,4** | 2,0 |
 | | Jours ≥ 30 °C | 10,1 | 9,1 | 10,7 | 10,4 | **12,6** | 15,9 | **22,8** | 6,1 |
-| | Nuits tropicales | 8,7 | 8,3 | 10,8 | 11,0 | **14,2** | 17,6 | **26,3** | 7,2 |
+| | Nuits tropicales | 8,7 | 8,3 | 10,8 | 11,0 | **14,2 → 13,6** | 17,6 | **26,3** | 7,2 |
 
-*Sources : DRIAS-TRACC (Météo-France, 17 modèles, médiane) ; SAFRAN SIM2 quotidienne (Météo-France), maille DRIAS de la commune. La colonne σ donne l'écart-type interannuel 1991–2020 au point. La dispersion des 17 modèles sur la référence reste faible : q10–q90 de 5,0–5,8 nuits à Rochefort, 31,1–33,1 à Nîmes.*
+*Nuits SAFRAN : colonnes 1976–2005, 1991–2020, 2006–2025 et série annuelle comptées `≥ 20` (chaîne exploratoire) ; colonne 2016–2025 : ancienne valeur → valeur au sens strict `> 20` servie par le produit.* *Sources : DRIAS-TRACC (Météo-France, 17 modèles, médiane) ; SAFRAN SIM2 quotidienne (Météo-France), maille DRIAS de la commune. La colonne σ donne l'écart-type interannuel 1991–2020 au point. La dispersion des 17 modèles sur la référence reste faible : q10–q90 de 5,0–5,8 nuits à Rochefort, 31,1–33,1 à Nîmes.*
 
 **Séries annuelles 2016–2025 au point** (nuits tropicales) :
 - Bordeaux : 13, 20, 30, 21, 19, 12, **37**, 32, 16, 30.
@@ -207,7 +307,7 @@ Une seule année peut doubler la moyenne : la période doit rester nommée.
 - **Évolutions relatives concordantes.** Exemple sur Nîmes, de 1976–2005 à 2016–2025 : ×3,8 pour la station comme pour la maille en jours ≥ 35 °C ; ×2,1 pour la station et ×1,9 pour la maille en nuits.
 - **Ce constat vaut déjà pour les chiffres DRIAS affichés aujourd'hui.** Les projections sont calibrées sur la même maille. Il justifie la limite écrite (« moyennes de secteur, pas les relevés d'un thermomètre »).
 
-**3. Les vallées de montagne : la maille ne décrit pas la ville.** Briançon et Chamonix lisent 0 partout. Pourtant, les stations de vallée comptent 16 à 23 jours ≥ 30 °C par an sur 2016–2025. La bascule « Et au-dessus de 30 °C ? » affiche donc « 0 jour par an » à Briançon pour 2050 (0,6), alors que la vallée en vit déjà plus de vingt. Ce défaut est **préexistant**, côté DRIAS. Le prototype ne l'aggrave pas, mais ne le corrige pas non plus. **Suite proposée :** un ticket « altitude de maille contre altitude habitée » pour les communes de relief, avec la piste d'un repli ou d'une mention lorsque l'altitude de la mairie s'écarte de celle de la maille. Les fichiers ouverts ne donnent pas l'altitude des mailles : il faudrait la croiser avec un modèle numérique de terrain.
+**3. Les vallées de montagne : la maille ne décrit pas la ville.** *(Corrigé en partie le 08/11 : réserve au premier niveau quand une station du secteur le démontre, voir « Corrections après contre-revue », § 3.)* Briançon et Chamonix lisent 0 partout. Pourtant, les stations de vallée comptent 16 à 23 jours ≥ 30 °C par an sur 2016–2025. La bascule « Et au-dessus de 30 °C ? » affiche donc « 0 jour par an » à Briançon pour 2050 (0,6), alors que la vallée en vit déjà plus de vingt. Ce défaut est **préexistant**, côté DRIAS. Le prototype ne l'aggrave pas, mais ne le corrige pas non plus. **Suite proposée :** un ticket « altitude de maille contre altitude habitée » pour les communes de relief, avec la piste d'un repli ou d'une mention lorsque l'altitude de la mairie s'écarte de celle de la maille. Les fichiers ouverts ne donnent pas l'altitude des mailles : il faudrait la croiser avec un modèle numérique de terrain.
 
 **4. Comparaison aux publications officielles.** Les stations de contrôle ci-dessus sont celles des fiches climatologiques Météo-France. Sur 1991–2020, Nîmes-Courbessac compte 10,4 jours ≥ 35 °C et 23,7 nuits ≥ 20 °C par an (nos agrégats des données quotidiennes publiques). Ces valeurs sont à comparer aux normales publiées : nous ne les avons pas relues dans le PDF officiel. Les comptes sont faits sur les seuls étés complets (mai à septembre, ≥ 150 jours valides), en ajoutant les rares occurrences hors de cette saison.
 
@@ -252,7 +352,9 @@ Les autres communes pilotes (sorties réelles du code) sont en annexe.
 | `scripts/climat-recent/agreger_safran.py` *(nouveau)* | Lit en flux les fichiers SIM2 de la période. Apparie chaque point DRIAS à sa maille SAFRAN et **échoue** au-delà de 0,002°. Vérifie années complètes et absence de valeurs manquantes. Écrit les comptes **annuels** par point, avec l'URL, la date `Last-Modified` et le SHA-256 de chaque fichier source. |
 | `data/climat-recent/safran-2016-2025.json` *(nouveau, 0,95 Mo, versionné)* | Sortie du script ; non empaquetée. |
 | `scripts/build-climat-recent.mjs` *(nouveau)* | Moyenne de la période par commune. Jointure par **les fonctions mêmes de DRIAS** (`loadCommunes`, `parseDriasFile`, `buildNearestPointIndex`). Mode `--ecrire`, sinon **vérification** octet pour octet. |
-| `src/data/climat-recent-communes.json` *(nouveau, 0,77 Mo, empaqueté)* | 34 788 communes × [jours ≥ 35, ≥ 30, nuits ≥ 20], empreinte de la source. |
+| `src/data/climat-recent-communes.json` *(nouveau, 1,1 Mo, empaqueté ; schéma 2 depuis le 08/11)* | 34 788 communes × [jours ≥ 35, ≥ 30, nuits > 20], stations témoins de 6 517 communes, empreintes des deux sources. |
+| `data/climat-recent/safran-1976-2005.json`, `comparabilite-1976-2005.json` *(08/11)* | Comptes SAFRAN de la période de référence ; comparaison à DRIAS recalculable (`scripts/climat-recent/comparer-drias.mjs`). |
+| `scripts/climat-recent/stations_temoins.py`, `data/climat-recent/stations-2016-2025.json` *(08/11)* | Stations Météo-France de métropole sur 2016–2025, mêmes définitions : témoins de la maille. |
 | `src/lib/accueil/climat-recent.ts` *(nouveau, pur)* | Lecture et contrôle du fichier ; outre-mer et absence → `null`, jamais 0. |
 | `src/lib/accueil/donnees-legeres.ts` | `climatRecentLeger(insee)`, même repli Paris, Lyon, Marseille que DRIAS. |
 | `src/lib/accueil/lecture-accueil.ts` | `SourcesLecture.climatRecent` ; `entreesChaleur` le transmet **après** le calcul du verdict, qui ne le lit pas. |
@@ -353,7 +455,11 @@ Les signaux sont identiques à ceux d'avant FUT-170 pour les 34 788 communes (te
 
 ```sh
 # Climat récent du produit (dépôt)
-python3 scripts/climat-recent/agreger_safran.py 2016 2025      # ~7 min, flux
+python3 -P scripts/climat-recent/agreger_safran.py 2016 2025   # ~7 min, flux
+python3 -P scripts/climat-recent/stations_temoins.py           # ~15 min, flux, 96 départements
+# Comparabilité historique (08/11), depuis le dépôt seul
+python3 -P scripts/climat-recent/agreger_safran.py 1976 2005   # ~20 min, flux
+node scripts/climat-recent/comparer-drias.mjs --ecrire
 node scripts/build-climat-recent.mjs --ecrire                  # jointure DRIAS
 node scripts/build-climat-recent.mjs                           # vérification (prebuild)
 node --test src/lib/accueil/climat-recent.test.ts

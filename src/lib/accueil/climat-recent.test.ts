@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_HORIZON } from "../decision/climat-facts.ts";
 import { climatRecentDepuisFichier, verifierFichier, type FichierClimatRecent } from "./climat-recent.ts";
-import { lireChaleur, phraseChaleur, type EntreesChaleur, type Lieu } from "./pastilles.ts";
+import { lireChaleur, phraseChaleur, stationContredit, ECART_LISIBLE, type EntreesChaleur, type Lieu } from "./pastilles.ts";
 import { formatCompte } from "./recits.ts";
 
 const FICHIER = JSON.parse(readFileSync("src/data/climat-recent-communes.json", "utf8")) as FichierClimatRecent;
@@ -19,6 +19,7 @@ const EXTRAIT = JSON.parse(readFileSync("src/data/apercu-climat-communes.json", 
   horizons: string[]; cles: string[]; communes: Record<string, (number | null)[]>;
 };
 
+const VILLES: Record<string, string> = { "75056": "75101", "69123": "69381", "13055": "13201" };
 /** Les scénarios DRIAS d'une commune, depuis l'extrait que lit l'accueil. */
 function scenarios(insee: string) {
   const v = EXTRAIT.communes[insee]!;
@@ -30,14 +31,14 @@ function scenarios(insee: string) {
 
 /** Les entrées de la lecture, comme `entreesChaleur` (lecture-accueil.ts) : même moteur, même formulation. */
 function entrees(insee: string, avecRecent = true): EntreesChaleur {
-  const sc = scenarios(insee);
+  const sc = scenarios(VILLES[insee] ?? insee);
   const f = buildClimatFacts(sc)!;
   return {
     verdict: classifyClimateComfort(f).verdict,
     jours: { projete: f.joursTresChauds.projete, reference: f.joursTresChauds.reference, seuil: f.joursTresChauds.threshold },
     nuits: { projete: f.nuitsTropicales.projete, reference: f.nuitsTropicales.reference, seuil: f.nuitsTropicales.threshold },
     jours30: { projete: sc[CLIMAT_HORIZON]?.v.NORTX30D_yr ?? null, reference: reconstructReference(sc, "NORTX30D_yr", "ATX30D_yr") },
-    recent: avecRecent ? climatRecentDepuisFichier(FICHIER, insee) : null,
+    recent: avecRecent ? climatRecentDepuisFichier(FICHIER, VILLES[insee] ?? insee, insee) : null,
     referenceTexte: (v, nuits) => formatCompte(v, nuits ? { singulier: "nuit", pluriel: "nuits", feminin: true } : undefined),
     limite: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
     gesteSansAdresse: "Vérifier l'orientation et la ventilation du logement",
@@ -51,6 +52,10 @@ test("fichier : forme attendue, période 2016-2025, produit depuis la source SAF
   verifierFichier(FICHIER);
   assert.deepEqual(FICHIER.periode, [2016, 2025]);
   assert.deepEqual(FICHIER.cles, ["tx35", "tx30", "tr20"]);
+  assert.equal(FICHIER.schema, 2, "schéma 2 : nuits tropicales au sens strict de DRIAS (Tmin > 20 °C)");
+  const src = JSON.parse(readFileSync(FICHIER.source.fichier, "utf8"));
+  assert.match(src.definitions.tr20, /TINF_H > 20 °C, strictement/);
+  assert.equal(FICHIER.stations_source.sha256, createHash("sha256").update(readFileSync(FICHIER.stations_source.fichier)).digest("hex"));
   assert.equal(FICHIER.source.sha256, createHash("sha256").update(readFileSync(FICHIER.source.fichier)).digest("hex"));
   assert.equal(FICHIER.source.licence, "Licence Ouverte 2.0");
 });
@@ -71,8 +76,8 @@ test("fichier : valeurs finies, positives, et les jours à 35 °C sont inclus da
 
 test("fichier : valeurs des communes pilotes de l'audit (SAFRAN 2016-2025, maille DRIAS de la commune)", () => {
   // docs/audits/2026-11-08-reference-climatique-recente.md, tableau des pilotes.
-  assert.deepEqual(FICHIER.communes["17299"], [1.5, 10.8, 13.1]); // Rochefort
-  assert.deepEqual(FICHIER.communes["30189"], [8, 53.9, 54.2]); // Nîmes
+  assert.deepEqual(FICHIER.communes["17299"], [1.5, 10.8, 12.5]); // Rochefort (nuits : 13,1 avec >= 20, 12,5 au sens strict)
+  assert.deepEqual(FICHIER.communes["30189"], [8, 53.9, 52.6]); // Nîmes
   assert.deepEqual(FICHIER.communes["05023"], [0, 0, 0]); // Briançon : la maille, pas la vallée (limite écrite)
 });
 
@@ -108,7 +113,7 @@ test("Rochefort : 2050 en grand, le climat récent en comparaison, ses années d
   assert.equal(j!.valeur, "3");
   assert.equal(j!.legende, "au-dessus de 35 °C à l'horizon 2050, contre 2 jours dans le climat récent (2016–2025)");
   assert.equal(n!.valeur, "24");
-  assert.equal(n!.legende, "par an à l'horizon 2050, sans descendre sous 20 °C, contre 13 nuits dans le climat récent (2016–2025)");
+  assert.equal(n!.legende, "par an à l'horizon 2050, sans tomber à 20 °C, contre 13 nuits dans le climat récent (2016–2025)");
   assert.equal(j!.bascule!.legende, "au-dessus de 30 °C à l'horizon 2050, dont 3 au-dessus de 35 °C ; contre 11 jours dans le climat récent (2016–2025)");
   assert.equal(l.fait!.texte, "À l'horizon 2050 (+2,7 °C en France) : 3 jours par an au-dessus de 35 °C, et 24 nuits tropicales par an. Climat récent (2016–2025) : 2 jours au-dessus de 35 °C et 13 nuits tropicales par an.");
   assert.match(l.fait!.source, /DRIAS · Météo-France/);
@@ -158,7 +163,8 @@ test("la phrase mesure sa hausse contre la période AFFICHÉE, pas contre une au
   const e = { ...entrees("17299"), verdict: "under_threshold" as const,
     jours: { projete: 3, reference: 0.3, seuil: 8 }, nuits: { projete: 20, reference: 8, seuil: 25 } };
   assert.match(phraseChaleur({ ...e, recent: null }, "X").texte, /beaucoup plus fréquentes/);
-  assert.match(phraseChaleur({ ...e, recent: { periode: [2016, 2025], jours: 2, jours30: 10, nuits: 12 } }, "X").texte, /les nuits tropicales seraient plus fréquentes\.$/);
+  assert.equal(phraseChaleur({ ...e, recent: { periode: [2016, 2025], jours: 2, jours30: 10, nuits: 12 } }, "X").texte,
+    "Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient plus fréquentes qu'en 2016–2025.");
   // Climat récent déjà à 19,5 nuits : moins d'une nuit de plus, aucune hausse affirmée.
   assert.equal(phraseChaleur({ ...e, recent: { periode: [2016, 2025], jours: 2.5, jours30: 10, nuits: 19.5 } }, "X").texte,
     "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.");
@@ -169,4 +175,89 @@ test("accord : « moins d'une nuit tropicale », jamais « nuit tropicales »", 
   const l = lireChaleur(lieu("44109", "Nantes"), e);
   assert.match(l.fait!.texte, /moins d'une journée au-dessus de 35 °C et moins d'une nuit tropicale par an\.$/);
   assert.doesNotMatch([l.fait!.texte, ...l.methode!].join(" "), /nuit tropicales/);
+});
+
+// ── Contre-revue du 08/11/2026 : exposition et évolution, deux questions distinctes ─────────────────────────
+
+const sousSeuil = (j: [number, number], n: [number, number], recent = true): EntreesChaleur => ({
+  ...entrees("17299"), verdict: "under_threshold",
+  jours: { projete: j[1], reference: 0, seuil: 8 }, nuits: { projete: n[1], reference: 0, seuil: 25 },
+  recent: recent ? { periode: [2016, 2025], jours: j[0], jours30: 10, nuits: n[0], stations: [] } : null,
+});
+
+test("évolution : des journées qui se multiplient ne sont plus dites « peu nombreuses » (cas Avignonet)", () => {
+  // Les chiffres de la contre-revue : de 0,5 à 5,3 journées à 35 °C, nuits quasi stables.
+  assert.equal(phraseChaleur(sousSeuil([0.5, 5.3], [2, 3]), "X").texte,
+    "Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes qu'en 2016–2025 ; les nuits tropicales resteraient peu nombreuses.");
+  assert.equal(phraseChaleur(sousSeuil([0.5, 5.3], [5, 12]), "X").texte,
+    "Les journées au-dessus de 35 °C et les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 2016–2025.");
+  assert.equal(phraseChaleur(sousSeuil([3, 5.5], [5, 12]), "X").texte,
+    "Les journées au-dessus de 35 °C deviendraient plus fréquentes qu'en 2016–2025, et les nuits tropicales beaucoup plus fréquentes.");
+});
+
+test("évolution : un écart sous ECART_LISIBLE n'est jamais une hausse, même doublé près de zéro", () => {
+  assert.equal(ECART_LISIBLE, 2);
+  for (const [j, n] of [[[0.3, 1.2], [0.2, 0.9]], [[1, 2.9], [10, 11.9]], [[4, 3], [12, 11]]] as [[number, number], [number, number]][]) {
+    assert.equal(phraseChaleur(sousSeuil(j, n), "X").texte, "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.", JSON.stringify([j, n]));
+  }
+  // 0 → 2 : hausse lisible et doublée (« beaucoup plus ») ; 3 → 5 : lisible sans doubler (« plus »).
+  assert.match(phraseChaleur(sousSeuil([0, 2], [0, 0.5]), "X").texte, /^Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes/);
+  assert.match(phraseChaleur(sousSeuil([3, 5], [0, 0.5]), "X").texte, /^Les journées au-dessus de 35 °C deviendraient plus fréquentes/);
+});
+
+test("défavorable : « deviendraient » seulement si la période de comparaison n'atteint pas déjà le repère", () => {
+  const e: EntreesChaleur = { ...sousSeuil([2, 5], [26, 30]), verdict: "unfavorable" };
+  assert.match(phraseChaleur(e, "X").texte, /^Les nuits tropicales seraient particulièrement fréquentes/);
+  assert.match(phraseChaleur({ ...sousSeuil([2, 5], [15, 30]), verdict: "unfavorable" }, "X").texte,
+    /^Les nuits tropicales deviendraient particulièrement fréquentes/);
+});
+
+test("LA PHRASE DIT VRAI, sur les 34 788 communes : « peu nombreuses » n'est jamais dit d'une mesure en hausse lisible", () => {
+  let n = 0;
+  for (const insee of Object.keys(FICHIER.communes)) {
+    const e = entrees(insee);
+    if (e.verdict !== "under_threshold" || !Number.isFinite(e.jours.projete) || !Number.isFinite(e.nuits.projete) || !e.recent) continue;
+    const t = phraseChaleur(e, insee).texte;
+    const gj = e.jours.projete! - e.recent.jours, gn = e.nuits.projete! - e.recent.nuits;
+    if (/^Les journées au-dessus de 35 °C (comme les nuits tropicales )?resteraient peu nombreuses/.test(t)) assert.ok(gj < ECART_LISIBLE, `${insee} : jours +${gj}`);
+    if (/nuits tropicales resteraient peu nombreuses|comme les nuits tropicales resteraient/.test(t)) assert.ok(gn < ECART_LISIBLE, `${insee} : nuits +${gn}`);
+    if (/journées au-dessus de 35 °C (et les nuits tropicales )?deviendraient/.test(t)) assert.ok(gj >= ECART_LISIBLE, `${insee} : jours +${gj}`);
+    if (/nuits tropicales (deviendraient )?(beaucoup )?plus fréquentes/.test(t)) assert.ok(gn >= ECART_LISIBLE, `${insee} : nuits +${gn}`);
+    assert.doesNotMatch(t, /aujourd'hui|actuel/);
+    n++;
+  }
+  assert.ok(n > 20000, `${n} communes sous les repères`);
+});
+
+// ── Contre-revue du 08/11/2026 : la maille contredite par le thermomètre de la commune ───────────────────
+
+test("Chamonix : la station de la commune contredit la maille, la réserve est dite au premier niveau", () => {
+  const e = entrees("74056");
+  const c = stationContredit(e);
+  assert.ok(c, "Chamonix : la station Météo-France relève plus que la maille n'en projette pour 2050");
+  const p = phraseChaleur(e, "Chamonix-Mont-Blanc");
+  assert.equal(p.signal, phraseChaleur({ ...e, recent: { ...e.recent!, stations: [] } }, "X").signal, "le signal du moteur ne bouge pas");
+  assert.doesNotMatch(p.texte, /^Les fortes chaleurs resteraient exceptionnelles ici/);
+  assert.match(p.texte, /La station Météo-France Chamonix \(1\s042 m d'altitude, à 4 km\) relève pourtant déjà 16 jours au-dessus de 30 °C par an en moyenne sur 2016–2025/);
+  assert.match(p.texte, /ces chiffres sous-estiment la chaleur là où elle mesure\.$/);
+  const l = lireChaleur(lieu("74056", "Chamonix-Mont-Blanc"), e);
+  assert.match(l.methode!.join(" "), /Ici, la station Météo-France Chamonix .* années complètes sur 2016–2025/);
+});
+
+test("témoin : sans station, ou quand la station ne dépasse pas la projection de la maille, aucune réserve", () => {
+  const e = entrees("74056");
+  assert.equal(stationContredit({ ...e, recent: { ...e.recent!, stations: [] } }), null);
+  const tiede = { nom: "X", altitude: 100, annees: 10, jours: 1.9, jours30: 1.9, nuits: 1.9, distanceKm: 1 };
+  assert.equal(stationContredit({ ...e, recent: { ...e.recent!, stations: [tiede] } }), null, "moins de ECART_LISIBLE relevé : pas de contradiction");
+  // Plaine : la station compte quelques journées à 30 °C de plus que la maille n'en projette (23 contre 20,6) : écart
+  // ordinaire entre un thermomètre et un secteur de 8 km, pas une absence contredite.
+  const plaine: EntreesChaleur = { ...e, jours: { ...e.jours, projete: 2 }, nuits: { ...e.nuits, projete: 8 }, jours30: { projete: 20.6, reference: 15 } };
+  const troyes = { nom: "TROYES-BARBEREY", altitude: 112, annees: 10, jours: 3, jours30: 23.4, nuits: 3, distanceKm: 2 };
+  assert.equal(stationContredit({ ...plaine, recent: { ...plaine.recent!, stations: [troyes] } }), null);
+  // Défavorable : la commune n'est pas présentée comme peu exposée, la phrase ne change pas.
+  const n = entrees("30189");
+  const chaud = { nom: "X", altitude: 59, annees: 10, jours: 40, jours30: 90, nuits: 60, distanceKm: 1 };
+  const nAbsent: EntreesChaleur = { ...n, jours30: { projete: 0.5, reference: 0 } }; // absence fictive, pour la règle
+  assert.ok(stationContredit({ ...nAbsent, recent: { ...n.recent!, stations: [chaud] } }));
+  assert.equal(phraseChaleur({ ...nAbsent, recent: { ...n.recent!, stations: [chaud] } }, "Nîmes").texte, phraseChaleur(nAbsent, "Nîmes").texte);
 });

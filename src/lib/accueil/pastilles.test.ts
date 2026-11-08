@@ -369,7 +369,9 @@ test("seuils de la règle du moteur : 8 jours au-dessus de 35 °C, 25 nuits trop
 const quantiteReformulee = (t: string) => /\d/.test(t.replace(/\b(?:19|20)\d{2}\b/g, "").replace(/\d+\s?°C/g, ""));
 const chaleurDe = (insee: string, commune = insee) => lireChaleur({ ...SETE, commune, insee }, entreesReelles(insee));
 
-const AVANT_LA_ROCHELLE = "Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient beaucoup plus fréquentes.";
+// Sans climat récent (ces entrées n'en portent pas), la phrase se compare à 1976-2005 et le dit. Contre-revue du
+// 08/11/2026 : les journées sont jugées comme les nuits (2,8 contre 0,6 : hausse lisible, plus que doublée).
+const AVANT_LA_ROCHELLE = "Les journées au-dessus de 35 °C et les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 1976-2005.";
 
 test("La Rochelle (sous les seuils, 23,4 nuits pour 25) : « À surveiller », jamais « favorable », une phrase de lecteur", () => {
   const e = entreesReelles("17300");
@@ -377,7 +379,7 @@ test("La Rochelle (sous les seuils, 23,4 nuits pour 25) : « À surveiller », j
   const l = chaleurDe("17300", "La Rochelle");
   assert.equal(MOT_DU_SIGNAL[l.pourVous.signal], "À surveiller");
   assert.notEqual(l.pourVous.signal, "favorable");
-  // « peu nombreuses » : 2,8 < 8 ; « beaucoup plus fréquentes » : 23,4 ≥ 2 × 5,1.
+  // Exposition sous les repères (la pastille) ; évolution lisible et doublée sur les deux mesures (la phrase).
   assert.equal(l.pourVous.texte, AVANT_LA_ROCHELLE);
   assert.ok(!quantiteReformulee(l.pourVous.texte));
   assert.match(l.methode!.join(" "), /nuits tropicales \(23,4 pour un repère de 25\)/);
@@ -403,7 +405,8 @@ test("chaque qualificatif suit sa règle : doublé, simplement plus fréquent, s
   const base = entreesReelles("17300");
   const avec = (jours: [number, number], nuits: [number, number], verdict: EntreesChaleur["verdict"] = "under_threshold") =>
     lireChaleur(SETE, { ...base, verdict, jours: { projete: jours[0], reference: jours[1], seuil: 8 }, nuits: { projete: nuits[0], reference: nuits[1], seuil: 25 } }).pourVous.texte;
-  assert.match(avec([3, 1], [12, 7]), /les nuits tropicales seraient plus fréquentes\.$/, "12 < 2 × 7 : pas « beaucoup »");
+  assert.match(avec([3, 2], [12, 7]), /^Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient plus fréquentes qu'en 1976-2005\.$/, "12 < 2 × 7 : pas « beaucoup » ; +1 jour : pas de hausse lisible");
+  assert.match(avec([3, 1], [12, 7]), /^Les journées au-dessus de 35 °C deviendraient beaucoup plus fréquentes qu'en 1976-2005, et les nuits tropicales plus fréquentes\.$/, "+2 jours, triplés : les journées comptent aussi");
   assert.match(avec([3, 1], [14, 7]), /beaucoup plus fréquentes/, "14 = 2 × 7 : doublé");
   assert.equal(avec([3, 2.5], [6, 5.5]), "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.");
   assert.equal(avec([9, 2], [10, 4], "unfavorable"), "Les journées au-dessus de 35 °C deviendraient particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.");
