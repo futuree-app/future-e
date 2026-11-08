@@ -226,6 +226,16 @@ export function valeurAffichee(v: number, seuil: number, precision: "entier" | "
 const gain = (a: AxeChaleur) => (a.projete != null && a.reference != null ? a.projete - a.reference : null);
 
 /**
+ * « a ≥ b » ENTRE DÉCIMAUX (contre-revue finale du 08/11/2026). Les valeurs sont au dixième, mais leur différence
+ * calculée en binaire tombe parfois juste sous la frontière : 2,3 − 0,3 donne 1,9999999999999998, et La Cavalerie
+ * (0,3 → 2,3 journées) se lisait « n'augmenteraient pas nettement » (236 axes, 231 communes). La tolérance est
+ * des millions de fois plus petite que le dixième affiché : elle ne déplace aucune frontière, elle la rend exacte.
+ * Réservé aux qualificatifs de la phrase ; le classement du moteur garde ses propres comparaisons.
+ */
+const TOLERANCE = 1e-9;
+const auMoins = (a: number, b: number) => a >= b - TOLERANCE;
+
+/**
  * L'ÉCART LISIBLE (contre-revue du 08/11/2026) : en dessous de 2 jours (ou 2 nuits) par an, l'écart entre la
  * projection DRIAS et le climat récent SAFRAN ne se distingue pas du bruit de la comparaison. Mesuré dans l'audit :
  * l'erreur type d'une moyenne sur dix ans vaut ~0,9 jour à 35 °C et ~1,1 nuit tropicale, et les deux systèmes
@@ -235,7 +245,7 @@ const gain = (a: AxeChaleur) => (a.projete != null && a.reference != null ? a.pr
  */
 export const ECART_LISIBLE = 2;
 /** La hausse se lit-elle au-delà du bruit de la comparaison ? */
-const hausseLisible = (a: AxeChaleur) => (gain(a) ?? 0) >= ECART_LISIBLE;
+const hausseLisible = (a: AxeChaleur) => { const g = gain(a); return g != null && auMoins(g, ECART_LISIBLE); };
 /**
  * LA RÉPONSE À LA PRIORITÉ : une pastille, puis une phrase qui parle de la commune, jamais du mécanisme de futur•e
  * (revue du 15/10 : ni « seuil », ni « ce que futur•e signale »). Elle ne reformule pas les nombres affichés.
@@ -260,15 +270,16 @@ const hausseLisible = (a: AxeChaleur) => (gain(a) ?? 0) >= ECART_LISIBLE;
  *                                      d'exposition. « Peu nombreuses » n'est plus employé (contre-revue du
  *                                      08/11/2026) : sans hausse lisible, 23 nuits pour un repère de 25 n'en sont pas
  *                                      moins nombreuses ; l'exposition, c'est la pastille qui la dit ;
- *   « particulièrement fréquentes » → seuil du moteur atteint (« deviendraient » seulement s'il ne l'est pas déjà
- *                                      sur la période de comparaison) ;
+ *   « particulièrement fréquentes » → seuil du moteur atteint ; « deviendraient » seulement si la hausse est
+ *                                      lisible ET que la période de comparaison n'atteint pas déjà ce niveau, sinon
+ *                                      « seraient » (contre-revue finale : Vence, 23,6 → 25 nuits, ne « devient » rien) ;
  *   « plus fréquentes »             → hausse lisible : ECART_LISIBLE de plus par an au moins ;
  *   « beaucoup plus fréquentes »    → hausse lisible ET au moins doublée (convention éditoriale du 15/10) : le
  *                                      doublement seul ne suffit plus près de zéro (0,3 → 0,8 n'est pas une hausse dite).
  * Chaque évolution nomme sa période de comparaison (« qu'en 2016–2025 ») : jamais « aujourd'hui ».
  * Deux communes aux chiffres différents peuvent recevoir la même phrase : la différence se lit dans les chiffres.
  */
-const double = (a: AxeChaleur) => hausseLisible(a) && a.projete! >= 2 * a.reference!;
+const double = (a: AxeChaleur) => hausseLisible(a) && auMoins(a.projete!, 2 * a.reference!);
 
 /** « beaucoup plus » / « plus » / `null` (aucune hausse lisible : rien à en dire sans inventer). */
 const evolution = (a: AxeChaleur): string | null => (!hausseLisible(a) ? null : double(a) ? "beaucoup plus" : "plus");
@@ -367,8 +378,9 @@ export function phraseChaleur(e: EntreesChaleur, commune: string): { signal: Sig
     }
     const axe = n ? nuits : jours;
     const sujet = n ? "Les nuits tropicales" : `Les ${JOURS_35}`;
-    // « deviendraient » dit un changement : faux si la période de comparaison atteint déjà ce niveau (Nîmes, nuits).
-    const verbe = axe.reference != null && axe.reference >= axe.seuil ? "seraient" : "deviendraient";
+    // « deviendraient » dit un changement : faux si la période de comparaison atteint déjà ce niveau (Nîmes, nuits),
+    // et faux aussi sous l'écart lisible (Vence : 23,6 → 25 nuits, +1,4). La phrase dit alors l'exposition seule.
+    const verbe = hausseLisible(axe) && !auMoins(axe.reference!, axe.seuil) ? "deviendraient" : "seraient";
     return { signal: "defavorable", texte: `${sujet} ${verbe} particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.` };
   }
   // Sous les seuils : l'exposition reste sous les repères (la pastille le dit) ; la phrase DÉCRIT l'évolution, axe

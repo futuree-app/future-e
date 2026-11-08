@@ -20,7 +20,7 @@ Le prototype est implémenté dans la PR (bloc « Éviter les fortes chaleurs »
 - la politique de mise à jour annuelle.
 
 
-> **Contre-revue du 08/11/2026 : trois corrections appliquées, une limite de reproductibilité levée ; puis trois ajustements avant fusion (section « Dernières corrections avant fusion »).** Voir la section « Corrections après contre-revue » ci-dessous. Elle **prime** sur le reste du document : nuits tropicales au sens strict de DRIAS (`> 20 °C`), phrase qui juge les journées comme les nuits, réserve de maille au premier niveau pour les cas démontrés en montagne, comparabilité recalculable depuis le dépôt.
+> **Contre-revue du 08/11/2026 : trois corrections appliquées, une limite de reproductibilité levée ; puis trois ajustements avant fusion (section « Dernières corrections avant fusion »), puis deux corrections de la contre-revue finale (section « Contre-revue finale »).** Voir la section « Corrections après contre-revue » ci-dessous. Elle **prime** sur le reste du document : nuits tropicales au sens strict de DRIAS (`> 20 °C`), phrase qui juge les journées comme les nuits, réserve de maille au premier niveau pour les cas démontrés en montagne, comparabilité recalculable depuis le dépôt.
 
 ## Corrections après contre-revue (08/11/2026)
 
@@ -192,6 +192,45 @@ Reproduit avec les mêmes versions (Node 25.8.2, ESLint 9.39.4, `node_modules` c
 3. Lint : restreindre l'objet de règles React aux fichiers JS/TS.
 
 ---
+
+## Contre-revue finale (08/11/2026, nuit) : deux corrections rédactionnelles
+
+*Reprise du SHA `8547bd3f` (NO GO). Le reste de ce SHA a été validé par la contre-revue : 45 changements de pastille exactement, réserves de station, projections, seuils et moteur inchangés, données et corrélations reproductibles.*
+
+### 1. « Deviendraient particulièrement fréquentes » sous l'écart lisible
+
+- **Cause.** Dans la branche « Plutôt défavorable » à un seul axe, le verbe ne vérifiait que le repère sur la période de comparaison (`reference >= seuil` donnait « seraient », sinon « deviendraient »). Il ne vérifiait pas l'écart lisible. À Courmes (06049), Coursegoules (06050) et Vence (06157), les nuits passent de **23,6 à 25** (+1,4) : la phrase disait « deviendraient », donc un changement que la convention de 2 nuits ne permet pas d'affirmer.
+- **Correction.** « deviendraient » exige maintenant une hausse lisible **et** une période de comparaison sous le repère ; sinon, « seraient particulièrement fréquentes », qui décrit l'exposition seule. Le signal défavorable et le classement ne bougent pas.
+- **Avant / après.** Vence : « Les nuits tropicales deviendraient particulièrement fréquentes… » devient « Les nuits tropicales seraient particulièrement fréquentes… ». 3 communes.
+
+### 2. La frontière exacte de 2,0
+
+- **Cause.** Les valeurs sont au dixième, mais leur différence se calcule en virgule flottante binaire : 2,3 − 0,3 donne `1.9999999999999998`. À La Cavalerie (12063), les journées passent de **0,3 à 2,3** et la phrase disait « n'augmenteraient pas nettement ». Le défaut touchait 236 axes, dans 231 communes.
+- **Correction.** Les qualificatifs comparent avec une tolérance de 10⁻⁹ (`auMoins`), soit des millions de fois moins que le dixième affiché. Elle ne déplace pas la frontière : elle la rend exacte. Le classement du moteur garde ses propres comparaisons, inchangées.
+- **Avant / après.** La Cavalerie : « Les journées à 35 °C ou plus n'augmenteraient pas nettement par rapport à 2016–2025, mais les nuits tropicales deviendraient beaucoup plus fréquentes. » devient « Les journées à 35 °C ou plus et les nuits tropicales deviendraient beaucoup plus fréquentes qu'en 2016–2025. »
+
+### Mesure nationale (34 791 lectures rejouées, SHA `8547bd3f` contre ce SHA)
+
+| | Nombre |
+|---|---|
+| phrases modifiées | **234** (231 à la frontière de 2,0, 3 défavorables) |
+| signaux modifiés | **0** |
+| classements modifiés | **0** |
+
+### Tests
+
+- Le test « LA PHRASE DIT VRAI » compte maintenant l'écart en **dixièmes entiers**, avec sa propre arithmétique et sans la tolérance du code testé. Il vérifie aussi le sens inverse : une hausse lisible n'est jamais dite « pas nettement ». C'est ce sens inverse qui manquait : l'ancien test calculait l'écart en flottant, comme le code, et ne voyait donc pas le défaut.
+- Nouveau test national : dans la branche défavorable, « deviendraient particulièrement » n'apparaît qu'après une hausse lisible, et seulement si la période de comparaison est sous le repère.
+- Nouveaux tests ciblés :
+  - la frontière, avec La Cavalerie, 0,3 → 2,3 et 3,1 → 5,1 ;
+  - un cas juste sous la frontière, 0,3 → 2,2 ;
+  - Courmes, Coursegoules et Vence ;
+  - 23 → 25 nuits, la frontière exacte côté défavorable.
+- Les deux fichiers ciblés passent : 61 tests, 0 échec.
+- La suite complète, lancée seule (`--test-concurrency=1`), passe : 4 376 tests, 4 375 réussis, 1 ignoré, 0 échec.
+- `tsc` passe. Le lint de `pastilles.ts` passe.
+
+**Limite ouverte.** Aucune nouvelle. La tolérance ne vaut que pour les qualificatifs de la phrase ; les repères du moteur (`>=` sur valeur non arrondie) restent tels quels, par consigne.
 
 ## A. Disponibilité des données
 

@@ -227,20 +227,69 @@ test("défavorable : « deviendraient » seulement si la période de comparaison
     /^Les nuits tropicales deviendraient particulièrement fréquentes/);
 });
 
+test("frontière exacte de l'écart lisible : 0,3 → 2,3 est une hausse de 2, pas 1,9999999999999998 (La Cavalerie)", () => {
+  assert.equal(2.3 - 0.3 < 2, true, "le piège binaire existe bien");
+  assert.match(phraseChaleur(sousSeuil([0.3, 2.3], [5, 5.5]), "X").texte, /^Les journées à 35 °C ou plus deviendraient beaucoup plus fréquentes qu'en 2016–2025/);
+  assert.match(phraseChaleur(sousSeuil([2.3, 4.3], [5, 5.5]), "X").texte, /^Les journées à 35 °C ou plus deviendraient plus fréquentes/);
+  assert.match(phraseChaleur(sousSeuil([2, 5], [3.1, 5.1]), "X").texte, /nuits tropicales plus fréquentes|nuits tropicales deviendraient plus fréquentes/);
+  // Juste sous la frontière, au dixième : toujours « pas nettement ».
+  assert.match(phraseChaleur(sousSeuil([0.3, 2.2], [5, 5.5]), "X").texte, /^Les journées à 35 °C ou plus comme les nuits tropicales n'augmenteraient pas nettement/);
+  const e = entrees("12063");
+  assert.equal(Math.round((e.jours.projete! - e.recent!.jours) * 10), 20, "La Cavalerie : +2,0 journées");
+  assert.match(phraseChaleur(e, "La Cavalerie").texte, /^Les journées à 35 °C ou plus (et les nuits tropicales )?deviendraient/);
+});
+
+test("défavorable, un seul axe : « deviendraient » exige aussi l'écart lisible (Vence, 23,6 → 25 nuits)", () => {
+  assert.match(phraseChaleur({ ...sousSeuil([0, 0.2], [23.6, 25]), verdict: "unfavorable" }, "X").texte,
+    /^Les nuits tropicales seraient particulièrement fréquentes/);
+  assert.match(phraseChaleur({ ...sousSeuil([0, 0.2], [23, 25]), verdict: "unfavorable" }, "X").texte,
+    /^Les nuits tropicales deviendraient particulièrement fréquentes/, "+2,0 : lisible, à la frontière exacte");
+  for (const insee of ["06049", "06050", "06157"]) {
+    const e = entrees(insee);
+    assert.equal(e.verdict, "unfavorable", `${insee} : le classement ne bouge pas`);
+    const p = phraseChaleur(e, insee);
+    assert.equal(p.signal, "defavorable", insee);
+    assert.match(p.texte, /^Les nuits tropicales seraient particulièrement fréquentes/, insee);
+  }
+});
+
+test("défavorable, sur toutes les communes : « deviendraient particulièrement » seulement après une hausse lisible", () => {
+  let n = 0;
+  for (const insee of Object.keys(FICHIER.communes)) {
+    const e = entrees(insee);
+    if (e.verdict !== "unfavorable" || !e.recent || !Number.isFinite(e.jours.projete) || !Number.isFinite(e.nuits.projete)) continue;
+    const t = phraseChaleur(e, insee).texte;
+    const m = /^Les (nuits tropicales|journées à 35 °C ou plus) deviendraient particulièrement/.exec(t);
+    if (!m) continue;
+    const nuit = m[1] === "nuits tropicales";
+    const g = Math.round(((nuit ? e.nuits.projete! : e.jours.projete!) - (nuit ? e.recent.nuits : e.recent.jours)) * 10);
+    assert.ok(g >= ECART_LISIBLE * 10, `${insee} : +${g / 10}`);
+    assert.ok((nuit ? e.recent.nuits : e.recent.jours) < (nuit ? e.nuits.seuil : e.jours.seuil), `${insee} : repère déjà atteint`);
+    n++;
+  }
+  assert.ok(n > 1000, `${n} phrases « deviendraient particulièrement »`);
+});
+
 test("LA PHRASE DIT VRAI, sur les 34 788 communes : chaque mot de l'évolution suit son chiffre, jamais « peu nombreuses »", () => {
   let n = 0;
   for (const insee of Object.keys(FICHIER.communes)) {
     const e = entrees(insee);
     if (e.verdict !== "under_threshold" || !Number.isFinite(e.jours.projete) || !Number.isFinite(e.nuits.projete) || !e.recent) continue;
     const t = phraseChaleur(e, insee).texte;
-    const gj = e.jours.projete! - e.recent.jours, gn = e.nuits.projete! - e.recent.nuits;
+    // Oracle indépendant du code testé : les valeurs sont au dixième, l'écart se compte en dixièmes ENTIERS
+    // (2,3 − 0,3 = 20 dixièmes, et non 1,9999999999999998 : contre-revue finale, La Cavalerie).
+    const gj = Math.round((e.jours.projete! - e.recent.jours) * 10), gn = Math.round((e.nuits.projete! - e.recent.nuits) * 10);
+    const LISIBLE = ECART_LISIBLE * 10;
     assert.doesNotMatch(t, /peu nombreuses/, insee);
-    if (/^Les journées à 35 °C ou plus (comme les nuits tropicales )?n'augmenteraient pas nettement/.test(t)) assert.ok(gj < ECART_LISIBLE && e.jours.projete! >= 1, `${insee} : jours +${gj}`);
-    if (/nuits tropicales n'augmenteraient pas nettement/.test(t)) assert.ok(gn < ECART_LISIBLE && e.nuits.projete! >= 1, `${insee} : nuits +${gn}`);
+    if (/^Les journées à 35 °C ou plus (comme les nuits tropicales )?n'augmenteraient pas nettement/.test(t)) assert.ok(gj < LISIBLE && e.jours.projete! >= 1, `${insee} : jours +${gj / 10}`);
+    if (/nuits tropicales n'augmenteraient pas nettement/.test(t)) assert.ok(gn < LISIBLE && e.nuits.projete! >= 1, `${insee} : nuits +${gn / 10}`);
     if (/^Les journées à 35 °C ou plus resteraient rares/.test(t)) assert.ok(e.jours.projete! < 1, insee);
     if (/nuits tropicales resteraient rares/.test(t)) assert.ok(e.nuits.projete! < 1, insee);
-    if (/journées à 35 °C ou plus (et les nuits tropicales )?deviendraient/.test(t)) assert.ok(gj >= ECART_LISIBLE, `${insee} : jours +${gj}`);
-    if (/nuits tropicales (deviendraient )?(beaucoup )?plus fréquentes/.test(t)) assert.ok(gn >= ECART_LISIBLE, `${insee} : nuits +${gn}`);
+    if (/journées à 35 °C ou plus (et les nuits tropicales )?deviendraient/.test(t)) assert.ok(gj >= LISIBLE, `${insee} : jours +${gj / 10}`);
+    if (/nuits tropicales (deviendraient )?(beaucoup )?plus fréquentes/.test(t)) assert.ok(gn >= LISIBLE, `${insee} : nuits +${gn / 10}`);
+    // Et l'inverse : une hausse lisible n'est jamais dite « pas nettement ».
+    if (gj >= LISIBLE) assert.doesNotMatch(t, /^Les journées à 35 °C ou plus (comme les nuits tropicales )?n'augmenteraient pas/, `${insee} : jours +${gj / 10}`);
+    if (gn >= LISIBLE) assert.doesNotMatch(t, /nuits tropicales n'augmenteraient pas/, `${insee} : nuits +${gn / 10}`);
     assert.doesNotMatch(t, /aujourd'hui|actuel/);
     n++;
   }
