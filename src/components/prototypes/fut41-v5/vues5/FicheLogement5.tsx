@@ -43,7 +43,7 @@ export function FicheLogement5({ api }: { api: Api5 }) {
       <Statut api={api} logement={l} />
 
       <Section titre="Où il en est" id="savoir">
-        <p className={s.corps}>{savoirCourt(api, l)}.</p>
+        <p className={s.corps}>{savoirCourt(api, l).replace(/\.?$/, ".")}</p>
         {al.map((x) => <p key={x.cle} className={v.alerte} data-genre={x.genre}>{lier(x.phrase)}</p>)}
         {g.cle === "adresse" ? <Adresse api={api} logement={l} /> : g.cle !== "ouvrir" ? (
           <div className={v.gesteBloc}>

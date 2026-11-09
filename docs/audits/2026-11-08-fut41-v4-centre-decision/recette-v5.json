@@ -394,13 +394,19 @@
   "taches": [
     {
       "tache": "Accueil",
-      "nom": "trois phrases au plus pour dire où en est la recherche",
+      "nom": "trois lignes titrées au plus pour dire où en est la recherche",
       "ok": true,
       "detail": "(3)"
     },
     {
       "tache": "Accueil",
-      "nom": "la synthèse dit ce qui distingue et ce qui manque",
+      "nom": "la synthèse dit qui se distingue, à quelle échelle, et ce qui reste à savoir",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Accueil",
+      "nom": "la conclusion ancienne de Rennes est datée, pas présentée comme actuelle",
       "ok": true,
       "detail": ""
     },
@@ -420,7 +426,7 @@
       "tache": "Accueil",
       "nom": "la section des lieux commence dans les 1 100 premiers pixels (1440 px)",
       "ok": true,
-      "detail": "(932 px)"
+      "detail": "(967 px)"
     },
     {
       "tache": "Accueil",
@@ -448,7 +454,13 @@
     },
     {
       "tache": "B",
-      "nom": "En bref : ce qui distingue les communes, lu de la même façon",
+      "nom": "En bref : ce qui distingue les communes, avec qui et quelle issue",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "B",
+      "nom": "En bref : la gare se mesure depuis une adresse ; Rennes est à revoir",
       "ok": true,
       "detail": ""
     },
@@ -501,6 +513,24 @@
       "detail": ""
     },
     {
+      "tache": "C",
+      "nom": "jamais « aucun ne bloque » quand la gare n'est mesurée que pour un logement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "une rubrique vide dit « aucun, parmi ce qui est lu » et combien de conditions sont lues",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "aucun médecin « disponible » sur la seule présence",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "tache": "D",
       "nom": "le panneau dit ce que l'analyse apprendra et ce qu'elle ne dira pas",
       "ok": true,
@@ -538,7 +568,13 @@
     },
     {
       "tache": "E",
-      "nom": "la mesure garde la limite d'alors",
+      "nom": "la mesure garde la limite d'alors, datée",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "E",
+      "nom": "l'issue ancienne est « à revoir », jamais « correspond » actuel",
       "ok": true,
       "detail": ""
     },
@@ -604,6 +640,12 @@
     },
     {
       "tache": "Et si",
+      "nom": "plus de « restent valables »",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Et si",
       "nom": "adopté : révision 4, inscrite dans « Ce qui a changé »",
       "ok": true,
       "detail": ""
@@ -617,6 +659,12 @@
     {
       "tache": "Z12",
       "nom": "la mesure de 24 min reste dans le détail",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Et si",
+      "nom": "près de la comparaison : les seules possibilités affichées, sans rien modifier",
       "ok": true,
       "detail": ""
     },

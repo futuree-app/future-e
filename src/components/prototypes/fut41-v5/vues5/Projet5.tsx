@@ -5,7 +5,7 @@
 // qu'elles ont été écrites, sous le Projet d'alors. Rien n'est relancé ni réactivé automatiquement.
 import { useId, useState } from "react";
 import { Selecteur, releve as s } from "@/components/releve/primitives";
-import { dateCourte, etSi, libelleCritere, montantFr, simuler, NOM_CRITERE, TITRE_SEAU, type CleCritere, type ModificationProjet, type SeauEtSi } from "../modele5";
+import { dateCourte, etSi5, libelleCritere, montantFr, simuler, NOM_CRITERE, TITRE_SEAU5, type CleCritere, type ModificationProjet, type SeauEtSi } from "../modele5";
 import type { Api5 } from "../CentreDecision5";
 import { Declare, Fil, Section, lier } from "../communs5";
 import v from "../v5.module.css";
@@ -39,7 +39,7 @@ export function Projet5({ api }: { api: Api5 }) {
   const texte = !modification ? "" : modification.type === "valeur" ? `${NOM_CRITERE[cle]} : ${actuel.valeur} → ${val} ${unite}.`
     : modification.type === "nature" ? `${NOM_CRITERE[cleNature]} devient ${modification.nature === "sans_compromis" ? "une condition sans compromis" : "une priorité"}.`
       : `Budget déclaré : ${montantFr(budget)}.`;
-  const seaux = modification?.type === "valeur" ? etSi(etat, cle, val) : [];
+  const seaux = modification?.type === "valeur" ? etSi5(etat, cle, val) : [];
   const effets = modification && modification.type !== "valeur" ? simuler(etat.logements, projet, modification).effets : [];
 
   return (
@@ -89,7 +89,7 @@ export function Projet5({ api }: { api: Api5 }) {
               const xs = seaux.filter((r) => r.seau === sx);
               return xs.length ? (
                 <div key={sx} className={v.seau} data-seau={sx}>
-                  <p className={v.seauTitre}>{TITRE_SEAU[sx]} <span className={v.seauNb}>{xs.length}</span></p>
+                  <p className={v.seauTitre}>{TITRE_SEAU5[sx]} <span className={v.seauNb}>{xs.length}</span></p>
                   <ul>{xs.map((r) => <li key={r.pisteId}><strong className={s.encre}>{r.nom}</strong> · {lier(r.raison)}</li>)}</ul>
                 </div>
               ) : null;

@@ -17,8 +17,8 @@
 //   - une mise à jour relit sous le Projet actuel, sans lire plus loin que l'analyse d'origine.
 import {
   analyseServie, communeCommeLieu, communeDe, comparerCritere, conditionsNonTenues, critereAJour, dateCourte,
-  estEtabli, gestePrincipal, libelleCritere, logementsDe, motifSimple, nomPiste, idPiste, valeurAnalyseAdresse, NOM_CRITERE, LIBELLE_ISSUE_SIMPLE,
-  type Analyse, type CleCritere, type Commune, type ComparaisonCritere, type Geste, type Lieu, type LigneRegistre, type Logement, type Piste, type Recherche,
+  estEtabli, etSi, gestePrincipal, libelleCritere, logementsDe, motifSimple, nomPiste, idPiste, valeurAnalyseAdresse, NOM_CRITERE, LIBELLE_ISSUE_SIMPLE,
+  type SeauEtSi, type Analyse, type CleCritere, type Commune, type ComparaisonCritere, type Geste, type Lieu, type LigneRegistre, type Logement, type Piste, type Recherche,
 } from "../fut41-v41/modele41.ts";
 
 export * from "../fut41-v41/modele41.ts";
@@ -70,6 +70,11 @@ export type Cellule = {
   limiteAlors: number | null;
   /** La colonne ne tient pas cette condition sans compromis (sous le Projet actuel) : dit une fois, en tête. */
   bloque: boolean;
+  /**
+   * B (revue Work) : la ligne a été écrite sous une autre version de cette condition. Elle reste
+   * consultable comme un fait daté ; elle n'est jamais affichée comme un verdict actuel.
+   */
+  perime: boolean;
   /** Le lieu réduit à cette seule ligne, pour le contrat de comparaison V4. */
   lieu: Lieu;
 };
@@ -93,7 +98,27 @@ function lectureCommune(r: Recherche, c: Commune, cle: CleCritere): { a: Analyse
   return null;
 }
 
+/**
+ * C (revue Work) : « un médecin disponible » ne s'établit jamais par la seule présence de généralistes.
+ * Une ligne favorable sur ce critère est relue comme « à vérifier » (garde de l'interface ; le moteur de
+ * production le fait déjà, `autour-facts.ts`). Les autres critères ne sont pas touchés.
+ */
+export const PRESENCE_SEULEMENT: CleCritere[] = ["medecin"];
+const DISPONIBILITE = " Leur disponibilité n'est pas connue.";
+export function prudente(l: LigneRegistre | null): LigneRegistre | null {
+  if (!l || !PRESENCE_SEULEMENT.includes(l.cle) || l.issue !== "favorable") return l;
+  return { ...l, issue: "to_confirm", constat: (l.constat ?? "Des généralistes recensés.").replace(/\.?$/, ".") + DISPONIBILITE };
+}
+
 function cellule(r: Recherche, col: Colonne, cle: CleCritere, couche: Couche): Cellule {
+  const c = celluleBrute(r, col, cle, couche);
+  const ligne = prudente(c.ligne);
+  const a = analyseServie(c.lieu);
+  const lieu = ligne !== c.ligne && a ? { ...c.lieu, analyses: [{ ...a, registre: [ligne!] }] } : c.lieu;
+  return { ...c, ligne, lieu, perime: !!ligne && !!a && !critereAJour(a, cle, r.projet) };
+}
+
+function celluleBrute(r: Recherche, col: Colonne, cle: CleCritere, couche: Couche): Omit<Cellule, "perime"> {
   const projet = r.projet;
   const c = r.communes.find((x) => x.insee === col.insee);
   if (col.type === "commune") {
@@ -228,6 +253,9 @@ export function confronter(r: Recherche, pistes: Piste[]): { colonnes: Colonne[]
 export type Bilan = {
   id: string; nom: string;
   apporte: string[]; accepte: string[]; ouvert: string[]; pasLu: string[];
+  /** A (revue Work) : combien de conditions sont lues pour cette colonne, sur combien. Une rubrique vide
+   *  ne dit « aucun » que si tout est lu ; sinon elle dit « aucun parmi ce qui est lu ». */
+  lus: number; total: number;
   /** Une condition sans compromis non tenue (dite en tête, pas ici) et une conclusion ancienne. */
   bloque: boolean; aRevoir: boolean;
   geste: Geste;
@@ -267,7 +295,8 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
       ouvert.push(`${nom}${ou} : ${q ? "une question à poser" : "à vérifier"}`);
     }
   }
-  return { id: col.id, nom: col.nom, apporte, accepte, ouvert, pasLu, bloque, aRevoir, geste: gestePrincipal(r, p, droits) };
+  const total = r.projet.criteres.length;
+  return { id: col.id, nom: col.nom, apporte, accepte, ouvert, pasLu, lus: total - pasLu.length - ouvert.filter((x) => / : pas encore lu /.test(x)).length, total, bloque, aRevoir, geste: gestePrincipal(r, p, droits) };
 }
 
 // ── Ce qui bloque, ce qui est à revoir : dit une fois ────────────────────────────────────────
@@ -305,43 +334,93 @@ export function deNom(p: Piste): string {
   return /^maison/i.test(n) ? `de la ${minus(n)}` : `du ${n}`;
 }
 
+export type Ligne5 = { titre: string; texte: string };
+
+const ISSUE_COURTE = (l: LigneRegistre) => LIBELLE_ISSUE_SIMPLE[l.issue].toLowerCase();
+
+/**
+ * D (revue Work) : CE QUI LES DISTINGUE, incarné. Pour chaque condition dont l'écart est lu de la même
+ * façon des deux côtés : qui, à quelle échelle, avec quelle issue. À la commune, entre des logements,
+ * la phrase rappelle que cela situe les logements sans les lire.
+ */
 function phraseDistingue(r: Recherche, pistes: Piste[]): string | null {
   const c = confronter(r, pistes);
-  const parCouche = new Map<Couche, CleCritere[]>();
-  for (const li of c.lignes) for (const x of li.couches) if (x.verdict === "distingue") parCouche.set(x.couche, [...(parCouche.get(x.couche) ?? []), li.cle]);
-  if (!parCouche.size) return null;
-  const parts = [...parCouche.entries()].map(([k, cles]) => `${listeFr(cles.map((x) => minus(NOM_CRITERE[x])))} ${NOM_COUCHE[k].toLowerCase()}`);
-  return `Ce qui les distingue vraiment : ${listeFr(parts)}.`;
-}
-
-function phraseManque(r: Recherche, pistes: Piste[]): string | null {
-  const m = pistes.map((p) => ({ p, g: gestePrincipal(r, p, "unite") })).filter((x) => ["adresse", "analyser", "examiner_commune", "lire_commune"].includes(x.g.cle));
-  if (!m.length) return null;
-  if (m.length > 2) {
-    const nl = m.filter((x) => x.p.type === "logement").length;
-    const qui = nl === m.length ? "logements" : nl === 0 ? "communes" : "de vos communes et logements";
-    return `${cap(nombre(m.length))} ${qui} attendent encore une adresse ou une analyse avant de se comparer au même niveau.`;
+  const logements = c.colonnes.some((k) => k.type === "logement");
+  const nomCommune = (id: string) => { const k = c.colonnes.find((x) => x.id === id); return r.communes.find((x) => x.insee === k?.insee)?.nom ?? k?.nom ?? id; };
+  const nomCol = (id: string) => c.colonnes.find((x) => x.id === id)?.nom ?? id;
+  const parCouche = new Map<Couche, string[]>();
+  let n = 0;
+  for (const li of c.lignes) for (const x of li.couches) {
+    if (x.verdict !== "distingue" || n >= 3) continue;
+    const nommer = x.couche === "commune" && logements ? nomCommune : nomCol;
+    const issues = x.cellules.filter((k) => k.ligne && !k.bloque && estEtabli(k.ligne)).map((k) => `${listeFr([...new Set(k.ids.map(nommer))])} ${ISSUE_COURTE(k.ligne!)}`);
+    parCouche.set(x.couche, [...(parCouche.get(x.couche) ?? []), `${minus(NOM_CRITERE[li.cle])} (${issues.join(", ")})`]);
+    n++;
   }
-  const bout = (x: (typeof m)[number]) => (x.g.cle === "adresse" ? `l'adresse ${deNom(x.p)}` : x.g.cle === "analyser" ? `l'analyse ${deNom(x.p)}` : `la lecture ${deNom(x.p)} pour votre Projet`);
-  return `Il manque ${listeFr(m.map(bout))}.`;
+  if (!parCouche.size) return null;
+  const phrases = [...parCouche.entries()].map(([k, xs]) => `${NOM_COUCHE[k]} : ${listeFr(xs)}${k === "commune" && logements ? " ; cela situe les logements, sans rien dire de chacun" : ""}.`);
+  return phrases.join(" ");
 }
 
-/** « En bref » d'une comparaison : ce qui bloque (une fois), ce qui distingue, ce qui manque. */
-export function enBref(r: Recherche, pistes: Piste[]): string[] {
-  const out: string[] = [];
-  const al = alertes(r, pistes);
-  const b = al.filter((x) => x.genre === "bloque");
-  const rev = al.filter((x) => x.genre === "a_revoir");
-  if (b.length) out.push(b.length === 1 ? b[0]!.phrase : `${b.length} ne tiennent pas une condition sans compromis : ${listeFr(b.map((x) => nomDe(r, x.pisteId)))}.`);
-  else if (rev.length) out.push(rev.length === 1 ? rev[0]!.phrase : `${listeFr(rev.map((x) => nomDe(r, x.pisteId)))} ont été lus sous une ancienne version de votre Projet : leur conclusion sur la gare est à revoir.`);
-  else out.push("Aucun ne bloque sur votre condition sans compromis, d'après ce qui est lu.");
-  out.push(phraseDistingue(r, pistes) ?? "Rien ne les distingue encore de façon sûre.");
+/**
+ * D (revue Work) : LA CONDITION SANS COMPROMIS, pour qui elle est réellement connue. Jamais « aucun ne
+ * bloque » quand elle n'est mesurée que pour certains : on dit qui la tient (mesure à jour), qui ne la
+ * tient pas, qui est à revoir (mesure faite sous une autre limite) et pour qui elle reste à mesurer.
+ */
+function phraseSansCompromis(r: Recherche, pistes: Piste[]): string | null {
+  const k = r.projet.criteres.find((x) => x.nature === "sans_compromis");
+  if (!k) return null;
+  const lib = libelleCritere(k);
+  const ls = pistes.filter((p): p is { type: "logement"; logement: Logement } => p.type === "logement").map((p) => p.logement);
+  if (!ls.length) return `${lib} se mesure depuis une adresse : une gare dans la commune ne dit pas le trajet depuis un logement.`;
+  const ca = COUCHE_ADRESSE[k.cle];
+  const etat = ls.map((l) => {
+    const c = ca ? cellule(r, colonnesDe(r, [{ type: "logement", logement: l }])[0]!, k.cle, ca) : null;
+    const m = c?.ligne?.mesure ? ` (${c.ligne.mesure.valeur} ${c.ligne.mesure.unite})` : "";
+    if (!c?.ligne) return { g: "inconnu" as const, t: l.libelle };
+    if (c.bloque) return { g: "bloque" as const, t: `${l.libelle}${m}` };
+    if (c.perime) return { g: "revoir" as const, t: `${l.libelle}${m}` };
+    if (c.ligne.issue === "favorable") return { g: "tient" as const, t: `${l.libelle}${m}` };
+    return { g: "inconnu" as const, t: l.libelle };
+  });
+  // Au-delà de deux noms, on compte : la phrase doit rester lisible avec dix logements.
+  const de = (g: string) => { const xs = etat.filter((x) => x.g === g).map((x) => x.t); return { n: xs.length, t: xs.length > 2 ? `${nombre(xs.length)} logements` : listeFr(xs) }; };
+  const [bl, ti, rv, inc] = ["bloque", "tient", "revoir", "inconnu"].map(de) as [{ n: number; t: string }, { n: number; t: string }, { n: number; t: string }, { n: number; t: string }];
+  const pl = (n: number, un: string, plus: string) => (n > 1 ? plus : un);
+  const morceaux = [
+    bl.n ? `${bl.t} ne ${pl(bl.n, "la tient", "la tiennent")} pas` : "",
+    ti.n ? `${ti.t} la ${pl(ti.n, "tient", "tiennent")}` : "",
+    rv.n ? `${rv.t}, ${pl(rv.n, "mesuré", "mesurés")} sous une ancienne limite, ${pl(rv.n, "est", "sont")} à revoir` : "",
+    inc.n ? `pour ${inc.t}, elle reste à mesurer depuis l'adresse` : "",
+  ].filter(Boolean);
+  return `${lib} : ${morceaux.join(" ; ")}.`;
+}
+
+/** D (revue Work) : CE QUI MANQUE, et pourquoi cela compte. */
+function phraseManque(r: Recherche, pistes: Piste[]): string | null {
+  const m = pistes.map((p) => ({ p, g: gestePrincipal(r, p, "unite") })).filter((x) => ["adresse", "analyser", "examiner_commune", "lire_commune", "mettre_a_jour"].includes(x.g.cle));
+  if (!m.length) return null;
+  const bout = (x: (typeof m)[number]) => (x.g.cle === "adresse" ? `l'adresse ${deNom(x.p)}` : x.g.cle === "analyser" ? `l'analyse ${deNom(x.p)}` : x.g.cle === "mettre_a_jour" ? `la mise à jour ${deNom(x.p)} (gratuite)` : `la lecture ${deNom(x.p)} pour votre Projet`);
+  if (m.length > 3) {
+    const nl = m.filter((x) => x.p.type === "logement").length;
+    return `${cap(nombre(m.length))} ${nl === m.length ? "logements" : "de vos communes et logements"} attendent une adresse, une analyse ou une mise à jour : tant qu'elles manquent, ils ne se comparent pas au même niveau.`;
+  }
+  return `${cap(listeFr(m.map(bout)))} ${m.length > 1 ? "permettraient" : "permettrait"} de comparer au même niveau.`;
+}
+
+/** « En bref » d'une comparaison : la condition sans compromis, ce qui les distingue, ce qui manque. */
+export function enBref(r: Recherche, pistes: Piste[]): Ligne5[] {
+  const out: Ligne5[] = [];
+  const sc = phraseSansCompromis(r, pistes);
+  const communes = pistes.every((p) => p.type === "commune");
+  const rev = communes ? alertes(r, pistes).filter((x) => x.genre === "a_revoir") : [];
+  if (sc) out.push({ titre: "Votre condition sans compromis", texte: rev.length ? `${sc} ${rev.map((x) => x.phrase).join(" ")}` : sc });
+  out.push({ titre: "Ce qui les distingue", texte: phraseDistingue(r, pistes) ?? "Rien ne les distingue encore à méthode égale : les autres conditions ne sont pas lues, ou pas de la même façon des deux côtés." });
   const m = phraseManque(r, pistes);
-  if (m) out.push(m);
-  return out.slice(0, 3);
+  if (m) out.push({ titre: "Ce qui manque", texte: m });
+  return out;
 }
 
-const nomDe = (r: Recherche, id: string) => r.logements.find((l) => l.id === id)?.libelle ?? r.communes.find((c) => `c:${c.insee}` === id)?.nom ?? id;
 
 export function pistesActives(r: Recherche): Piste[] {
   return [
@@ -353,8 +432,8 @@ export function pistesActives(r: Recherche): Piste[] {
 const NOMBRE = ["aucun", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
 const nombre = (n: number, f = false) => (n === 1 && f ? "une" : NOMBRE[n] ?? String(n));
 
-/** « Où vous en êtes », en trois phrases au plus : la recherche, ce qui compte, ce qui manque. */
-export function ouVousEnEtes(r: Recherche): string[] {
+/** « Où vous en êtes », en trois lignes titrées au plus : la recherche, ce qui les distingue, ce qui manque. */
+export function ouVousEnEtes(r: Recherche): Ligne5[] {
   const communes = r.communes.filter((c) => c.statut !== "ecartee");
   const logements = r.logements.filter((l) => l.statut !== "ecarte");
   if (!communes.length && !logements.length) return [];
@@ -362,19 +441,19 @@ export function ouVousEnEtes(r: Recherche): string[] {
   const s1 = logements.length
     ? `${cap(nombre(communes.length, true))} commune${communes.length > 1 ? "s" : ""} et ${nombre(logements.length)} logement${logements.length > 1 ? "s" : ""} en vue ; ${analyses === 0 ? "aucun n'est encore analysé à son adresse" : analyses === 1 ? "un seul est analysé à son adresse" : `${nombre(analyses)} sont analysés à leur adresse`}.`
     : `${cap(nombre(communes.length, true))} commune${communes.length > 1 ? "s" : ""} en vue, aucun logement pour l'instant.`;
-  const out = [s1];
-  const al = alertes(r, logements.map((logement) => ({ type: "logement" as const, logement })));
-  const b = al.find((x) => x.genre === "bloque");
-  const rev = al.find((x) => x.genre === "a_revoir");
-  const communesP = communes.map((commune) => ({ type: "commune" as const, commune }));
-  // Seules les communes lues pour le Projet peuvent « faire la différence » : une lecture gratuite ne compte pas.
+  const out: Ligne5[] = [{ titre: "Votre recherche", texte: s1 }];
+  const lp = logements.map((logement) => ({ type: "logement" as const, logement }));
+  const b = alertes(r, lp).find((x) => x.genre === "bloque");
+  // Seules les communes lues pour le Projet peuvent distinguer : une lecture gratuite ne compte pas.
   const lues = communes.filter((c) => c.lecture === "rapport");
-  const d = lues.length > 1 ? phraseDistingue(r, lues.map((commune) => ({ type: "commune" as const, commune }))) : logements.length > 1 ? phraseDistingue(r, logements.map((logement) => ({ type: "logement" as const, logement }))) : null;
-  if (b) out.push(b.phrase);
-  else if (d) out.push(d.replace("Ce qui les distingue vraiment", lues.length > 1 ? `Entre ${listeFr(lues.map((c) => c.nom))}, ce qui fait la différence` : "Entre vos logements, ce qui fait la différence"));
-  else if (rev) out.push(rev.phrase);
-  const m = phraseManque(r, [...communesP, ...logements.map((logement) => ({ type: "logement" as const, logement }))]);
-  if (m) out.push(m);
+  const d = lues.length > 1 ? phraseDistingue(r, lues.map((commune) => ({ type: "commune" as const, commune }))) : logements.length > 1 ? phraseDistingue(r, lp) : null;
+  if (b) out.push({ titre: "Ce qui bloque", texte: b.phrase });
+  else if (d) out.push({ titre: lues.length > 1 ? `Entre ${listeFr(lues.map((c) => c.nom))}` : "Entre vos logements", texte: d });
+  // Sur l'accueil, ce qui manque est déjà dans « À faire maintenant » (gestes et raisons) : on ne le
+  // répète pas ici. Reste la condition sans compromis, pour qui elle est connue et pour qui elle ne l'est pas.
+  const sc = logements.length ? phraseSansCompromis(r, lp) : null;
+  const m = !logements.length ? phraseManque(r, communes.map((commune) => ({ type: "commune" as const, commune }))) : null;
+  if (sc || m) out.push({ titre: sc ? "Votre condition sans compromis" : "Ce qui reste à savoir", texte: (sc ?? m)! });
   return out.slice(0, 3);
 }
 
@@ -459,3 +538,25 @@ export function portee(r: Recherche, p: Piste, cle: Geste["cle"]): Portee {
 }
 
 export { communeDe };
+
+// ── Et si… ? : libellés prudents (B, revue Work) ─────────────────────────────────────────────
+
+export const TITRE_SEAU5: Record<SeauEtSi, string> = {
+  pourrait_changer: "Pourraient changer de côté",
+  ecarte_a_revoir: "Écartés à revoir",
+  nouvelle_analyse: "Demanderaient une nouvelle analyse",
+  inchange: "Resteraient du même côté, d'après leur mesure",
+  pas_lu: "Rien à recalculer : pas encore lus",
+};
+
+/**
+ * ET SI, en V5 : les groupes de la V4.1, avec des raisons qui disent ce qu'une MESURE permet d'écrire.
+ * Une mesure datée place un lieu d'un côté du seuil ; elle ne garantit pas qu'il « tient » aujourd'hui.
+ */
+export function etSi5(r: Recherche, cle: CleCritere, valeur: number): ReturnType<typeof etSi> {
+  return etSi(r, cle, valeur).map((x) => (x.seau !== "inchange" ? x : {
+    ...x,
+    raison: x.raison.replace(/^Mesuré à (\d+) (\w+) : tient à (\d+) comme à (\d+) \w+\.$/, "Mesuré à $1 $2 : sous $3 comme sous $4 $2, d'après cette mesure.")
+      .replace(/^Mesuré à (\d+) (\w+) : ne tient pas à (\d+) comme à (\d+) \w+\.$/, "Mesuré à $1 $2 : au-dessus de $3 comme de $4 $2, d'après cette mesure."),
+  }));
+}

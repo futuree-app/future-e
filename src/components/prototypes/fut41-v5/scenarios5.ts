@@ -40,6 +40,11 @@ const ana = (o: Omit<Analyse, "conventionsVersion" | "version"> & { version?: nu
 // ── Communes (positions en km depuis Nantes, nord en haut : approximations des vraies villes) ──
 export const NANTES: Commune = { ...structuredClone(NA41), position: { x: 0, y: 0 } };
 export const RENNES: Commune = { ...structuredClone(RE41), position: { x: -9, y: -100 } };
+// C (revue Work) : la densité de généralistes est une PRÉSENCE ; elle ne dit pas si un médecin accepte
+// de nouveaux patients. Les fixtures héritées de la V4.1 la donnaient « favorable » : corrigé ici, comme
+// le fait déjà le moteur de production (`src/lib/decision/autour-facts.ts`).
+const medecinPrudent = (constat: string) => (x: LigneRegistre): LigneRegistre => (x.cle === "medecin" && x.issue === "favorable" ? { ...x, issue: "to_confirm", constat } : x);
+RENNES.analyses = RENNES.analyses.map((a) => ({ ...a, registre: a.registre.map(medecinPrudent("Densité de généralistes au-dessus de la moyenne ; leur disponibilité n'est pas connue.")) }));
 export const ANGERS: Commune = { ...structuredClone(A41), position: { x: 76, y: -28 } };
 
 // ── Logements repris de la V4.1, corrigés pour S8 et le dossier ancien ───────────────────────
@@ -61,7 +66,7 @@ fosse.verifications = fosse.verifications.map((v) => {
 const convention: Logement = structuredClone(N2);
 const viarme: Logement = structuredClone(N3);
 const felix: Logement = structuredClone(N4);
-felix.analyses = felix.analyses.map((a) => ({ ...a, registre: a.registre.map((x) => (x.cle === "gare" ? { ...x, mesure: { valeur: 23, unite: "min" }, constat: "La gare est à 23 min à pied depuis l'adresse." } : x)) }));
+felix.analyses = felix.analyses.map((a) => ({ ...a, registre: a.registre.map((x) => (x.cle === "gare" ? { ...x, mesure: { valeur: 23, unite: "min" }, constat: "La gare est à 23 min à pied depuis l'adresse." } : x)).map(medecinPrudent("Des généralistes nombreux ; leur disponibilité n'est pas connue.")) }));
 const thabor: Logement = structuredClone(R1);
 
 // ── Logements ajoutés pour la situation « dix candidats » (non analysés pour la plupart) ─────
@@ -103,7 +108,7 @@ export const ANALYSE_SAINTE_ANNE: Analyse = ana({
     l({ cle: "gare", issue: "favorable", grain: "secteur", mesure: { valeur: 17, unite: "min" }, constat: "La gare est à 17 min à pied depuis l'adresse.", preuve: { source: "Gares SNCF, IGN", date: "2025" }, sources: [S.gares] }),
     l({ cle: "nuits", issue: "to_confirm", grain: "batiment", constat: "Diagnostic de 2019, classe D ; orientation non décrite.", preuve: { source: "ADEME DPE", date: "2025" }, sources: [S.dpe, S.drias] }),
     l({ cle: "calme", issue: "reserve", grain: "secteur", constat: "Place animée le soir : 60 à 65 dB.", preuve: { source: "Cerema, cartes de bruit", date: "2022" }, sources: [S.bruit] }),
-    l({ cle: "medecin", issue: "favorable", grain: "commune", constat: "Densité de généralistes au-dessus de la moyenne.", preuve: { source: "BPE", date: "2024" }, sources: [S.bpe24] }),
+    l({ cle: "medecin", issue: "to_confirm", grain: "commune", constat: "Densité de généralistes au-dessus de la moyenne ; leur disponibilité n'est pas connue.", preuve: { source: "BPE", date: "2024" }, sources: [S.bpe24] }),
     l({ cle: "quartier", issue: "favorable", grain: "secteur", constat: "Marché, commerces et métro à 3 min.", preuve: { source: "BPE, OpenStreetMap", date: "2025" }, sources: [S.bpe25, S.osm] }),
   ],
 });

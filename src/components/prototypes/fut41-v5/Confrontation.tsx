@@ -76,8 +76,8 @@ function ContenuCellule({ c, limite, seul }: { c: Cellule; limite: number | null
   if (!c.ligne) return <span className={v.vide} data-etat={c.etat}>{ETAT_VIDE[c.etat]}</span>;
   return (
     <>
-      <Marque ligne={c.ligne} />
-      {c.ligne.mesure ? <Mesure valeur={c.ligne.mesure.valeur} unite={c.ligne.mesure.unite} limite={limite} limiteAlors={c.limiteAlors} /> : c.limiteAlors != null ? <span className={v.change}>lu quand votre limite était de {c.limiteAlors} min</span> : null}
+      <Marque ligne={c.ligne} perime={c.perime} />
+      {c.ligne.mesure ? <Mesure valeur={c.ligne.mesure.valeur} unite={c.ligne.mesure.unite} limite={limite} limiteAlors={c.limiteAlors} date={c.origine?.match(/du (\d+ [^ ]+)$/)?.[1] ?? null} /> : null}
       {seul && c.ligne.constat ? <span className={v.faceConstat}>{lier(c.ligne.constat)}</span> : null}
       {seul && c.ligne.preuve ? <span className={v.preuve}>{c.ligne.preuve.source}, {c.ligne.preuve.date}{c.origine ? ` · ${c.origine}` : ""}</span> : !seul && c.origine ? <span className={v.preuve}>{c.origine}</span> : null}
     </>

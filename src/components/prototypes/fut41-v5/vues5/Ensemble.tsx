@@ -8,7 +8,7 @@
 import { useId, useState } from "react";
 import { GlypheGrain, Plaque, Selecteur, releve as s } from "@/components/releve/primitives";
 import {
-  aFaire5, analyseServie, communeCommeLieu, dateCourte, gestePrincipal, libelleCritere, logementsDe, montantAnnonce, montantFr, ouVousEnEtes, trier,
+  aFaire5, analyseServie, communeCommeLieu, criteresDepasses, dateCourte, gestePrincipal, libelleCritere, logementsDe, montantAnnonce, montantFr, ouVousEnEtes, trier,
   LIBELLE_DIMENSION, LIBELLE_STATUT, type Commune, type DimensionTri, type Logement, type Piste,
 } from "../modele5";
 import { AUJOURDHUI } from "../scenarios5";
@@ -67,7 +67,7 @@ export function Ensemble({ api }: { api: Api5 }) {
           <div className={v.debut}>
           <Plaque etiquette="Où vous en êtes" className={v.ouPlaque}>
             <p className={s.etiquette}>Où vous en êtes</p>
-            <div className={v.brefTexte}>{resume.map((x, i) => <p key={i}>{lier(x)}</p>)}</div>
+            <dl className={v.lignesTitrees}>{resume.map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
           </Plaque>
 
           {faire.length ? (
@@ -190,7 +190,9 @@ function GroupeCommune({ api, commune }: { api: Api5; commune: Commune }) {
           <p className={v.groupeEtat}>
             {a ? <>Rapport de territoire du {dateCourte(a.generatedAt)}{a.simulee ? " (simulé)" : ""}</> : commune.lecture === "gratuite" ? "Lecture gratuite : des repères, rien de conclu pour votre Projet" : "Pas encore lue"}
           </p>
-          {a ? <p className={v.citation}>« {lier(a.conclusion.phrase)} »</p> : null}
+          {a ? (criteresDepasses(a, etat.projet).length
+            ? <p className={v.citationAncienne}>Conclusion du {dateCourte(a.generatedAt)}, écrite sous votre Projet d&apos;alors : « {lier(a.conclusion.phrase)} » Elle est à revoir pour {criteresDepasses(a, etat.projet).map((d) => d.apres.toLowerCase()).join(", ")}.</p>
+            : <p className={v.citation}>« {lier(a.conclusion.phrase)} »</p>) : null}
         </div>
         {g.cle !== "ouvrir_rapport" ? <BoutonGeste geste={g} faire={faireGeste(api, piste)} /> : null}
       </header>

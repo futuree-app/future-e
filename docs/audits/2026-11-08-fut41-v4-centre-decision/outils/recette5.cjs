@@ -73,9 +73,10 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   await ouvrir("?s=ref");
   const ou = await p.locator("[aria-label='Où vous en êtes'], .x").count();
   t = await txt();
-  const phrases = await p.evaluate(() => [...document.querySelectorAll("main p")].filter((x) => x.closest("[class*=ouPlaque]") && !/^Où vous en êtes$/.test(x.textContent.trim())).length);
-  ok("Accueil", "trois phrases au plus pour dire où en est la recherche", phrases >= 2 && phrases <= 3, `(${phrases})`);
-  ok("Accueil", "la synthèse dit ce qui distingue et ce qui manque", /Entre Nantes et Rennes, ce qui fait la différence : des nuits fraîches l'été et le calme à la commune/.test(t) && /Il manque l'analyse du T4 rue de la Convention et l'adresse du T3 près du Thabor/.test(t));
+  const phrases = await p.locator("[class*=ouPlaque] dl > div").count();
+  ok("Accueil", "trois lignes titrées au plus pour dire où en est la recherche", phrases >= 2 && phrases <= 3, `(${phrases})`);
+  ok("Accueil", "la synthèse dit qui se distingue, à quelle échelle, et ce qui reste à savoir", /À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/.test(t) && /T3 quai de la Fosse \(9 min\) la tient ; pour T4 rue de la Convention et T3 près du Thabor, elle reste à mesurer/.test(t));
+  ok("Accueil", "la conclusion ancienne de Rennes est datée, pas présentée comme actuelle", /Conclusion du 18 sept\., écrite sous votre Projet d'alors/.test(t) && /Elle est à revoir pour une gare à moins de 20 min/.test(t));
   ok("Accueil", "trois gestes au plus, chacun avec son bouton", (await p.locator("#faire-t + p, ol li").count()) <= 4 && (await p.locator("ol li button").count()) <= 3);
   ok("Accueil", "communes et logements nommés sur l'accueil", /Nantes/.test(t) && /T3 quai de la Fosse/.test(t) && /T3 près du Thabor/.test(t));
   const hautLieux = await p.evaluate(() => document.getElementById("lieux")?.getBoundingClientRect().top ?? 9999);
@@ -99,7 +100,8 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   // B · Nantes contre Rennes, sans adresse
   await ouvrir("?s=communes#/comparer/communes/c:44109,c:35238");
   t = await txt();
-  ok("B", "En bref : ce qui distingue les communes, lu de la même façon", /Ce qui les distingue vraiment : des nuits fraîches l'été et le calme à la commune/.test(t));
+  ok("B", "En bref : ce qui distingue les communes, avec qui et quelle issue", /À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/.test(t));
+  ok("B", "En bref : la gare se mesure depuis une adresse ; Rennes est à revoir", /se mesure depuis une adresse/.test(t) && /sa conclusion est à revoir/.test(t));
   ok("B", "la gare ne se compare pas encore, et le remède est dit", /Votre condition n'était pas la même lors des deux analyses/.test(t) && /Mettre à jour l'analyse la plus ancienne/.test(t));
   ok("B", "la carte situe les communes sans rien départager", /100 km/.test(t) && /Le trajet réel se mesure depuis une adresse/.test(t));
   ok("B", "la commune ne promet rien pour un logement", /pour un logement, la commune n'en donne qu'un repère/.test(t));
@@ -113,6 +115,9 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   ok("C", "à la commune, le verdict nomme les communes", /Nantes : moins bien ; Rennes : correspond/.test(t));
   ok("C", "les valeurs sont côte à côte dans « ce que chacun apporte »", (await p.locator("[class*=bilanRang]").count()) >= 4);
   ok("C", "aucun classement", !/meilleur|gagnant|recommand/i.test(t));
+  ok("C", "jamais « aucun ne bloque » quand la gare n'est mesurée que pour un logement", !/Aucun ne bloque/.test(t));
+  ok("C", "une rubrique vide dit « aucun, parmi ce qui est lu » et combien de conditions sont lues", /aucun, parmi ce qui est lu/.test(t) && /lu : 1 condition sur 5/.test(t) && !/\brien\b(?! de)/.test((await p.locator("[class*=bilans]").innerText())));
+  ok("C", "aucun médecin « disponible » sur la seule présence", !/un médecin, à la commune\s*$/m.test(t));
 
   // D · Un logement pas encore analysé : le panneau explique avant de lancer
   await ouvrir("?s=non-analyse");
@@ -136,7 +141,8 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   t = await txt();
   ok("E", "la conclusion est conservée sans être reconduite", /Conclusion conservée telle qu'elle a été écrite/.test(t) && /n'est pas reconduite pour votre Projet actuel/.test(t));
   ok("E", "« pourrait ne plus tenir », jamais « ne tient pas »", /il pourrait ne plus tenir votre limite de 20 min/.test(t) && !/T3 Saint-Félix ne tient pas/.test(t));
-  ok("E", "la mesure garde la limite d'alors", /mesuré quand elle était de 30 min/.test(t));
+  ok("E", "la mesure garde la limite d'alors, datée", /mesuré le 2 sept\. quand elle était de 30 min/.test(t));
+  ok("E", "l'issue ancienne est « à revoir », jamais « correspond » actuel", /À revoir/.test(t) && /concluait « correspond » sous votre Projet d'alors/.test(t));
   await ouvrir("?s=ancien#/commune/c:35238");
   await p.getByRole("button", { name: /Mettre à jour/ }).first().click();
   await p.waitForTimeout(200);
@@ -179,6 +185,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   t = await txt();
   ok("Et si", "les seaux : écarté à revoir, pourrait changer, nouvelle analyse, pas lus", /Écartés à revoir/.test(t) && /T2 place Viarme/.test(t) && /Pourraient changer/.test(t) && /T3 Saint-Félix/.test(t) && /Rien à recalculer/.test(t));
   ok("Et si", "ce qui ne peut pas être déduit est dit", /Une analyse ne se recalcule pas toute seule/.test(t));
+  ok("Et si", "plus de « restent valables »", !/Restent valables/.test(t));
   await p.getByRole("button", { name: "Adopter ce changement" }).click();
   await p.getByRole("button", { name: "Confirmer" }).click();
   await p.waitForTimeout(200);
@@ -192,9 +199,17 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   await p.evaluate(() => { location.hash = "#/comparer/logements/fosse,viarme"; });
   await p.waitForTimeout(300);
   t = await txt();
-  ok("Z12", "dite une fois sur l'écran de comparaison", (t.match(/ne tient pas votre condition sans compromis/g) ?? []).length === 1, `(${(t.match(/ne tient pas votre condition sans compromis/g) ?? []).length})`);
+  const nz = (t.match(/ne la tient pas|ne tient pas votre condition sans compromis/g) ?? []).length;
+  ok("Z12", "dite une fois sur l'écran de comparaison", nz === 1 && /T2 place Viarme \(24 min\) ne la tient pas/.test(t), `(${nz})`);
   ok("Z12", "la mesure de 24 min reste dans le détail", /24 min/.test(t));
   await cap("25-z12-une-seule-fois");
+
+  // Et si près de la comparaison (essai limité)
+  await ouvrir("?s=meme");
+  await p.getByText("Et si votre limite pour la gare changeait ?").click();
+  await p.waitForTimeout(150);
+  t = await txt();
+  ok("Et si", "près de la comparaison : les seules possibilités affichées, sans rien modifier", /Essai · votre Projet n'est pas modifié/.test(t) && /T3 Saint-Félix · Mesuré à 23 min : tiendrait à 30 min/.test(t) && /révision 3/.test(t));
 
   // Retour : fiche → Relevé → bouton retour
   await ouvrir("?s=ref#/logement/fosse");

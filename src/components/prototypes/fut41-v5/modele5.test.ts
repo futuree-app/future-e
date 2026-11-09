@@ -1,7 +1,7 @@
 // FUT-41 V5 · tests du modèle (fixtures fictives). État ET phrase rendue (AGENTS.md).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { confronter, enBref, ouVousEnEtes, bilan, alertes, type Recherche, type Piste } from "./modele5.ts";
+import { confronter, enBref, ouVousEnEtes, bilan, alertes, etSi5, prudente, TITRE_SEAU5, type Recherche, type Piste } from "./modele5.ts";
 import { PROJET, COMMUNES, LOGEMENTS } from "./scenarios5.ts";
 
 const R = (c: string[], l: string[]): Recherche => ({
@@ -38,17 +38,17 @@ test("synthèses : trois phrases au plus, aucun classement", () => {
   const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
   const o = ouVousEnEtes(r);
   assert.ok(o.length <= 3);
-  assert.match(o[0]!, /Deux communes et trois logements en vue ; un seul est analysé/);
+  assert.match(o[0]!.texte, /Deux communes et trois logements en vue ; un seul est analysé/);
   const b = enBref(r, [P(r, "c:44109"), P(r, "c:35238")]);
   assert.ok(b.length <= 3);
-  assert.doesNotMatch([...o, ...b].join(" "), /meilleur|recommand|gagnant/i);
+  assert.doesNotMatch([...o, ...b].map((x) => x.texte).join(" "), /meilleur|recommand|gagnant/i);
 });
 
 test("une commune en lecture gratuite n'entre pas dans « ce qui fait la différence »", () => {
   const r = R(["44109", "35238", "49007"], []);
-  const o = ouVousEnEtes(r).join(" ");
-  assert.match(o, /Entre Nantes et Rennes, ce qui fait la différence/);
-  assert.doesNotMatch(o, /Entre Nantes, Rennes et Angers/);
+  const o = ouVousEnEtes(r);
+  assert.ok(o.some((x) => x.titre === "Entre Nantes et Rennes"));
+  assert.ok(!o.some((x) => /Angers/.test(x.titre)));
 });
 
 test("S8 : « sur cour » ne conclut pas au calme de nuit", () => {
@@ -63,4 +63,80 @@ test("une mise à jour d'un rapport de commune ne promet pas les abords", async 
   const r = R(["44109", "35238"], []);
   const p = portee(r, P(r, "c:35238"), "mettre_a_jour");
   assert.match(p.nePasDire.join(" "), /ne lit pas plus loin que l'analyse d'origine/);
+});
+
+// ── Consolidation après la revue Work (09/11) ────────────────────────────────────────────────
+const tous = () => R(["44109", "35238", "49007"], LOGEMENTS.map((l) => l.id));
+
+test("A : un logement peu documenté ne paraît pas plus favorable : on sait combien de conditions sont lues", () => {
+  const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
+  const [fosse, conv, thabor] = ["fosse", "convention", "thabor"].map((id) => bilan(r, P(r, id), "unite"));
+  assert.equal(fosse!.lus, fosse!.total, "la Fosse est lue sur toutes ses conditions");
+  assert.ok(conv!.lus < conv!.total && thabor!.lus < thabor!.total, "Convention et Thabor ne le sont pas");
+  assert.equal(thabor!.accepte.length, 0);
+  assert.ok(thabor!.pasLu.length >= 3, "son « rien à accepter » vient de ce qui n'est pas lu, et c'est dit");
+});
+
+test("B : une issue écrite sous l'ancienne limite est « périmée » dans la confrontation, jamais « correspond » actuel", () => {
+  const r = R(["44109"], ["fosse", "felix"]);
+  const gare = confronter(r, [P(r, "fosse"), P(r, "felix")]).lignes.find((x) => x.cle === "gare")!.couches.find((x) => x.couche === "abords")!;
+  const felix = gare.cellules.find((c) => c.ids.includes("felix"))!;
+  assert.equal(felix.perime, true);
+  assert.equal(felix.limiteAlors, 30);
+  assert.equal(felix.bloque, false, "une mesure ancienne au-dessus de la limite n'est pas « ne tient pas »");
+  assert.equal(gare.cellules.find((c) => c.ids.includes("fosse"))!.perime, false);
+});
+
+test("B : la synthèse dit « à revoir » pour Saint-Félix, sans le dire tenu ni non tenu", () => {
+  const r = R(["44109"], ["fosse", "felix", "convention"]);
+  const sc = enBref(r, ["fosse", "felix", "convention"].map((id) => P(r, id)))[0]!.texte;
+  assert.match(sc, /T3 Saint-Félix \(23 min\), mesuré sous une ancienne limite, est à revoir/);
+  assert.doesNotMatch(sc, /Saint-Félix[^;]*la tient|Saint-Félix[^;]*ne la tient pas/);
+});
+
+test("B : « Et si » ne dit plus « restent valables » ; une mesure place d'un côté du seuil, sans garantir", () => {
+  const r = R(["44109"], ["fosse", "felix"]);
+  assert.doesNotMatch(Object.values(TITRE_SEAU5).join(" "), /valables/);
+  const fosse = etSi5(r, "gare", 30).find((x) => x.pisteId === "fosse")!;
+  assert.equal(fosse.seau, "inchange");
+  assert.match(fosse.raison, /sous 20 comme sous 30 min, d'après cette mesure/);
+});
+
+test("C : aucun « médecin disponible » favorable sur la seule présence de généralistes, dans aucune situation", () => {
+  const r = tous();
+  const pistes: Piste[] = [...r.communes.map((commune) => ({ type: "commune" as const, commune })), ...r.logements.map((logement) => ({ type: "logement" as const, logement }))];
+  for (const p of pistes) {
+    for (const li of confronter(r, [p]).lignes.filter((x) => x.cle === "medecin")) for (const c of li.couches) for (const k of c.cellules) assert.notEqual(k.ligne?.issue, "favorable", `médecin favorable pour ${p.type === "commune" ? p.commune.nom : p.logement.libelle}`);
+    assert.ok(bilan(r, p, "unite").apporte.every((x) => !/médecin/.test(x)));
+  }
+  const garde = prudente({ cle: "medecin", issue: "favorable", grain: "commune", constat: "Des généralistes nombreux.", sources: [] });
+  assert.equal(garde!.issue, "to_confirm");
+  assert.match(garde!.constat!, /Leur disponibilité n'est pas connue/);
+});
+
+test("D : jamais « aucun ne bloque » quand la condition n'est mesurée que pour certains ; on dit pour qui", () => {
+  const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
+  const t = enBref(r, ["fosse", "convention", "thabor"].map((id) => P(r, id))).map((x) => x.texte).join(" ");
+  assert.doesNotMatch(t, /Aucun ne bloque/);
+  assert.match(t, /T3 quai de la Fosse \(9 min\) la tient ; pour T4 rue de la Convention et T3 près du Thabor, elle reste à mesurer depuis l'adresse/);
+});
+
+test("D : entre des logements, une différence communale est dite comme telle", () => {
+  const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
+  const d = enBref(r, ["fosse", "convention", "thabor"].map((id) => P(r, id)))[1]!.texte;
+  assert.match(d, /^À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/);
+  assert.match(d, /cela situe les logements, sans rien dire de chacun/);
+});
+
+test("D : des communes seules ne prétendent rien sur la gare d'un logement, et Rennes est dite à revoir", () => {
+  const r = R(["44109", "35238"], []);
+  const sc = enBref(r, [P(r, "c:44109"), P(r, "c:35238")])[0]!.texte;
+  assert.match(sc, /se mesure depuis une adresse/);
+  assert.match(sc, /Rennes a été lue quand votre condition était « une gare à moins de 30 min » : sa conclusion est à revoir/);
+});
+
+test("D : avec dix logements, la ligne reste lisible (on compte au-delà de deux noms)", () => {
+  const t = ouVousEnEtes(tous()).map((x) => x.texte).join(" ");
+  assert.match(t, /pour cinq logements, elle reste à mesurer/);
+  assert.ok(t.length < 700, `longueur ${t.length}`);
 });

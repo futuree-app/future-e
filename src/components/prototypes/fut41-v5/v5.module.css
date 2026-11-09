@@ -509,3 +509,16 @@ button.navLien { cursor: pointer; }
 @media (min-width: 1040px) { .debut { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 40px; align-items: start; } .debut .faire { padding-top: 0; } }
 .ouPlaque .brefTexte p { font-size: 17px; }
 .sectionTete > .ligneGestes { display: flex; }
+
+/* Consolidation après la revue Work : lignes titrées, conclusion ancienne datée, issue à revoir */
+.lignesTitrees { margin: 10px 0 0; display: grid; gap: 12px; }
+.lignesTitrees > div { display: grid; gap: 2px; }
+@media (min-width: 760px) { .lignesTitrees > div { grid-template-columns: minmax(150px, 0.32fr) minmax(0, 1fr); gap: 16px; } }
+.lignesTitrees dt { font-weight: 600; font-size: var(--r-t-etiquette); color: var(--r-discret); padding-top: 3px; }
+.lignesTitrees dd { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--r-encre); }
+.citationAncienne { margin: 2px 0 0; font-size: var(--r-t-dense); line-height: 1.55; color: var(--r-texte); padding-left: 12px; border-left: 2px dotted var(--reg-controle); }
+.marqueAlors { flex-basis: 100%; font-size: 12px; color: var(--r-discret); }
+.etSiIci { margin: 8px 0 0; padding: 14px 0; border-top: 1px solid var(--r-filet); border-bottom: 1px solid var(--r-filet); }
+.etSiCorps { display: grid; gap: 12px; padding-top: 14px; max-width: 720px; }
+.etSiCorps p { margin: 0; }
+.etSiCorps .simulation { justify-self: start; }

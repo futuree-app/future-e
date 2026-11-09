@@ -13,8 +13,16 @@ export { lier };
 export const GLYPHE_COUCHE = { commune: "commune", abords: "secteur", logement: "batiment" } as const;
 
 /** L'issue : le trait de son registre et un mot simple. */
-export function Marque({ ligne }: { ligne: LigneRegistre | null }) {
+export function Marque({ ligne, perime = false }: { ligne: LigneRegistre | null; perime?: boolean }) {
   if (!ligne) return <span className={v.pasLu}>pas encore lu</span>;
+  // B (revue Work) : une issue écrite sous une autre version de la condition est un fait daté.
+  if (perime) return (
+    <span className={v.marque} style={{ "--r-teinte": "var(--reg-controle)" } as CSSProperties}>
+      <span className={v.trait} aria-hidden />
+      <span className={v.marqueMot}>À revoir</span>
+      <span className={v.marqueAlors}>concluait « {LIBELLE_ISSUE_SIMPLE[ligne.issue].toLowerCase()} » sous votre Projet d&apos;alors</span>
+    </span>
+  );
   return (
     <span className={v.marque} style={{ "--r-teinte": TEINTE_ISSUE[ligne.issue] } as CSSProperties}>
       <span className={v.trait} aria-hidden />
@@ -27,20 +35,21 @@ export function Marque({ ligne }: { ligne: LigneRegistre | null }) {
  * UNE MESURE SUR SA RÈGLE (idée reprise de la V4.1 Work) : la valeur mesurée, la limite actuelle en
  * pointillé, et la limite d'alors quand l'analyse a été faite sous une autre. La donnée ne s'anime pas.
  */
-export function Mesure({ valeur, unite, limite, limiteAlors }: { valeur: number; unite: string; limite: number | null; limiteAlors: number | null }) {
+export function Mesure({ valeur, unite, limite, limiteAlors, date }: { valeur: number; unite: string; limite: number | null; limiteAlors: number | null; date?: string | null }) {
   const max = Math.max(40, valeur + 5, limite ?? 0, limiteAlors ?? 0);
   const pc = (x: number) => `${Math.round((x / max) * 1000) / 10}%`;
   return (
     <span className={v.mesure}>
       <span className={v.mesureValeur}>{valeur} {unite}</span>
       <span className={v.regle} aria-hidden>
-        <span className={v.regleValeur} style={{ width: pc(valeur) }} data-depasse={limite != null && valeur > limite ? "" : undefined} />
+        {/* Une mesure faite sous une autre limite n'est pas colorée comme un dépassement : elle ne dit pas la situation présente. */}
+        <span className={v.regleValeur} style={{ width: pc(valeur) }} data-depasse={limite != null && limiteAlors == null && valeur > limite ? "" : undefined} />
         {limite != null ? <span className={v.regleLimite} style={{ left: pc(limite) }} /> : null}
         {limiteAlors != null ? <span className={v.regleAlors} style={{ left: pc(limiteAlors) }} /> : null}
       </span>
       <span className={v.mesureNote}>
         {limite != null ? `votre limite : ${limite} ${unite}` : null}
-        {limiteAlors != null ? ` · mesuré quand elle était de ${limiteAlors} ${unite}` : null}
+        {limiteAlors != null ? ` · mesuré${date ? ` le ${date}` : ""} quand elle était de ${limiteAlors} ${unite} ; une mise à jour dirait où il en est aujourd'hui` : null}
       </span>
     </span>
   );
