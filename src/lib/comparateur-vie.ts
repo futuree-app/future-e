@@ -814,16 +814,24 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
     cats.add('montagne');
   }
 
-  // ── Densité : urbain dense (sud/nord) vs rural/périurbain ───────────────────
+  // ── Densité moyenne : angle « urbain dense » au-delà de 1 500 hab/km² ──────
   // densite null = arrondissement (Paris/Lyon/Marseille) présent dans l'index → cœur urbain. Ailleurs, une
-  // densité inconnue (commune sans ligne ADEME, FUT-109) ne choisit aucun des deux angles.
+  // densité inconnue (commune sans ligne ADEME, FUT-109) ne choisit aucun angle.
+  //
+  // FUT-185 : une densité MOYENNE sous 1 500 hab/km² n'atteste ni ruralité ni périurbanité. Nîmes,
+  // Aix-en-Provence, Avignon, Colmar ou Quimper y passent par la seule étendue de leurs terres agricoles ou
+  // naturelles (3 612 communes urbaines au sens de la grille Insee 2025, 20,3 millions d'habitants). Elle
+  // n'émet donc plus `rural_peri_urbain`, qui ouvrait « Quitter la ville pour Nîmes ? » et les phrases de
+  // dépendance à la voiture. `peuDense` ne garde qu'un rôle : restreindre les catégories qui suivent, dont
+  // chacune repose sur sa propre mesure (part voiture MOBPRO, couvert OSO, vie locale). Un libellé rural
+  // officiel viendrait de la grille communale de densité Insee (FUT-184), pas d'un seuil de densité moyenne.
   const dense = c.densite == null ? estArrondissementPLM(c.insee) : c.densite >= 1500;
   const peuDense = c.densite != null && !dense;
   if (dense) {
     cats.add(sud ? 'urbain_dense_sud' : 'urbain_dense_nord');
   } else if (peuDense) {
-    cats.add('rural_peri_urbain');
-    // Dépendance à la voiture : percentile haut = peu d'alternatives.
+    // Part des trajets domicile-travail faits en voiture (RP MOBPRO 2022) au 60e percentile national ou
+    // au-delà. Cette catégorie choisit des QUESTIONS sur la voiture ; aucune phrase ne la cite comme un fait.
     if (c.mobilite && c.mobilite.dependance >= 60) cats.add('periurbain_dependance_auto');
   }
 

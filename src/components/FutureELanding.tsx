@@ -19,6 +19,7 @@ import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import {
   apercuCommune,
   carteMachineASous,
+  carteMobiliteMachineASous,
   getDriaSub,
   getEmptyStateCopy,
   getHeroCopy,
@@ -52,16 +53,17 @@ const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
 
 // La machine à sous du hero (avant toute commune). Ses cartes climat et risques sont construites par
 // les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis des valeurs DRIAS figées et
-// testées (src/lib/accueil/recits.ts). Les cartes de cadre de vie sont restées telles quelles : elles
-// relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte submersion :
-// l'État n'y recense pas ce risque.
+// testées (src/lib/accueil/recits.ts). Les cartes Mobilité portent la part voiture MOBPRO de la ville
+// (FUT-185 : elles étaient rédigées à la main sous cette source). Les cartes Nature et Vie locale sont restées
+// telles quelles : elles relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte
+// submersion : l'État n'y recense pas ce risque.
 const slotCard = (cle, titre, fait, col, source) => ({ cle, titre, fait, col, source });
 const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
       carteMachineASous('Lyon', 'chaleur'),
-      slotCard('mobilite', 'Mobilité à Lyon', 'Métro, tram et train dessinent un quotidien moins dépendant de la voiture à Lyon.', C.violet, 'INSEE MOBPRO / SNCF'),
+      carteMobiliteMachineASous('Lyon'),
       slotCard('vie-locale', 'Vie locale à Lyon', 'Commerces, écoles et vie associative restent denses dans le quotidien lyonnais.', C.green, 'INSEE BPE / RNA'),
       carteMachineASous('Lyon', 'nuits'),
     ].filter(Boolean),
@@ -71,7 +73,7 @@ const SLOT_CITIES = [
     cards: [
       carteMachineASous('Marseille', 'nuits'),
       slotCard('nature', 'Nature à Marseille', 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.', C.green, 'OSM / IGN'),
-      slotCard('mobilite', 'Mobilité à Marseille', 'Au quotidien, se déplacer à Marseille tient encore beaucoup à la voiture.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('Marseille'),
       carteMachineASous('Marseille', 'risque'),
     ].filter(Boolean),
   },
@@ -80,14 +82,14 @@ const SLOT_CITIES = [
     cards: [
       carteMachineASous('Vannes', 'chaleur'),
       slotCard('vie-locale', 'Vie locale à Vannes', 'À taille humaine, Vannes garde un centre dense en commerces et en services.', C.green, 'INSEE BPE'),
-      slotCard('mobilite', 'Mobilité à Vannes', 'Courtes distances : à Vannes, une partie des trajets du quotidien se fait à pied ou à vélo.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('Vannes'),
     ].filter(Boolean),
   },
   {
     name: 'La Rochelle',
     cards: [
       carteMachineASous('La Rochelle', 'risque'),
-      slotCard('mobilite', 'Mobilité à La Rochelle', 'La Rochelle reste une ville où le vélo tient une vraie place dans les trajets.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('La Rochelle'),
       slotCard('nature', 'Nature à La Rochelle', 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.', C.green, 'OSM / IGN'),
       carteMachineASous('La Rochelle', 'chaleur'),
     ].filter(Boolean),
@@ -624,22 +626,30 @@ export default function FutureELanding() {
     // Catégorisation manuelle (44 communes affinées à la main) prioritaire ; sinon
     // on tire les catégories de la VRAIE donnée commune via /api/landing-signals
     // (index A), au lieu du préfixe département qui laissait dormir le catalogue.
+    // FUT-185 : /api/landing-signals est lu pour toute commune connue, manuelle comprise, car il porte aussi la
+    // part voiture MOBPRO, seule base de la carte Mobilité. Sans elle (échec, commune hors index), pas de carte.
+    let signaux = null;
+    if (inseeCode) {
+      try {
+        const res = await fetch(`/api/landing-signals?insee=${inseeCode}`);
+        signaux = res.ok ? await res.json() : null;
+      } catch {
+        signaux = null;
+      }
+    }
     let categories: string[];
     if (matchedRow?.categories && matchedRow.categories.length > 0) {
       categories = matchedRow.categories;
     } else if (inseeCode) {
-      try {
-        const res = await fetch(`/api/landing-signals?insee=${inseeCode}`);
-        const payload = res.ok ? await res.json() : null;
-        categories = Array.isArray(payload?.categories) && payload.categories.length > 0
-          ? payload.categories
-          : deriveCategories(inseeCode); // repli dept si l'endpoint échoue
-      } catch {
-        categories = deriveCategories(inseeCode);
-      }
+      categories = Array.isArray(signaux?.categories) && signaux.categories.length > 0
+        ? signaux.categories
+        : deriveCategories(inseeCode); // repli dept si l'endpoint échoue
     } else {
       categories = ['all'];
     }
+    const mobilite = typeof signaux?.mobilite?.partVoitureDomicileTravail === 'number'
+      ? { partVoitureDomicileTravail: signaux.mobilite.partVoitureDomicileTravail }
+      : null;
 
     // usedFallback controls generic vs contextual copy: false when we have
     // meaningful categories (either from DB or derived from dept code).
@@ -648,6 +658,7 @@ export default function FutureELanding() {
     setCommuneMeta({
       inseeCode,
       categories,
+      mobilite,
       usedFallback: !matchedRow && !hasContextualCategories,
     });
 
@@ -1777,6 +1788,7 @@ export default function FutureELanding() {
         indicators: communeIndicators,
         georisques: communeGeorisques,
         horizon,
+        mobilite: communeMeta?.mobilite ?? null,
       })
     : { etat: 'cartes', cartes: activeSlotCity.cards };
   const previewCards = apercu.etat === 'cartes' ? apercu.cartes : [];

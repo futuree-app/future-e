@@ -1,0 +1,404 @@
+{
+ "releve": "2026-11-10",
+ "requete": "communes_categorization?select=commune_name,insee_code,categories (clé publique, lecture seule)",
+ "lignes": [
+  {
+   "commune_name": "Antibes",
+   "insee_code": "06004",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "tourisme_urbain"
+   ]
+  },
+  {
+   "commune_name": "Auribeau-sur-Siagne",
+   "insee_code": "06008",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Cagnes-sur-Mer",
+   "insee_code": "06027",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "La Gaude",
+   "insee_code": "06078",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Nice",
+   "insee_code": "06088",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "tourisme_urbain",
+    "urbain_dense_sud"
+   ]
+  },
+  {
+   "commune_name": "Saint-Jeannet",
+   "insee_code": "06113",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Saint-Laurent-du-Var",
+   "insee_code": "06123",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Vallauris",
+   "insee_code": "06155",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Villeneuve-Loubet",
+   "insee_code": "06161",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Rodez",
+   "insee_code": "12202",
+   "categories": [
+    "rural_peri_urbain",
+    "rural_agricole"
+   ]
+  },
+  {
+   "commune_name": "Aix-en-Provence",
+   "insee_code": "13001",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "urbain_dense_sud"
+   ]
+  },
+  {
+   "commune_name": "Aubagne",
+   "insee_code": "13005",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Ceyreste",
+   "insee_code": "13025",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Gémenos",
+   "insee_code": "13043",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Lambesc",
+   "insee_code": "13050",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_agricole"
+   ]
+  },
+  {
+   "commune_name": "Marseille",
+   "insee_code": "13055",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "tourisme_urbain",
+    "urbain_dense_sud"
+   ]
+  },
+  {
+   "commune_name": "Martigues",
+   "insee_code": "13056",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Les Pennes-Mirabeau",
+   "insee_code": "13071",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Rognac",
+   "insee_code": "13082",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Roquevaire",
+   "insee_code": "13083",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Salon-de-Provence",
+   "insee_code": "13103",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Sausset-les-Pins",
+   "insee_code": "13104",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Vitrolles",
+   "insee_code": "13117",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "La Rochelle",
+   "insee_code": "17300",
+   "categories": [
+    "littoral",
+    "littoral_atlantique",
+    "tension_hydrique_connue"
+   ]
+  },
+  {
+   "commune_name": "Brest",
+   "insee_code": "29019",
+   "categories": [
+    "littoral",
+    "littoral_manche",
+    "urbain_dense_nord"
+   ]
+  },
+  {
+   "commune_name": "Toulouse",
+   "insee_code": "31555",
+   "categories": [
+    "urbain_dense_sud",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Bordeaux",
+   "insee_code": "33063",
+   "categories": [
+    "urbain_dense_sud",
+    "sud_ouest",
+    "periurbain_dependance_auto"
+   ]
+  },
+  {
+   "commune_name": "Nantes",
+   "insee_code": "44109",
+   "categories": [
+    "urbain_dense_nord"
+   ]
+  },
+  {
+   "commune_name": "Lyon",
+   "insee_code": "69123",
+   "categories": [
+    "urbain_dense_nord",
+    "vallee_industrielle"
+   ]
+  },
+  {
+   "commune_name": "Chamonix",
+   "insee_code": "74056",
+   "categories": [
+    "montagne"
+   ]
+  },
+  {
+   "commune_name": "Bauduen",
+   "insee_code": "83014",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_lacs",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "La Croix-Valmer",
+   "insee_code": "83042",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "La Crau",
+   "insee_code": "83048",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Fréjus",
+   "insee_code": "83061",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "tourisme_urbain"
+   ]
+  },
+  {
+   "commune_name": "Hyères",
+   "insee_code": "83069",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Ollioules",
+   "insee_code": "83090",
+   "categories": [
+    "vectoriel",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Roquebrune-sur-Argens",
+   "insee_code": "83107",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Sanary-sur-Mer",
+   "insee_code": "83117",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Saint-Raphaël",
+   "insee_code": "83118",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "tourisme_urbain"
+   ]
+  },
+  {
+   "commune_name": "Six-Fours-les-Plages",
+   "insee_code": "83126",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee"
+   ]
+  },
+  {
+   "commune_name": "Toulon",
+   "insee_code": "83137",
+   "categories": [
+    "vectoriel",
+    "littoral_mediterranee",
+    "mediterranee",
+    "urbain_dense_sud"
+   ]
+  },
+  {
+   "commune_name": "Trans-en-Provence",
+   "insee_code": "83143",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_peri_urbain"
+   ]
+  },
+  {
+   "commune_name": "Richerenches",
+   "insee_code": "84099",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_agricole",
+    "rural_viticole"
+   ]
+  },
+  {
+   "commune_name": "Valréas",
+   "insee_code": "84137",
+   "categories": [
+    "vectoriel",
+    "mediterranee",
+    "rural_agricole"
+   ]
+  }
+ ]
+}

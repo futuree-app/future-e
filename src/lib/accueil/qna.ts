@@ -96,17 +96,21 @@ export type ContexteQna = {
   faits: FaitsCommune;
 };
 
-/** Le message utilisateur envoyé au modèle. Aucune réponse éditoriale, aucun fait d'une autre commune. */
+/** Le message utilisateur envoyé au modèle. Aucune réponse éditoriale, aucun fait d'une autre commune.
+ *
+ *  FUT-185 : ni les catégories éditoriales de l'accueil. Ce sont des clés de choix d'angle (`rural_agricole`,
+ *  `periurbain_dependance_auto`, et `rural_peri_urbain` dans la table manuelle), pas des faits : le modèle les
+ *  lisait comme une identité (« commune rurale ou périurbaine ») qu'aucune mesure ne fonde. Ce qu'il peut dire
+ *  vient de `faits_commune` et `territory_signals`, et nulle part ailleurs. */
 export function construirePromptUtilisateur(args: {
   contexte: ContexteQna;
-  categories: string[];
   questionType: "preset" | "free";
   freeTextQuestion: string | null;
   territorySignals: Record<string, unknown> | null;
 }) {
   const { contexte } = args;
   return {
-    user_profile: { commune: contexte.commune, commune_categories: args.categories, profile_known: false },
+    user_profile: { commune: contexte.commune, profile_known: false },
     question: {
       type: args.questionType,
       preset_id: contexte.tensionId,
