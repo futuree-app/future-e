@@ -718,17 +718,24 @@ export function buildFactors(
           detail: {
             eyebrow: "L'occupation des sols",
             title: "Espaces naturels",
-            headline: `${couvertNaturel.brutPct} % d'espaces naturels`,
+            headline: `${couvertNaturel.naturelTerresPct} % de ses terres en espaces naturels`,
             // D4 (FUT-6) : le volet ne qualifie plus. Sa grille 75 / 50 / 25 était une TROISIÈME
             // lecture du même chiffre (après la face et la carte d'identité), et pouvait les
             // contredire. Il montre la mesure et sa définition ; la catégorie est celle de la face.
-            subhead: `Forêts, prairies, landes et pelouses, roche et dunes, eau : ils couvrent ${couvertNaturel.brutPct} % de la commune. Les cultures n'en font pas partie.${
+            // FUT-175 : les parts portent sur les TERRES ; l'eau est dite à part, jamais comptée comme nature.
+            subhead: `Forêts, prairies, landes et pelouses, roche et dunes couvrent ${couvertNaturel.naturelTerresPct} % des terres de la commune. Ni les cultures ni l'eau n'en font partie.${
+              couvertNaturel.eauPct != null && couvertNaturel.eauPct >= 1
+                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${couvertNaturel.eauPct} % de la surface cartographiée de la commune.`
+                : ""
+            }${
               couvertNaturel.radiusPct != null
-                ? ` Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
+                ? // FUT-178 : ce chiffre agrège des communes ENTIÈRES retenues par la distance de leur centre (parfois
+                  // aucune, parfois pas toutes), pas un cercle de 15 km. FUT-175 : l'eau y reste comptée.
+                  ` Sur son secteur (la commune et, s'il y en a, des communes voisines retenues), espaces naturels et eau confondus : ${couvertNaturel.radiusPct} %.`
                 : ""
             }`,
             accent: "var(--green)",
-            breakdownLabel: "Ce qui couvre le territoire",
+            breakdownLabel: "Ce qui couvre ses terres",
             breakdown: couvertNaturel.composition.slice(0, 5).map((c) => ({
               label: c.label,
               value: `${c.pct} %`,
@@ -737,7 +744,8 @@ export function buildFactors(
             why: "La place laissée aux espaces naturels en dit long sur le territoire : ils rafraîchissent la commune l'été, retiennent l'eau lors des fortes pluies et abritent la vie. Là où le bâti domine, ces effets se font plus rares.",
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
-            sources: "OSO 2023 (CESBIO, couverture des sols) · ADEME (taux de boisement)",
+            // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
+            sources: "OSO 2023 (CESBIO, couverture des sols). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
           },
         }
       : {

@@ -926,9 +926,21 @@ export function buildTerritorySignals(c: IndexCommune, gares?: GaresCommune): Re
     };
   }
 
+  // FUT-178 : `nature.score` est le rang national du couvert naturel d'un SECTEUR : la commune et, quand elles sont
+  // retenues, des communes voisines ENTIÈRES dont le centre est à moins de 15 km du sien. La sélection peut en oublier
+  // (grille du précalcul, 2 465 communes) ou n'en retenir aucune (3 communes, dont Saintes-Maries-de-la-Mer) : le
+  // niveau dit donc « dans le secteur », jamais « alentour ». Tant que FUT-182 n'a pas refait le calcul raster, l'eau
+  // (mer, étangs, lacs) y est comptée (FUT-175) : le signal le dit. Un bas ne prouve pas une urbanisation (FUT-34).
   if (c.nature) {
     const sc = c.nature.score;
-    s.nature = { niveau: sc >= 70 ? "fort caractère naturel" : sc >= 40 ? "nature présente" : "territoire peu naturel" };
+    s.espaces_naturels_secteur = {
+      niveau: sc >= 70 ? "beaucoup d'espaces naturels ou d'eau dans le secteur" : sc >= 40 ? "espaces naturels ou eau présents dans le secteur" : "peu d'espaces naturels ou d'eau dans le secteur",
+      // Sans chiffre : le contrôle de /qna rejette tout nombre non sourcé (nombresAutorises), et « une quinzaine »
+      // dit aussi que la sélection n'est pas un cercle exact.
+      perimetre: "le secteur : la commune et, quand elles sont retenues, des communes voisines entières dont le centre est à moins d'une quinzaine de kilomètres du sien ; la sélection peut en oublier, et certaines communes n'en ont aucune",
+      composition: "forêts, prairies, landes et pelouses, roche et dunes, et aussi l'eau (mer, étangs, lacs, rivières) ; les cultures n'en font pas partie",
+      ne_dit_pas: "ni la commune seule, ni les abords d'une adresse, ni des espaces uniquement terrestres ou végétalisés ; une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles",
+    };
   }
 
   if (c.rayonnement_pct != null) {
@@ -1470,7 +1482,8 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   // FUT-145 : l'indice forêt-météo DRIAS projeté (+2,7 °C en France, vers 2050) décrit une MÉTÉO favorable aux feux,
   // en rang national ; jamais un risque d'incendie, et l'horizon est dit pour qu'AskFuture ne le lise pas au présent.
   { id: "feu", key: "faible_risque_feu", bands: ["météo moins souvent propice aux feux qu'ailleurs, vers 2050", "météo propice aux feux à un niveau intermédiaire, vers 2050", "météo plus souvent propice aux feux qu'ailleurs, vers 2050"] },
-  { id: "nature", key: "nature", bands: ["davantage de nature autour", "présence de nature intermédiaire", "moins de nature autour"] },
+  // FUT-178 : le secteur (la commune et ses voisines retenues, parfois aucune), eau comprise ; jamais « autour ».
+  { id: "nature", key: "nature", bands: ["davantage d'espaces naturels ou d'eau dans le secteur", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur", "moins d'espaces naturels ou d'eau dans le secteur"] },
   { id: "soins", key: "acces_soins", bands: ["accès aux soins plus facile", "accès aux soins intermédiaire", "accès aux soins plus limité"] },
   { id: "emploi", key: "viabilite_emploi", bands: ["bassin d'emploi plus dynamique", "bassin d'emploi intermédiaire", "bassin d'emploi moins dynamique"] },
   { id: "ecoles", key: "acces_ecoles", bands: ["accès aux écoles plus facile", "accès aux écoles intermédiaire", "accès aux écoles plus limité"] },
@@ -1541,7 +1554,7 @@ export const DIMENSIONS: ComparaisonDim[] = [
   { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", forte: "son calme", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports).", risque: true, directionnel: true },
   { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", forte: "son éloignement des sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution.", risque: true, directionnel: true },
   { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", forte: "le peu d'agriculture intensive autour", aide: "L'éloignement des cultures à traitements fréquents.", risque: true, directionnel: true },
-  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", forte: "ses espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie.", risque: false, directionnel: true },
+  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup d'espaces naturels ou d'eau dans le secteur", "Espaces naturels ou eau présents", "Peu d'espaces naturels ou d'eau dans le secteur"], gp: "les espaces naturels", forte: "les espaces naturels et l'eau de son secteur", aide: "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.", risque: false, directionnel: true },
   { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["Rivage marin proche", "Rivage marin à distance", "Rivage marin éloigné"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "Distance du centre de la commune au rivage marin, lagunes comprises.", risque: false, directionnel: true },
   { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
   // SANS VOITURE est le souhait du lecteur ; la ligne, elle, classe la part des actifs qui vont
@@ -2475,9 +2488,10 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_soins: "bon accès aux médecins",
   acces_services: "commune qui concentre commerces et services",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
-  // « à proximité » assumé : on mesure le couvert naturel autour, pas dans la commune.
-  // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine).
-  nature: "forêts et espaces naturels à proximité",
+  // « dans le secteur » : la commune et ses voisines retenues (parfois aucune), pas la commune seule ni « alentour ».
+  // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine). FUT-178 : ni « forêts »,
+  // que la mesure ne garantit pas, et l'eau nommée, que la mesure compte (Saintes-Maries-de-la-Mer, Sète).
+  nature: "beaucoup d'espaces naturels ou d'eau dans le secteur",
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
   // FUT-129 : jamais lu (la priorité n'a plus de sous-score, donc jamais de raison favorable). Un texte qui
@@ -2531,7 +2545,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_services: "commune hors pôle de services",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
-  nature: "peu d'espaces naturels à proximité",
+  nature: "peu d'espaces naturels ou d'eau dans le secteur",
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
   faible_risque_inondation: RAISON_SINISTRES_FREQUENTS,
@@ -2561,7 +2575,8 @@ export const REASON_NEG_INTERMEDIAIRE: Partial<Record<PreferenceKey, string>> = 
   calme_sonore: "exposition sonore modérée",
   faible_exposition_industrielle: "présence industrielle modérée",
   faible_pression_agricole: "agriculture intensive modérée",
-  nature: "nature présente, sans abonder",
+  // FUT-178 : reprend le palier « Espaces naturels ou eau présents » (FUT-154) ; la mesure compte l'eau.
+  nature: "espaces naturels ou eau présents dans le secteur, sans abonder",
   proximite_mer: "rivage marin à distance",
   cadre_calme: "cadre intermédiaire",
   faible_dependance_auto: "usage intermédiaire de la voiture pour aller travailler",
@@ -2979,7 +2994,7 @@ function buildDistinctive(
   if (n < 2) return {};
   const suffix = n >= 3 ? " des trois" : " des deux";
   const CANDS: DistinctiveCand[] = [
-    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus proche de grands espaces naturels", key: "nature", guard: (w) => w >= 60 },
+    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus riche{n} en espaces naturels ou en eau dans son secteur", key: "nature", guard: (w) => w >= 60 },
     { tier: 1, value: (c) => c.vivpct?.apl ?? null, dir: "max", scale: 22, label: "le meilleur accès aux médecins", key: "acces_soins", guard: (w) => w >= 50 },
     { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", key: "viabilite_emploi", guard: (w) => w >= 50 },
     { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables", key: "faible_chaleur" },
@@ -3017,7 +3032,9 @@ function buildDistinctive(
       sal = Math.abs(ext.v - nearest.v) / cd.scale;
       if (sal < DISTINCTIVE_FLOOR) continue;
     }
-    cand.get(ext.insee)!.push({ tier: cd.tier, label: cd.label + suffix, sal });
+    // « {n} » place le suffixe dans le libellé quand il ne peut pas le clore (« la plus riche des trois en … »).
+    const label = cd.label.includes("{n}") ? cd.label.replace("{n}", suffix) : cd.label + suffix;
+    cand.get(ext.insee)!.push({ tier: cd.tier, label, sal });
   }
   const out: Record<string, string> = {};
   for (const c of picks) {
