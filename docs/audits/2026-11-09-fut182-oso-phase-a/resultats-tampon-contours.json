@@ -1,0 +1,1426 @@
+{
+ "couverture": {
+  "communes": 34743,
+  "quantiles": {
+   "0.1": 0.9505,
+   "1": 0.9909,
+   "5": 0.999,
+   "25": 0.9999,
+   "50": 1.0,
+   "75": 1.0,
+   "95": 1.0002,
+   "99": 1.0004,
+   "99.9": 1.0008
+  },
+  "min": 0.8478,
+  "max": 1.003,
+  "sous_99pct": 327,
+  "sous_95pct": 35,
+  "sous_90pct": 2,
+  "au_dessus_101pct": 0,
+  "surface_totale_km2": 548466.5,
+  "pixels_classes_km2": 548260.0,
+  "plus_basses": [
+   [
+    "76353",
+    "Héberville",
+    0.848,
+    0.0
+   ],
+   [
+    "85255",
+    "Saint-Michel-en-l'Herm",
+    0.882,
+    1.0
+   ],
+   [
+    "13083",
+    "Rognonas",
+    0.901,
+    2.2
+   ],
+   [
+    "76346",
+    "Hautot-l'Auvray",
+    0.906,
+    0.0
+   ],
+   [
+    "76104",
+    "Blosseville",
+    0.907,
+    0.0
+   ],
+   [
+    "13036",
+    "Eyragues",
+    0.91,
+    0.1
+   ],
+   [
+    "76172",
+    "La Chapelle-sur-Dun",
+    0.911,
+    0.0
+   ],
+   [
+    "76669",
+    "Sausseuzemare-en-Caux",
+    0.915,
+    0.1
+   ],
+   [
+    "76004",
+    "Ambrumesnil",
+    0.916,
+    0.8
+   ],
+   [
+    "76428",
+    "Le Mesnil-Durdent",
+    0.917,
+    0.0
+   ],
+   [
+    "76158",
+    "Canville-les-Deux-Églises",
+    0.918,
+    0.0
+   ],
+   [
+    "13027",
+    "Châteaurenard",
+    0.924,
+    1.2
+   ],
+   [
+    "76504",
+    "Pleine-Sève",
+    0.926,
+    0.0
+   ],
+   [
+    "85104",
+    "Grues",
+    0.928,
+    1.6
+   ],
+   [
+    "76294",
+    "La Gaillarde",
+    0.932,
+    0.0
+   ]
+  ]
+ },
+ "contours_sans_oso": [
+  [
+   "13055",
+   "Marseille",
+   238.12
+  ],
+  [
+   "69123",
+   "Lyon",
+   47.9
+  ],
+  [
+   "75056",
+   "Paris",
+   105.43
+  ]
+ ],
+ "plm": {
+  "75056": {
+   "nom": "Paris",
+   "arrondissements": 20,
+   "invalides": [],
+   "aire_commune_km2": 105.43,
+   "somme_arrondissements_km2": 105.43,
+   "union_arrondissements_km2": 105.43,
+   "recouvrement_entre_arrondissements_km2": 0.0,
+   "commune_hors_union_km2": 0.0,
+   "union_hors_commune_km2": 0.0,
+   "surface_api_ha_somme": 10536.0,
+   "aires_km2": {
+    "75101": 1.83,
+    "75102": 0.99,
+    "75103": 1.17,
+    "75104": 1.6,
+    "75105": 2.54,
+    "75106": 2.15,
+    "75107": 4.09,
+    "75108": 3.88,
+    "75109": 2.18,
+    "75110": 2.89,
+    "75111": 3.65,
+    "75112": 16.38,
+    "75113": 7.14,
+    "75114": 5.61,
+    "75115": 8.47,
+    "75116": 16.41,
+    "75117": 5.67,
+    "75118": 6.0,
+    "75119": 6.78,
+    "75120": 6.0
+   }
+  },
+  "69123": {
+   "nom": "Lyon",
+   "arrondissements": 9,
+   "invalides": [],
+   "aire_commune_km2": 47.9,
+   "somme_arrondissements_km2": 47.9,
+   "union_arrondissements_km2": 47.9,
+   "recouvrement_entre_arrondissements_km2": 0.0,
+   "commune_hors_union_km2": 0.0,
+   "union_hors_commune_km2": 0.0,
+   "surface_api_ha_somme": 4797.4,
+   "aires_km2": {
+    "69381": 1.54,
+    "69382": 3.44,
+    "69383": 6.35,
+    "69384": 2.91,
+    "69385": 6.17,
+    "69386": 3.75,
+    "69387": 9.45,
+    "69388": 6.77,
+    "69389": 7.53
+   }
+  },
+  "13055": {
+   "nom": "Marseille",
+   "arrondissements": 16,
+   "invalides": [],
+   "aire_commune_km2": 238.12,
+   "somme_arrondissements_km2": 238.12,
+   "union_arrondissements_km2": 238.12,
+   "recouvrement_entre_arrondissements_km2": 0.0,
+   "commune_hors_union_km2": 0.0,
+   "union_hors_commune_km2": 0.0,
+   "surface_api_ha_somme": 23793.3,
+   "aires_km2": {
+    "13201": 1.78,
+    "13202": 3.52,
+    "13203": 2.54,
+    "13204": 2.89,
+    "13205": 2.19,
+    "13206": 2.06,
+    "13207": 5.7,
+    "13208": 20.62,
+    "13209": 63.28,
+    "13210": 10.76,
+    "13211": 33.52,
+    "13212": 14.05,
+    "13213": 28.01,
+    "13214": 16.38,
+    "13215": 16.65,
+    "13216": 14.18
+   }
+  }
+ },
+ "point_reference": {
+  "communes": 34743,
+  "hors_de_son_contour": 483,
+  "hors_exemples": [
+   [
+    "01041",
+    "Bettant",
+    5.0
+   ],
+   [
+    "01076",
+    "Chaley",
+    5.0
+   ],
+   [
+    "01174",
+    "Giron",
+    3.0
+   ],
+   [
+    "01177",
+    "Grand-Corent",
+    2.0
+   ],
+   [
+    "01405",
+    "Servas",
+    1.0
+   ],
+   [
+    "02140",
+    "Camelin",
+    3.0
+   ],
+   [
+    "02232",
+    "Coyolles",
+    5.0
+   ],
+   [
+    "02305",
+    "Fère-en-Tardenois",
+    3.0
+   ],
+   [
+    "02435",
+    "Logny-lès-Aubenton",
+    3.0
+   ],
+   [
+    "02458",
+    "Dhuys et Morin-en-Brie",
+    1.0
+   ]
+  ],
+  "distance_au_centroide_m": {
+   "50": 241,
+   "90": 582,
+   "99": 1148
+  },
+  "distance_au_centroide_max_m": 13898
+ },
+ "C": {
+  "B_eau_vers_C1_eau": {
+   "delta_radius": {
+    "min": -11.2,
+    "p1": -2.2,
+    "p5": -1.2,
+    "mediane": 0.0,
+    "p95": 1.3,
+    "p99": 2.5,
+    "max": 11.4,
+    "abs_mediane": 0.4,
+    "abs_ge_5": 65,
+    "abs_ge_10": 4
+   },
+   "score_change": 17263,
+   "score_abs_ge_5": 241,
+   "score_abs_ge_10": 20,
+   "palier_34_66_change": 561,
+   "seuils": {
+    "40": 347,
+    "55": 328,
+    "60": 269,
+    "70": 197,
+    "88": 113
+   },
+   "verdict_rang_change": 442,
+   "transitions": {
+    "n->s": 78,
+    "s->n": 83,
+    "n->m": 132,
+    "m->n": 149
+   },
+   "spearman": 0.9992,
+   "plus_forts": [
+    [
+     "50218",
+     "Granville",
+     36.3,
+     47.7,
+     17,
+     32
+    ],
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     91.3,
+     80.1,
+     87,
+     74
+    ],
+    [
+     "30117",
+     "Fourques",
+     37.0,
+     47.7,
+     18,
+     32
+    ],
+    [
+     "30258",
+     "Saint-Gilles",
+     41.1,
+     51.5,
+     23,
+     39
+    ],
+    [
+     "30034",
+     "Bellegarde",
+     33.4,
+     42.4,
+     13,
+     25
+    ],
+    [
+     "67405",
+     "Rœschwoog",
+     48.3,
+     57.0,
+     33,
+     47
+    ],
+    [
+     "67231",
+     "Kauffenheim",
+     45.9,
+     54.2,
+     30,
+     43
+    ],
+    [
+     "77485",
+     "Le Vaudoué",
+     57.9,
+     49.6,
+     48,
+     36
+    ],
+    [
+     "67529",
+     "Weyersheim",
+     55.8,
+     47.6,
+     45,
+     32
+    ],
+    [
+     "67140",
+     "Forstfeld",
+     45.2,
+     52.9,
+     29,
+     41
+    ]
+   ]
+  },
+  "B_eau_vers_C2_eau": {
+   "delta_radius": {
+    "min": -22.5,
+    "p1": -4.6,
+    "p5": -2.6,
+    "mediane": 0.0,
+    "p95": 2.9,
+    "p99": 5.0,
+    "max": 25.1,
+    "abs_mediane": 0.8,
+    "abs_ge_5": 628,
+    "abs_ge_10": 26
+   },
+   "score_change": 25308,
+   "score_abs_ge_5": 1882,
+   "score_abs_ge_10": 137,
+   "palier_34_66_change": 1297,
+   "seuils": {
+    "40": 830,
+    "55": 739,
+    "60": 584,
+    "70": 454,
+    "88": 322
+   },
+   "verdict_rang_change": 1008,
+   "transitions": {
+    "n->s": 204,
+    "s->n": 196,
+    "m->n": 309,
+    "n->m": 299
+   },
+   "spearman": 0.997,
+   "plus_forts": [
+    [
+     "50218",
+     "Granville",
+     36.3,
+     61.4,
+     17,
+     53
+    ],
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     91.3,
+     68.8,
+     87,
+     63
+    ],
+    [
+     "30258",
+     "Saint-Gilles",
+     41.1,
+     58.0,
+     23,
+     48
+    ],
+    [
+     "26084",
+     "Châteauneuf-sur-Isère",
+     36.7,
+     53.0,
+     17,
+     41
+    ],
+    [
+     "77186",
+     "Fontainebleau",
+     63.8,
+     50.6,
+     57,
+     37
+    ],
+    [
+     "30117",
+     "Fourques",
+     37.0,
+     50.1,
+     18,
+     36
+    ],
+    [
+     "61230",
+     "Longny les Villages",
+     65.7,
+     53.3,
+     59,
+     41
+    ],
+    [
+     "30034",
+     "Bellegarde",
+     33.4,
+     45.7,
+     13,
+     29
+    ],
+    [
+     "29042",
+     "Crozon",
+     70.8,
+     58.6,
+     65,
+     49
+    ],
+    [
+     "11115",
+     "Cuxac-Cabardès",
+     89.2,
+     77.1,
+     84,
+     72
+    ]
+   ]
+  },
+  "C1_eau_vers_C2_eau": {
+   "delta_radius": {
+    "min": -13.4,
+    "p1": -3.9,
+    "p5": -2.2,
+    "mediane": 0.0,
+    "p95": 2.3,
+    "p99": 3.8,
+    "max": 15.2,
+    "abs_mediane": 0.7,
+    "abs_ge_5": 248,
+    "abs_ge_10": 15
+   },
+   "score_change": 23490,
+   "score_abs_ge_5": 963,
+   "score_abs_ge_10": 57,
+   "palier_34_66_change": 1064,
+   "seuils": {
+    "40": 629,
+    "55": 609,
+    "60": 473,
+    "70": 357,
+    "88": 269
+   },
+   "verdict_rang_change": 836,
+   "transitions": {
+    "s->n": 170,
+    "n->s": 183,
+    "m->n": 238,
+    "n->m": 245
+   },
+   "spearman": 0.998,
+   "plus_forts": [
+    [
+     "26084",
+     "Châteauneuf-sur-Isère",
+     37.8,
+     53.0,
+     19,
+     41
+    ],
+    [
+     "50218",
+     "Granville",
+     47.7,
+     61.4,
+     32,
+     53
+    ],
+    [
+     "77186",
+     "Fontainebleau",
+     64.0,
+     50.6,
+     57,
+     37
+    ],
+    [
+     "14371",
+     "Livarot-Pays-d'Auge",
+     76.6,
+     63.5,
+     71,
+     56
+    ],
+    [
+     "33514",
+     "Soulac-sur-Mer",
+     82.9,
+     70.5,
+     77,
+     65
+    ],
+    [
+     "61230",
+     "Longny les Villages",
+     65.7,
+     53.3,
+     59,
+     41
+    ],
+    [
+     "29042",
+     "Crozon",
+     70.5,
+     58.6,
+     64,
+     49
+    ],
+    [
+     "66136",
+     "Perpignan",
+     39.8,
+     51.3,
+     21,
+     38
+    ],
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     80.1,
+     68.8,
+     74,
+     63
+    ],
+    [
+     "13004",
+     "Arles",
+     72.8,
+     61.8,
+     67,
+     54
+    ]
+   ]
+  },
+  "A_eau_vers_C1_terres": {
+   "delta_radius": {
+    "min": -35.3,
+    "p1": -3.8,
+    "p5": -1.9,
+    "mediane": -0.2,
+    "p95": 1.0,
+    "p99": 2.1,
+    "max": 11.0,
+    "abs_mediane": 0.4,
+    "abs_ge_5": 215,
+    "abs_ge_10": 38
+   },
+   "score_change": 18601,
+   "score_abs_ge_5": 481,
+   "score_abs_ge_10": 101,
+   "palier_34_66_change": 696,
+   "seuils": {
+    "40": 468,
+    "55": 390,
+    "60": 306,
+    "70": 226,
+    "88": 122
+   },
+   "verdict_rang_change": 509,
+   "transitions": {
+    "n->s": 82,
+    "n->m": 171,
+    "s->n": 87,
+    "m->n": 169
+   },
+   "spearman": 0.9986,
+   "plus_forts": [
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     91.3,
+     56.0,
+     87,
+     46
+    ],
+    [
+     "17098",
+     "Chenac-Saint-Seurin-d'Uzet",
+     60.6,
+     42.4,
+     52,
+     25
+    ],
+    [
+     "17034",
+     "Barzan",
+     64.3,
+     46.2,
+     57,
+     31
+    ],
+    [
+     "17437",
+     "Talmont-sur-Gironde",
+     64.5,
+     46.6,
+     57,
+     31
+    ],
+    [
+     "17015",
+     "Arces",
+     59.5,
+     41.8,
+     50,
+     24
+    ],
+    [
+     "17230",
+     "Meschers-sur-Gironde",
+     62.0,
+     44.4,
+     54,
+     28
+    ],
+    [
+     "17160",
+     "Floirac",
+     60.7,
+     43.6,
+     52,
+     27
+    ],
+    [
+     "17328",
+     "Saint-Fort-sur-Gironde",
+     59.0,
+     42.6,
+     49,
+     26
+    ],
+    [
+     "17248",
+     "Mortagne-sur-Gironde",
+     59.0,
+     42.6,
+     49,
+     26
+    ],
+    [
+     "30133",
+     "Le Grau-du-Roi",
+     67.4,
+     51.7,
+     61,
+     40
+    ]
+   ]
+  },
+  "A_eau_vers_C2_terres": {
+   "delta_radius": {
+    "min": -40.4,
+    "p1": -5.6,
+    "p5": -3.2,
+    "mediane": -0.2,
+    "p95": 2.5,
+    "p99": 4.6,
+    "max": 25.0,
+    "abs_mediane": 0.9,
+    "abs_ge_5": 782,
+    "abs_ge_10": 55
+   },
+   "score_change": 25551,
+   "score_abs_ge_5": 2167,
+   "score_abs_ge_10": 204,
+   "palier_34_66_change": 1375,
+   "seuils": {
+    "40": 879,
+    "55": 776,
+    "60": 625,
+    "70": 479,
+    "88": 328
+   },
+   "verdict_rang_change": 1023,
+   "transitions": {
+    "n->s": 200,
+    "s->n": 198,
+    "n->m": 309,
+    "m->n": 316
+   },
+   "spearman": 0.9964,
+   "plus_forts": [
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     91.3,
+     50.9,
+     87,
+     38
+    ],
+    [
+     "50218",
+     "Granville",
+     36.3,
+     61.3,
+     17,
+     54
+    ],
+    [
+     "33514",
+     "Soulac-sur-Mer",
+     81.4,
+     60.3,
+     76,
+     52
+    ],
+    [
+     "30133",
+     "Le Grau-du-Roi",
+     67.4,
+     47.8,
+     61,
+     33
+    ],
+    [
+     "33521",
+     "Talais",
+     79.7,
+     60.4,
+     74,
+     52
+    ],
+    [
+     "33490",
+     "Saint-Vivien-de-Médoc",
+     81.2,
+     62.9,
+     76,
+     56
+    ],
+    [
+     "17369",
+     "Saint-Martin-de-Ré",
+     57.3,
+     40.3,
+     47,
+     22
+    ],
+    [
+     "17034",
+     "Barzan",
+     64.3,
+     47.4,
+     57,
+     32
+    ],
+    [
+     "17098",
+     "Chenac-Saint-Seurin-d'Uzet",
+     60.6,
+     43.8,
+     52,
+     27
+    ],
+    [
+     "17051",
+     "Le Bois-Plage-en-Ré",
+     56.7,
+     40.1,
+     46,
+     22
+    ]
+   ]
+  },
+  "B_terres_vers_C1_terres": {
+   "delta_radius": {
+    "min": -15.8,
+    "p1": -2.2,
+    "p5": -1.2,
+    "mediane": 0.0,
+    "p95": 1.3,
+    "p99": 2.4,
+    "max": 11.6,
+    "abs_mediane": 0.4,
+    "abs_ge_5": 66,
+    "abs_ge_10": 2
+   },
+   "score_change": 17262,
+   "score_abs_ge_5": 241,
+   "score_abs_ge_10": 21,
+   "palier_34_66_change": 577,
+   "seuils": {
+    "40": 370,
+    "55": 326,
+    "60": 268,
+    "70": 205,
+    "88": 121
+   },
+   "verdict_rang_change": 421,
+   "transitions": {
+    "n->s": 77,
+    "s->n": 79,
+    "n->m": 147,
+    "m->n": 118
+   },
+   "spearman": 0.9992,
+   "plus_forts": [
+    [
+     "13096",
+     "Saintes-Maries-de-la-Mer",
+     71.8,
+     56.0,
+     66,
+     46
+    ],
+    [
+     "50218",
+     "Granville",
+     35.7,
+     47.3,
+     17,
+     33
+    ],
+    [
+     "67405",
+     "Rœschwoog",
+     46.1,
+     55.5,
+     31,
+     45
+    ],
+    [
+     "67231",
+     "Kauffenheim",
+     43.9,
+     52.8,
+     27,
+     42
+    ],
+    [
+     "67529",
+     "Weyersheim",
+     54.9,
+     46.2,
+     45,
+     31
+    ],
+    [
+     "77485",
+     "Le Vaudoué",
+     57.8,
+     49.4,
+     49,
+     36
+    ],
+    [
+     "67140",
+     "Forstfeld",
+     43.2,
+     51.5,
+     27,
+     40
+    ],
+    [
+     "67476",
+     "Stattmatten",
+     51.3,
+     58.9,
+     39,
+     50
+    ],
+    [
+     "77269",
+     "Maincy",
+     49.4,
+     41.8,
+     36,
+     24
+    ],
+    [
+     "67142",
+     "Fort-Louis",
+     50.4,
+     57.9,
+     38,
+     49
+    ]
+   ]
+  },
+  "communes_ponderees_C1": {
+   "mediane": 70.0,
+   "min": 1
+  },
+  "communes_ponderees_C2": {
+   "mediane": 89.0,
+   "min": 1
+  }
+ },
+ "cas": {
+  "13004": {
+   "nom": "Arles",
+   "A_eau": 66.1,
+   "B_eau": 66.1,
+   "B_terres": 51.7,
+   "C1_eau": 72.8,
+   "C1_terres": 56.1,
+   "C2_eau": 61.8,
+   "C2_terres": 51.7,
+   "score_A_eau": 59,
+   "score_B_eau": 59,
+   "score_B_terres": 40,
+   "score_C1_eau": 67,
+   "score_C1_terres": 46,
+   "score_C2_eau": 54,
+   "score_C2_terres": 40,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "13096": {
+   "nom": "Saintes-Maries-de-la-Mer",
+   "A_eau": 91.3,
+   "B_eau": 91.3,
+   "B_terres": 71.8,
+   "C1_eau": 80.1,
+   "C1_terres": 56.0,
+   "C2_eau": 68.8,
+   "C2_terres": 50.9,
+   "score_A_eau": 87,
+   "score_B_eau": 87,
+   "score_B_terres": 66,
+   "score_C1_eau": 74,
+   "score_C1_terres": 46,
+   "score_C2_eau": 63,
+   "score_C2_terres": 38,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "85113": {
+   "nom": "L'Île-d'Yeu",
+   "A_eau": 71.2,
+   "B_eau": 71.2,
+   "B_terres": 70.9,
+   "C1_eau": 71.2,
+   "C1_terres": 70.9,
+   "C2_eau": 71.2,
+   "C2_terres": 70.9,
+   "score_A_eau": 65,
+   "score_B_eau": 65,
+   "score_B_terres": 65,
+   "score_C1_eau": 65,
+   "score_C1_terres": 65,
+   "score_C2_eau": 65,
+   "score_C2_terres": 65,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "17094": {
+   "nom": "Châtelaillon-Plage",
+   "A_eau": 27.9,
+   "B_eau": 28.1,
+   "B_terres": 27.0,
+   "C1_eau": 28.6,
+   "C1_terres": 27.4,
+   "C2_eau": 28.6,
+   "C2_terres": 27.3,
+   "score_A_eau": 8,
+   "score_B_eau": 8,
+   "score_B_terres": 7,
+   "score_C1_eau": 8,
+   "score_C1_terres": 8,
+   "score_C2_eau": 8,
+   "score_C2_terres": 7,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "34301": {
+   "nom": "Sète",
+   "A_eau": 55.6,
+   "B_eau": 55.6,
+   "B_terres": 44.1,
+   "C1_eau": 56.8,
+   "C1_terres": 44.8,
+   "C2_eau": 56.1,
+   "C2_terres": 48.3,
+   "score_A_eau": 45,
+   "score_B_eau": 45,
+   "score_B_terres": 28,
+   "score_C1_eau": 47,
+   "score_C1_terres": 29,
+   "score_C2_eau": 45,
+   "score_C2_terres": 34,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "34192": {
+   "nom": "Palavas-les-Flots",
+   "A_eau": 58.0,
+   "B_eau": 58.0,
+   "B_terres": 48.2,
+   "C1_eau": 58.3,
+   "C1_terres": 48.2,
+   "C2_eau": 59.1,
+   "C2_terres": 50.8,
+   "score_A_eau": 48,
+   "score_B_eau": 48,
+   "score_B_terres": 34,
+   "score_C1_eau": 49,
+   "score_C1_terres": 34,
+   "score_C2_eau": 50,
+   "score_C2_terres": 38,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "17299": {
+   "nom": "Rochefort",
+   "A_eau": 47.5,
+   "B_eau": 47.5,
+   "B_terres": 45.3,
+   "C1_eau": 46.9,
+   "C1_terres": 44.8,
+   "C2_eau": 44.9,
+   "C2_terres": 42.9,
+   "score_A_eau": 32,
+   "score_B_eau": 32,
+   "score_B_terres": 29,
+   "score_C1_eau": 31,
+   "score_C1_terres": 29,
+   "score_C2_eau": 27,
+   "score_C2_terres": 25,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "74010": {
+   "nom": "Annecy",
+   "A_eau": 84.4,
+   "B_eau": 84.4,
+   "B_terres": 83.9,
+   "C1_eau": 83.3,
+   "C1_terres": 82.7,
+   "C2_eau": 86.6,
+   "C2_terres": 86.3,
+   "score_A_eau": 79,
+   "score_B_eau": 79,
+   "score_B_terres": 79,
+   "score_C1_eau": 78,
+   "score_C1_terres": 77,
+   "score_C2_eau": 82,
+   "score_C2_terres": 82,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "44116": {
+   "nom": "Paimbœuf",
+   "A_eau": 74.2,
+   "B_eau": 74.2,
+   "B_terres": 71.6,
+   "C1_eau": 74.3,
+   "C1_terres": 71.6,
+   "C2_eau": 74.1,
+   "C2_terres": 71.6,
+   "score_A_eau": 68,
+   "score_B_eau": 68,
+   "score_B_terres": 66,
+   "score_C1_eau": 68,
+   "score_C1_terres": 66,
+   "score_C2_eau": 68,
+   "score_C2_terres": 66,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "02100": {
+   "nom": "Bony",
+   "A_eau": 11.2,
+   "B_eau": 11.2,
+   "B_terres": 11.0,
+   "C1_eau": 11.6,
+   "C1_terres": 11.3,
+   "C2_eau": 12.9,
+   "C2_terres": 12.7,
+   "score_A_eau": 0,
+   "score_B_eau": 0,
+   "score_B_terres": 0,
+   "score_C1_eau": 0,
+   "score_C1_terres": 0,
+   "score_C2_eau": 0,
+   "score_C2_terres": 1,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "28199": {
+   "nom": "Janville-en-Beauce",
+   "A_eau": 5.6,
+   "B_eau": 5.6,
+   "B_terres": 5.5,
+   "C1_eau": 5.5,
+   "C1_terres": 5.4,
+   "C2_eau": 6.6,
+   "C2_terres": 6.5,
+   "score_A_eau": 0,
+   "score_B_eau": 0,
+   "score_B_terres": 0,
+   "score_C1_eau": 0,
+   "score_C1_terres": 0,
+   "score_C2_eau": 0,
+   "score_C2_terres": 0,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "2B096": {
+   "nom": "Corte",
+   "A_eau": 99.6,
+   "B_eau": 99.6,
+   "B_terres": 99.6,
+   "C1_eau": 99.7,
+   "C1_terres": 99.7,
+   "C2_eau": 99.7,
+   "C2_terres": 99.7,
+   "score_A_eau": 100,
+   "score_B_eau": 100,
+   "score_B_terres": 100,
+   "score_C1_eau": 100,
+   "score_C1_terres": 100,
+   "score_C2_eau": 100,
+   "score_C2_terres": 100,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "33063": {
+   "nom": "Bordeaux",
+   "A_eau": 54.0,
+   "B_eau": 54.0,
+   "B_terres": 51.8,
+   "C1_eau": 57.5,
+   "C1_terres": 55.8,
+   "C2_eau": 62.7,
+   "C2_terres": 61.0,
+   "score_A_eau": 43,
+   "score_B_eau": 43,
+   "score_B_terres": 40,
+   "score_C1_eau": 47,
+   "score_C1_terres": 46,
+   "score_C2_eau": 55,
+   "score_C2_terres": 53,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "59350": {
+   "nom": "Lille",
+   "A_eau": 27.0,
+   "B_eau": 27.0,
+   "B_terres": 26.5,
+   "C1_eau": 27.0,
+   "C1_terres": 26.5,
+   "C2_eau": 27.6,
+   "C2_terres": 27.1,
+   "score_A_eau": 7,
+   "score_B_eau": 7,
+   "score_B_terres": 7,
+   "score_C1_eau": 7,
+   "score_C1_terres": 7,
+   "score_C2_eau": 7,
+   "score_C2_terres": 7,
+   "plm_km2_C1": 0.0,
+   "plm_km2_C2": 0.0
+  },
+  "92012": {
+   "nom": "Boulogne-Billancourt",
+   "A_eau": 33.2,
+   "B_eau": 33.2,
+   "B_terres": 31.8,
+   "C1_eau": 30.4,
+   "C1_terres": 28.9,
+   "C2_eau": 32.1,
+   "C2_terres": 30.8,
+   "score_A_eau": 13,
+   "score_B_eau": 13,
+   "score_B_terres": 12,
+   "score_C1_eau": 10,
+   "score_C1_terres": 9,
+   "score_C2_eau": 11,
+   "score_C2_terres": 10,
+   "plm_km2_C1": 101.33,
+   "plm_km2_C2": 105.32
+  },
+  "93048": {
+   "nom": "Montreuil",
+   "A_eau": 22.0,
+   "B_eau": 22.0,
+   "B_terres": 20.6,
+   "C1_eau": 21.8,
+   "C1_terres": 20.4,
+   "C2_eau": 24.8,
+   "C2_terres": 23.5,
+   "score_A_eau": 4,
+   "score_B_eau": 4,
+   "score_B_terres": 3,
+   "score_C1_eau": 4,
+   "score_C1_terres": 3,
+   "score_C2_eau": 5,
+   "score_C2_terres": 4,
+   "plm_km2_C1": 102.32,
+   "plm_km2_C2": 105.43
+  },
+  "94080": {
+   "nom": "Vincennes",
+   "A_eau": 21.9,
+   "B_eau": 21.9,
+   "B_terres": 20.4,
+   "C1_eau": 22.3,
+   "C1_terres": 20.9,
+   "C2_eau": 24.2,
+   "C2_terres": 22.8,
+   "score_A_eau": 4,
+   "score_B_eau": 4,
+   "score_B_terres": 3,
+   "score_C1_eau": 4,
+   "score_C1_terres": 3,
+   "score_C2_eau": 4,
+   "score_C2_terres": 4,
+   "plm_km2_C1": 104.21,
+   "plm_km2_C2": 105.43
+  },
+  "69259": {
+   "nom": "Vénissieux",
+   "A_eau": 37.6,
+   "B_eau": 37.6,
+   "B_terres": 36.3,
+   "C1_eau": 37.5,
+   "C1_terres": 36.2,
+   "C2_eau": 41.7,
+   "C2_terres": 40.6,
+   "score_A_eau": 18,
+   "score_B_eau": 18,
+   "score_B_terres": 18,
+   "score_C1_eau": 18,
+   "score_C1_terres": 17,
+   "score_C2_eau": 23,
+   "score_C2_terres": 22,
+   "plm_km2_C1": 47.9,
+   "plm_km2_C2": 47.9
+  },
+  "13041": {
+   "nom": "Gardanne",
+   "A_eau": 69.4,
+   "B_eau": 69.4,
+   "B_terres": 69.3,
+   "C1_eau": 71.2,
+   "C1_terres": 71.1,
+   "C2_eau": 70.2,
+   "C2_terres": 70.1,
+   "score_A_eau": 63,
+   "score_B_eau": 63,
+   "score_B_terres": 63,
+   "score_C1_eau": 65,
+   "score_C1_terres": 65,
+   "score_C2_eau": 64,
+   "score_C2_terres": 64,
+   "plm_km2_C1": 39.91,
+   "plm_km2_C2": 103.38
+  },
+  "13022": {
+   "nom": "Cassis",
+   "A_eau": 70.6,
+   "B_eau": 70.6,
+   "B_terres": 70.5,
+   "C1_eau": 71.3,
+   "C1_terres": 71.2,
+   "C2_eau": 72.6,
+   "C2_terres": 72.5,
+   "score_A_eau": 64,
+   "score_B_eau": 64,
+   "score_B_terres": 65,
+   "score_C1_eau": 65,
+   "score_C1_terres": 65,
+   "score_C2_eau": 67,
+   "score_C2_terres": 67,
+   "plm_km2_C1": 138.21,
+   "plm_km2_C2": 186.23
+  },
+  "13005": {
+   "nom": "Aubagne",
+   "A_eau": 76.4,
+   "B_eau": 76.4,
+   "B_terres": 76.3,
+   "C1_eau": 76.1,
+   "C1_terres": 76.0,
+   "C2_eau": 75.7,
+   "C2_terres": 75.7,
+   "score_A_eau": 71,
+   "score_B_eau": 71,
+   "score_B_terres": 71,
+   "score_C1_eau": 70,
+   "score_C1_terres": 70,
+   "score_C2_eau": 70,
+   "score_C2_terres": 70,
+   "plm_km2_C1": 162.6,
+   "plm_km2_C2": 220.83
+  },
+  "69266": {
+   "nom": "Villeurbanne",
+   "A_eau": 34.2,
+   "B_eau": 34.2,
+   "B_terres": 32.6,
+   "C1_eau": 34.7,
+   "C1_terres": 33.1,
+   "C2_eau": 37.3,
+   "C2_terres": 36.0,
+   "score_A_eau": 14,
+   "score_B_eau": 14,
+   "score_B_terres": 13,
+   "score_C1_eau": 15,
+   "score_C1_terres": 13,
+   "score_C2_eau": 17,
+   "score_C2_terres": 16,
+   "plm_km2_C1": 47.9,
+   "plm_km2_C2": 47.9
+  }
+ },
+ "plm_voisinage": {
+  "communes_dont_le_disque_C1_touche_PLM": 387,
+  "part_du_disque_sans_oso": {
+   "mediane": 0.061,
+   "max": 0.295
+  },
+  "communes_dont_le_tampon_C2_touche_PLM": 463,
+  "par_ville_C1": {
+   "01": 12,
+   "13": 39,
+   "38": 3,
+   "69": 107,
+   "77": 14,
+   "78": 32,
+   "91": 23,
+   "92": 36,
+   "93": 39,
+   "94": 46,
+   "95": 36
+  },
+  "communes_avec_un_centre_arrondissement_a_15km": 328
+ }
+}
