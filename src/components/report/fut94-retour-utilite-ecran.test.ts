@@ -229,8 +229,11 @@ for (const presentation of ["classique", "releve"] as const) {
     assert.doesNotMatch(texte(r), /Cette analyse vous a-t-elle appris/);
     assert.match(texte(r), /Votre retour sur cette analyse : Pas encore lu\. Merci\./);
     assert.equal(boutons(r).length, 1);
-    // « Modifier » rouvre, avec la réponse marquée et le commentaire enregistré dans le champ.
-    const r2 = await ecran({ presentation, initial: { answer: "oui", comment: "La carte des écoles." } });
+    // « Modifier » rouvre, avec la réponse marquée et le commentaire enregistré dans le champ. Le faux
+    // serveur part du même état que l'écran (il garde le commentaire, comme le vrai).
+    initialServeur = { answer: "oui", comment: "La carte des écoles." };
+    simulerFetch();
+    const r2 = await ecran({ presentation, initial: initialServeur });
     await cliquer(bouton(r2, /Modifier/));
     assert.equal(bouton(r2, /^\["Oui"\]$/).props["aria-pressed"], true);
     assert.equal(champ(r2).props.value, "La carte des écoles.");
@@ -239,6 +242,7 @@ for (const presentation of ["classique", "releve"] as const) {
     assert.deepEqual(appels.at(-1)!.corps, { insee: "44109", dossierId: null, presentation, answer: "pas_vraiment" });
     assert.equal(champ(r2).props.value, "La carte des écoles.");
     assert.equal(appels.length, 1);
+    initialServeur = null;
   });
 
   test(`${presentation} · au-delà de 2 000 caractères : compte affiché, envoi bloqué, rien n'est coupé`, async () => {
@@ -301,6 +305,11 @@ for (const presentation of ["classique", "releve"] as const) {
     assert.deepEqual(appels.at(-1)!.corps, { insee: "44109", dossierId: null, presentation, answer: "pas_encore_lu" });
     assert.match(texte(r), /Merci, c'est noté\. Votre commentaire précédent a été retiré\./);
     assert.equal(champ(r), undefined);
+    // Retour à « Oui » : le champ revient VIDE. Le texte retiré n'y est plus, Envoyer ne peut pas le
+    // ressusciter (défaut trouvé par la recette réelle du 09/11/2026).
+    await cliquer(bouton(r, /^\["Oui"\]$/));
+    assert.equal(champ(r).props.value, "");
+    assert.doesNotMatch(texte(r), /Rien sur les écoles/);
     // Oui ↔ Pas vraiment, lui, garde le commentaire et n'annonce aucun retrait.
     initialServeur = { answer: "oui", comment: "La carte des écoles." };
     simulerFetch();

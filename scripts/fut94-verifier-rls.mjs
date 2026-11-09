@@ -29,6 +29,7 @@ const DB = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 await db.exec(`
   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
   alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+  alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
   grant usage on schema public to anon, authenticated, service_role;
   create schema auth; grant usage on schema auth to anon, authenticated, service_role;
   create table auth.users (id uuid primary key);
@@ -112,18 +113,33 @@ await db.exec(`
   insert into public.dossier_utility_feedback (user_id, insee_code, scope_key, answer, comment, commented_at, updated_at) values
     ('${BOB}', '33063', 'commune', 'oui',          'récent', now() - interval '11 months', now() - interval '11 months'),
     ('${BOB}', '31555', 'commune', 'pas_vraiment', 'ancien', now() - interval '13 months', now() - interval '13 months'),
-    ('${BOB}', '06088', 'commune', 'oui',          null,     null,                         now() - interval '25 months');
+    ('${BOB}', '06088', 'commune', 'oui',          null,     null,                         now() - interval '25 months'),
+    -- Réponse MODIFIÉE récemment, commentaire ancien : le commentaire suit SA date, la réponse la sienne.
+    ('${BOB}', '59350', 'commune', 'oui',          'vieux',  now() - interval '13 months', now() - interval '1 month'),
+    -- Juste en deçà des bornes : rien ne part.
+    ('${BOB}', '67482', 'commune', 'pas_vraiment', 'presque', now() - interval '12 months' + interval '1 hour', now() - interval '24 months' + interval '1 hour');
 `);
 await refuse(en("authenticated", BOB, `select * from public.purger_retours_utilite()`), /permission denied/, "purge : interdite à authenticated");
 await refuse(en("anon", null, `select * from public.purger_retours_utilite()`), /permission denied/, "purge : interdite à anon");
 await refuse(en("service_role", null, `select * from public.purger_retours_utilite(interval '2 years', interval '1 year')`), /incohérents/, "purge : délais incohérents refusés");
 const purge = await en("service_role", null, `select * from public.purger_retours_utilite()`);
-assert.deepEqual(purge.rows, [{ commentaires_effaces: 1, retours_supprimes: 1 }]);
-const apresPurge = await db.query(`select insee_code, answer, comment, commented_at from public.dossier_utility_feedback where insee_code in ('33063', '31555', '06088') order by insee_code`);
+assert.deepEqual(purge.rows, [{ commentaires_effaces: 2, retours_supprimes: 1 }]);
+const apresPurge = await db.query(`select insee_code, answer, comment, commented_at from public.dossier_utility_feedback where insee_code in ('33063', '31555', '06088', '59350', '67482') order by insee_code`);
 assert.deepEqual(apresPurge.rows.map((r) => [r.insee_code, r.answer, r.comment, r.commented_at === null]), [
-  ["31555", "pas_vraiment", null, true], ["33063", "oui", "récent", false],
+  ["31555", "pas_vraiment", null, true], ["33063", "oui", "récent", false], ["59350", "oui", null, true], ["67482", "pas_vraiment", "presque", false],
 ]);
 ok("purge : le commentaire de 13 mois effacé avec sa date (réponse gardée), celui de 11 mois gardé, la réponse de 25 mois supprimée");
+ok("purge : réponse modifiée il y a 1 mois, commentaire de 13 mois : le commentaire part, la réponse reste (chacun suit sa date)");
+ok("purge : 1 heure en deçà de 12 et de 24 mois, rien ne part");
+const droits = await db.query(`select r.rolname, has_function_privilege(r.rolname, 'public.purger_retours_utilite(interval, interval)', 'execute') as peut
+  from pg_roles r where r.rolname in ('anon', 'authenticated', 'service_role', 'public') order by 1`);
+assert.deepEqual(droits.rows, [
+  { rolname: "anon", peut: false }, { rolname: "authenticated", peut: false }, { rolname: "service_role", peut: true },
+]);
+const def = await db.query(`select prosecdef, proconfig from pg_proc where proname = 'purger_retours_utilite'`);
+assert.equal(def.rows[0].prosecdef, true);
+assert.deepEqual(def.rows[0].proconfig, ["search_path=public"]);
+ok("purge : EXECUTE seulement pour service_role, malgré les privilèges par défaut de Supabase sur les fonctions ; security definer à search_path fixé");
 const rejeu = await en("service_role", null, `select * from public.purger_retours_utilite()`);
 assert.deepEqual(rejeu.rows, [{ commentaires_effaces: 0, retours_supprimes: 0 }]);
 ok("purge : idempotente (un second passage ne fait rien)");

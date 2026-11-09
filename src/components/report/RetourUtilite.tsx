@@ -103,7 +103,11 @@ export function RetourUtilite({
       const precedent = enregistre;
       setEnregistre(json.retour);
       setConfirme(type);
-      setCommentaireRetire(type === "reponse" && Boolean(precedent?.comment) && json.retour.comment === null);
+      const retire = type === "reponse" && Boolean(precedent?.comment) && json.retour.comment === null;
+      setCommentaireRetire(retire);
+      // L'écran vient de dire « votre commentaire précédent a été retiré » : le champ ne doit pas le
+      // reproposer au retour à « Oui » (un clic sur Envoyer le ressusciterait). Trouvé en recette réelle.
+      if (retire) setBrouillon("");
       // UN ÉVÉNEMENT AGRÉGÉ, SANS LE TEXTE, ET SEULEMENT AVEC CONSENTEMENT. La réponse, la présence d'un
       // commentaire, la portée.
       try {

@@ -1,0 +1,36 @@
+FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T10:54:27.762Z
+
+✔ classique · la question est posée sous le dossier, aucune réponse en base
+✔ classique · première réponse « Oui » sans commentaire : une ligne, réponse seule
+✔ classique · ajouter un commentaire : enregistré avec sa date, résumé replié
+✔ classique · modifier le commentaire : texte et date remplacés, même ligne
+✔ classique · effacer le commentaire (champ vidé) : comment et commented_at à NULL
+✔ classique · « Pas vraiment » commenté → « Pas encore lu » : commentaire retiré, annoncé à l'écran
+✔ classique · retour à « Oui » : pas de commentaire ressuscité, champ vide
+✔ classique · rechargement : l'état vient de la base (résumé « Oui »), aucune question reposée
+✔ classique · double clic : un seul envoi, une seule ligne
+✔ classique · panne réseau puis nouvel essai : texte conservé, envoi réussi
+✔ classique · clavier : Tab jusqu'à une réponse, Entrée l'enregistre, le focus reste dans le bloc
+✔ releve · la question est posée sous le dossier, aucune réponse en base
+✔ releve · première réponse « Oui » sans commentaire : une ligne, réponse seule
+✔ releve · ajouter un commentaire : enregistré avec sa date, résumé replié
+✔ releve · modifier le commentaire : texte et date remplacés, même ligne
+✔ releve · effacer le commentaire (champ vidé) : comment et commented_at à NULL
+✔ releve · « Pas vraiment » commenté → « Pas encore lu » : commentaire retiré, annoncé à l'écran
+✔ releve · retour à « Oui » : pas de commentaire ressuscité, champ vide
+✔ releve · rechargement : l'état vient de la base (résumé « Oui »), aucune question reposée
+✔ releve · double clic : un seul envoi, une seule ligne
+✔ releve · panne réseau puis nouvel essai : texte conservé, envoi réussi
+✔ releve · clavier : Tab jusqu'à une réponse, Entrée l'enregistre, le focus reste dans le bloc
+✔ isolation multi-dossiers : l'autre bien de A (D1) n'hérite d'aucune réponse, sa réponse est une ligne distincte
+    6 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
+✔ consentement absent : événements FUT-94 conformes, aucun texte de commentaire envoyé
+    6 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
+✔ consentement denied : événements FUT-94 conformes, aucun texte de commentaire envoyé
+    8 événement(s) tentés ; FUT-94 : 2 [{"answer":"pas_vraiment","has_comment":true,"step":"reponse","scope":"adresse","presentation":"releve"},{"answer":"pas_vraiment","has_comment":true,"step":"commentaire","scope":"adresse","presentation":"releve"}] ; autocapture du bloc : 0 ; texte du commentaire : 0
+✔ consentement granted : événements FUT-94 conformes, aucun texte de commentaire envoyé
+
+✔ table illisible pour le compte : droit SELECT de `authenticated` retiré le temps du cas (projet de test seulement), /rapport s'affiche, la question n'est pas posée (0 bloc)
+✔ contre-épreuve : droit rétabli, même compte, même page : la question réapparaît (1 bloc)
+
+Journal du serveur (next dev) : 29 POST /api/dossier/retour-utilite, tous 200 ; texte témoin du commentaire présent 0 fois.

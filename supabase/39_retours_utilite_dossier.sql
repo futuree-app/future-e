@@ -108,9 +108,8 @@ create policy dossier_utility_feedback_select_own
 -- agrégés (requêtes 2 à 4), qui ne désignent personne.
 --
 -- IDEMPOTENTE, OBSERVABLE (elle rend ce qu'elle a fait), réservée au service role. NON PLANIFIÉE ICI
--- (patron de la migration 38). Configuration proposée, à appliquer à la main après revue :
---   select cron.schedule('purge-retours-utilite', '23 3 * * *',
---     $$select * from public.purger_retours_utilite()$$);
+-- (patron de la migration 38). Planification, contrôle et alerte, à appliquer à la main après
+-- validation : supabase/maintenance/fut94-planifier-purge.sql.
 create or replace function public.purger_retours_utilite(
   p_delai_commentaire interval default interval '12 months',
   p_delai_reponse     interval default interval '24 months'
