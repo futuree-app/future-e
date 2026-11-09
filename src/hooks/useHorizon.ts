@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 
@@ -22,7 +22,7 @@ export const HORIZON_META: Record<HorizonKey, { year: string; france: string }> 
 // que cross-tab). Un pub/sub au niveau module règle ça sans Context.
 
 let currentHorizon: HorizonKey = DEFAULT;
-const listeners = new Set<(h: HorizonKey) => void>();
+const listeners = new Set<() => void>();
 let hydrated = false;
 
 function hydrateOnce() {
@@ -38,24 +38,33 @@ function hydrateOnce() {
   }
 }
 
-function notifyAll(next: HorizonKey) {
-  for (const l of listeners) l(next);
+function notifyAll() {
+  for (const l of listeners) l();
+}
+
+// Le store est lu par `useSyncExternalStore` (FUT-121), qui remplace l'ancien « useState + effet qui
+// resynchronise au montage ». Même séquence pour le lecteur : pendant l'hydratation, React rend la
+// valeur serveur (`DEFAULT`, celle du HTML servi), puis la valeur du store, restaurée depuis
+// localStorage à la première lecture côté client. Un composant monté plus tard lit directement la
+// valeur courante, éventuellement hydratée par un autre consommateur.
+function subscribe(onChange: () => void): () => void {
+  listeners.add(onChange);
+  return () => {
+    listeners.delete(onChange);
+  };
+}
+
+function getSnapshot(): HorizonKey {
+  hydrateOnce();
+  return currentHorizon;
+}
+
+function getServerSnapshot(): HorizonKey {
+  return DEFAULT;
 }
 
 export function useHorizon(): [HorizonKey, (h: HorizonKey) => void] {
-  const [horizon, setHorizonState] = useState<HorizonKey>(currentHorizon);
-
-  useEffect(() => {
-    hydrateOnce();
-    // Synchroniser le composant avec la valeur courante du store (peut avoir
-    // été hydratée par un autre consommateur monté avant lui).
-    if (currentHorizon !== horizon) setHorizonState(currentHorizon);
-    listeners.add(setHorizonState);
-    return () => {
-      listeners.delete(setHorizonState);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const horizon = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   function setHorizon(h: HorizonKey) {
     if (!VALID.includes(h) || h === currentHorizon) return;
@@ -65,7 +74,7 @@ export function useHorizon(): [HorizonKey, (h: HorizonKey) => void] {
     } catch {
       /* ignore */
     }
-    notifyAll(h);
+    notifyAll();
   }
 
   return [horizon, setHorizon];

@@ -9,9 +9,17 @@ import { VentesAutourBloc } from "@/components/report/VentesAutourBloc";
 
 const DELAI_TOTAL_MS = 6_000;
 
-export async function VentesAutourServeur({ lat, lon, insee, type }: { lat: number; lon: number; insee: string; type: TypeDuLogement }) {
+// La course contre le délai vit hors du composant (FUT-121) : la minuterie y est une variable
+// ordinaire d'une fonction asynchrone, et non une variable du rendu réaffectée par une fermeture.
+// Même contrat qu'avant : `null` au-delà du délai, l'erreur de lecture propagée telle quelle, la
+// minuterie toujours libérée.
+async function avantDelai<T>(lecture: Promise<T>, delaiMs: number): Promise<T | null> {
   let minuterie: ReturnType<typeof setTimeout> | undefined;
-  const delai = new Promise<null>((r) => { minuterie = setTimeout(() => r(null), DELAI_TOTAL_MS); });
-  const autour = await Promise.race([lireVentesAutour({ lat, lon }, insee), delai]).finally(() => clearTimeout(minuterie));
+  const delai = new Promise<null>((r) => { minuterie = setTimeout(() => r(null), delaiMs); });
+  return Promise.race([lecture, delai]).finally(() => clearTimeout(minuterie));
+}
+
+export async function VentesAutourServeur({ lat, lon, insee, type }: { lat: number; lon: number; insee: string; type: TypeDuLogement }) {
+  const autour = await avantDelai(lireVentesAutour({ lat, lon }, insee), DELAI_TOTAL_MS);
   return <VentesAutourBloc autour={autour} type={type} />;
 }
