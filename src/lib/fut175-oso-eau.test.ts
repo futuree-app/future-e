@@ -90,8 +90,9 @@ test("Sète : la moitié de ses terres est urbanisée, l'eau (étang de Thau) es
 
   const carte = buildTerritoryCards(snap).couvertNaturel!;
   assert.equal(carte.headlineLabel, "Majoritairement urbanisé");
-  assert.equal(carte.naturelTerresPct, 34);
-  assert.equal(carte.eauPct, 51);
+  // FUT-183 : la carte garde le dixième de la catégorie.
+  assert.equal(carte.naturelTerresPct, 33.8);
+  assert.equal(carte.eauPct, 50.6);
   assert.ok(!carte.composition.some((x) => /eau/i.test(x.label)), "l'eau ne figure plus parmi les postes des terres");
   const somme = carte.composition.reduce((a, x) => a + x.pct, 0);
   assert.ok(somme >= 98 && somme <= 102, `postes des terres : ${somme}`);

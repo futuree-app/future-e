@@ -16,6 +16,7 @@ import type { VigieauSummary, DroughtLevel } from "@/lib/vigieau";
 import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
+import { pctOso } from "@/lib/territoire/oso-format";
 import type { Era5Trend } from "@/lib/era5-trend";
 import type { MemoireIncendies } from "@/lib/data/bdiff-incendies";
 import { texteTerritoire } from "@/lib/incendies-observes";
@@ -718,27 +719,28 @@ export function buildFactors(
           detail: {
             eyebrow: "L'occupation des sols",
             title: "Espaces naturels",
-            headline: `${couvertNaturel.naturelTerresPct} % de ses terres en espaces naturels`,
+            // FUT-183 : parts au dixième (`pctOso`), la précision de la catégorie : 44,9 % reste sous le seuil de 45 %.
+            headline: `${pctOso(couvertNaturel.naturelTerresPct)} % de ses terres en espaces naturels`,
             // D4 (FUT-6) : le volet ne qualifie plus. Sa grille 75 / 50 / 25 était une TROISIÈME
             // lecture du même chiffre (après la face et la carte d'identité), et pouvait les
             // contredire. Il montre la mesure et sa définition ; la catégorie est celle de la face.
             // FUT-175 : les parts portent sur les TERRES ; l'eau est dite à part, jamais comptée comme nature.
-            subhead: `Forêts, prairies, landes et pelouses, roche et dunes couvrent ${couvertNaturel.naturelTerresPct} % des terres de la commune. Ni les cultures ni l'eau n'en font partie.${
+            subhead: `Forêts, prairies, landes et pelouses, roche et dunes couvrent ${pctOso(couvertNaturel.naturelTerresPct)} % des terres de la commune. Ni les cultures ni l'eau n'en font partie.${
               couvertNaturel.eauPct != null && couvertNaturel.eauPct >= 1
-                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${couvertNaturel.eauPct} % de la surface cartographiée de la commune.`
+                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${pctOso(couvertNaturel.eauPct)} % de la surface cartographiée de la commune.`
                 : ""
             }${
               couvertNaturel.radiusPct != null
                 ? // FUT-178 : ce chiffre agrège des communes ENTIÈRES retenues par la distance de leur centre (parfois
                   // aucune, parfois pas toutes), pas un cercle de 15 km. FUT-175 : l'eau y reste comptée.
-                  ` Sur son secteur (la commune et, s'il y en a, des communes voisines retenues), espaces naturels et eau confondus : ${couvertNaturel.radiusPct} %.`
+                  ` Sur son secteur (la commune et, s'il y en a, des communes voisines retenues), espaces naturels et eau confondus : ${pctOso(couvertNaturel.radiusPct)} %.`
                 : ""
             }`,
             accent: "var(--green)",
             breakdownLabel: "Ce qui couvre ses terres",
             breakdown: couvertNaturel.composition.slice(0, 5).map((c) => ({
               label: c.label,
-              value: `${c.pct} %`,
+              value: `${pctOso(c.pct)} %`,
               bar: c.pct / 100,
             })),
             why: "Les terres d'une commune se partagent entre trois familles : espaces naturels, cultures et espaces urbanisés. Une commune peut compter peu d'espaces naturels sans être très urbanisée : les cultures occupent alors une large part de ses terres. Vue par satellite, cette mesure dit ce qui couvre les sols ; elle ne dit ni la fraîcheur en été, ni l'accès à la nature, ni la richesse de la vie sauvage.",

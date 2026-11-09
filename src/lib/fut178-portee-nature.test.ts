@@ -88,8 +88,9 @@ test("Châtelaillon-Plage : 36,5 % (index, eau comprise), 36,4 % des terres (Ter
   const snap = buildTerritoireSnapshot(i, "2026-11-09T00:00:00.000Z");
   assert.equal(factOf(snap, "land.natural_share")!.value, 36.4, "Territoire lit la part des TERRES, pas le brut_pct de l'index");
   const carte = buildTerritoryCards(snap).couvertNaturel!;
-  assert.equal(carte.naturelTerresPct, 36);
-  assert.equal(carte.radiusPct, 28);
+  // FUT-183 : au dixième, la précision de la catégorie.
+  assert.equal(carte.naturelTerresPct, 36.4);
+  assert.equal(carte.radiusPct, 27.9);
 
   const s = m.buildTerritorySignals(c);
   assert.equal(s.nature, undefined, "l'ancien signal sans périmètre ne part plus au modèle");
@@ -198,9 +199,9 @@ test("la carte « Espaces naturels » garde FUT-175 (terres, eau à part) et dit
   const src = readFileSync("src/components/report/QuartierClimatData.tsx", "utf8");
   assert.doesNotMatch(src, /Dans un rayon de 15 km/);
   assert.doesNotMatch(src, /En comptant aussi les communes voisines/);
-  assert.match(src, /Sur son secteur \(la commune et, s'il y en a, des communes voisines retenues\), espaces naturels et eau confondus : \$\{couvertNaturel\.radiusPct\} %\./);
+  assert.match(src, /Sur son secteur \(la commune et, s'il y en a, des communes voisines retenues\), espaces naturels et eau confondus : \$\{pctOso\(couvertNaturel\.radiusPct\)\} %\./);
   // FUT-175, intact : la part des terres, l'eau à part, la ventilation des terres, la réserve de couverture.
-  assert.match(src, /headline: `\$\{couvertNaturel\.naturelTerresPct\} % de ses terres en espaces naturels`/);
+  assert.match(src, /headline: `\$\{pctOso\(couvertNaturel\.naturelTerresPct\)\} % de ses terres en espaces naturels`/);
   assert.match(src, /Ni les cultures ni l'eau n'en font partie\./);
   assert.match(src, /L'eau \(mer, étangs, lacs, rivières\) occupe par ailleurs/);
   assert.match(src, /breakdownLabel: "Ce qui couvre ses terres"/);
