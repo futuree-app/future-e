@@ -43,3 +43,24 @@ test("synthèses : trois phrases au plus, aucun classement", () => {
   assert.ok(b.length <= 3);
   assert.doesNotMatch([...o, ...b].join(" "), /meilleur|recommand|gagnant/i);
 });
+
+test("une commune en lecture gratuite n'entre pas dans « ce qui fait la différence »", () => {
+  const r = R(["44109", "35238", "49007"], []);
+  const o = ouVousEnEtes(r).join(" ");
+  assert.match(o, /Entre Nantes et Rennes, ce qui fait la différence/);
+  assert.doesNotMatch(o, /Entre Nantes, Rennes et Angers/);
+});
+
+test("S8 : « sur cour » ne conclut pas au calme de nuit", () => {
+  const fosse = LOGEMENTS.find((l) => l.id === "fosse")!;
+  const cour = fosse.verifications.find((v) => v.id === "v-fen")!.reponses.find((x) => x.valeur === "cour")!;
+  assert.match(cour.reste, /bruit de la cour la nuit/);
+  assert.doesNotMatch(cour.effet, /ne touche pas la chambre/);
+});
+
+test("une mise à jour d'un rapport de commune ne promet pas les abords", async () => {
+  const { portee } = await import("./modele5.ts");
+  const r = R(["44109", "35238"], []);
+  const p = portee(r, P(r, "c:35238"), "mettre_a_jour");
+  assert.match(p.nePasDire.join(" "), /ne lit pas plus loin que l'analyse d'origine/);
+});

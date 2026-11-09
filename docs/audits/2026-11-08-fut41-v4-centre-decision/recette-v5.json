@@ -1,0 +1,794 @@
+{
+  "vues": [
+    {
+      "f": "01-accueil-reference-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "01-accueil-reference-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "01-accueil-reference-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "01-accueil-reference-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "01-accueil-reference-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "01-accueil-reference-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "02-accueil-communes-seules-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "03-comparer-communes-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "04-comparer-logements-reference-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "05-comparer-meme-commune-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "06-logement-non-analyse-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "07-logement-ancien-projet-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "08-logement-apres-visite-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "09-accueil-dix-logements-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "10-accueil-vide-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "11-projet-et-si-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "12-releve-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "13-commune-projet-ancien-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    }
+  ],
+  "taches": [
+    {
+      "tache": "Accueil",
+      "nom": "trois phrases au plus pour dire où en est la recherche",
+      "ok": true,
+      "detail": "(3)"
+    },
+    {
+      "tache": "Accueil",
+      "nom": "la synthèse dit ce qui distingue et ce qui manque",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Accueil",
+      "nom": "trois gestes au plus, chacun avec son bouton",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Accueil",
+      "nom": "communes et logements nommés sur l'accueil",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Accueil",
+      "nom": "la section des lieux commence dans les 1 100 premiers pixels (1440 px)",
+      "ok": true,
+      "detail": "(932 px)"
+    },
+    {
+      "tache": "Accueil",
+      "nom": "aucun vocabulaire du moteur à la première lecture",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "A",
+      "nom": "deux entrées : une commune, ou une adresse ou une annonce",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "A",
+      "nom": "la commune est reconnue dans l'adresse",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "A",
+      "nom": "la fiche s'ouvre, sa commune est gardée, l'analyse est proposée sans être lancée",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "B",
+      "nom": "En bref : ce qui distingue les communes, lu de la même façon",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "B",
+      "nom": "la gare ne se compare pas encore, et le remède est dit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "B",
+      "nom": "la carte situe les communes sans rien départager",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "B",
+      "nom": "la commune ne promet rien pour un logement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "une seule case communale pour les deux logements de Nantes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "S7 : rien aux abords sans analyse d'adresse",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "à la commune, le verdict nomme les communes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "les valeurs sont côte à côte dans « ce que chacun apporte »",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "C",
+      "nom": "aucun classement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "D",
+      "nom": "le panneau dit ce que l'analyse apprendra et ce qu'elle ne dira pas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "D",
+      "nom": "le prix est dit, rien n'est lancé sans geste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "D",
+      "nom": "Échap ferme et rend le focus au bouton",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "D",
+      "nom": "après l'analyse simulée, le dossier daté apparaît",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "E",
+      "nom": "la conclusion est conservée sans être reconduite",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "E",
+      "nom": "« pourrait ne plus tenir », jamais « ne tient pas »",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "E",
+      "nom": "la mesure garde la limite d'alors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "E",
+      "nom": "une mise à jour ne lit pas plus loin que l'analyse d'origine",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "G",
+      "nom": "S8 : « sur cour » rend l'aération envisageable, sans conclure au calme de nuit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "G",
+      "nom": "la réponse garde sa date et ne change pas la donnée publique",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "G",
+      "nom": "la note est rangée avec son origine",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "H",
+      "nom": "les écartés restent consultables avec leur raison",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "H",
+      "nom": "ranger sur une dimension nommée dit d'où vient la valeur",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "H",
+      "nom": "au-delà de quatre, on choisit avant de comparer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "H",
+      "nom": "quatre au plus côte à côte",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Et si",
+      "nom": "les seaux : écarté à revoir, pourrait changer, nouvelle analyse, pas lus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Et si",
+      "nom": "ce qui ne peut pas être déduit est dit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Et si",
+      "nom": "adopté : révision 4, inscrite dans « Ce qui a changé »",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Z12",
+      "nom": "dite une fois sur l'écran de comparaison",
+      "ok": true,
+      "detail": "(1)"
+    },
+    {
+      "tache": "Z12",
+      "nom": "la mesure de 24 min reste dans le détail",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Retour",
+      "nom": "même conclusion dans le Relevé",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Retour",
+      "nom": "le bouton retour rouvre la fiche",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Mobile",
+      "nom": "deux colonnes à la fois, et l'on change l'une ou l'autre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Mobile",
+      "nom": "changer la colonne de droite change la confrontation",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "clavier": [
+    {
+      "tag": "A",
+      "texte": "Aller au contenu",
+      "contour": true
+    },
+    {
+      "tag": "SELECT",
+      "texte": "Deux appartements à Nantes, un à Rennes ",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "à l'unité",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Pass Recherche (hypothèse)",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Réinitialiser",
+      "contour": true
+    },
+    {
+      "tag": "A",
+      "texte": "V4",
+      "contour": true
+    },
+    {
+      "tag": "A",
+      "texte": "V4.1",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Ma décision",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Vue d'ensemble",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Comparer",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Mon Projet",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Voir le détail",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Et si… ?",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Modifier",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Préparer",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Répondre",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Mettre à jour",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Comparer les communes",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Comparer les logements",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Par commune",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Loyer ou prix déclaré",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Surface déclarée",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Trajet jusqu'à la gare",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Ordre d'ajout",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "+ Une commune",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "+ Un logement",
+      "contour": true
+    },
+    {
+      "tag": "BUTTON",
+      "texte": "Nantes",
+      "contour": true
+    }
+  ],
+  "mouvement": {
+    "animation": "none"
+  },
+  "echecs": []
+}

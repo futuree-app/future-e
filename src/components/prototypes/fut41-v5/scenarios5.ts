@@ -34,7 +34,6 @@ const S = {
   osm: { id: "osm", nom: "OpenStreetMap", millesime: "2025" },
 } satisfies Record<string, Source>;
 const l = (o: LigneRegistre) => o;
-const REV2: Analyse["projet"] = structuredClone(RE41.analyses[0]!.projet);
 const REV3: Analyse["projet"] = structuredClone(NA41.analyses[0]!.projet);
 const ana = (o: Omit<Analyse, "conventionsVersion" | "version"> & { version?: number }): Analyse => ({ version: 1, conventionsVersion: "conv-2026-10", ...o });
 
@@ -66,7 +65,7 @@ felix.analyses = felix.analyses.map((a) => ({ ...a, registre: a.registre.map((x)
 const thabor: Logement = structuredClone(R1);
 
 // ── Logements ajoutés pour la situation « dix candidats » (non analysés pour la plupart) ─────
-const vide = { visiteLe: null, analyses: [], observations: [], verifications: [], photo: null } as const;
+const vide: Pick<Logement, "visiteLe" | "analyses" | "observations" | "verifications" | "photo"> = { visiteLe: null, analyses: [], observations: [], verifications: [], photo: null };
 const chantenay: Logement = {
   ...vide, id: "chantenay", libelle: "T2 Chantenay", commune: { insee: "44109", nom: "Nantes" }, adresse: "40 rue de la Marseillaise, Nantes",
   annonce: { url: null, site: null, nature: "vente", montant: 198000, surface: 41, pieces: 2 }, statut: "ecarte", ajouteLe: "2026-10-01", droit: "aucun", position: null,

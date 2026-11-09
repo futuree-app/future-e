@@ -1,0 +1,85 @@
+"use client";
+// LA CONFRONTATION, partagée par la fiche (une colonne) et par Comparer (deux à quatre colonnes).
+// Une condition par bloc ; dans chaque bloc, une ligne par couche : « À la commune », puis la couche
+// où l'adresse la lit. Une lecture communale partagée occupe UNE cellule qui couvre les logements
+// concernés : on voit qu'elle ne les distingue pas, sans avoir à le lire. Les preuves sont repliées
+// sous la condition. Aucune structure de tableau : chaque cellule dit elle-même à qui elle s'applique.
+import type { CSSProperties } from "react";
+import { releve as s } from "@/components/releve/primitives";
+import { NOM_COUCHE, LIBELLE_VERDICT, type Cellule, type Colonne, type LigneConfrontation, type Projet } from "./modele5";
+import { Glyphe, Marque, Mesure, lier } from "./communs5";
+import v from "./v5.module.css";
+
+const ETAT_VIDE = { a_lire: "à lire depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore lue", lu: "" } as const;
+
+export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true }: {
+  colonnes: Colonne[]; lignes: LigneConfrontation[]; projet: Projet; seul?: boolean; enTete?: boolean;
+}) {
+  const nomDe = (ids: string[]) => ids.map((id) => colonnes.find((c) => c.id === id)?.nom ?? id).join(" et ");
+  return (
+    <div className={v.conf} style={{ "--cols": colonnes.length } as CSSProperties} data-seul={seul || undefined}>
+      {enTete && !seul ? (
+        <div className={v.confTete} aria-hidden>
+          <span className={v.confCoin} />
+          {colonnes.map((c) => <span key={c.id} className={v.confCol}><strong>{c.nom}</strong><span>{c.sous}</span></span>)}
+        </div>
+      ) : null}
+      {lignes.map((li) => {
+        const limite = projet.criteres.find((k) => k.cle === li.cle)?.valeur ?? null;
+        const preuves = li.couches.flatMap((x) => x.cellules.filter((c) => c.ligne?.constat).map((c) => ({ couche: x.couche, c })));
+        return (
+          <section key={li.cle} className={v.confBloc} aria-labelledby={`cf-${li.cle}`}>
+            <h3 className={v.confCrit} id={`cf-${li.cle}`}>
+              {li.libelle}
+              {li.sansCompromis ? <span className={v.dur}> · sans compromis</span> : li.poids === 3 ? <span className={v.dur}> · compte beaucoup</span> : null}
+            </h3>
+            {li.couches.map((x) => (
+              <div key={x.couche} className={v.confCouche} role="group" aria-label={NOM_COUCHE[x.couche]} data-verdict={x.verdict}>
+                <span className={v.confOu}><Glyphe couche={x.couche} /> {NOM_COUCHE[x.couche]}</span>
+                {x.cellules.map((c) => (
+                  <div key={c.ids.join()} className={v.confCell} style={{ gridColumn: `span ${c.ids.length}` }} data-partage={c.ids.length > 1 || undefined}>
+                    {!seul ? <span className={v.sr}>{nomDe(c.ids)} : </span> : null}
+                    <ContenuCellule c={c} limite={x.couche === "commune" ? null : limite} seul={seul} />
+                    {c.ids.length > 1 ? <span className={v.partage}>une seule lecture pour {nomDe(c.ids)}</span> : null}
+                    {seul && x.couche === "commune" && c.ligne && li.couches.some((y) => y.couche !== "commune" && y.cellules.every((k) => !k.ligne)) ? <span className={v.partage}>Dit pour la commune ; ce logement reste à lire depuis son adresse.</span> : null}
+                  </div>
+                ))}
+                {!seul ? (
+                  <p className={v.confVerdict}>
+                    <span className={v.confVerdictMot}>{LIBELLE_VERDICT[x.verdict]}</span>
+                    {lier(x.phrase)}{x.remede ? <span className={v.remede}> {lier(x.remede)}</span> : null}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+            {preuves.length && !seul ? (
+              <details className={`${s.details} ${v.preuves}`}>
+                <summary>Preuves et sources</summary>
+                <ul className={v.listeSimple}>
+                  {preuves.map(({ couche, c }) => (
+                    <li key={couche + c.ids.join()} className={s.dense}>
+                      <strong className={s.encre}>{nomDe(c.ids)}</strong>, {NOM_COUCHE[couche].toLowerCase()} : {lier(c.ligne!.constat!)}
+                      <span className={v.preuve}> {c.ligne!.preuve ? `${c.ligne!.preuve.source}, ${c.ligne!.preuve.date}` : ""}{c.origine ? ` · ${c.origine}` : ""}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function ContenuCellule({ c, limite, seul }: { c: Cellule; limite: number | null; seul: boolean }) {
+  if (!c.ligne) return <span className={v.vide} data-etat={c.etat}>{ETAT_VIDE[c.etat]}</span>;
+  return (
+    <>
+      <Marque ligne={c.ligne} />
+      {c.ligne.mesure ? <Mesure valeur={c.ligne.mesure.valeur} unite={c.ligne.mesure.unite} limite={limite} limiteAlors={c.limiteAlors} /> : c.limiteAlors != null ? <span className={v.change}>lu quand votre limite était de {c.limiteAlors} min</span> : null}
+      {seul && c.ligne.constat ? <span className={v.faceConstat}>{lier(c.ligne.constat)}</span> : null}
+      {seul && c.ligne.preuve ? <span className={v.preuve}>{c.ligne.preuve.source}, {c.ligne.preuve.date}{c.origine ? ` · ${c.origine}` : ""}</span> : !seul && c.origine ? <span className={v.preuve}>{c.origine}</span> : null}
+    </>
+  );
+}

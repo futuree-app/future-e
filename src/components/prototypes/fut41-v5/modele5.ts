@@ -164,7 +164,7 @@ function lireCouche(couche: Couche, cellules: Cellule[], cle: CleCritere, noms: 
   const base = { couche, cellules };
   if (cellules.length === 1 && cellules[0]!.ids.length > 1) {
     const c = cellules[0]!;
-    return { ...base, verdict: c.ligne ? "une_lecture" : "pas_assez_lu", phrase: c.ligne ? `Une seule lecture, la même pour ${noms(c.ids)} : elle ne les distingue pas.` : "Pas encore lue à la commune.", remede: null };
+    return { ...base, verdict: c.ligne ? "une_lecture" : "pas_assez_lu", phrase: c.ligne ? `Une seule lecture de ${noms(c.ids)}, la même pour ces logements : elle ne les distingue pas.` : "Pas encore lue à la commune.", remede: null };
   }
   if (!lues.length) {
     const sansAdresse = enJeu.every((c) => c.etat === "adresse_manquante");
@@ -194,7 +194,7 @@ function lireCouche(couche: Couche, cellules: Cellule[], cle: CleCritere, noms: 
   if (paires.length && paires.every((p) => p.etat === "a_verifier")) {
     return { ...base, verdict: "inconnu", phrase: `Personne ne le sait encore : à vérifier par vous.${suite}`, remede: null };
   }
-  if (manquent) return { ...base, verdict: "pas_assez_lu", phrase: `Lu pour ${lues.length} sur ${enJeu.length}.${suite}`, remede: couche === "commune" ? null : "Analyser l'adresse le lirait." };
+  if (manquent) return { ...base, verdict: "pas_assez_lu", phrase: `Lu pour ${lues.length} sur ${enJeu.length} : ${noms(enJeu.filter((c) => c.ligne).flatMap((c) => c.ids))}.`, remede: couche === "commune" ? null : "Analyser l'adresse le lirait." };
   return { ...base, verdict: "pareil", phrase: lues.length > 1 ? "Même conclusion des deux côtés." : "Lu pour celui-ci seulement.", remede: null };
 }
 
@@ -208,12 +208,14 @@ function lireCouche(couche: Couche, cellules: Cellule[], cle: CleCritere, noms: 
 export function confronter(r: Recherche, pistes: Piste[]): { colonnes: Colonne[]; lignes: LigneConfrontation[] } {
   const cols = colonnesDe(r, pistes);
   const noms = (ids: string[]) => listeFr(ids.map((id) => cols.find((c) => c.id === id)?.nom ?? id));
+  // À la commune, une lecture se nomme par sa commune (« Nantes »), pas par les logements qu'elle couvre.
+  const nomsCommune = (ids: string[]) => listeFr([...new Set(ids.map((id) => { const c = cols.find((k) => k.id === id); return r.communes.find((x) => x.insee === c?.insee)?.nom ?? c?.nom ?? id; }))]);
   const logements = cols.some((c) => c.type === "logement");
   const lignes = r.projet.criteres.map((k): LigneConfrontation => {
     const couches: CoucheLue[] = [];
     const brutes = cols.map((c) => cellule(r, c, k.cle, "commune"));
     const communales = logements ? fusionner(brutes, cols, k.cle) : brutes;
-    if (!logements || communales.some((c) => c.ligne)) couches.push(lireCouche("commune", communales, k.cle, noms));
+    if (!logements || communales.some((c) => c.ligne)) couches.push(lireCouche("commune", communales, k.cle, logements ? nomsCommune : noms));
     const ca = COUCHE_ADRESSE[k.cle];
     if (logements && ca) couches.push(lireCouche(ca, cols.map((c) => cellule(r, c, k.cle, ca)), k.cle, noms));
     return { cle: k.cle, libelle: libelleCritere(k), sansCompromis: k.nature === "sans_compromis", poids: k.poids ?? 0, couches };
@@ -244,7 +246,7 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
     const nom = NOM_COURT[k.cle];
     if (fine?.bloque) { bloque = true; continue; }
     const ligne = fine?.ligne ?? (p.type === "commune" || !ca ? com.ligne : null);
-    const lim = fine?.ligne ? fine.limiteAlors : com.limiteAlors;
+    const lim = !ligne ? null : fine?.ligne ? fine.limiteAlors : com.limiteAlors;
     if (lim != null && k.nature === "sans_compromis") aRevoir = true;
     if (!ligne) {
       // Un logement dont l'adresse n'est pas lue : la commune donne un contexte, jamais un fait du logement.
@@ -365,9 +367,11 @@ export function ouVousEnEtes(r: Recherche): string[] {
   const b = al.find((x) => x.genre === "bloque");
   const rev = al.find((x) => x.genre === "a_revoir");
   const communesP = communes.map((commune) => ({ type: "commune" as const, commune }));
-  const d = communes.length > 1 ? phraseDistingue(r, communesP) : logements.length > 1 ? phraseDistingue(r, logements.map((logement) => ({ type: "logement" as const, logement }))) : null;
+  // Seules les communes lues pour le Projet peuvent « faire la différence » : une lecture gratuite ne compte pas.
+  const lues = communes.filter((c) => c.lecture === "rapport");
+  const d = lues.length > 1 ? phraseDistingue(r, lues.map((commune) => ({ type: "commune" as const, commune }))) : logements.length > 1 ? phraseDistingue(r, logements.map((logement) => ({ type: "logement" as const, logement }))) : null;
   if (b) out.push(b.phrase);
-  else if (d) out.push(d.replace("Ce qui les distingue vraiment", communes.length > 1 ? `Entre ${listeFr(communes.map((c) => c.nom))}, ce qui fait la différence` : "Entre vos logements, ce qui fait la différence"));
+  else if (d) out.push(d.replace("Ce qui les distingue vraiment", lues.length > 1 ? `Entre ${listeFr(lues.map((c) => c.nom))}, ce qui fait la différence` : "Entre vos logements, ce qui fait la différence"));
   else if (rev) out.push(rev.phrase);
   const m = phraseManque(r, [...communesP, ...logements.map((logement) => ({ type: "logement" as const, logement }))]);
   if (m) out.push(m);
@@ -390,7 +394,7 @@ export function aFaire5(r: Recherche, aujourdhui: string, droits: "unite" | "pas
   const actifs = r.logements.filter((l) => l.statut !== "ecarte");
   for (const l of actifs) if (l.visiteLe && l.visiteLe >= aujourdhui) {
     const n = l.verifications.filter((v) => v.moment === "sur_place" && !v.reponse).length;
-    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, pourquoi: n ? `${n} question${n > 1 ? "s" : ""} à poser sur place, qui peuvent changer votre lecture.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
+    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, pourquoi: n ? `${n === 1 ? "Une question" : `${n} questions`} à poser sur place, qui ${n === 1 ? "peut" : "peuvent"} changer votre lecture.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
   }
   for (const l of actifs) {
     const v = l.verifications.find((x) => !x.reponse && x.moment !== "avant_engagement" && !(l.visiteLe && l.visiteLe >= aujourdhui && x.moment === "sur_place"));
