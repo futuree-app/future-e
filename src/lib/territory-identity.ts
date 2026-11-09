@@ -135,7 +135,7 @@ export type DemographieCardData = {
 export type CouvertCardData = {
   headlineLabel: string; // valeur de la carte (« Occupation mixte »…)
   naturelTerresPct: number; // FUT-175 : milieux naturels terrestres, en % des TERRES (eau exclue)
-  eauPct: number | null; // part du contour communal couverte d'eau, comptée à part
+  eauPct: number | null; // part de l'eau dans la surface cartographiée de la commune, comptée à part
   radiusPct: number | null; // naturel et eau confondus dans 15 km (l'eau n'a pas pu en être retirée)
   composition: { label: string; pct: number }[]; // postes terrestres, en % des terres, triés décroissant
 };

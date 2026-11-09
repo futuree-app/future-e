@@ -725,7 +725,7 @@ export function buildFactors(
             // FUT-175 : les parts portent sur les TERRES ; l'eau est dite à part, jamais comptée comme nature.
             subhead: `Forêts, prairies, landes et pelouses, roche et dunes couvrent ${couvertNaturel.naturelTerresPct} % des terres de la commune. Ni les cultures ni l'eau n'en font partie.${
               couvertNaturel.eauPct != null && couvertNaturel.eauPct >= 1
-                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${couvertNaturel.eauPct} % de la surface communale.`
+                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${couvertNaturel.eauPct} % de la surface cartographiée de la commune.`
                 : ""
             }${
               couvertNaturel.radiusPct != null
@@ -742,7 +742,8 @@ export function buildFactors(
             why: "La place laissée aux espaces naturels en dit long sur le territoire : ils rafraîchissent la commune l'été, retiennent l'eau lors des fortes pluies et abritent la vie. Là où le bâti domine, ces effets se font plus rares.",
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
-            sources: "OSO 2023 (CESBIO, couverture des sols) · ADEME (taux de boisement)",
+            // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
+            sources: "OSO 2023 (CESBIO, couverture des sols). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés · ADEME (taux de boisement)",
           },
         }
       : {

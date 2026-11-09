@@ -142,7 +142,7 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
               .sort(([, a], [, b]) => b - a)
               .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, round1(x)]),
           ),
-          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de toute sa surface. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés = bâti, routes et surfaces imperméabilisées vus par satellite. Mesure OSO 2023, à l'échelle de la commune.",
+          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés = bâti, routes et surfaces imperméabilisées vus par satellite. Mesure OSO 2023, à l'échelle de la commune, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas).",
         }
       : null,
     boisement_ademe_pct: forestAdeme != null

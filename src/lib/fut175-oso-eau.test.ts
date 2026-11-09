@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { buildTerritoireSnapshot, landCategory, landShares, LAND_KEYS, LAND_LABEL, type LandCategory, type TerritoireInputs } from "./territoire/facts.ts";
+import { buildTerritoireSnapshot, landCategory, landShares, readLandShares, LAND_KEYS, LAND_LABEL, OSO_COUVERTURE, OSO_SUM_TOLERANCE, OSO_BRUT_TOLERANCE, type LandCategory, type TerritoireInputs } from "./territoire/facts.ts";
 import { derivedOf, factOf } from "./facts/contract.ts";
 import { buildTerritoryCards, buildTerritoryIdentity } from "./territory-identity.ts";
 import { projectForSynthesis } from "./territoire/synthesis-contract.ts";
@@ -193,6 +193,81 @@ test("absent ≠ zéro : sans OSO ou avec un poste manquant, ni part ni catégor
       assert.notEqual(factOf(s, key)?.status, "ok", key);
     }
     assert.equal(buildTerritoryCards(s).couvertNaturel, null);
+  }
+});
+
+// ── Cohérence numérique (reprise après contre-revue) ─────────────────────────────────────────
+
+test("cohérence : les 34 743 compositions OSO de l'index passent les contrôles, aucune n'est écartée", () => {
+  assert.equal(avecOso.length, 34743);
+  const refus = avecOso.map((c) => [c.nom, readLandShares(c.nature!.brut_pct, c.nature!.composition)] as const)
+    .filter(([, r]) => r.status !== "ok");
+  assert.deepEqual(refus, []);
+  // Les tolérances sont des bornes d'arrondi (7 et 6 valeurs au dixième), pas des réglages sur les données.
+  assert.ok(Math.abs(OSO_SUM_TOLERANCE - 0.35) < 0.002 && Math.abs(OSO_BRUT_TOLERANCE - 0.3) < 0.002);
+});
+
+test("cohérence : une composition contradictoire est refusée avec sa raison, jamais complétée", () => {
+  const sete = par.get("34301")!.nature!; // somme 100, brut = naturels + eau
+  const ok = readLandShares(sete.brut_pct, sete.composition);
+  assert.equal(ok.status, "ok");
+  const zero = Object.fromEntries([...LAND_KEYS, "eau"].map((k) => [k, 0]));
+  const cas: [string, number, Record<string, number>, RegExp][] = [
+    ["composition entièrement nulle", 0, zero, /somment à 0 %/],
+    ["somme excessive", sete.brut_pct, { ...sete.composition, agricole: sete.composition.agricole + 5 }, /somment à 105/],
+    ["somme insuffisante", sete.brut_pct, { ...sete.composition, artificialise: sete.composition.artificialise - 3 }, /somment à 97/],
+    ["brut_pct incompatible", sete.brut_pct - 5, sete.composition, /brut_pct .* contredit/],
+    ["brut_pct sans eau (ancienne définition)", sete.brut_pct - sete.composition.eau, sete.composition, /contredit/],
+    ["valeur négative", sete.brut_pct, { ...sete.composition, foret: -1, prairies: sete.composition.prairies + 1 }, /foret hors de \[0, 100\]/],
+    ["valeur au-delà de 100", 101, sete.composition, /brut_pct hors de \[0, 100\]/],
+    ["terres quasi nulles", 96, { artificialise: 2, agricole: 2, foret: 0, prairies: 0, landes_pelouses: 0, mineral_dunes: 0, eau: 96 }, /terres trop réduites/],
+  ];
+  for (const [nom, brut, comp, raison] of cas) {
+    const r = readLandShares(brut, comp);
+    assert.equal(r.status, "inconsistent", nom);
+    assert.match(r.status === "inconsistent" ? r.reason : "", raison, nom);
+    assert.equal(landShares(brut, comp), null, nom);
+  }
+  // Juste sous les bornes d'arrondi : accepté ; juste au-delà : refusé.
+  assert.equal(readLandShares(sete.brut_pct, { ...sete.composition, agricole: sete.composition.agricole + 0.3 }).status, "ok");
+  assert.equal(readLandShares(sete.brut_pct, { ...sete.composition, agricole: sete.composition.agricole + 0.4 }).status, "inconsistent");
+  assert.equal(readLandShares(sete.brut_pct + 0.25, sete.composition).status, "ok");
+  assert.equal(readLandShares(sete.brut_pct + 0.4, sete.composition).status, "inconsistent");
+});
+
+test("cohérence : le snapshot d'une commune incohérente le dit, sans part ni catégorie", () => {
+  const i = chatelaillonInputs();
+  const comp = { ...par.get("34301")!.nature!.composition };
+  i.entry = { ...i.entry!, nature: { brut_pct: 67.3, radius_pct: 50, composition: { ...comp, agricole: comp.agricole + 5 } } };
+  const s = buildTerritoireSnapshot(i, T0);
+  assert.equal(derivedOf(s, "land.category"), null);
+  for (const key of ["land.composition", "land.natural_share", "land.water_share"]) {
+    const f = factOf(s, key)!;
+    assert.equal(f.value, null, key);
+    assert.equal(f.status, "missing", key);
+    assert.match(f.limits!, /incohérentes pour cette commune \(les sept postes somment à 105/, key);
+  }
+  assert.equal(buildTerritoryCards(s).couvertNaturel, null);
+});
+
+// ── Couverture des pourcentages ────────────────────────────────────────────────────────────────
+
+test("couverture : les parts portent sur la surface classée par OSO, jamais présentée comme exhaustive", () => {
+  const s = snapDe("34301");
+  for (const key of ["land.composition", "land.natural_share", "land.water_share"]) {
+    assert.ok(factOf(s, key)!.limits!.includes(OSO_COUVERTURE), key);
+  }
+  assert.equal(factOf(s, "land.water_share")!.unit, "% de la surface cartographiée");
+  assert.match(OSO_COUVERTURE, /contour administratif/);
+  assert.match(OSO_COUVERTURE, /non classés/);
+  const carte = readFileSync(new URL("src/components/report/QuartierClimatData.tsx", racine), "utf8");
+  assert.match(carte, /surface cartographiée de la commune/);
+  assert.match(carte, /pixels non classés, de part non mesurée/);
+  const contrat = readFileSync(new URL("src/lib/territoire/synthesis-contract.ts", racine), "utf8");
+  assert.match(contrat, /surface cartographiée/);
+  assert.match(contrat, /pixels non classés/);
+  for (const f of ["src/components/report/QuartierClimatData.tsx", "src/lib/territoire/synthesis-contract.ts", "src/lib/territoire/synthesis-deterministe.ts", "src/lib/territoire/facts.ts"]) {
+    assert.doesNotMatch(readFileSync(new URL(f, racine), "utf8"), /surface communale|toute sa surface|% de la commune\b/, f);
   }
 });
 

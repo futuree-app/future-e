@@ -105,7 +105,7 @@ function blocTerritoire(p: P): string[] {
     if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${frNum(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
     out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
     const eau = land.part_eau_de_la_commune_pct;
-    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de la commune.`);
+    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de sa surface cartographiée.`);
   }
 
   // L'évolution porte sur 2015-2021 ; la part d'arrivants (une seule année) n'est pas reprise ici,

@@ -89,7 +89,7 @@ Vaires-sur-Marne, L'Île-Saint-Denis.
 
 `src/lib/territoire/facts.ts` · `landShares(brut_pct, composition)` :
 - `land.composition` : six postes terrestres, **en % des terres** (`100 − eau`) ; l'eau n'y figure plus.
-- `land.water_share` (nouveau) : part du contour communal couverte d'eau, comptée à part.
+- `land.water_share` (nouveau) : part de l'eau dans la surface cartographiée de la commune, comptée à part.
 - `land.natural_share` : milieux naturels terrestres en % des terres = (brut − eau) / (100 − eau).
 - `land.category` : même grille (50 / 45 / 50 / 20), sur les parts des terres ; règle `land-category@2`.
 - Données absentes : composition incomplète (un poste, eau comprise) ou `brut_pct` absent → aucune part,
@@ -126,3 +126,77 @@ snapshot (nouvelle empreinte) et une nouvelle synthèse est générée **à la d
 Coût maximal estimé : 16 communes × 3 horizons × ≤ 2 appels Sonnet ≈ 96 appels, en pratique ~1,5 appel par
 synthèse comme aujourd'hui. Aucune migration, aucune suppression : les anciennes lignes restent en base,
 orphelines (leur clé n'est plus demandée). Aucune régénération proactive n'est nécessaire.
+
+## 8. Reprise après contre-revue indépendante (09/11/2026)
+
+Contre-revue de `4cc80b99` : NO GO provisoire, trois reprises.
+
+### 8.1 `landShares()` contrôle la cohérence numérique
+
+`readLandShares()` rend `ok`, `missing` (absent ≠ zéro) ou `inconsistent` avec une raison ; `landShares()` en reste
+l'accès simple. Refus, sans part résiduelle inventée :
+- une valeur hors de [0, 100] (`brut_pct` ou un poste) ;
+- des sept postes qui ne somment pas à 100 ± 0,35 (7 valeurs arrondies au dixième, 0,05 chacune) ;
+- un `brut_pct` qui s'écarte de plus de 0,30 de forêts + prairies + landes et pelouses + roche et dunes + eau
+  (6 valeurs arrondies) ;
+- des terres sous 10 %.
+
+Une contradiction n'est pas tue : la raison remplace les `limits` des faits `land.composition`,
+`land.natural_share` et `land.water_share` (« Données OSO de l'index incohérentes pour cette commune (…) :
+aucune part n'est affichée »), sans catégorie.
+
+Mesure sur l'index réel : écarts maximaux de 0,2 sur la somme comme sur `brut_pct` ; **les 34 743 communes OSO
+passent les contrôles**, les distributions nationales sont inchangées (332 changements, 342 sur parts brutes,
+les mêmes 17 vers « Majoritairement urbanisé »). Tests négatifs : composition nulle, somme à 105 et à 97,
+`brut_pct` incompatible (dont l'ancienne définition sans eau), valeur négative, valeur > 100, terres quasi
+nulles, et les bornes exactes (+0,3 accepté, +0,4 refusé).
+
+### 8.2 Garde FUT-147 figée
+
+`lignesFut175()` admettait tout le diff vivant depuis `51a493d0`, hors mots des feux : une modification future
+sans rapport passait. Défaut **reproduit** : la garde de `4cc80b99`, rejouée avec `export const SEUIL_SANS_RAPPORT
+= 42;` ajouté à `facts.ts` et `export const AUTRE = "x";` au contrat, passe (2/2).
+
+Remplacée par une référence figée : `src/lib/__fixtures__/fut175-lignes-admises.json` (13 lignes du contrat, 145 du
+registre, toutes issues du diff FUT-175, aucune sur les feux). Chaque ligne admise couvre une seule occurrence ;
+une ligne admise absente du diff fait échouer (« référence FUT-175 périmée »). Contre-épreuve réelle avec les
+deux mêmes lignes : **les deux gardes échouent** (« ligne non admise dans src/lib/territoire/facts.ts : +export
+const SEUIL_SANS_RAPPORT = 42; » ; le contrat montre `'+export const AUTRE = "x";'` en trop). Un test permanent
+rejoue cette contre-épreuve (ajout, retrait, duplication d'une ligne FUT-175, retouche d'une ligne FUT-175).
+
+Empreinte Territoire de Châtelaillon recalculée (les limites OSO changent de texte) :
+`6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3`, clé
+`de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930`. Les invariants feux sont inchangés.
+
+### 8.3 Couverture des pourcentages
+
+Les parts portent sur les pixels classés 1 à 23 dans le contour administratif ; la part des pixels non classés
+est inconnue. Formulations reprises :
+- `limits` des trois faits OSO de la commune : « Parts calculées sur la surface que la carte OSO a classée dans
+  le contour administratif ; les pixels non classés, dont la part n'est pas mesurée, n'y figurent pas. » ;
+- unité de `land.water_share` : « % de la surface cartographiée » ;
+- carte : l'eau « occupe par ailleurs X % de la surface cartographiée de la commune » (au lieu de « de la surface
+  communale ») ; la réserve complète en pied de volet (sources), pas sur la face ;
+- contrat IA et texte déterministe : « surface cartographiée », pixels non classés mentionnés dans la définition ;
+- rayon 15 km : « rapportés à toute la surface cartographiée ».
+
+### 8.4 Cas rejoués
+
+| Commune | Contrôle | Avant | Après | Eau | Naturel terres | Urbanisé terres |
+|---|---|---|---|---|---|---|
+| Sète | ok | Forte présence naturelle | Majoritairement urbanisé | 50,6 | 33,8 | 50,4 |
+| Palavas-les-Flots | ok | Forte présence naturelle | Forte présence naturelle | 67,7 | 48,9 | 49,2 |
+| Rochefort | ok | Forte présence naturelle | Occupation mixte | 7,7 | 44,9 | 47,7 |
+| Châtelaillon-Plage | ok | Occupation mixte | Occupation mixte | 0,2 | 36,4 | 49,3 |
+
+Snapshot, carte, projection IA et texte déterministe concordent pour les quatre.
+
+**Réserve préexistante, hors périmètre** : la carte et le texte arrondissent à l'entier, la catégorie se lit au
+dixième. Rochefort affiche « 45 % d'espaces naturels » sous « Occupation mixte » (44,9 < 45). Ce décalage existe
+sur `main` : 238 communes y montrent un entier qui atteint un seuil non retenu, 252 après cette PR. À traiter
+dans un ticket d'affichage (décimale près des seuils), sans toucher aux catégories.
+
+### 8.5 Toujours hors périmètre, suivi confirmé
+
+Rayon 15 km et score Où vivre (eau comprise, raster requis : FUT-178), seuil de boisement Projet de 70 %
+(77 communes de plus le franchiraient hors eau), catégories rurales d'Où vivre : non modifiés.
