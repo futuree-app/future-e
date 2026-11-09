@@ -1554,7 +1554,7 @@ export const DIMENSIONS: ComparaisonDim[] = [
   { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", forte: "son calme", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports).", risque: true, directionnel: true },
   { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", forte: "son éloignement des sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution.", risque: true, directionnel: true },
   { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", forte: "le peu d'agriculture intensive autour", aide: "L'éloignement des cultures à traitements fréquents.", risque: true, directionnel: true },
-  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature dans le secteur", "Nature présente", "Peu de nature dans le secteur"], gp: "les espaces naturels", forte: "les espaces naturels et l'eau de son secteur", aide: "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.", risque: false, directionnel: true },
+  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup d'espaces naturels ou d'eau dans le secteur", "Espaces naturels ou eau présents", "Peu d'espaces naturels ou d'eau dans le secteur"], gp: "les espaces naturels", forte: "les espaces naturels et l'eau de son secteur", aide: "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.", risque: false, directionnel: true },
   { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["Rivage marin proche", "Rivage marin à distance", "Rivage marin éloigné"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "Distance du centre de la commune au rivage marin, lagunes comprises.", risque: false, directionnel: true },
   { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
   // SANS VOITURE est le souhait du lecteur ; la ligne, elle, classe la part des actifs qui vont
@@ -2575,7 +2575,8 @@ export const REASON_NEG_INTERMEDIAIRE: Partial<Record<PreferenceKey, string>> = 
   calme_sonore: "exposition sonore modérée",
   faible_exposition_industrielle: "présence industrielle modérée",
   faible_pression_agricole: "agriculture intensive modérée",
-  nature: "nature présente dans le secteur, sans abonder",
+  // FUT-178 : reprend le palier « Espaces naturels ou eau présents » (FUT-154) ; la mesure compte l'eau.
+  nature: "espaces naturels ou eau présents dans le secteur, sans abonder",
   proximite_mer: "rivage marin à distance",
   cadre_calme: "cadre intermédiaire",
   faible_dependance_auto: "usage intermédiaire de la voiture pour aller travailler",

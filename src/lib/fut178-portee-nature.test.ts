@@ -229,7 +229,8 @@ test("dossier, Bony : l'écart sur la nature dit le secteur, l'eau comprise, et 
   assert.equal(r.outcome, "mismatch");
   const f = r.facts[0]!;
   assert.match(f.statement, /^Vous avez placé la proximité des espaces naturels parmi vos priorités\. Sur la part d'espaces naturels et d'eau dans le secteur, Bony se situe parmi les .+ de communes les moins favorables de France\.$/);
-  assert.equal(f.headlineSubject, "les espaces naturels du secteur");
+  assert.equal(f.headlineSubject, "les espaces naturels (eau comprise)"); // le titre de l'écart reprend le `subject` court
+  assert.equal(f.topic, "les espaces naturels du secteur (eau comprise)");
   assert.match(f.limitation!, /eau comprise \(mer, étangs, lacs\)/);
   assert.match(f.limitation!, /elle-même et, quand elles sont retenues, des communes voisines entières dont le centre est à moins de 15 km du sien, sélection parfois incomplète/);
   assert.match(f.limitation!, /ni la commune seule, ni les abords d'une adresse/);
@@ -243,7 +244,7 @@ test("dossier, Corte et Saintes-Maries : le point fort dit le secteur et l'eau, 
     const r = ALIGNMENT_RULES.find((x) => x.id === "territoire.alignment-nature")!.evaluate(facts(insee, nom, 0.97, 0.99), projet, undefined as never);
     assert.equal(r.outcome, "satisfied");
     const f = r.facts[0]!;
-    assert.match(f.statement, new RegExp(`^Pour les espaces naturels du secteur, ${nom} se situe parmi les .+ de communes dont le secteur compte le plus d'espaces naturels ou d'eau en France\\.$`));
+    assert.match(f.statement, new RegExp(`^Pour les espaces naturels du secteur \\(eau comprise\\), ${nom} se situe parmi les .+ de communes dont le secteur compte le plus d'espaces naturels ou d'eau en France\\.$`));
     assert.match(f.limitation!, /quand elles sont retenues/);
     assert.doesNotMatch(f.statement, INTERDIT);
   }
@@ -264,12 +265,13 @@ test("comparateur : la ligne, les paliers, les raisons, le point fort et les sig
   const dim = m.DIMENSIONS.find((d) => d.id === "nature");
   assert.equal(dim.aide, "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.");
   assert.equal(dim.forte, "les espaces naturels et l'eau de son secteur");
-  assert.deepEqual(dim.paliers, ["Beaucoup de nature dans le secteur", "Nature présente", "Peu de nature dans le secteur"]);
+  assert.deepEqual(dim.paliers, ["Beaucoup d'espaces naturels ou d'eau dans le secteur", "Espaces naturels ou eau présents", "Peu d'espaces naturels ou d'eau dans le secteur"]);
+  assert.equal(dim.label, "Espaces naturels", "la ligne garde le nom de la préférence ; ses paliers disent la mesure");
   const src = readFileSync("src/lib/comparateur-vie.ts", "utf8");
   assert.match(src, /label: "la plus riche\{n\} en espaces naturels ou en eau dans son secteur", key: "nature"/);
   assert.match(src, /\n {2}nature: "beaucoup d'espaces naturels ou d'eau dans le secteur",/);
   assert.match(src, /\n {2}nature: "peu d'espaces naturels ou d'eau dans le secteur",/);
-  assert.match(src, /\n {2}nature: "nature présente dans le secteur, sans abonder",/);
+  assert.match(src, /\n {2}nature: "espaces naturels ou eau présents dans le secteur, sans abonder",/);
   assert.match(src, /bands: \["davantage d'espaces naturels ou d'eau dans le secteur", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur", "moins d'espaces naturels ou d'eau dans le secteur"\]/);
   // Corte face à Bony et Janville, puis Saintes-Maries face à Arles et L'Île-d'Yeu : ce que le comparateur écrit réellement.
   for (const trio of [[CORTE, BONY, JANVILLE], [SAINTES_MARIES, ARLES, YEU]]) {
@@ -293,4 +295,42 @@ test("le trait national « entourées d'espaces naturels » reste invisible : au
   assert.ok(!synthesisFacts(snap).facts.some((x) => x.key === "place.distinctive_trait"), "jamais transmis au modèle");
   const vus = readFileSync("src/lib/territory-identity.ts", "utf8") + readFileSync("src/components/report/QuartierClimatData.tsx", "utf8");
   assert.doesNotMatch(vus, /distinctive_trait|getCommuneDistinctive/, "aucune surface lue par le lecteur ne l'affiche");
+});
+
+// ── Dernier correctif : les étiquettes visibles disent « espaces naturels ou eau », jamais « nature » seule ────────
+test("comparateur : les trois paliers et la raison intermédiaire nomment l'eau ; Saintes-Maries et Sète les reçoivent", async () => {
+  const m = await moteur();
+  const dim = m.DIMENSIONS.find((d) => d.id === "nature");
+  for (const p of dim.paliers) {
+    assert.match(p, /espaces naturels ou (d')?eau/i, p);
+    assert.doesNotMatch(p, /\bnature\b/i, p);
+  }
+  const src = readFileSync("src/lib/comparateur-vie.ts", "utf8");
+  const inter = /\n {2}nature: "([^"]+)",\n {2}proximite_mer: "rivage marin à distance"/.exec(src)?.[1];
+  assert.equal(inter, "espaces naturels ou eau présents dans le secteur, sans abonder");
+  // Les cellules réellement rendues pour Saintes-Maries (rang 87, 69 % d'eau) et Sète (rang 45, 51 % d'eau).
+  const seed = await m.seedComparaison([SAINTES_MARIES, SETE, LILLE]);
+  assert.ok(seed);
+  const ligne = seed.comparaison.themes.flatMap((t: { lignes: { id: string }[] }) => t.lignes).find((l: { id: string }) => l.id === "nature") as { cellules: { insee: string; palier: string }[] };
+  const palier = (insee: string) => ligne.cellules.find((c) => c.insee === insee)!.palier;
+  assert.equal(palier(SAINTES_MARIES), "Beaucoup d'espaces naturels ou d'eau dans le secteur");
+  assert.equal(palier(SETE), "Espaces naturels ou eau présents");
+  assert.equal(palier(LILLE), "Peu d'espaces naturels ou d'eau dans le secteur");
+  assert.doesNotMatch(JSON.stringify(seed), /de nature dans le secteur|"Nature présente"|nature présente dans le secteur/);
+});
+
+test("dossier : les intitulés courts nomment la mesure (espaces naturels et eau), la priorité garde son nom", () => {
+  const lab = MISMATCH_LABELS.nature!;
+  assert.equal(lab.subject, "les espaces naturels (eau comprise)");
+  assert.equal(lab.topic, "les espaces naturels du secteur (eau comprise)");
+  assert.equal(ALIGNMENT_LABELS.nature!.headlineSubject, "les espaces naturels du secteur (eau comprise)");
+  assert.equal(lab.projectPhrase, "la proximité des espaces naturels", "la priorité du lecteur n'est pas une priorité pour les plans d'eau");
+  // Saintes-Maries (rang 87, surtout de l'eau) : le point fort du dossier titre « espaces naturels et eau ».
+  // Sète (rang 45) ne déclenche ni écart ni point fort : ses paliers visibles sont testés côté comparateur.
+  const r = ALIGNMENT_RULES.find((x) => x.id === "territoire.alignment-nature")!.evaluate(facts(SAINTES_MARIES, "Saintes-Maries-de-la-Mer", 0.85, 0.88), projet, undefined as never);
+  assert.equal(r.outcome, "satisfied");
+  const f = r.facts[0]!;
+  assert.equal(f.headlineSubject, "les espaces naturels du secteur (eau comprise)");
+  assert.equal(f.topic, "les espaces naturels du secteur (eau comprise)");
+  assert.match(f.statement, /^Pour les espaces naturels du secteur \(eau comprise\), Saintes-Maries-de-la-Mer se situe parmi/);
 });

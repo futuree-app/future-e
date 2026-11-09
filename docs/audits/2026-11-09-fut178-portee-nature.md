@@ -72,3 +72,16 @@ La contre-revue a relevé trois excès : « alentour » / « entourées » est f
 - **Territoire :** aucune empreinte supplémentaire. Le registre, le contrat et le trait sont inchangés, et le test d'empreinte de `fut147` reste vert.
 - **Conclusions de dossier :** celles dont le plan contient un fait nature (écart ou point fort) changent de texte. Elles seront rédigées à nouveau une fois, à leur prochaine ouverture. La PR n'a jamais été livrée, donc cette régénération est la même qu'avec la première version.
 - **Comparateur et /qna :** pas de cache persistant indexé sur le texte (synthèses en flux, `no-store`).
+
+## Dernier correctif avant fusion (09/11/2026)
+
+Réserve de la contre-revue : des étiquettes visibles disaient encore « nature » seule alors que la mesure compte l'eau. La préférence garde son nom (ligne « Espaces naturels », « la proximité des espaces naturels »). Seules les étiquettes de la **mesure** changent :
+
+| Étiquette | Avant | Après |
+|---|---|---|
+| Paliers du comparateur | « Beaucoup de nature dans le secteur » / « Nature présente » / « Peu de nature dans le secteur » | « Beaucoup d'espaces naturels ou d'eau dans le secteur » / « Espaces naturels ou eau présents » / « Peu d'espaces naturels ou d'eau dans le secteur » |
+| Raison intermédiaire | « nature présente dans le secteur, sans abonder » | « espaces naturels ou eau présents dans le secteur, sans abonder » (FUT-154 : reprend le palier) |
+| Dossier, `subject` (titre de l'écart) | « les espaces naturels du secteur » | « les espaces naturels (eau comprise) ». La forme est sans « et », sinon elle se coordonnerait avec l'énumération du titre (garde de `mismatch-facts.test.ts`), et elle tient en 45 caractères. |
+| Dossier, `topic` et `headlineSubject` (point fort) | « les espaces naturels du secteur » | « les espaces naturels du secteur (eau comprise) » |
+
+Rendu vérifié sur les cellules réelles du comparateur : Saintes-Maries-de-la-Mer « Beaucoup d'espaces naturels ou d'eau dans le secteur », Sète « Espaces naturels ou eau présents », Lille « Peu d'espaces naturels ou d'eau dans le secteur ». Aucun score, seuil, rang ni index ne change. Le registre Territoire et son empreinte sont inchangés.
