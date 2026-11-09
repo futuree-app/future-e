@@ -1,7 +1,8 @@
 // FUT-41 V5 · tests du modèle (fixtures fictives). État ET phrase rendue (AGENTS.md).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { confronter, enBref, ouVousEnEtes, bilan, alertes, etSi5, prudente, TITRE_SEAU5, type Recherche, type Piste } from "./modele5.ts";
+import { confronter, enBref, ouVousEnEtes, bilan, alertes, ecarts, etSi5, prudente, simuler, TITRE_SEAU5, type Recherche, type Piste } from "./modele5.ts";
+import { etatInitial5 } from "./etat5.ts";
 import { PROJET, COMMUNES, LOGEMENTS } from "./scenarios5.ts";
 
 const R = (c: string[], l: string[]): Recherche => ({
@@ -124,8 +125,8 @@ test("D : jamais « aucun ne bloque » quand la condition n'est mesurée que pou
 test("D : entre des logements, une différence communale est dite comme telle", () => {
   const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
   const d = enBref(r, ["fosse", "convention", "thabor"].map((id) => P(r, id)))[1]!.texte;
-  assert.match(d, /^À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/);
-  assert.match(d, /cela situe les logements, sans rien dire de chacun/);
+  assert.match(d, /^À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme\./);
+  assert.match(d, /Pour vos logements, cela se lit à l'adresse : c'est fait pour T3 quai de la Fosse seulement\./);
 });
 
 test("D : des communes seules ne prétendent rien sur la gare d'un logement, et Rennes est dite à revoir", () => {
@@ -139,4 +140,38 @@ test("D : avec dix logements, la ligne reste lisible (on compte au-delà de deux
   const t = ouVousEnEtes(tous()).map((x) => x.texte).join(" ");
   assert.match(t, /pour cinq logements, elle reste à mesurer/);
   assert.ok(t.length < 700, `longueur ${t.length}`);
+});
+
+// ── Deuxième revue Work (09/11) : lecture naturelle, examinées / à vérifier, scénario d'arbitrage ──
+
+test("examinées et à vérifier : la Fosse est examinée sur tout, mais deux réponses manquent", () => {
+  const r = R(["44109", "35238"], ["fosse"]);
+  const b = bilan(r, P(r, "fosse"), "unite");
+  assert.equal(b.lus, 5);
+  assert.equal(b.aVerifier, 2, "des nuits fraîches et un médecin restent à vérifier");
+});
+
+test("arbitrage : deux écarts établis, de sens opposés, sans total", () => {
+  const e = etatInitial5("arbitrage");
+  const ps: Piste[] = e.logements.map((logement) => ({ type: "logement", logement }));
+  const ec = ecarts(e, ps);
+  assert.deepEqual(ec.map((x) => `${x.cle}:${x.mieux}>${x.moins}`).sort(), ["calme:T4 rue de la Convention>T3 quai de la Fosse", "quartier:T3 quai de la Fosse>T4 rue de la Convention"]);
+  const t = enBref(e, ps).map((x) => x.texte).join(" ");
+  assert.match(t, /Aux abords, T4 rue de la Convention répond mieux que T3 quai de la Fosse pour le calme ; T3 quai de la Fosse répond mieux que T4 rue de la Convention pour la vie de quartier\./);
+  assert.match(t, /Les nuits fraîches l'été dans le logement : T4 rue de la Convention y répond ; à vérifier pour T3 quai de la Fosse \(deux questions prêtes pour la visite\)\./);
+  assert.doesNotMatch(t, /meilleur|recommand|gagnant|au total/i);
+});
+
+test("arbitrage : une différence encore possible n'est jamais rangée parmi les écarts établis", () => {
+  const e = etatInitial5("arbitrage");
+  const ec = ecarts(e, e.logements.map((logement) => ({ type: "logement" as const, logement })));
+  assert.ok(!ec.some((x) => x.cle === "nuits"), "les nuits de la Fosse ne sont pas connues");
+});
+
+test("arbitrage : et si la vie de quartier devenait sans compromis, seul ce qui est un compromis est dit, au conditionnel", () => {
+  const e = etatInitial5("arbitrage");
+  const fx = simuler(e.logements, e.projet, { type: "nature", cle: "quartier", nature: "sans_compromis" }).effets;
+  assert.equal(fx.length, 1);
+  assert.match(fx[0]!.phrase, /T4 rue de la Convention : une vie de quartier y est un compromis ; sans compromis, il pourrait ne plus tenir/);
+  assert.equal(e.projet.criteres.find((c) => c.cle === "quartier")!.nature, "priorite", "le Projet n'a pas changé");
 });

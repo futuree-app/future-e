@@ -12,12 +12,14 @@ import v from "./v5.module.css";
 
 const ETAT_VIDE = { a_lire: "à lire depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore lue", lu: "" } as const;
 
-export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true }: {
+export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false }: {
   colonnes: Colonne[]; lignes: LigneConfrontation[]; projet: Projet; seul?: boolean; enTete?: boolean;
+  /** Lecture rapide : les marques et les mesures seulement, le verdict en un mot, sans preuves ni origine. */
+  compact?: boolean;
 }) {
   const nomDe = (ids: string[]) => ids.map((id) => colonnes.find((c) => c.id === id)?.nom ?? id).join(" et ");
   return (
-    <div className={v.conf} style={{ "--cols": colonnes.length } as CSSProperties} data-seul={seul || undefined}>
+    <div className={v.conf} style={{ "--cols": colonnes.length } as CSSProperties} data-seul={seul || undefined} data-compact={compact || undefined}>
       {enTete && !seul ? (
         <div className={v.confTete} aria-hidden>
           <span className={v.confCoin} />
@@ -31,7 +33,8 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
           <section key={li.cle} className={v.confBloc} aria-labelledby={`cf-${li.cle}`}>
             <h3 className={v.confCrit} id={`cf-${li.cle}`}>
               {li.libelle}
-              {li.sansCompromis ? <span className={v.dur}> · sans compromis</span> : li.poids === 3 ? <span className={v.dur}> · compte beaucoup</span> : null}
+              {/* Le poids que la personne a déclaré : il dit ce qui compte pour elle, jamais un total. */}
+              {li.sansCompromis ? <span className={v.dur}> · sans compromis</span> : <span className={v.dur}> · {li.poids === 3 ? "compte beaucoup pour vous" : li.poids === 2 ? "compte pour vous" : "compte un peu pour vous"}</span>}
             </h3>
             {li.couches.map((x) => (
               <div key={x.couche} className={v.confCouche} role="group" aria-label={NOM_COUCHE[x.couche]} data-verdict={x.verdict}>
@@ -39,7 +42,7 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
                 {x.cellules.map((c) => (
                   <div key={c.ids.join()} className={v.confCell} style={{ gridColumn: `span ${c.ids.length}` }} data-partage={c.ids.length > 1 || undefined}>
                     {!seul ? <span className={v.sr}>{nomDe(c.ids)} : </span> : null}
-                    <ContenuCellule c={c} limite={x.couche === "commune" ? null : limite} seul={seul} />
+                    <ContenuCellule c={c} limite={x.couche === "commune" ? null : limite} seul={seul} compact={compact} />
                     {c.ids.length > 1 ? <span className={v.partage}>une seule lecture pour {nomDe(c.ids)}</span> : null}
                     {seul && x.couche === "commune" && c.ligne && li.couches.some((y) => y.couche !== "commune" && y.cellules.every((k) => !k.ligne)) ? <span className={v.partage}>Dit pour la commune ; ce logement reste à lire depuis son adresse.</span> : null}
                   </div>
@@ -47,12 +50,12 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
                 {!seul ? (
                   <p className={v.confVerdict}>
                     <span className={v.confVerdictMot}>{LIBELLE_VERDICT[x.verdict]}</span>
-                    {lier(x.phrase)}{x.remede ? <span className={v.remede}> {lier(x.remede)}</span> : null}
+                    {compact ? null : <>{lier(x.phrase)}{x.remede ? <span className={v.remede}> {lier(x.remede)}</span> : null}</>}
                   </p>
                 ) : null}
               </div>
             ))}
-            {preuves.length && !seul ? (
+            {preuves.length && !seul && !compact ? (
               <details className={`${s.details} ${v.preuves}`}>
                 <summary>Preuves et sources</summary>
                 <ul className={v.listeSimple}>
@@ -72,14 +75,15 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
   );
 }
 
-function ContenuCellule({ c, limite, seul }: { c: Cellule; limite: number | null; seul: boolean }) {
+function ContenuCellule({ c, limite, seul, compact = false }: { c: Cellule; limite: number | null; seul: boolean; compact?: boolean }) {
   if (!c.ligne) return <span className={v.vide} data-etat={c.etat}>{ETAT_VIDE[c.etat]}</span>;
   return (
     <>
       <Marque ligne={c.ligne} perime={c.perime} />
       {c.ligne.mesure ? <Mesure valeur={c.ligne.mesure.valeur} unite={c.ligne.mesure.unite} limite={limite} limiteAlors={c.limiteAlors} date={c.origine?.match(/du (\d+ [^ ]+)$/)?.[1] ?? null} /> : null}
       {seul && c.ligne.constat ? <span className={v.faceConstat}>{lier(c.ligne.constat)}</span> : null}
-      {seul && c.ligne.preuve ? <span className={v.preuve}>{c.ligne.preuve.source}, {c.ligne.preuve.date}{c.origine ? ` · ${c.origine}` : ""}</span> : !seul && c.origine ? <span className={v.preuve}>{c.origine}</span> : null}
+      {compact && c.ligne.constat ? <span className={v.faceConstat}>{lier(c.ligne.constat)}</span> : null}
+      {compact ? null : seul && c.ligne.preuve ? <span className={v.preuve}>{c.ligne.preuve.source}, {c.ligne.preuve.date}{c.origine ? ` · ${c.origine}` : ""}</span> : !seul && c.origine ? <span className={v.preuve}>{c.origine}</span> : null}
     </>
   );
 }

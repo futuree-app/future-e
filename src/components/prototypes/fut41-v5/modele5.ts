@@ -17,7 +17,7 @@
 //   - une mise à jour relit sous le Projet actuel, sans lire plus loin que l'analyse d'origine.
 import {
   analyseServie, communeCommeLieu, communeDe, comparerCritere, conditionsNonTenues, critereAJour, dateCourte,
-  estEtabli, etSi, gestePrincipal, libelleCritere, logementsDe, motifSimple, nomPiste, idPiste, valeurAnalyseAdresse, NOM_CRITERE, LIBELLE_ISSUE_SIMPLE,
+  estEtabli, etSi, gestePrincipal, libelleCritere, logementsDe, motifSimple, nomPiste, idPiste, valeurAnalyseAdresse, LIBELLE_ISSUE_SIMPLE,
   type SeauEtSi, type Analyse, type CleCritere, type Commune, type ComparaisonCritere, type Geste, type Lieu, type LigneRegistre, type Logement, type Piste, type Recherche,
 } from "../fut41-v41/modele41.ts";
 
@@ -256,6 +256,8 @@ export type Bilan = {
   /** A (revue Work) : combien de conditions sont lues pour cette colonne, sur combien. Une rubrique vide
    *  ne dit « aucun » que si tout est lu ; sinon elle dit « aucun parmi ce qui est lu ». */
   lus: number; total: number;
+  /** Deuxième revue Work : parmi les conditions examinées, combien restent sans réponse (« à vérifier »). */
+  aVerifier: number;
   /** Une condition sans compromis non tenue (dite en tête, pas ici) et une conclusion ancienne. */
   bloque: boolean; aRevoir: boolean;
   geste: Geste;
@@ -296,7 +298,8 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
     }
   }
   const total = r.projet.criteres.length;
-  return { id: col.id, nom: col.nom, apporte, accepte, ouvert, pasLu, lus: total - pasLu.length - ouvert.filter((x) => / : pas encore lu /.test(x)).length, total, bloque, aRevoir, geste: gestePrincipal(r, p, droits) };
+  const nonLus = ouvert.filter((x) => / : pas encore lu /.test(x)).length;
+  return { id: col.id, nom: col.nom, apporte, accepte, ouvert, pasLu, lus: total - pasLu.length - nonLus, total, aVerifier: ouvert.length - nonLus, bloque, aRevoir, geste: gestePrincipal(r, p, droits) };
 }
 
 // ── Ce qui bloque, ce qui est à revoir : dit une fois ────────────────────────────────────────
@@ -337,28 +340,71 @@ export function deNom(p: Piste): string {
 export type Ligne5 = { titre: string; texte: string };
 
 const ISSUE_COURTE = (l: LigneRegistre) => LIBELLE_ISSUE_SIMPLE[l.issue].toLowerCase();
+/** L'issue dite comme un verbe courant (« y répond », « y répond moins bien »), pour les phrases. */
+const Y_REPOND: Partial<Record<LigneRegistre["issue"], string>> = { favorable: "y répond", reserve: "y répond avec un compromis", mismatch: "y répond moins bien", incompatible: "n'y répond pas" };
 
 /**
  * D (revue Work) : CE QUI LES DISTINGUE, incarné. Pour chaque condition dont l'écart est lu de la même
  * façon des deux côtés : qui, à quelle échelle, avec quelle issue. À la commune, entre des logements,
  * la phrase rappelle que cela situe les logements sans les lire.
  */
-function phraseDistingue(r: Recherche, pistes: Piste[]): string | null {
+/** L'ordre des issues établies, condition par condition (jamais additionné entre conditions). */
+const RANG: Partial<Record<LigneRegistre["issue"], number>> = { favorable: 3, reserve: 2, mismatch: 1, incompatible: 0 };
+const POUR: Record<CleCritere, string> = { mer: "la mer", gare: "la gare", nuits: "les nuits fraîches l'été", calme: "le calme", medecin: "un médecin disponible", quartier: "la vie de quartier" };
+const PREFIXE: Record<Couche, string> = { commune: "À l'échelle des communes", abords: "Aux abords", logement: "Dans le logement" };
+
+export type Ecart = { couche: Couche; cle: CleCritere; mieux: string; moins: string };
+
+/**
+ * LES ÉCARTS ÉTABLIS, condition par condition : sur une condition lue de la même façon des deux côtés,
+ * qui y répond mieux que qui. Une comparaison par condition nommée, jamais un total : un lieu peut
+ * répondre mieux sur le calme et moins bien sur le quartier, et les deux sont dits.
+ */
+export function ecarts(r: Recherche, pistes: Piste[]): Ecart[] {
   const c = confronter(r, pistes);
   const logements = c.colonnes.some((k) => k.type === "logement");
   const nomCommune = (id: string) => { const k = c.colonnes.find((x) => x.id === id); return r.communes.find((x) => x.insee === k?.insee)?.nom ?? k?.nom ?? id; };
   const nomCol = (id: string) => c.colonnes.find((x) => x.id === id)?.nom ?? id;
-  const parCouche = new Map<Couche, string[]>();
-  let n = 0;
+  const out: Ecart[] = [];
   for (const li of c.lignes) for (const x of li.couches) {
-    if (x.verdict !== "distingue" || n >= 3) continue;
+    if (x.verdict !== "distingue") continue;
     const nommer = x.couche === "commune" && logements ? nomCommune : nomCol;
-    const issues = x.cellules.filter((k) => k.ligne && !k.bloque && estEtabli(k.ligne)).map((k) => `${listeFr([...new Set(k.ids.map(nommer))])} ${ISSUE_COURTE(k.ligne!)}`);
-    parCouche.set(x.couche, [...(parCouche.get(x.couche) ?? []), `${minus(NOM_CRITERE[li.cle])} (${issues.join(", ")})`]);
-    n++;
+    const lues = x.cellules.filter((k) => k.ligne && !k.bloque && !k.perime && RANG[k.ligne.issue] != null);
+    const rangs = [...new Set(lues.map((k) => RANG[k.ligne!.issue]!))].sort((a, b) => b - a);
+    if (rangs.length < 2) continue;
+    const noms = (rg: number) => listeFr([...new Set(lues.filter((k) => RANG[k.ligne!.issue] === rg).flatMap((k) => k.ids.map(nommer)))]);
+    out.push({ couche: x.couche, cle: li.cle, mieux: noms(rangs[0]!), moins: noms(rangs[rangs.length - 1]!) });
   }
-  if (!parCouche.size) return null;
-  const phrases = [...parCouche.entries()].map(([k, xs]) => `${NOM_COUCHE[k]} : ${listeFr(xs)}${k === "commune" && logements ? " ; cela situe les logements, sans rien dire de chacun" : ""}.`);
+  return out;
+}
+
+/**
+ * CE QUI LES DISTINGUE, en phrase naturelle (deuxième revue Work) : « À l'échelle des communes, Rennes
+ * répond mieux que Nantes pour le calme et les nuits fraîches l'été. » La réserve est attachée à la
+ * phrase : entre des logements, une différence communale dit pour qui elle est lue à l'adresse.
+ */
+function phraseDistingue(r: Recherche, pistes: Piste[], logementsDuLieu?: Logement[]): string | null {
+  const e = ecarts(r, pistes);
+  if (!e.length) return null;
+  // Entre des logements, ou sur l'accueil quand des logements existent : la réserve suit la phrase communale.
+  const logements = logementsDuLieu ?? pistes.filter((p): p is { type: "logement"; logement: Logement } => p.type === "logement").map((p) => p.logement);
+  const phrases: string[] = [];
+  for (const couche of ["commune", "abords", "logement"] as Couche[]) {
+    const ec = e.filter((x) => x.couche === couche);
+    if (!ec.length) continue;
+    const paires = new Map<string, CleCritere[]>();
+    for (const x of ec) paires.set(`${x.mieux}|${x.moins}`, [...(paires.get(`${x.mieux}|${x.moins}`) ?? []), x.cle]);
+    const morceaux = [...paires.entries()].map(([k, cles]) => { const [m, n] = k.split("|"); return `${m} ${/ et /.test(m!) ? "répondent" : "répond"} mieux que ${n} pour ${listeFr(cles.map((x) => POUR[x]))}`; });
+    let ph = `${PREFIXE[couche]}, ${morceaux.join(" ; ")}.`;
+    if (couche === "commune" && logements.length) {
+      const cles = [...new Set(ec.map((x) => x.cle))];
+      const lus = logements.filter((l) => cles.some((k) => { const ca = COUCHE_ADRESSE[k]; return ca && cellule(r, colonnesDe(r, [{ type: "logement", logement: l }])[0]!, k, ca).ligne; }));
+      ph += lus.length === logements.length ? " Pour vos logements, ces points sont aussi lus à l'adresse, plus bas."
+        : lus.length ? ` Pour vos logements, cela se lit à l'adresse : c'est fait pour ${listeFr(lus.map((l) => l.libelle))} seulement.`
+          : " Pour vos logements, cela reste à lire à leur adresse.";
+    }
+    phrases.push(ph);
+  }
   return phrases.join(" ");
 }
 
@@ -396,6 +442,26 @@ function phraseSansCompromis(r: Recherche, pistes: Piste[]): string | null {
   return `${lib} : ${morceaux.join(" ; ")}.`;
 }
 
+/**
+ * CE QUI POURRAIT CHANGER VOTRE CHOIX (deuxième revue Work) : une condition connue d'un côté seulement,
+ * à l'adresse. On dit qui est connu, avec quelle issue, et pour qui c'est à vérifier, avec les questions
+ * prêtes s'il y en a. Une différence possible n'est jamais présentée comme établie.
+ */
+function phrasePourrait(r: Recherche, pistes: Piste[]): string | null {
+  const c = confronter(r, pistes);
+  const nomCol = (id: string) => c.colonnes.find((x) => x.id === id)?.nom ?? id;
+  const parts: string[] = [];
+  for (const li of c.lignes) for (const x of li.couches) {
+    if (x.verdict !== "pourrait" || x.couche === "commune" || parts.length >= 2) continue;
+    const connus = x.cellules.filter((k) => k.ligne && estEtabli(k.ligne) && !k.perime);
+    const ouverts = x.cellules.filter((k) => k.ligne && !estEtabli(k.ligne));
+    if (!connus.length || !ouverts.length) continue;
+    const questions = ouverts.flatMap((k) => k.ids).map((id) => r.logements.find((l) => l.id === id)?.verifications.filter((v) => v.cle === li.cle && !v.reponse).length ?? 0).reduce((a, b) => a + b, 0);
+    parts.push(`${POUR[li.cle]} ${NOM_COUCHE[x.couche].toLowerCase()} : ${connus.map((k) => `${listeFr(k.ids.map(nomCol))} ${Y_REPOND[k.ligne!.issue] ?? ISSUE_COURTE(k.ligne!)}`).join(", ")} ; à vérifier pour ${listeFr(ouverts.flatMap((k) => k.ids).map(nomCol))}${questions ? ` (${questions === 1 ? "une question prête" : `${nombre(questions)} questions prêtes`} pour la visite)` : ""}`);
+  }
+  return parts.length ? `${cap(parts.join(". "))}.` : null;
+}
+
 /** D (revue Work) : CE QUI MANQUE, et pourquoi cela compte. */
 function phraseManque(r: Recherche, pistes: Piste[]): string | null {
   const m = pistes.map((p) => ({ p, g: gestePrincipal(r, p, "unite") })).filter((x) => ["adresse", "analyser", "examiner_commune", "lire_commune", "mettre_a_jour"].includes(x.g.cle));
@@ -416,6 +482,8 @@ export function enBref(r: Recherche, pistes: Piste[]): Ligne5[] {
   const rev = communes ? alertes(r, pistes).filter((x) => x.genre === "a_revoir") : [];
   if (sc) out.push({ titre: "Votre condition sans compromis", texte: rev.length ? `${sc} ${rev.map((x) => x.phrase).join(" ")}` : sc });
   out.push({ titre: "Ce qui les distingue", texte: phraseDistingue(r, pistes) ?? "Rien ne les distingue encore à méthode égale : les autres conditions ne sont pas lues, ou pas de la même façon des deux côtés." });
+  const pc = phrasePourrait(r, pistes);
+  if (pc) out.push({ titre: "Ce qui pourrait changer votre choix", texte: pc });
   const m = phraseManque(r, pistes);
   if (m) out.push({ titre: "Ce qui manque", texte: m });
   return out;
@@ -446,7 +514,7 @@ export function ouVousEnEtes(r: Recherche): Ligne5[] {
   const b = alertes(r, lp).find((x) => x.genre === "bloque");
   // Seules les communes lues pour le Projet peuvent distinguer : une lecture gratuite ne compte pas.
   const lues = communes.filter((c) => c.lecture === "rapport");
-  const d = lues.length > 1 ? phraseDistingue(r, lues.map((commune) => ({ type: "commune" as const, commune }))) : logements.length > 1 ? phraseDistingue(r, lp) : null;
+  const d = lues.length > 1 ? phraseDistingue(r, lues.map((commune) => ({ type: "commune" as const, commune })), logements) : logements.length > 1 ? phraseDistingue(r, lp) : null;
   if (b) out.push({ titre: "Ce qui bloque", texte: b.phrase });
   else if (d) out.push({ titre: lues.length > 1 ? `Entre ${listeFr(lues.map((c) => c.nom))}` : "Entre vos logements", texte: d });
   // Sur l'accueil, ce qui manque est déjà dans « À faire maintenant » (gestes et raisons) : on ne le

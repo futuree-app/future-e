@@ -522,3 +522,9 @@ button.navLien { cursor: pointer; }
 .etSiCorps { display: grid; gap: 12px; padding-top: 14px; max-width: 720px; }
 .etSiCorps p { margin: 0; }
 .etSiCorps .simulation { justify-self: start; }
+
+/* Deuxième revue Work : intitulés au-dessus du texte (la phrase garde toute la largeur), lecture rapide */
+@media (min-width: 760px) { .lignesTitrees > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+.lignesTitrees dt { padding-top: 0; }
+.conf[data-compact] .confBloc { padding: 12px 0 10px; }
+.conf[data-compact] .confVerdict { margin-top: 0; }

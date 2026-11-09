@@ -22,6 +22,7 @@ const VUES = [
   ["07-logement-ancien-projet", "?s=ancien"],
   ["08-logement-apres-visite", "?s=visite#/logement/fosse"],
   ["09-accueil-dix-logements", "?s=dix"],
+  ["14-comparer-arbitrage", "?s=arbitrage"],
   ["10-accueil-vide", "?s=vide"],
   ["11-projet-et-si", "?s=dix#/projet"],
   ["12-releve", "?s=ref#/releve/fosse"],
@@ -75,7 +76,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   t = await txt();
   const phrases = await p.locator("[class*=ouPlaque] dl > div").count();
   ok("Accueil", "trois lignes titrées au plus pour dire où en est la recherche", phrases >= 2 && phrases <= 3, `(${phrases})`);
-  ok("Accueil", "la synthèse dit qui se distingue, à quelle échelle, et ce qui reste à savoir", /À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/.test(t) && /T3 quai de la Fosse \(9 min\) la tient ; pour T4 rue de la Convention et T3 près du Thabor, elle reste à mesurer/.test(t));
+  ok("Accueil", "la synthèse dit qui se distingue, à quelle échelle, et ce qui reste à savoir", /À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme\. Pour vos logements, cela se lit à l'adresse : c'est fait pour T3 quai de la Fosse seulement/.test(t) && /T3 quai de la Fosse \(9 min\) la tient ; pour T4 rue de la Convention et T3 près du Thabor, elle reste à mesurer/.test(t));
   ok("Accueil", "la conclusion ancienne de Rennes est datée, pas présentée comme actuelle", /Conclusion du 18 sept\., écrite sous votre Projet d'alors/.test(t) && /Elle est à revoir pour une gare à moins de 20 min/.test(t));
   ok("Accueil", "trois gestes au plus, chacun avec son bouton", (await p.locator("#faire-t + p, ol li").count()) <= 4 && (await p.locator("ol li button").count()) <= 3);
   ok("Accueil", "communes et logements nommés sur l'accueil", /Nantes/.test(t) && /T3 quai de la Fosse/.test(t) && /T3 près du Thabor/.test(t));
@@ -100,7 +101,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   // B · Nantes contre Rennes, sans adresse
   await ouvrir("?s=communes#/comparer/communes/c:44109,c:35238");
   t = await txt();
-  ok("B", "En bref : ce qui distingue les communes, avec qui et quelle issue", /À la commune : des nuits fraîches l'été \(Nantes moins bien, Rennes correspond\)/.test(t));
+  ok("B", "En bref : ce qui distingue les communes, en phrase courante", /À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme/.test(t));
   ok("B", "En bref : la gare se mesure depuis une adresse ; Rennes est à revoir", /se mesure depuis une adresse/.test(t) && /sa conclusion est à revoir/.test(t));
   ok("B", "la gare ne se compare pas encore, et le remède est dit", /Votre condition n'était pas la même lors des deux analyses/.test(t) && /Mettre à jour l'analyse la plus ancienne/.test(t));
   ok("B", "la carte situe les communes sans rien départager", /100 km/.test(t) && /Le trajet réel se mesure depuis une adresse/.test(t));
@@ -116,7 +117,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   ok("C", "les valeurs sont côte à côte dans « ce que chacun apporte »", (await p.locator("[class*=bilanRang]").count()) >= 4);
   ok("C", "aucun classement", !/meilleur|gagnant|recommand/i.test(t));
   ok("C", "jamais « aucun ne bloque » quand la gare n'est mesurée que pour un logement", !/Aucun ne bloque/.test(t));
-  ok("C", "une rubrique vide dit « aucun, parmi ce qui est lu » et combien de conditions sont lues", /aucun, parmi ce qui est lu/.test(t) && /lu : 1 condition sur 5/.test(t) && !/\brien\b(?! de)/.test((await p.locator("[class*=bilans]").innerText())));
+  ok("C", "une rubrique vide dit « aucun, parmi ce qui est lu » et combien de conditions sont lues", /aucun, parmi ce qui est examiné/.test(t) && /1 examinée sur 5 · 1 à vérifier/.test(t) && /5 examinées sur 5 · 2 à vérifier/.test(t) && !/\brien\b(?! de)/.test((await p.locator("[class*=bilans]").innerText())));
   ok("C", "aucun médecin « disponible » sur la seule présence", !/un médecin, à la commune\s*$/m.test(t));
 
   // D · Un logement pas encore analysé : le panneau explique avant de lancer
@@ -204,9 +205,22 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   ok("Z12", "la mesure de 24 min reste dans le détail", /24 min/.test(t));
   await cap("25-z12-une-seule-fois");
 
+  // Arbitrage : deux adresses analysées dans les mêmes conditions (scénario fictif)
+  await ouvrir("?s=arbitrage");
+  t = await txt();
+  ok("Arbitrage", "« Ce qui change votre choix » montre les écarts établis et l'écart possible", /Ce qui change votre choix/.test(t) && /Rue résidentielle : sous 55 dB le jour/.test(t) && /Commerces, marché et tramway à moins de 5 min à pied/.test(t) && /Pourrait les distinguer/.test(t));
+  ok("Arbitrage", "le poids déclaré de chaque priorité est visible", /compte beaucoup pour vous/.test(t) && /compte un peu pour vous/.test(t));
+  ok("Arbitrage", "chaque écart est dit dans les deux sens, sans total", /T4 rue de la Convention répond mieux que T3 quai de la Fosse pour le calme ; T3 quai de la Fosse répond mieux que T4 rue de la Convention pour la vie de quartier/.test(t) && !/meilleur|au total/i.test(t));
+  await p.getByText("Et si vos conditions changeaient ?").click();
+  await p.locator("details[open] select").first().selectOption("quartier");
+  await p.waitForTimeout(150);
+  t = await txt();
+  ok("Arbitrage", "et si la vie de quartier devenait sans compromis : conditionnel, Projet inchangé", /Si une vie de quartier devenait une condition sans compromis/.test(t) && /T4 rue de la Convention : une vie de quartier y est un compromis ; sans compromis, il pourrait ne plus tenir/.test(t) && /révision 3/.test(t));
+  await cap("27-arbitrage-et-si");
+
   // Et si près de la comparaison (essai limité)
   await ouvrir("?s=meme");
-  await p.getByText("Et si votre limite pour la gare changeait ?").click();
+  await p.getByText("Et si vos conditions changeaient ?").click();
   await p.waitForTimeout(150);
   t = await txt();
   ok("Et si", "près de la comparaison : les seules possibilités affichées, sans rien modifier", /Essai · votre Projet n'est pas modifié/.test(t) && /T3 Saint-Félix · Mesuré à 23 min : tiendrait à 30 min/.test(t) && /révision 3/.test(t));

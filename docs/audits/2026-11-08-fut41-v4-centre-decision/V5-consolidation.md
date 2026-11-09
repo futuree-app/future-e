@@ -165,3 +165,32 @@ Planches dans `consolidation-v5/` (V5 initiale à gauche, consolidée à droite)
   2. le contrat de comparabilité servi par le moteur (FUT-22, préalable FUT-173). Sans lui, la confrontation de production ne pourrait pas être alimentée honnêtement.
 
 À votre accord : reconstruire la version statique et pousser la branche pour que ChatGPT voie la V5 consolidée. Le lien actuel montre encore la V5 initiale.
+
+## 8. Second retour de Work : lisibilité et scénario d'arbitrage
+
+Work confirme les nuances de la revue (gare et péremption par critère, médecin = défaut des données). Il conteste un point : la synthèse n'est pas « le maximum honnête ». La prudence borne ce qu'on peut affirmer, pas la façon de le rendre clair. **Il a raison.**
+
+| Retour | Vérification | Verdict | Décision |
+|---|---|---|---|
+| Intitulés en colonne dans la synthèse : phrases comprimées, texte haut | Constaté sur l'accueil (encadré étroit à côté de « À faire ») | **Confirmé** | Intitulés au-dessus de la phrase, qui garde toute la largeur |
+| « Nantes moins bien, Rennes correspond » expose les catégories du système | Constaté | **Confirmé** | Phrase courante, par condition nommée : « À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme. » |
+| Réserve proposée : « Pour les logements, ces deux points restent à vérifier » | Faux pour le quai de la Fosse, dont le calme est lu à l'adresse (compromis) | **Rejeté tel quel, corrigé** | « Pour vos logements, cela se lit à l'adresse : c'est fait pour T3 quai de la Fosse seulement. » |
+| « Lu : 5 sur 5 » peut se lire « tout est connu » | La Fosse affichait « tout est lu » avec deux conditions à vérifier | **Confirmé** | « 5 examinées sur 5 · 2 à vérifier » ; « toutes examinées » ; « aucun, parmi ce qui est examiné » |
+| Un scénario fictif conçu pour éprouver un arbitrage | Il manquait : aucune situation n'avait deux adresses analysées dans les mêmes conditions | **Retenu** | Situation « Deux adresses analysées : un vrai arbitrage » (données inventées, annoncées comme telles) |
+| Une première lecture plus visuelle | La comparaison commençait par du texte | **Retenu** | Bloc « Ce qui change votre choix » : les seules conditions où les logements diffèrent à méthode égale, et celles qui pourraient encore tout changer, avec ce que dit chaque dossier et le poids que vous avez déclaré |
+| « Et si » pour l'effet d'un changement de priorité | L'essai de Comparer ne portait que sur la limite de la gare | **Retenu** | L'essai propose aussi « faire d'une priorité une condition sans compromis » (au conditionnel, Projet inchangé) |
+
+**Ce que l'arbitrage montre** (données fictives) : les deux adresses tiennent la gare. Aux abords, la Convention répond mieux pour le calme, qui compte pour vous ; la Fosse répond mieux pour la vie de quartier, qui compte un peu. Les nuits fraîches, qui comptent beaucoup, correspondent à la Convention et restent à vérifier pour la Fosse, avec deux questions prêtes pour la visite. Et si la vie de quartier devenait sans compromis, la Convention pourrait ne plus tenir. Aucun total, aucun gagnant : chaque écart est dit dans les deux sens, et le poids vient de la personne.
+
+**Nouvelles règles du modèle** :
+- `ecarts()` compare condition par condition (favorable, puis compromis, puis moins bien), jamais en somme ;
+- une différence encore possible n'est jamais rangée parmi les écarts établis ;
+- une issue « à revoir » n'entre dans aucun écart.
+
+**Tests** : 4 nouveaux (examinées et à vérifier ; deux écarts opposés sans total ; une différence possible exclue des écarts ; « Et si » sur une priorité). Au total 20 tests V5, et 55 sur 55 avec la V4.1 et la V4.
+
+**Recette** : 84 captures (une vue de plus), 54 vérifications sur 54, dont 4 sur l'arbitrage.
+
+**Ce qui reste ouvert.** Sur un écran de 1 440 px, l'accueil place encore les lieux juste sous le premier écran. Inverser la synthèse et les lieux est une question de test (§ 6, question 6), pas de doctrine. Pour la question « je comprends ce qui change mon choix », la situation d'arbitrage est désormais celle à faire lire en premier aux trois à cinq personnes.
+
+**Recommandation mise à jour** : GO pour le socle et le contrat moteur ; marge d'ajustement de présentation pour la Vue d'ensemble et Mon Projet ; Comparer figé seulement après le test, en commençant par la situation d'arbitrage.

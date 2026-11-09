@@ -46,6 +46,11 @@
       "erreurs": []
     },
     {
+      "f": "14-comparer-arbitrage-1440-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
       "f": "10-accueil-vide-1440-sombre.png",
       "debord": 0,
       "erreurs": []
@@ -107,6 +112,11 @@
     },
     {
       "f": "09-accueil-dix-logements-390-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "14-comparer-arbitrage-390-sombre.png",
       "debord": 0,
       "erreurs": []
     },
@@ -176,6 +186,11 @@
       "erreurs": []
     },
     {
+      "f": "14-comparer-arbitrage-360-sombre.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
       "f": "10-accueil-vide-360-sombre.png",
       "debord": 0,
       "erreurs": []
@@ -237,6 +252,11 @@
     },
     {
       "f": "09-accueil-dix-logements-1440-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
+      "f": "14-comparer-arbitrage-1440-clair.png",
       "debord": 0,
       "erreurs": []
     },
@@ -306,6 +326,11 @@
       "erreurs": []
     },
     {
+      "f": "14-comparer-arbitrage-390-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
       "f": "10-accueil-vide-390-clair.png",
       "debord": 0,
       "erreurs": []
@@ -371,6 +396,11 @@
       "erreurs": []
     },
     {
+      "f": "14-comparer-arbitrage-360-clair.png",
+      "debord": 0,
+      "erreurs": []
+    },
+    {
       "f": "10-accueil-vide-360-clair.png",
       "debord": 0,
       "erreurs": []
@@ -426,7 +456,7 @@
       "tache": "Accueil",
       "nom": "la section des lieux commence dans les 1 100 premiers pixels (1440 px)",
       "ok": true,
-      "detail": "(967 px)"
+      "detail": "(932 px)"
     },
     {
       "tache": "Accueil",
@@ -454,7 +484,7 @@
     },
     {
       "tache": "B",
-      "nom": "En bref : ce qui distingue les communes, avec qui et quelle issue",
+      "nom": "En bref : ce qui distingue les communes, en phrase courante",
       "ok": true,
       "detail": ""
     },
@@ -659,6 +689,30 @@
     {
       "tache": "Z12",
       "nom": "la mesure de 24 min reste dans le détail",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Arbitrage",
+      "nom": "« Ce qui change votre choix » montre les écarts établis et l'écart possible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Arbitrage",
+      "nom": "le poids déclaré de chaque priorité est visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Arbitrage",
+      "nom": "chaque écart est dit dans les deux sens, sans total",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "tache": "Arbitrage",
+      "nom": "et si la vie de quartier devenait sans compromis : conditionnel, Projet inchangé",
       "ok": true,
       "detail": ""
     },

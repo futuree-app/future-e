@@ -134,6 +134,11 @@ export const SCENARIOS5: Scenario5[] = [
   { id: "ancien", titre: "Un dossier fait sous votre ancien Projet", resume: "Saint-Félix a été analysé quand la gare était à 30 min ; Rennes aussi. Votre limite est aujourd'hui de 20 min.", communes: ["44109", "35238"], logements: ["fosse", "felix"], vue: { ecran: "logement", id: "felix" } },
   { id: "visite", titre: "Après une visite", resume: "Le quai de la Fosse a été visité le 6 nov. : répondre aux questions, noter ce qui a été vu.", communes: ["44109", "35238"], logements: ["fosse", "convention", "thabor"], vue: { ecran: "logement", id: "fosse", ancre: "verifier" },
     ajuste: (x) => (x.id === "fosse" ? { ...x, statut: "visite", visiteLe: "2026-11-06", journal: [...x.journal.slice(0, 2), { date: "2026-11-06", type: "statut", texte: "Visité." }] } : x) },
+  // Deuxième revue Work : un scénario FICTIF conçu pour éprouver un arbitrage établi entre deux
+  // adresses (même date, mêmes règles, même Projet, mêmes données). Il sert à tester l'interaction ;
+  // seules de vraies analyses diront si de tels arbitrages se présentent.
+  { id: "arbitrage", titre: "Deux adresses analysées : un vrai arbitrage", resume: "Deux appartements de Nantes analysés dans les mêmes conditions : l'un offre le calme et des nuits fraîches, l'autre la vie de quartier. Données inventées pour éprouver la comparaison.", communes: ["44109"], logements: ["fosse", "convention"], vue: { ecran: "comparer", mode: "logements", selection: ["fosse", "convention"] },
+    ajuste: (x) => (x.id === "convention" ? { ...x, statut: "a_visiter", droit: "adresse", analyses: [{ ...structuredClone(ANALYSE_CONVENTION), generatedAt: "2026-11-04", simulee: false }], journal: [...x.journal, { date: "2026-11-04", type: "analyse", texte: "Dossier d'adresse : commune, abords et logement analysés." }] } : x) },
   { id: "dix", titre: "Dix logements, dont trois écartés", resume: "Trois communes, dix logements : trois écartés pour leur raison, plusieurs sans adresse ou sans analyse.", communes: ["44109", "35238", "49007"], logements: LOGEMENTS.map((x) => x.id), vue: { ecran: "ensemble" } },
   { id: "vide", titre: "Je découvre Ma décision", resume: "Le Projet existe ; aucune commune ni aucun logement n'est encore gardé.", communes: [], logements: [], vue: { ecran: "ensemble" } },
 ];

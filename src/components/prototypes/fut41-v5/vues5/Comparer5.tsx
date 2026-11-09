@@ -8,7 +8,7 @@
 // l'une ou l'autre. Aucun ordre de mérite : les colonnes suivent l'ordre de vos communes.
 import { useId, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { GlypheGrain, Plaque, releve as s } from "@/components/releve/primitives";
-import { bilan, colonnesDe, confronter, dateCourte, enBref, etSi5, libelleCritere, logementsDe, NOM_CRITERE, TITRE_SEAU5, type Bilan, type Piste, type SeauEtSi } from "../modele5";
+import { bilan, colonnesDe, confronter, dateCourte, enBref, etSi5, logementsDe, simuler, NOM_CRITERE, TITRE_SEAU5, type Bilan, type Logement, type Piste, type SeauEtSi } from "../modele5";
 import { faireGeste, type Api5 } from "../CentreDecision5";
 import { BoutonGeste, Fil, Section, Vignette, lier } from "../communs5";
 import { Confrontation } from "../Confrontation";
@@ -41,6 +41,8 @@ export function Comparer5({ api }: { api: Api5 }) {
   const conf = montres.length >= 2 ? confronter(etat, montres) : null;
   const cols = montres.length >= 2 ? colonnesDe(etat, montres) : [];
   const bilans = cols.map((c) => bilan(etat, montres.find((p) => idDe(p) === c.id)!, etat.droits));
+  // Deuxième revue Work : une première lecture plus visuelle, réduite aux écarts établis et aux écarts possibles.
+  const change = conf ? conf.lignes.map((li) => ({ ...li, couches: li.couches.filter((x) => x.verdict === "distingue" || (x.verdict === "pourrait" && x.couche !== "commune")) })).filter((li) => li.couches.length) : [];
   const communesVues = [...new Set(montres.map((p) => (p.type === "commune" ? p.commune.insee : p.logement.commune.insee)))].map((i) => etat.communes.find((c) => c.insee === i)!).filter(Boolean);
 
   return (
@@ -101,6 +103,12 @@ export function Comparer5({ api }: { api: Api5 }) {
             <dl className={v.lignesTitrees}>{enBref(etat, montres).map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
           </Plaque>
 
+          {change.length ? (
+            <Section titre="Ce qui change votre choix" id="change" sous="Les seules conditions où ils diffèrent à méthode égale, et celles qui pourraient encore tout changer. Le reste est au détail, plus bas.">
+              <Confrontation colonnes={conf.colonnes} lignes={change} projet={etat.projet} compact />
+            </Section>
+          ) : null}
+
           <Section titre={mode === "communes" ? "Ce que chacune apporte, et ce qu'elle demande" : "Ce que chacun apporte, et ce qu'il demande"} id="bilan">
             <Bilans bilans={bilans} api={api} montres={montres} />
           </Section>
@@ -160,7 +168,7 @@ function Bilans({ bilans, api, montres }: { bilans: Bilan[]; api: Api5; montres:
               <span className={s.pileSerree}>
                 <button type="button" className={v.lien} onClick={() => api.aller(p.type === "commune" ? { ecran: "commune", id: b.id } : { ecran: "logement", id: b.id })}>{b.nom}</button>
                 <span className={v.bilanSous}>{p.type === "commune" ? "la commune" : p.logement.commune.nom}</span>
-                <span className={v.bilanSous}>lu : {b.lus} condition{b.lus > 1 ? "s" : ""} sur {b.total}</span>
+                <span className={v.bilanSous}>{b.lus} examinée{b.lus > 1 ? "s" : ""} sur {b.total}{b.aVerifier ? ` · ${b.aVerifier} à vérifier` : ""}</span>
                 {b.bloque ? <span className={v.etiquetteBloque}>bloque, voir En bref</span> : b.aRevoir ? <span className={v.etiquetteRevoir}>lu sous votre ancien Projet</span> : null}
               </span>
             </div>
@@ -173,7 +181,7 @@ function Bilans({ bilans, api, montres }: { bilans: Bilan[]; api: Api5; montres:
           {bilans.map((b) => (
             <div key={b.id} className={v.bilanCell}>
               <span className={v.sr}>{b.nom}, {r.titre.toLowerCase()} : </span>
-              {b[r.cle].length ? (r.cle === "pasLu" ? <span className={v.nonLu}>{b[r.cle].join(", ")}</span> : <ul>{b[r.cle].map((x) => <li key={x}>{lier(x)}</li>)}</ul>) : <span className={v.nonLu}>{r.cle === "pasLu" ? "tout est lu" : b.lus < b.total ? "aucun, parmi ce qui est lu" : "aucun"}</span>}
+              {b[r.cle].length ? (r.cle === "pasLu" ? <span className={v.nonLu}>{b[r.cle].join(", ")}</span> : <ul>{b[r.cle].map((x) => <li key={x}>{lier(x)}</li>)}</ul>) : <span className={v.nonLu}>{r.cle === "pasLu" ? "toutes examinées" : b.lus < b.total ? "aucun, parmi ce qui est examiné" : "aucun"}</span>}
             </div>
           ))}
         </div>
@@ -191,32 +199,53 @@ function Bilans({ bilans, api, montres }: { bilans: Bilan[]; api: Api5; montres:
 }
 
 /**
- * ET SI, PRÈS DE LA COMPARAISON (essai limité, piste 3 de la revue Work) : la condition sans compromis
- * à seuil, une autre valeur, et ce que cela changerait pour les seules possibilités affichées. Replié par
- * défaut ; rien n'est modifié ici. Adopter se fait dans Mon Projet.
+ * ET SI, PRÈS DE LA COMPARAISON (essai limité, pistes de la revue Work) : une autre limite pour la
+ * condition sans compromis, ou une priorité qui deviendrait sans compromis, et ce que cela changerait
+ * pour les seules possibilités affichées. Replié par défaut ; rien n'est modifié ici. Adopter se fait
+ * dans Mon Projet.
  */
 function EtSiIci({ api, montres }: { api: Api5; montres: Piste[] }) {
   const { etat, aller } = api;
   const k = etat.projet.criteres.find((c) => c.nature === "sans_compromis" && c.valeur != null);
+  const prios = etat.projet.criteres.filter((c) => c.nature === "priorite");
   const choix = [15, 20, 30, 40].filter((x) => x !== k?.valeur);
+  const [essai, setEssai] = useState<string>(k ? "limite" : prios[0]?.cle ?? "");
   const [val, setVal] = useState<number>(choix.find((x) => x > (k?.valeur ?? 0)) ?? choix[0]!);
-  if (!k) return null;
   const ids = new Set(montres.map((p) => (p.type === "commune" ? `c:${p.commune.insee}` : p.logement.id)));
-  const res = etSi5(etat, k.cle, val).filter((x) => ids.has(x.pisteId));
+  const logements = montres.filter((p): p is { type: "logement"; logement: Logement } => p.type === "logement").map((p) => p.logement);
   const ordre: SeauEtSi[] = ["pourrait_changer", "nouvelle_analyse", "inchange", "pas_lu"];
+  const prio = prios.find((c) => c.cle === essai);
+  const res = essai === "limite" && k ? etSi5(etat, k.cle, val).filter((x) => ids.has(x.pisteId)) : [];
+  const effets = prio ? simuler(logements, etat.projet, { type: "nature", cle: prio.cle, nature: "sans_compromis" }).effets : [];
+  if (!k && !prios.length) return null;
   return (
     <details className={`${s.details} ${v.etSiIci}`}>
-      <summary>Et si votre limite pour {NOM_CRITERE[k.cle].toLowerCase()} changeait ?</summary>
+      <summary>Et si vos conditions changeaient ?</summary>
       <div className={v.etSiCorps}>
         <p className={v.simulation}>Essai · votre Projet n&apos;est pas modifié</p>
-        <label className={v.champ}><span className={s.etiquette}>Au lieu de {k.valeur} min</span>
-          <select value={val} onChange={(e) => setVal(Number(e.target.value))}>{choix.map((x) => <option key={x} value={x}>{x} min</option>)}</select>
+        <label className={v.champ}><span className={s.etiquette}>Essayer</span>
+          <select value={essai} onChange={(e) => setEssai(e.target.value)}>
+            {k ? <option value="limite">une autre limite pour {NOM_CRITERE[k.cle].toLowerCase()}</option> : null}
+            {prios.map((c) => <option key={c.cle} value={c.cle}>{NOM_CRITERE[c.cle].toLowerCase()} sans compromis</option>)}
+          </select>
         </label>
-        {ordre.map((sx) => {
-          const xs = res.filter((x) => x.seau === sx);
-          return xs.length ? <div key={sx} className={v.seau} data-seau={sx}><p className={v.seauTitre}>{TITRE_SEAU5[sx]}</p><ul>{xs.map((x) => <li key={x.pisteId}><strong className={s.encre}>{x.nom}</strong> · {lier(x.raison)}</li>)}</ul></div> : null;
-        })}
-        <p className={s.nuance}>Une mesure permet d&apos;écrire « pourrait » ; seule une analyse mise à jour dirait « tient ». <button type="button" className={v.lien} onClick={() => aller({ ecran: "projet", ancre: "et-si" })}>Essayer d&apos;autres changements, ou adopter « {libelleCritere({ ...k, valeur: val }).toLowerCase()} », dans Mon Projet</button></p>
+        {essai === "limite" && k ? (
+          <>
+            <label className={v.champ}><span className={s.etiquette}>Au lieu de {k.valeur} min</span>
+              <select value={val} onChange={(e) => setVal(Number(e.target.value))}>{choix.map((x) => <option key={x} value={x}>{x} min</option>)}</select>
+            </label>
+            {ordre.map((sx) => {
+              const xs = res.filter((x) => x.seau === sx);
+              return xs.length ? <div key={sx} className={v.seau} data-seau={sx}><p className={v.seauTitre}>{TITRE_SEAU5[sx]}</p><ul>{xs.map((x) => <li key={x.pisteId}><strong className={s.encre}>{x.nom}</strong> · {lier(x.raison)}</li>)}</ul></div> : null;
+            })}
+          </>
+        ) : prio ? (
+          <div className={v.seau} data-seau="pourrait_changer">
+            <p className={v.seauTitre}>Si {NOM_CRITERE[prio.cle].toLowerCase()} devenait une condition sans compromis</p>
+            {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Parmi ce qui est lu, aucune de ces possibilités n&apos;y est un compromis : rien ne changerait de côté, d&apos;après leurs analyses.</p>}
+          </div>
+        ) : null}
+        <p className={s.nuance}>Une mesure ou une issue connue permet d&apos;écrire « pourrait » ; seule une analyse mise à jour dirait « tient ». <button type="button" className={v.lien} onClick={() => aller({ ecran: "projet", ancre: "et-si" })}>Adopter un changement dans Mon Projet</button></p>
       </div>
     </details>
   );
