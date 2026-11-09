@@ -43,7 +43,7 @@ const cas = process.argv[3];
 if (cas === "doc-expire") { await seed(-60); await aller("/rapport", "doc"); }
 if (cas === "doc-valide") { await seed(3600); await aller("/rapport", "doc"); }
 if (cas === "parcours-doc") { await seed(-60); await aller("/rapport/quartier", "doc"); await aller("/pourquoi", "doc"); await aller("/rapport", "doc"); }
-if (cas === "parcours-expire-sur-public") { await seed(3600); await aller("/rapport/quartier", "doc"); const s = await seed(-60); await aller("/pourquoi", "doc"); await aller("/rapport", "doc"); }
+if (cas === "parcours-expire-sur-public") { await seed(3600); await aller("/rapport/quartier", "doc"); await seed(-60); await aller("/pourquoi", "doc"); await aller("/rapport", "doc"); }
 if (cas === "parcours-rsc") { await seed(-60); await aller("/rapport/quartier", "rsc"); await aller("/pourquoi", "rsc"); await aller("/rapport", "rsc"); }
 if (cas === "rsc-expire") { await seed(-60); await aller("/rapport", "rsc"); }
 if (cas === "course") {

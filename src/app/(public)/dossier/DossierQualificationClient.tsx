@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import posthog from "posthog-js";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import type { BanAddressResult } from "@/lib/ban";
@@ -96,19 +96,23 @@ function MatterRow({ label, text, tone }: { label: string; text: string; tone: "
   );
 }
 
+// L'adresse ne change pas sans recharger cette page : rien à écouter.
+const sansAbonnement = () => () => {};
+const lireCodeDeLancement = () => new URLSearchParams(window.location.search).get("code")?.trim() ?? "";
+
 export function DossierQualificationClient() {
   // Le code de lancement porté par le lien d'invitation (`/dossier?code=BETA`). Il n'est ici qu'un
   // PASSAGER : rien ne l'interprète côté navigateur, `resolvePromo` tranche côté serveur, et un
   // code inventé ne change donc aucun montant.
   //
-  // LU AU MONTAGE PLUTÔT QUE PAR `useSearchParams`, et c'est une contrainte de cette page-ci :
+  // LU CÔTÉ CLIENT PLUTÔT QUE PAR `useSearchParams`, et c'est une contrainte de cette page-ci :
   // `/dossier` est publique et prérendue (elle porte le SEO de la porte par l'adresse). Le hook
   // aurait exigé une frontière `Suspense` et fait basculer la page en rendu dynamique, ce qui
   // coûterait son prérendu pour un paramètre qui ne sert qu'au clic, bien après la première peinture.
-  const [codeDeLancement, setCodeDeLancement] = useState("");
-  useEffect(() => {
-    setCodeDeLancement(new URLSearchParams(window.location.search).get("code")?.trim() ?? "");
-  }, []);
+  //
+  // `useSyncExternalStore` (FUT-121) : le prérendu et l'hydratation lisent `""`, puis React relit
+  // l'adresse côté client. Même séquence que l'ancien effet de montage, sans le rendu en cascade.
+  const codeDeLancement = useSyncExternalStore(sansAbonnement, lireCodeDeLancement, () => "");
   const [address, setAddress] = useState<BanAddressResult | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [busy, setBusy] = useState(false);

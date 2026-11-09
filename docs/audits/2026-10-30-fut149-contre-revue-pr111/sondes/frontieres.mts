@@ -53,7 +53,7 @@ sonde("5. Deux zones de profils différents de part et d'autre", construire({ "5
 // 6. Voisine partiellement couverte : zone voisine sur la moitié sud seulement ; sonde au nord (vraie limite) et au sud (coupe)
 const partiel = construire({ "50_435": [zoneOuest], "51_435": [{ p: 0, ring: rect(X1, Y0, X1 + 200_000, ymid) }] });
 sonde("6a. Voisine couverte au sud seulement — sonde au nord à 1 km de la jonction (vraie limite)", partiel, vraie, "x", ymid + 90_000);
-sonde("6b. idem — sonde au sud à 1 km de la jonction (coupe)", partiel, (c, d) => "en_zone", "x", ymid - 90_000);
+sonde("6b. idem — sonde au sud à 1 km de la jonction (coupe)", partiel, () => "en_zone", "x", ymid - 90_000);
 lignes.push("  (6b dehors : la zone voisine s'arrête à 1 km au nord, donc en_zone attendu partout)");
 // 6c. au droit de la jonction (point sur y=ymid) : limite nord de la zone voisine perpendiculaire
 sonde("6c. idem — au droit de la jonction (y = milieu)", partiel, (c, d) => c === "dehors" ? (d <= 50 ? "en_limite" : "en_limite") : (d <= 50 ? "en_limite" : "en_zone"), "x", ymid);

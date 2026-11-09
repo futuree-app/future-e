@@ -95,8 +95,13 @@ export function LandingComparatorInput() {
             onKeyDown={handleKeyDown}
             autoComplete="off"
             aria-label="Nom de commune"
+            // Motif ARIA « combobox » (FUT-121) : `aria-expanded` n'est valide que sur ce rôle, et la
+            // liste qu'il ouvre est désignée par `aria-controls` quand elle est affichée.
+            role="combobox"
+            aria-autocomplete="list"
             aria-expanded={open}
             aria-haspopup="listbox"
+            aria-controls={open && suggestions.length > 0 ? 'lm-commune-suggestions' : undefined}
           />
           {loading && (
             <span style={{
@@ -105,12 +110,13 @@ export function LandingComparatorInput() {
             }}>…</span>
           )}
           {open && suggestions.length > 0 && (
-            <div className="lm-dropdown" role="listbox">
+            <div className="lm-dropdown" role="listbox" id="lm-commune-suggestions">
               {suggestions.map((c) => (
                 <button
                   key={c.code}
                   className="lm-row"
                   role="option"
+                  aria-selected={selected?.code === c.code}
                   onMouseDown={(e) => { e.preventDefault(); handleSelect(c); }}
                 >
                   <span className="lm-row-name">{c.nom}</span>

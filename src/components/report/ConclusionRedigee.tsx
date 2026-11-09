@@ -141,16 +141,20 @@ export async function ConclusionRedigee({
   const toStore = blocks
     .filter((b) => generableKeys.has(b.key))
     .map((b) => ({ key: b.key as string, text: b.text }));
+  //    Le `try` ne fait que persister et relire : le rendu vient après (FUT-121). Une erreur levée
+  //    pendant le rendu d'un composant n'est de toute façon jamais attrapée par un `try` qui entoure
+  //    son JSX ; seule la frontière d'erreur le peut.
+  let canonicalBlocks: typeof blocks | null = null;
   try {
     const canonical = await saveNarrative(
       supabase, user.id, insee, scopeKey, inputHash, toStore,
       DECISION_NARRATIVE_PROMPT_VERSION, DECISION_NARRATIVE_MODEL,
     );
     await pruneNarratives(supabase, user.id, insee, scopeKey, 3);
-    const { blocks: canonicalBlocks } = validateGeneratedBlocks(plan, canonical);
-    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
+    canonicalBlocks = validateGeneratedBlocks(plan, canonical).blocks;
   } catch (error) {
     console.error("[dossier-narrative] persistance échouée", { insee, scopeKey, error });
-    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
   }
+  if (canonicalBlocks) return <ConclusionBlock plan={plan} blocks={canonicalBlocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
+  return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
 }

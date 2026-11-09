@@ -32,7 +32,7 @@ register(`data:text/javascript,${encodeURIComponent(`export async function resol
   if (s.startsWith("@/")) return n(${JSON.stringify(racine)} + "src/" + s.slice(2) + ".ts", c);
   return n(s, c);
 }`)}`);
-const { client, envoyer, basculer, purger, etat, RefusPublication } = await import(`${W}/scripts/debroussaillement/publier.mjs`);
+const { client, envoyer, basculer, purger, etat } = await import(`${W}/scripts/debroussaillement/publier.mjs`);
 const lecteur = await import(`${W}/src/lib/server/debroussaillement-tuiles.ts`);
 const lib = await import(`${W}/src/lib/debroussaillement.ts`);
 

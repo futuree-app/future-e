@@ -9,10 +9,9 @@ const hook = readFileSync('src/lib/fut81-urbanisme-parcelle.test.ts','utf8').mat
 const racine = pathToFileURL(root+'/').href;
 const hookText = Function('racine', 'return `'+hook+'`')(racine);
 register('data:text/javascript,'+encodeURIComponent(hookText));
-const {lireUrbanisme,couvre} = await import(pathToFileURL(root+'/src/lib/urbanisme-parcelle.ts'));
+const {lireUrbanisme} = await import(pathToFileURL(root+'/src/lib/urbanisme-parcelle.ts'));
 // ADAPTATION APRÈS CORRECTION : les deux mesures supprimées sont rejouées par la sortie métier.
 const partsDansParcelle=(parcelle,geoms)=>geoms.map(g=>{const u=lireUrbanisme({point:[2,46],...base,parcelle:{geometry:parcelle,contenance:null,rattachement:'point'},zones:[feat(parcelle,{libelle:'P'})],prescriptions:{surface:[feat(g,{typepsc:'01',stypepsc:'00',libelle:'mesure'})],ligne:[],point:[]}});return u.prescriptions[0]?.part ?? 0;});
-const traverseParcelle=()=>null;
 const {sourcesAbsentes,issueActualisation} = await import(pathToFileURL(root+'/src/lib/logement-report-version.ts'));
 const require = createRequire(root+'/package.json');
 const {createElement} = require('react');
@@ -26,7 +25,7 @@ const p=rect(0,0,100,100);
 const feat=(geometry,extra={})=>({geometry,properties:{gpu_doc_id:doc,...extra}});
 const base={point:xy(50,50),parcelle:{geometry:p,contenance:10000,rattachement:'point'},municipality:[{properties:{is_rnu:false}}],documents:[feat(null,{du_type:'PLU'})],zones:[feat(p,{libelle:'UA',typezone:'U'})],secteurs:[],prescriptions:{surface:[],ligne:[],point:[]},details:{[doc]:{effectiveStatus:'EN_VIGUEUR',legalStatus:'APPROVED'}},fichiers:{[doc]:[]}};
 const text=h=>h.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
-const render=(u,repli=false)=>renderToStaticMarkup(createElement(UrbanismeBlock,{urbanisme:u,parcelCode:'PARCELLE-TEST',withDivider:false}));
+const render=(u)=>renderToStaticMarkup(createElement(UrbanismeBlock,{urbanisme:u,parcelCode:'PARCELLE-TEST',withDivider:false}));
 const result={sha:'992af92fd4c23eece89b5c39ec465fcd2b3099c0',geometry:[],failures:[],witnesses:[]};
 const report=(name,value)=>result.failures.push({name,...value});
 for(const [name,g,exact,area] of [

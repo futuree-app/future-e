@@ -2,7 +2,6 @@ const fs=require('node:fs');
 const path=require('node:path');
 const os=require('node:os');
 const vm=require('node:vm');
-const cp=require('node:child_process');
 const assert=require('node:assert/strict');
 const root=process.cwd();
 const before=path.resolve('../future-e');

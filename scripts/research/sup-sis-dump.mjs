@@ -9,7 +9,7 @@
  *   node scripts/research/sup-sis-dump.mjs --out tmp/fil/sup-sis-communes.json
  */
 
-import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 const args = Object.fromEntries(

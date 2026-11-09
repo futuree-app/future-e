@@ -85,7 +85,7 @@ function Signal({ icon, headline, stat, precision, source }: SignalContent) {
 
 export function WizardTeaser({
   answers,
-  context: _context,
+  // `context` est reçu sans encore servir (cf. ReportWizard) : il reste dans le type, pas dans le corps.
   inseeCode,
   onRestart,
 }: {

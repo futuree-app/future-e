@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ReportWizard } from '@/components/wizard/ReportWizard';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -332,6 +332,10 @@ export default function FutureELanding() {
   // indicateurs + tensions. restoringRef coupe le scroll auto (pas de saut au
   // chargement). Lecture en effet (jamais au SSR) → pas de mismatch d'hydratation.
   const didRestoreRef = useRef(false);
+  // `loadCommuneTensions` est recréée à chaque rendu : la citer en dépendance relancerait cet effet
+  // (et la purge différée qu'il applique) à chaque rendu tant qu'aucune commune n'est restaurée.
+  // Un événement d'effet lit sa version courante sans en faire une dépendance (FUT-121).
+  const restaurerCommune = useEffectEvent((saved) => loadCommuneTensions(saved));
   useEffect(() => {
     if (didRestoreRef.current || tensionsCatalog.length === 0 || selectedCommune) return;
     let saved: { name?: string; citycode?: string } | null = null;
@@ -344,7 +348,7 @@ export default function FutureELanding() {
     didRestoreRef.current = true;
     restoringRef.current = true;
     setCommuneFieldOpen(true);
-    loadCommuneTensions(saved);
+    restaurerCommune(saved);
   }, [tensionsCatalog, selectedCommune]);
 
   // Seconde voie du hero : révèle le champ commune (replié par défaut) et y place

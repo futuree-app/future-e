@@ -325,7 +325,7 @@ async function main() {
     const { error: upsertErr } = await supabase
       .from('communes_tension')
       .upsert(
-        batch.map(({ altitude_m: _, ...r }) => r),
+        batch.map((r) => { const ligne = { ...r }; delete ligne.altitude_m; return ligne; }),
         { onConflict: 'slug,insee_code', ignoreDuplicates: false },
       );
 

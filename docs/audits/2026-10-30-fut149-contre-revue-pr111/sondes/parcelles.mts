@@ -1,6 +1,6 @@
 const W = process.argv[2];
 const { lireDebroussaillement, FORMAT_TUILES_DEBROUSSAILLEMENT: FORMAT } = await import(`${W}/src/lib/debroussaillement.ts`);
-const PAS = 1_000_000, IX = 50, IY = 435, X1 = (IX + 1) * PAS;
+const PAS = 1_000_000, IX = 50, IY = 435;
 const LAT = 43.55, mLon = 1 / (111320 * Math.cos(LAT * Math.PI / 180)), mLat = 1 / 111132;
 const code = (r: number[][]) => { const o = [r[0][0], r[0][1]]; for (let i = 1; i < r.length; i++) o.push(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]); return o; };
 // Zone : ouest de la droite x = 5,07 (vraie limite NON alignée), dans la cellule 50_435

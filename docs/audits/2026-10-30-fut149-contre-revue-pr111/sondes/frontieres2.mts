@@ -49,7 +49,7 @@ const lire = (w: ReturnType<typeof monde>, lon: number, lat: number, parcelle: u
 const D = [1, 5, 10, 20, 49, 55, 100];
 const lignes: string[] = [];
 let ok = 0, ecarts = 0;
-const verifier = (r: string, a: string) => { const bon = r.startsWith(a); bon ? ok++ : ecarts++; return bon ? "OK " : "ÉCART"; };
+const verifier = (r: string, a: string) => { const bon = r.startsWith(a); if (bon) ok++; else ecarts++; return bon ? "OK " : "ÉCART"; };
 const sonde = (titre: string, w: ReturnType<typeof monde>, attendu: (cote: string, d: number) => string, axe: "x" | "y" = "x", y = ymid) => {
   lignes.push(`\n## ${titre}`);
   for (const cote of ["dedans", "dehors"]) for (const d of D) {
