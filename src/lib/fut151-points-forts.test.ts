@@ -83,7 +83,7 @@ function clesNegatives(texte: string | null, c: M): string[] {
 }
 // Les traits distinctifs qui louent une priorité (cf. `key` dans buildDistinctive).
 const DISTINCTIF: [RegExp, string][] = [
-  [/^la plus entourée d'espaces naturels/, "nature"],
+  [/^la plus riche des (deux|trois) en espaces naturels ou en eau dans son secteur$/, "nature"],
   [/^le meilleur accès aux médecins/, "acces_soins"],
   [/^le bassin d'emploi le plus dynamique/, "viabilite_emploi"],
   [/^les étés les plus supportables/, "faible_chaleur"],

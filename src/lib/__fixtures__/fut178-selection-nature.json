@@ -1,0 +1,224 @@
+{
+ "_source": "docs/audits/2026-11-09-fut178-verif-nature.py --fixture (cache OSO 2023 de populate-nature.py)",
+ "communes": 34743,
+ "ecart_index": 0,
+ "seules": [
+  {
+   "insee": "13004",
+   "nom": "Arles",
+   "radius_pct": 66.1,
+   "brut_pct": 66.1
+  },
+  {
+   "insee": "13096",
+   "nom": "Saintes-Maries-de-la-Mer",
+   "radius_pct": 91.3,
+   "brut_pct": 91.3
+  },
+  {
+   "insee": "85113",
+   "nom": "L'Île-d'Yeu",
+   "radius_pct": 71.2,
+   "brut_pct": 71.2
+  }
+ ],
+ "selection_incomplete": {
+  "total": 2465,
+  "ecart_median_pts": 0.2,
+  "ecart_max_pts": 4.8,
+  "echantillon": [
+   {
+    "insee": "67058",
+    "nom": "Bossendorf",
+    "retenues": 106,
+    "a_15_km": 109,
+    "radius_pct": 38.5,
+    "radius_pct_complet": 43.3
+   },
+   {
+    "insee": "67068",
+    "nom": "Buswiller",
+    "retenues": 92,
+    "a_15_km": 95,
+    "radius_pct": 48.2,
+    "radius_pct_complet": 52.4
+   },
+   {
+    "insee": "68173",
+    "nom": "Labaroche",
+    "retenues": 53,
+    "a_15_km": 54,
+    "radius_pct": 80.0,
+    "radius_pct_complet": 75.9
+   },
+   {
+    "insee": "67286",
+    "nom": "Meistratzheim",
+    "retenues": 76,
+    "a_15_km": 78,
+    "radius_pct": 44.3,
+    "radius_pct_complet": 47.8
+   },
+   {
+    "insee": "67150",
+    "nom": "Furdenheim",
+    "retenues": 108,
+    "a_15_km": 110,
+    "radius_pct": 29.2,
+    "radius_pct_complet": 32.6
+   },
+   {
+    "insee": "28248",
+    "nom": "Le Mesnil-Thomas",
+    "retenues": 40,
+    "a_15_km": 41,
+    "radius_pct": 34.7,
+    "radius_pct_complet": 37.9
+   },
+   {
+    "insee": "67363",
+    "nom": "Osthoffen",
+    "retenues": 103,
+    "a_15_km": 105,
+    "radius_pct": 32.8,
+    "radius_pct_complet": 35.7
+   },
+   {
+    "insee": "60375",
+    "nom": "Maimbeville",
+    "retenues": 88,
+    "a_15_km": 91,
+    "radius_pct": 27.3,
+    "radius_pct_complet": 30.0
+   },
+   {
+    "insee": "44138",
+    "nom": "Puceul",
+    "retenues": 15,
+    "a_15_km": 16,
+    "radius_pct": 58.4,
+    "radius_pct_complet": 61.0
+   },
+   {
+    "insee": "67441",
+    "nom": "Schalkendorf",
+    "retenues": 91,
+    "a_15_km": 93,
+    "radius_pct": 56.0,
+    "radius_pct_complet": 58.6
+   },
+   {
+    "insee": "63461",
+    "nom": "Vinzelles",
+    "retenues": 40,
+    "a_15_km": 41,
+    "radius_pct": 61.1,
+    "radius_pct_complet": 63.6
+   },
+   {
+    "insee": "36040",
+    "nom": "La Chapelle-Orthemale",
+    "retenues": 17,
+    "a_15_km": 18,
+    "radius_pct": 59.6,
+    "radius_pct_complet": 62.0
+   },
+   {
+    "insee": "14046",
+    "nom": "Bavent",
+    "retenues": 74,
+    "a_15_km": 79,
+    "radius_pct": 55.3,
+    "radius_pct_complet": 53.0
+   },
+   {
+    "insee": "51281",
+    "nom": "Grauves",
+    "retenues": 56,
+    "a_15_km": 58,
+    "radius_pct": 41.1,
+    "radius_pct_complet": 41.9
+   },
+   {
+    "insee": "54110",
+    "nom": "Cerville",
+    "retenues": 82,
+    "a_15_km": 83,
+    "radius_pct": 56.4,
+    "radius_pct_complet": 56.9
+   },
+   {
+    "insee": "60483",
+    "nom": "Orvillers-Sorel",
+    "retenues": 97,
+    "a_15_km": 100,
+    "radius_pct": 25.4,
+    "radius_pct_complet": 25.0
+   },
+   {
+    "insee": "08086",
+    "nom": "Briquenay",
+    "retenues": 58,
+    "a_15_km": 59,
+    "radius_pct": 68.7,
+    "radius_pct_complet": 68.4
+   },
+   {
+    "insee": "34075",
+    "nom": "Cesseras",
+    "retenues": 43,
+    "a_15_km": 44,
+    "radius_pct": 67.3,
+    "radius_pct_complet": 67.5
+   },
+   {
+    "insee": "59558",
+    "nom": "Saulzoir",
+    "retenues": 102,
+    "a_15_km": 104,
+    "radius_pct": 21.0,
+    "radius_pct_complet": 20.8
+   },
+   {
+    "insee": "74260",
+    "nom": "Savigny",
+    "retenues": 63,
+    "a_15_km": 64,
+    "radius_pct": 82.8,
+    "radius_pct_complet": 82.9
+   },
+   {
+    "insee": "62437",
+    "nom": "Herly",
+    "retenues": 83,
+    "a_15_km": 85,
+    "radius_pct": 42.1,
+    "radius_pct_complet": 42.2
+   },
+   {
+    "insee": "89189",
+    "nom": "Gisy-les-Nobles",
+    "retenues": 57,
+    "a_15_km": 58,
+    "radius_pct": 30.8,
+    "radius_pct_complet": 30.9
+   },
+   {
+    "insee": "02403",
+    "nom": "Landifay-et-Bertaignemont",
+    "retenues": 68,
+    "a_15_km": 70,
+    "radius_pct": 16.9,
+    "radius_pct_complet": 16.9
+   },
+   {
+    "insee": "59368",
+    "nom": "La Madeleine",
+    "retenues": 83,
+    "a_15_km": 86,
+    "radius_pct": 26.3,
+    "radius_pct_complet": 26.3
+   }
+  ]
+ }
+}

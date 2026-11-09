@@ -54,14 +54,19 @@ before(async () => {
 const REF = JSON.parse(
   readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8")
     .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas")
-    // FUT-178 : les libellés de la nature disent un couvert de la commune ET de ses voisines, ni « forêts », ni
-    // « grands espaces », ni « ses » espaces naturels, ni les abords d'un « lieu de vie ». Seuls ces libellés changent.
-    .replaceAll("la plus proche de grands espaces naturels", "la plus entourée d'espaces naturels")
-    .replaceAll("forêts et espaces naturels à proximité", "beaucoup d'espaces naturels alentour")
-    .replaceAll("peu d'espaces naturels à proximité", "peu d'espaces naturels alentour")
-    .replaceAll("nature présente, sans abonder", "nature présente alentour, sans abonder")
-    .replaceAll("se distingue par ses espaces naturels", "se distingue par les espaces naturels qui l'entourent")
-    .replaceAll("La présence d'espaces naturels autour du lieu de vie.", "La part d'espaces naturels dans la commune et ses voisines (centres à moins de 15 km), pas aux abords d'une adresse."),
+    // FUT-178 : les libellés de la nature disent le SECTEUR (la commune et ses voisines retenues, parfois aucune), eau
+    // comprise, ni « forêts », ni « grands espaces », ni « autour », ni un « lieu de vie ». Seuls ces libellés changent.
+    .replace(/la plus proche de grands espaces naturels des (deux|trois)/g, "la plus riche des $1 en espaces naturels ou en eau dans son secteur")
+    .replaceAll("forêts et espaces naturels à proximité", "beaucoup d'espaces naturels ou d'eau dans le secteur")
+    .replaceAll("peu d'espaces naturels à proximité", "peu d'espaces naturels ou d'eau dans le secteur")
+    .replaceAll("nature présente, sans abonder", "nature présente dans le secteur, sans abonder")
+    .replaceAll("se distingue par ses espaces naturels", "se distingue par les espaces naturels et l'eau de son secteur")
+    .replaceAll("Beaucoup de nature autour", "Beaucoup de nature dans le secteur")
+    .replaceAll("Peu de nature autour", "Peu de nature dans le secteur")
+    .replaceAll("davantage de nature autour", "davantage d'espaces naturels ou d'eau dans le secteur")
+    .replaceAll("présence de nature intermédiaire", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur")
+    .replaceAll("moins de nature autour", "moins d'espaces naturels ou d'eau dans le secteur")
+    .replaceAll("La présence d'espaces naturels autour du lieu de vie.", "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse."),
 );
 const BASE = [{ key: "eviter_isolement", weight: 0.5, baseline: true }, { key: "viabilite_emploi", weight: 0.5, baseline: true }];
 // Les mêmes entrées que la capture (scripts/fut147/capturer-reference.mjs), recopiées : la référence ne

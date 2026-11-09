@@ -1,10 +1,12 @@
 // FUT-178 : LE SIGNAL DE NATURE ENVIRONNANTE DIT SA PORTÉE RÉELLE.
 //
-// `nature.score` / `nature.radius_pct` (scripts/populate-nature.py, OSO 2023) agrègent le couvert naturel de communes
-// ENTIÈRES retenues parce que leur centre (lat/lon de l'index) est à 15 km au plus de celui de la commune, elle
-// comprise. Ce n'est ni la commune seule (`nature.brut_pct`), ni un cercle de 15 km, ni les abords d'une adresse.
-// Recalcul du 09/11/2026 (docs/audits/2026-11-09-fut178-portee-nature.md) : 0 écart sur 34 743 communes ; 3 communes
-// n'ont qu'elles-mêmes dans leur « rayon » ; la grille de recherche omet des voisines à ≤ 15 km pour 2 465 communes.
+// `nature.score` / `nature.radius_pct` (scripts/populate-nature.py, OSO 2023) agrègent le couvert naturel d'un
+// SECTEUR : la commune et, quand elles sont retenues, des communes voisines ENTIÈRES dont le centre (lat/lon de
+// l'index) est à 15 km au plus du sien. Ce n'est ni la commune seule (`nature.brut_pct`), ni un cercle de 15 km, ni
+// les abords d'une adresse. Recalcul du 09/11/2026 (docs/audits/2026-11-09-fut178-verif-nature.py, référence figée
+// dans __fixtures__/fut178-selection-nature.json) : 0 écart sur 34 743 communes ; 3 communes n'ont qu'elles-mêmes
+// dans leur secteur ; la grille du précalcul omet des voisines à ≤ 15 km pour 2 465 communes (FUT-182 corrigera).
+// L'eau y est comptée (FUT-175 ne l'a retirée que des parts communales de Territoire).
 //
 // On vérifie ce que les surfaces RACONTENT (pas seulement qu'elles apparaissent), sur l'index réel. Aucun appel au modèle.
 import { test, before } from "node:test";
@@ -15,6 +17,12 @@ import { pathToFileURL } from "node:url";
 import { MISMATCH_RULES } from "./decision/mismatch-rules.ts";
 import { ALIGNMENT_RULES } from "./decision/alignment-rules.ts";
 import { MISMATCH_LABELS, ALIGNMENT_LABELS } from "./decision/mismatch-facts.ts";
+import { getCommuneDistinctive } from "./trait-distinctif.ts";
+import { synthesisFacts, type FactsSnapshot } from "./facts/contract.ts";
+import { buildTerritoireSnapshot, type TerritoireInputs } from "./territoire/facts.ts";
+import { factOf } from "./facts/contract.ts";
+import { buildTerritoryCards } from "./territory-identity.ts";
+import { chatelaillonInputs } from "./territoire/__fixtures__/chatelaillon.ts";
 import type { ModuleFacts } from "./decision/decision-fact.ts";
 import type { UserProject } from "./user-project.ts";
 
@@ -40,72 +48,165 @@ type Moteur = {
 const moteur = async () => (await import(`${racine}src/lib/comparateur-vie.ts`)) as Moteur;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-// Ce qu'aucune phrase de la nature environnante ne doit plus dire.
-const INTERDIT = /territoire peu naturel|caractère naturel|rayon de 15 km|grands espaces|accès aux espaces naturels|forêts et espaces|lieu de vie|urbanis/i;
+type Selection = {
+  communes: number; ecart_index: number;
+  seules: { insee: string; nom: string; radius_pct: number; brut_pct: number }[];
+  selection_incomplete: { total: number; ecart_median_pts: number; ecart_max_pts: number; echantillon: { insee: string; nom: string; retenues: number; a_15_km: number; radius_pct: number; radius_pct_complet: number }[] };
+};
+const SELECTION = JSON.parse(readFileSync("src/lib/__fixtures__/fut178-selection-nature.json", "utf8")) as Selection;
 
-const CHATELAILLON = "17094", BONY = "02100", JANVILLE = "28199", CORTE = "2B096", BORDEAUX = "33063", LILLE = "59350", SAINTES_MARIES = "13096";
+// Ce qu'aucune phrase de la nature environnante ne doit plus dire : une commune « entourée », un « alentour » ou un
+// « autour » qu'une sélection vide dément, un cercle, des forêts, un accès, une urbanisation, une affirmation sur les cultures.
+const INTERDIT = /territoire peu naturel|caractère naturel|rayon de 15 km|dans un rayon|cercle exact|grands espaces|accès aux espaces naturels|forêts et espaces|lieu de vie|urbanisée?s?\b|alentour|entourée|\bautour\b|tient le plus souvent|le plus souvent des cultures/i;
+// Ce qu'une phrase sur un niveau BAS ne peut pas affirmer : une ville, ou une cause certaine.
+const BAS_INTERDIT = /\bville\b|urbain|bâti|béton|artificialis|cultures, pas|signifie/i;
 
-test("Châtelaillon-Plage : le couvert de la commune et celui des alentours sont deux mesures distinctes, et le signal ne prend que la seconde", async () => {
+const CHATELAILLON = "17094", BONY = "02100", JANVILLE = "28199", CORTE = "2B096", BORDEAUX = "33063", LILLE = "59350";
+const SAINTES_MARIES = "13096", SETE = "34301", ARLES = "13004", YEU = "85113";
+
+/** Tout le texte d'un signal transmis au modèle de /qna. */
+const texteSignal = (s: Record<string, string>) => Object.values(s).join(" ");
+
+test("la référence de sélection est celle du recalcul : 3 communes seules, 2 465 sélections incomplètes, 0 écart", () => {
+  assert.equal(SELECTION.communes, 34743);
+  assert.equal(SELECTION.ecart_index, 0);
+  assert.deepEqual(SELECTION.seules.map((s) => s.insee), [ARLES, SAINTES_MARIES, YEU]);
+  assert.equal(SELECTION.selection_incomplete.total, 2465);
+  assert.ok(SELECTION.selection_incomplete.ecart_max_pts <= 5);
+  assert.equal(SELECTION.selection_incomplete.echantillon.length, 24);
+});
+
+test("Châtelaillon-Plage : 36,5 % (index, eau comprise), 36,4 % des terres (Territoire, FUT-175), 27,9 % du secteur ; le signal ne prend que le rang du dernier, sans chiffre", async () => {
   const m = await moteur();
   const c = await m.getCommuneEntry(CHATELAILLON);
-  // Les deux chiffres de l'index : 36,5 % dans la commune, 27,9 % avec les voisines. Le rang (8) suit le second.
+  // Trois mesures distinctes, jamais confondues : l'index (eau comprise), Territoire (terres, eau à part), le secteur.
   assert.equal(c.nature.brut_pct, 36.5);
   assert.equal(c.nature.radius_pct, 27.9);
   assert.equal(c.nature.score, 8);
+  const i: TerritoireInputs = chatelaillonInputs();
+  i.entry = { ...i.entry!, nature: { brut_pct: c.nature.brut_pct, radius_pct: c.nature.radius_pct, composition: c.nature.composition } };
+  const snap = buildTerritoireSnapshot(i, "2026-11-09T00:00:00.000Z");
+  assert.equal(factOf(snap, "land.natural_share")!.value, 36.4, "Territoire lit la part des TERRES, pas le brut_pct de l'index");
+  const carte = buildTerritoryCards(snap).couvertNaturel!;
+  assert.equal(carte.naturelTerresPct, 36);
+  assert.equal(carte.radiusPct, 28);
+
   const s = m.buildTerritorySignals(c);
   assert.equal(s.nature, undefined, "l'ancien signal sans périmètre ne part plus au modèle");
-  assert.equal(s.espaces_naturels_alentour.niveau, "peu d'espaces naturels alentour");
-  assert.match(s.espaces_naturels_alentour.perimetre, /^la commune et les communes voisines dont le centre est à moins d'une quinzaine de kilomètres du sien$/);
-  assert.match(s.espaces_naturels_alentour.ne_dit_pas, /commune seule/);
-  assert.match(s.espaces_naturels_alentour.ne_dit_pas, /adresse/);
-  // Aucun chiffre ne passe : ni 36,5 ni 27,9 ne peuvent être attribués à la mauvaise échelle, et le contrôle de /qna
+  assert.equal(s.espaces_naturels_alentour, undefined, "ni la version « alentour » de la première revue");
+  const sig = s.espaces_naturels_secteur;
+  assert.equal(sig.niveau, "peu d'espaces naturels ou d'eau dans le secteur");
+  assert.match(sig.perimetre, /^le secteur : la commune et, quand elles sont retenues, des communes voisines entières dont le centre est à moins d'une quinzaine de kilomètres du sien ; la sélection peut en oublier, et certaines communes n'en ont aucune$/);
+  assert.match(sig.composition, /aussi l'eau \(mer, étangs, lacs, rivières\)/);
+  assert.match(sig.ne_dit_pas, /ni la commune seule, ni les abords d'une adresse, ni des espaces uniquement terrestres ou végétalisés/);
+  // Aucun chiffre : ni 36,5, ni 36,4, ni 27,9 ne peuvent être attribués à la mauvaise échelle, et le contrôle de /qna
   // rejetterait un « 15 km » non sourcé.
-  assert.doesNotMatch(JSON.stringify(s.espaces_naturels_alentour), /\d/);
+  assert.doesNotMatch(JSON.stringify(sig), /\d/);
+  assert.doesNotMatch(texteSignal(sig), INTERDIT);
 });
 
-test("Bony et Janville-en-Beauce : peu d'espaces naturels alentour, jamais une commune urbanisée ni « peu naturelle »", async () => {
+test("Arles, Saintes-Maries-de-la-Mer, L'Île-d'Yeu : un secteur réduit à la commune n'est jamais dit « alentour » ni « entouré »", async () => {
+  const m = await moteur();
+  for (const { insee, nom, radius_pct, brut_pct } of SELECTION.seules) {
+    const c = await m.getCommuneEntry(insee);
+    // Le chiffre publié est celui de la commune seule : secteur = commune.
+    assert.equal(c.nature.radius_pct, radius_pct, nom);
+    assert.equal(radius_pct, brut_pct, nom);
+    const sig = m.buildTerritorySignals(c).espaces_naturels_secteur;
+    assert.match(sig.niveau, /dans le secteur$/, nom);
+    assert.match(sig.perimetre, /certaines communes n'en ont aucune/, nom);
+    assert.doesNotMatch(texteSignal(sig), INTERDIT, nom);
+  }
+  // Saintes-Maries : 91,3 %, surtout de l'eau. Le niveau haut nomme l'eau ; le trait aussi.
+  const sm = await m.getCommuneEntry(SAINTES_MARIES);
+  assert.ok(sm.nature.composition.eau > 40, "Saintes-Maries : l'eau domine le couvert compté");
+  assert.equal(m.buildTerritorySignals(sm).espaces_naturels_secteur.niveau, "beaucoup d'espaces naturels ou d'eau dans le secteur");
+});
+
+test("sélection incomplète (échantillon de 24 des 2 465 communes) : l'index publie bien la sélection partielle, et les phrases ne promettent ni toutes les voisines ni un cercle", async () => {
+  const m = await moteur();
+  for (const e of SELECTION.selection_incomplete.echantillon) {
+    const c = await m.getCommuneEntry(e.insee);
+    assert.ok(c?.nature, e.nom);
+    assert.ok(e.a_15_km > e.retenues, e.nom);
+    // Le chiffre publié est celui des communes RETENUES, pas de toutes celles à 15 km : d'où « la sélection peut en oublier ».
+    assert.equal(c.nature.radius_pct, e.radius_pct, e.nom);
+    const sig = m.buildTerritorySignals(c).espaces_naturels_secteur;
+    assert.match(sig.perimetre, /quand elles sont retenues/, e.nom);
+    assert.match(sig.perimetre, /la sélection peut en oublier/, e.nom);
+    assert.doesNotMatch(texteSignal(sig), INTERDIT, e.nom);
+  }
+});
+
+test("Sète et Saintes-Maries : l'eau est nommée partout où le rang du secteur est dit", async () => {
+  const m = await moteur();
+  for (const insee of [SETE, SAINTES_MARIES]) {
+    const c = await m.getCommuneEntry(insee);
+    assert.ok(c.nature.composition.eau >= 20, `${c.nom} : une part d'eau importante dans le couvert compté`);
+    const sig = m.buildTerritorySignals(c).espaces_naturels_secteur;
+    assert.match(sig.niveau, /ou d'eau|ou eau/, c.nom);
+    assert.match(sig.composition, /l'eau/, c.nom);
+  }
+  const dim = m.DIMENSIONS.find((d) => d.id === "nature");
+  assert.match(dim.aide, /Espaces naturels et eau/);
+});
+
+test("Bony et Janville-en-Beauce : peu d'espaces naturels dans le secteur, jamais une urbanisation, et les cultures comme explication possible, pas certaine", async () => {
   const m = await moteur();
   for (const insee of [BONY, JANVILLE]) {
     const c = await m.getCommuneEntry(insee);
-    // Ce qui n'est pas naturel ici, ce sont des cultures (≈ 90 % de la commune), dans une commune peu dense.
+    // Ce qui n'est pas naturel dans la commune, ce sont des cultures (≈ 90 %), dans une commune peu dense.
     assert.ok(c.nature.composition.agricole >= 89, c.nom);
     assert.ok(c.densite < 100, c.nom);
-    const sig = m.buildTerritorySignals(c).espaces_naturels_alentour;
-    assert.equal(sig.niveau, "peu d'espaces naturels alentour", c.nom);
-    assert.doesNotMatch(sig.niveau + sig.perimetre, INTERDIT, c.nom);
-    assert.match(sig.ne_dit_pas, /cultures/);
-    assert.match(sig.ne_dit_pas, /jamais à lui seul une ville ou un territoire urbanisé/);
+    const sig = m.buildTerritorySignals(c).espaces_naturels_secteur;
+    assert.equal(sig.niveau, "peu d'espaces naturels ou d'eau dans le secteur", c.nom);
+    assert.doesNotMatch(sig.niveau + sig.perimetre, BAS_INTERDIT, c.nom);
+    assert.doesNotMatch(texteSignal(sig), INTERDIT, c.nom);
+    assert.match(sig.ne_dit_pas, /une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles$/);
+    // FUT-34 : le bas du couvert n'a pas de trait (Janville garde son trait démographique, Bony n'en a aucun).
+    assert.doesNotMatch(getCommuneDistinctive(c) ?? "", /espaces naturels|urbanis/, c.nom);
   }
 });
 
-test("des environnements contrastés reçoivent chacun le niveau de leur rang, toujours « alentour »", async () => {
+test("des environnements contrastés reçoivent chacun le niveau de leur rang, toujours « dans le secteur »", async () => {
   const m = await moteur();
   const attendu: Record<string, string> = {
-    [CORTE]: "beaucoup d'espaces naturels alentour", // 99,6 % alentour
-    [BORDEAUX]: "espaces naturels présents alentour", // 54 % alentour, 36,4 % dans la commune
-    [LILLE]: "peu d'espaces naturels alentour", // 27 % alentour, 82 % urbanisé dans la commune
-    [SAINTES_MARIES]: "beaucoup d'espaces naturels alentour", // surtout de l'eau : ni « forêts », ni « montagne »
+    [CORTE]: "beaucoup d'espaces naturels ou d'eau dans le secteur", // 99,6 % (surtout des landes : ni « forêts »)
+    [BORDEAUX]: "espaces naturels ou eau présents dans le secteur", // 54 % du secteur, 36,4 % dans la commune
+    [LILLE]: "peu d'espaces naturels ou d'eau dans le secteur", // 27 % du secteur
+    [SETE]: "espaces naturels ou eau présents dans le secteur", // rang 45 ; la moitié du couvert compté dans la commune est de l'eau
   };
   for (const [insee, niveau] of Object.entries(attendu)) {
-    const sig = m.buildTerritorySignals(await m.getCommuneEntry(insee)).espaces_naturels_alentour;
+    const sig = m.buildTerritorySignals(await m.getCommuneEntry(insee)).espaces_naturels_secteur;
     assert.equal(sig.niveau, niveau, insee);
-    assert.doesNotMatch(Object.values(sig).join(" "), /forêt|cercle exact|dans un rayon/i, insee);
+    assert.doesNotMatch(texteSignal(sig).replace(/forêts, prairies/, ""), /forêt/i, insee);
+    assert.doesNotMatch(texteSignal(sig), INTERDIT, insee);
   }
 });
 
-test("le modèle de /qna reçoit la règle de lecture du signal", () => {
+test("le modèle de /qna reçoit la règle de lecture du signal : secteur, sélection incomplète, eau comptée, terres agricoles", () => {
   const qna = readFileSync("src/lib/accueil/qna.ts", "utf8");
-  assert.match(qna, /territory_signals\.espaces_naturels_alentour/);
-  assert.match(qna, /never as an exact circle around it/);
-  assert.match(qna, /never turn few natural areas into a city or an urbanised commune/);
+  assert.doesNotMatch(qna, /espaces_naturels_alentour/);
+  assert.match(qna, /territory_signals\.espaces_naturels_secteur/);
+  assert.match(qna, /a selection that may be incomplete or empty/);
+  assert.match(qna, /as an exact circle around it, and never say the commune is surrounded by them/);
+  assert.match(qna, /Water is counted with them \("composition"\): never present them as land or green areas only/);
+  assert.match(qna, /A low share does not prove strong urbanisation; it may notably be explained by farmland/);
 });
 
-test("la carte « Espaces naturels » ne présente plus la sélection de communes voisines comme un cercle de 15 km", () => {
+test("la carte « Espaces naturels » garde FUT-175 (terres, eau à part) et dit le secteur sans cercle ni promesse de complétude", () => {
   const src = readFileSync("src/components/report/QuartierClimatData.tsx", "utf8");
   assert.doesNotMatch(src, /Dans un rayon de 15 km/);
-  assert.match(src, /En comptant aussi les communes voisines dont le centre est à moins de 15 km du sien : \$\{couvertNaturel\.radiusPct\} %\./);
-  // La ventilation est celle de la commune seule (pixels dans son contour).
-  assert.match(src, /breakdownLabel: "Ce qui couvre la commune"/);
+  assert.doesNotMatch(src, /En comptant aussi les communes voisines/);
+  assert.match(src, /Sur son secteur \(la commune et, s'il y en a, des communes voisines retenues\), espaces naturels et eau confondus : \$\{couvertNaturel\.radiusPct\} %\./);
+  // FUT-175, intact : la part des terres, l'eau à part, la ventilation des terres, la réserve de couverture.
+  assert.match(src, /headline: `\$\{couvertNaturel\.naturelTerresPct\} % de ses terres en espaces naturels`/);
+  assert.match(src, /Ni les cultures ni l'eau n'en font partie\./);
+  assert.match(src, /L'eau \(mer, étangs, lacs, rivières\) occupe par ailleurs/);
+  assert.match(src, /breakdownLabel: "Ce qui couvre ses terres"/);
+  assert.match(src, /pixels non classés, de part non mesurée/);
+  // La méthode du secteur va au pied du volet.
+  assert.match(src, /Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier/);
 });
 
 // ── Dossier : écart au projet et point fort sur la priorité « nature » ─────────────────────────────────────────────
@@ -123,28 +224,32 @@ const projet: UserProject = {
   updatedAt: "1970-01-01T00:00:00.000Z",
 };
 
-test("dossier, Bony : l'écart sur la nature dit une part d'espaces naturels alentour, sa portée, et pas une urbanisation", () => {
+test("dossier, Bony : l'écart sur la nature dit le secteur, l'eau comprise, et pas une urbanisation", () => {
   const r = MISMATCH_RULES.find((x) => x.id === "territoire.mismatch-nature")!.evaluate(facts(BONY, "Bony", 0, 0.01), projet, undefined as never);
   assert.equal(r.outcome, "mismatch");
   const f = r.facts[0]!;
-  assert.match(f.statement, /^Vous avez placé la proximité des espaces naturels parmi vos priorités\. Sur la part d'espaces naturels alentour, Bony se situe parmi les .+ de communes les moins favorables de France\.$/);
-  assert.equal(f.headlineSubject, "les espaces naturels alentour");
-  assert.match(f.limitation!, /dans la commune et les communes voisines dont le centre est à moins de 15 km du sien/);
+  assert.match(f.statement, /^Vous avez placé la proximité des espaces naturels parmi vos priorités\. Sur la part d'espaces naturels et d'eau dans le secteur, Bony se situe parmi les .+ de communes les moins favorables de France\.$/);
+  assert.equal(f.headlineSubject, "les espaces naturels du secteur");
+  assert.match(f.limitation!, /eau comprise \(mer, étangs, lacs\)/);
+  assert.match(f.limitation!, /elle-même et, quand elles sont retenues, des communes voisines entières dont le centre est à moins de 15 km du sien, sélection parfois incomplète/);
   assert.match(f.limitation!, /ni la commune seule, ni les abords d'une adresse/);
-  assert.match(f.limitation!, /cultures, pas à la ville/);
-  for (const t of [f.statement, f.topic, f.headlineSubject ?? "", f.limitation!]) assert.doesNotMatch(t, INTERDIT);
+  assert.match(f.limitation!, /Une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles\.$/);
+  for (const t of [f.statement, f.topic, f.headlineSubject ?? ""]) assert.doesNotMatch(t, INTERDIT);
+  assert.doesNotMatch(f.limitation!.replace("ne prouve pas une forte urbanisation", ""), INTERDIT);
 });
 
-test("dossier, Corte : le point fort sur la nature dit « entourées d'espaces naturels », plus « l'accès »", () => {
-  const r = ALIGNMENT_RULES.find((x) => x.id === "territoire.alignment-nature")!.evaluate(facts(CORTE, "Corte", 0.97, 0.99), projet, undefined as never);
-  assert.equal(r.outcome, "satisfied");
-  const f = r.facts[0]!;
-  assert.match(f.statement, /^Pour les espaces naturels alentour, Corte se situe parmi les .+ de communes les plus entourées d'espaces naturels en France\.$/);
-  assert.match(f.limitation!, /communes voisines dont le centre est à moins de 15 km/);
-  assert.doesNotMatch(f.statement, INTERDIT);
+test("dossier, Corte et Saintes-Maries : le point fort dit le secteur et l'eau, plus « entourées »", () => {
+  for (const [insee, nom] of [[CORTE, "Corte"], [SAINTES_MARIES, "Saintes-Maries-de-la-Mer"]]) {
+    const r = ALIGNMENT_RULES.find((x) => x.id === "territoire.alignment-nature")!.evaluate(facts(insee, nom, 0.97, 0.99), projet, undefined as never);
+    assert.equal(r.outcome, "satisfied");
+    const f = r.facts[0]!;
+    assert.match(f.statement, new RegExp(`^Pour les espaces naturels du secteur, ${nom} se situe parmi les .+ de communes dont le secteur compte le plus d'espaces naturels ou d'eau en France\\.$`));
+    assert.match(f.limitation!, /quand elles sont retenues/);
+    assert.doesNotMatch(f.statement, INTERDIT);
+  }
 });
 
-test("les libellés du dossier pour la nature ne promettent ni un accès, ni une mesure communale", () => {
+test("les libellés du dossier pour la nature ne promettent ni un accès, ni une mesure communale, ni des voisines", () => {
   const lab = MISMATCH_LABELS.nature!;
   assert.ok(lab.subject.length <= 45);
   for (const t of [lab.topic, lab.indicator, lab.subject, ALIGNMENT_LABELS.nature!.headlineSubject, ALIGNMENT_LABELS.nature!.favorableStatusTemplate]) {
@@ -154,19 +259,38 @@ test("les libellés du dossier pour la nature ne promettent ni un accès, ni une
 });
 
 // ── Comparateur ────────────────────────────────────────────────────────────────────────────────────────────────────
-test("comparateur : la ligne, la raison et le point fort de la nature disent « alentour », jamais forêts, grands espaces ni lieu de vie", async () => {
+test("comparateur : la ligne, les paliers, les raisons, le point fort et les signaux ambiants disent le secteur et l'eau", async () => {
   const m = await moteur();
   const dim = m.DIMENSIONS.find((d) => d.id === "nature");
-  assert.equal(dim.aide, "La part d'espaces naturels dans la commune et ses voisines (centres à moins de 15 km), pas aux abords d'une adresse.");
-  assert.equal(dim.forte, "les espaces naturels qui l'entourent");
+  assert.equal(dim.aide, "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.");
+  assert.equal(dim.forte, "les espaces naturels et l'eau de son secteur");
+  assert.deepEqual(dim.paliers, ["Beaucoup de nature dans le secteur", "Nature présente", "Peu de nature dans le secteur"]);
   const src = readFileSync("src/lib/comparateur-vie.ts", "utf8");
-  assert.match(src, /label: "la plus entourée d'espaces naturels", key: "nature"/);
-  assert.match(src, /\n {2}nature: "beaucoup d'espaces naturels alentour",/);
-  assert.match(src, /\n {2}nature: "peu d'espaces naturels alentour",/);
-  assert.match(src, /\n {2}nature: "nature présente alentour, sans abonder",/);
-  // Corte face à Bony et Janville : ce que le comparateur écrit réellement.
-  const seed = await m.seedComparaison([CORTE, BONY, JANVILLE]);
-  assert.ok(seed);
-  const texte = JSON.stringify(seed);
-  assert.doesNotMatch(texte, /territoire peu naturel|grands espaces naturels|forêts et espaces naturels|ses espaces naturels|autour du lieu de vie|urbanis/);
+  assert.match(src, /label: "la plus riche\{n\} en espaces naturels ou en eau dans son secteur", key: "nature"/);
+  assert.match(src, /\n {2}nature: "beaucoup d'espaces naturels ou d'eau dans le secteur",/);
+  assert.match(src, /\n {2}nature: "peu d'espaces naturels ou d'eau dans le secteur",/);
+  assert.match(src, /\n {2}nature: "nature présente dans le secteur, sans abonder",/);
+  assert.match(src, /bands: \["davantage d'espaces naturels ou d'eau dans le secteur", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur", "moins d'espaces naturels ou d'eau dans le secteur"\]/);
+  // Corte face à Bony et Janville, puis Saintes-Maries face à Arles et L'Île-d'Yeu : ce que le comparateur écrit réellement.
+  for (const trio of [[CORTE, BONY, JANVILLE], [SAINTES_MARIES, ARLES, YEU]]) {
+    const seed = await m.seedComparaison(trio);
+    assert.ok(seed);
+    const texte = JSON.stringify(seed);
+    // (« alentour » reste légitime ailleurs, p. ex. « collèges et lycées alentour » : on ne le cherche que côté nature.)
+    assert.doesNotMatch(texte, /territoire peu naturel|grands espaces naturels|forêts et espaces naturels|ses espaces naturels|autour du lieu de vie|nature autour|nature alentour|naturels alentour|entourée|urbanis/);
+    assert.doesNotMatch(texte, /\{n\}/, "le gabarit du point fort est toujours rempli");
+  }
+});
+
+// ── Le trait national laissé volontairement (cf. trait-distinctif.ts) ─────────────────────────────────────────────
+test("le trait national « entourées d'espaces naturels » reste invisible : aucune carte, aucune synthèse ne le lit", () => {
+  const i: TerritoireInputs = chatelaillonInputs();
+  i.distinctiveTrait = "compte parmi les communes les plus entourées d'espaces naturels";
+  const snap = buildTerritoireSnapshot(i, "2026-11-09T00:00:00.000Z") as FactsSnapshot;
+  const f = factOf(snap, "place.distinctive_trait")!;
+  assert.equal(f.value, i.distinctiveTrait);
+  assert.match(JSON.stringify(f), /"noCard":\{"reason":"other"/, "aucune carte");
+  assert.ok(!synthesisFacts(snap).facts.some((x) => x.key === "place.distinctive_trait"), "jamais transmis au modèle");
+  const vus = readFileSync("src/lib/territory-identity.ts", "utf8") + readFileSync("src/components/report/QuartierClimatData.tsx", "utf8");
+  assert.doesNotMatch(vus, /distinctive_trait|getCommuneDistinctive/, "aucune surface lue par le lecteur ne l'affiche");
 });
