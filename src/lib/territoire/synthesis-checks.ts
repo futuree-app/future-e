@@ -345,6 +345,20 @@ const RULES: Rule[] = [
       /\bconcentre (les|des) (fonctions|services|commerces|équipements)\b/,
     ],
   },
+  // FUT-176 (contre-revue) : le statut de ville-centre est celui de Paris, Lyon ou Marseille, pas de l'arrondissement lu.
+  {
+    id: "interdit:arrondissement-ville-centre",
+    when: (p) => /^arrondissement\b/.test(String(at(p, "commune.role_territorial.role") ?? "")),
+    polarity: "affirmative",
+    patterns: [
+      /\b(l'arrondissement|cet arrondissement|il) (est|constitue|forme|reste|demeure) (la |une |lui-même )?ville-centre\b/,
+      /\b(l'arrondissement|cet arrondissement|il) (est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
+      /\barrondissement,? ville-centre\b/,
+      /\b(est|se situe|se trouve) au (centre|cœur) de (son |l')agglomération\b/,
+    ],
+    // « Paris est au centre de son agglomération » dit le statut de la commune entière : il est exact.
+    unless: /\b(paris|lyon|marseille)(,[^,]*,)? (est|se situe|se trouve|forme|constitue)\b/,
+  },
   {
     id: "interdit:station-balneaire",
     when: always,
@@ -629,6 +643,7 @@ const CONSIGNES: [RegExp, string][] = [
   [/^catnat:/, "citez les jours de sols secs projetés et la sécheresse reconnue en catastrophe naturelle dans deux phrases séparées, sans lien entre elles"],
   [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],
   [/^format:/, "respectez le format : un titre puis exactement trois blocs « ## »"],
+  [/^interdit:arrondissement-ville-centre$/, "le statut de ville-centre est celui de la commune entière (Paris, Lyon, Marseille) : ne le prêtez pas à l'arrondissement"],
   [/^interdit:statut-urbain-surinterprete$/, "reprenez le rôle territorial tel quel : ni « isolée », ni « pôle », ni services ou animation déduits d'un statut statistique"],
 ];
 

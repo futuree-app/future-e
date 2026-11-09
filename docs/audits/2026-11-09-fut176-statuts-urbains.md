@@ -68,7 +68,7 @@ Comparateur et accueil :
 | Dimension « Isolement » : paliers | Bassin de vie étendu / Bassin de proximité / Bassin de vie restreint | Grande agglomération / Agglomération moyenne / Petite agglomération ou commune |
 | Aide | « La taille du bassin de vie qui dessert le territoire. » | « Le nombre d'habitants de l'agglomération, ou de la commune quand elle est hors agglomération. Il ne mesure pas à lui seul l'accès aux services ni aux transports. » |
 | Raison favorable | au cœur d'un vaste bassin de vie / bassin de vie bien pourvu / bassin de vie de proximité | dans une grande agglomération / dans une agglomération de taille moyenne / dans une petite agglomération · commune hors agglomération |
-| Compromis | bassin de vie réduit, plus isolé · bassin de proximité, plutôt qu'étendu | agglomération plus petite que souhaité · agglomération moyenne, plutôt que grande |
+| Compromis | bassin de vie réduit, plus isolé · bassin de proximité, plutôt qu'étendu | commune ou agglomération plus petite que souhaité · agglomération moyenne, plutôt que grande |
 | Libellé du critère | Présence d'un bassin de vie offrant services et activités du quotidien. | Taille de l'agglomération (unité urbaine), ou de la commune quand elle est hors agglomération. Elle ne mesure pas à elle seule l'accès aux services. |
 | Accueil, pastille taille | « Environ 10 893 507 habitants dans l'agglomération de Levallois-Perret. » | « … dans l'agglomération dont fait partie Levallois-Perret. » |
 
@@ -81,11 +81,40 @@ Aucun score, aucun classement, aucune commune des cinq projets et quatre trios d
 - Millésimes de population (FUT-109) : UU 00760, 49305, 85139 réunissent désormais 2023 (`rafraichir-unites-urbaines.mjs`, contre-épreuve identique sur l'ancien index).
 - Porte des Pierres Dorées est lue à la taille de l'agglomération de Lyon (classée « métropole » dans les critères de taille), comme Levallois-Perret à celle de Paris : c'est la convention existante appliquée au bon statut.
 
-**Résiduel non traité (volontaire)** : les scores BPE (écoles, culture, études supérieures) de Porte des Pierres Dorées, L'Oie et Sainte-Florence gardent un rayon calculé avec leur population communale. Les recalculer déplace des rangs sur ~35 000 communes et dépend d'un parquet local qui diffère du fichier Insee republié (cf. FUT-141) : à traiter avec la prochaine mise à jour BPE. Le rayon affiché reste celui de la mesure : aucune phrase n'est fausse.
+### Équipements (BPE) : recalcul reporté (décision du 09/11/2026, contre-revue)
 
-Hors périmètre, signalé : `labelForCategory` (FUT-8) dit « une ville moyenne » pour une agglomération de 25 000 à 100 000 habitants ; la phrase porte sur l'agglomération (« appartient à une ville moyenne »), pas sur la commune. Non modifié (décision de FUT-8).
+Le rayon d'accès BPE (`scripts/populate-bpe.py`, `radius_for(taille_ville)`) dépend de la taille d'agglomération : ≥ 500 000 hab. → 5 km, 100 000-500 000 → 10 km, 30 000-100 000 → 15 km, sinon 25 km. Comparaison de l'index de `main` et de celui de la branche, commune par commune : **une seule commune change de palier de rayon**.
+
+| Commune | Taille avant → après | Rayon calculé (index) | Rayon selon la nouvelle taille | Valeurs actuelles |
+|---|---|---|---|---|
+| Porte des Pierres Dorées (69114, banlieue de Lyon) | 4 185 (commune) → 1 703 131 (UU de Lyon) | 25 km | 5 km | écoles 94, culture 97, accès études 56 (`etudesSup.radiusKm` = 25) |
+
+L'Oie (85165) et Sainte-Florence (85212) rejoignent une unité urbaine de 2 609 habitants : le palier (25 km) ne change pas. Orée d'Anjou (ville isolée) garde sa propre population. Le diagnostic initial en annonçait trois : c'est une.
+
+Limites des valeurs actuelles : pour Porte des Pierres Dorées, les scores écoles, culture et accès aux études sont mesurés dans un rayon de 25 km, celui des communes rurales, et non dans les 5 km appliqués aux communes de l'agglomération lyonnaise. Ils sont donc plus généreux que ceux de ses voisines de banlieue. Le rayon affiché (`radiusKm`) est bien celui du calcul : aucune phrase n'annonce un rayon qui n'a pas servi.
+
+Dépendance : le recalcul passe par `populate-bpe.py` sur `data/bpe25.parquet`, qui diffère du fichier Insee republié le 05/10/2026 (cf. mémoire BPE25). Rejouer le script pour une commune change aussi les percentiles nationaux (rang de ±1 pour les autres communes). À faire avec la prochaine actualisation des équipements, sans toucher les 35 000 communes ici.
 
 ## 5. Tests
 
 `src/lib/fut176-statuts-urbains.test.ts` (19 tests) : statuts et incohérences, très petites communes, données manquantes, communes nouvelles et arrondissements, couverture nationale contre le fichier Insee (sautée sans le xlsx), surinterprétation sur tous les rôles × 5 tailles, contrôle de synthèse, compatibilité des snapshots et projections d'avant (`isolee` → inconnu, `pole`/`agglo` → « dans l'agglomération »), comparateur, accueil.
 Tests mis à jour avec leur raison : FUT-147 (libellés, clé de cache, lignes admises), FUT-140 (1 781 périurbaines), FUT-141 (décalage Mulhouse, 5 556 mesurées), FUT-109 (Lyon [2021, 2023], L'Oie), PLM (rôle ville-centre).
+
+## 6. Reprise après contre-revue (09/11/2026, SHA audité a62bc494)
+
+| Point | Avant (a62bc494) | Après |
+|---|---|---|
+| Synthèse d'un arrondissement (Paris 20e, Lyon 9e, Marseille 16e) | `projectForSynthesis` transmettait « au centre de son agglomération » sans `arrondissementDe` : le patron disait « Paris 20e Arrondissement, …, au centre de son agglomération, est une commune dense » | rôle `ROLE_TEXT_ARRONDISSEMENT` + `commune: "Paris"` ; patron : « …, arrondissement de Paris (ville-centre de son agglomération), est un arrondissement dense » ; population et densité restent celles de l'arrondissement |
+| Consigne et contrôle | — | consigne : l'arrondissement n'est jamais présenté comme ville-centre ; contrôle `interdit:arrondissement-ville-centre` (« l'arrondissement est la ville-centre », « … est au centre de son agglomération »), « Paris est au centre de son agglomération » admis |
+| « Pour une petite ville qui reste vraiment vivante. » | population ≥ 2 000 seulement | `peutDireVille` (ville-centre ou ville isolée, et ≥ 2 000 hab.), arrondissements exclus. Lucé (banlieue de Chartres, 15 602 hab.) ne la reçoit plus. Ordre de grandeur : ~294 communes de banlieue et ~216 hors unité urbaine de plus de 2 000 hab. perdent ce candidat (vie locale ≥ 60) |
+| « aux portes d'une grande ville, sans en habiter le centre » | tout statut sauf C, donc aussi un statut inconnu | statut Insee B exigé ; un statut inconnu ne prouve pas l'absence de centre (aucune commune de l'index n'est concernée aujourd'hui) |
+| Raison « Isolement », sans code ni statut | « commune hors agglomération » | « commune de moins (plus) de 25 000 habitants » ; « hors agglomération » exige le statut H. Compromis : « commune ou agglomération plus petite que souhaité » |
+| `labelForCategory("moyenne", "urban_unit")` (FUT-8) | « une ville moyenne » (« Lucé appartient à une ville moyenne ») | « une agglomération moyenne » ; source commune inchangée (« une ville moyenne »). Ni score ni seuil touchés |
+| Accueil, pastille taille (même convention) | « Moins de 25 000 habitants : c'est une petite ville » pour une population d'agglomération | en source agglomération : « … habitants dans l'agglomération : une petite agglomération / une agglomération moyenne » ; source commune inchangée |
+| BPE | trois communes annoncées | une seule change réellement de palier de rayon (Porte des Pierres Dorées), cf. § 4 ; recalcul reporté |
+
+Scores, classements et ordres : aucun changement. Les modifications sont des textes (identité, raisons, libellés, projection). La garde FUT-147 (5 projets, 4 trios) passe sans changer ses références ; la liste des lignes admises du contrat (`LIGNES_CONTRAT_FUT176`) est régénérée depuis le diff, sans ligne sur les feux.
+
+### Convergence avec FUT-175 (PR #140)
+
+Voir § 7.

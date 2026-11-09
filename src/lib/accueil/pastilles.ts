@@ -729,10 +729,19 @@ export function lireTaille(lieu: Lieu, e: EntreesTaille): LecturePastille {
   // recopiés à la main.
   const t = AGGLOMERATION_SIZE_CONVENTION.thresholds;
   const n = (x: number) => x.toLocaleString("fr-FR");
+  // FUT-176 (contre-revue) : quand la population est celle de l'agglomération, la taille est celle de l'agglomération.
+  // « c'est une petite ville » prêtait à Mont-Dauphin (171 habitants) la taille de l'agglomération de Guillestre.
+  const agglo = e.source === "urban_unit";
   const lecture: Record<"favorable" | "mismatch" | "indeterminate", { signal: Signal; texte: string }> = {
-    favorable: { signal: "favorable", texte: `Moins de ${n(t.petiteMaxExclusive)} habitants : c'est une petite ville, ou un village, au sens de futur•e.` },
-    mismatch: { signal: "defavorable", texte: `Plus de ${n(t.moyenneMaxExclusive)} habitants : ce n'est pas une petite ville.` },
-    indeterminate: { signal: "neutre", texte: `Entre ${n(t.petiteMaxExclusive)} et ${n(t.moyenneMaxExclusive)} habitants : une ville moyenne, ni petite, ni grande.` },
+    favorable: { signal: "favorable", texte: agglo
+      ? `Moins de ${n(t.petiteMaxExclusive)} habitants dans l'agglomération : une petite agglomération, au sens de futur•e.`
+      : `Moins de ${n(t.petiteMaxExclusive)} habitants : c'est une petite ville, ou un village, au sens de futur•e.` },
+    mismatch: { signal: "defavorable", texte: agglo
+      ? `Plus de ${n(t.moyenneMaxExclusive)} habitants dans l'agglomération : ce n'est pas une petite ville.`
+      : `Plus de ${n(t.moyenneMaxExclusive)} habitants : ce n'est pas une petite ville.` },
+    indeterminate: { signal: "neutre", texte: agglo
+      ? `Entre ${n(t.petiteMaxExclusive)} et ${n(t.moyenneMaxExclusive)} habitants dans l'agglomération : une agglomération moyenne, ni petite, ni grande.`
+      : `Entre ${n(t.petiteMaxExclusive)} et ${n(t.moyenneMaxExclusive)} habitants : une ville moyenne, ni petite, ni grande.` },
   };
   // Le fait : la population, dite simplement. La catégorie du moteur (`categoryStatementFragment`) se lit dans
   // la convention juste dessous, sans jargon (« agglomération selon la convention de taille… »).

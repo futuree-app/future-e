@@ -17,7 +17,10 @@ import { gunzipSync } from "node:zlib";
 import { buildTerritoireSnapshot, type UrbanRole } from "./territoire/facts.ts";
 import { chatelaillonInputs } from "./territoire/__fixtures__/chatelaillon.ts";
 import { buildTerritoryIdentity } from "./territory-identity.ts";
-import { projectForSynthesis, ROLE_TEXT, SYNTHESIS_CONTRACT_VERSION, SYNTHESIS_SYSTEM } from "./territoire/synthesis-contract.ts";
+import {
+  projectForSynthesis, ROLE_TEXT, ROLE_TEXT_ARRONDISSEMENT, roleTerritorialPourSynthese, SYNTHESIS_CONTRACT_VERSION, SYNTHESIS_SYSTEM,
+} from "./territoire/synthesis-contract.ts";
+import { AGGLOMERATION_SIZE_CONVENTION, categoryStatementFragment, labelForCategory } from "./decision/agglomeration-facts.ts";
 import { deterministicSynthesis } from "./territoire/synthesis-deterministe.ts";
 import { checkAssertions } from "./territoire/synthesis-checks.ts";
 import {
@@ -328,7 +331,7 @@ test("comparateur : la dimension « Isolement » parle d'une taille d'aggloméra
   assert.equal(V.reasonText("eviter_isolement", await V.getCommuneEntry("92044")), "dans une grande agglomération");
   assert.equal(V.reasonText("eviter_isolement", await V.getCommuneEntry("02100")), "commune hors agglomération");
   assert.equal(V.reasonText("eviter_isolement", await V.getCommuneEntry("05082")), "dans une petite agglomération");
-  assert.equal(V.raisonNeg("eviter_isolement", null), "agglomération plus petite que souhaité");
+  assert.equal(V.raisonNeg("eviter_isolement", null), "commune ou agglomération plus petite que souhaité");
   assert.doesNotMatch(V.REASON_NEG_INTERMEDIAIRE.eviter_isolement, /bassin/);
 });
 
@@ -339,4 +342,96 @@ test("accueil : l'agglomération n'est jamais nommée d'après la commune lue", 
   assert.doesNotMatch(l.fait!.texte, /agglomération de Levallois-Perret/);
   const bony = lireTaille({ ...lieu, libelle: "Bony", commune: "Bony", insee: "02100" }, { issue: "favorable", phraseTaille: null, population: 139, source: "commune" } as M);
   assert.equal(bony.fait!.texte, "Environ 139 habitants à Bony.");
+});
+
+// ── 7. Contre-revue : arrondissements dans la synthèse, mot « ville » canonique, statut inconnu ─────────────
+
+test("synthèse : Paris 20e, Lyon 9e, Marseille 16e — la projection dit l'arrondissement, le statut reste celui de la ville", async () => {
+  for (const [insee, ville] of [["75120", "Paris"], ["69389", "Lyon"], ["13216", "Marseille"]] as const) {
+    const { ctx, projection } = await identiteReelle(insee);
+    const r = projection.commune.role_territorial;
+    assert.equal(r.role, ROLE_TEXT_ARRONDISSEMENT, insee);
+    assert.notEqual(r.role, ROLE_TEXT.ville_centre, `${insee} : l'arrondissement n'est pas lui-même au centre`);
+    assert.equal(r.commune, ville);
+    assert.equal(r.agglomeration, ctx.uuLabel);
+    // Les faits propres à l'arrondissement restent à leur grain : la population est la sienne, pas celle de la ville.
+    assert.equal(projection.commune.population_habitants, ctx.entry.population);
+    assert.ok(projection.commune.population_habitants < r.population_agglomeration);
+    const texte = deterministicSynthesis(projection, "gwl20");
+    assert.match(texte, new RegExp(`, arrondissement de ${ville} \\(ville-centre de son agglomération\\),`), insee);
+    assert.doesNotMatch(texte, /au centre de (son |l')agglomération/, insee);
+    assert.doesNotMatch(texte, /est une commune (dense|peu dense)/, `${insee} : un arrondissement n'est pas une commune`);
+    assert.deepEqual(checkAssertions(texte, projection).filter((v) => v.rule.startsWith("interdit:arrondissement")), [], insee);
+  }
+  // Un rôle d'arrondissement incohérent (autre que ville-centre) ne se dit pas.
+  assert.equal(roleTerritorialPourSynthese({ role: "banlieue", uuLabel: "Paris", uuPop: 1, arrondissementDe: "Paris" }), null);
+  assert.match(SYNTHESIS_SYSTEM, /n'écrivez jamais que l'arrondissement est une ville-centre/);
+});
+
+test("contrôle : un arrondissement présenté comme ville-centre est refusé ; la ville elle-même peut l'être", async () => {
+  const { projection } = await identiteReelle("75120");
+  const refuse = (t: string) => checkAssertions(t, projection).some((v) => v.rule === "interdit:arrondissement-ville-centre");
+  assert.equal(refuse("Paris 20e Arrondissement est au centre de son agglomération."), true);
+  assert.equal(refuse("L'arrondissement est la ville-centre de l'agglomération parisienne."), true);
+  assert.equal(refuse("Cet arrondissement, ville-centre de son agglomération, compte 190 000 habitants."), true);
+  assert.equal(refuse("Paris est au centre de son agglomération ; le 20e en est un arrondissement."), false);
+  assert.equal(refuse("L'arrondissement n'est pas lui-même une ville-centre."), false);
+  // Pour une commune ordinaire, la règle ne s'applique pas.
+  const chartres = identite("Chartres", 38447, { role: "ville_centre", uuLabel: "Chartres", uuPop: 88891 }).projection;
+  assert.equal(checkAssertions("Chartres est au centre de son agglomération.", chartres).some((v) => v.rule === "interdit:arrondissement-ville-centre"), false);
+});
+
+test("comparateur : « petite ville » suit `peutDireVille` — banlieue, ville-centre en grande agglomération, statut inconnu, arrondissements", async () => {
+  const PETITE_VILLE = "Pour une petite ville qui reste vraiment vivante.";
+  const PERI = "Pour vivre aux portes d'une grande ville, sans en habiter le centre.";
+  const ids = (c: M) => V.buildIdentiteCandidates(c) as string[];
+  // Lucé : banlieue de Chartres, 15 602 habitants, vie locale forte (82), agglomération moyenne. Plus de 2 000 habitants
+  // ne suffit pas : ce n'est pas « une petite ville ».
+  const luce = await V.getCommuneEntry("28218");
+  assert.equal(luce.uu_statut, "B");
+  assert.equal(ids(luce).includes(PETITE_VILLE), false);
+  // La même commune lue ville-centre ou ville isolée le serait (contrôle : c'est bien le statut qui décide).
+  assert.equal(ids({ ...luce, uu_statut: "C" }).includes(PETITE_VILLE), true);
+  assert.equal(ids({ ...luce, uu_statut: "I" }).includes(PETITE_VILLE), true);
+  // Audincourt : ville-centre de 13 944 habitants dans une grande agglomération (112 810) : ni « aux portes d'une
+  // grande ville », ni « petite ville » (l'agglomération est grande).
+  const aud = await V.getCommuneEntry("25031");
+  assert.equal(aud.uu_statut, "C");
+  assert.equal(ids({ ...aud, vieLocale: { score: 99 } }).includes(PERI), false);
+  assert.equal(ids({ ...aud, vieLocale: { score: 99 } }).includes(PETITE_VILLE), false);
+  // Statut inconnu : il ne prouve ni la banlieue (« aux portes… ») ni le centre (« petite ville »).
+  const sceaux = await V.getCommuneEntry("92071");
+  assert.equal(ids(sceaux)[0], PERI);
+  assert.equal(ids({ ...sceaux, uu_statut: null }).includes(PERI), false);
+  assert.equal(ids({ ...luce, uu_statut: null }).includes(PETITE_VILLE), false);
+  // Arrondissements : jamais « aux portes », jamais « petite ville », même lus avec le statut de leur ville.
+  for (const insee of ["75120", "69389", "13216", "13202"]) {
+    const a = await V.getCommuneEntry(insee);
+    assert.equal(a.uu_statut, "C", insee);
+    const l = ids({ ...a, vieLocale: { score: 99 } });
+    assert.equal(l.includes(PERI), false, insee);
+    assert.equal(l.includes(PETITE_VILLE), false, insee);
+  }
+});
+
+test("comparateur : sans code ni statut, la raison « Isolement » ne dit jamais « hors agglomération »", async () => {
+  const bony = await V.getCommuneEntry("02100");
+  assert.equal(V.reasonText("eviter_isolement", bony), "commune hors agglomération");
+  const inconnue = { ...bony, uu: null, uu_statut: null };
+  const r = V.reasonText("eviter_isolement", inconnue);
+  assert.equal(r, "commune de moins de 25 000 habitants");
+  assert.doesNotMatch(r, /hors agglomération|agglomération/);
+  // Un statut H incohérent avec un code ne vaut pas « hors agglomération » non plus (rôle inconnu, code présent).
+  assert.equal(V.reasonText("eviter_isolement", { ...bony, uu: "02000", uu_statut: "H" }), "dans une petite agglomération");
+});
+
+test("libellés de taille : en source agglomération, jamais « une ville moyenne » pour la commune", () => {
+  assert.equal(labelForCategory("moyenne", "urban_unit"), "une agglomération moyenne");
+  assert.equal(labelForCategory("moyenne", "commune"), "une ville moyenne");
+  assert.equal(
+    categoryStatementFragment("Lucé", "moyenne", "urban_unit"),
+    "Lucé appartient à une agglomération moyenne selon la population de son agglomération et la convention de taille utilisée par futur•e",
+  );
+  // Seuils de FUT-8 inchangés.
+  assert.deepEqual(AGGLOMERATION_SIZE_CONVENTION.thresholds, { villageMaxExclusive: 2000, petiteMaxExclusive: 25000, moyenneMaxExclusive: 100000, grandeMaxExclusive: 500000 });
 });

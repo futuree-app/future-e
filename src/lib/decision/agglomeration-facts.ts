@@ -39,7 +39,9 @@ export function labelForCategory(cat: AgglomerationCategory, source: "urban_unit
   switch (cat) {
     case "village": return "un village";
     case "petite": return uu ? "une petite agglomération" : "une petite commune";
-    case "moyenne": return "une ville moyenne";
+    // FUT-176 (contre-revue) : en source UU, la taille est celle de l'agglomération. « X appartient à une ville
+    // moyenne » prêtait à la commune (Levallois-Perret, Mont-Dauphin) une taille qui n'est pas la sienne.
+    case "moyenne": return uu ? "une agglomération moyenne" : "une ville moyenne";
     case "grande": return uu ? "une grande agglomération" : "une grande ville";
     case "metropole": return uu ? "une métropole" : "une très grande ville";
   }

@@ -36,7 +36,8 @@ test("libellés dépendants de la source ('agglomération' + 'métropole' seulem
   assert.equal(labelForCategory("metropole", "urban_unit"), "une métropole");
   assert.equal(labelForCategory("metropole", "commune"), "une très grande ville");
   assert.equal(labelForCategory("village", "commune"), "un village");
-  assert.equal(labelForCategory("moyenne", "urban_unit"), "une ville moyenne");
+  assert.equal(labelForCategory("moyenne", "urban_unit"), "une agglomération moyenne");
+  assert.equal(labelForCategory("moyenne", "commune"), "une ville moyenne");
 });
 
 test("fragment de phrase : 'appartient à' (UU) vs 'est classée comme' (commune)", () => {

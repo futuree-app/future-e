@@ -51,7 +51,7 @@ import {
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, villeDeArrondissement, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
-import { roleUrbain, SEUIL_HABITANTS_VILLE, type RoleUrbain } from "@/lib/territoire/statut-urbain";
+import { peutDireVille, roleUrbain, type RoleUrbain } from "@/lib/territoire/statut-urbain";
 import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
 import { chargerTableIncendies } from "@/lib/bdiff-incendies-commune";
 import { memoireIncendiesDeLaCommune, type TableIncendies } from "@/lib/data/bdiff-incendies";
@@ -1117,9 +1117,11 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // l'arrondissement en est exclu. Narratif seulement : population, taille de ville et scores ne changent pas.
   const arrondissementPLM = communeParent(c.insee) !== c.insee;
   // FUT-176 : ni une ville-centre au sens de l'Insee (Béthune, Bruay-la-Buissière, Nogent-sur-Oise, Audincourt : « sans
-  // en habiter le centre » y était faux). La phrase reste aux communes de banlieue (et au statut inconnu, comme avant).
+  // en habiter le centre » y était faux). La phrase exige que l'Insee classe la commune en BANLIEUE : un statut inconnu
+  // ne prouve pas qu'elle n'est pas au centre (contre-revue).
+  const role = roleUrbain(c.uu, c.uu_statut);
   const periurbain =
-    !arrondissementPLM && c.uu_statut !== "C" && c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
+    !arrondissementPLM && role === "banlieue" && c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
   // « Grande ville » : la COMMUNE elle-même est grande (pas l'UU), sinon un village
   // dans une grande agglo serait mal étiqueté (Espelette).
   const grandeVille = c.population != null && c.population >= 50000;
@@ -1166,9 +1168,10 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // phrase dit le fait observé, sans lui prêter de cause.
   if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");
   // FUT-176 : « petite ville » parle de la COMMUNE. La taille d'agglomération ne suffit pas : Mont-Dauphin
-  // (171 habitants) appartient à une agglomération de 3 258 habitants sans être une ville. La commune doit porter
-  // elle-même le seuil Insee de 2 000 habitants.
-  const villeElleMeme = c.population != null && c.population >= SEUIL_HABITANTS_VILLE;
+  // (171 habitants) appartient à une agglomération de 3 258 habitants sans être une ville. La règle est celle de tout
+  // le produit (`peutDireVille`) : ville-centre ou ville isolée, ET 2 000 habitants dans la commune. Une commune de
+  // banlieue de 5 000 habitants n'est pas « une petite ville » ; un arrondissement non plus.
+  const villeElleMeme = !arrondissementPLM && peutDireVille(role, c.population);
   if (vieLocaleForte && villeElleMeme && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
   if ((natureForte || calmeForte) && petit) push("Pour un cadre rural préservé, loin de l'agitation.");
   if (calmeForte) push("Pour un quotidien au calme, loin de l'agitation.");
@@ -2476,8 +2479,13 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // la commune hors agglomération), jamais le nombre d'habitants brut. Détail au rapport. FUT-176 : la mesure est
   // une population, pas un « bassin de vie » (autre zonage Insee) ni une offre de services : ni « bien pourvu », ni
   // « au cœur » (une commune de banlieue n'est pas au cœur de son agglomération).
+  // Contre-revue : « hors agglomération » exige le statut Insee H. Sans code ni statut, on dit la population de la commune.
   eviter_isolement: (c) => {
     const t = tailleVille(c) ?? 0;
+    const role = roleUrbain(c.uu, c.uu_statut);
+    if (!c.uu && role !== "hors_uu") {
+      return t >= 25_000 ? "commune de plus de 25 000 habitants" : "commune de moins de 25 000 habitants";
+    }
     return t >= 100_000
       ? "dans une grande agglomération"
       : t >= 25_000
@@ -2538,7 +2546,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   proximite_mer: "éloignée du littoral",
   eloignement_mer: "plus proche de la mer que souhaité",
   cadre_calme: "plus dense que recherché",
-  eviter_isolement: "agglomération plus petite que souhaité", // FUT-176 : une population, pas un isolement
+  eviter_isolement: "commune ou agglomération plus petite que souhaité", // FUT-176 : une population, pas un isolement ; hors agglomération, c'est la commune
   air_sain: "air plus chargé en particules",
   acces_soins: "accès aux soins limité",
   acces_services: "commune hors pôle de services",

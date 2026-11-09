@@ -65,8 +65,17 @@ test("palier de la comparaison : il suit la note publiée (Gennes-Val-de-Loire e
   assert.deepEqual(trio.map((k) => c(k).vieLocale.score), [81, 69, 86]);
 });
 
-test("identité : La Hague devient « une petite ville qui reste vraiment vivante » (69), et la règle tient partout", () => {
-  assert.ok(V.buildIdentiteCandidates(c("50041")).includes(VIVANTE));
+// FUT-176 (contre-revue, 09/11/2026) : le mot « ville » suit désormais la règle canonique `peutDireVille` (ville-centre ou
+// ville isolée au sens de l'Insee, et 2 000 habitants). La Hague (commune nouvelle de 11 223 habitants) est HORS unité
+// urbaine : aucun ensemble bâti continu de 2 000 habitants. Elle garde sa vie locale forte (69, la décision de FUT-137),
+// mais n'est plus appelée « petite ville ». La règle de FUT-137 (jamais d'identité « vie locale » sous 60) tient partout.
+test("identité : La Hague garde sa vie locale forte (69) sans être appelée « petite ville » (hors unité urbaine), et la règle tient partout", () => {
+  const laHague = c("50041");
+  assert.equal(laHague.uu_statut, "H");
+  assert.ok((V.subScore("vie_locale", laHague) ?? 0) >= 60);
+  assert.equal(V.buildIdentiteCandidates(laHague).includes(VIVANTE), false);
+  // La même commune lue ville isolée recevrait l'identité : c'est bien le statut, pas la vie locale, qui décide.
+  assert.ok(V.buildIdentiteCandidates({ ...laHague, uu: "50000", uu_statut: "I" }).includes(VIVANTE));
   // Pour chaque commune : une identité « vie locale » n'est jamais portée sous 60 (ni sans note).
   const ecarts = COMMUNES.filter((x) => {
     const ids = V.buildIdentiteCandidates(x);
