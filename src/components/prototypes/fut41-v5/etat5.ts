@@ -12,7 +12,9 @@ import {
 } from "./scenarios5.ts";
 
 export type Droits = "unite" | "pass";
-export type Etat5 = Recherche & { scenario: string; vue: Vue5; droits: Droits; passUtilisees: number; annonce: string | null; historique: Revision[] };
+/** `comparaison` : la dernière comparaison ouverte (mode, sélection, duo affiché sur téléphone), retrouvée au retour. */
+export type Comparaison = { mode: NonNullable<Vue5["mode"]>; selection: string[]; duel: [number, number] };
+export type Etat5 = Recherche & { scenario: string; vue: Vue5; droits: Droits; passUtilisees: number; annonce: string | null; historique: Revision[]; comparaison: Comparaison | null };
 
 export type Geste5 =
   | { type: "charger"; scenario: string }
@@ -30,7 +32,8 @@ export type Geste5 =
   | { type: "mettre_a_jour"; id: string }
   | { type: "adopter"; modification: ModificationProjet; texte: string }
   | { type: "photo"; id: string; url: string | null }
-  | { type: "droits"; droits: Droits };
+  | { type: "droits"; droits: Droits }
+  | { type: "duel"; duel: [number, number] };
 
 export const PASS_INCLUSES = 10;
 /** Les analyses que le prototype sait simuler (aucune génération réelle). */
@@ -41,6 +44,7 @@ export function etatInitial5(id = "ref"): Etat5 {
   const sc = SCENARIOS5.find((s) => s.id === id) ?? SCENARIOS5[0]!;
   return {
     scenario: sc.id, vue: sc.vue, droits: "unite", passUtilisees: 3, annonce: null,
+    comparaison: sc.vue.ecran === "comparer" ? { mode: sc.vue.mode ?? "logements", selection: sc.vue.selection ?? [], duel: [0, 1] } : null,
     projet: structuredClone(PROJET), historique: structuredClone(HISTORIQUE_PROJET),
     communes: COMMUNES.filter((c) => sc.communes.includes(c.insee)).map((c) => structuredClone(c)),
     logements: LOGEMENTS.filter((l) => sc.logements.includes(l.id)).map((l) => structuredClone(l)).map((l) => (sc.ajuste ? sc.ajuste(l) : l)),
@@ -55,7 +59,16 @@ const communeGratuite = (c0: Commune): Commune => ({ ...structuredClone(c0), sta
 export function reduire5(e: Etat5, g: Geste5): Etat5 {
   switch (g.type) {
     case "charger": return { ...etatInitial5(g.scenario), droits: e.droits };
-    case "naviguer": return { ...e, vue: g.vue, annonce: null };
+    case "naviguer": {
+      // Retrouver sa comparaison : Comparer ouvert sans sélection reprend la dernière (même mode).
+      if (g.vue.ecran !== "comparer") return { ...e, vue: g.vue, annonce: null };
+      const mode = g.vue.mode ?? e.comparaison?.mode ?? "logements";
+      const reprise = g.vue.selection === undefined && e.comparaison && e.comparaison.mode === mode;
+      const selection = reprise ? e.comparaison!.selection : g.vue.selection ?? [];
+      const meme = e.comparaison && e.comparaison.mode === mode && e.comparaison.selection.join() === selection.join();
+      return { ...e, vue: { ...g.vue, mode, selection }, comparaison: { mode, selection, duel: meme ? e.comparaison!.duel : [0, 1] }, annonce: null };
+    }
+    case "duel": return e.comparaison ? { ...e, comparaison: { ...e.comparaison, duel: g.duel } } : e;
     case "droits": return { ...e, droits: g.droits };
     case "statut":
       return { ...e, logements: majL(e, g.id, (l) => ({ ...l, statut: g.statut, journal: [...l.journal, { date: AUJOURDHUI, type: "statut", texte: `${LIBELLE_STATUT[g.statut]}.` }] })), annonce: `${nom(e, g.id)} : ${LIBELLE_STATUT[g.statut].toLowerCase()}.` };
@@ -137,7 +150,7 @@ export function reduire5(e: Etat5, g: Geste5): Etat5 {
 export function vueVersHash5(v: Vue5): string {
   switch (v.ecran) {
     case "ensemble": return "#/";
-    case "projet": return v.ancre ? `#/projet/${v.ancre}` : "#/projet";
+    case "projet": return v.ancre ? `#/projet/${v.ancre}${v.essai ? `/${v.essai}` : ""}` : "#/projet";
     case "logement": return `#/logement/${v.id}${v.ancre ? `/${v.ancre}` : ""}`;
     case "commune": return `#/commune/${v.id}`;
     case "releve": return `#/releve/${v.id}`;
@@ -148,7 +161,7 @@ export function vueVersHash5(v: Vue5): string {
 export function hashVersVue5(h: string): Vue5 | null {
   const p = h.replace(/^#\/?/, "").split("/");
   if (!p[0]) return { ecran: "ensemble" };
-  if (p[0] === "projet") return { ecran: "projet", ...(p[1] ? { ancre: p[1] } : {}) };
+  if (p[0] === "projet") return { ecran: "projet", ...(p[1] ? { ancre: p[1] } : {}), ...(p[1] && p[2] ? { essai: p[2] } : {}) };
   if (p[0] === "logement" && p[1]) return { ecran: "logement", id: p[1], ...(p[2] ? { ancre: p[2] } : {}) };
   if (p[0] === "commune" && p[1]) return { ecran: "commune", id: p[1] };
   if (p[0] === "releve" && p[1]) return { ecran: "releve", id: p[1] };

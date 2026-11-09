@@ -7,7 +7,7 @@ import { useId, useState } from "react";
 import { Selecteur, releve as s } from "@/components/releve/primitives";
 import { dateCourte, etSi5, libelleCritere, montantFr, simuler, NOM_CRITERE, TITRE_SEAU5, type CleCritere, type ModificationProjet, type SeauEtSi } from "../modele5";
 import type { Api5 } from "../CentreDecision5";
-import { Declare, Fil, Section, lier } from "../communs5";
+import { Declare, Section, lier } from "../communs5";
 import v from "../v5.module.css";
 
 const ORDRE: SeauEtSi[] = ["pourrait_changer", "ecarte_a_revoir", "nouvelle_analyse", "inchange", "pas_lu"];
@@ -21,13 +21,16 @@ export function Projet5({ api }: { api: Api5 }) {
   const durs = projet.criteres.filter((c) => c.nature === "sans_compromis");
   const prefs = projet.criteres.filter((c) => c.nature === "priorite").sort((a, b) => (b.poids ?? 0) - (a.poids ?? 0));
   const seuils = projet.criteres.filter((c) => c.valeur != null);
+  // Un essai venu de Comparer arrive tel quel : la personne retrouve le changement qu'elle vient d'examiner.
+  const venu = lireEssai(etat.vue.essai, projet.criteres.map((c) => c.cle));
 
-  const [essai, setEssai] = useState<Essai>("valeur");
-  const [cle, setCle] = useState<CleCritere>(seuils[0]?.cle ?? "gare");
+  const [essai, setEssai] = useState<Essai>(venu?.type ?? "valeur");
+  const [cle, setCle] = useState<CleCritere>(venu?.type === "valeur" ? venu.cle : seuils[0]?.cle ?? "gare");
   const actuel = projet.criteres.find((c) => c.cle === cle)!;
   const choix = cle === "mer" ? [10, 15, 25] : [15, 20, 30, 40];
-  const [val, setVal] = useState<number>(choix.find((x) => x !== actuel.valeur) ?? choix[0]!);
-  const [cleNature, setCleNature] = useState<CleCritere>(prefs[0]?.cle ?? projet.criteres[0]!.cle);
+  const [val, setVal] = useState<number>(venu?.type === "valeur" && venu.valeur ? venu.valeur : choix.find((x) => x !== actuel.valeur) ?? choix[0]!);
+  const [cleNature, setCleNature] = useState<CleCritere>(venu?.type === "nature" ? venu.cle : prefs[0]?.cle ?? projet.criteres[0]!.cle);
+  const [repris, setRepris] = useState(venu != null);
   const [budget, setBudget] = useState<number>(projet.budget?.montant ?? 300000);
   const [confirmer, setConfirmer] = useState(false);
   const unite = cle === "mer" ? "km" : "min";
@@ -44,7 +47,6 @@ export function Projet5({ api }: { api: Api5 }) {
 
   return (
     <>
-      <Fil segments={[{ libelle: "Ma décision", aller: () => aller({ ecran: "ensemble" }) }, { libelle: "Mon Projet" }]} />
       <div className={v.tete}>
         <h1 className={`${s.titre} ${v.titreVue}`} tabIndex={-1} data-titre-vue>Mon Projet</h1>
         <p className={s.nuance}>Vos conditions orientent chaque lecture ; aucun score ne les remplace. Révision {projet.revision}, du {dateCourte(projet.date)}</p>
@@ -66,17 +68,23 @@ export function Projet5({ api }: { api: Api5 }) {
       </Section>
 
       <Section titre="Et si… ?" id="et-si" sous="Essayez un changement : rien n'est modifié tant que vous ne l'adoptez pas.">
-        <Selecteur id={`${id}-e`} question="Essayer" valeur={essai} onChoisir={(x) => { setEssai(x); setConfirmer(false); }}
+        {repris && modification ? (
+          <div className={v.repris} role="note">
+            <p className={s.dense}><strong className={s.encre}>Le changement essayé dans Comparer</strong> · {texte} Le voici pour toutes vos possibilités ; rien n&apos;est adopté tant que vous ne le confirmez pas.</p>
+            <button type="button" className={`${s.action} ${v.cible}`} onClick={() => aller({ ecran: "comparer" })}>Revenir à la comparaison</button>
+          </div>
+        ) : null}
+        <Selecteur id={`${id}-e`} question="Essayer" valeur={essai} onChoisir={(x) => { setEssai(x); setConfirmer(false); setRepris(false); }}
           options={[{ valeur: "valeur", libelle: "une autre limite" }, { valeur: "nature", libelle: "une autre exigence" }, { valeur: "budget", libelle: "un autre budget" }]} />
         {essai === "valeur" ? (
           <div className={v.essai}>
-            {seuils.length > 1 ? <Selecteur id={`${id}-c`} question="La condition" valeur={cle} onChoisir={(k) => { setCle(k); setConfirmer(false); }} options={seuils.map((c) => ({ valeur: c.cle, libelle: libelleCritere(c) }))} /> : null}
+            {seuils.length > 1 ? <Selecteur id={`${id}-c`} question="La condition" valeur={cle} onChoisir={(k) => { setCle(k); setConfirmer(false); setRepris(false); }} options={seuils.map((c) => ({ valeur: c.cle, libelle: libelleCritere(c) }))} /> : null}
             <p className={v.question41}>Et si j&apos;acceptais <strong>{val} {unite}</strong> au lieu de {actuel.valeur} {unite} pour {NOM_CRITERE[cle].toLowerCase()} ?</p>
-            <Selecteur id={`${id}-v`} question="Nouvelle limite" valeur={String(val)} onChoisir={(x) => { setVal(Number(x)); setConfirmer(false); }} options={choix.map((x) => ({ valeur: String(x), libelle: `${x} ${unite}${x === actuel.valeur ? " (actuelle)" : ""}` }))} />
+            <Selecteur id={`${id}-v`} question="Nouvelle limite" valeur={String(val)} onChoisir={(x) => { setVal(Number(x)); setConfirmer(false); setRepris(false); }} options={choix.map((x) => ({ valeur: String(x), libelle: `${x} ${unite}${x === actuel.valeur ? " (actuelle)" : ""}` }))} />
           </div>
         ) : essai === "nature" ? (
           <div className={v.essai}>
-            <Selecteur id={`${id}-n`} question="La condition" valeur={cleNature} onChoisir={(k) => { setCleNature(k); setConfirmer(false); }} options={projet.criteres.map((c) => ({ valeur: c.cle, libelle: NOM_CRITERE[c.cle] }))} />
+            <Selecteur id={`${id}-n`} question="La condition" valeur={cleNature} onChoisir={(k) => { setCleNature(k); setConfirmer(false); setRepris(false); }} options={projet.criteres.map((c) => ({ valeur: c.cle, libelle: NOM_CRITERE[c.cle] }))} />
             <p className={v.question41}>Et si {NOM_CRITERE[cleNature].toLowerCase()} devenait {kn.nature === "sans_compromis" ? "une simple priorité" : "une condition sans compromis"} ?</p>
           </div>
         ) : (
@@ -101,7 +109,7 @@ export function Projet5({ api }: { api: Api5 }) {
             )}
             <div className={v.seau} data-seau="note">
               <p className={v.seauTitre}>Ce qui ne peut pas être déduit</p>
-              <p className={s.dense}>Une analyse ne se recalcule pas toute seule : seule sa mise à jour dirait l&apos;effet réel. Une mesure déjà faite permet d&apos;écrire « pourrait » ; jamais « est ». Un logement écarté n&apos;est pas remis en course sans vous.</p>
+              <p className={s.dense}>Ces effets sont estimés d&apos;après les mesures déjà faites. Seule la mise à jour d&apos;une analyse dirait l&apos;effet réel. Un logement écarté n&apos;est pas remis en course sans vous.</p>
             </div>
             {!confirmer ? (
               <div className={v.ligneGestes}>
@@ -130,4 +138,14 @@ export function Projet5({ api }: { api: Api5 }) {
       </Section>
     </>
   );
+}
+
+/** « valeur.gare.20 » ou « nature.quartier », écrits par l'essai de Comparer ; tout autre texte est ignoré. */
+function lireEssai(x: string | undefined, cles: CleCritere[]): { type: "valeur"; cle: CleCritere; valeur: number | null } | { type: "nature"; cle: CleCritere } | null {
+  const [t, c, n] = (x ?? "").split(".");
+  const cle = cles.find((k) => k === c);
+  if (!cle) return null;
+  if (t === "nature") return { type: "nature", cle };
+  if (t === "valeur" && n && Number.isFinite(Number(n))) return { type: "valeur", cle, valeur: Number(n) };
+  return null;
 }

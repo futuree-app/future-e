@@ -4,7 +4,7 @@
 // où l'adresse la lit. Une lecture communale partagée occupe UNE cellule qui couvre les logements
 // concernés : on voit qu'elle ne les distingue pas, sans avoir à le lire. Les preuves sont repliées
 // sous la condition. Aucune structure de tableau : chaque cellule dit elle-même à qui elle s'applique.
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { releve as s } from "@/components/releve/primitives";
 import { NOM_COUCHE, LIBELLE_VERDICT, type Cellule, type Colonne, type LigneConfrontation, type Projet } from "./modele5";
 import { Glyphe, Marque, Mesure, lier } from "./communs5";
@@ -12,10 +12,12 @@ import v from "./v5.module.css";
 
 const ETAT_VIDE = { a_lire: "à lire depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore lue", lu: "" } as const;
 
-export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false }: {
+export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false, action }: {
   colonnes: Colonne[]; lignes: LigneConfrontation[]; projet: Projet; seul?: boolean; enTete?: boolean;
   /** Lecture rapide : les marques et les mesures seulement, le verdict en un mot, sans preuves ni origine. */
   compact?: boolean;
+  /** Un geste posé dans la cellule même, là où l'incertitude apparaît (ex. les questions de visite). */
+  action?: (cle: LigneConfrontation["cle"], ids: string[]) => ReactNode;
 }) {
   const nomDe = (ids: string[]) => ids.map((id) => colonnes.find((c) => c.id === id)?.nom ?? id).join(" et ");
   return (
@@ -43,6 +45,7 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
                   <div key={c.ids.join()} className={v.confCell} style={{ gridColumn: `span ${c.ids.length}` }} data-partage={c.ids.length > 1 || undefined}>
                     {!seul ? <span className={v.sr}>{nomDe(c.ids)} : </span> : null}
                     <ContenuCellule c={c} limite={x.couche === "commune" ? null : limite} seul={seul} compact={compact} />
+                    {action && x.verdict === "pourrait" ? action(li.cle, c.ids) : null}
                     {c.ids.length > 1 ? <span className={v.partage}>une seule lecture pour {nomDe(c.ids)}</span> : null}
                     {seul && x.couche === "commune" && c.ligne && li.couches.some((y) => y.couche !== "commune" && y.cellules.every((k) => !k.ligne)) ? <span className={v.partage}>Dit pour la commune ; ce logement reste à lire depuis son adresse.</span> : null}
                   </div>

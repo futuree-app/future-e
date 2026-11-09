@@ -38,7 +38,7 @@ export function PanneauAnalyse({ api, piste, geste, fermer }: { api: Api5; piste
   return (
     <div className={v.voile} onClick={(e) => { if (e.target === e.currentTarget) fermer(); }}>
       <div ref={ref} className={v.panneau} role="dialog" aria-modal="true" aria-labelledby={`${id}-t`}>
-        <div className={v.panneauTete}><p className={v.simulation}>Prototype · rien n&apos;est payé ni analysé</p><button type="button" className={s.action} onClick={fermer}>Fermer</button></div>
+        <div className={v.panneauTete}><p className={v.simulation}>Prototype · rien n&apos;est payé ni analysé</p><button type="button" className={`${s.action} ${v.cible}`} onClick={fermer}>Fermer</button></div>
         <h2 className={s.titre} id={`${id}-t`} tabIndex={-1}>{lier(p.titre)}</h2>
         <div className={v.portee}>
           <p className={v.porteeCle}>Ce que vous saurez</p>
@@ -56,7 +56,7 @@ export function PanneauAnalyse({ api, piste, geste, fermer }: { api: Api5; piste
         {simulable ? (
           <div className={v.ligneGestes}>
             <button type="button" className={`${s.bouton} ${s.boutonMarque}`} onClick={lancer}>{geste === "mettre_a_jour" ? "Mettre à jour (simulé)" : "Lancer l'analyse (simulée)"}</button>
-            <button type="button" className={s.action} onClick={fermer}>Pas maintenant</button>
+            <button type="button" className={`${s.action} ${v.cible}`} onClick={fermer}>Pas maintenant</button>
           </div>
         ) : (
           <p className={v.simplifie}>Dans ce prototype, seules l&apos;analyse du T4 rue de la Convention, celle du T4 place Sainte-Anne et la lecture d&apos;Angers sont simulées. Rien d&apos;autre ne peut être lancé ici.</p>

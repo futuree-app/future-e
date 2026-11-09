@@ -78,7 +78,8 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   ok("Accueil", "trois lignes titrées au plus pour dire où en est la recherche", phrases >= 2 && phrases <= 3, `(${phrases})`);
   ok("Accueil", "la synthèse dit qui se distingue, à quelle échelle, et ce qui reste à savoir", /À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme\. Pour vos logements, cela se lit à l'adresse : c'est fait pour T3 quai de la Fosse seulement/.test(t) && /T3 quai de la Fosse \(9 min\) la tient ; pour T4 rue de la Convention et T3 près du Thabor, elle reste à mesurer/.test(t));
   ok("Accueil", "la conclusion ancienne de Rennes est datée, pas présentée comme actuelle", /Conclusion du 18 sept\., écrite sous votre Projet d'alors/.test(t) && /Elle est à revoir pour une gare à moins de 20 min/.test(t));
-  ok("Accueil", "trois gestes au plus, chacun avec son bouton", (await p.locator("#faire-t + p, ol li").count()) <= 4 && (await p.locator("ol li button").count()) <= 3);
+  ok("Accueil", "un seul geste prioritaire en tête ; les autres sous le lieu concerné", (await p.locator("[class*=premierGeste]").count()) === 1 && (await p.locator("[class*=premierGeste] button").count()) === 1 && (await p.locator("#lieux [aria-label='Aussi à faire'] li").count()) >= 1);
+  ok("Accueil", "deux portes distinctes vers le Projet", (await p.getByRole("button", { name: "Voir mon Projet" }).count()) === 1 && (await p.getByRole("button", { name: "Essayer un changement" }).count()) === 1 && !/Voir le détail/.test(t));
   ok("Accueil", "communes et logements nommés sur l'accueil", /Nantes/.test(t) && /T3 quai de la Fosse/.test(t) && /T3 près du Thabor/.test(t));
   const hautLieux = await p.evaluate(() => document.getElementById("lieux")?.getBoundingClientRect().top ?? 9999);
   ok("Accueil", "la section des lieux commence dans les 1 100 premiers pixels (1440 px)", hautLieux < 1100, `(${Math.round(hautLieux)} px)`);
@@ -185,7 +186,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   await p.waitForTimeout(150);
   t = await txt();
   ok("Et si", "les seaux : écarté à revoir, pourrait changer, nouvelle analyse, pas lus", /Écartés à revoir/.test(t) && /T2 place Viarme/.test(t) && /Pourraient changer/.test(t) && /T3 Saint-Félix/.test(t) && /Rien à recalculer/.test(t));
-  ok("Et si", "ce qui ne peut pas être déduit est dit", /Une analyse ne se recalcule pas toute seule/.test(t));
+  ok("Et si", "ce qui ne peut pas être déduit est dit, sans règle de rédaction", /Ces effets sont estimés d'après les mesures déjà faites/.test(t) && !/permet d'écrire/.test(t));
   ok("Et si", "plus de « restent valables »", !/Restent valables/.test(t));
   await p.getByRole("button", { name: "Adopter ce changement" }).click();
   await p.getByRole("button", { name: "Confirmer" }).click();
@@ -217,6 +218,24 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   t = await txt();
   ok("Arbitrage", "et si la vie de quartier devenait sans compromis : conditionnel, Projet inchangé", /Si une vie de quartier devenait une condition sans compromis/.test(t) && /T4 rue de la Convention : une vie de quartier y est un compromis ; sans compromis, il pourrait ne plus tenir/.test(t) && /révision 3/.test(t));
   await cap("27-arbitrage-et-si");
+
+  // Troisième revue Work · P1 : l'essai arrive tel quel dans Mon Projet ; le retour retrouve la comparaison
+  await p.getByRole("button", { name: "Adopter ce changement dans Mon Projet" }).click();
+  await p.waitForTimeout(250);
+  t = await txt();
+  ok("Continuité", "Mon Projet reçoit le changement essayé dans Comparer, et pas un autre", /Le changement essayé dans Comparer/.test(t) && /Une vie de quartier devient une condition sans compromis\./.test(t) && /Si une vie de quartier|il pourrait ne plus tenir/.test(t) && !/Et si j'acceptais/.test(t));
+  await cap("28-continuite-essai-transmis");
+  await p.getByRole("button", { name: "Revenir à la comparaison" }).click();
+  await p.waitForTimeout(250);
+  ok("Arbitrage", "tout étant examiné des deux côtés, le bilan se réduit à ce qui reste à vérifier", /Ce qui reste à vérifier, et le prochain geste/.test(await txt()));
+  ok("Continuité", "retour dans Comparer : la même sélection, sans la reconstruire", /#\/comparer\/logements\/fosse,convention/.test(p.url()) && /Ce qui change votre choix/.test(await txt()));
+  await p.getByRole("button", { name: "Mon Projet" }).click(); await p.waitForTimeout(150);
+  await p.getByRole("navigation", { name: "Ma décision" }).getByRole("button", { name: "Comparer" }).click(); await p.waitForTimeout(250);
+  ok("Continuité", "par la navigation aussi, Comparer est retrouvé tel qu'on l'a laissé", /#\/comparer\/logements\/fosse,convention/.test(p.url()));
+  ok("Continuité", "pas de fil d'Ariane sur les trois entrées", (await p.locator("nav[aria-label=\"Fil d'Ariane\"]").count()) === 0);
+  ok("Valeur", "les questions de visite s'ouvrent depuis l'incertitude", (await p.getByRole("button", { name: "Voir les 2 questions à poser" }).count()) === 1);
+  await p.getByRole("button", { name: "Voir les 2 questions à poser" }).click(); await p.waitForTimeout(250);
+  ok("Valeur", "elles mènent aux questions du logement concerné", /#\/logement\/fosse\/verifier/.test(p.url()));
 
   // Et si près de la comparaison (essai limité)
   await ouvrir("?s=meme");

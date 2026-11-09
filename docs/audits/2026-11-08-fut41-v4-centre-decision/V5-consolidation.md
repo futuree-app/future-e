@@ -194,3 +194,26 @@ Work confirme les nuances de la revue (gare et péremption par critère, médeci
 **Ce qui reste ouvert.** Sur un écran de 1 440 px, l'accueil place encore les lieux juste sous le premier écran. Inverser la synthèse et les lieux est une question de test (§ 6, question 6), pas de doctrine. Pour la question « je comprends ce qui change mon choix », la situation d'arbitrage est désormais celle à faire lire en premier aux trois à cinq personnes.
 
 **Recommandation mise à jour** : GO pour le socle et le contrat moteur ; marge d'ajustement de présentation pour la Vue d'ensemble et Mon Projet ; Comparer figé seulement après le test, en commençant par la situation d'arbitrage.
+
+## 9. Troisième retour de Work (revue UX ciblée de 5e352962)
+
+Vérifié dans le code avant de corriger ; chaque point est jugé, pas accepté d'office.
+
+| Point de Work | Verdict | Ce qui est fait |
+|---|---|---|
+| P1 · l'essai fait dans Comparer n'arrive pas dans Mon Projet (gare à 15 min à la place) | **Confirmé** (le lien n'emportait rien) | L'essai voyage dans l'adresse (`#/projet/et-si/nature.quartier`) ; Mon Projet l'ouvre tel quel, avec un encadré « Le changement essayé dans Comparer » et « Revenir à la comparaison » |
+| P1 · retour dans Comparer : sélection perdue | **Confirmé** | L'état garde la dernière comparaison (mode, sélection, duo affiché sur téléphone) ; la navigation la retrouve |
+| P1 · les questions de visite ne sont pas accessibles depuis l'incertitude | **Confirmé** | « Voir les 2 questions à poser » dans la case « à vérifier » même, vers la fiche |
+| P2 · quatre lectures successives de l'arbitrage | **Confirmé, corrigé avec une réserve** | « En bref » ne garde que la condition sans compromis et ce qui manque ; la phrase « répond mieux » devient l'introduction de « Ce qui change votre choix » ; « Et si » suit directement. Le bilan « apporte / demande d'accepter » se réduit à « ce qui reste à vérifier, et le prochain geste » **seulement quand tout est examiné partout** : sinon un compromis lu pour un seul logement (« place animée le soir ») disparaîtrait de la lecture principale. La recette l'a révélé ; la règle de Work appliquée telle quelle était fausse dans ce cas |
+| P2 · fils d'Ariane redondants | Accepté | Retirés de Comparer et Mon Projet ; gardés sur les fiches et le Relevé |
+| P2 · trois portes autour du Projet sur l'accueil | Accepté | « Voir mon Projet » et « Essayer un changement » |
+| P2 · accueil : trois gestes de même poids | Accepté | Un seul geste en tête, nettement prioritaire ; les autres sous le logement ou la commune concernés |
+| P2 · textes du point de vue du système | Accepté | « L'effet estimé resterait le même » ; règles de rédaction du moteur retirées (« permet d'écrire pourrait ») ; bilan en faits (« Commerces, marché et tramway à moins de 5 min à pied ») ; « Noter la réponse » ; « La commune sera ajoutée automatiquement » ; « Pas encore examiné » |
+| P3 · sélection | Accepté | Coche visible, « 2 logements sélectionnés · 4 au plus » |
+| P3 · petites cibles | Accepté | Sélection 44 px ; « Fermer » et « Pas maintenant » du panneau 44 px |
+| P3 · noms courts des logements dans les colonnes | **Différé** | Utile sur téléphone, mais touche toutes les phrases générées ; à décider après le test |
+| Accueil : lieux plus haut | **Non résolu** | Le titre des lieux reste vers 975 px à 1 440 px : la hauteur vient de la plaque « Où vous en êtes ». Question de test, comme avant |
+
+Tests : 25 V5 (5 nouveaux : continuité de la comparaison, essai transmis, bilan en faits, geste court, libellé de l'Et si), 60 au total. Recette : 84 vues, 62/62 (dont 8 nouvelles : continuité, questions depuis l'incertitude, geste prioritaire, portes du Projet), clavier 28, mouvement réduit conforme. Aucun test avec des personnes.
+
+Recommandation inchangée sur le fond : les deux ruptures de parcours sont levées, la V5 peut aller aux testeurs. Proposition de Work retenue pour le test : la présentation actuelle contre une seule variante allégée.

@@ -1,16 +1,18 @@
 "use client";
 // COMPARER, V5 · deux modes explicites (vos communes, vos logements), une seule structure :
-//   1. En bref : ce qui bloque (dit une fois, Z12), ce qui les distingue, ce qui manque ;
-//   2. Ce que chacun apporte, ce qu'il demande d'accepter, ce qui pourrait changer l'arbitrage,
-//      et son prochain geste : en colonnes, valeurs côte à côte ;
-//   3. Le détail, condition par condition, couche par couche, avec mesures et preuves.
+//   1. En bref : ce qui bloque (dit une fois, Z12), la condition sans compromis, ce qui manque ;
+//   2. Ce qui change votre choix : les écarts lus de la même façon, et ce qui reste à vérifier,
+//      avec le geste au niveau de l'incertitude (troisième revue Work : une lecture principale) ;
+//   3. Et si… ? juste après ; puis ce qui reste à vérifier et le prochain geste de chacun ;
+//   4. Le détail, condition par condition, couche par couche, avec mesures et preuves.
+// Quand il n'y a pas d'écart à montrer, le bilan complet (apporte, demande d'accepter) reprend sa place.
 // Sur ordinateur : deux à quatre colonnes. Sur téléphone : deux, en face-à-face, et l'on change
 // l'une ou l'autre. Aucun ordre de mérite : les colonnes suivent l'ordre de vos communes.
 import { useId, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { GlypheGrain, Plaque, releve as s } from "@/components/releve/primitives";
 import { bilan, colonnesDe, confronter, dateCourte, enBref, etSi5, logementsDe, simuler, NOM_CRITERE, TITRE_SEAU5, type Bilan, type Logement, type Piste, type SeauEtSi } from "../modele5";
 import { faireGeste, type Api5 } from "../CentreDecision5";
-import { BoutonGeste, Fil, Section, Vignette, lier } from "../communs5";
+import { BoutonGeste, Section, Vignette, lier } from "../communs5";
 import { Confrontation } from "../Confrontation";
 import { Plan5 } from "../Plan5";
 import v from "../v5.module.css";
@@ -32,7 +34,8 @@ export function Comparer5({ api }: { api: Api5 }) {
   const idDe = (p: Piste) => (p.type === "commune" ? `c:${p.commune.insee}` : p.logement.id);
   const sel = (etat.vue.selection ?? []).filter((x) => candidats.some((p) => idDe(p) === x)).slice(0, MAX);
   const choisis = candidats.filter((p) => sel.includes(idDe(p)));
-  const [duel, setDuel] = useState<[number, number]>([0, 1]);
+  const duel = etat.comparaison?.duel ?? [0, 1];
+  const setDuel = (d: [number, number]) => api.envoyer({ type: "duel", duel: d });
   const d0 = Math.min(duel[0], choisis.length - 1); const d1 = Math.min(duel[1], choisis.length - 1);
   const montres = etroit && choisis.length > 2 ? [choisis[d0]!, choisis[d1 === d0 ? (d0 + 1) % choisis.length : d1]!] : choisis;
   const choisir = (selection: string[], m = mode) => aller({ ecran: "comparer", mode: m, selection });
@@ -43,14 +46,26 @@ export function Comparer5({ api }: { api: Api5 }) {
   const bilans = cols.map((c) => bilan(etat, montres.find((p) => idDe(p) === c.id)!, etat.droits));
   // Deuxième revue Work : une première lecture plus visuelle, réduite aux écarts établis et aux écarts possibles.
   const change = conf ? conf.lignes.map((li) => ({ ...li, couches: li.couches.filter((x) => x.verdict === "distingue" || (x.verdict === "pourrait" && x.couche !== "commune")) })).filter((li) => li.couches.length) : [];
+  const bref = conf ? enBref(etat, montres) : [];
+  const distingue = bref.find((x) => x.titre === "Ce qui les distingue");
+  const resteAVerifier = change.some((li) => li.couches.some((x) => x.verdict === "pourrait"));
+  // Le bilan ne se réduit que si tout est examiné partout : sinon ce qu'un seul lieu demande d'accepter
+  // (un compromis lu pour lui seul) disparaîtrait de la lecture principale.
+  const reduit = change.length > 0 && bilans.every((b) => b.lus === b.total);
+  // Le geste au niveau de l'incertitude : les questions déjà prêtes pour ce logement et cette condition.
+  const questions = (cle: string, ids: string[]) => {
+    if (ids.length !== 1) return null;
+    const l = etat.logements.find((x) => x.id === ids[0]);
+    const n = l ? l.verifications.filter((q) => q.cle === cle && !q.reponse).length : 0;
+    return l && n ? <button type="button" className={`${s.action} ${v.cible}`} onClick={() => aller({ ecran: "logement", id: l.id, ancre: "verifier" })}>{n === 1 ? "Voir la question à poser" : `Voir les ${n} questions à poser`}</button> : null;
+  };
   const communesVues = [...new Set(montres.map((p) => (p.type === "commune" ? p.commune.insee : p.logement.commune.insee)))].map((i) => etat.communes.find((c) => c.insee === i)!).filter(Boolean);
 
   return (
     <>
-      <Fil segments={[{ libelle: "Ma décision", aller: () => aller({ ecran: "ensemble" }) }, { libelle: "Comparer" }]} />
       <div className={v.tete}>
         <h1 className={`${s.titre} ${v.titreVue}`} tabIndex={-1} data-titre-vue>{mode === "communes" ? "Comparer vos communes" : "Comparer vos logements"}</h1>
-        <p className={s.nuance}>Aucun classement : ce qui les distingue, ce que chacun demande, ce qui reste à savoir. Face à votre Projet (révision {etat.projet.revision} du {dateCourte(etat.projet.date)})</p>
+        <p className={s.nuance}>Aucun classement. Face à votre Projet, révision {etat.projet.revision} du {dateCourte(etat.projet.date)}.</p>
       </div>
 
       <div className={v.modes} role="group" aria-label="Ce que vous comparez">
@@ -63,7 +78,7 @@ export function Comparer5({ api }: { api: Api5 }) {
       </div>
 
       <div className={v.choix} role="group" aria-labelledby={`${id}-c`}>
-        <p className={s.etiquette} id={`${id}-c`}>{mode === "communes" ? "Communes comparées" : "Logements comparés"} · deux à {MAX}</p>
+        <p className={s.etiquette} id={`${id}-c`}>{sel.length ? `${sel.length} ${mode === "communes" ? "commune" : "logement"}${sel.length > 1 ? "s" : ""} sélectionné${mode === "communes" ? "e" : ""}${sel.length > 1 ? "s" : ""} · ${MAX} au plus` : `Choisissez deux à ${MAX} ${mode === "communes" ? "communes" : "logements"}`}</p>
         <div className={v.choixGroupes}>
           {mode === "communes" ? (
             <div className={v.choixGroupe}>{candidats.map((p) => <Puce key={idDe(p)} p={p} actif={sel.includes(idDe(p))} plein={sel.length >= MAX} basculer={basculer} />)}</div>
@@ -100,20 +115,21 @@ export function Comparer5({ api }: { api: Api5 }) {
 
           <Plaque etiquette="En bref" className={v.bref}>
             <p className={s.etiquette}>En bref</p>
-            <dl className={v.lignesTitrees}>{enBref(etat, montres).map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
+            <dl className={v.lignesTitrees}>{bref.filter((x) => !change.length || (x.titre !== "Ce qui les distingue" && (x.titre !== "Ce qui pourrait changer votre choix" || !resteAVerifier))).map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
           </Plaque>
 
           {change.length ? (
-            <Section titre="Ce qui change votre choix" id="change" sous="Les seules conditions où ils diffèrent à méthode égale, et celles qui pourraient encore tout changer. Le reste est au détail, plus bas.">
-              <Confrontation colonnes={conf.colonnes} lignes={change} projet={etat.projet} compact />
+            <Section titre="Ce qui change votre choix" id="change"
+              sous={`${distingue && !/^Rien ne les distingue/.test(distingue.texte) ? `${distingue.texte} ` : ""}${resteAVerifier ? "Les cases à vérifier pourraient encore changer votre choix." : ""}`.trim() || undefined}>
+              <Confrontation colonnes={conf.colonnes} lignes={change} projet={etat.projet} compact action={questions} />
             </Section>
           ) : null}
 
-          <Section titre={mode === "communes" ? "Ce que chacune apporte, et ce qu'elle demande" : "Ce que chacun apporte, et ce qu'il demande"} id="bilan">
-            <Bilans bilans={bilans} api={api} montres={montres} />
-          </Section>
-
           <EtSiIci api={api} montres={montres} />
+
+          <Section titre={reduit ? "Ce qui reste à vérifier, et le prochain geste" : mode === "communes" ? "Ce que chacune apporte, et ce qu'elle demande" : "Ce que chacun apporte, et ce qu'il demande"} id="bilan">
+            <Bilans bilans={bilans} api={api} montres={montres} reduit={reduit} />
+          </Section>
 
           {mode === "communes" || communesVues.length > 1 ? (
             <Section titre="Où elles sont" id="carte" sous="Un repère pour situer les communes l'une par rapport à l'autre. Le trajet réel se mesure depuis une adresse.">
@@ -142,6 +158,7 @@ function Puce({ p, actif, plein, basculer }: { p: Piste; actif: boolean; plein: 
   const id = p.type === "commune" ? `c:${p.commune.insee}` : p.logement.id;
   return (
     <button type="button" className={v.puce} aria-pressed={actif} disabled={!actif && plein} onClick={() => basculer(id)} data-commune={p.type === "commune" || undefined}>
+      <span className={v.coche} aria-hidden>{actif ? "✓" : ""}</span>
       {p.type === "commune" ? <><GlypheGrain grain="commune" taille={10} /> {p.commune.nom}</> : p.logement.libelle}
     </button>
   );
@@ -151,10 +168,10 @@ const RANGS: { cle: keyof Pick<Bilan, "apporte" | "accepte" | "ouvert" | "pasLu"
   { cle: "apporte", titre: "Apporte", genre: "apporte" },
   { cle: "accepte", titre: "Demande d'accepter", genre: "accepte" },
   { cle: "ouvert", titre: "Pourrait changer l'arbitrage", genre: "inconnu" },
-  { cle: "pasLu", titre: "Pas encore lu", genre: "manque" },
+  { cle: "pasLu", titre: "Pas encore examiné", genre: "manque" },
 ];
 
-function Bilans({ bilans, api, montres }: { bilans: Bilan[]; api: Api5; montres: Piste[] }) {
+function Bilans({ bilans, api, montres, reduit = false }: { bilans: Bilan[]; api: Api5; montres: Piste[]; reduit?: boolean }) {
   const piste = (id: string) => montres.find((p) => (p.type === "commune" ? `c:${p.commune.insee}` : p.logement.id) === id)!;
   return (
     <div className={v.bilans} style={{ "--cols": bilans.length } as CSSProperties}>
@@ -175,7 +192,7 @@ function Bilans({ bilans, api, montres }: { bilans: Bilan[]; api: Api5; montres:
           );
         })}
       </div>
-      {RANGS.map((r) => bilans.some((b) => b[r.cle].length) ? (
+      {RANGS.filter((r) => !reduit || r.cle === "ouvert" || r.cle === "pasLu").map((r) => bilans.some((b) => b[r.cle].length) ? (
         <div key={r.cle} className={v.bilanRang} data-genre={r.genre}>
           <span className={v.bilanCle}>{r.titre}</span>
           {bilans.map((b) => (
@@ -242,10 +259,11 @@ function EtSiIci({ api, montres }: { api: Api5; montres: Piste[] }) {
         ) : prio ? (
           <div className={v.seau} data-seau="pourrait_changer">
             <p className={v.seauTitre}>Si {NOM_CRITERE[prio.cle].toLowerCase()} devenait une condition sans compromis</p>
-            {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Parmi ce qui est lu, aucune de ces possibilités n&apos;y est un compromis : rien ne changerait de côté, d&apos;après leurs analyses.</p>}
+            {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Parmi ce qui est examiné, aucune de ces possibilités n&apos;y fait un compromis : l&apos;effet estimé serait nul.</p>}
           </div>
         ) : null}
-        <p className={s.nuance}>Une mesure ou une issue connue permet d&apos;écrire « pourrait » ; seule une analyse mise à jour dirait « tient ». <button type="button" className={v.lien} onClick={() => aller({ ecran: "projet", ancre: "et-si" })}>Adopter un changement dans Mon Projet</button></p>
+        <p className={s.nuance}>Effet estimé d&apos;après les mesures déjà faites ; seule une analyse mise à jour le confirmerait.</p>
+        <p><button type="button" className={`${s.bouton} ${v.cible}`} onClick={() => aller({ ecran: "projet", ancre: "et-si", essai: essai === "limite" && k ? `valeur.${k.cle}.${val}` : prio ? `nature.${prio.cle}` : undefined })}>Adopter ce changement dans Mon Projet</button></p>
       </div>
     </details>
   );

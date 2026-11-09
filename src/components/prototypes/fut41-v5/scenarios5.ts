@@ -118,7 +118,8 @@ void S.bpe25;
 
 export type Ecran5 = "ensemble" | "comparer" | "projet" | "commune" | "logement" | "releve";
 export type Mode = "communes" | "logements";
-export type Vue5 = { ecran: Ecran5; id?: string; mode?: Mode; selection?: string[]; ancre?: string };
+/** `essai` : le changement essayé dans Comparer, transmis à Mon Projet (« nature.quartier », « valeur.gare.20 »). */
+export type Vue5 = { ecran: Ecran5; id?: string; mode?: Mode; selection?: string[]; ancre?: string; essai?: string };
 
 export type Scenario5 = {
   id: string; titre: string; resume: string;

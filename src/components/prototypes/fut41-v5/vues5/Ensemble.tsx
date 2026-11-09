@@ -1,14 +1,15 @@
 "use client";
 // VUE D'ENSEMBLE, V5 · l'ordre de lecture est l'ordre des questions d'une personne :
 //   1. où en suis-je ? (titre, Projet en une ligne, trois phrases au plus)
-//   2. que faire maintenant ? (trois gestes au plus, chacun avec son bouton)
-//   3. mes communes et mes logements (visibles sans défiler sur ordinateur), et l'accès à Comparer.
+//   2. le geste le plus utile maintenant, seul et nettement prioritaire ;
+//   3. mes communes et mes logements, et l'accès à Comparer ; les autres gestes à faire sont posés
+//      sous le logement ou la commune qu'ils concernent (troisième revue Work).
 // Aucun tableau de bord, aucun compteur ; aucun ordre de mérite : on range par commune, ou sur une
 // dimension nommée (prix, surface, trajet mesuré) qui dit d'où vient sa valeur.
 import { useId, useState } from "react";
 import { GlypheGrain, Plaque, Selecteur, releve as s } from "@/components/releve/primitives";
 import {
-  aFaire5, analyseServie, communeCommeLieu, criteresDepasses, dateCourte, gestePrincipal, libelleCritere, logementsDe, montantAnnonce, montantFr, ouVousEnEtes, trier,
+  aFaire5, analyseServie, type Faire, communeCommeLieu, criteresDepasses, dateCourte, gestePrincipal, libelleCritere, logementsDe, montantAnnonce, ouVousEnEtes, trier,
   LIBELLE_DIMENSION, LIBELLE_STATUT, type Commune, type DimensionTri, type Logement, type Piste,
 } from "../modele5";
 import { AUJOURDHUI } from "../scenarios5";
@@ -30,6 +31,7 @@ export function Ensemble({ api }: { api: Api5 }) {
   const idRang = useId();
   const resume = ouVousEnEtes(etat);
   const faire = aFaire5(etat, AUJOURDHUI, etat.droits);
+  const autres = faire.slice(1);
   const ecartes = [...etat.logements.filter((l) => l.statut === "ecarte"), ...etat.communes.filter((c) => c.statut === "ecartee")];
 
   const titre = vide ? "Où aimeriez-vous vivre ?"
@@ -57,7 +59,7 @@ export function Ensemble({ api }: { api: Api5 }) {
             <button type="button" className={v.entree} onClick={() => setAjout("logement")} aria-expanded={ajout === "logement"}>
               <GlypheGrain grain="batiment" taille={22} />
               <span className={v.entreeTitre}>J&apos;ai une adresse ou une annonce</span>
-              <span className={v.entreeSous}>La commune sera ajoutée avec lui.</span>
+              <span className={v.entreeSous}>La commune sera ajoutée automatiquement.</span>
             </button>
           </div>
           {ajout ? <Ajout5 key={ajout} api={api} depart={ajout} fermer={() => setAjout(null)} /> : null}
@@ -70,30 +72,17 @@ export function Ensemble({ api }: { api: Api5 }) {
             <dl className={v.lignesTitrees}>{resume.map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
           </Plaque>
 
-          {faire.length ? (
+          {faire[0] ? (
             <section className={v.faire} aria-labelledby="faire-t">
-              <div className={v.faireTete}>
-                <h2 className={v.sectionTitre} id="faire-t">À faire maintenant</h2>
-                <p className={s.nuance}>Une visite qui approche, une question ouverte, puis ce qui manque pour comparer. Cet ordre ne classe pas vos logements.</p>
+              <h2 className={v.sectionTitre} id="faire-t">Le plus utile maintenant</h2>
+              <div className={v.premierGeste}>
+                <span className={s.pileSerree}>
+                  <span className={v.actionTexte}>{lier(faire[0].texte)}</span>
+                  <span className={s.nuance}>{lier(faire[0].pourquoi)}</span>
+                </span>
+                <button type="button" className={`${s.bouton} ${s.boutonMarque}`} onClick={(e) => agir(api, faire[0]!, e.currentTarget)}>{faire[0].bouton}</button>
               </div>
-              <ol className={v.actions}>
-                {faire.map((a, i) => {
-                  const p = pisteDe(api, a.pisteId);
-                  return (
-                    <li key={i}>
-                      <span className={v.actionNum}>{i + 1}</span>
-                      <span className={s.pileSerree}>
-                        <span className={v.actionTexte}>{lier(a.texte)}</span>
-                        <span className={s.nuance}>{lier(a.pourquoi)}</span>
-                      </span>
-                      <button type="button" className={s.bouton} onClick={(e) => {
-                        if (a.action.type === "panneau" && p) api.ouvrirPanneau(p, a.action.geste, e.currentTarget);
-                        else aller(a.pisteId.startsWith("c:") ? { ecran: "commune", id: a.pisteId } : { ecran: "logement", id: a.pisteId, ...(a.action.type === "fiche" && a.action.ancre ? { ancre: a.action.ancre } : {}) });
-                      }}>{a.bouton}</button>
-                    </li>
-                  );
-                })}
-              </ol>
+              {autres.length ? <p className={s.nuance}>{autres.length === 1 ? "Un autre geste attend" : `${autres.length} autres gestes attendent`}, sous le lieu concerné.</p> : null}
             </section>
           ) : null}
           </div>
@@ -117,7 +106,7 @@ export function Ensemble({ api }: { api: Api5 }) {
             {ajout ? <Ajout5 key={ajout} api={api} depart={ajout} fermer={() => setAjout(null)} /> : null}
 
             {rang === "commune" ? (
-              <div className={v.groupes}>{communes.map((c) => <GroupeCommune key={c.insee} api={api} commune={c} />)}</div>
+              <div className={v.groupes}>{communes.map((c) => <GroupeCommune key={c.insee} api={api} commune={c} autres={autres} />)}</div>
             ) : (
               <div className={v.groupes}>
                 {trier(logements, rang, etat.projet, AUJOURDHUI).map((g) => (
@@ -125,7 +114,7 @@ export function Ensemble({ api }: { api: Api5 }) {
                     <p className={v.faceTitre}>{g.titre}</p>
                     {g.note ? <p className={s.nuance}>{lier(g.note)}</p> : null}
                     <ul className={`${v.logements} ${v.logementsPlats}`}>
-                      {g.lieux.map((x) => <LigneLogement key={x.lieu.id} api={api} logement={x.lieu as Logement} valeur={x.valeur} raison={x.raison} />)}
+                      {g.lieux.map((x) => <LigneLogement key={x.lieu.id} api={api} logement={x.lieu as Logement} valeur={x.valeur} raison={x.raison} autres={autres} />)}
                     </ul>
                   </div>
                 ))}
@@ -140,15 +129,29 @@ export function Ensemble({ api }: { api: Api5 }) {
   );
 }
 
+function agir(api: Api5, a: Faire, el: HTMLElement) {
+  const p = pisteDe(api, a.pisteId);
+  if (a.action.type === "panneau" && p) api.ouvrirPanneau(p, a.action.geste, el);
+  else api.aller(a.pisteId.startsWith("c:") ? { ecran: "commune", id: a.pisteId } : { ecran: "logement", id: a.pisteId, ...(a.action.type === "fiche" && a.action.ancre ? { ancre: a.action.ancre } : {}) });
+}
+
+/** Les autres gestes à faire, sous le lieu qu'ils concernent. */
+function Aussi({ api, gestes }: { api: Api5; gestes: Faire[] }) {
+  return gestes.length ? (
+    <ul className={v.aussi} aria-label="Aussi à faire">
+      {gestes.map((a, i) => <li key={i}><span className={v.aussiTexte}>À faire · {lier(a.court)}</span><button type="button" className={`${s.action} ${v.cible}`} onClick={(e) => agir(api, a, e.currentTarget)}>{a.bouton}</button></li>)}
+    </ul>
+  ) : null;
+}
+
 function pisteDe(api: Api5, id: string): Piste | null {
   if (id.startsWith("c:")) { const c = api.etat.communes.find((x) => `c:${x.insee}` === id); return c ? { type: "commune", commune: c } : null; }
   const l = api.etat.logements.find((x) => x.id === id); return l ? { type: "logement", logement: l } : null;
 }
 
-/** Le Projet en une ligne, ouvrable ; « Et si… ? » mène à la simulation de Mon Projet. */
+/** Le Projet en une ligne ; une entrée vers Mon Projet, une autre pour essayer un changement. */
 export function ProjetCompact({ api }: { api: Api5 }) {
   const { projet } = api.etat;
-  const [ouvert, setOuvert] = useState(false);
   const durs = projet.criteres.filter((c) => c.nature === "sans_compromis");
   const prefs = projet.criteres.filter((c) => c.nature === "priorite").sort((a, b) => (b.poids ?? 0) - (a.poids ?? 0));
   return (
@@ -157,25 +160,14 @@ export function ProjetCompact({ api }: { api: Api5 }) {
         <strong className={s.encre}>Votre Projet</strong> · {projet.intention === "achat" ? "acheter" : "louer"} · {durs.map((c) => `${libelleCritere(c).toLowerCase()} (sans compromis)`).join(", ")}, puis {prefs.map((c) => libelleCritere(c).toLowerCase()).join(", ")}.
       </p>
       <div className={v.ligneGestes}>
-        <button type="button" className={s.action} aria-expanded={ouvert} onClick={() => setOuvert((x) => !x)}>{ouvert ? "Replier" : "Voir le détail"}</button>
-        <button type="button" className={s.action} onClick={() => api.aller({ ecran: "projet", ancre: "et-si" })}>Et si… ?</button>
-        <button type="button" className={s.action} onClick={() => api.aller({ ecran: "projet" })}>Modifier</button>
+        <button type="button" className={`${s.action} ${v.cible}`} onClick={() => api.aller({ ecran: "projet" })}>Voir mon Projet</button>
+        <button type="button" className={`${s.action} ${v.cible}`} onClick={() => api.aller({ ecran: "projet", ancre: "et-si" })}>Essayer un changement</button>
       </div>
-      {ouvert ? (
-        <div className={v.projetDetail}>
-          <p className={v.projetCle}>Sans compromis</p>
-          <ul className={v.projetListe}>{durs.map((c) => <li key={c.cle} data-dur>{libelleCritere(c)}</li>)}</ul>
-          <p className={v.projetCle}>Ce qui compte</p>
-          <ul className={v.projetListe}>{prefs.map((c) => <li key={c.cle}>{libelleCritere(c)}<span className={v.beaucoup}> · {c.poids === 3 ? "compte beaucoup" : c.poids === 2 ? "compte" : "compte un peu"}</span></li>)}</ul>
-          {projet.budget ? <p className={v.projetBudget}>Budget : {montantFr(projet.budget.montant)}{projet.budget.periodicite === "mois" ? " par mois" : ""} <Declare>déclaré par vous, non mesuré</Declare></p> : null}
-          <p className={s.nuance}>Révision {projet.revision}, du {dateCourte(projet.date)}</p>
-        </div>
-      ) : null}
     </section>
   );
 }
 
-function GroupeCommune({ api, commune }: { api: Api5; commune: Commune }) {
+function GroupeCommune({ api, commune, autres }: { api: Api5; commune: Commune; autres: Faire[] }) {
   const { etat, aller } = api;
   const a = commune.lecture === "rapport" ? analyseServie(communeCommeLieu(commune)) : null;
   const logements = logementsDe(etat, commune).filter((l) => l.statut !== "ecarte");
@@ -196,9 +188,10 @@ function GroupeCommune({ api, commune }: { api: Api5; commune: Commune }) {
         </div>
         {g.cle !== "ouvrir_rapport" ? <BoutonGeste geste={g} faire={faireGeste(api, piste)} /> : null}
       </header>
+      <Aussi api={api} gestes={autres.filter((a) => a.pisteId === `c:${commune.insee}`)} />
       {logements.length ? (
         <ul className={v.logements} aria-label={`Vos logements à ${commune.nom}`}>
-          {logements.map((l) => <LigneLogement key={l.id} api={api} logement={l} />)}
+          {logements.map((l) => <LigneLogement key={l.id} api={api} logement={l} autres={autres} />)}
         </ul>
       ) : <p className={v.aucunLogement}>Aucun logement à {commune.nom} pour l&apos;instant : la commune se compare déjà aux autres.</p>}
     </article>
@@ -214,7 +207,7 @@ export function savoirCourt(api: Api5, l: Logement): string {
   return `${commune} · ${l.adresse ? "adresse pas encore analysée" : "adresse inconnue"}`;
 }
 
-function LigneLogement({ api, logement, valeur, raison }: { api: Api5; logement: Logement; valeur?: string | null; raison?: string }) {
+function LigneLogement({ api, logement, valeur, raison, autres = [] }: { api: Api5; logement: Logement; valeur?: string | null; raison?: string; autres?: Faire[] }) {
   const { etat, aller } = api;
   const piste: Piste = { type: "logement", logement };
   const g = gestePrincipal(etat, piste, etat.droits);
@@ -230,6 +223,7 @@ function LigneLogement({ api, logement, valeur, raison }: { api: Api5; logement:
         <p className={v.savoir}>{savoirCourt(api, logement)}</p>
         {valeur ? <p className={v.valeurTri}>{valeur}</p> : null}
         {raison ? <p className={v.change}>{lier(raison)}</p> : null}
+        <Aussi api={api} gestes={autres.filter((a) => a.pisteId === logement.id)} />
       </div>
       <div className={v.logementGeste}>
         <BoutonGeste geste={g} faire={faireGeste(api, piste)} apport={g.commercial ? g.court ?? null : g.cle === "adresse" ? "Sans elle, seule la commune est lue." : null} />

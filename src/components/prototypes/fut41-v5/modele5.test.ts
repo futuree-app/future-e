@@ -2,7 +2,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { confronter, enBref, ouVousEnEtes, bilan, alertes, ecarts, etSi5, prudente, simuler, TITRE_SEAU5, type Recherche, type Piste } from "./modele5.ts";
-import { etatInitial5 } from "./etat5.ts";
+import { etatInitial5, reduire5, vueVersHash5, hashVersVue5 } from "./etat5.ts";
+import { aFaire5 } from "./modele5.ts";
 import { PROJET, COMMUNES, LOGEMENTS } from "./scenarios5.ts";
 
 const R = (c: string[], l: string[]): Recherche => ({
@@ -174,4 +175,46 @@ test("arbitrage : et si la vie de quartier devenait sans compromis, seul ce qui 
   assert.equal(fx.length, 1);
   assert.match(fx[0]!.phrase, /T4 rue de la Convention : une vie de quartier y est un compromis ; sans compromis, il pourrait ne plus tenir/);
   assert.equal(e.projet.criteres.find((c) => c.cle === "quartier")!.nature, "priorite", "le Projet n'a pas changé");
+});
+
+// ── Troisième revue Work : continuité des parcours et textes concrets ──────────────────────
+
+test("continuité : revenir dans Comparer retrouve le mode, la sélection et le duo affiché", () => {
+  let e = etatInitial5("dix");
+  e = reduire5(e, { type: "naviguer", vue: { ecran: "comparer", mode: "logements", selection: ["fosse", "convention", "felix"] } });
+  e = reduire5(e, { type: "duel", duel: [1, 2] });
+  e = reduire5(e, { type: "naviguer", vue: { ecran: "projet" } });
+  e = reduire5(e, { type: "naviguer", vue: { ecran: "comparer", mode: "logements" } });
+  assert.deepEqual(e.vue.selection, ["fosse", "convention", "felix"]);
+  assert.deepEqual(e.comparaison?.duel, [1, 2]);
+  e = reduire5(e, { type: "naviguer", vue: { ecran: "comparer", mode: "logements", selection: ["fosse", "felix"] } });
+  assert.deepEqual(e.comparaison?.duel, [0, 1], "une autre sélection repart du premier duo");
+});
+
+test("continuité : l'essai fait dans Comparer est transmis tel quel à Mon Projet", () => {
+  const vue = { ecran: "projet" as const, ancre: "et-si", essai: "nature.quartier" };
+  assert.equal(vueVersHash5(vue), "#/projet/et-si/nature.quartier");
+  assert.deepEqual(hashVersVue5("#/projet/et-si/valeur.gare.30"), { ecran: "projet", ancre: "et-si", essai: "valeur.gare.30" });
+  assert.deepEqual(hashVersVue5("#/projet/et-si"), { ecran: "projet", ancre: "et-si" });
+});
+
+test("bilan : ce qu'un logement apporte est dit par le fait mesuré, pas par le nom du critère seul", () => {
+  const e = etatInitial5("arbitrage");
+  const b = bilan(e, { type: "logement", logement: e.logements.find((l) => l.id === "fosse")! }, "unite");
+  assert.ok(b.apporte.includes("Commerces, marché et tramway à moins de 5 min à pied"), b.apporte.join(" | "));
+  assert.ok(b.apporte.every((x) => !/^(la|le|les) [a-zé]+$/.test(x)), "jamais le nom du critère seul quand le fait est connu");
+});
+
+test("à faire : le geste court ne répète pas le nom du lieu, et l'on note une réponse", () => {
+  const e = etatInitial5("ref");
+  const f = aFaire5(e, "2026-11-09", "unite");
+  for (const a of f) {
+    const nom = e.logements.find((l) => l.id === a.pisteId)?.libelle ?? e.communes.find((c) => `c:${c.insee}` === a.pisteId)?.nom ?? "";
+    assert.ok(!a.court.includes(nom), a.court);
+  }
+  assert.ok(!f.some((a) => a.bouton === "Répondre"));
+});
+
+test("et si : le seau inchangé dit un effet estimé, sans « du même côté »", () => {
+  assert.equal(TITRE_SEAU5.inchange, "L'effet estimé resterait le même");
 });

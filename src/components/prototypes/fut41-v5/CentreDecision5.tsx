@@ -1,7 +1,8 @@
 "use client";
 // FUT-41 / FUT-22 · PROTOTYPE V5 DU CENTRE DE DÉCISION (revue produit, DEV UNIQUEMENT).
 // Ma décision reste l'espace unique. Trois entrées : Vue d'ensemble, Comparer (communes ou
-// logements), Mon Projet. Les fiches et le Relevé sont des profondeurs, avec leur fil d'Ariane.
+// logements), Mon Projet. Les fiches et le Relevé sont des profondeurs, avec leur fil d'Ariane ;
+// les trois entrées n'en ont pas (la navigation les nomme déjà). Comparer est retrouvé tel qu'on l'a laissé.
 // La V4 (/dev/centre-decision) et la V4.1 (/dev/centre-decision-v41) restent intactes.
 import { useCallback, useEffect, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import { BandeauPrototype, releve as s } from "@/components/releve/primitives";
@@ -130,7 +131,7 @@ export function CentreDecision5({ lienV4 = "/dev/centre-decision", lienV41 = "/d
         <nav aria-label="Ma décision" className={v.sousNav}>
           {([["ensemble", "Vue d'ensemble"], ["comparer", "Comparer"], ["projet", "Mon Projet"]] as const).map(([k, t]) => (
             <button key={k} type="button" className={v.sousNavLien} aria-current={onglet === k ? "page" : undefined}
-              onClick={() => aller(k === "comparer" ? { ecran: "comparer", mode: etat.communes.filter((c) => c.statut !== "ecartee").length > 1 && !etat.logements.some((l) => l.statut !== "ecarte") ? "communes" : "logements" } : { ecran: k })}>{t}</button>
+              onClick={() => aller(k === "comparer" ? { ecran: "comparer", mode: etat.comparaison?.mode ?? (etat.communes.filter((c) => c.statut !== "ecartee").length > 1 && !etat.logements.some((l) => l.statut !== "ecarte") ? "communes" : "logements") } : { ecran: k })}>{t}</button>
           ))}
         </nav>
         <div ref={zone} key={`${etat.scenario}:${vueVersHash5({ ...etat.vue, ancre: undefined })}`} className={v.vue}>

@@ -289,8 +289,10 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
     const ou = p.type === "commune" ? "" : ligne.grain ? `, ${OU[ligne.grain]}` : "";
     const mesure = ligne.mesure ? `, ${ligne.mesure.valeur} ${ligne.mesure.unite}` : "";
     const ancien = lim != null ? ` (lu sous votre ancienne limite de ${lim} ${ligne.mesure?.unite ?? "min"})` : "";
-    if (ligne.issue === "favorable") (lim != null && k.nature === "sans_compromis" ? ouvert : apporte).push(`${nom}${mesure}${ou}${ancien}`);
-    else if (ligne.issue === "reserve" || ligne.issue === "mismatch") accepte.push(`${nom}${ou}${ligne.issue === "mismatch" ? " (moins bien)" : ""}`);
+    // Troisième revue Work : le fait concret (« commerces et marché à 5 min ») plutôt que le nom du critère seul.
+    const fait = ligne.constat ? ligne.constat.replace(/\.$/, "") : `${nom}${mesure}${ou}`;
+    if (ligne.issue === "favorable") (lim != null && k.nature === "sans_compromis" ? ouvert : apporte).push(`${lim != null ? `${nom}${mesure}${ou}` : fait}${ancien}`);
+    else if (ligne.issue === "reserve" || ligne.issue === "mismatch") accepte.push(`${fait}${ligne.issue === "mismatch" && !ligne.constat ? " (moins bien)" : ""}`);
     else if (ligne.issue === "incompatible") (lim != null ? ouvert : accepte).push(`${nom}${mesure}${ou}${ancien}`);
     else {
       const q = p.type === "logement" ? p.logement.verifications.find((v) => v.cle === k.cle && !v.reponse) : undefined;
@@ -530,6 +532,8 @@ export function ouVousEnEtes(r: Recherche): Ligne5[] {
 export type Faire = {
   pisteId: string;
   texte: string;
+  /** Le même geste sans le nom du lieu, pour l'afficher sous le logement ou la commune concernés. */
+  court: string;
   pourquoi: string;
   bouton: string;
   /** Ce que fait le bouton : ouvrir une fiche (à une ancre), ou ouvrir le panneau d'un geste d'analyse. */
@@ -541,11 +545,11 @@ export function aFaire5(r: Recherche, aujourdhui: string, droits: "unite" | "pas
   const actifs = r.logements.filter((l) => l.statut !== "ecarte");
   for (const l of actifs) if (l.visiteLe && l.visiteLe >= aujourdhui) {
     const n = l.verifications.filter((v) => v.moment === "sur_place" && !v.reponse).length;
-    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, pourquoi: n ? `${n === 1 ? "Une question" : `${n} questions`} à poser sur place, qui ${n === 1 ? "peut" : "peuvent"} changer votre lecture.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
+    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, court: `Préparer la visite du ${dateCourte(l.visiteLe)}`, pourquoi: n ? `${n === 1 ? "Une question" : `${n} questions`} à poser sur place, qui ${n === 1 ? "peut" : "peuvent"} changer votre lecture.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
   }
   for (const l of actifs) {
     const v = l.verifications.find((x) => !x.reponse && x.moment !== "avant_engagement" && !(l.visiteLe && l.visiteLe >= aujourdhui && x.moment === "sur_place"));
-    if (v) out.push({ pisteId: l.id, texte: `${l.libelle} : ${v.question.charAt(0).toLowerCase()}${v.question.slice(1)}`, pourquoi: v.pourquoi, bouton: "Répondre", action: { type: "fiche", ancre: "verifier" } });
+    if (v) out.push({ pisteId: l.id, texte: `${l.libelle} : ${v.question.charAt(0).toLowerCase()}${v.question.slice(1)}`, court: v.question, pourquoi: v.pourquoi, bouton: "Noter la réponse", action: { type: "fiche", ancre: "verifier" } });
   }
   const pistes = pistesActives(r);
   const ordre: Geste["cle"][] = ["mettre_a_jour", "adresse", "analyser", "examiner_commune"];
@@ -553,10 +557,10 @@ export function aFaire5(r: Recherche, aujourdhui: string, droits: "unite" | "pas
     const g = gestePrincipal(r, p, droits);
     if (g.cle !== cle) continue;
     const n = nomPiste(p);
-    if (cle === "mettre_a_jour") out.push({ pisteId: idPiste(p), texte: `Mettre à jour ${p.type === "logement" ? `le dossier ${deNom(p)}` : `le rapport ${deNom(p)}`} avec votre Projet actuel`, pourquoi: "Lu sous une ancienne version de votre Projet : tant qu'il ne l'est pas, sa gare ne se compare pas. Gratuit.", bouton: "Mettre à jour", action: { type: "panneau", geste: cle } });
-    if (cle === "adresse") out.push({ pisteId: idPiste(p), texte: `Demander l'adresse exacte ${deNom(p)}`, pourquoi: "Sans elle, seule la commune est lue.", bouton: "Renseigner", action: { type: "fiche", ancre: "adresse" } });
-    if (cle === "analyser") out.push({ pisteId: idPiste(p), texte: `Analyser l'adresse ${deNom(p)}`, pourquoi: g.court ?? g.apport, bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
-    if (cle === "examiner_commune") out.push({ pisteId: idPiste(p), texte: `Lire ${n} pour votre Projet`, pourquoi: "La lecture gratuite situe la commune ; elle ne dit pas si elle tient vos conditions.", bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
+    if (cle === "mettre_a_jour") out.push({ pisteId: idPiste(p), texte: `Mettre à jour ${p.type === "logement" ? `le dossier ${deNom(p)}` : `le rapport ${deNom(p)}`} avec votre Projet actuel`, court: `Mettre à jour ${p.type === "logement" ? "le dossier" : "le rapport"} avec votre Projet actuel`, pourquoi: "Lu sous une ancienne version de votre Projet : tant qu'il ne l'est pas, sa gare ne se compare pas. Gratuit.", bouton: "Mettre à jour", action: { type: "panneau", geste: cle } });
+    if (cle === "adresse") out.push({ pisteId: idPiste(p), texte: `Demander l'adresse exacte ${deNom(p)}`, court: "Demander l'adresse exacte", pourquoi: "Sans elle, seule la commune est lue.", bouton: "Renseigner", action: { type: "fiche", ancre: "adresse" } });
+    if (cle === "analyser") out.push({ pisteId: idPiste(p), texte: `Analyser l'adresse ${deNom(p)}`, court: "Analyser l'adresse", pourquoi: g.court ?? g.apport, bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
+    if (cle === "examiner_commune") out.push({ pisteId: idPiste(p), texte: `Lire ${n} pour votre Projet`, court: "Lire la commune pour votre Projet", pourquoi: "La lecture gratuite situe la commune ; elle ne dit pas si elle tient vos conditions.", bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
   }
   return out.slice(0, 3);
 }
@@ -613,7 +617,7 @@ export const TITRE_SEAU5: Record<SeauEtSi, string> = {
   pourrait_changer: "Pourraient changer de côté",
   ecarte_a_revoir: "Écartés à revoir",
   nouvelle_analyse: "Demanderaient une nouvelle analyse",
-  inchange: "Resteraient du même côté, d'après leur mesure",
+  inchange: "L'effet estimé resterait le même",
   pas_lu: "Rien à recalculer : pas encore lus",
 };
 
