@@ -185,7 +185,9 @@ test("D9. projection : le modèle reçoit la catégorie au périmètre lu, et le
   const ordinaire = buildTerritoireSnapshot(chatelaillonInputs(), T0);
   assert.equal(fait(ordinaire, "place.density").scale, "commune");
   assert.match(String(derive(ordinaire, "density.category")?.label), /^(Commune|Densité)/);
-  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@6", "contrat inchangé : le cache des autres communes reste valide");
+  // FUT-179 ne touche pas au contrat. FUT-177 (fusionné après) l'a porté à @7 pour ses propres consignes ; c'est
+  // la seule montée admise depuis @6 (garde FUT-147 : fixture fut177-lignes-admises.json).
+  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@7", "contrat : FUT-179 n'y touche pas, seul FUT-177 l'a porté à @7");
 });
 
 const violations = (s: ReturnType<typeof buildTerritoireSnapshot>, texte: string) =>

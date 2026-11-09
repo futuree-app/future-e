@@ -741,11 +741,14 @@ export function buildFactors(
               value: `${c.pct} %`,
               bar: c.pct / 100,
             })),
-            why: "La place laissée aux espaces naturels en dit long sur le territoire : ils rafraîchissent la commune l'été, retiennent l'eau lors des fortes pluies et abritent la vie. Là où le bâti domine, ces effets se font plus rares.",
+            why: "Les terres d'une commune se partagent entre trois familles : espaces naturels, cultures et espaces urbanisés. Une commune peut compter peu d'espaces naturels sans être très urbanisée : les cultures occupent alors une large part de ses terres. Vue par satellite, cette mesure dit ce qui couvre les sols ; elle ne dit ni la fraîcheur en été, ni l'accès à la nature, ni la richesse de la vie sauvage.",
+            // FUT-177 : « là où le bâti domine » faisait lire l'urbanisé d'OSO comme du bâti, et le peu de nature comme du bâti.
+            // La contre-revue a retiré aussi « ils rafraîchissent la commune, retiennent l'eau et abritent la vie » : une part
+            // de terres ne mesure ni un effet climatique ni un effet écologique. Le texte explique la composition, sans plus.
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
             // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
-            sources: "OSO 2023 (CESBIO, couverture des sols). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
+            sources: "OSO 2023 (CESBIO, couverture des sols vue par satellite). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments ; ce n'est pas la mesure réglementaire de l'OCS GE. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
           },
         }
       : {
@@ -755,7 +758,8 @@ export function buildFactors(
           col: "var(--green)",
           src: "ADEME · données communales",
           missing: boisementPct == null,
-          tip: "Les arbres rafraîchissent la commune l'été et abritent la vie. Leur place en dit long sur le confort par fortes chaleurs et sur le quotidien qu'on y trouve.",
+          // FUT-177 : le repli ADEME ne prête pas non plus à la forêt un effet sur la chaleur ou la vie qu'il ne mesure pas.
+          tip: "Part de la surface de la commune couverte de forêt. Elle dit la place des bois sur le territoire, sans mesurer la fraîcheur en été ni l'accès à la forêt depuis un logement.",
         },
   ];
 

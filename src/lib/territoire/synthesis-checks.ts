@@ -84,6 +84,111 @@ const SEASON = "residences_secondaires.categorie";
 
 // Accords : e?s? couvre masculin/féminin/pluriel.
 const A = "e?s?";
+// FUT-177 : la FIN d'un mot. En JavaScript, `\b` ne voit pas une lettre accentuée comme une lettre : « très urbanisé »
+// (masculin singulier, suivi d'une espace) échappait à `très urbanisé${A}\b`. Le texte est en minuscules.
+const FIN = "(?![a-zà-ÿœæ0-9])";
+
+// ── Couvert : les deux familles de requalification (D4, FUT-177) ──
+// TERRITOIRE BÂTI OU URBANISÉ : vrai seulement pour « Majoritairement urbanisé ». Ces tournures étaient déjà
+// refusées pour trois catégories ; FUT-177 les étend à « Faible présence d'espaces naturels », qui y échappait
+// alors que ses terres se partagent entre cultures et espaces urbanisés sans que ces derniers dominent
+// (Carpiquet : 41 % d'urbanisé, 45 % de cultures). « Peu d'espaces naturels » n'est pas « beaucoup de bâti ».
+const COUVERT_BATI: RegExp[] = [
+  new RegExp(`\\b(presque|quasi(ment)?|entièrement|totalement|essentiellement|largement) (bâti${A}|urbanisé${A}|construit${A}|minéral${A}|minérale${A})${FIN}`),
+  new RegExp(`\\btrès (urbanisé${A}|bâti${A}|minéral${A}|minérale${A}|construit${A})${FIN}`),
+  new RegExp(`\\bmajoritairement (bâti${A}|urbanisé${A})${FIN}`),
+  /\b(l'essentiel|la majeure partie|la majorité) (du territoire|de la commune) (est |reste )?(bâti|urbanisé|construit|couvert)/,
+  /\ble bâti (domine|l'emporte|prédomine)/,
+  new RegExp(`\\bdensément (bâti${A}|construit${A})`),
+  // FUT-177 : la dominance et l'intensité, sous d'autres mots.
+  new RegExp(`\\b(principalement|surtout|avant tout|fortement|en majorité) (bâti${A}|urbanisé${A}|construit${A}|minéral${A}|minérale${A})${FIN}`),
+  /\bforte urbanisation\b/,
+  new RegExp(`\\b(dominé${A}|façonné${A}) par (l'urbanisation|le bâti|les espaces urbanisés|les surfaces urbanisées|la ville|le béton|les constructions)`),
+  /\b(l'urbanisation|les espaces urbanisés|les surfaces urbanisées) (domine|dominent|l'emporte|l'emportent|prédomine|prédominent)\b/,
+];
+// Le manque de nature : refusé quand la catégorie le contredit, permis pour « Faible présence d'espaces naturels ».
+const COUVERT_PEU_NATUREL: RegExp[] = [
+  /\b(très|si|trop) peu d(e |')(espaces? (verts?|naturels?|ouverts?)|végétation|verdure|nature|couvert végétal)/,
+  /\b(presque|quasi(ment)?) (pas|plus|aucun) d?(e |')?(nature|verdure|végétation|espaces? verts?|terre)/,
+];
+const OSO_PRESENT = (p: Projection) => at(p, "occupation_des_sols") != null;
+// Une phrase qui RANGE routes et parkings DANS l'urbanisé en donne la bonne définition (FUT-177). Nommer les routes
+// ne suffit pas : « couverte de bâtiments, sans compter les routes » les met à part et laisse entier le contresens.
+// L'exception exige une tournure d'inclusion (« compris », « confondus », « comptent… routes ») et aucune d'exclusion.
+const INFRA = "(routes?|voiries?|parkings?|zones? d'activités?|voies? ferrées?|pistes?)";
+const INCLUSION_INFRA: RegExp[] = [
+  new RegExp(`\\b${INFRA}[^.]{0,60}\\b(compris|comprises|confondus|inclus|incluses)${FIN}`),
+  new RegExp(`\\by compris (les |des |la |le )?${INFRA}`),
+  new RegExp(`\\burbanisée?s?${FIN}[^.]{0,30}\\b(compte|comptent|comprend|comprennent|inclut|incluent|englobe|englobent|regroupe|regroupent|réunit|réunissent|rassemble|rassemblent|mêle|mêlent|désigne|désignent|recouvre|recouvrent)\\b[^.]{0,80}\\b${INFRA}`),
+  new RegExp(`\\b${INFRA}[^.]{0,40}\\b(autant que|aussi bien que|au même titre que)\\b`),
+];
+const EXCLUSION_INFRA: RegExp[] = [
+  new RegExp(`\\b(sans compter|sans parler|sans|hors|en dehors|à l'exclusion|excepté|exceptées?|sauf|outre|en plus|à part|non compris|non comprises)${FIN}[^.]{0,15}\\b${INFRA}`),
+  new RegExp(`\\b${INFRA}[^.]{0,20}\\b(exclus|exclue?s?|non compris|non comprises|à part|en plus|en sus|mis à part)${FIN}`),
+];
+// Ce que la règle refuse : l'urbanisé lu comme des bâtiments ou une densité de constructions.
+const URBANISE_BATIMENTS: RegExp[] = [
+  /(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)[^.]{0,40}\b(de |des )?(bâtiments|constructions|immeubles|maisons)\b/,
+  /\b(couvert|couverte|couverts|couvertes|occupée?s?) (de|par des|par les) (bâtiments|constructions|immeubles|maisons)/,
+  /\b(les )?(bâtiments|constructions|immeubles|maisons) (couvrent|occupent|recouvrent|représentent)[^.]{0,30}(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)/,
+  new RegExp(`\\b(majoritairement|essentiellement|en majorité|pour moitié|à moitié|largement|principalement) (bâti${A}|construit${A})${FIN}`),
+  /\b(espaces|surfaces) urbanisée?s?,? (c'est-à-dire|soit|autrement dit|donc|autant de) (des |les |de )?(bâtiments|constructions|immeubles|maisons)/,
+  /\bdensité (du bâti|des constructions|des bâtiments|bâtie|de construction)\b/,
+  new RegExp(`\\b(densément|fortement|très) (bâti${A}|construit${A})${FIN}`),
+];
+// PORTÉE de l'exception (contre-revue du 09/11) : une définition juste dans une proposition ne rachète pas une
+// assertion fausse dans une autre. « La moitié de ses terres est couverte de bâtiments ; les espaces urbanisés
+// comptent aussi les routes et les parkings » : la définition est dans la seconde proposition, l'assertion sur les
+// bâtiments dans la première. Chaque proposition qui porte une assertion sur les bâtiments doit porter elle-même
+// l'inclusion. Les virgules ne coupent pas (« bâtiments, routes et parkings confondus » est une seule énumération) ;
+// « et » coupe quand il ouvre une nouvelle proposition (« et les espaces urbanisés… », « et il… »).
+const PROPOSITIONS_URBANISE = new RegExp(
+  `[;:]|\\b(?:mais|car|alors que|tandis que|cependant|toutefois|pourtant|même si|bien que)\\b|\\bet (?=(?:(?:les|le|la|il|elle|ils|elles|ce|cela|on|ses|son|sa)(?![a-zà-ÿœæ])|l'|c')(?! ?${INFRA}))`,
+);
+const DEFINITION_URBANISE = (s: string): boolean => {
+  if (EXCLUSION_INFRA.some((r) => r.test(s))) return false;
+  const assertions = s.split(PROPOSITIONS_URBANISE).filter((c) => c != null && URBANISE_BATIMENTS.some((r) => r.test(c)));
+  return assertions.length > 0 && assertions.every((c) => INCLUSION_INFRA.some((r) => r.test(c)));
+};
+
+// Le cadre de vie : ce qu'une mesure des sols à l'échelle communale ne dit pas.
+// « à deux pas » n'y figure pas : son « pas » se lit comme une négation (`isNegated`), la règle ne le verrait jamais.
+const CADRE_DE_VIE: RegExp[] = [
+  /\baccès (direct |facile |rapide |immédiat )?(à la |aux |à des |à une )(nature|espaces? (naturels?|verts?)|forêts?|campagne|bois)\b/,
+  /\b(nature|forêts?|campagne|espaces? naturels?|bois)( est| sont| reste| restent)? (à portée( de main)?|à proximité( immédiate)?|tout proches?|toute proches?|aux portes|accessibles?|à quelques minutes)\b/,
+  // La même conclusion, quelques mots plus loin : « La nature dépend du quartier et reste toute proche ».
+  /\b(nature|forêts?|campagne|espaces? naturels?|bois)\b[^.]{0,40}\b(est|sont|reste|restent|demeure|demeurent) (tout |toute |très )?(à portée( de main)?|à proximité( immédiate)?|proches?|accessibles?|aux portes|à quelques minutes)(?![a-zà-ÿœæ])/,
+  /\bespaces? verts?\b/,
+  /\bverdure\b|\bverdoyante?s?\b|\bpoumons? verts?\b/,
+  /\bcadre de vie\b/,
+  new RegExp(`\\b(commune|ville|territoire|lieu|village|environnement|cadre)s? (calme|paisible|tranquille|préservé${A}|bucolique|champêtre)s?${FIN}`),
+  new RegExp(`\\b(au |du |le )calme\\b|\\btranquillité${FIN}|\\bquiétude\\b`),
+];
+// Le RENVOI à l'adresse ou au quartier reste permis : c'est là que ces questions se posent. Une RÉSERVE ne l'est pas :
+// « La commune offre un accès direct à la nature, mais cela dépend du quartier » affirme d'abord, puis nuance.
+// La phrase est coupée en propositions (virgule, point-virgule, deux-points, « mais », « même si »…) : chaque
+// proposition qui parle du cadre de vie doit elle-même le renvoyer à l'adresse, sans rien en affirmer.
+const PROPOSITIONS = /[,;:()]|\b(?:mais|cependant|toutefois|néanmoins|pourtant|même si|bien que|quoique|alors que|tandis que)\b/;
+const RENVOI = new RegExp(
+  `\\b(dépend|dépendent|dépendra|dépendront|varie|varient|variera|se (vérifie|vérifient|mesure|mesurent|juge|jugent|lit|lisent|regarde|regardent|apprécie|apprécient|joue|jouent)|relève|relèvent|(est|sont) à (vérifier|regarder|apprécier)|examine|examinent|regardez|consultez|vérifiez)${FIN}[^.]{0,40}\\b(adresses?|quartiers?|rues?)${FIN}`,
+);
+const AFFIRMATION = new RegExp(
+  `\\b(offre|offrent|garde|gardent|conserve|conservent|bénéficie|bénéficient|jouit|jouissent|profite|profitent|dispose|disposent|propose|proposent|possède|possèdent|assure|assurent|garantit|garantissent)${FIN}`,
+);
+// Une CONCLUSION sur le cadre de vie, dans la proposition même du renvoi (contre-revue du 09/11) : « Le cadre de vie
+// dépend du quartier et reste paisible », « L'accès à la nature dépend de l'adresse et le cadre de vie est verdoyant ».
+// Le renvoi y est présent, mais la proposition conclut quand même. Un renvoi vrai ne qualifie rien.
+const QUALIFIE = "(verte?s?|proches?|accessibles?|à portée|à proximité|calmes?|préservée?s?|agréables?|nombreu(x|ses)|abondante?s?|riches?)";
+const CONCLUSION_CADRE: RegExp[] = [
+  // Après un verbe d'état : « reste paisible », « est verdoyant », « sont nombreux ». « espaces verts » seul n'en est pas une.
+  new RegExp(`\\b(est|sont|reste|restent|demeure|demeurent|semble|semblent|paraît|paraissent|s'avère|s'avèrent)( très| plutôt| particulièrement| assez| bien| toute?s?| tout)? (${QUALIFIE.slice(1, -1)}|paisibles?|tranquilles?|verdoyante?s?)${FIN}`),
+  // Des qualificatifs qui concluent à eux seuls, où qu'ils soient.
+  new RegExp(`\\b(paisibles?|tranquilles?|verdoyante?s?|bucoliques?|champêtres?|idylliques?|privilégiée?s?)${FIN}`),
+];
+const RENVOI_ADRESSE = (s: string): boolean => {
+  const concernees = s.split(PROPOSITIONS).filter((c) => c != null && CADRE_DE_VIE.some((r) => r.test(c)));
+  return concernees.length > 0 && concernees.every((c) => RENVOI.test(c) && !AFFIRMATION.test(c) && !CONCLUSION_CADRE.some((r) => r.test(c)));
+};
 
 const RULES: Rule[] = [
   // ── Couvert (D4) ──
@@ -91,25 +196,74 @@ const RULES: Rule[] = [
     id: "couvert:territoire-tres-bati",
     when: catIs(LAND, "Occupation mixte", "Forte présence naturelle", "À dominante agricole"),
     polarity: "affirmative",
+    patterns: [...COUVERT_BATI, ...COUVERT_PEU_NATUREL],
+  },
+  {
+    // FUT-177 (A5) : la faible présence d'espaces naturels n'établit ni un territoire bâti ni un territoire urbanisé.
+    id: "couvert:faible-nature-lue-comme-bati",
+    when: catIs(LAND, "Faible présence d'espaces naturels"),
+    polarity: "affirmative",
     patterns: [
-      new RegExp(`\\b(presque|quasi(ment)?|entièrement|totalement|essentiellement|largement) (bâti${A}|urbanisé${A}|construit${A}|minéral${A}|minérale${A})\\b`),
-      new RegExp(`\\btrès (urbanisé${A}|bâti${A}|minéral${A}|minérale${A}|construit${A})\\b`),
-      new RegExp(`\\bmajoritairement (bâti${A}|urbanisé${A})\\b`),
-      /\b(l'essentiel|la majeure partie|la majorité) (du territoire|de la commune) (est |reste )?(bâti|urbanisé|construit|couvert)/,
-      /\b(très|si|trop) peu d(e |')(espaces? (verts?|naturels?|ouverts?)|végétation|verdure|nature|couvert végétal)/,
-      /\b(presque|quasi(ment)?) (pas|plus|aucun) d?(e |')?(nature|verdure|végétation|espaces? verts?|terre)/,
-      /\ble bâti (domine|l'emporte|prédomine)/,
-      new RegExp(`\\bdensément (bâti${A}|construit${A})`),
+      ...COUVERT_BATI,
+      new RegExp(`\\b(commune|territoire|ville)s? (très |surtout |essentiellement |principalement |avant tout )?urbaine${A}${FIN}`),
     ],
   },
   {
     id: "couvert:territoire-tres-naturel",
-    when: catIs(LAND, "Majoritairement urbanisé", "Faible présence d'espaces naturels"),
+    // FUT-177 : « À dominante agricole » y entre. Des cultures ne sont pas des espaces naturels (Bony : 89 % de
+    // cultures, 6,8 % d'espaces naturels) ; dire le territoire « très naturel » confondait les deux.
+    when: catIs(LAND, "Majoritairement urbanisé", "Faible présence d'espaces naturels", "À dominante agricole"),
     polarity: "affirmative",
     patterns: [
       /\bforte présence (naturelle|d'espaces naturels)/,
-      new RegExp(`\\b(largement|majoritairement|très) (naturel${A}|naturelle${A}|verte${A}|boisé${A})\\b`),
+      new RegExp(`\\b(largement|majoritairement|très|essentiellement|principalement) (naturel${A}|naturelle${A}|verte${A}|boisé${A})${FIN}`),
       /\ble naturel (domine|l'emporte)/,
+      /\bles espaces naturels (dominent|l'emportent|prédominent)\b/,
+    ],
+  },
+  {
+    // FUT-177 (A5) : le raisonnement « peu de nature, donc urbanisé » (ou l'inverse), quelle que soit la catégorie.
+    // Les terres d'une commune se partagent entre TROIS postes : l'un ne se déduit pas de l'absence d'un autre.
+    id: "couvert:peu-naturel-donc-urbanise",
+    when: OSO_PRESENT,
+    polarity: "affirmative",
+    patterns: [
+      /\b(peu|faible (part|place|présence)|rareté|manque|absence) (d(e |')|des )?(espaces? naturels?|nature|milieux naturels)[^.]*\b(traduit|reflète|témoigne|signe|révèle|montre|indique|illustre|s'explique|dû|due|car|parce|conséquence|résultat|au profit)(?![a-zà-ÿœæ0-9])[^.]*\b(urbanis\w*|bâti\w*|construit\w*|construction\w*|béton\w*|minéral\w*|ville)/,
+      /\b(urbanisation|bâti|constructions?|espaces urbanisés|la ville)(?![a-zà-ÿœæ0-9])[^.]*\b(explique|expliquent|réduit|réduisent|laisse peu|laissent peu|grignote|grignotent|a remplacé|ont remplacé|au détriment)\b[^.]*\b(espaces? naturels?|nature|milieux naturels)/,
+    ],
+  },
+  {
+    // FUT-177 (A7) : la part « urbanisée » d'OSO compte routes, parkings, zones d'activité et pistes autant que les
+    // bâtiments (Roissy-en-France : 55 % d'urbanisé, l'aéroport en tête, pour une densité intermédiaire). Elle ne dit
+    // ni la part couverte de bâtiments, ni une densité de constructions. Une phrase qui range routes ou parkings dans
+    // l'urbanisé en donne la bonne définition et passe ; une phrase qui les met à part, non (voir DEFINITION_URBANISE).
+    id: "couvert:urbanise-lu-comme-batiments",
+    when: OSO_PRESENT,
+    polarity: "affirmative",
+    unless: DEFINITION_URBANISE,
+    patterns: URBANISE_BATIMENTS,
+  },
+  {
+    // FUT-177 : une mesure satellite des sols, à l'échelle de la commune, ne dit ni l'accès à la nature, ni les
+    // espaces verts urbains (parcs, jardins : la carte ne les distingue pas), ni le calme, ni le cadre de vie. Le renvoi au
+    // quartier ou à l'adresse reste permis, une réserve ajoutée à une affirmation ne l'est pas (voir RENVOI_ADRESSE).
+    id: "couvert:cadre-de-vie-non-mesure",
+    when: always,
+    polarity: "affirmative",
+    unless: RENVOI_ADRESSE,
+    patterns: CADRE_DE_VIE,
+  },
+  {
+    // FUT-177 : la composition des sols n'est pas une mesure écologique.
+    id: "couvert:ecologie-non-mesuree",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\bbiodiversité(?![a-zà-ÿœæ0-9])/,
+      /\b(richesse|qualité|valeur|intérêt|patrimoine) (écologique|naturel(le)? remarquable)/,
+      /\b(corridors?|continuités?) écologiques?\b|\bréservoirs? de (biodiversité|vie)\b/,
+      /\b(faune|flore)\b/,
+      /\babrit(e|ent) (la |une )?(vie|faune|flore)\b/,
     ],
   },
   // ── Densité (D3) ──
@@ -127,7 +281,7 @@ const RULES: Rule[] = [
     id: "densite:requalifiee-peu-dense",
     when: catIs(DENSITY, "Densité intermédiaire", "Commune dense", "Arrondissement dense"),
     polarity: "affirmative",
-    patterns: [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})\\b`)],
+    patterns: [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})${FIN}`)],
   },
   // ── Démographie (D7) ──
   {
@@ -666,6 +820,10 @@ const CONSIGNES: [RegExp, string][] = [
   [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],
   [/^format:/, "respectez le format : un titre puis exactement trois blocs « ## »"],
   [/^interdit:arrondissement-ville-centre$/, "le statut de ville-centre est celui de la commune entière (Paris, Lyon, Marseille) : ne le prêtez pas à l'arrondissement"],
+  [/^couvert:(territoire-tres-bati|faible-nature-lue-comme-bati|peu-naturel-donc-urbanise)$/, "reprenez la catégorie d'occupation des sols telle quelle et lisez la composition : les terres se partagent entre espaces urbanisés, cultures et espaces naturels, et le peu de l'un ne prouve pas la dominance d'un autre"],
+  [/^couvert:territoire-tres-naturel$/, "reprenez la catégorie d'occupation des sols telle quelle : les cultures ne sont pas des espaces naturels"],
+  [/^couvert:urbanise-lu-comme-batiments$/, "les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments : ne parlez ni de bâtiments ni de densité de constructions"],
+  [/^couvert:(cadre-de-vie-non-mesure|ecologie-non-mesuree)$/, "la composition des sols ne mesure ni l'accès à la nature, ni les espaces verts, ni le calme, ni le cadre de vie, ni la biodiversité : citez les parts sans les interpréter"],
   [/^interdit:densite-arrondissement-pretee-a-la-commune$/, "la densité transmise est celle de l'arrondissement, pas de la commune entière : dites « arrondissement », ni « commune » ni « ville »"],
   [/^interdit:densite-ville-pretee-a-un-arrondissement$/, "la densité transmise est celle de la commune entière : ne l'attribuez à aucun arrondissement, et n'en citez aucune autre"],
   [/^interdit:statut-urbain-surinterprete$/, "reprenez le rôle territorial tel quel : ni « isolée », ni « pôle », ni services ou animation déduits d'un statut statistique"],

@@ -253,7 +253,8 @@ test("surinterprétation : aucun rôle, à aucune taille, ne dit isolement, pôl
 // ── 4. Synthèse rédigée : ce qui est dit au modèle, et ce que le contrôle refuse ─────────────────────────────
 
 test("synthèse : le rôle transmis est le statut en mots courants ; hors agglomération, aucune agglomération n'est nommée", () => {
-  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@6", "le cache des anciennes synthèses est invalidé");
+  // FUT-177 monte le contrat à @7 : l'invalidation voulue par FUT-176 (@6) reste acquise.
+  assert.ok(Number(/^territoire-synthese@(\d+):/.exec(SYNTHESIS_CONTRACT_VERSION)?.[1]) >= 6, "le cache des anciennes synthèses est invalidé");
   for (const r of ROLES_URBAINS) if (ROLE_TEXT[r]) assert.doesNotMatch(ROLE_TEXT[r]!, SURINTERPRETATION, r);
   const hors = identite("Bony", 139, { role: "hors_uu", uuLabel: "Bony", uuPop: 139 }).projection.commune.role_territorial;
   assert.deepEqual(hors, { role: ROLE_TEXT.hors_uu, agglomeration: null, population_agglomeration: null });

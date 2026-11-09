@@ -188,7 +188,9 @@ const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a346
 // Convergence FUT-175 + FUT-176 : l'empreinte est celle de FUT-175 (registre `territoire-facts@2`, FUT-176 ne change que
 // le type du rôle) ; la clé suit le contrat commun `territoire-synthese@6`. Clé de la PR #140 seule (@5) :
 // de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930.
-const CLE_MAIN = "5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72";
+// FUT-177 (09/11/2026) : l'empreinte ne bouge pas (registre intact) ; la clé suit le contrat `territoire-synthese@7`.
+// Clé de main au contrat @6 : 5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72.
+const CLE_MAIN = "fd9b97308224b1cef6dbf86d637d8f316b5f1741d77c0fc16aba121115135b4b";
 
 /**
  * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
@@ -236,9 +238,53 @@ function horsFut175(f: string, lignes: readonly string[]): string[] {
 const CONTRAT = "src/lib/territoire/synthesis-contract.ts";
 const REGISTRE = "src/lib/territoire/facts.ts";
 
+/**
+ * FUT-177 · RÉFÉRENCE FIGÉE, même principe que FUT-175. Les lignes que FUT-177 change dans le contrat par rapport à
+ * bab5eb49 (main, après FUT-175 + FUT-176) sont écrites UNE FOIS dans `__fixtures__/fut177-lignes-admises.json`, au
+ * format `git diff -U0`, en-têtes « @@ » compris. `avantFut177` les annule sur le diff depuis 4d75603f : une ligne « + » de FUT-177 est
+ * retirée (une occurrence) ; une ligne « - » de FUT-177 restaure la ligne « + » que main avait ajoutée, ou retire la
+ * ligne « - » d'origine. Une ligne admise introuvable fait échouer : la référence ne survit pas à une retouche.
+ * Aucune ligne FUT-177 ne parle des feux ; le registre (facts.ts) n'est pas touché par FUT-177.
+ */
+const FUT177_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut177-lignes-admises.json", "utf8")) as Record<string, string[]>;
+
+function avantFut177(f: string, lignes: readonly string[]): string[] {
+  const delta = FUT177_ADMISES[f] ?? [];
+  const reste = [...lignes];
+  // Le delta, au format `git diff -U0`, garde ses en-têtes « @@ » : chaque bloc a ses lignes « - » puis ses lignes « + ».
+  // La ligne restaurée reprend la place du bloc : la garde du contrat compare des listes ORDONNÉES.
+  const blocs: { moins: string[]; plus: string[] }[] = [];
+  for (const l of delta) {
+    assert.doesNotMatch(l, FEUX, l);
+    if (l.startsWith("@@")) blocs.push({ moins: [], plus: [] });
+    else if (l.startsWith("-")) blocs.at(-1)!.moins.push(l);
+    else blocs.at(-1)!.plus.push(l);
+  }
+  for (const { moins, plus } of blocs) {
+    // Les lignes « + » d'un bloc se cherchent comme une SÉQUENCE contiguë : « /** », « */ » ou une ligne vide
+    // existent ailleurs dans le diff, une recherche ligne à ligne retirerait celles d'un autre ticket.
+    let place = -1;
+    if (plus.length > 0) {
+      for (let i = 0; i + plus.length <= reste.length && place === -1; i++) {
+        if (plus.every((l, k) => reste[i + k] === l)) place = i;
+      }
+      assert.ok(place !== -1, `référence FUT-177 périmée pour ${f} : ${plus[0]}`);
+      reste.splice(place, plus.length);
+    }
+    const restaurees: string[] = [];
+    for (const l of moins) {
+      const i = reste.indexOf(l);
+      if (i !== -1) reste.splice(i, 1); // une ligne d'origine (4d75603f) que FUT-177 retire
+      else restaurees.push(`+${l.slice(1)}`); // une ligne que main avait ajoutée et que FUT-177 remplace
+    }
+    reste.splice(place === -1 ? reste.length : place, 0, ...restaurees);
+  }
+  return reste;
+}
+
 /** La garde du contrat de synthèse, sur une liste de lignes changées depuis 4d75603f. */
 function verifierContrat(lignes: readonly string[]): void {
-  const changees = horsFut175(CONTRAT, lignes);
+  const changees = horsFut175(CONTRAT, avantFut177(CONTRAT, lignes));
   // Convergence FUT-175 + FUT-176 : la version commune @6 et les lignes du rôle territorial sont celles de FUT-176
   // (`LIGNES_CONTRAT_FUT176`) ; la ligne « @5 » de FUT-175 a été retirée de sa référence figée, qui garde le « @4 » retiré.
   assert.deepEqual(changees.filter((l) => FUT163.includes(l)), FUT163);
@@ -569,4 +615,15 @@ test("FUT-175 : une modification étrangère du contrat ou du registre fait éch
   // Une ligne FUT-175 retouchée plus tard : la référence est périmée, la garde le dit.
   const sansUne = registre.filter((l) => l !== dupliquee);
   assert.throws(() => verifierRegistre(sansUne), /référence FUT-175 périmée/);
+});
+
+// FUT-177 : la référence figée du contrat ne couvre que ses propres lignes. Une ligne FUT-177 retouchée ou absente la
+// rend périmée ; une ligne étrangère ajoutée à côté reste refusée par la garde.
+test("FUT-177 : la référence figée du contrat est exacte, et ne couvre aucune ligne étrangère", () => {
+  const contrat = lignesDiff("4d75603f", CONTRAT);
+  verifierContrat(contrat);
+  const ligne177 = FUT177_ADMISES[CONTRAT].find((l) => l.startsWith("+") && l.includes("territoire-synthese@7"))!;
+  assert.ok(ligne177);
+  assert.throws(() => verifierContrat(contrat.filter((l) => l !== ligne177)), /référence FUT-177 périmée/);
+  assert.throws(() => verifierContrat([...contrat, "+  ce_que_dit_la_categorie_bis: null,"]), /deepStrictEqual|Expected values/);
 });

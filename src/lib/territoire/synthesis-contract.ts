@@ -29,7 +29,9 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  */
 // @6 (FUT-175 + FUT-176) : parts OSO rapportées aux terres, eau à part (FUT-175) ; rôle territorial lu au statut Insee,
 // arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@6:${SYNTHESIS_MODEL}`;
+// @7 (FUT-177) : catégorie d'occupation des sols dite en mots et limites OSO transmises ; contrôles « faible nature
+// lue comme bâti », « urbanisé lu comme bâtiments », cadre de vie et écologie ; texte déterministe qui nomme les cultures.
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@7:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -96,6 +98,34 @@ export function roleTerritorialPourSynthese(role: UrbanRole | null): Record<stri
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/**
+ * FUT-177 · CE QUE DIT CHAQUE CATÉGORIE D'OCCUPATION DES SOLS, la grille `landCategory` (facts.ts) mise en mots,
+ * SANS CHIFFRE : un seuil écrit ici deviendrait un nombre admis par `checkNumbers`. « Faible présence d'espaces
+ * naturels » pouvait se lire « très urbanisé » : ses terres se partagent pourtant entre cultures et espaces
+ * urbanisés, aucun des deux n'atteignant la moitié (Carpiquet : 45 % de cultures, 41 % d'urbanisé). La phrase dit
+ * donc aussi ce que la catégorie NE dit PAS. Un libellé ajouté à `LAND_LABEL` sans entrée ici est refusé par test.
+ */
+export const LAND_CATEGORY_MEANING: Record<string, string> = {
+  "Majoritairement urbanisé": "Les espaces urbanisés couvrent au moins la moitié des terres. Ils comptent routes, parkings, zones industrielles et commerciales autant que les bâtiments : la catégorie ne dit ni la part couverte par des bâtiments, ni une densité de constructions.",
+  "Forte présence naturelle": "Les espaces naturels couvrent près de la moitié des terres ou davantage, et les espaces urbanisés moins de la moitié.",
+  "À dominante agricole": "Les cultures couvrent au moins la moitié des terres. Ce sont des terres agricoles, pas des espaces naturels.",
+  "Faible présence d'espaces naturels": "Les espaces naturels couvrent moins d'un cinquième des terres ; le reste se partage entre cultures et espaces urbanisés, sans que les uns ni les autres atteignent la moitié des terres. La catégorie ne dit pas que la commune est bâtie ou très urbanisée : seule la composition dit la part de chacun.",
+  "Occupation mixte": "Ni les espaces urbanisés ni les cultures n'atteignent la moitié des terres, et les espaces naturels en couvrent entre un cinquième et près de la moitié.",
+};
+
+/**
+ * FUT-177 (A7) · LES LIMITES DE LA MESURE, transmises au modèle. La définition complète des espaces urbanisés vivait
+ * dans le registre (`land.composition.limits`) sans atteindre la projection, qui disait « bâti, routes et surfaces
+ * imperméabilisées » (un mot que `interdit:impermeabilisation` refuse ensuite dans le texte) : « urbanisé » pouvait
+ * se lire « couvert de bâtiments ». Sans chiffre, pour la même raison (le millésime 2023 figure dans `source`).
+ */
+export const OSO_LIMITES_SYNTHESE = {
+  source: "Carte d'occupation des sols OSO 2023 (CESBIO), établie à partir d'images satellite",
+  echelle: "la commune entière, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas)",
+  espaces_urbanises: "Tout ce que le satellite voit comme construit ou revêtu : bâtiments, mais aussi routes, parkings, zones industrielles et commerciales. Ce n'est ni la part couverte par des bâtiments, ni une densité de constructions, ni la mesure réglementaire de l'occupation du sol (OCS GE), qui suit d'autres règles.",
+  ce_que_la_mesure_ne_dit_pas: "Ni l'accès à la nature, ni les espaces verts urbains (parcs, jardins), que la carte ne distingue pas, ni le calme, ni la biodiversité, ni le cadre de vie, ni ce qui se passe dans un quartier.",
+} as const;
 
 /**
  * LA VALEUR DE RÉFÉRENCE 1976-2005, telle que la carte l'affiche (« ≈ 7 → 19 jours chauds »). DRIAS ne
@@ -180,7 +210,10 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
               .sort(([, a], [, b]) => b - a)
               .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, round1(x)]),
           ),
-          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés = bâti, routes et surfaces imperméabilisées vus par satellite. Mesure OSO 2023, à l'échelle de la commune, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas).",
+          // FUT-177 : la catégorie en mots ; le modèle la cite, il ne la reconstruit pas avec ses propres adjectifs.
+          ce_que_dit_la_categorie: LAND_CATEGORY_MEANING[cat("land.category")?.label ?? ""] ?? null,
+          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Trois familles se partagent les terres : espaces urbanisés, terres agricoles (cultures) et espaces naturels. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés, source et échelle de la mesure : voir \"limites\".",
+          limites: OSO_LIMITES_SYNTHESE,
         }
       : null,
     boisement_ademe_pct: forestAdeme != null
@@ -282,7 +315,10 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 LES FAITS FOURNIS SONT LES SEULS FAITS
 - Chaque affirmation doit se rattacher à un champ du payload. Ne comblez jamais un manque par une connaissance générale de la commune.
 - Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la densité est "Densité intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
-- Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues. Les parts portent sur les terres ; l'eau est une part de la commune, à part : ne la présentez jamais comme un espace naturel ou vert, et n'additionnez pas une part d'eau à une part des terres.
+- Occupation des sols : appuyez-vous sur la catégorie, sur ce qu'elle dit ("ce_que_dit_la_categorie") et sur la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues. Les parts portent sur les terres ; l'eau est une part de la commune, à part : ne la présentez jamais comme un espace naturel ou vert, et n'additionnez pas une part d'eau à une part des terres.
+- Les terres se partagent entre trois familles : espaces urbanisés, cultures, espaces naturels. Le peu de l'une ne prouve pas la dominance d'une autre : "Faible présence d'espaces naturels" ne veut pas dire que la commune est bâtie ou très urbanisée (les cultures peuvent y tenir plus de place que les espaces urbanisés) ; "À dominante agricole" ne veut pas dire naturel. N'écrivez jamais "peu de nature, donc urbanisé".
+- Espaces urbanisés : ce que le satellite voit comme construit ou revêtu, routes, parkings et zones d'activité compris (voir "limites"). N'en tirez ni une part de bâtiments ("50 % de bâtiments", "couvert de constructions"), ni une densité de constructions, ni un territoire "bâti" ou "construit".
+- La composition des sols ne dit rien de l'accès à la nature, des espaces verts, du calme, de la biodiversité ni du cadre de vie : ne les déduisez pas.
 - Démographie : décrivez ce qui est mesuré. L'évolution de la population porte sur 2015-2021. La part d'arrivants récents est une situation sur UNE année ("X % des habitants vivaient ailleurs un an plus tôt") : ne l'associez jamais à la période 2015-2021 ni à plusieurs années. N'écrivez jamais que la commune "attire", est "attractive", "recherchée" ou "prisée" : aucune donnée ne mesure l'attractivité.
 - Catastrophes naturelles : la "sécheresse des sols" reconnue en catastrophe naturelle (dommages aux bâtiments, argiles) n'est pas le même objet que les "jours de sols secs" projetés (un indicateur climatique). Citez-les séparément si besoin, sans jamais présenter l'un comme le prolongement ou l'annonce de l'autre.
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
