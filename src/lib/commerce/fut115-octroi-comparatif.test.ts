@@ -203,8 +203,8 @@ const TRIO = ["75056", "69123", "13055"];
 async function commanderComparatif(insees = TRIO, mesure = true): Promise<string> {
   const res = await creerPaiement(new Request("http://localhost/api/stripe/create-payment-intent", {
     method: "POST", headers: { "content-type": "application/json" },
-    // FUT-181 : un navigateur qui a consenti à la mesure transmet son identifiant ; sans lui, le webhook ne
-    // compterait aucun `payment_completed` et ces tests ne pourraient plus vérifier qu'il n'est compté qu'une fois.
+    // FUT-181 : un navigateur qui a consenti à la mesure transmet son identifiant (`payment_intent_created`).
+    // Le webhook, lui, ne mesure plus rien, avec ou sans cet identifiant (contre-revue).
     body: JSON.stringify({ productType: "pack-decision", ...(mesure ? { phDistinctId: "ph-fut115-alice" } : {}), pack: { mode: "choix", trio: insees.map((insee) => ({ insee, commune: insee })), projetLabel: "" } }),
   }));
   const corps = await res.json() as { clientSecret: string };
@@ -458,7 +458,9 @@ async function visiterPage(pi: string | undefined, compte: { id: string; email?:
   return etat === "en_attente" ? "attente" : "apercu";
 }
 const confirmations = () => courriels.length;
-const paiementsComptes = () => evenements.filter((e) => e === "payment_completed").length;
+// FUT-181 (contre-revue) : le suivi commercial se lit dans `payments`, plus dans PostHog. Le webhook n'émet
+// plus `payment_completed` ; ce compteur garde l'exigence « un encaissement = une ligne », rejeux compris.
+const paiementsComptes = () => (tables.payments ?? []).filter((l) => l.status === "succeeded").length;
 function etatStable() {
   return JSON.stringify(DROITS.map((t) => tables[t] ?? []).concat([tables.payments ?? []]));
 }
@@ -514,7 +516,7 @@ for (const enPanne of ["report_grants", "user_accounts", "decision_packs"] as co
     }
     assert.equal(etatStable(), avant, "aucun doublon");
     assert.equal(confirmations(), 1, "une seule confirmation");
-    assert.equal(paiementsComptes(), 1, "un seul payment_completed");
+    assert.equal(paiementsComptes(), 1, "un seul paiement enregistré");
   });
 }
 
@@ -543,7 +545,7 @@ test("concurrence · webhook et retour simultanés : tout est livré une fois", 
   assert.equal(paiementsComptes(), 1);
 });
 
-test("rejeux · trois webhooks identiques : une confirmation, un payment_completed, un paiement enregistré", async () => {
+test("rejeux · trois webhooks identiques : une confirmation, un paiement enregistré", async () => {
   const pi = await commanderComparatif();
   stripeConfirme(pi);
   for (let i = 0; i < 3; i += 1) assert.equal(await livrerWebhook(pi), 200);
@@ -560,8 +562,27 @@ test("FUT-181 · sans consentement à la mesure : livré et confirmé comme les 
   assert.equal(tables.payments?.length, 1, "le paiement est enregistré");
   assert.deepEqual(evenements, [], "ni payment_intent_created, ni payment_completed");
   const metadata = (await getStripe().paymentIntents.retrieve(pi)).metadata;
-  assert.equal(metadata.phMesure, "", "pas de marqueur de mesure");
-  assert.equal(metadata.phDistinctId, "", "ni l'UUID du compte en repli");
+  assert.equal(metadata.phMesure, undefined, "pas de marqueur de mesure");
+  assert.equal(metadata.phDistinctId, undefined, "ni identifiant de mesure, ni UUID du compte en repli");
+});
+
+test("FUT-181 · consentement retiré entre l'intention et le webhook : le webhook n'émet rien, la livraison est entière", async () => {
+  // 1-2. Navigateur consentant : l'intention est mesurée pendant sa requête, et c'est tout.
+  const pi = await commanderComparatif(TRIO, true);
+  assert.deepEqual(evenements, ["payment_intent_created"]);
+  const metadata = (await getStripe().paymentIntents.retrieve(pi)).metadata;
+  assert.equal(metadata.phDistinctId, undefined, "l'identifiant de mesure ne voyage pas par Stripe");
+  assert.equal(metadata.phMesure, undefined);
+  // 3. Le lecteur retire son consentement : le serveur n'en sait rien. 4. Stripe confirme plus tard.
+  stripeConfirme(pi);
+  assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(await livrerWebhook(pi), 200, "rejeu");
+  // 5. Aucun événement sous l'ancien identifiant ; livraison, confirmation et paiement enregistrés.
+  assert.deepEqual(evenements, ["payment_intent_created"], "ni payment_completed, ni address_dossier_purchased");
+  droitsAlice();
+  assert.equal(confirmations(), 1);
+  assert.equal(paiementsComptes(), 1);
+  assert.equal(tables.payments![0]!.stripe_payment_intent_id, pi, "le paiement reste rapprochable de Stripe");
 });
 
 test("rejeux · confirmation refusée par le fournisseur : le rejeu suivant la renvoie, elle n'est pas perdue", async () => {
@@ -579,7 +600,7 @@ test("rejeux · confirmation refusée par le fournisseur : le rejeu suivant la r
   assert.equal(paiementsComptes(), 1);
 });
 
-test("rejeux · retour du lecteur AVANT le webhook : paiement enregistré, confirmation et mesure ont bien lieu", async () => {
+test("rejeux · retour du lecteur AVANT le webhook : paiement enregistré et confirmation ont bien lieu", async () => {
   const pi = await commanderComparatif();
   stripeConfirme(pi);
   assert.equal(await visiterPage(pi), "comparatif");

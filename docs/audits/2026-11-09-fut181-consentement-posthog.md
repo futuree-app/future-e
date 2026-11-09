@@ -39,7 +39,7 @@ Point favorable, vérifié : avant `init`, `capture` / `identify` / `reset` sont
 
 **Minimisation, même avec consentement** : URLs réduites à une liste blanche de paramètres (`insee`, `communes`, `mode`, `source`, `rank`, `horizon`, `utm_*`), fragment retiré, dans `$current_url`, `$referrer`, propriétés initiales, `$elements_chain`, `$elements`, clés `$heatmap_data`, messages d'exception ; `mask_all_text`, `mask_all_element_attributes`, `mask_personal_data_properties` ; pas de chronométrage réseau ; **enregistrement de session désactivé** (il filmerait le contenu des dossiers ; à réexaminer en lot B) ; `address_token` retiré.
 
-**Google Consent Mode** : finalités et réglages inchangés. Ajout : un choix fait dans un autre onglet est appliqué à Google dans celui-ci.
+**Google Consent Mode** : finalités et réglages inchangés. Ajouts : un choix fait dans un autre onglet est appliqué à Google dans celui-ci ; rouvrir les préférences (choix effacé) remet Google en refus, dans cet onglet et les autres (contre-revue, §7).
 
 **FUT-121** : `ConsentBanner` garde son `useSyncExternalStore` et sa logique d'affichage ; les ajouts sont dans l'effet existant. Les tests FUT-121 de la bannière passent.
 
@@ -61,20 +61,20 @@ Point favorable, vérifié : avant `init`, `capture` / `identify` / `reset` sont
 | Champ libre, adresse dans l'URL | adresse dans `$current_url`, `attr__href`, `next` | absente de tout envoi |
 | Stockage inaccessible | mesure active | 0 / 0, même après « Accepter » |
 
-## 4. Les six captures serveur
+## 4. Les six captures serveur (état après contre-revue, §7)
 
 Le serveur ne voit pas la bannière. **Signal retenu** : l'identifiant de mesure, que le navigateur ne transmet que mesure consentie et active (`identifiantMesure()`). Sans lui, aucun événement de mesure, et plus aucun repli (e-mail, UUID, identifiant de paiement). Ce n'est pas une preuve juridique de consentement (un client modifié peut envoyer un identifiant) ; c'est la garantie que le parcours normal sans consentement n'émet rien.
 
 | Point | Événement(s) | Données (après) | Finalité | Nécessité technique | Base légale (à confirmer) | Sans consentement |
 |---|---|---|---|---|---|---|
 | `auth/actions.ts` | `user_logged_in`, `user_signed_up`, `user_signed_out` | `method`, `email_confirmation_required` ; plus d'e-mail ni d'`identify` serveur | entonnoir d'inscription | aucune (l'authentification ne dépend pas de PostHog) | consentement | rien (champ caché `ChampMesure` vide) |
-| `qna/route.ts` (AskFuture) | `$ai_generation` | modèle, jetons, latence, statut HTTP, catégorie, commune, source de la réponse, violations du garde FUT-37 ; `distinctId: "anonymous"`, **`$process_person_profile: false`** | coût et qualité du modèle, détection des réponses remplacées | **oui, diagnostic** | intérêt légitime, **réserve** : à valider (aucun identifiant ni cookie, aucune donnée du lecteur ; pas un traceur au sens de l'art. 82) | maintenu, catégorie B |
+| `qna/route.ts` (AskFuture) | `$ai_generation` | modèle, jetons, latence, statut HTTP, catégorie, commune, source de la réponse, violations du garde FUT-37 ; `distinctId: "anonymous"`, **`$process_person_profile: false`** | coût et qualité du modèle, détection des réponses remplacées | **oui, diagnostic** | intérêt légitime, **réserve** : à valider (aucun identifiant ni cookie, aucune donnée du lecteur ; pas un traceur au sens de l'art. 82) | **coupé par défaut** (contre-revue) : rien vers PostHog sauf `QNA_TELEMETRIE_POSTHOG=1` ; journal serveur interne conservé |
 | `api/comparateur-vie/ask` | `life_ask_submitted`, `life_ask_answered`, `life_ask_limit_reached` | rang, index, longueur de question, mode, indicateurs ; jamais le texte | usage produit | aucune (le quota repose sur un cookie, pas sur PostHog) | consentement | rien (plus de repli « anon ») |
 | `api/inscription-pro` | `pro_inscription_submitted` | `profession`, `cabinet_renseigne`, `besoin_renseigne` ; plus d'e-mail, de cabinet ni de texte libre | conversion pro | aucune (l'inscription vit dans `pro_inscriptions`) | consentement | rien |
-| `api/stripe/create-payment-intent` | `payment_intent_created` | produit, montant, devise, contexte déclaré (booléens) ; plus d'`user_id` | entonnoir d'achat | aucune | consentement | rien ; pose `phMesure=1` seulement si consenti |
-| `api/stripe/webhook` | `payment_completed` (×2), `address_dossier_purchased` | montant, produit, devise, `payment_intent_id` (rapprochement), commune ; plus d'`user_id` ni de `dossier_id` | chiffre d'affaires par parcours | **aucune** : le paiement est suivi par Stripe, `payments`, `address_dossiers`, la facture | consentement | rien sans `phMesure=1` |
+| `api/stripe/create-payment-intent` | `payment_intent_created` | produit, montant, devise, contexte déclaré (booléens) ; plus d'`user_id` | entonnoir d'achat | aucune | consentement | rien ; l'identifiant n'est plus confié à Stripe |
+| `api/stripe/webhook` | ~~`payment_completed` (×2), `address_dossier_purchased`~~ **retirés** | aucune | (chiffre d'affaires par parcours) | **aucune** : le paiement est suivi par Stripe, `payments`, `address_dossiers`, packs, la facture | consentement, impossible à vérifier sans navigateur | **rien, jamais** (contre-revue) |
 
-Intentions de paiement créées **avant** le déploiement : elles portent `phDistinctId` = UUID sans le marqueur, donc le webhook n'émet rien pour elles (protection conservatoire, perte de mesure assumée sur cette fenêtre).
+Intentions de paiement créées **avant** le déploiement : elles portent encore `phDistinctId` dans leurs métadonnées Stripe ; le webhook ne le lit plus et n'émet rien.
 
 ## 5. Tests
 
@@ -103,3 +103,65 @@ Au passage, la recette a corrigé deux défauts de la première version du corre
 5. **Propriétés de profil** : `wizard_completed` (secteur, mobilité, projets en valeurs fermées, commune), `workbook_answered` (réponses fermées) : valeurs d'énumération, pas de texte libre ; à revoir en lot B.
 6. **Heatmaps** : actives si le projet les active ; clés d'URL réduites.
 7. **Enregistrement de session** : désactivé ; s'il doit revenir, avec `maskTextSelector: "*"` et un masquage des attributs `href`, après revue.
+
+## 7. Reprises après contre-revue indépendante (SHA audité `099c205a`)
+
+Verdict de la contre-revue : architecture validée, NO GO provisoire sur quatre points.
+
+### 7.1 Retrait du consentement entre l'intention de paiement et le webhook
+
+Défaut : `phMesure=1` et l'identifiant de mesure étaient figés dans les métadonnées Stripe à la création de l'intention. Un retrait du consentement avant la confirmation n'y changeait rien : le webhook émettait `payment_completed` ou `address_dossier_purchased` sous l'ancien identifiant.
+
+Correction (la plus simple) : **le webhook n'émet plus aucun événement de mesure** (trois `capture` retirés, et les deux lectures de base qui ne servaient qu'à eux : rang du dossier, détection du rejeu pour `payment_completed`). `create-payment-intent` ne confie plus d'identifiant de mesure à Stripe (`phDistinctId` et `phMesure` retirés des métadonnées). L'entonnoir garde `payment_intent_created`, émis pendant la requête du navigateur consentant.
+
+Inchangés : Stripe, l'octroi des produits, les tables `payments` / `address_dossiers` / packs, la facture, l'e-mail de confirmation. Le chiffre d'affaires se lit dans Stripe et `payments`.
+
+Perte assumée : PostHog ne voit plus l'achat confirmé, seulement l'intention. Rétablir `payment_completed` demande une règle de consentement actualisé côté serveur (par exemple un consentement horodaté relu au webhook), hors lot A.
+
+Tests (exécutés, `fut115-octroi-comparatif`) : nouveau scénario « consentement → intention → retrait → confirmation → webhook et rejeu » : seul `payment_intent_created` existe, aucun identifiant dans les métadonnées, droits livrés, une confirmation, un paiement enregistré et rapprochable. Le compteur des rejeux s'appuie désormais sur `payments` (un encaissement = une ligne), et plus sur `payment_completed`. Statique (`fut181-consentement-mesure`) : le webhook n'importe plus PostHog, le bloc `metadata` ne porte plus d'identifiant de mesure.
+
+### 7.2 Réouverture des préférences Google
+
+Défaut : `futuree:show-consent` effaçait le choix et arrêtait PostHog, mais Google restait à `granted`.
+
+Correction (`ConsentBanner.tsx`) : la réouverture envoie `gtag("consent", "update", …denied)`. Dans les autres onglets, l'événement `storage` suit la même règle que PostHog : seule la valeur exacte `granted` ouvre ; une valeur effacée, inconnue, ou un `clear()` (clé nulle) vaut refus.
+
+Tests (exécutés, `fut121-sans-cascade`, harnais existant de la bannière) : un onglet, accepter → rouvrir → refuser → rouvrir → accepter, avec la suite exacte des commandes Google ; deux onglets, effacement, refus, nouvelle acceptation, `clear()`, valeur inconnue, autre clé. Réseau : recette Playwright, scénario 12 (§7.4).
+
+### 7.3 Politique de confidentialité et télémétrie `/qna`
+
+Politique :
+- les URL partent avec **les seuls paramètres explicitement autorisés**, décrits un par un (code des communes, mode d'affichage, horizon, origine et rang du lien, `utm_…`) ; un test lie cette liste à `PARAMETRES_URL_CONSERVES`, si bien qu'un paramètre ajouté en code sans mise à jour de la phrase fait échouer le test ;
+- « votre navigateur ne lui envoie rien » remplace « rien ne lui est envoyé » ;
+- nouvelle section « Journal technique de l'assistant », séparée de la mesure navigateur.
+
+`$ai_generation` (avant contre-revue, émis à chaque réponse du modèle) :
+
+| Propriété | Contenu |
+|---|---|
+| `distinctId` | constante `"anonymous"`, la même pour tous |
+| `$process_person_profile` | `false` : aucune personne créée ni enrichie |
+| `$geoip_disable` | `true`, ajouté par posthog-node (défaut `disableGeoip: true`) |
+| IP vue par PostHog | celle du serveur (Vercel), pas celle du lecteur |
+| `$ai_trace_id` | UUID aléatoire par requête, non relié au lecteur |
+| `$ai_provider`, `$ai_model`, `$ai_base_url`, `$ai_span_name` | constantes techniques |
+| `$ai_input_tokens`, `$ai_output_tokens`, `$ai_latency`, `$ai_http_status` | mesures techniques |
+| `question_category`, `module_id`, `module_context` | thème de la question (désormais filtré : identifiant bien formé seulement) |
+| `report_id` | code INSEE de la commune (désormais filtré : code bien formé seulement) |
+| `qna_source`, `qna_violations` | modèle ou repli, codes de règle du garde FUT-37 (jamais d'extrait de texte) |
+
+Ni la question (prédéfinie ou libre), ni la réponse, ni un identifiant de compte, de mesure ou de session.
+
+**Limites de l'anonymisation** : l'absence de profil n'est pas une anonymisation au sens du RGPD. L'horodatage, la commune et le thème, croisés avec d'autres journaux (hébergeur, base, mesure navigateur consentie sur la même page), peuvent permettre de relier une génération à une visite. Le risque est faible, mais il n'est pas nul.
+
+**Désactivation conservatoire** : la base légale (intérêt légitime ou consentement) relève du responsable du traitement et n'est pas présumée. La capture PostHog est donc **coupée par défaut** et ne se rallume qu'avec `QNA_TELEMETRIE_POSTHOG=1` (`telemetrieQnaPostHogActive`, test exécuté). Le diagnostic interne reste : une ligne `console.info("[qna] génération", …)` dans les journaux du serveur, avec le modèle, le statut, la latence, les jetons, le module, la commune, la source et les violations, sans question, sans texte et sans identifiant. Si le fondement est validé et la variable activée, la phrase de la politique « Il n'est pas transmis à PostHog » devra changer : le test de la politique le rappelle.
+
+À signaler : la question posée à l'assistant est transmise à Anthropic pour produire la réponse, et Anthropic ne figure pas dans la liste des sous-traitants de la politique. Ce point est hors du périmètre de la mesure ; il est à trancher par le responsable du traitement.
+
+### 7.4 Intégration du dernier `main`
+
+`origin/main` (FUT-175, FUT-176, FUT-178, FUT-180) fusionné dans la branche sans conflit : seul `fut147-non-regression.test.ts` était touché des deux côtés, et la fusion automatique l'a résolu. Les tests FUT-147 (contrats de synthèse, registre Territoire, garde FUT-175), FUT-121, FUT-115, FUT-119, FUT-10 et FUT-181 passent.
+
+FUT-94 (#135, non fusionnée) : une fusion d'essai locale, ensuite abandonnée, a été faite pour vérifier les conflits sur la politique (résultat ci-dessous).
+
+Résultats : voir §7.5.

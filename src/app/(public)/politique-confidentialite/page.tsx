@@ -199,7 +199,7 @@ export default function PolitiqueConfidentialitePage() {
               Votre choix est mémorisé dans le stockage de votre navigateur (<code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>). Il ne contient aucune donnée personnelle.
             </p>
             <p>
-              Si vous acceptez, PostHog dépose un identifiant de mesure dans votre navigateur (un cookie et une entrée de stockage dont le nom commence par <code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>ph_</code>). Si vous refusez, ou tant que vous n&apos;avez pas choisi, PostHog n&apos;est pas chargé : rien ne lui est envoyé et rien n&apos;est déposé.
+              Si vous acceptez, PostHog dépose un identifiant de mesure dans votre navigateur (un cookie et une entrée de stockage dont le nom commence par <code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>ph_</code>). Si vous refusez, ou tant que vous n&apos;avez pas choisi, PostHog n&apos;est pas chargé : votre navigateur ne lui envoie rien et rien n&apos;est déposé.
             </p>
             <p>
               Retirer votre consentement arrête la mesure tout de suite, y compris dans vos autres onglets ouverts sur futur•e, et efface ces identifiants de votre navigateur.
@@ -217,10 +217,20 @@ export default function PolitiqueConfidentialitePage() {
               Avec votre consentement, futur•e utilise PostHog pour comprendre comment le service est utilisé : les pages vues, les clics (le type d&apos;élément cliqué, jamais son texte), les étapes franchies, les erreurs techniques et les temps de chargement.
             </p>
             <p>
-              Les adresses de pages sont transmises <strong style={{ color: "var(--fg-1)" }}>sans leurs paramètres</strong> : une adresse de logement, un identifiant de dossier ou de paiement présents dans l&apos;adresse de la page ne partent pas. La mesure ne reçoit jamais votre adresse, le texte de votre projet, vos commentaires, le contenu de vos dossiers, ni votre adresse e-mail. Si vous êtes connecté, elle est rattachée à un identifiant interne de compte.
+              Les adresses de pages sont transmises <strong style={{ color: "var(--fg-1)" }}>avec les seuls paramètres que nous avons explicitement autorisés</strong>, qui décrivent une commune ou l&apos;origine d&apos;une visite, jamais une personne : le code des communes consultées, le mode d&apos;affichage, l&apos;horizon de projection, la page ou la liste d&apos;où vient le lien (et le rang dans cette liste), et les paramètres de campagne <code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>utm_…</code>. Tous les autres paramètres sont retirés : une adresse de logement, un identifiant de dossier ou de paiement présents dans l&apos;adresse de la page ne partent pas. La mesure ne reçoit jamais votre adresse, le texte de votre projet, vos commentaires, le contenu de vos dossiers, ni votre adresse e-mail. Si vous êtes connecté, elle est rattachée à un identifiant interne de compte.
             </p>
             <p>
               futur•e <strong style={{ color: "var(--fg-1)" }}>n&apos;enregistre pas vos sessions de navigation</strong>.
+            </p>
+          </Section>
+
+          {/* Journal technique de l'assistant */}
+          <Section title="Journal technique de l'assistant">
+            <p>
+              Ce qui précède concerne la mesure faite depuis votre navigateur, qui n&apos;a lieu qu&apos;avec votre accord. Indépendamment de ce choix, quand l&apos;assistant répond à une question sur une commune, le serveur de futur•e note dans son journal technique, chez notre hébergeur : le modèle utilisé, la durée et le volume de la réponse, son statut, la commune et le thème concernés, et si la réponse a dû être remplacée par une réponse de secours.
+            </p>
+            <p>
+              Ce journal <strong style={{ color: "var(--fg-1)" }}>ne contient ni votre question, ni la réponse, ni aucun identifiant de compte ou de mesure</strong>. Il sert uniquement à surveiller le coût et le bon fonctionnement de l&apos;assistant. Il n&apos;est pas transmis à PostHog.
             </p>
           </Section>
 

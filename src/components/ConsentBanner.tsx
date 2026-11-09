@@ -57,14 +57,19 @@ export function ConsentBanner() {
 
     const handler = () => {
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
-      // Rouvrir les préférences efface le choix : la mesure s'arrête jusqu'au prochain clic.
+      // Rouvrir les préférences efface le choix : la mesure s'arrête jusqu'au prochain clic. Google
+      // aussi (contre-revue FUT-181) : sans choix enregistré, il revient au refus par défaut, comme PostHog.
+      updateGoogleConsent("denied");
       annoncerChangement();
       setDecision("afficher");
     };
     // FUT-181 : un choix fait dans un AUTRE onglet s'applique aussi à Google dans celui-ci. PostHog
-    // écoute le même événement de son côté (`PostHogProvider`).
+    // écoute le même événement de son côté (`PostHogProvider`). Même règle que PostHog : seule la valeur
+    // exacte « granted » ouvre ; un choix effacé (préférences rouvertes, `key` nulle d'un `clear()`) ou
+    // inconnu vaut refus.
     const autreOnglet = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && (e.newValue === "granted" || e.newValue === "denied")) updateGoogleConsent(e.newValue);
+      if (e.key !== STORAGE_KEY && e.key !== null) return;
+      updateGoogleConsent(e.key !== null && e.newValue === "granted" ? "granted" : "denied");
     };
     window.addEventListener("futuree:show-consent", handler);
     window.addEventListener("storage", autreOnglet);

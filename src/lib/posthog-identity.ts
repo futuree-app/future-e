@@ -1,5 +1,5 @@
-// Le distinct_id de PostHog voyage du navigateur au serveur, puis jusqu'au webhook par les
-// métadonnées Stripe.
+// Le distinct_id de PostHog voyage du navigateur au serveur, dans la requête que le navigateur
+// consentant fait lui-même. Il ne va pas plus loin : ni Stripe, ni webhook (contre-revue FUT-181).
 //
 // SANS LUI, LES ÉVÉNEMENTS SERVEUR CRÉENT UNE SECONDE PERSONNE. Le navigateur identifie sur l'UUID
 // Supabase (`mesure-audience.ts`, `identify(compte)`, depuis FUT-181) tandis que les routes émettaient sur
@@ -40,10 +40,8 @@ export function sanitizeDistinctId(input: unknown, fallback: string): string {
 // Le champ caché des formulaires d'authentification (`ChampMesure`).
 export const CHAMP_IDENTIFIANT_MESURE = "ph_distinct_id";
 
-// La métadonnée Stripe qui dit que l'intention de paiement est née d'un navigateur consentant. Les
-// intentions créées avant FUT-181 portaient `phDistinctId` = UUID du compte même sans consentement :
-// sans ce marqueur, le webhook n'émet rien.
-export const METADATA_MESURE_CONSENTIE = "phMesure";
+// Aucun identifiant de mesure n'est confié à Stripe : le webhook, qui arrive sans navigateur et parfois
+// après un retrait du consentement, n'émet aucun événement de mesure (contre-revue FUT-181).
 
 export function identifiantMesureConsenti(input: unknown): string | null {
   return sanitizeDistinctId(input, "") || null;
@@ -55,3 +53,20 @@ export const MESURE_MUETTE: { capture: (evenement: unknown) => void; shutdown: (
   capture: rien,
   shutdown: async () => {},
 };
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+// TÉLÉMÉTRIE DU MODÈLE `/qna` (`$ai_generation`) : COUPÉE PAR DÉFAUT (contre-revue FUT-181).
+//
+// Elle ne dépend pas du consentement navigateur : identifiant constant « anonymous », aucun profil
+// (`$process_person_profile: false`), géolocalisation désactivée (`$geoip_disable`, défaut de
+// posthog-node), émise depuis le serveur (l'adresse IP vue par PostHog est celle de l'hébergeur).
+// Elle porte la commune consultée et le module, à l'heure près : ce n'est pas une anonymisation
+// garantie, seulement l'absence de rattachement à une personne dans PostHog.
+//
+// Son fondement (intérêt légitime ou consentement) appartient au responsable du traitement. Tant
+// qu'il n'est pas validé, rien ne part vers PostHog ; la variable `QNA_TELEMETRIE_POSTHOG=1` la
+// rallume, sans changement de code. Le diagnostic interne (journal serveur) reste dans tous les cas.
+// ════════════════════════════════════════════════════════════════════════════════════════════════
+export function telemetrieQnaPostHogActive(env: Record<string, string | undefined> = process.env): boolean {
+  return env.QNA_TELEMETRIE_POSTHOG === "1";
+}

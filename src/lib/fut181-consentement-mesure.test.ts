@@ -15,9 +15,9 @@ import vm from "node:vm";
 import { createRequire } from "node:module";
 import {
   CLE_CONSENTEMENT_MESURE, domainesDeCookie, estCleStockagePostHog, lireConsentementMesure, mesureConsentie,
-  nettoyerEvenement, nettoyerUrl, nettoyerUrlsDansTexte, purgerTracesPostHog,
+  nettoyerEvenement, nettoyerUrl, nettoyerUrlsDansTexte, PARAMETRES_URL_CONSERVES, purgerTracesPostHog,
 } from "./mesure-audience-regles.ts";
-import { identifiantMesureConsenti } from "./posthog-identity.ts";
+import { identifiantMesureConsenti, telemetrieQnaPostHogActive } from "./posthog-identity.ts";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -297,19 +297,24 @@ test("sources : aucun e-mail ne part vers PostHog (identifiant ou propriété)",
   }
 });
 
-test("sources : les six captures serveur n'émettent que sur un identifiant de mesure consenti", () => {
+test("sources : les captures serveur n'émettent que sur un identifiant de mesure consenti", () => {
   const routes = [
     "src/app/auth/actions.ts", "src/app/api/comparateur-vie/ask/route.ts", "src/app/api/inscription-pro/route.ts",
-    "src/app/api/stripe/webhook/route.ts", "src/app/api/stripe/create-payment-intent/route.ts",
+    "src/app/api/stripe/create-payment-intent/route.ts",
   ];
   for (const f of routes) {
     const s = lire(f);
     assert.match(s, /identifiantMesureConsenti\(/, f);
     assert.doesNotMatch(s, /sanitizeDistinctId\(/, `${f} : plus de repli sur un autre identifiant`);
   }
+  // Contre-revue : le webhook arrive sans navigateur, parfois après un retrait du consentement. Il ne
+  // mesure rien, et aucun identifiant de mesure ne voyage par Stripe.
   const webhook = lire("src/app/api/stripe/webhook/route.ts");
-  assert.match(webhook, /metadata\[METADATA_MESURE_CONSENTIE\] === "1"/);
-  assert.doesNotMatch(webhook, /[\s{]dossier_id: dossier\.id/);
+  assert.doesNotMatch(webhook, /@\/lib\/posthog|getPostHogClient|\.capture\(|phDistinctId/);
+  const intention = lire("src/app/api/stripe/create-payment-intent/route.ts");
+  const metadata = intention.slice(intention.indexOf("metadata: {"), intention.indexOf("buyerName,"));
+  assert.ok(metadata.length > 100, "bloc metadata repéré");
+  assert.doesNotMatch(metadata, /phDistinctId:|phMesure|METADATA_MESURE/);
   const pro = lire("src/app/api/inscription-pro/route.ts");
   const proprietesPro = pro.slice(pro.indexOf("'pro_inscription_submitted'")).split("\n")[1];
   assert.equal(proprietesPro.trim(), "properties: { profession, cabinet_renseigne: Boolean(cabinet), besoin_renseigne: Boolean(besoin) },", "ni e-mail, ni cabinet, ni texte libre");
@@ -327,3 +332,40 @@ test("sources : le $pageview attend la mesure active ET la session relue", () =>
   assert.match(p, /\(\) => definirCompte\(null\),/);
 });
 
+
+test("qna (contre-revue) : la télémétrie PostHog du modèle est coupée tant que son fondement n'est pas validé", () => {
+  assert.equal(telemetrieQnaPostHogActive({}), false, "coupée par défaut");
+  for (const v of ["0", "true", "oui", " 1", ""]) assert.equal(telemetrieQnaPostHogActive({ QNA_TELEMETRIE_POSTHOG: v }), false, v);
+  assert.equal(telemetrieQnaPostHogActive({ QNA_TELEMETRIE_POSTHOG: "1" }), true, "rallumée par décision explicite");
+  const qna = lire("src/app/qna/route.ts");
+  const garde = qna.indexOf("if (telemetrieQnaPostHogActive()) {");
+  assert.ok(garde > 0, "garde présente");
+  assert.equal(qna.indexOf("getPostHogClient()"), qna.indexOf("getPostHogClient()", garde), "aucun client PostHog créé hors de la garde");
+  assert.equal((qna.match(/getPostHogClient\(\)/g) ?? []).length, 1);
+  // Le diagnostic interne reste, sans donnée du lecteur.
+  const journal = qna.slice(qna.indexOf('console.info("[qna] génération"'), garde);
+  assert.ok(journal.length > 0, "journal serveur présent");
+  assert.doesNotMatch(journal, /freeTextQuestion|text\b|userPrompt|categories/);
+  assert.match(journal, /module: moduleId, insee,/, "champs bien formés seulement");
+});
+
+test("politique (contre-revue) : elle décrit les paramètres réellement gardés et la télémétrie /qna réellement émise", () => {
+  const politique = lire("src/app/(public)/politique-confidentialite/page.tsx");
+  // La liste blanche est celle que la politique décrit, paramètre par paramètre. Un ajout fait échouer ce
+  // test : il faut alors compléter la phrase de la politique avant de l'élargir.
+  assert.deepEqual([...PARAMETRES_URL_CONSERVES].sort(), [
+    "communes", "horizon", "insee", "mode", "rank", "source",
+    "utm_campaign", "utm_content", "utm_medium", "utm_source", "utm_term",
+  ]);
+  assert.doesNotMatch(politique, /sans leurs paramètres/, "plus de promesse d'URL sans aucun paramètre");
+  assert.match(politique, /seuls paramètres que nous avons explicitement autorisés/);
+  for (const mot of ["code des communes", "mode d&apos;affichage", "horizon de projection", "rang dans cette liste", "utm_…"]) {
+    assert.ok(politique.includes(mot), mot);
+  }
+  // Mesure navigateur ≠ journal serveur de l'assistant ; la phrase « pas transmis à PostHog » n'est vraie que
+  // tant que la télémétrie /qna reste coupée par défaut.
+  assert.match(politique, /votre navigateur ne lui envoie rien/);
+  assert.match(politique, /title="Journal technique de l'assistant"/);
+  assert.match(politique, /Il n&apos;est pas transmis à PostHog\./);
+  assert.equal(telemetrieQnaPostHogActive({}), false);
+});
