@@ -61,12 +61,23 @@ const DENSITY_VERB: Record<string, string> = {
 /** FUT-175 : en deçà, l'eau n'est pas nommée par la synthèse déterministe (la carte la dit dès 1 %). */
 const EAU_NOTABLE_PCT = 10;
 
-const LAND_PHRASE: Record<string, string> = {
-  "Occupation mixte": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures",
-  "Majoritairement urbanisé": "Ses sols sont majoritairement urbanisés",
-  "Forte présence naturelle": "Les espaces naturels y tiennent une grande place",
-  "À dominante agricole": "Les terres agricoles y dominent",
-  "Faible présence d'espaces naturels": "Les espaces naturels y sont peu présents",
+type LandComposition = Record<string, number> | undefined;
+
+/**
+ * FUT-177 : la phrase de chaque catégorie. Deux d'entre elles portent leur limite, parce que c'est là que la lecture
+ * dérapait : « Majoritairement urbanisé » compte routes et zones d'activité autant que les bâtiments (Roissy-en-France,
+ * aéroport compris) ; « Faible présence d'espaces naturels » laisse des terres partagées entre cultures et espaces
+ * urbanisés, nommées dans l'ordre de leur part (Carpiquet : les cultures d'abord).
+ */
+const LAND_PHRASE: Record<string, (c: LandComposition) => string> = {
+  "Occupation mixte": () => "Ses sols mêlent espaces urbanisés, espaces naturels et cultures",
+  "Majoritairement urbanisé": () => "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus)",
+  "Forte présence naturelle": () => "Les espaces naturels y tiennent une grande place",
+  "À dominante agricole": () => "Les terres agricoles y dominent",
+  "Faible présence d'espaces naturels": (c) =>
+    `Les espaces naturels y sont peu présents, ses terres se partageant entre ${
+      (c?.terres_agricoles ?? 0) > (c?.espaces_urbanises ?? 0) ? "cultures et espaces urbanisés" : "espaces urbanisés et cultures"
+    }`,
 };
 
 function blocTerritoire(p: P): string[] {
@@ -109,11 +120,15 @@ function blocTerritoire(p: P): string[] {
   }>(p, "occupation_des_sols");
   if (land?.categorie && LAND_PHRASE[land.categorie]) {
     // FUT-175 : les parts portent sur les terres ; l'eau, quand elle compte, est dite dans sa propre phrase.
+    // FUT-177 : les TROIS familles des terres, cultures comprises. Sans elles, « 41 % d'espaces urbanisés et 14 %
+    // d'espaces naturels » laissait le lecteur deviner les 45 % restants (Carpiquet), et y lire du bâti.
     const parts: string[] = [];
     const urb = land.composition_des_terres_pct?.espaces_urbanises;
+    const agri = land.composition_des_terres_pct?.terres_agricoles;
     if (urb != null) parts.push(`${frNum(urb)} % d'espaces urbanisés`);
+    if (agri != null) parts.push(`${frNum(agri)} % de cultures`);
     if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${frNum(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
-    out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
+    out.push(`${LAND_PHRASE[land.categorie](land.composition_des_terres_pct)}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
     const eau = land.part_eau_de_la_commune_pct;
     if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de sa surface cartographiée.`);
   }
