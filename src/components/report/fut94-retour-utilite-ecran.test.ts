@@ -322,6 +322,24 @@ for (const presentation of ["classique", "releve"] as const) {
     initialServeur = null;
   });
 
+  test(`${presentation} · brouillon jamais envoyé puis « Pas encore lu » : le champ revient vide à « Oui »`, async () => {
+    initialServeur = null;
+    simulerFetch();
+    const r = await ecran({ presentation });
+    await cliquer(bouton(r, /^\["Oui"\]$/));
+    await saisir(r, "Un brouillon que je n'envoie pas.");
+    await cliquer(bouton(r, /Pas encore lu/));
+    assert.equal(champ(r), undefined);
+    await cliquer(bouton(r, /^\["Oui"\]$/));
+    assert.equal(champ(r).props.value, "");
+    // Rien n'a jamais porté ce texte vers le serveur.
+    assert.ok(appels.every((a) => !JSON.stringify(a.corps).includes("brouillon")));
+    // Contre-cas : un brouillon garde son texte entre « Oui » et « Pas vraiment ».
+    await saisir(r, "Gardé entre deux réponses lues.");
+    await cliquer(bouton(r, /Pas vraiment/));
+    assert.equal(champ(r).props.value, "Gardé entre deux réponses lues.");
+  });
+
   test(`${presentation} · effacer son commentaire depuis l'écran : champ vidé, envoi permis, plus de commentaire`, async () => {
     initialServeur = { answer: "oui", comment: "La carte des écoles." };
     simulerFetch();

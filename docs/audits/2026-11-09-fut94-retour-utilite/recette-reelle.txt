@@ -1,4 +1,4 @@
-FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T10:54:27.762Z
+FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T11:42:26.683Z
 
 ✔ classique · la question est posée sous le dossier, aucune réponse en base
 ✔ classique · première réponse « Oui » sans commentaire : une ligne, réponse seule
@@ -7,6 +7,7 @@ FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T
 ✔ classique · effacer le commentaire (champ vidé) : comment et commented_at à NULL
 ✔ classique · « Pas vraiment » commenté → « Pas encore lu » : commentaire retiré, annoncé à l'écran
 ✔ classique · retour à « Oui » : pas de commentaire ressuscité, champ vide
+✔ classique · brouillon jamais envoyé → « Pas encore lu » → « Oui » : champ vide, rien en base
 ✔ classique · rechargement : l'état vient de la base (résumé « Oui »), aucune question reposée
 ✔ classique · double clic : un seul envoi, une seule ligne
 ✔ classique · panne réseau puis nouvel essai : texte conservé, envoi réussi
@@ -18,6 +19,7 @@ FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T
 ✔ releve · effacer le commentaire (champ vidé) : comment et commented_at à NULL
 ✔ releve · « Pas vraiment » commenté → « Pas encore lu » : commentaire retiré, annoncé à l'écran
 ✔ releve · retour à « Oui » : pas de commentaire ressuscité, champ vide
+✔ releve · brouillon jamais envoyé → « Pas encore lu » → « Oui » : champ vide, rien en base
 ✔ releve · rechargement : l'état vient de la base (résumé « Oui »), aucune question reposée
 ✔ releve · double clic : un seul envoi, une seule ligne
 ✔ releve · panne réseau puis nouvel essai : texte conservé, envoi réussi
@@ -30,7 +32,8 @@ FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T
     8 événement(s) tentés ; FUT-94 : 2 [{"answer":"pas_vraiment","has_comment":true,"step":"reponse","scope":"adresse","presentation":"releve"},{"answer":"pas_vraiment","has_comment":true,"step":"commentaire","scope":"adresse","presentation":"releve"}] ; autocapture du bloc : 0 ; texte du commentaire : 0
 ✔ consentement granted : événements FUT-94 conformes, aucun texte de commentaire envoyé
 
+Passe précédente (même jour, sur 1f3285c5, chemin de lecture inchangé depuis) :
 ✔ table illisible pour le compte : droit SELECT de `authenticated` retiré le temps du cas (projet de test seulement), /rapport s'affiche, la question n'est pas posée (0 bloc)
 ✔ contre-épreuve : droit rétabli, même compte, même page : la question réapparaît (1 bloc)
 
-Journal du serveur (next dev) : 29 POST /api/dossier/retour-utilite, tous 200 ; texte témoin du commentaire présent 0 fois.
+Journal du serveur (next dev), cette passe : 33 POST /api/dossier/retour-utilite, 33 en 200 ; texte témoin du commentaire et du brouillon présents 0 fois.

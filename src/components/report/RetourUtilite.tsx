@@ -103,11 +103,12 @@ export function RetourUtilite({
       const precedent = enregistre;
       setEnregistre(json.retour);
       setConfirme(type);
-      const retire = type === "reponse" && Boolean(precedent?.comment) && json.retour.comment === null;
-      setCommentaireRetire(retire);
-      // L'écran vient de dire « votre commentaire précédent a été retiré » : le champ ne doit pas le
-      // reproposer au retour à « Oui » (un clic sur Envoyer le ressusciterait). Trouvé en recette réelle.
-      if (retire) setBrouillon("");
+      setCommentaireRetire(type === "reponse" && Boolean(precedent?.comment) && json.retour.comment === null);
+      // « Pas encore lu » vide le champ, qu'il porte un commentaire ENREGISTRÉ (retiré en base) ou un
+      // brouillon jamais envoyé : au retour à « Oui », rien ne doit être reproposé, sinon un clic sur
+      // Envoyer ressusciterait un texte que le lecteur a renoncé à donner (recette réelle et contre-revue
+      // du 09/11/2026). Entre « Oui » et « Pas vraiment », le champ et le commentaire enregistré restent.
+      if (type === "reponse" && json.retour.answer === "pas_encore_lu") setBrouillon("");
       // UN ÉVÉNEMENT AGRÉGÉ, SANS LE TEXTE, ET SEULEMENT AVEC CONSENTEMENT. La réponse, la présence d'un
       // commentaire, la portée.
       try {

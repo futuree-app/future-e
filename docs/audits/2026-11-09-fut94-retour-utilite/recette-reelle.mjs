@@ -220,6 +220,17 @@ for (const [c, vue] of [[A, "classique"], [R, "releve"]]) {
     const [l] = await ligneDe(c.id, S);
     assert.equal(l.answer, "oui"); assert.equal(l.comment, null);
   });
+  await cas(`${vue} · brouillon jamais envoyé → « Pas encore lu » → « Oui » : champ vide, rien en base`, async () => {
+    await b.getByLabel(/Quoi, ou qu'est-ce qui vous a manqué/).fill("Brouillon-FUT94 jamais envoyé");
+    await b.getByRole("button", { name: "Pas encore lu" }).click();
+    await b.getByText("Merci, c'est noté.").waitFor();
+    await b.getByRole("button", { name: "Oui", exact: true }).click();
+    await b.getByText("Merci, votre réponse est enregistrée.").waitFor();
+    assert.equal(await b.getByLabel(/Quoi, ou qu'est-ce qui vous a manqué/).inputValue(), "");
+    const [l] = await ligneDe(c.id, S);
+    assert.equal(l.answer, "oui"); assert.equal(l.comment, null);
+    assert.ok(envois.every((x) => !String(x).includes("Brouillon-FUT94")), "le brouillon n'est jamais parti");
+  });
   await cas(`${vue} · rechargement : l'état vient de la base (résumé « Oui »), aucune question reposée`, async () => {
     await page.reload(); await b.waitFor({ timeout: 120000 });
     assert.match(await texteDe(b), /Votre retour sur cette analyse : Oui\. Merci\./);
