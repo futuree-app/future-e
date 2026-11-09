@@ -354,10 +354,11 @@ const RULES: Rule[] = [
       /\b(l'arrondissement|cet arrondissement|il) (est|constitue|forme|reste|demeure) (la |une |lui-même )?ville-centre\b/,
       /\b(l'arrondissement|cet arrondissement|il) (est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
       /\barrondissement,? ville-centre\b/,
-      /\b(est|se situe|se trouve) au (centre|cœur) de (son |l')agglomération\b/,
+      // « Paris est au centre de son agglomération » dit le statut de la commune entière : il est exact. L'exception
+      // porte sur CETTE affirmation seulement (le sujet est la ville), jamais sur la phrase entière : « Paris est au
+      // centre de son agglomération, mais l'arrondissement est la ville-centre » reste refusée (contre-revue).
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|se situe|se trouve) au (centre|cœur) de (son |l')agglomération\b/,
     ],
-    // « Paris est au centre de son agglomération » dit le statut de la commune entière : il est exact.
-    unless: /\b(paris|lyon|marseille)(,[^,]*,)? (est|se situe|se trouve|forme|constitue)\b/,
   },
   {
     id: "interdit:station-balneaire",

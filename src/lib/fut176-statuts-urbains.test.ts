@@ -427,11 +427,61 @@ test("comparateur : sans code ni statut, la raison « Isolement » ne dit jamais
 
 test("libellés de taille : en source agglomération, jamais « une ville moyenne » pour la commune", () => {
   assert.equal(labelForCategory("moyenne", "urban_unit"), "une agglomération moyenne");
-  assert.equal(labelForCategory("moyenne", "commune"), "une ville moyenne");
+  assert.equal(labelForCategory("moyenne", "commune"), "une commune de taille moyenne");
   assert.equal(
     categoryStatementFragment("Lucé", "moyenne", "urban_unit"),
     "Lucé appartient à une agglomération moyenne selon la population de son agglomération et la convention de taille utilisée par futur•e",
   );
   // Seuils de FUT-8 inchangés.
   assert.deepEqual(AGGLOMERATION_SIZE_CONVENTION.thresholds, { villageMaxExclusive: 2000, petiteMaxExclusive: 25000, moyenneMaxExclusive: 100000, grandeMaxExclusive: 500000 });
+});
+
+// ── 8. Dernière reprise : l'exception PLM ne couvre que son affirmation ; « ville » jamais tiré d'une population ─
+
+test("contrôle PLM : l'exception « Paris est au centre… » ne neutralise pas une autre affirmation de la même phrase", async () => {
+  for (const [insee, ville, n] of [["75120", "Paris", "20e"], ["69389", "Lyon", "9e"], ["13216", "Marseille", "16e"]] as const) {
+    const { projection } = await identiteReelle(insee);
+    const refuse = (t: string) => checkAssertions(t, projection).some((v) => v.rule === "interdit:arrondissement-ville-centre");
+    // Positifs : la ville elle-même, ou une négation, sont admis.
+    assert.equal(refuse(`${ville} est au centre de son agglomération ; le ${n} en est un arrondissement.`), false, insee);
+    assert.equal(refuse(`${ville}, ville-centre de son agglomération, compte plusieurs arrondissements.`), false, insee);
+    assert.equal(refuse(`${ville}, ville-centre, est au centre de son agglomération.`), false, insee);
+    assert.equal(refuse("L'arrondissement n'est pas lui-même une ville-centre."), false, insee);
+    // Négatifs simples.
+    assert.equal(refuse("L'arrondissement est la ville-centre de son agglomération."), true, insee);
+    assert.equal(refuse(`${ville} ${n} est au centre de son agglomération.`), true, insee);
+    // Composés : l'affirmation admise ne couvre pas la suivante (contre-exemple de la contre-revue).
+    assert.equal(refuse(`${ville} est au centre de son agglomération, mais l'arrondissement est la ville-centre.`), true, insee);
+    assert.equal(refuse(`${ville} est au centre de son agglomération, et le ${n} se trouve au cœur de son agglomération.`), true, insee);
+    assert.equal(refuse(`${ville} se situe au centre de l'agglomération ; cet arrondissement, ville-centre lui aussi, en profite.`), true, insee);
+  }
+});
+
+test("taille, source commune : jamais « ville » tiré d'une population — La Hague, Mont-Dauphin, Bony, une commune de banlieue", async () => {
+  const lieu = (commune: string, insee: string): Lieu => ({ type: "commune", libelle: commune, commune, insee });
+  // La Hague (11 223 habitants, hors unité urbaine) : sa population est la sienne, sa taille est celle d'une commune.
+  const hague = await V.getCommuneEntry("50041");
+  assert.equal(hague.uu_statut, "H");
+  const lh = lireTaille(lieu("La Hague", "50041"), { issue: "favorable", phraseTaille: null, population: hague.population, source: "commune" } as M);
+  assert.match(lh.pourVous.texte, /^Moins de 25.000 habitants dans la commune : une commune de petite taille, au sens de futur•e\.$/);
+  // Bony (139 habitants, hors unité urbaine).
+  const bony = lireTaille(lieu("Bony", "02100"), { issue: "favorable", phraseTaille: null, population: 139, source: "commune" } as M);
+  assert.doesNotMatch(bony.pourVous.texte, /ville/);
+  // Mont-Dauphin (171 habitants, banlieue de Guillestre) : la population lue est celle de l'agglomération.
+  const md = lireTaille(lieu("Mont-Dauphin", "05082"), { issue: "favorable", phraseTaille: null, population: 3258, source: "urban_unit" } as M);
+  assert.match(md.pourVous.texte, /^Moins de 25.000 habitants dans l'agglomération : une petite agglomération, au sens de futur•e\.$/);
+  // Lucé (banlieue de Chartres, agglomération de 88 891 habitants).
+  const luce = lireTaille(lieu("Lucé", "28218"), { issue: "indeterminate", phraseTaille: null, population: 88891, source: "urban_unit" } as M);
+  assert.match(luce.pourVous.texte, /dans l'agglomération : une agglomération moyenne/);
+  // Aucune lecture de taille ne dit « ville » d'après une population, quelle que soit la source.
+  for (const source of ["commune", "urban_unit"] as const) {
+    for (const [issue, population] of [["favorable", 1000], ["indeterminate", 50000], ["mismatch", 200000]] as const) {
+      const t = lireTaille(lieu("X", "00000"), { issue, phraseTaille: null, population, source } as M).pourVous.texte;
+      assert.doesNotMatch(t, /\bville\b/, `${source} ${issue} : ${t}`);
+    }
+    for (const cat of ["village", "petite", "moyenne", "grande", "metropole"] as const) {
+      assert.doesNotMatch(labelForCategory(cat, source), /\bville\b/, `${source} ${cat}`);
+    }
+  }
+  assert.equal(categoryStatementFragment("La Hague", "petite", "commune"), "La Hague est classée comme une petite commune selon sa population communale");
 });

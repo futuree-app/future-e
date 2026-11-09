@@ -150,3 +150,34 @@ Le fusionné doit aussi être relu sur deux points : la projection d'un arrondis
 - Ciblés : FUT-176 (24), FUT-147 (20, références inchangées), FUT-140, FUT-141, PLM, `territoire/*`, `agglomeration-*`, pastilles : 259/259. `npm run index:verify` : index vérifié.
 - Index inchangé par la reprise : aucun score, classement ni ordre ne bouge.
 - Test FUT-137 ajusté (La Hague) : la commune garde sa vie locale forte (69), décision de FUT-137 intacte, mais elle est hors unité urbaine. Elle n'est donc plus « une petite ville qui reste vraiment vivante ». C'est l'effet direct de la règle canonique demandée par la contre-revue, à valider en contre-revue.
+
+## 9. Dernière reprise (SHA audité 2f4378c6) et intégration de main
+
+**Intégration.** `origin/main` (6fc48f7b, FUT-175 fusionnée par #140) est fusionnée dans la branche. L'arbre de main est identique à celui de la tête de #140 (a9490c31), donc la résolution essayée au § 7 s'applique telle quelle (commit 13181a1f). L'arbre obtenu est identique à celui de l'essai, rapports à part :
+- `territoire-facts@2` et la lecture OSO de FUT-175 sont intacts ;
+- le contrat est unique, en `territoire-synthese@6` ;
+- `HASH_MAIN` = `6f4c52b2…68d3` (celle de FUT-175) et `CLE_MAIN` = `5b0eb94c…6c72` ;
+- la référence figée FUT-175 perd seulement sa ligne `@5`, et les contre-épreuves FUT-147/FUT-175 passent.
+
+**Garde-fou PLM.** L'exception `unless`, posée sur la phrase entière, a été retirée. L'exception est maintenant un lookbehind sur la seule affirmation admise : « Paris|Lyon|Marseille [, …,] est au centre de son agglomération ».
+- Refusées : « Paris est au centre de son agglomération, mais l'arrondissement est la ville-centre », et « …, et le 20e se trouve au cœur de son agglomération ».
+- Admise : « Paris est au centre de son agglomération ; le 20e en est un arrondissement ».
+- Ces cas sont testés sur Paris, Lyon et Marseille.
+
+**Mot « ville » tiré d'une population (source commune).**
+
+| Où | Avant | Après |
+|---|---|---|
+| Pastille taille, commune < 25 000 | « c'est une petite ville, ou un village » | « … habitants dans la commune : une commune de petite taille » |
+| Pastille taille, commune 25 000-100 000 | « une ville moyenne » | « une commune de taille moyenne » |
+| Pastille taille, > 100 000 (commune / agglomération) | « ce n'est pas une petite ville » | « ce n'est pas une commune de petite taille » / « … une petite agglomération » |
+| `labelForCategory(·, "commune")` | une ville moyenne · une grande ville · une très grande ville | une commune de taille moyenne · une grande commune · une très grande commune |
+| Face favorable en source agglomération | « Mont-Dauphin est une petite agglomération » | « Mont-Dauphin appartient à une petite agglomération » (« est un village » inchangé) |
+
+Seuils, scores, préférences, ordres : inchangés. La consigne de conclusion (`conclusion-prompt.ts`) cite encore « une ville moyenne, … une très grande ville » parmi ses exemples. La changer impose de passer `DECISION_NARRATIVE_PROMPT_VERSION` de v16 à v17. Or ce passage modifie l'empreinte des conclusions figées, que FUT-17 garantit relues mot pour mot (deux tests échouaient). Ce point est laissé tel quel et signalé pour un ticket FUT-17/FUT-8.
+
+**Recette.**
+- Suite complète : 4 508 tests, 4 502 réussis, 5 échecs fut27 connus (« · » du chemin), 1 sauté (FUT-137, déjà présent).
+- FUT-176 : 26 tests.
+- `tsc` : sans erreur. `eslint .` : sans erreur. `index:verify` : vérifié.
+- `npm run build` : réussi, avec des variables Supabase factices. Les erreurs de fetch au prérendu viennent de l'adresse factice.

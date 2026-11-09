@@ -68,13 +68,13 @@ test("petite ville : la population dite simplement, la convention du moteur en c
   assert.equal(lille.pourVous.signal, "defavorable");
   assert.equal(lille.fait!.texte, `Environ ${(1058439).toLocaleString("fr-FR")} habitants dans l'agglomération dont fait partie Lille.`);
   assert.equal(lille.fait!.grain, "unite_urbaine", "la taille d'une agglomération n'est pas présentée comme communale");
-  assert.match(lille.pourVous.texte, /^Plus de 100.000 habitants dans l'agglomération : ce n'est pas une petite ville\.$/);
+  assert.match(lille.pourVous.texte, /^Plus de 100.000 habitants dans l'agglomération : ce n'est pas une petite agglomération\.$/);
   // FUT-176 : en source agglomération, la taille est celle de l'agglomération, jamais « une ville moyenne » pour la commune.
   const moyenne = lireTaille(SETE, { issue: "indeterminate", ...base, population: 94088 }).pourVous.texte;
   assert.match(moyenne, /^Entre 25.000 et 100.000 habitants dans l'agglomération : une agglomération moyenne/);
   assert.doesNotMatch(moyenne, /ville moyenne/);
   assert.match(lireTaille(SETE, { issue: "favorable", ...base, population: 3258 }).pourVous.texte, /dans l'agglomération : une petite agglomération/);
-  assert.match(lireTaille(SETE, { issue: "indeterminate", phraseTaille: null, population: 30000, source: "commune" }).pourVous.texte, /une ville moyenne/);
+  assert.match(lireTaille(SETE, { issue: "indeterminate", phraseTaille: null, population: 30000, source: "commune" }).pourVous.texte, /dans la commune : une commune de taille moyenne/);
   const village = lireTaille(SETE, { issue: "favorable", phraseTaille: null, population: 151, source: "commune" });
   assert.equal(village.fait!.grain, "commune");
   assert.match(village.pourVous.texte, /^Moins de 25.000 habitants/);

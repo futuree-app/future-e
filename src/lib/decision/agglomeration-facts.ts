@@ -30,7 +30,9 @@ export function classifyAgglomerationSize(
 }
 
 // « agglomération » et « métropole » ne sont légitimes que si la classification repose sur l'unité urbaine.
-// En repli « population communale », libellé neutre (« grande ville », « très grande ville », « petite commune »).
+// En repli « population communale », libellé neutre (« petite commune », « commune de taille moyenne », « grande commune »).
+// FUT-176 (contre-revue) : jamais « ville » déduit d'une population seule. « Ville » est une forme urbaine (statut Insee
+// ville-centre ou ville isolée, cf. `peutDireVille`) ; La Hague (11 223 habitants) est hors unité urbaine.
 // UN SEUL MOT face au lecteur pour le périmètre UU : « agglomération » (celui du héros et des libellés
 // ci-dessous). « unité urbaine » reste le terme de PROVENANCE (ici en commentaire, et la source en
 // « Données et limites »), jamais un second nom pour la même mesure à trois centimètres d'écart.
@@ -41,9 +43,9 @@ export function labelForCategory(cat: AgglomerationCategory, source: "urban_unit
     case "petite": return uu ? "une petite agglomération" : "une petite commune";
     // FUT-176 (contre-revue) : en source UU, la taille est celle de l'agglomération. « X appartient à une ville
     // moyenne » prêtait à la commune (Levallois-Perret, Mont-Dauphin) une taille qui n'est pas la sienne.
-    case "moyenne": return uu ? "une agglomération moyenne" : "une ville moyenne";
-    case "grande": return uu ? "une grande agglomération" : "une grande ville";
-    case "metropole": return uu ? "une métropole" : "une très grande ville";
+    case "moyenne": return uu ? "une agglomération moyenne" : "une commune de taille moyenne";
+    case "grande": return uu ? "une grande agglomération" : "une grande commune";
+    case "metropole": return uu ? "une métropole" : "une très grande commune";
   }
 }
 
