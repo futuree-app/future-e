@@ -12,7 +12,7 @@ import v from "./v5.module.css";
 
 const ETAT_VIDE = { a_lire: "à étudier depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore étudiée", lu: "" } as const;
 
-export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false, action, tete }: {
+export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false, action, tete, sansVerdict = false }: {
   colonnes: Colonne[]; lignes: LigneConfrontation[]; projet: Projet; seul?: boolean; enTete?: boolean;
   /** Lecture rapide : les marques et les mesures seulement, le verdict en un mot, sans preuves ni origine. */
   compact?: boolean;
@@ -20,6 +20,8 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
   action?: (cle: LigneConfrontation["cle"], ids: string[]) => ReactNode;
   /** L'en-tête d'une colonne, quand l'écran veut y montrer plus que le nom (prix, surface, vignette). */
   tete?: (c: Colonne) => ReactNode;
+  /** V5.1 : le verdict est déjà dit par le titre de la section (« Ce qui les distingue ») ; ne pas le répéter. */
+  sansVerdict?: boolean;
 }) {
   const nomDe = (ids: string[]) => ids.map((id) => colonnes.find((c) => c.id === id)?.nom ?? id).join(" et ");
   return (
@@ -52,7 +54,7 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
                     {seul && x.couche === "commune" && c.ligne && li.couches.some((y) => y.couche !== "commune" && y.cellules.every((k) => !k.ligne)) ? <span className={v.partage}>Dit pour la commune ; ce logement reste à lire depuis son adresse.</span> : null}
                   </div>
                 ))}
-                {!seul ? (
+                {!seul && !sansVerdict ? (
                   <p className={v.confVerdict}>
                     <span className={v.confVerdictMot}>{LIBELLE_VERDICT[x.verdict]}</span>
                     {compact ? null : <>{lier(x.phrase)}{x.remede ? <span className={v.remede}> {lier(x.remede)}</span> : null}</>}

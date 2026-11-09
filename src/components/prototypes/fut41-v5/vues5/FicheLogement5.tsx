@@ -100,7 +100,7 @@ export function FicheLogement5({ api }: { api: Api5 }) {
   );
 }
 
-function Photo({ api, logement }: { api: Api5; logement: Logement }) {
+export function Photo({ api, logement }: { api: Api5; logement: Logement }) {
   const id = useId();
   return (
     <div className={v.photo}>
@@ -150,7 +150,7 @@ function Statut({ api, logement }: { api: Api5; logement: Logement }) {
   );
 }
 
-function Adresse({ api, logement }: { api: Api5; logement: Logement }) {
+export function Adresse({ api, logement }: { api: Api5; logement: Logement }) {
   const [a, setA] = useState("");
   return (
     <form className={v.adresseForm} id="adresse" onSubmit={(e) => { e.preventDefault(); if (a.trim()) api.envoyer({ type: "adresse", id: logement.id, adresse: `${a.trim()}, ${logement.commune.nom}` }); }}>
@@ -161,7 +161,7 @@ function Adresse({ api, logement }: { api: Api5; logement: Logement }) {
   );
 }
 
-function Verifier({ api, logement }: { api: Api5; logement: Logement }) {
+export function Verifier({ api, logement }: { api: Api5; logement: Logement }) {
   const moments = [["avant_visite", "Avant la visite"], ["sur_place", "Sur place"], ["avant_engagement", "Avant de vous engager"]] as const;
   return (
     <Section titre="À vérifier avant de décider" id="verifier" sous="Chaque question vise une inconnue de votre Projet. Votre réponse est gardée avec sa date et son origine ; la donnée publique reste celle de sa source.">
@@ -193,7 +193,7 @@ function UneQuestion({ api, logement, q }: { api: Api5; logement: Logement; q: V
   );
 }
 
-function Notes({ api, logement }: { api: Api5; logement: Logement }) {
+export function Notes({ api, logement }: { api: Api5; logement: Logement }) {
   const id = useId();
   const [t, setT] = useState("");
   const [n, setN] = useState<NatureObservation>("observation");

@@ -1,0 +1,151 @@
+/* FUT-41 V5.1 · s'ajoute à v5.module.css (même racine). Direction : moins de documentation, plus de
+   lecture. Une seule plaque par écran (« À retenir ») ; le reste respire par l'espace et les filets.
+   Aucune nouvelle couleur sémantique : le registre des issues reste celui de la V5. */
+
+/* 1. Texte : une seule famille (les métadonnées en chasse fixe donnaient l'air d'un rapport technique),
+      textes secondaires plus grands et plus contrastés. Les jetons de production ne changent pas. */
+.racine.racine {
+  --font-mono: var(--font-serif);
+  --r-discret: var(--fg-2);
+  --r-meta: var(--fg-3);
+  --r-t-nuance: 15px;
+  --r-t-dense: 15.5px;
+  font-size: 16.5px;
+}
+.racine :is(p, li, dd) { line-height: 1.55; }
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.tete { padding: 8px 0 6px; }
+.titre { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.12; letter-spacing: -0.015em; margin: 0; }
+
+/* 2. Ce que l'on compare : collé en haut, toujours lisible. */
+.compares { position: sticky; top: 60px; z-index: 7; background: var(--r-fond); border-bottom: 1px solid var(--r-filet-fort); padding: 10px 0; margin-bottom: 8px; }
+.comparesLigne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; justify-content: space-between; }
+.comparesNoms { margin: 0; font-size: 16px; color: var(--r-encre); min-width: 0; }
+.comparesNoms strong { font-weight: 600; }
+.comparesCle { display: block; font-size: 13px; color: var(--r-discret); margin-bottom: 2px; }
+.et { color: var(--r-discret); font-weight: 400; }
+.comparesNote { margin: 6px 0 0; font-size: 13.5px; color: var(--r-discret); }
+/* Sur téléphone, un sélecteur par ligne : le nom entier reste lisible ; « À gauche / À droite » dit où il s'affiche. */
+.duel { display: grid; grid-template-columns: 1fr; gap: 6px; flex: 1 1 100%; }
+.duelChamp { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 8px; }
+.duelCle { font-size: 14px; color: var(--r-discret); }
+.duelChamp select { font: inherit; font-size: 15px; width: 100%; min-height: 44px; color: var(--r-encre); background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 6px 8px; }
+
+.choix { display: grid; gap: 12px; padding: 16px 0 20px; border-bottom: 1px solid var(--r-filet); margin-bottom: 8px; }
+.choix > p { margin: 0; }
+.puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.puce { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px 6px 10px; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); cursor: pointer; color: var(--r-texte); font-size: 15px; }
+.puce[data-actif] { border-color: var(--r-encre); color: var(--r-encre); background: var(--bg-elev-2); }
+.puce input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.puce:focus-within { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.puceSous { color: var(--r-discret); }
+
+/* 3. À retenir : la seule plaque de l'écran. */
+.aRetenir { margin: 20px 0 8px; padding: 22px 24px 20px; background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: calc(var(--r-rayon) * 2); }
+.aRetenirTitre { margin: 0 0 14px; font-size: 22px; line-height: 1.2; color: var(--r-encre); }
+.retenirListe { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.retenir { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; }
+.retenirCorps { display: grid; gap: 2px; min-width: 0; }
+.retenirTitre { margin: 0; font-size: 14px; font-weight: 600; color: var(--r-discret); letter-spacing: 0.01em; }
+.retenirTexte { font-size: 17px; line-height: 1.5; color: var(--r-encre); }
+.retenirAction { margin-top: 4px; }
+.signe { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; flex: none; margin-top: 1px; color: var(--r-discret); }
+.signe[data-genre="fait"] { color: var(--r-encre); }
+.signe[data-genre="action"] { color: var(--accent); }
+.retenir .signe { margin-top: 18px; }
+
+.prochain { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--r-filet-fort); }
+.prochainTexte { display: flex; gap: 10px; align-items: flex-start; margin: 0; flex: 1 1 320px; font-size: 16px; color: var(--r-encre); }
+.prochainCle { display: block; font-size: 14px; font-weight: 600; color: var(--r-discret); }
+.agir { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding-inline: 18px; font-size: 16px; }
+.agir svg { flex: none; }
+
+/* 4. Pourquoi : listes calmes ; les tableaux viennent de la V5. */
+.manques, .pareils, .avancer, .sources { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.manques li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; color: var(--r-texte); }
+.raison { color: var(--r-discret); }
+.pareils li { padding-left: 14px; border-left: 2px solid var(--r-filet-fort); color: var(--r-texte); }
+.avancer li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding: 14px 0; border-top: 1px solid var(--r-filet); }
+.avancer li:first-child { border-top: 0; padding-top: 0; }
+.avancerTexte { color: var(--r-texte); }
+
+.toutDetail { margin-top: 36px; border-top: 1px solid var(--r-filet-fort); padding-top: 14px; }
+.toutDetail > summary { font-size: 17px; font-weight: 600; color: var(--r-encre); min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.toutDetailCorps { display: grid; gap: 20px; padding-top: 12px; }
+.plan { display: grid; gap: 6px; }
+.sousTitre { margin: 0; font-size: 17px; font-weight: 600; color: var(--r-encre); }
+
+.preuves { margin-top: 18px; }
+.preuves > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; color: var(--r-discret); font-size: 15px; }
+.preuvesCorps { display: grid; gap: 10px; padding: 6px 0 4px; }
+.sources li { font-size: 14.5px; color: var(--r-discret); }
+
+/* 5. Les deux dimensions d'un logement. */
+.deuxDimensions { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; }
+.suivi, .savoir { display: inline-flex; align-items: center; gap: 7px; font-size: 14.5px; color: var(--r-encre); }
+.suivi svg { flex: none; color: var(--r-discret); }
+.suivi[data-suivi="visite_prevue"] svg { color: var(--accent); }
+.savoirDetail { color: var(--r-discret); }
+.paliers { display: inline-grid; grid-template-columns: repeat(3, 9px); gap: 2px; flex: none; }
+.palier { height: 12px; border: 1.3px solid var(--r-discret); border-radius: 2px; }
+.palier[data-plein] { background: var(--r-encre); border-color: var(--r-encre); }
+.savoir[data-actualiser] .palier:last-child { background: repeating-linear-gradient(135deg, var(--r-encre) 0 2px, transparent 2px 4px); }
+.prix { margin: 4px 0 0; font-size: 15.5px; color: var(--r-encre); font-variant-numeric: tabular-nums; }
+
+/* 6. Fiche d'un logement. */
+.ficheTete { display: flex; gap: 18px; align-items: flex-start; margin: 6px 0 12px; }
+.adresse { margin: 0; color: var(--r-texte); }
+.dimensions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 32px; padding: 14px 0; border-top: 1px solid var(--r-filet); border-bottom: 1px solid var(--r-filet); }
+.dimension { display: grid; gap: 8px; align-content: start; }
+.dimensionCle { margin: 0; font-size: 14px; font-weight: 600; color: var(--r-discret); }
+.unefois { margin: 0 0 16px; padding-left: 14px; border-left: 2px solid var(--r-filet-fort); color: var(--r-texte); }
+.conditions { display: grid; }
+.condition { display: grid; grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.6fr); gap: 6px 24px; padding: 14px 0; border-top: 1px solid var(--r-filet); }
+.condition:first-child { border-top: 0; }
+.conditionNom { margin: 0; font-weight: 600; color: var(--r-encre); }
+.conditionPoids { font-weight: 400; color: var(--r-discret); }
+.conditionLecture { display: grid; gap: 4px; justify-items: start; min-width: 0; }
+.constat { color: var(--r-encre); }
+.ou { font-size: 14px; color: var(--r-discret); }
+.vide { color: var(--r-discret); font-style: italic; }
+.noter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 40px 0 8px; }
+
+/* 7. Ajouter une annonce. */
+.ajouterAnnonce { min-height: 44px; }
+.ajout { display: grid; gap: 16px; padding: 20px 22px; margin: 12px 0 20px; border: 1px solid var(--r-filet-fort); border-radius: calc(var(--r-rayon) * 2); }
+.ajoutTitre { margin: 0; font-size: 20px; font-weight: 600; color: var(--r-encre); }
+.etape { display: grid; gap: 10px; justify-items: start; }
+.etape > label { width: 100%; }
+.lienLigne { display: flex; gap: 8px; width: 100%; }
+.lienLigne input { flex: 1 1 auto; min-width: 0; }
+.lienLigne button { white-space: nowrap; }
+.exemples { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; }
+.reconnue { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.reconnue > :last-child { grid-column: 1 / -1; margin: 0; }
+.miniature { margin: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; grid-column: 1 / -1; }
+.miniatureCadre { width: 132px; height: 92px; border: 1px dashed var(--r-filet-fort); border-radius: var(--r-rayon); display: grid; place-items: center; text-align: center; font-size: 13px; color: var(--r-discret); padding: 6px; }
+.sansMiniature { display: flex; gap: 12px; align-items: center; margin: 0; grid-column: 1 / -1; }
+.miniaturePetite { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); color: var(--r-discret); font-size: 13px; }
+.illisible { margin: 0; color: var(--r-texte); }
+.champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 16px; }
+.large { grid-column: 1 / -1; }
+.aConfirmer { font-weight: 400; color: var(--r-discret); }
+
+@media (max-width: 759px) {
+  .aRetenir { padding: 18px 16px; margin-inline: -4px; }
+  .retenirTexte { font-size: 16.5px; }
+  .condition { grid-template-columns: 1fr; }
+  .ficheTete { gap: 14px; }
+  .comparesNoms { font-size: 15px; }
+  .lienLigne { flex-direction: column; }
+  .miniature { grid-template-columns: 1fr; }
+  .agir { width: 100%; justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) { .racine * { transition: none !important; animation: none !important; } }
+
+/* 8. L'analyse complète : ses échelles en onglets (Synthèse · Territoire · Autour de l'adresse · Logement). */
+.onglets { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 18px 0 16px; border-bottom: 1px solid var(--r-filet-fort); }
+.onglet { font: inherit; font-size: 15.5px; color: var(--r-discret); background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 0; min-height: 44px; cursor: pointer; margin-bottom: -1px; }
+.onglet[aria-current="page"] { color: var(--r-encre); border-bottom-color: var(--r-encre); font-weight: 600; }
+.onglet:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }

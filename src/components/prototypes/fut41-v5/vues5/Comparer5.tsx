@@ -161,7 +161,7 @@ export function Comparer5({ api }: { api: Api5 }) {
 }
 
 /** Un lieu en tête de colonne : vignette (photo seulement si vous l'avez ajoutée), nom, commune, prix et surface déclarés. */
-function TeteLieu({ nom, sous, logement }: { nom: string; sous: string; logement?: Logement }) {
+export function TeteLieu({ nom, sous, logement }: { nom: string; sous: string; logement?: Logement }) {
   const annonce = logement ? [montantAnnonce(logement.annonce), logement.annonce?.surface ? `${logement.annonce.surface} m²` : null].filter(Boolean).join(" · ") : "";
   return (
     <span className={v.teteLieu}>
@@ -242,7 +242,7 @@ function Bilans({ bilans, api, montres, reduit = false }: { bilans: Bilan[]; api
  * pour les seules possibilités affichées. Replié par défaut ; rien n'est modifié ici. Adopter se fait
  * dans Mon Projet.
  */
-function EtSiIci({ api, montres }: { api: Api5; montres: Piste[] }) {
+export function EtSiIci({ api, montres }: { api: Api5; montres: Piste[] }) {
   const { etat, aller } = api;
   const k = etat.projet.criteres.find((c) => c.nature === "sans_compromis" && c.valeur != null);
   const prios = etat.projet.criteres.filter((c) => c.nature === "priorite");
