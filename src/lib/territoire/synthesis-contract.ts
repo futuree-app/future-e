@@ -13,6 +13,7 @@
 
 import { derivedOf, synthesisFacts, valueOf, type FactsSnapshot } from "../facts/contract.ts";
 import { DEMOGRAPHY_PHRASE, isDemographyCode, type GwlScenarios, type UrbanRole } from "./facts.ts";
+import { normaliserRoleUrbain, type RoleUrbain } from "./statut-urbain.ts";
 import type { GasparCatnatSummary } from "../georisques.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
@@ -26,7 +27,8 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  * TOUT ce qui peut changer le texte : projection, consigne, modèle, contrôles, patrons déterministes.
  * La monter invalide le cache de synthèse (clé = empreinte + horizon + cette version).
  */
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;
+// @5 (FUT-176) : rôle territorial lu au statut Insee, consigne et contrôle contre sa surinterprétation.
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@5:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -50,10 +52,16 @@ const COMPOSITION_KEYS: Record<string, string> = {
   eau: "eau",
 };
 
-const ROLE_TEXT: Record<UrbanRole["role"], string> = {
-  isolee: "commune isolée, hors agglomération",
-  pole: "principal pôle de son agglomération",
-  agglo: "commune d'une agglomération",
+// FUT-176 : le rôle dit au modèle (et au patron déterministe), en mots courants, au statut Insee. Jamais
+// « isolée » (le terme Insee « ville isolée » veut dire « agglomération d'une seule commune »), jamais « pôle »,
+// jamais « ville » (une commune de banlieue de 171 habitants n'en est pas une). Statut inconnu : aucun rôle.
+export const ROLE_TEXT: Record<RoleUrbain, string | null> = {
+  ville_centre: "au centre de son agglomération",
+  banlieue: "commune de banlieue de son agglomération",
+  ville_isolee: "seule commune de son agglomération",
+  hors_uu: "hors de toute agglomération (aucun ensemble bâti continu de 2 000 habitants)",
+  dans_agglomeration: "commune d'une agglomération",
+  inconnu: null,
 };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -126,8 +134,12 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
         ? { habitants_par_km2: round1(get<number>("place.density")!), categorie: cat("density.category")?.label ?? null }
         : null,
       typologie: get<string>("place.typology"),
-      role_territorial: role
-        ? { role: ROLE_TEXT[role.role], agglomeration: role.uuLabel, population_agglomeration: role.uuPop }
+      role_territorial: role && ROLE_TEXT[normaliserRoleUrbain(role.role)]
+        ? {
+            role: ROLE_TEXT[normaliserRoleUrbain(role.role)],
+            agglomeration: normaliserRoleUrbain(role.role) === "hors_uu" ? null : role.uuLabel,
+            population_agglomeration: normaliserRoleUrbain(role.role) === "hors_uu" ? null : role.uuPop,
+          }
         : null,
     },
     horizon: { annee: meta.year, scenario_france: meta.france },
@@ -249,6 +261,7 @@ LES FAITS FOURNIS SONT LES SEULS FAITS
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.
+- Rôle territorial ("role_territorial") : c'est un classement statistique de l'Insee, qui dit seulement si la commune fait partie d'un ensemble bâti continu d'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N'en déduisez jamais la présence de services ou de commerces, l'animation, l'isolement, ni un rôle de "pôle" ou de "centre de vie" pour les environs. N'écrivez jamais que la commune est "isolée", et n'appelez pas "ville" une commune que le payload ne présente pas comme telle. S'il est absent, n'en parlez pas.
 - Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent, ressentent, attendent ou recherchent ("les résidents comptent sur…", "on attend…"), ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
 - Pas de comparaison sans donnée comparative : ni "beaucoup pour une commune de cette densité", ni "peu pour une ville de cette taille", ni "remarquable compte tenu de…". Donnez le chiffre, sans le juger par rapport à d'autres communes.
 - Eau : les jours de sols secs, les catastrophes naturelles reconnues et les restrictions d'eau en vigueur sont des faits distincts. Juxtaposez-les si besoin ; n'en tirez aucune conclusion sur une tension, une pression, une rareté ou un accès futur à la ressource en eau : aucune donnée ne la mesure.

@@ -736,7 +736,10 @@ export function lireTaille(lieu: Lieu, e: EntreesTaille): LecturePastille {
   };
   // Le fait : la population, dite simplement. La catégorie du moteur (`categoryStatementFragment`) se lit dans
   // la convention juste dessous, sans jargon (« agglomération selon la convention de taille… »).
-  const ou = e.source === "urban_unit" ? `dans l'agglomération de ${lieu.commune}` : `à ${lieu.commune}`;
+  // FUT-176 : l'agglomération ne porte pas le nom de la commune lue. Levallois-Perret est dans celle de Paris :
+  // « 10 893 507 habitants dans l'agglomération de Levallois-Perret » était faux. L'accueil ne connaît pas le nom de
+  // l'agglomération, il dit donc l'appartenance.
+  const ou = e.source === "urban_unit" ? `dans l'agglomération dont fait partie ${lieu.commune}` : `à ${lieu.commune}`;
   return {
     cle: "taille", commune: lieu.commune,
     fait: {

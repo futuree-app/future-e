@@ -51,9 +51,19 @@ before(async () => {
 
 // FUT-138 : le trait distinctif des prix dit un fait (« les prix de vente les plus bas »), plus une accessibilité
 // (« le marché immobilier le plus accessible ») : seul ce libellé change dans la référence, ni commune, ni score, ni ordre.
+// FUT-176 : la dimension « Isolement » mesure la population de l'agglomération, pas un « bassin de vie » (un autre zonage
+// Insee) ni une offre de services. Seuls ses libellés changent (paliers, raison, aide) ; ni commune, ni score, ni ordre.
+// « bassin de vie de proximité » n'y désigne que La Broque (67066), dans une unité urbaine : « dans une petite agglomération ».
 const REF = JSON.parse(
   readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8")
-    .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas"),
+    .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas")
+    .replaceAll("Bassin de vie étendu", "Grande agglomération")
+    .replaceAll("Bassin de proximité", "Agglomération moyenne")
+    .replaceAll("Bassin de vie restreint", "Petite agglomération ou commune")
+    .replaceAll("au cœur d'un vaste bassin de vie", "dans une grande agglomération")
+    .replaceAll("bassin de vie bien pourvu", "dans une agglomération de taille moyenne")
+    .replaceAll("bassin de vie de proximité", "dans une petite agglomération")
+    .replaceAll("La taille du bassin de vie qui dessert le territoire.", "Le nombre d'habitants de l'agglomération, ou de la commune quand elle est hors agglomération. Il ne mesure pas à lui seul l'accès aux services ni aux transports."),
 );
 const BASE = [{ key: "eviter_isolement", weight: 0.5, baseline: true }, { key: "viabilite_emploi", weight: 0.5, baseline: true }];
 // Les mêmes entrées que la capture (scripts/fut147/capturer-reference.mjs), recopiées : la référence ne
@@ -154,7 +164,10 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 
 // Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date.
 const HASH_MAIN = "cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f";
-const CLE_MAIN = "7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9";
+// FUT-176 (09/11/2026) monte le contrat de synthèse à @5 : une synthèse en cache peut dire « commune isolée » ou
+// « principal pôle », que le rôle territorial ne permet plus. L'empreinte du snapshot est intacte (HASH_MAIN) ; seule
+// la clé change, volontairement. Clé de main avant FUT-176 : 7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9.
+const CLE_MAIN = "75ca849669cf31ca651cf4780d3c00987ad34ad2dc116d3e2173cbad5d79b98a";
 
 test("Territoire : l'empreinte du snapshot et la clé du cache de synthèse sont celles de main", () => {
   const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
@@ -199,17 +212,51 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 // `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
 // brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
 // parle des feux. Toute autre modification du contrat le fait échouer.
-test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
+const FUT163 = [
+  '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
+  "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
+  "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
+  "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
+  '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
+];
+const LIGNES_CONTRAT_FUT176 = [
+  '+import { normaliserRoleUrbain, type RoleUrbain } from "./statut-urbain.ts";',
+  "-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;",
+  "+// @5 (FUT-176) : rôle territorial lu au statut Insee, consigne et contrôle contre sa surinterprétation.",
+  "+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@5:${SYNTHESIS_MODEL}`;",
+  '-const ROLE_TEXT: Record<UrbanRole["role"], string> = {',
+  '-  isolee: "commune isolée, hors agglomération",',
+  '-  pole: "principal pôle de son agglomération",',
+  '-  agglo: "commune d\'une agglomération",',
+  "+// FUT-176 : le rôle dit au modèle (et au patron déterministe), en mots courants, au statut Insee. Jamais",
+  "+// « isolée » (le terme Insee « ville isolée » veut dire « agglomération d'une seule commune »), jamais « pôle »,",
+  "+// jamais « ville » (une commune de banlieue de 171 habitants n'en est pas une). Statut inconnu : aucun rôle.",
+  "+export const ROLE_TEXT: Record<RoleUrbain, string | null> = {",
+  '+  ville_centre: "au centre de son agglomération",',
+  '+  banlieue: "commune de banlieue de son agglomération",',
+  '+  ville_isolee: "seule commune de son agglomération",',
+  '+  hors_uu: "hors de toute agglomération (aucun ensemble bâti continu de 2 000 habitants)",',
+  '+  dans_agglomeration: "commune d\'une agglomération",',
+  "+  inconnu: null,",
+  "-      role_territorial: role",
+  "-        ? { role: ROLE_TEXT[role.role], agglomeration: role.uuLabel, population_agglomeration: role.uuPop }",
+  "+      role_territorial: role && ROLE_TEXT[normaliserRoleUrbain(role.role)]",
+  "+        ? {",
+  "+            role: ROLE_TEXT[normaliserRoleUrbain(role.role)],",
+  '+            agglomeration: normaliserRoleUrbain(role.role) === "hors_uu" ? null : role.uuLabel,',
+  '+            population_agglomeration: normaliserRoleUrbain(role.role) === "hors_uu" ? null : role.uuPop,',
+  "+          }",
+  '+- Rôle territorial ("role_territorial") : c\'est un classement statistique de l\'Insee, qui dit seulement si la commune fait partie d\'un ensemble bâti continu d\'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N\'en déduisez jamais la présence de services ou de commerces, l\'animation, l\'isolement, ni un rôle de "pôle" ou de "centre de vie" pour les environs. N\'écrivez jamais que la commune est "isolée", et n\'appelez pas "ville" une commune que le payload ne présente pas comme telle. S\'il est absent, n\'en parlez pas.',
+];
+
+test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163) et du rôle territorial (FUT-176), et rien sur les feux", () => {
   const f = "src/lib/territoire/synthesis-contract.ts";
   const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
   const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  assert.deepEqual(changees, [
-    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
-    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
-    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
-    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
-    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
-  ]);
+  // FUT-176 (09/11/2026) : le rôle territorial au statut Insee, sa consigne, et la version @5. Aucune ligne sur les feux.
+  const fut176 = changees.filter((l) => !FUT163.includes(l));
+  assert.deepEqual(changees.filter((l) => FUT163.includes(l)), FUT163);
+  assert.deepEqual(fut176, LIGNES_CONTRAT_FUT176);
   for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
   assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
 });
@@ -347,11 +394,12 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // et seules ces lignes ajoutées.
 // FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
 // `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
-test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), et l'application de la provenance (FUT-12)", () => {
+test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), de l'application de la provenance (FUT-12) et du type du rôle territorial (FUT-176)", () => {
   const f = "src/lib/territoire/facts.ts";
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
   const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
+  // FUT-176 : le type du rôle territorial suit le statut Insee ; c'est la seule ligne retirée.
+  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), ['-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };'], "seul le type du rôle est retiré");
   const admises = [
     /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
     /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
@@ -363,6 +411,11 @@ test("IA : le registre des faits Territoire n'a changé que des statuts de panne
     // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
     /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
     /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
+    // FUT-176 : le rôle territorial au statut Insee (type seulement ; le fait et sa source sont intacts).
+    /^\+import type \{ RoleUrbain, RoleUrbainAncien \} from "\.\/statut-urbain\.ts";$/,
+    /^\+\/\/ FUT-176 : le rôle suit le STATUT Insee/, /^\+\/\/ Un snapshot ancien peut encore porter/, /^\+\/\/ `normaliserRoleUrbain`\. `arrondissementDe` : la ville d'un arrondissement/,
+    /^\+export type UrbanRole = \{ role: RoleUrbain \| RoleUrbainAncien; uuLabel: string \| null; uuPop: number \| null; arrondissementDe\?: string \};$/,
+    /^-export type UrbanRole = \{ role: "isolee" \| "pole" \| "agglo"; uuLabel: string \| null; uuPop: number \| null \};$/,
   ];
   for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
 });

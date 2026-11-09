@@ -112,9 +112,14 @@ test("candidats : aucun des 45 arrondissements PLM ne propose « aux portes d'un
 
 test("candidats : l'exclusion ne retire l'identité qu'aux quatre arrondissements, sur tout l'index", () => {
   const retires = COMMUNES.filter((c) => reglePeriurbaine(c) && !V.buildIdentiteCandidates(c).includes(PERI)).map((c) => c.insee);
-  assert.deepEqual(retires.sort(), ["13202", "13216", "75101", "75102"]);
+  // FUT-176 : et aux quatre villes-centres Insee de la règle (Audincourt, Nogent-sur-Oise, Béthune, Bruay-la-Buissière).
+  assert.deepEqual(retires.sort(), ["13202", "13216", "25031", "60463", "62119", "62178", "75101", "75102"]);
   const gardes = COMMUNES.filter((c) => V.buildIdentiteCandidates(c).includes(PERI));
-  assert.equal(gardes.length, 1784); // 1 788 sur main, moins les quatre arrondissements
+  // 1 788 sur main, moins les quatre arrondissements. FUT-176 : plus Porte des Pierres Dorées (69114, 4 185 habitants),
+  // enfin rangée dans l'agglomération de Lyon, dont l'Insee la classe en banlieue (elle était « hors unité urbaine » faute
+  // de figurer dans l'ancien fichier) ; moins quatre villes-centres au sens de l'Insee, où « sans en habiter le centre »
+  // était faux (Audincourt, Nogent-sur-Oise, Béthune, Bruay-la-Buissière).
+  assert.equal(gardes.length, 1781);
   for (const c of gardes) assert.ok(reglePeriurbaine(c), c.insee); // aucune identité ajoutée par la correction
 });
 

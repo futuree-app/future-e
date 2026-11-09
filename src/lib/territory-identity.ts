@@ -12,6 +12,7 @@ import { DEMOGRAPHY_PHRASE, isDemographyCode, type UrbanRole } from "./territoir
 import { REPERE_PRES_DU_RIVAGE_KM } from "./mer-recherche.ts";
 import { kmLisible } from "./hard-constraints.ts";
 import { deCommune } from "./typography.ts";
+import { normaliserRoleUrbain, peutDireVille, SEUIL_HABITANTS_VILLE } from "./territoire/statut-urbain.ts";
 
 export type TerritoryIdentity = {
   // Phrase de synthèse descriptive (compose les champs, sans interprétation).
@@ -31,25 +32,35 @@ export function frInt(n: number | null | undefined): string | null {
   return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+// FUT-176 : la ligne « rôle » dit le STATUT Insee de la commune, en langage courant, et rien de plus. Avant :
+// « Commune isolée, hors agglomération » pour toute commune sans code d'unité urbaine (Bony, mais aussi Orée
+// d'Anjou, dont la donnée manquait), et « Principal pôle urbain local » pour la commune la plus peuplée de son
+// unité urbaine (Corte, qui forme seule son agglomération). Un statut statistique ne dit ni services, ni
+// animation, ni isolement ; un statut inconnu ne dit rien.
 function roleLabel(r: UrbanRole, communePop: number | null): string | null {
-  // Taille de l'unité urbaine (= agglomération), surfacée quand elle situe la
-  // commune : toujours pour une commune d'agglo (elle n'en est qu'une part),
-  // et pour un pôle seulement si l'agglo dépasse nettement la commune (sinon
-  // c'est le même nombre que la population, donc inerte).
+  const role = normaliserRoleUrbain(r.role);
   const uuPop = frInt(r.uuPop);
-  switch (r.role) {
-    case "isolee":
-      return "Commune isolée, hors agglomération";
-    case "pole": {
-      if (uuPop && r.uuPop != null && r.uuPop > (communePop ?? 0) * 1.1) {
-        return `Principal pôle d'une agglomération de ${uuPop} habitants`;
-      }
-      return "Principal pôle urbain local";
-    }
-    case "agglo": {
-      const base = r.uuLabel ? `Dans l'agglomération ${deCommune(r.uuLabel)}` : "Dans une agglomération";
-      return uuPop ? `${base} (${uuPop} habitants)` : base;
-    }
+  const habitants = uuPop ? ` (${uuPop} habitants)` : "";
+  const agglo = r.uuLabel ? `l'agglomération ${deCommune(r.uuLabel)}` : "son agglomération";
+  // Un arrondissement porte le statut de sa ville sans être la ville-centre : on le dit (Paris 1er, 15 919 habitants).
+  if (r.arrondissementDe && role === "ville_centre") {
+    const sienne = !r.uuLabel || r.uuLabel === r.arrondissementDe ? "son agglomération" : agglo;
+    return `Arrondissement de ${r.arrondissementDe}, ville-centre de ${sienne}${habitants}`;
+  }
+  switch (role) {
+    case "ville_centre":
+      return `${peutDireVille(role, communePop) ? "Ville-centre" : "Commune-centre"} de ${agglo}${habitants}`;
+    case "banlieue":
+      return `Commune de banlieue de ${agglo}${habitants}`;
+    case "ville_isolee":
+      // L'agglomération est la commune : son nombre d'habitants est déjà sur la ligne population.
+      return "Forme à elle seule une agglomération";
+    case "hors_uu":
+      return `Hors agglomération : aucun ensemble bâti continu de ${frInt(SEUIL_HABITANTS_VILLE)} habitants`;
+    case "dans_agglomeration":
+      return `Dans ${agglo}${habitants}`;
+    case "inconnu":
+      return null;
   }
 }
 
@@ -66,11 +77,10 @@ function geoLabel(p: Position | null): string | null {
   return null;
 }
 
-// Phrase de synthèse avec du caractère : une amorce qui situe le territoire
-// (nature + typologie + densité), puis le rôle dans le bassin de vie. Reste
-// strictement factuelle (rien d'inventé, pas de « portuaire » deviné).
-// Ex : « Ville dense de la façade atlantique, La Rochelle concentre les
-// fonctions urbaines de son bassin de vie. »
+// Phrase de synthèse : une amorce qui situe le territoire (nature + typologie + densité), puis la place de la
+// commune dans le zonage en agglomérations. Strictement factuelle (rien d'inventé, pas de « portuaire » deviné).
+// Ex : « Ville dense de la façade atlantique, La Rochelle est au centre de son agglomération. » ; « Commune de
+// l'intérieur, Bony se situe hors de toute agglomération. »
 const TYPE_TRAIT: Record<string, string> = {
   "Littoral atlantique": "de la façade atlantique",
   "Méditerranéen": "méditerranéenne",
@@ -78,26 +88,36 @@ const TYPE_TRAIT: Record<string, string> = {
   "Intérieur": "de l'intérieur",
 };
 
-function summaryHead(typeLabel: string, role: UrbanRole | null, dense: boolean): string {
-  const noun = role?.role === "isolee" ? "Commune" : "Ville";
+function summaryHead(typeLabel: string, ville: boolean, dense: boolean, arrondissement = false): string {
+  const noun = arrondissement ? "Arrondissement" : ville ? "Ville" : "Commune";
   const d = dense ? "dense " : "";
   const trait = TYPE_TRAIT[typeLabel];
   if (!trait) return `${noun} ${d}`.trim();
   // « méditerranéenne » est un adjectif (accord direct) ; les autres sont « de X ».
-  if (typeLabel === "Méditerranéen") return `${noun} ${d}méditerranéenne`.trim();
+  if (typeLabel === "Méditerranéen") return `${noun} ${d}${arrondissement ? "méditerranéen" : "méditerranéenne"}`.trim();
   return `${noun} ${d}${trait}`.trim();
 }
 
-function summaryRole(role: UrbanRole | null): string {
-  switch (role?.role) {
-    case "pole":
-      return "concentre les fonctions urbaines de son bassin de vie";
-    case "agglo":
-      return role.uuLabel ? `s'inscrit dans l'agglomération ${deCommune(role.uuLabel)}` : "s'inscrit dans une agglomération";
-    case "isolee":
-      return "structure la vie locale d'un territoire plus rural";
-    default:
-      return "compose son propre territoire";
+// Le verbe de la phrase de synthèse : la place de la commune dans le zonage, sans rôle prêté (FUT-176 : ni
+// « concentre les fonctions urbaines de son bassin de vie », ni « structure la vie locale d'un territoire plus
+// rural »). `null` quand le statut est inconnu : la phrase se passe alors de verbe.
+function summaryRole(role: UrbanRole | null, name: string): string | null {
+  const r = role ? normaliserRoleUrbain(role.role) : "inconnu";
+  const label = role?.uuLabel ?? null;
+  const memeNom = label != null && label.trim().toLowerCase() === name.trim().toLowerCase();
+  if (role?.arrondissementDe && r === "ville_centre") return `appartient à ${role.arrondissementDe}, ville-centre de son agglomération`;
+  switch (r) {
+    case "ville_centre":
+      return !label || memeNom ? "est au centre de son agglomération" : `fait partie du centre de l'agglomération ${deCommune(label)}`;
+    case "banlieue":
+    case "dans_agglomeration":
+      return label && !memeNom ? `s'inscrit dans l'agglomération ${deCommune(label)}` : "s'inscrit dans une agglomération";
+    case "ville_isolee":
+      return "forme à elle seule une agglomération";
+    case "hors_uu":
+      return "se situe hors de toute agglomération";
+    case "inconnu":
+      return null;
   }
 }
 
@@ -110,8 +130,11 @@ export function buildTerritoryIdentity(snapshot: FactsSnapshot): TerritoryIdenti
   const densityCat = derivedOf(snapshot, "density.category");
   const land = derivedOf(snapshot, "land.category");
   const densityValue = frInt(density);
+  const ville = role != null && peutDireVille(normaliserRoleUrbain(role.role), population);
+  const head = summaryHead(typeLabel, ville, densityCat?.value === "dense", Boolean(role?.arrondissementDe));
+  const verbe = summaryRole(role, name);
   return {
-    summary: `${summaryHead(typeLabel, role, densityCat?.value === "dense")}, ${name} ${summaryRole(role)}.`,
+    summary: verbe ? `${head}, ${name} ${verbe}.` : `${name}, ${head.charAt(0).toLowerCase()}${head.slice(1)}.`,
     typologie: typeLabel,
     densite: densityCat ? { label: densityCat.label, value: densityValue ? `${densityValue} hab/km²` : null } : null,
     population: frInt(population) ? `${frInt(population)} habitants` : null,

@@ -37,7 +37,9 @@ test("population communale : 2021 par défaut, 2023 pour une commune reprise", (
 test("agglomération : les millésimes réunis, jamais un seul millésime présumé", () => {
   assert.deepEqual(millesimesAgglomeration("00851"), [2021, 2023]); // Paris, qui compte Saint-Denis
   assert.deepEqual(millesimesAgglomeration("85213", "85084"), [2023]); // Essarts-en-Bocage, seule dans son UU
-  assert.deepEqual(millesimesAgglomeration("00760"), [2021]); // Lyon : aucune commune reprise
+  // Lyon : depuis FUT-176, l'agglomération compte Porte des Pierres Dorées (fusion du 15/03/2024, population 2023).
+  assert.deepEqual(millesimesAgglomeration("00760"), [2021, 2023]);
+  assert.deepEqual(millesimesAgglomeration("00759"), [2021]); // Marseille : aucune commune reprise
   assert.deepEqual(millesimesAgglomeration(null, "85165"), [2023]); // hors UU : le millésime de la commune
 });
 

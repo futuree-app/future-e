@@ -125,6 +125,8 @@ test("accueil : les données légères recopient la population corrigée", () =>
     const l = accueil.communes[k];
     assert.equal(l[col.population], parCode.get(k).population, k);
   }
-  assert.equal(accueil.communes["85165"][col.tailleVille], 1250);
-  assert.equal(accueil.communes["85165"][col.tailleVilleSource], "commune");
+  // FUT-176 : L'Oie (1 250 habitants) est, pour l'Insee, en banlieue de l'agglomération de Sainte-Florence (2 609) ;
+  // absente de l'ancien fichier, elle était lue hors unité urbaine, à sa population communale.
+  assert.equal(accueil.communes["85165"][col.tailleVille], 2609);
+  assert.equal(accueil.communes["85165"][col.tailleVilleSource], "urban_unit");
 });

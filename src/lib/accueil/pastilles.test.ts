@@ -66,7 +66,7 @@ test("petite ville : la population dite simplement, la convention du moteur en c
   const base = { phraseTaille: null, population: 1058439, source: "urban_unit" as const };
   const lille = lireTaille({ ...SETE, commune: "Lille", insee: "59350", libelle: "Lille" }, { issue: "mismatch", ...base });
   assert.equal(lille.pourVous.signal, "defavorable");
-  assert.equal(lille.fait!.texte, `Environ ${(1058439).toLocaleString("fr-FR")} habitants dans l'agglomération de Lille.`);
+  assert.equal(lille.fait!.texte, `Environ ${(1058439).toLocaleString("fr-FR")} habitants dans l'agglomération dont fait partie Lille.`);
   assert.equal(lille.fait!.grain, "unite_urbaine", "la taille d'une agglomération n'est pas présentée comme communale");
   assert.match(lille.pourVous.texte, /^Plus de 100.000 habitants : ce n'est pas une petite ville\.$/);
   assert.match(lireTaille(SETE, { issue: "indeterminate", ...base, population: 94088 }).pourVous.texte, /^Entre 25.000 et 100.000 habitants/);
@@ -277,7 +277,7 @@ test("la mesure en grand : présente quand une valeur pertinente existe, jamais 
   // Petite ville : la population, avec son périmètre.
   const guéret = lireTaille({ ...SETE, commune: "Guéret" }, { issue: "favorable", phraseTaille: null, population: 13901, source: "urban_unit" });
   assert.equal(guéret.fait?.mesure?.unite, "habitants");
-  assert.equal(guéret.fait?.mesure?.legende, "dans l'agglomération de Guéret");
+  assert.equal(guéret.fait?.mesure?.legende, "dans l'agglomération dont fait partie Guéret");
   assert.equal(lireRisques(SETE, [{ code: "11", libelle: "Inondation" }]).fait?.mesure, undefined);
 });
 

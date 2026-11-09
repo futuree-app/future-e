@@ -15,7 +15,7 @@
 // passe les mêmes contrôles (vérifié par test).
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { HORIZON_META, type HorizonKey } from "./synthesis-contract.ts";
+import { HORIZON_META, ROLE_TEXT, type HorizonKey } from "./synthesis-contract.ts";
 import { aleaDominant } from "../georisques-flags.ts";
 import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
 
@@ -73,14 +73,19 @@ function blocTerritoire(p: P): string[] {
   const d = at<{ habitants_par_km2: number; categorie: string | null }>(p, "commune.densite");
   const out: string[] = [];
 
+  // FUT-176 : les rôles tels que synthesis-contract.ts les écrit (ROLE_TEXT), au statut Insee.
+  const memeNom = role?.agglomeration != null && role.agglomeration.trim().toLowerCase() === nom.trim().toLowerCase();
+  const dansAgglo = role?.agglomeration && !memeNom ? ` dans l'agglomération ${deCommune(role.agglomeration)}` : "";
   const roleClause =
-    role?.role === "commune d'une agglomération" && role.agglomeration
-      ? ` dans l'agglomération ${deCommune(role.agglomeration)}`
-      : role?.role === "principal pôle de son agglomération"
-        ? `, principal pôle de son agglomération`
-        : role?.role === "commune isolée, hors agglomération"
-          ? `, hors de toute agglomération`
-          : "";
+    role?.role === ROLE_TEXT.banlieue || role?.role === ROLE_TEXT.dans_agglomeration
+      ? dansAgglo || ", dans une agglomération"
+      : role?.role === ROLE_TEXT.ville_centre
+        ? dansAgglo ? `, au centre de l'agglomération ${deCommune(role.agglomeration!)}` : ", au centre de son agglomération"
+        : role?.role === ROLE_TEXT.ville_isolee
+          ? ", seule commune de son agglomération"
+          : role?.role === ROLE_TEXT.hors_uu
+            ? ", hors de toute agglomération"
+            : "";
   const who = pop != null ? `${nom}, ${frNum(pop)} habitants${roleClause},` : nom;
   if (d?.categorie && DENSITY_VERB[d.categorie]) {
     out.push(`${who} ${DENSITY_VERB[d.categorie]} (${frNum(d.habitants_par_km2)} habitants au km²).`);
