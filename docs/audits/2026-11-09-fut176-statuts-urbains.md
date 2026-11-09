@@ -115,6 +115,38 @@ Tests mis à jour avec leur raison : FUT-147 (libellés, clé de cache, lignes a
 
 Scores, classements et ordres : aucun changement. Les modifications sont des textes (identité, raisons, libellés, projection). La garde FUT-147 (5 projets, 4 trios) passe sans changer ses références ; la liste des lignes admises du contrat (`LIGNES_CONTRAT_FUT176`) est régénérée depuis le diff, sans ligne sur les feux.
 
-### Convergence avec FUT-175 (PR #140)
 
-Voir § 7.
+## 7. Convergence avec FUT-175 (PR #140)
+
+État vérifié le 09/11/2026 : `main` = 51a493d0 ; PR #140 = a9490c31 ; PR #139 = cette branche. Les deux PR partent de 51a493d0 et touchent `facts.ts`, `synthesis-contract.ts`, `synthesis-deterministe.ts`, `territory-identity.ts` et `fut147-non-regression.test.ts`. Git fusionne seul `facts.ts`, le patron déterministe et l'identité. Il reste deux conflits : la version du contrat et la garde FUT-147.
+
+Les deux branches portent `territoire-synthese@5`, pour deux contrats différents. Ni l'un ni l'autre n'est sorti. Le contrat réunissant les deux doit prendre un numéro neuf.
+
+**Ordre proposé : #140 (FUT-175) d'abord, puis #139 (FUT-176) remise à jour sur `main`.** #140 a figé ses lignes admises dans `__fixtures__/fut175-lignes-admises.json`. Il est plus simple que FUT-176, qui connaît ses propres lignes, s'adapte à ce mécanisme que l'inverse. L'essai a été fait localement : branche `essai/fut175-puis-fut176` (c00d9197, non poussée), patch dans `~/Documents/futuree-fut176/convergence/resolution-cote-fut176.patch`.
+
+Résolution, une fois #140 fusionnée :
+
+1. `git merge origin/main` dans la branche FUT-176.
+2. `synthesis-contract.ts` : une seule version, **`territoire-synthese@6`**, avec un commentaire qui cite les deux tickets. Si un autre ticket a monté le contrat entre-temps, prendre le numéro suivant celui de `main`, sans en forcer un.
+3. `fut147-non-regression.test.ts` : garder la structure de FUT-175 (`horsFut175`, `verifierContrat`, `verifierRegistre`), puis :
+   - `verifierContrat` attend `FUT163` + `LIGNES_CONTRAT_FUT176`, régénérée depuis le diff réel moins la référence FUT-175 (aucune ligne sur les feux) ;
+   - `verifierRegistre` admet le type du rôle (FUT-176), seule ligne retirée ;
+   - `CLE_MAIN` est recalculée (essai : `5b0eb94c…6c72`), et `HASH_MAIN` reste celle de FUT-175 (FUT-176 ne change pas l'empreinte).
+4. `__fixtures__/fut175-lignes-admises.json` : retirer la ligne `+… territoire-synthese@5` (sans quoi la référence est « périmée »), et l'écrire dans le commentaire de la référence.
+5. `fut176-statuts-urbains.test.ts` : la version attendue passe à `@6`.
+
+À refaire après intégration :
+- `npx tsc --noEmit` ;
+- la suite complète `--test-concurrency=1` (essai : 4 499 réussis, 5 échecs fut27 connus dus au « · » du chemin, 2 sautés : FUT-137 et la couverture nationale sans le xlsx) ;
+- les tests ciblés : `fut147-non-regression`, `fut175-oso-eau`, `fut176-statuts-urbains` (avec `data/source/UU2020_au_01-01-2025.xlsx` pour la couverture nationale), `territoire/*`, `plm-communal`, `fut140`, `fut141`, `index-population` ;
+- `npm run index:verify`.
+
+Le fusionné doit aussi être relu sur deux points : la projection d'un arrondissement avec les parts OSO de FUT-175 (deux grains différents dans la même projection), et la clé de cache, qui doit changer une seule fois.
+
+## 8. Recette de la reprise
+
+- TypeScript : `tsc --noEmit` sans erreur ; ESLint sans erreur sur les fichiers modifiés.
+- Suite complète (`--test-concurrency=1`) : 4 492 tests, 4 486 réussis, 5 échecs fut27 connus (chemin « · »), 1 sauté (FUT-137, déjà présent).
+- Ciblés : FUT-176 (24), FUT-147 (20, références inchangées), FUT-140, FUT-141, PLM, `territoire/*`, `agglomeration-*`, pastilles : 259/259. `npm run index:verify` : index vérifié.
+- Index inchangé par la reprise : aucun score, classement ni ordre ne bouge.
+- Test FUT-137 ajusté (La Hague) : la commune garde sa vie locale forte (69), décision de FUT-137 intacte, mais elle est hors unité urbaine. Elle n'est donc plus « une petite ville qui reste vraiment vivante ». C'est l'effet direct de la règle canonique demandée par la contre-revue, à valider en contre-revue.
