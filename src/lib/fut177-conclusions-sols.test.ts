@@ -464,3 +464,51 @@ test("contre-revue 3 : la carte et son repli expliquent la composition des terre
     for (const texte of [why, tip]) assert.deepEqual(reglesCouvert(texte, p), [], `${par.get(insee)!.nom} : « ${texte} »`);
   }
 });
+
+// ── Dernière reprise (SHA audité b97ab528) : la portée des deux exceptions est la PROPOSITION, pas la phrase ──
+// Chaque cas « refusé » PASSAIT sur b97ab528 ; chaque cas « permis » doit le rester.
+test("contre-revue 4 : une définition juste dans une autre proposition ne rachète pas « couverte de bâtiments »", () => {
+  const refuse = [
+    "La moitié de ses terres est couverte de bâtiments ; les espaces urbanisés comptent aussi les routes et les parkings.",
+    "La moitié de ses terres est couverte de bâtiments, et les espaces urbanisés comptent aussi les routes.",
+    "La moitié de ses terres est couverte de bâtiments : les espaces urbanisés comprennent aussi routes et parkings.",
+    "La moitié de ses terres est couverte de bâtiments, mais l'urbanisé compte aussi les routes.",
+    "Les espaces urbanisés incluent routes et parkings, alors que 55 % de ses terres sont des bâtiments.",
+  ];
+  const permis = [
+    "La moitié de ses terres est urbanisée, routes et parkings compris.",
+    "Les espaces urbanisés comptent bâtiments, routes et parkings : ils couvrent la moitié de ses terres.",
+    "Les espaces urbanisés, routes, parkings et zones d'activité compris, couvrent 55 % de ses terres.",
+    "50 % de ses terres sont urbanisées, bâtiments, routes et parkings confondus.",
+    "La moitié de ses terres est faite de bâtiments, de routes et de parkings confondus.",
+    "La moitié de ses terres est urbanisée, y compris les routes, les parkings et les bâtiments.",
+  ];
+  for (const insee of COMMUNES_CONTRE_REVUE) {
+    const p = projDe(insee);
+    for (const phrase of refuse) assert.ok(regles(phrase, p).includes("couvert:urbanise-lu-comme-batiments"), `${par.get(insee)!.nom} : « ${phrase} »`);
+    for (const phrase of permis) assert.ok(!regles(phrase, p).includes("couvert:urbanise-lu-comme-batiments"), `${par.get(insee)!.nom} : « ${phrase} »`);
+  }
+});
+
+test("contre-revue 5 : un renvoi à l'adresse qui conclut dans la même proposition reste une affirmation", () => {
+  const refuse = [
+    "Le cadre de vie dépend du quartier et reste paisible.",
+    "L'accès à la nature dépend de l'adresse et le cadre de vie est verdoyant.",
+    "Le cadre de vie dépend du quartier et reste très calme.",
+    "L'accès aux espaces verts dépend de l'adresse et ils sont nombreux.",
+    "La nature dépend du quartier et reste toute proche.",
+  ];
+  const permis = [
+    "Le cadre de vie dépend du quartier.",
+    "L'accès à la nature dépend de l'adresse et ne peut pas être déduit de la composition communale des sols.",
+    "La proximité d'un espace vert dépend de l'adresse, qu'examine le module Autour de l'adresse.",
+    "L'accès aux espaces verts se vérifie à l'adresse.",
+    "La présence d'un espace vert à proximité dépend de l'adresse.",
+    "La composition des sols ne dit rien du cadre de vie.",
+  ];
+  for (const insee of COMMUNES_CONTRE_REVUE) {
+    const p = projDe(insee);
+    for (const phrase of refuse) assert.ok(regles(phrase, p).includes("couvert:cadre-de-vie-non-mesure"), `${par.get(insee)!.nom} : « ${phrase} »`);
+    for (const phrase of permis) assert.ok(!regles(phrase, p).includes("couvert:cadre-de-vie-non-mesure"), `${par.get(insee)!.nom} : « ${phrase} »`);
+  }
+});

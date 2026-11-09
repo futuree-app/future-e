@@ -126,14 +126,38 @@ const EXCLUSION_INFRA: RegExp[] = [
   new RegExp(`\\b(sans compter|sans parler|sans|hors|en dehors|à l'exclusion|excepté|exceptées?|sauf|outre|en plus|à part|non compris|non comprises)${FIN}[^.]{0,15}\\b${INFRA}`),
   new RegExp(`\\b${INFRA}[^.]{0,20}\\b(exclus|exclue?s?|non compris|non comprises|à part|en plus|en sus|mis à part)${FIN}`),
 ];
-const DEFINITION_URBANISE = (s: string): boolean =>
-  INCLUSION_INFRA.some((r) => r.test(s)) && !EXCLUSION_INFRA.some((r) => r.test(s));
+// Ce que la règle refuse : l'urbanisé lu comme des bâtiments ou une densité de constructions.
+const URBANISE_BATIMENTS: RegExp[] = [
+  /(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)[^.]{0,40}\b(de |des )?(bâtiments|constructions|immeubles|maisons)\b/,
+  /\b(couvert|couverte|couverts|couvertes|occupée?s?) (de|par des|par les) (bâtiments|constructions|immeubles|maisons)/,
+  /\b(les )?(bâtiments|constructions|immeubles|maisons) (couvrent|occupent|recouvrent|représentent)[^.]{0,30}(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)/,
+  new RegExp(`\\b(majoritairement|essentiellement|en majorité|pour moitié|à moitié|largement|principalement) (bâti${A}|construit${A})${FIN}`),
+  /\b(espaces|surfaces) urbanisée?s?,? (c'est-à-dire|soit|autrement dit|donc|autant de) (des |les |de )?(bâtiments|constructions|immeubles|maisons)/,
+  /\bdensité (du bâti|des constructions|des bâtiments|bâtie|de construction)\b/,
+  new RegExp(`\\b(densément|fortement|très) (bâti${A}|construit${A})${FIN}`),
+];
+// PORTÉE de l'exception (contre-revue du 09/11) : une définition juste dans une proposition ne rachète pas une
+// assertion fausse dans une autre. « La moitié de ses terres est couverte de bâtiments ; les espaces urbanisés
+// comptent aussi les routes et les parkings » : la définition est dans la seconde proposition, l'assertion sur les
+// bâtiments dans la première. Chaque proposition qui porte une assertion sur les bâtiments doit porter elle-même
+// l'inclusion. Les virgules ne coupent pas (« bâtiments, routes et parkings confondus » est une seule énumération) ;
+// « et » coupe quand il ouvre une nouvelle proposition (« et les espaces urbanisés… », « et il… »).
+const PROPOSITIONS_URBANISE = new RegExp(
+  `[;:]|\\b(?:mais|car|alors que|tandis que|cependant|toutefois|pourtant|même si|bien que)\\b|\\bet (?=(?:(?:les|le|la|il|elle|ils|elles|ce|cela|on|ses|son|sa)(?![a-zà-ÿœæ])|l'|c')(?! ?${INFRA}))`,
+);
+const DEFINITION_URBANISE = (s: string): boolean => {
+  if (EXCLUSION_INFRA.some((r) => r.test(s))) return false;
+  const assertions = s.split(PROPOSITIONS_URBANISE).filter((c) => c != null && URBANISE_BATIMENTS.some((r) => r.test(c)));
+  return assertions.length > 0 && assertions.every((c) => INCLUSION_INFRA.some((r) => r.test(c)));
+};
 
 // Le cadre de vie : ce qu'une mesure des sols à l'échelle communale ne dit pas.
 // « à deux pas » n'y figure pas : son « pas » se lit comme une négation (`isNegated`), la règle ne le verrait jamais.
 const CADRE_DE_VIE: RegExp[] = [
   /\baccès (direct |facile |rapide |immédiat )?(à la |aux |à des |à une )(nature|espaces? (naturels?|verts?)|forêts?|campagne|bois)\b/,
   /\b(nature|forêts?|campagne|espaces? naturels?|bois)( est| sont| reste| restent)? (à portée( de main)?|à proximité( immédiate)?|tout proches?|toute proches?|aux portes|accessibles?|à quelques minutes)\b/,
+  // La même conclusion, quelques mots plus loin : « La nature dépend du quartier et reste toute proche ».
+  /\b(nature|forêts?|campagne|espaces? naturels?|bois)\b[^.]{0,40}\b(est|sont|reste|restent|demeure|demeurent) (tout |toute |très )?(à portée( de main)?|à proximité( immédiate)?|proches?|accessibles?|aux portes|à quelques minutes)(?![a-zà-ÿœæ])/,
   /\bespaces? verts?\b/,
   /\bverdure\b|\bverdoyante?s?\b|\bpoumons? verts?\b/,
   /\bcadre de vie\b/,
@@ -151,9 +175,19 @@ const RENVOI = new RegExp(
 const AFFIRMATION = new RegExp(
   `\\b(offre|offrent|garde|gardent|conserve|conservent|bénéficie|bénéficient|jouit|jouissent|profite|profitent|dispose|disposent|propose|proposent|possède|possèdent|assure|assurent|garantit|garantissent)${FIN}`,
 );
+// Une CONCLUSION sur le cadre de vie, dans la proposition même du renvoi (contre-revue du 09/11) : « Le cadre de vie
+// dépend du quartier et reste paisible », « L'accès à la nature dépend de l'adresse et le cadre de vie est verdoyant ».
+// Le renvoi y est présent, mais la proposition conclut quand même. Un renvoi vrai ne qualifie rien.
+const QUALIFIE = "(verte?s?|proches?|accessibles?|à portée|à proximité|calmes?|préservée?s?|agréables?|nombreu(x|ses)|abondante?s?|riches?)";
+const CONCLUSION_CADRE: RegExp[] = [
+  // Après un verbe d'état : « reste paisible », « est verdoyant », « sont nombreux ». « espaces verts » seul n'en est pas une.
+  new RegExp(`\\b(est|sont|reste|restent|demeure|demeurent|semble|semblent|paraît|paraissent|s'avère|s'avèrent)( très| plutôt| particulièrement| assez| bien| toute?s?| tout)? (${QUALIFIE.slice(1, -1)}|paisibles?|tranquilles?|verdoyante?s?)${FIN}`),
+  // Des qualificatifs qui concluent à eux seuls, où qu'ils soient.
+  new RegExp(`\\b(paisibles?|tranquilles?|verdoyante?s?|bucoliques?|champêtres?|idylliques?|privilégiée?s?)${FIN}`),
+];
 const RENVOI_ADRESSE = (s: string): boolean => {
   const concernees = s.split(PROPOSITIONS).filter((c) => c != null && CADRE_DE_VIE.some((r) => r.test(c)));
-  return concernees.length > 0 && concernees.every((c) => RENVOI.test(c) && !AFFIRMATION.test(c));
+  return concernees.length > 0 && concernees.every((c) => RENVOI.test(c) && !AFFIRMATION.test(c) && !CONCLUSION_CADRE.some((r) => r.test(c)));
 };
 
 const RULES: Rule[] = [
@@ -207,15 +241,7 @@ const RULES: Rule[] = [
     when: OSO_PRESENT,
     polarity: "affirmative",
     unless: DEFINITION_URBANISE,
-    patterns: [
-      /(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)[^.]{0,40}\b(de |des )?(bâtiments|constructions|immeubles|maisons)\b/,
-      /\b(couvert|couverte|couverts|couvertes|occupée?s?) (de|par des|par les) (bâtiments|constructions|immeubles|maisons)/,
-      /\b(les )?(bâtiments|constructions|immeubles|maisons) (couvrent|occupent|recouvrent|représentent)[^.]{0,30}(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)/,
-      new RegExp(`\\b(majoritairement|essentiellement|en majorité|pour moitié|à moitié|largement|principalement) (bâti${A}|construit${A})${FIN}`),
-      /\b(espaces|surfaces) urbanisée?s?,? (c'est-à-dire|soit|autrement dit|donc|autant de) (des |les |de )?(bâtiments|constructions|immeubles|maisons)/,
-      /\bdensité (du bâti|des constructions|des bâtiments|bâtie|de construction)\b/,
-      new RegExp(`\\b(densément|fortement|très) (bâti${A}|construit${A})${FIN}`),
-    ],
+    patterns: URBANISE_BATIMENTS,
   },
   {
     // FUT-177 : une mesure satellite des sols, à l'échelle de la commune, ne dit ni l'accès à la nature, ni les
