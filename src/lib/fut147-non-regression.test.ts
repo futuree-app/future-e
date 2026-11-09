@@ -51,9 +51,19 @@ before(async () => {
 
 // FUT-138 : le trait distinctif des prix dit un fait (« les prix de vente les plus bas »), plus une accessibilité
 // (« le marché immobilier le plus accessible ») : seul ce libellé change dans la référence, ni commune, ni score, ni ordre.
+// FUT-176 : la dimension « Isolement » mesure la population de l'agglomération, pas un « bassin de vie » (un autre zonage
+// Insee) ni une offre de services. Seuls ses libellés changent (paliers, raison, aide) ; ni commune, ni score, ni ordre.
+// « bassin de vie de proximité » n'y désigne que La Broque (67066), dans une unité urbaine : « dans une petite agglomération ».
 const REF = JSON.parse(
   readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8")
     .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas")
+    .replaceAll("Bassin de vie étendu", "Grande agglomération")
+    .replaceAll("Bassin de proximité", "Agglomération moyenne")
+    .replaceAll("Bassin de vie restreint", "Petite agglomération ou commune")
+    .replaceAll("au cœur d'un vaste bassin de vie", "dans une grande agglomération")
+    .replaceAll("bassin de vie bien pourvu", "dans une agglomération de taille moyenne")
+    .replaceAll("bassin de vie de proximité", "dans une petite agglomération")
+    .replaceAll("La taille du bassin de vie qui dessert le territoire.", "Le nombre d'habitants de l'agglomération, ou de la commune quand elle est hors agglomération. Il ne mesure pas à lui seul l'accès aux services ni aux transports.")
     // FUT-178 : les libellés de la nature disent le SECTEUR (la commune et ses voisines retenues, parfois aucune), eau
     // comprise, ni « forêts », ni « grands espaces », ni « autour », ni un « lieu de vie ». Seuls ces libellés changent.
     .replace(/la plus proche de grands espaces naturels des (deux|trois)/g, "la plus riche des $1 en espaces naturels ou en eau dans son secteur")
@@ -175,7 +185,10 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 // c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a / 9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d. Ce que
 // ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
 const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3";
-const CLE_MAIN = "de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930";
+// Convergence FUT-175 + FUT-176 : l'empreinte est celle de FUT-175 (registre `territoire-facts@2`, FUT-176 ne change que
+// le type du rôle) ; la clé suit le contrat commun `territoire-synthese@6`. Clé de la PR #140 seule (@5) :
+// de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930.
+const CLE_MAIN = "5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72";
 
 /**
  * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
@@ -184,6 +197,8 @@ const CLE_MAIN = "de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d09
  * étrangère et fait échouer la garde. Chaque ligne admise ne couvre qu'UNE occurrence (multiensemble), et une
  * ligne admise que le diff ne contient plus fait aussi échouer : la référence ne survit pas à une retouche.
  * Pour la changer, un ticket la régénère explicitement et le dit dans ce commentaire.
+ * Convergence FUT-176 (09/11/2026) : la ligne « +… territoire-synthese@5 » en est retirée ; la version commune @6 est
+ * admise avec les lignes de FUT-176 (`LIGNES_CONTRAT_FUT176`). Le « -… @4 » retiré y reste.
  */
 const FUT175_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut175-lignes-admises.json", "utf8")) as Record<string, string[]>;
 const FEUX = /bdiff|incendi|feux? de for|MemoireIncendies/i;
@@ -223,20 +238,83 @@ const REGISTRE = "src/lib/territoire/facts.ts";
 /** La garde du contrat de synthèse, sur une liste de lignes changées depuis 4d75603f. */
 function verifierContrat(lignes: readonly string[]): void {
   const changees = horsFut175(CONTRAT, lignes);
-  assert.deepEqual(changees, [
+  // Convergence FUT-175 + FUT-176 : la version commune @6 et les lignes du rôle territorial sont celles de FUT-176
+  // (`LIGNES_CONTRAT_FUT176`) ; la ligne « @5 » de FUT-175 a été retirée de sa référence figée, qui garde le « @4 » retiré.
+  assert.deepEqual(changees.filter((l) => FUT163.includes(l)), FUT163);
+  assert.deepEqual(changees.filter((l) => !FUT163.includes(l)), LIGNES_CONTRAT_FUT176);
+  for (const l of changees) assert.doesNotMatch(l, FEUX, l);
+}
+
+const FUT163 = [
     '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
     "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
     "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
     "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
     '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
-  ]);
-  for (const l of changees) assert.doesNotMatch(l, FEUX, l);
-}
+];
+const LIGNES_CONTRAT_FUT176: string[] = [
+  "+import { normaliserRoleUrbain, type RoleUrbain } from \"./statut-urbain.ts\";",
+  "+// @6 (FUT-175 + FUT-176) : parts OSO rapportées aux terres, eau à part (FUT-175) ; rôle territorial lu au statut Insee,",
+  "+// arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.",
+  "+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@6:${SYNTHESIS_MODEL}`;",
+  "-const ROLE_TEXT: Record<UrbanRole[\"role\"], string> = {",
+  "-  isolee: \"commune isolée, hors agglomération\",",
+  "-  pole: \"principal pôle de son agglomération\",",
+  "-  agglo: \"commune d'une agglomération\",",
+  "+// FUT-176 : le rôle dit au modèle (et au patron déterministe), en mots courants, au statut Insee. Jamais",
+  "+// « isolée » (le terme Insee « ville isolée » veut dire « agglomération d'une seule commune »), jamais « pôle »,",
+  "+// jamais « ville » (une commune de banlieue de 171 habitants n'en est pas une). Statut inconnu : aucun rôle.",
+  "+export const ROLE_TEXT: Record<RoleUrbain, string | null> = {",
+  "+  ville_centre: \"au centre de son agglomération\",",
+  "+  banlieue: \"commune de banlieue de son agglomération\",",
+  "+  ville_isolee: \"seule commune de son agglomération\",",
+  "+  hors_uu: \"hors de toute agglomération (aucun ensemble bâti continu de 2 000 habitants)\",",
+  "+  dans_agglomeration: \"commune d'une agglomération\",",
+  "+  inconnu: null,",
+  "+/**",
+  "+ * FUT-176 (contre-revue) : un arrondissement de Paris, Lyon ou Marseille n'a pas de statut Insee propre. L'index lui",
+  "+ * prête celui de sa commune (ville-centre), mais Paris 20e n'est pas « au centre de son agglomération » : c'est Paris",
+  "+ * qui l'est. Le rôle transmis dit donc l'appartenance à la commune, et le statut reste celui de la commune entière.",
+  "+ * Les autres faits (population, densité…) restent ceux de l'arrondissement.",
+  "+ */",
+  "+export const ROLE_TEXT_ARRONDISSEMENT = \"arrondissement d'une commune qui est au centre de son agglomération (le statut est celui de la commune entière, pas de l'arrondissement)\";",
+  "+",
+  "+/** Le rôle territorial transmis au modèle, ou null quand on ne sait rien (aucun texte n'est alors produit). */",
+  "+export function roleTerritorialPourSynthese(role: UrbanRole | null): Record<string, unknown> | null {",
+  "+  if (!role) return null;",
+  "+  const r = normaliserRoleUrbain(role.role);",
+  "+  if (role.arrondissementDe) {",
+  "+    // Seul un arrondissement d'une ville-centre est connu (Paris, Lyon, Marseille). Un autre rôle serait une incohérence.",
+  "+    if (r !== \"ville_centre\") return null;",
+  "+    return {",
+  "+      role: ROLE_TEXT_ARRONDISSEMENT,",
+  "+      commune: role.arrondissementDe,",
+  "+      agglomeration: role.uuLabel,",
+  "+      population_agglomeration: role.uuPop,",
+  "+    };",
+  "+  }",
+  "+  const texte = ROLE_TEXT[r];",
+  "+  if (!texte) return null;",
+  "+  return {",
+  "+    role: texte,",
+  "+    agglomeration: r === \"hors_uu\" ? null : role.uuLabel,",
+  "+    population_agglomeration: r === \"hors_uu\" ? null : role.uuPop,",
+  "+  };",
+  "+}",
+  "+",
+  "-      role_territorial: role",
+  "-        ? { role: ROLE_TEXT[role.role], agglomeration: role.uuLabel, population_agglomeration: role.uuPop }",
+  "-        : null,",
+  "+      role_territorial: roleTerritorialPourSynthese(role),",
+  "+- Rôle territorial (\"role_territorial\") : c'est un classement statistique de l'Insee, qui dit seulement si la commune fait partie d'un ensemble bâti continu d'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N'en déduisez jamais la présence de services ou de commerces, l'animation, l'isolement, ni un rôle de \"pôle\" ou de \"centre de vie\" pour les environs. N'écrivez jamais que la commune est \"isolée\", et n'appelez pas \"ville\" une commune que le payload ne présente pas comme telle. Quand le rôle présente un arrondissement, c'est la commune nommée (\"commune\"), pas l'arrondissement, qui est au centre de l'agglomération : n'écrivez jamais que l'arrondissement est une ville-centre ou au centre de l'agglomération. S'il est absent, n'en parlez pas.",
+];
 
 /** La garde du registre des faits, sur une liste de lignes changées depuis 4d75603f. */
 function verifierRegistre(lignesChangees: readonly string[]): void {
   const lignes = horsFut175(REGISTRE, lignesChangees);
-  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
+  // FUT-176 : le type du rôle territorial suit le statut Insee ; c'est la seule ligne retirée admise.
+  const RETIREE_FUT176 = '-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };';
+  assert.deepEqual(lignes.filter((l) => l.startsWith("-") && l !== RETIREE_FUT176), [], "aucune ligne retirée (hors le type du rôle, FUT-176)");
   const admises = [
     /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
     /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
@@ -248,6 +326,11 @@ function verifierRegistre(lignesChangees: readonly string[]): void {
     // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
     /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
     /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
+    // FUT-176 : le rôle territorial au statut Insee (type seulement ; le fait et sa source sont intacts).
+    /^\+import type \{ RoleUrbain, RoleUrbainAncien \} from "\.\/statut-urbain\.ts";$/,
+    /^\+\/\/ FUT-176 : le rôle suit le STATUT Insee/, /^\+\/\/ Un snapshot ancien peut encore porter/, /^\+\/\/ `normaliserRoleUrbain`\. `arrondissementDe` : la ville d'un arrondissement/,
+    /^\+export type UrbanRole = \{ role: RoleUrbain \| RoleUrbainAncien; uuLabel: string \| null; uuPop: number \| null; arrondissementDe\?: string \};$/,
+    /^-export type UrbanRole = \{ role: "isolee" \| "pole" \| "agglo"; uuLabel: string \| null; uuPop: number \| null \};$/,
   ];
   for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${REGISTRE} : ${l}`);
 }

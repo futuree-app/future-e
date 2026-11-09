@@ -12,8 +12,9 @@
  * QUOI. Pour chaque commune appartenant à une unité urbaine (`uu` non nul), on
  * somme la population des communes partageant le même code `uu`. Aucune source
  * externe : tout est dérivé de l'index lui-même. Les communes hors UU (`uu` nul,
- * ~78 % des communes, rural INSEE) sont leur propre « agglo » : uu_pop = population
- * communale, uu_count = 1, hors_uu = true.
+ * ~78 % des communes) sont leur propre « agglo » : uu_pop = population communale,
+ * uu_count = 1. hors_uu = true SEULEMENT si le statut Insee est H (FUT-176) ; un statut
+ * inconnu (`uu_statut` nul) donne hors_uu = null, jamais « hors unité urbaine ».
  *
  * HONNÊTETÉ (à divulguer au récit). C'est l'UNITÉ URBAINE (continuité du bâti),
  * PAS l'aire d'attraction des villes (AAV, bassin de vie élargi). On a l'UU, pas
@@ -48,12 +49,16 @@ async function main() {
   // 2) Affecter uu_pop / uu_count à chaque commune.
   let inUu = 0;
   let horsUu = 0;
+  let inconnu = 0;
   for (const c of communes) {
     if (c.uu == null) {
       c.uu_pop = c.population ?? null; // hors UU : la commune est sa propre agglo
       c.uu_count = c.population == null ? null : 1;
-      c.hors_uu = true;
-      horsUu++;
+      // FUT-176 : « hors unité urbaine » seulement si l'Insee le dit (statut H). Une commune que le fichier
+      // ne connaît pas (statut null) n'est ni dedans ni dehors : `hors_uu` reste inconnu.
+      c.hors_uu = c.uu_statut === "H" ? true : null;
+      if (c.hors_uu) horsUu++;
+      else inconnu++;
     } else {
       const k = String(c.uu);
       c.uu_pop = sum.has(k) ? sum.get(k) : null;
@@ -66,7 +71,7 @@ async function main() {
   meta.uuPop = {
     methode:
       "somme de la population communale par code uu (unité urbaine INSEE 2020), dérivée de l'index",
-    champ: "uu_pop (habitants de l'UU), uu_count (nb communes), hors_uu (bool)",
+    champ: "uu_pop (habitants de l'UU), uu_count (nb communes), hors_uu (true si statut Insee H, false si dans une UU, null si statut inconnu)",
     usage:
       "récit « taille vécue / est-ce une grande ville ? » à l'échelle de l'agglomération, pas de la commune",
     limite:
@@ -96,7 +101,7 @@ async function main() {
       );
   }
   console.log(
-    `✓ uu_pop écrit : ${inUu} communes en UU, ${horsUu} hors UU (singleton).`,
+    `✓ uu_pop écrit : ${inUu} communes en UU, ${horsUu} hors UU (singleton), ${inconnu} au statut inconnu.`,
   );
 }
 

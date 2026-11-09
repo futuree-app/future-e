@@ -15,7 +15,7 @@
 // passe les mêmes contrôles (vérifié par test).
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { HORIZON_META, type HorizonKey } from "./synthesis-contract.ts";
+import { HORIZON_META, ROLE_TEXT, ROLE_TEXT_ARRONDISSEMENT, type HorizonKey } from "./synthesis-contract.ts";
 import { aleaDominant } from "../georisques-flags.ts";
 import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
 
@@ -72,21 +72,31 @@ const LAND_PHRASE: Record<string, string> = {
 function blocTerritoire(p: P): string[] {
   const nom = at<string>(p, "commune.nom") ?? "Cette commune";
   const pop = at<number>(p, "commune.population_habitants");
-  const role = at<{ role: string; agglomeration: string | null }>(p, "commune.role_territorial");
+  const role = at<{ role: string; agglomeration: string | null; commune?: string | null }>(p, "commune.role_territorial");
   const d = at<{ habitants_par_km2: number; categorie: string | null }>(p, "commune.densite");
   const out: string[] = [];
 
-  const roleClause =
-    role?.role === "commune d'une agglomération" && role.agglomeration
-      ? ` dans l'agglomération ${deCommune(role.agglomeration)}`
-      : role?.role === "principal pôle de son agglomération"
-        ? `, principal pôle de son agglomération`
-        : role?.role === "commune isolée, hors agglomération"
-          ? `, hors de toute agglomération`
-          : "";
+  // FUT-176 : les rôles tels que synthesis-contract.ts les écrit (ROLE_TEXT), au statut Insee.
+  const memeNom = role?.agglomeration != null && role.agglomeration.trim().toLowerCase() === nom.trim().toLowerCase();
+  const dansAgglo = role?.agglomeration && !memeNom ? ` dans l'agglomération ${deCommune(role.agglomeration)}` : "";
+  // Un arrondissement (Paris 20e) : le centre de l'agglomération, c'est la commune nommée, jamais l'arrondissement.
+  const roleClause = role?.role === ROLE_TEXT_ARRONDISSEMENT
+    ? role.commune ? `, arrondissement ${deCommune(role.commune)} (ville-centre de son agglomération)` : ""
+    : role?.role === ROLE_TEXT.banlieue || role?.role === ROLE_TEXT.dans_agglomeration
+      ? dansAgglo || ", dans une agglomération"
+      : role?.role === ROLE_TEXT.ville_centre
+        ? dansAgglo ? `, au centre de l'agglomération ${deCommune(role.agglomeration!)}` : ", au centre de son agglomération"
+        : role?.role === ROLE_TEXT.ville_isolee
+          ? ", seule commune de son agglomération"
+          : role?.role === ROLE_TEXT.hors_uu
+            ? ", hors de toute agglomération"
+            : "";
   const who = pop != null ? `${nom}, ${frNum(pop)} habitants${roleClause},` : nom;
+  // La densité est celle de l'arrondissement : on ne l'appelle pas « commune » (FUT-176, contre-revue).
+  const estArrondissement = role?.role === ROLE_TEXT_ARRONDISSEMENT;
+  const verbeDensite = (cat: string) => estArrondissement ? DENSITY_VERB[cat].replace("une commune", "un arrondissement") : DENSITY_VERB[cat];
   if (d?.categorie && DENSITY_VERB[d.categorie]) {
-    out.push(`${who} ${DENSITY_VERB[d.categorie]} (${frNum(d.habitants_par_km2)} habitants au km²).`);
+    out.push(`${who} ${verbeDensite(d.categorie)} (${frNum(d.habitants_par_km2)} habitants au km²).`);
   } else if (pop != null) {
     out.push(`${nom} compte ${frNum(pop)} habitants${roleClause}.`);
   }

@@ -15,6 +15,7 @@ import type {
   CardPolicy, DerivedFact, Fact, FactScale, FactSource, FactStatus, FactsSnapshot, SynthesisPolicy,
 } from "../facts/contract.ts";
 import type { GeorisquesSummary, GasparCatnatSummary } from "../georisques.ts";
+import type { RoleUrbain, RoleUrbainAncien } from "./statut-urbain.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
 import type { LittoralSummary } from "../littoral.ts";
@@ -54,7 +55,10 @@ export type TerritoireIndexEntry = {
   } | null;
 };
 
-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };
+// FUT-176 : le rôle suit le STATUT Insee (statut-urbain.ts), jamais l'absence d'un code ni le nom de l'agglomération.
+// Un snapshot ancien peut encore porter « isolee » / « pole » / « agglo » : les lecteurs passent par
+// `normaliserRoleUrbain`. `arrondissementDe` : la ville d'un arrondissement de Paris, Lyon ou Marseille (absent sinon).
+export type UrbanRole = { role: RoleUrbain | RoleUrbainAncien; uuLabel: string | null; uuPop: number | null; arrondissementDe?: string };
 
 export type TerritoireInputs = {
   insee: string;

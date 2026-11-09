@@ -30,13 +30,16 @@ test("donnée absente ou corrompue -> uncertain", () => {
 
 test("libellés dépendants de la source ('agglomération' + 'métropole' seulement en UU)", () => {
   assert.equal(labelForCategory("grande", "urban_unit"), "une grande agglomération");
-  assert.equal(labelForCategory("grande", "commune"), "une grande ville");
+  // FUT-176 : en source commune, jamais « ville » déduit d'une population seule.
+  assert.equal(labelForCategory("grande", "commune"), "une grande commune");
   assert.equal(labelForCategory("petite", "urban_unit"), "une petite agglomération");
   assert.equal(labelForCategory("petite", "commune"), "une petite commune");
   assert.equal(labelForCategory("metropole", "urban_unit"), "une métropole");
-  assert.equal(labelForCategory("metropole", "commune"), "une très grande ville");
+  assert.equal(labelForCategory("metropole", "commune"), "une très grande commune");
   assert.equal(labelForCategory("village", "commune"), "un village");
-  assert.equal(labelForCategory("moyenne", "urban_unit"), "une ville moyenne");
+  assert.equal(labelForCategory("moyenne", "urban_unit"), "une agglomération moyenne");
+  assert.equal(labelForCategory("moyenne", "commune"), "une commune de taille moyenne");
+  for (const cat of ["village", "petite", "moyenne", "grande", "metropole"] as const) assert.doesNotMatch(labelForCategory(cat, "commune"), /ville/, cat);
 });
 
 test("fragment de phrase : 'appartient à' (UU) vs 'est classée comme' (commune)", () => {

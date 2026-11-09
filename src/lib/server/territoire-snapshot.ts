@@ -80,8 +80,8 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
         }
       : null,
     urbanRole: ctx
-      ? { role: ctx.role, uuLabel: ctx.uuLabel, uuPop: ctx.uuPop }
-      : plm?.lecture.uu ? { role: plm.role, uuLabel: plm.uuLabel, uuPop: plm.lecture.uuPop } : null,
+      ? { role: ctx.role, uuLabel: ctx.uuLabel, uuPop: ctx.uuPop, ...(ctx.arrondissementDe ? { arrondissementDe: ctx.arrondissementDe } : {}) }
+      : plm ? { role: plm.role, uuLabel: plm.uuLabel, uuPop: plm.lecture.uuPop } : null,
     typology: { type: mood.type, label: mood.typeLabel },
     ademe: ademe
       ? {
