@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { lectureCommunalePLM, libellesAgglomeration, villePLM, type ArrondissementIndex } from "./plm-communal.ts";
+import { roleUrbain } from "./statut-urbain.ts";
 import { buildTerritoireSnapshot, type TerritoireInputs } from "./facts.ts";
 import { projectForSynthesis } from "./synthesis-contract.ts";
 import { deterministicSynthesis } from "./synthesis-deterministe.ts";
@@ -26,7 +27,7 @@ function inputsPLM(insee: string, nom: string): TerritoireInputs {
   return {
     ...chatelaillonInputs(), insee, communeName: nom, ademe: null, distinctiveTrait: null, catnat: null, littoral: null,
     entry: { population: l.population, densite: null, mer_centre_km: null, relief_proximite: null, altitude: null, nature: null, demographie: l.demographie },
-    urbanRole: l.uu ? { role: uuLabel === nom ? "pole" : "agglo", uuLabel, uuPop: l.uuPop } : null,
+    urbanRole: { role: roleUrbain(l.uu, l.uuStatut), uuLabel, uuPop: l.uuPop },
     catnatInondationIndex: catnatInondationDepuisIndex({ insee, inondation: parInsee.get(arrondissementsDe(insee)[0]!)!.inondation ?? null }),
   };
 }
@@ -38,7 +39,8 @@ for (const [n, insee, nom] of [["P1", "75056", "Paris"], ["P2", "69123", "Lyon"]
     const s = buildTerritoireSnapshot(inputsPLM(insee, nom), T0);
     assert.equal(valeur(s, "place.population"), somme(insee), "population = somme des arrondissements");
     const role = valeur(s, "place.urban_role") as { role: string; uuLabel: string };
-    assert.deepEqual([role.role, role.uuLabel], ["pole", nom], "pôle de l'agglomération qui porte son nom");
+    // FUT-176 : le statut Insee de la commune (ville-centre), commun à tous ses arrondissements.
+    assert.deepEqual([role.role, role.uuLabel], ["ville_centre", nom], "ville-centre de l'agglomération qui porte son nom");
     const trend = valeur(s, "demography.trend") as { annualPct: number; newcomersPct: number | null };
     assert.equal(typeof trend.annualPct, "number");
     assert.equal(trend.newcomersPct, null, "les arrivants ne s'additionnent pas entre arrondissements");
@@ -91,7 +93,7 @@ test("P8. les comptes FUT-60 sont intacts dans le snapshot communal", () => {
 test("P9. Paris : plus de repli générique là où un fait communal fiable existe", () => {
   const texte = deterministicSynthesis(projectForSynthesis(buildTerritoireSnapshot(inputsPLM("75056", "Paris"), T0), "gwl20"), "gwl20");
   assert.doesNotMatch(texte, /ne permettent pas de décrire/);
-  assert.match(texte, /Paris compte 2 133 111 habitants, principal pôle de son agglomération\. Sa population a reculé de 0,56 % par an/);
+  assert.match(texte, /Paris compte 2 133 111 habitants, au centre de son agglomération\. Sa population a reculé de 0,56 % par an/);
 });
 
 test("P10. une commune ordinaire n'est pas touchée", () => {

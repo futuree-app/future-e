@@ -44,7 +44,7 @@ export const POPULATIONS_HORS_GRAIN: Readonly<Record<string, {
   "42084": { population: 507, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Solore-en-Forez
   "42217": { population: 520, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // La Côte-Saint-Didier
   "46172": { population: 925, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Pern-Lhospitalet
-  "49126": { population: 17162, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Orée d'Anjou
+  "49126": { population: 17162, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "49305" }, // Orée d'Anjou
   "51485": { population: 579, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // La Neuville-au-Temple
   "59006": { population: 619, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // L'Orée de Mormal
   "60054": { population: 339, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: null }, // Beaumont-les-Nonains
@@ -52,7 +52,7 @@ export const POPULATIONS_HORS_GRAIN: Readonly<Record<string, {
   "61275": { population: 1429, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Merlerault-le-Pin
   "62447": { population: 4480, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "62204" }, // Hesdin-la-Forêt
   "63109": { population: 825, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Les Deux-Rives
-  "69114": { population: 4185, millesime: 2023, retablissement: false, mouvement: "2024-03-15", uu: null }, // Porte des Pierres Dorées
+  "69114": { population: 4185, millesime: 2023, retablissement: false, mouvement: "2024-03-15", uu: "00760" }, // Porte des Pierres Dorées
   "70152": { population: 605, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Colombine
   "70180": { population: 600, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Belles-Fontaines
   "71566": { population: 1811, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "71105" }, // Verdun-Ciel
@@ -63,8 +63,8 @@ export const POPULATIONS_HORS_GRAIN: Readonly<Record<string, {
   "80155": { population: 556, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: null }, // Bussus-lès-Yaucourt
   "85076": { population: 5711, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "00362" }, // Cugand-la-Bernardière
   "85084": { population: 6851, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: "85213" }, // Essarts-en-Bocage
-  "85165": { population: 1250, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: null }, // L'Oie
-  "85212": { population: 1359, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: null }, // Sainte-Florence
+  "85165": { population: 1250, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: "85139" }, // L'Oie
+  "85212": { population: 1359, millesime: 2023, retablissement: true, mouvement: "2024-01-01", uu: "85139" }, // Sainte-Florence
   "85223": { population: 3611, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "85113" }, // Saint-Jean-d'Hermine
   "88321": { population: 6732, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "88204" }, // Neufchâteau
   "93066": { population: 149077, millesime: 2023, retablissement: false, mouvement: "2025-01-01", uu: "00851" }, // Saint-Denis
@@ -77,15 +77,18 @@ export const POPULATIONS_HORS_GRAIN: Readonly<Record<string, {
 /** Millésimes réunis dans la population des unités urbaines qui comptent une commune de la table. */
 export const MILLESIMES_UNITES_URBAINES: Readonly<Record<string, readonly number[]>> = {
   "00362": [2021, 2023],
+  "00760": [2021, 2023],
   "00851": [2021, 2023],
   "14206": [2021, 2023],
   "22103": [2023],
   "22201": [2021, 2023],
   "39108": [2023],
+  "49305": [2023],
   "62204": [2021, 2023],
   "71105": [2021, 2023],
   "72701": [2021, 2023],
   "85113": [2023],
+  "85139": [2023],
   "85213": [2023],
   "88204": [2023],
 };

@@ -72,16 +72,16 @@ test("eviter_isolement : village -> mismatch + limitation + topic isolement ; JA
 test("provenance : source commune -> 'est classée comme' + 'population communale', jamais 'agglomération' ; grain commune", () => {
   const p = project([{ key: "eviter_grandes_villes", weight: 3 }]);
   const co = rule("eviter_grandes_villes").evaluate(facts({ tailleVille: 200_000, tailleVilleSource: "commune" }), p, undefined as never).facts[0]!;
-  assert.match(co.statement, /est classée comme une grande ville/);
+  assert.match(co.statement, /est classée comme une grande commune/);
   assert.match(co.statement, /population communale/);
   assert.doesNotMatch(co.statement, /agglomération/);
   assert.equal(co.evidence[0]!.grain, "commune");
 });
 
-test("métropole en source commune -> 'une très grande ville' (jamais 'métropole')", () => {
+test("métropole en source commune -> 'une très grande commune' (jamais 'métropole' ni « ville », FUT-176)", () => {
   const p = project([{ key: "eviter_grandes_villes", weight: 3 }]);
   const co = rule("eviter_grandes_villes").evaluate(facts({ tailleVille: 700_000, tailleVilleSource: "commune" }), p, undefined as never).facts[0]!;
-  assert.match(co.statement, /une très grande ville/);
+  assert.match(co.statement, /une très grande commune/);
   assert.doesNotMatch(co.statement, /métropole/);
 });
 

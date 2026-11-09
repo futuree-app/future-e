@@ -15,7 +15,7 @@
 // passe les mêmes contrôles (vérifié par test).
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { HORIZON_META, type HorizonKey } from "./synthesis-contract.ts";
+import { HORIZON_META, ROLE_TEXT, ROLE_TEXT_ARRONDISSEMENT, type HorizonKey } from "./synthesis-contract.ts";
 import { aleaDominant } from "../georisques-flags.ts";
 import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
 
@@ -58,6 +58,9 @@ const DENSITY_VERB: Record<string, string> = {
   "Commune peu dense": "est une commune peu dense",
 };
 
+/** FUT-175 : en deçà, l'eau n'est pas nommée par la synthèse déterministe (la carte la dit dès 1 %). */
+const EAU_NOTABLE_PCT = 10;
+
 const LAND_PHRASE: Record<string, string> = {
   "Occupation mixte": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures",
   "Majoritairement urbanisé": "Ses sols sont majoritairement urbanisés",
@@ -69,32 +72,50 @@ const LAND_PHRASE: Record<string, string> = {
 function blocTerritoire(p: P): string[] {
   const nom = at<string>(p, "commune.nom") ?? "Cette commune";
   const pop = at<number>(p, "commune.population_habitants");
-  const role = at<{ role: string; agglomeration: string | null }>(p, "commune.role_territorial");
+  const role = at<{ role: string; agglomeration: string | null; commune?: string | null }>(p, "commune.role_territorial");
   const d = at<{ habitants_par_km2: number; categorie: string | null }>(p, "commune.densite");
   const out: string[] = [];
 
-  const roleClause =
-    role?.role === "commune d'une agglomération" && role.agglomeration
-      ? ` dans l'agglomération ${deCommune(role.agglomeration)}`
-      : role?.role === "principal pôle de son agglomération"
-        ? `, principal pôle de son agglomération`
-        : role?.role === "commune isolée, hors agglomération"
-          ? `, hors de toute agglomération`
-          : "";
+  // FUT-176 : les rôles tels que synthesis-contract.ts les écrit (ROLE_TEXT), au statut Insee.
+  const memeNom = role?.agglomeration != null && role.agglomeration.trim().toLowerCase() === nom.trim().toLowerCase();
+  const dansAgglo = role?.agglomeration && !memeNom ? ` dans l'agglomération ${deCommune(role.agglomeration)}` : "";
+  // Un arrondissement (Paris 20e) : le centre de l'agglomération, c'est la commune nommée, jamais l'arrondissement.
+  const roleClause = role?.role === ROLE_TEXT_ARRONDISSEMENT
+    ? role.commune ? `, arrondissement ${deCommune(role.commune)} (ville-centre de son agglomération)` : ""
+    : role?.role === ROLE_TEXT.banlieue || role?.role === ROLE_TEXT.dans_agglomeration
+      ? dansAgglo || ", dans une agglomération"
+      : role?.role === ROLE_TEXT.ville_centre
+        ? dansAgglo ? `, au centre de l'agglomération ${deCommune(role.agglomeration!)}` : ", au centre de son agglomération"
+        : role?.role === ROLE_TEXT.ville_isolee
+          ? ", seule commune de son agglomération"
+          : role?.role === ROLE_TEXT.hors_uu
+            ? ", hors de toute agglomération"
+            : "";
   const who = pop != null ? `${nom}, ${frNum(pop)} habitants${roleClause},` : nom;
+  // La densité est celle de l'arrondissement : on ne l'appelle pas « commune » (FUT-176, contre-revue).
+  const estArrondissement = role?.role === ROLE_TEXT_ARRONDISSEMENT;
+  const verbeDensite = (cat: string) => estArrondissement ? DENSITY_VERB[cat].replace("une commune", "un arrondissement") : DENSITY_VERB[cat];
   if (d?.categorie && DENSITY_VERB[d.categorie]) {
-    out.push(`${who} ${DENSITY_VERB[d.categorie]} (${frNum(d.habitants_par_km2)} habitants au km²).`);
+    out.push(`${who} ${verbeDensite(d.categorie)} (${frNum(d.habitants_par_km2)} habitants au km²).`);
   } else if (pop != null) {
     out.push(`${nom} compte ${frNum(pop)} habitants${roleClause}.`);
   }
 
-  const land = at<{ categorie: string | null; part_espaces_naturels_pct: number | null; composition_pct: Record<string, number> }>(p, "occupation_des_sols");
+  const land = at<{
+    categorie: string | null;
+    part_espaces_naturels_des_terres_pct: number | null;
+    part_eau_de_la_commune_pct: number | null;
+    composition_des_terres_pct: Record<string, number>;
+  }>(p, "occupation_des_sols");
   if (land?.categorie && LAND_PHRASE[land.categorie]) {
+    // FUT-175 : les parts portent sur les terres ; l'eau, quand elle compte, est dite dans sa propre phrase.
     const parts: string[] = [];
-    const urb = land.composition_pct?.espaces_urbanises;
+    const urb = land.composition_des_terres_pct?.espaces_urbanises;
     if (urb != null) parts.push(`${frNum(urb)} % d'espaces urbanisés`);
-    if (land.part_espaces_naturels_pct != null) parts.push(`${frNum(land.part_espaces_naturels_pct)} % d'espaces naturels`);
-    out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)}` : ""}.`);
+    if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${frNum(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
+    out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
+    const eau = land.part_eau_de_la_commune_pct;
+    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de sa surface cartographiée.`);
   }
 
   // L'évolution porte sur 2015-2021 ; la part d'arrivants (une seule année) n'est pas reprise ici,

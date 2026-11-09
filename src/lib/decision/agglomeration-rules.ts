@@ -29,7 +29,9 @@ type SizeSpec = {
   buildStatement: (nom: string, fragment: string) => string;
   // LA FACE FAVORABLE (lot C) : la 2e ligne de la carte quand la catégorie observée EST celle recherchée.
   // Absente sur eviter_isolement, qui ne produit jamais de `satisfied` (village -> mismatch, reste neutral).
-  favorableFace?: (nom: string, catLabel: string) => string;
+  // FUT-176 : en source agglomération, la commune APPARTIENT à la catégorie (« Mont-Dauphin est une petite agglomération »
+  // était faux) ; en source commune, elle EST la catégorie (« Bony est un village »).
+  favorableFace?: (nom: string, catLabel: string, source: "urban_unit" | "commune") => string;
   limitation?: string;
 };
 
@@ -41,7 +43,7 @@ const SPECS: SizeSpec[] = [
     outcomes: { village: "satisfied", petite: "satisfied", moyenne: "neutral", grande: "mismatch", metropole: "mismatch" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait d'éviter les grandes villes parmi vos priorités. ${fragment}.`,
-    favorableFace: (nom, cat) => `${nom} est ${cat}, à taille humaine.`,
+    favorableFace: (nom, cat, source) => `${nom} ${source === "urban_unit" && cat !== "un village" ? "appartient à" : "est"} ${cat}, à taille humaine.`,
   },
   {
     key: "prefere_grande_ville",
@@ -50,7 +52,7 @@ const SPECS: SizeSpec[] = [
     outcomes: { village: "mismatch", petite: "mismatch", moyenne: "neutral", grande: "satisfied", metropole: "satisfied" },
     buildStatement: (nom, fragment) =>
       `Vous avez placé le fait de vivre dans une grande ville parmi vos priorités. ${fragment}.`,
-    favorableFace: (nom, cat) => `${nom} appartient à ${cat}, ce que vous recherchez.`,
+    favorableFace: (nom, cat, source) => `${nom} ${source === "urban_unit" ? "appartient à" : "est"} ${cat}, ce que vous recherchez.`,
   },
   {
     key: "eviter_isolement",
@@ -101,7 +103,7 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
       // métropole, ce que vous recherchez »), statement = la même phrase, déjà autonome (elle nomme la commune).
       if (outcome === "satisfied" && visible && spec.favorableFace) {
         const tier = weight >= 3 ? "structuring" : "secondary";
-        const face = spec.favorableFace(f.nom, labelForCategory(cat, source));
+        const face = spec.favorableFace(f.nom, labelForCategory(cat, source), source);
         const ev: EvidenceRef = {
           factId: TERRITORY_SIZE_FACT_ID, module: "territoire", label: `Territoire · ${f.nom}`,
           grain: source === "urban_unit" ? "unite_urbaine" : "commune", href: territoireHref,

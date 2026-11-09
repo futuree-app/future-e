@@ -82,7 +82,7 @@ export function rankFractionFavorable(low: number): string {
 // priorités ». topic = le SUJET nommé (<= 70 car., cf. assertFactValid). projectPhrase = la priorité,
 // tournée pour l'ouverture. indicator = ce sur quoi porte la comparaison.
 // subject = le groupe nominal qui se lit APRÈS un deux-points dans le headline du verdict
-// (« Toulouse répond moins bien à deux de vos priorités : le calme et l'accès aux espaces naturels. »). Il nomme
+// (« Toulouse répond moins bien à deux de vos priorités : le calme et les espaces naturels (eau comprise). »). Il nomme
 // LA PRIORITÉ DU LECTEUR, jamais l'indicateur défavorable ni la mesure : « la possibilité de se
 // passer de la voiture », et non « la dépendance à la voiture », que le lecteur n'a jamais demandée.
 // Deux garde-fous de plus, appris du rendu réel : ne pas empiler deux négations (« la faible
@@ -93,7 +93,21 @@ export type MismatchLabel = { topic: string; projectPhrase: string; indicator: s
 // restant indexable par PreferenceKey dans la fabrique. L'exhaustivité (chaque MISMATCH_KEY a un label) est
 // garantie par un test de garde (mismatch-rules.test.ts), pas par le type (éviterait un cycle facts<->rules).
 export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
-  nature: { topic: "les espaces naturels", projectPhrase: "la proximité des espaces naturels", indicator: "l'accès aux espaces naturels", subject: "l'accès aux espaces naturels" },
+  // FUT-178 : la mesure est une PART de couvert naturel (OSO 2023), pas un accès (rien ne dit qu'un espace est
+  // ouvert ni atteignable, cf. FUT-73), et elle porte sur un SECTEUR : la commune et, quand elles sont retenues, des
+  // communes voisines entières par la distance de leur centre (sélection parfois incomplète, parfois vide), pas un
+  // cercle. L'eau y est comptée tant que FUT-182 n'a pas refait le calcul (FUT-175). Une part faible ne prouve pas
+  // une urbanisation (FUT-34) : la limitation le dit sans affirmer ce qui la remplace.
+  nature: {
+    // La priorité garde son nom (« la proximité des espaces naturels ») ; les intitulés nomment ce que la MESURE
+    // compte, eau comprise, pour qu'un titre ne réintroduise pas « espaces naturels » seuls.
+    topic: "les espaces naturels du secteur (eau comprise)",
+    projectPhrase: "la proximité des espaces naturels",
+    indicator: "la part d'espaces naturels et d'eau dans le secteur",
+    // Sans « et » : le sujet se lit dans une énumération (mismatch-facts.test.ts), et tient en 45 caractères.
+    subject: "les espaces naturels (eau comprise)",
+    limitation: "Cette position porte sur la part de forêts, prairies, landes, roche et dunes, eau comprise (mer, étangs, lacs), dans le secteur de la commune : elle-même et, quand elles sont retenues, des communes voisines entières dont le centre est à moins de 15 km du sien, sélection parfois incomplète (OSO 2023). Elle ne décrit ni la commune seule, ni les abords d'une adresse. Une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles.",
+  },
   acces_ecoles: { topic: "l'accès aux collèges et lycées", projectPhrase: "l'accès aux collèges et lycées", indicator: "l'accès aux collèges et lycées", subject: "l'accès aux collèges et lycées" },
   acces_soins: { topic: "l'accès aux soins", projectPhrase: "un bon accès aux soins", indicator: "l'accès aux soins", subject: "l'accès aux soins" },
   acces_culture: { topic: "l'accès à la culture", projectPhrase: "l'accès à une offre culturelle", indicator: "l'accès à l'offre culturelle", subject: "l'accès à l'offre culturelle" },
@@ -157,7 +171,7 @@ export const ALIGNMENT_LABELS: Record<string, AlignmentLabel> = {
   acces_culture: { headlineSubject: "l'accès à la culture", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
   acces_services: { headlineSubject: "le niveau de services de la commune", favorableStatusTemplate: "Parmi les {rank} de communes qui concentrent le plus de commerces et services en France" },
   acces_transports: { headlineSubject: "l'accès au train", favorableStatusTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
-  nature: { headlineSubject: "l'accès aux espaces naturels", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
+  nature: { headlineSubject: "les espaces naturels du secteur (eau comprise)", favorableStatusTemplate: "Parmi les {rank} de communes dont le secteur compte le plus d'espaces naturels ou d'eau en France" },
   vie_locale: { headlineSubject: "la vie locale", favorableStatusTemplate: "Parmi les {rank} de communes les plus animées de France" },
   faible_dependance_auto: { headlineSubject: "les trajets domicile-travail sans voiture", favorableStatusTemplate: "Parmi les {rank} de communes de France où les actifs vont le moins souvent travailler en voiture" },
   croissance_demographique: { headlineSubject: "la trajectoire démographique", favorableStatusTemplate: "Parmi les {rank} de communes où la population progresse le plus en France" },

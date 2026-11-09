@@ -59,7 +59,8 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   ensoleillement_recherche: "Plus ensoleillé.",
   proximite_mer: "Accès rapide à la côte.",
   eloignement_mer: "Distance du centre de la commune au rivage marin : plus elle est grande, mieux la commune répond.",
-  eviter_isolement: "Présence d'un bassin de vie offrant services et activités du quotidien.",
+  // FUT-176 : la mesure est la taille de l'agglomération ; elle ne dit ni services, ni activités, ni isolement vécu.
+  eviter_isolement: "Taille de l'agglomération (unité urbaine), ou de la commune quand elle est hors agglomération. Elle ne mesure pas à elle seule l'accès aux services.",
   nature: "Forêts, prairies et milieux naturels autour.",
   acces_culture: "Présence d'équipements culturels à proximité.",
   acces_ecoles: "Collèges et lycées accessibles alentour.",

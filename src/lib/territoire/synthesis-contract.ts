@@ -13,6 +13,7 @@
 
 import { derivedOf, synthesisFacts, valueOf, type FactsSnapshot } from "../facts/contract.ts";
 import { DEMOGRAPHY_PHRASE, isDemographyCode, type GwlScenarios, type UrbanRole } from "./facts.ts";
+import { normaliserRoleUrbain, type RoleUrbain } from "./statut-urbain.ts";
 import type { GasparCatnatSummary } from "../georisques.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
@@ -26,7 +27,9 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  * TOUT ce qui peut changer le texte : projection, consigne, modèle, contrôles, patrons déterministes.
  * La monter invalide le cache de synthèse (clé = empreinte + horizon + cette version).
  */
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;
+// @6 (FUT-175 + FUT-176) : parts OSO rapportées aux terres, eau à part (FUT-175) ; rôle territorial lu au statut Insee,
+// arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@6:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -47,14 +50,50 @@ const COMPOSITION_KEYS: Record<string, string> = {
   prairies: "prairies",
   landes_pelouses: "landes_et_pelouses",
   mineral_dunes: "roche_et_dunes",
-  eau: "eau",
 };
 
-const ROLE_TEXT: Record<UrbanRole["role"], string> = {
-  isolee: "commune isolée, hors agglomération",
-  pole: "principal pôle de son agglomération",
-  agglo: "commune d'une agglomération",
+// FUT-176 : le rôle dit au modèle (et au patron déterministe), en mots courants, au statut Insee. Jamais
+// « isolée » (le terme Insee « ville isolée » veut dire « agglomération d'une seule commune »), jamais « pôle »,
+// jamais « ville » (une commune de banlieue de 171 habitants n'en est pas une). Statut inconnu : aucun rôle.
+export const ROLE_TEXT: Record<RoleUrbain, string | null> = {
+  ville_centre: "au centre de son agglomération",
+  banlieue: "commune de banlieue de son agglomération",
+  ville_isolee: "seule commune de son agglomération",
+  hors_uu: "hors de toute agglomération (aucun ensemble bâti continu de 2 000 habitants)",
+  dans_agglomeration: "commune d'une agglomération",
+  inconnu: null,
 };
+
+/**
+ * FUT-176 (contre-revue) : un arrondissement de Paris, Lyon ou Marseille n'a pas de statut Insee propre. L'index lui
+ * prête celui de sa commune (ville-centre), mais Paris 20e n'est pas « au centre de son agglomération » : c'est Paris
+ * qui l'est. Le rôle transmis dit donc l'appartenance à la commune, et le statut reste celui de la commune entière.
+ * Les autres faits (population, densité…) restent ceux de l'arrondissement.
+ */
+export const ROLE_TEXT_ARRONDISSEMENT = "arrondissement d'une commune qui est au centre de son agglomération (le statut est celui de la commune entière, pas de l'arrondissement)";
+
+/** Le rôle territorial transmis au modèle, ou null quand on ne sait rien (aucun texte n'est alors produit). */
+export function roleTerritorialPourSynthese(role: UrbanRole | null): Record<string, unknown> | null {
+  if (!role) return null;
+  const r = normaliserRoleUrbain(role.role);
+  if (role.arrondissementDe) {
+    // Seul un arrondissement d'une ville-centre est connu (Paris, Lyon, Marseille). Un autre rôle serait une incohérence.
+    if (r !== "ville_centre") return null;
+    return {
+      role: ROLE_TEXT_ARRONDISSEMENT,
+      commune: role.arrondissementDe,
+      agglomeration: role.uuLabel,
+      population_agglomeration: role.uuPop,
+    };
+  }
+  const texte = ROLE_TEXT[r];
+  if (!texte) return null;
+  return {
+    role: texte,
+    agglomeration: r === "hors_uu" ? null : role.uuLabel,
+    population_agglomeration: r === "hors_uu" ? null : role.uuPop,
+  };
+}
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -104,6 +143,7 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
 
   const role = get<UrbanRole>("place.urban_role");
   const composition = get<Record<string, number>>("land.composition");
+  const eau = get<number>("land.water_share");
   const trend = get<{ annualPct: number | null; newcomersPct: number | null; code: string | null }>("demography.trend");
   const demoCat = cat("demography.category");
   const scen = get<GwlScenarios>("climate.scenarios");
@@ -126,22 +166,21 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
         ? { habitants_par_km2: round1(get<number>("place.density")!), categorie: cat("density.category")?.label ?? null }
         : null,
       typologie: get<string>("place.typology"),
-      role_territorial: role
-        ? { role: ROLE_TEXT[role.role], agglomeration: role.uuLabel, population_agglomeration: role.uuPop }
-        : null,
+      role_territorial: roleTerritorialPourSynthese(role),
     },
     horizon: { annee: meta.year, scenario_france: meta.france },
     occupation_des_sols: composition
       ? {
           categorie: cat("land.category")?.label ?? null,
-          part_espaces_naturels_pct: get<number>("land.natural_share"),
-          composition_pct: Object.fromEntries(
+          part_espaces_naturels_des_terres_pct: get<number>("land.natural_share"),
+          part_eau_de_la_commune_pct: eau,
+          composition_des_terres_pct: Object.fromEntries(
             Object.entries(composition)
               .filter(([, x]) => typeof x === "number" && x >= 1)
               .sort(([, a], [, b]) => b - a)
               .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, round1(x)]),
           ),
-          definition: "Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes, eau. Les cultures n'en font pas partie. Mesure satellite OSO 2023, à l'échelle de la commune.",
+          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés = bâti, routes et surfaces imperméabilisées vus par satellite. Mesure OSO 2023, à l'échelle de la commune, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas).",
         }
       : null,
     boisement_ademe_pct: forestAdeme != null
@@ -243,12 +282,13 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 LES FAITS FOURNIS SONT LES SEULS FAITS
 - Chaque affirmation doit se rattacher à un champ du payload. Ne comblez jamais un manque par une connaissance générale de la commune.
 - Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la densité est "Densité intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
-- Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues.
+- Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues. Les parts portent sur les terres ; l'eau est une part de la commune, à part : ne la présentez jamais comme un espace naturel ou vert, et n'additionnez pas une part d'eau à une part des terres.
 - Démographie : décrivez ce qui est mesuré. L'évolution de la population porte sur 2015-2021. La part d'arrivants récents est une situation sur UNE année ("X % des habitants vivaient ailleurs un an plus tôt") : ne l'associez jamais à la période 2015-2021 ni à plusieurs années. N'écrivez jamais que la commune "attire", est "attractive", "recherchée" ou "prisée" : aucune donnée ne mesure l'attractivité.
 - Catastrophes naturelles : la "sécheresse des sols" reconnue en catastrophe naturelle (dommages aux bâtiments, argiles) n'est pas le même objet que les "jours de sols secs" projetés (un indicateur climatique). Citez-les séparément si besoin, sans jamais présenter l'un comme le prolongement ou l'annonce de l'autre.
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.
+- Rôle territorial ("role_territorial") : c'est un classement statistique de l'Insee, qui dit seulement si la commune fait partie d'un ensemble bâti continu d'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N'en déduisez jamais la présence de services ou de commerces, l'animation, l'isolement, ni un rôle de "pôle" ou de "centre de vie" pour les environs. N'écrivez jamais que la commune est "isolée", et n'appelez pas "ville" une commune que le payload ne présente pas comme telle. Quand le rôle présente un arrondissement, c'est la commune nommée ("commune"), pas l'arrondissement, qui est au centre de l'agglomération : n'écrivez jamais que l'arrondissement est une ville-centre ou au centre de l'agglomération. S'il est absent, n'en parlez pas.
 - Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent, ressentent, attendent ou recherchent ("les résidents comptent sur…", "on attend…"), ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
 - Pas de comparaison sans donnée comparative : ni "beaucoup pour une commune de cette densité", ni "peu pour une ville de cette taille", ni "remarquable compte tenu de…". Donnez le chiffre, sans le juger par rapport à d'autres communes.
 - Eau : les jours de sols secs, les catastrophes naturelles reconnues et les restrictions d'eau en vigueur sont des faits distincts. Juxtaposez-les si besoin ; n'en tirez aucune conclusion sur une tension, une pression, une rareté ou un accès futur à la ressource en eau : aucune donnée ne la mesure.
