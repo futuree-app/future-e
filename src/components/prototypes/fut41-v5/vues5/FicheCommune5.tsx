@@ -33,7 +33,7 @@ export function FicheCommune5({ api }: { api: Api5 }) {
         <div className={s.pileSerree}>
           <p className={s.surtitre}><span>La commune</span></p>
           <h1 className={`${s.titre} ${v.titreVue}`} tabIndex={-1} data-titre-vue>{c.nom}</h1>
-          <p className={s.nuance}>{a ? `Rapport de territoire du ${dateCourte(a.generatedAt)}${a.simulee ? " (simulé)" : ""}` : c.lecture === "gratuite" ? "Lecture gratuite" : "Pas encore lue"} · {actifs.length ? `${actifs.length} logement${actifs.length > 1 ? "s" : ""} en vue` : "aucun logement"}</p>
+          <p className={s.nuance}>{a ? `Rapport de territoire du ${dateCourte(a.generatedAt)}${a.simulee ? " (simulé)" : ""}` : c.lecture === "gratuite" ? "Lecture gratuite" : "Pas encore étudiée"} · {actifs.length ? `${actifs.length} logement${actifs.length > 1 ? "s" : ""} en vue` : "aucun logement"}</p>
         </div>
       </div>
       {c.statut === "ecartee" ? <div className={v.ecarteBandeau}><p className={s.dense}>Écartée : « {c.raisonEcart} ».</p><button type="button" className={s.bouton} onClick={() => envoyer({ type: "reactiver", id: `c:${c.insee}` })}>Remettre en course</button></div> : null}

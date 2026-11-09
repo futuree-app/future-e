@@ -104,7 +104,7 @@ export function Projet5({ api }: { api: Api5 }) {
             }) : (
               <div className={v.seau} data-seau="pourrait_changer">
                 <p className={v.seauTitre}>Ce qui pourrait changer <span className={v.seauNb}>{effets.length}</span></p>
-                {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Aucune de vos possibilités lues n&apos;est concernée d&apos;après ce qui est connu.</p>}
+                {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Aucune de vos possibilités étudiées n&apos;est concernée d&apos;après ce qui est connu.</p>}
               </div>
             )}
             <div className={v.seau} data-seau="note">

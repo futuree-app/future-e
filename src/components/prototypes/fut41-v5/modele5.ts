@@ -155,10 +155,10 @@ export const LIBELLE_VERDICT: Record<Verdict, string> = {
   distingue: "Les distingue",
   pourrait: "Pourrait les distinguer",
   pareil: "Pareil",
-  une_lecture: "Une seule lecture",
+  une_lecture: "Même donnée",
   pas_comparable: "Pas encore comparable",
   inconnu: "Inconnu partout",
-  pas_assez_lu: "Pas assez lu",
+  pas_assez_lu: "Pas assez étudié",
 };
 
 export type CoucheLue = { couche: Couche; cellules: Cellule[]; verdict: Verdict; phrase: string; remede: string | null };
@@ -189,16 +189,16 @@ function lireCouche(couche: Couche, cellules: Cellule[], cle: CleCritere, noms: 
   const base = { couche, cellules };
   if (cellules.length === 1 && cellules[0]!.ids.length > 1) {
     const c = cellules[0]!;
-    return { ...base, verdict: c.ligne ? "une_lecture" : "pas_assez_lu", phrase: c.ligne ? `Une seule lecture de ${noms(c.ids)}, la même pour ces logements : elle ne les distingue pas.` : "Pas encore lue à la commune.", remede: null };
+    return { ...base, verdict: c.ligne ? "une_lecture" : "pas_assez_lu", phrase: c.ligne ? `La donnée de ${noms(c.ids)} vaut pour ces logements : elle ne les distingue pas.` : "Pas encore étudiée pour la commune.", remede: null };
   }
   if (!lues.length) {
     const sansAdresse = enJeu.every((c) => c.etat === "adresse_manquante");
-    return { ...base, verdict: "pas_assez_lu", phrase: couche === "commune" ? "Pas encore lue à la commune." : sansAdresse ? "Il faut l'adresse exacte pour le lire." : "Pas encore lu : il faut analyser l'adresse.", remede: null };
+    return { ...base, verdict: "pas_assez_lu", phrase: couche === "commune" ? "Pas encore lue à la commune." : sansAdresse ? "Il faut l'adresse exacte pour l'étudier." : "Pas encore étudié : il faut analyser l'adresse.", remede: null };
   }
   const paires: ComparaisonCritere[] = [];
   for (let i = 0; i < lues.length; i++) for (let j = i + 1; j < lues.length; j++) paires.push(comparerCritere(cle, lues[i]!.lieu, lues[j]!.lieu));
   const manquent = enJeu.length - lues.length;
-  const suite = manquent ? ` Pas encore lu pour ${manquent === 1 ? noms(enJeu.filter((c) => !c.ligne)[0]!.ids) : `${manquent} d'entre eux`}.` : "";
+  const suite = manquent ? ` Pas encore étudié pour ${manquent === 1 ? noms(enJeu.filter((c) => !c.ligne)[0]!.ids) : `${manquent} d'entre eux`}.` : "";
   const demontree = paires.find((p) => p.etat === "difference_demontree");
   if (demontree) {
     const parIssue = [...new Set(lues.filter((c) => estEtabli(c.ligne)).map((c) => c.ligne!.issue))].map((iss) => `${noms(lues.filter((c) => c.ligne!.issue === iss).flatMap((c) => c.ids))} : ${LIBELLE_ISSUE_SIMPLE[iss].toLowerCase()}`);
@@ -219,7 +219,7 @@ function lireCouche(couche: Couche, cellules: Cellule[], cle: CleCritere, noms: 
   if (paires.length && paires.every((p) => p.etat === "a_verifier")) {
     return { ...base, verdict: "inconnu", phrase: `Personne ne le sait encore : à vérifier par vous.${suite}`, remede: null };
   }
-  if (manquent) return { ...base, verdict: "pas_assez_lu", phrase: `Lu pour ${lues.length} sur ${enJeu.length} : ${noms(enJeu.filter((c) => c.ligne).flatMap((c) => c.ids))}.`, remede: couche === "commune" ? null : "Analyser l'adresse le lirait." };
+  if (manquent) return { ...base, verdict: "pas_assez_lu", phrase: `Étudié pour ${lues.length} sur ${enJeu.length} : ${noms(enJeu.filter((c) => c.ligne).flatMap((c) => c.ids))}.`, remede: couche === "commune" ? null : "Analyser l'adresse le lirait." };
   return { ...base, verdict: "pareil", phrase: lues.length > 1 ? "Même conclusion des deux côtés." : "Lu pour celui-ci seulement.", remede: null };
 }
 
@@ -282,13 +282,13 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
       // Un logement dont l'adresse n'est pas lue : la commune donne un contexte, jamais un fait du logement.
       // Seule une RÉSERVE de la commune est rappelée (un point à vérifier) ; une lecture communale
       // favorable ne dit rien du logement et n'est pas reprise ici (S7).
-      if (p.type === "logement" && ca && com.ligne && (com.ligne.issue === "reserve" || com.ligne.issue === "mismatch")) ouvert.push(`${nom} : pas encore lu ${NOM_COUCHE[ca].toLowerCase()} (à la commune : ${LIBELLE_ISSUE_SIMPLE[com.ligne.issue].toLowerCase()})`);
+      if (p.type === "logement" && ca && com.ligne && (com.ligne.issue === "reserve" || com.ligne.issue === "mismatch")) ouvert.push(`${nom} : pas encore étudié ${ca === "abords" ? "autour de l'adresse" : NOM_COUCHE[ca].toLowerCase()} (à la commune : ${LIBELLE_ISSUE_SIMPLE[com.ligne.issue].toLowerCase()})`);
       else pasLu.push(nom);
       continue;
     }
     const ou = p.type === "commune" ? "" : ligne.grain ? `, ${OU[ligne.grain]}` : "";
     const mesure = ligne.mesure ? `, ${ligne.mesure.valeur} ${ligne.mesure.unite}` : "";
-    const ancien = lim != null ? ` (lu sous votre ancienne limite de ${lim} ${ligne.mesure?.unite ?? "min"})` : "";
+    const ancien = lim != null ? ` (étudié avec votre ancienne limite de ${lim} ${ligne.mesure?.unite ?? "min"})` : "";
     // Troisième revue Work : le fait concret (« commerces et marché à 5 min ») plutôt que le nom du critère seul.
     const fait = ligne.constat ? ligne.constat.replace(/\.$/, "") : `${nom}${mesure}${ou}`;
     if (ligne.issue === "favorable") (lim != null && k.nature === "sans_compromis" ? ouvert : apporte).push(`${lim != null ? `${nom}${mesure}${ou}` : fait}${ancien}`);
@@ -300,7 +300,7 @@ export function bilan(r: Recherche, p: Piste, droits: "unite" | "pass"): Bilan {
     }
   }
   const total = r.projet.criteres.length;
-  const nonLus = ouvert.filter((x) => / : pas encore lu /.test(x)).length;
+  const nonLus = ouvert.filter((x) => / : pas encore étudié /.test(x)).length;
   return { id: col.id, nom: col.nom, apporte, accepte, ouvert, pasLu, lus: total - pasLu.length - nonLus, total, aVerifier: ouvert.length - nonLus, bloque, aRevoir, geste: gestePrincipal(r, p, droits) };
 }
 
@@ -358,6 +358,22 @@ const PREFIXE: Record<Couche, string> = { commune: "À l'échelle des communes",
 export type Ecart = { couche: Couche; cle: CleCritere; mieux: string; moins: string };
 
 /**
+ * LE POIDS DÉCLARÉ, dit dans la phrase (revue « utilisateur » de Work) : ce que la personne a elle-même
+ * déclaré, jamais un poids calculé. Chaque écart porte le sien, des deux côtés : rappeler une seule
+ * priorité ferait pencher la phrase sans le dire. Une condition sans compromis n'a pas de poids.
+ */
+const PLURIEL: Partial<Record<CleCritere, true>> = { nuits: true };
+function poidsDit(r: Recherche, cle: CleCritere): string | null {
+  const k = r.projet.criteres.find((x) => x.cle === cle);
+  if (!k || k.nature !== "priorite") return null;
+  const v = PLURIEL[cle] ? "comptent" : "compte";
+  return k.poids === 3 ? `${v} beaucoup pour vous` : k.poids === 2 ? `${v} pour vous` : `${v} un peu pour vous`;
+}
+const avecPoids = (r: Recherche, cles: CleCritere[]) => (cles.length === 1
+  ? `${POUR[cles[0]!]}${poidsDit(r, cles[0]!) ? `, qui ${poidsDit(r, cles[0]!)}` : ""}`
+  : listeFr(cles.map((c) => `${POUR[c]}${poidsDit(r, c) ? ` (qui ${poidsDit(r, c)})` : ""}`)));
+
+/**
  * LES ÉCARTS ÉTABLIS, condition par condition : sur une condition lue de la même façon des deux côtés,
  * qui y répond mieux que qui. Une comparaison par condition nommée, jamais un total : un lieu peut
  * répondre mieux sur le calme et moins bien sur le quartier, et les deux sont dits.
@@ -396,14 +412,15 @@ function phraseDistingue(r: Recherche, pistes: Piste[], logementsDuLieu?: Logeme
     if (!ec.length) continue;
     const paires = new Map<string, CleCritere[]>();
     for (const x of ec) paires.set(`${x.mieux}|${x.moins}`, [...(paires.get(`${x.mieux}|${x.moins}`) ?? []), x.cle]);
-    const morceaux = [...paires.entries()].map(([k, cles]) => { const [m, n] = k.split("|"); return `${m} ${/ et /.test(m!) ? "répondent" : "répond"} mieux que ${n} pour ${listeFr(cles.map((x) => POUR[x]))}`; });
+    // À deux, « que l'autre » va de soi : la phrase ne répète pas chaque nom.
+    const morceaux = [...paires.entries()].map(([k, cles]) => { const [m, n] = k.split("|"); return `${m} ${/ et /.test(m!) ? "répondent" : "répond"} mieux${pistes.length === 2 && pistes.every((p) => p.type === "logement") ? "" : ` que ${n}`} pour ${avecPoids(r, cles)}`; });
     let ph = `${PREFIXE[couche]}, ${morceaux.join(" ; ")}.`;
     if (couche === "commune" && logements.length) {
       const cles = [...new Set(ec.map((x) => x.cle))];
       const lus = logements.filter((l) => cles.some((k) => { const ca = COUCHE_ADRESSE[k]; return ca && cellule(r, colonnesDe(r, [{ type: "logement", logement: l }])[0]!, k, ca).ligne; }));
-      ph += lus.length === logements.length ? " Pour vos logements, ces points sont aussi lus à l'adresse, plus bas."
-        : lus.length ? ` Pour vos logements, cela se lit à l'adresse : c'est fait pour ${listeFr(lus.map((l) => l.libelle))} seulement.`
-          : " Pour vos logements, cela reste à lire à leur adresse.";
+      ph += lus.length === logements.length ? " Pour vos logements, ces points sont aussi étudiés à l'adresse, plus bas."
+        : lus.length ? ` Pour vos logements, cela s'étudie à l'adresse : c'est fait pour ${listeFr(lus.map((l) => l.libelle))} seulement.`
+          : " Pour vos logements, cela reste à étudier à leur adresse.";
     }
     phrases.push(ph);
   }
@@ -459,7 +476,8 @@ function phrasePourrait(r: Recherche, pistes: Piste[]): string | null {
     const ouverts = x.cellules.filter((k) => k.ligne && !estEtabli(k.ligne));
     if (!connus.length || !ouverts.length) continue;
     const questions = ouverts.flatMap((k) => k.ids).map((id) => r.logements.find((l) => l.id === id)?.verifications.filter((v) => v.cle === li.cle && !v.reponse).length ?? 0).reduce((a, b) => a + b, 0);
-    parts.push(`${POUR[li.cle]} ${NOM_COUCHE[x.couche].toLowerCase()} : ${connus.map((k) => `${listeFr(k.ids.map(nomCol))} ${Y_REPOND[k.ligne!.issue] ?? ISSUE_COURTE(k.ligne!)}`).join(", ")} ; à vérifier pour ${listeFr(ouverts.flatMap((k) => k.ids).map(nomCol))}${questions ? ` (${questions === 1 ? "une question prête" : `${nombre(questions)} questions prêtes`} pour la visite)` : ""}`);
+    const pd = poidsDit(r, li.cle);
+    parts.push(`pour ${POUR[li.cle]}${pd ? `, qui ${pd}` : ""} : ${connus.map((k) => `${listeFr(k.ids.map(nomCol))} ${Y_REPOND[k.ligne!.issue] ?? ISSUE_COURTE(k.ligne!)}`).join(", ")} ${NOM_COUCHE[x.couche].toLowerCase()} ; à vérifier pour ${listeFr(ouverts.flatMap((k) => k.ids).map(nomCol))} avant de trancher${questions ? ` (${questions === 1 ? "une question prête" : `${nombre(questions)} questions prêtes`} pour la visite)` : ""}`);
   }
   return parts.length ? `${cap(parts.join(". "))}.` : null;
 }
@@ -483,7 +501,7 @@ export function enBref(r: Recherche, pistes: Piste[]): Ligne5[] {
   const communes = pistes.every((p) => p.type === "commune");
   const rev = communes ? alertes(r, pistes).filter((x) => x.genre === "a_revoir") : [];
   if (sc) out.push({ titre: "Votre condition sans compromis", texte: rev.length ? `${sc} ${rev.map((x) => x.phrase).join(" ")}` : sc });
-  out.push({ titre: "Ce qui les distingue", texte: phraseDistingue(r, pistes) ?? "Rien ne les distingue encore à méthode égale : les autres conditions ne sont pas lues, ou pas de la même façon des deux côtés." });
+  out.push({ titre: "Ce qui les distingue", texte: phraseDistingue(r, pistes) ?? "Rien ne les distingue encore : les autres conditions ne sont pas encore étudiées, ou pas avec les mêmes données des deux côtés." });
   const pc = phrasePourrait(r, pistes);
   if (pc) out.push({ titre: "Ce qui pourrait changer votre choix", texte: pc });
   const m = phraseManque(r, pistes);
@@ -545,7 +563,7 @@ export function aFaire5(r: Recherche, aujourdhui: string, droits: "unite" | "pas
   const actifs = r.logements.filter((l) => l.statut !== "ecarte");
   for (const l of actifs) if (l.visiteLe && l.visiteLe >= aujourdhui) {
     const n = l.verifications.filter((v) => v.moment === "sur_place" && !v.reponse).length;
-    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, court: `Préparer la visite du ${dateCourte(l.visiteLe)}`, pourquoi: n ? `${n === 1 ? "Une question" : `${n} questions`} à poser sur place, qui ${n === 1 ? "peut" : "peuvent"} changer votre lecture.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
+    out.push({ pisteId: l.id, texte: `Préparer la visite du ${dateCourte(l.visiteLe)} : ${l.libelle}`, court: `Préparer la visite du ${dateCourte(l.visiteLe)}`, pourquoi: n ? `${n === 1 ? "Une question" : `${n} questions`} à poser sur place, qui ${n === 1 ? "peut" : "peuvent"} changer ce que vous en savez.` : "La visite approche.", bouton: "Préparer", action: { type: "fiche", ancre: "verifier" } });
   }
   for (const l of actifs) {
     const v = l.verifications.find((x) => !x.reponse && x.moment !== "avant_engagement" && !(l.visiteLe && l.visiteLe >= aujourdhui && x.moment === "sur_place"));
@@ -558,7 +576,7 @@ export function aFaire5(r: Recherche, aujourdhui: string, droits: "unite" | "pas
     if (g.cle !== cle) continue;
     const n = nomPiste(p);
     if (cle === "mettre_a_jour") out.push({ pisteId: idPiste(p), texte: `Mettre à jour ${p.type === "logement" ? `le dossier ${deNom(p)}` : `le rapport ${deNom(p)}`} avec votre Projet actuel`, court: `Mettre à jour ${p.type === "logement" ? "le dossier" : "le rapport"} avec votre Projet actuel`, pourquoi: "Lu sous une ancienne version de votre Projet : tant qu'il ne l'est pas, sa gare ne se compare pas. Gratuit.", bouton: "Mettre à jour", action: { type: "panneau", geste: cle } });
-    if (cle === "adresse") out.push({ pisteId: idPiste(p), texte: `Demander l'adresse exacte ${deNom(p)}`, court: "Demander l'adresse exacte", pourquoi: "Sans elle, seule la commune est lue.", bouton: "Renseigner", action: { type: "fiche", ancre: "adresse" } });
+    if (cle === "adresse") out.push({ pisteId: idPiste(p), texte: `Demander l'adresse exacte ${deNom(p)}`, court: "Demander l'adresse exacte", pourquoi: "Sans elle, seule la commune peut être étudiée.", bouton: "Renseigner", action: { type: "fiche", ancre: "adresse" } });
     if (cle === "analyser") out.push({ pisteId: idPiste(p), texte: `Analyser l'adresse ${deNom(p)}`, court: "Analyser l'adresse", pourquoi: g.court ?? g.apport, bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
     if (cle === "examiner_commune") out.push({ pisteId: idPiste(p), texte: `Lire ${n} pour votre Projet`, court: "Lire la commune pour votre Projet", pourquoi: "La lecture gratuite situe la commune ; elle ne dit pas si elle tient vos conditions.", bouton: "Voir ce qu'elle apprendrait", action: { type: "panneau", geste: cle } });
   }
@@ -618,7 +636,7 @@ export const TITRE_SEAU5: Record<SeauEtSi, string> = {
   ecarte_a_revoir: "Écartés à revoir",
   nouvelle_analyse: "Demanderaient une nouvelle analyse",
   inchange: "L'effet estimé resterait le même",
-  pas_lu: "Rien à recalculer : pas encore lus",
+  pas_lu: "Pas encore étudiés : rien à estimer",
 };
 
 /**

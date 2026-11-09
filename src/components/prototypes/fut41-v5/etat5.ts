@@ -116,12 +116,12 @@ export function reduire5(e: Etat5, g: Geste5): Etat5 {
       const pass = e.droits === "pass";
       return { ...e, passUtilisees: pass ? e.passUtilisees + 1 : e.passUtilisees,
         logements: majL(e, g.id, (l) => ({ ...l, droit: "adresse", viaPass: pass, analyses: [structuredClone(a)], journal: [...l.journal, { date: AUJOURDHUI, type: "analyse", texte: `Dossier d'adresse simulé${pass ? " (Pass)" : ""}.` }] })),
-        annonce: "Analyse simulée : les abords et le logement sont lus." };
+        annonce: "Analyse simulée : les abords et le logement sont étudiés." };
     }
     case "examiner": {
       if (g.insee !== "49007") return e;
       const pass = e.droits === "pass";
-      return { ...e, communes: majC(e, g.insee, (c) => ({ ...c, lecture: "rapport", analyses: [structuredClone(RAPPORT_ANGERS)], viaPass: pass })), annonce: "Rapport simulé : Angers est lue pour votre Projet." };
+      return { ...e, communes: majC(e, g.insee, (c) => ({ ...c, lecture: "rapport", analyses: [structuredClone(RAPPORT_ANGERS)], viaPass: pass })), annonce: "Rapport simulé : Angers est étudiée pour votre Projet." };
     }
     case "mettre_a_jour": {
       if (g.id.startsWith("c:")) {

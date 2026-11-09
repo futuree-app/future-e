@@ -217,3 +217,17 @@ Vérifié dans le code avant de corriger ; chaque point est jugé, pas accepté 
 Tests : 25 V5 (5 nouveaux : continuité de la comparaison, essai transmis, bilan en faits, geste court, libellé de l'Et si), 60 au total. Recette : 84 vues, 62/62 (dont 8 nouvelles : continuité, questions depuis l'incertitude, geste prioritaire, portes du Projet), clavier 28, mouvement réduit conforme. Aucun test avec des personnes.
 
 Recommandation inchangée sur le fond : les deux ruptures de parcours sont levées, la V5 peut aller aux testeurs. Proposition de Work retenue pour le test : la présentation actuelle contre une seule variante allégée.
+
+## 10. Revue « en tant qu'utilisateur » de Work
+
+Work a parcouru le prototype en se mettant à la place d'une personne. Ce n'est pas un test utilisateur : c'est une quatrième revue experte, utile surtout là où elle rejoint les précédentes.
+
+| Point | Verdict | Ce qui est fait |
+|---|---|---|
+| Trop à lire avant de retrouver ses logements | Justifié (troisième occurrence) | Accueil : une phrase « Où vous en êtes », le reste derrière « Comprendre » ; surtitre redondant retiré. Le titre des lieux passe d'environ 975 à 660 px (1 440 × 900), dans le premier écran |
+| Le vocabulaire fait travailler | Justifié, avec une nuance : « examinées » et « aucun, parmi ce qui est examiné » répondaient à des demandes de Work | « lu » remplacé par « étudié » partout où il décrit ce que la personne sait ; « Adresse analysée » ; « même donnée pour… » au lieu de « une seule lecture » ; « à méthode égale » retiré ; rubriques vides : « aucun compromis identifié pour l'instant ; 4 points pas encore étudiés » ; « Tout est étudié » |
+| Prix et surface absents de la comparaison | Justifié, oubli | Prix, surface (« déclaré ») et vignette en tête de chaque colonne de Comparer et du bilan ; aucune couleur, aucun ordre |
+| Une synthèse qui s'appuie sur mes priorités | Justifié, phrase de Work corrigée : elle rappelait le calme et taisait que les nuits fraîches comptent le plus, ce qui penchait sans le dire | Chaque écart porte le poids déclaré de sa condition, des deux côtés, et l'inconnue aussi : « T4 rue de la Convention répond mieux pour le calme, qui compte pour vous ; T3 quai de la Fosse répond mieux pour la vie de quartier, qui compte un peu pour vous. Pour les nuits fraîches l'été, qui comptent beaucoup pour vous : T4 rue de la Convention y répond dans le logement ; à vérifier pour T3 quai de la Fosse avant de trancher. » Le poids est celui que la personne a déclaré ; la condition sans compromis n'en a pas |
+| Ambiance de dossier d'étude | Justifié en partie | Textes secondaires plus grands et plus clairs dans le prototype (jetons de production inchangés). Fond sombre gardé (thème de production, le clair existe). Pas de photo inventée : seules vos photos s'affichent (décision V4.1) |
+
+Tests : 26 V5, 61 au total. Recette : 84 vues, 65/65, clavier 28, mouvement réduit conforme. Aucun test avec des personnes.

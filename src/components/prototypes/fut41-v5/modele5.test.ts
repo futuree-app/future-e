@@ -126,8 +126,8 @@ test("D : jamais « aucun ne bloque » quand la condition n'est mesurée que pou
 test("D : entre des logements, une différence communale est dite comme telle", () => {
   const r = R(["44109", "35238"], ["fosse", "convention", "thabor"]);
   const d = enBref(r, ["fosse", "convention", "thabor"].map((id) => P(r, id)))[1]!.texte;
-  assert.match(d, /^À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été et le calme\./);
-  assert.match(d, /Pour vos logements, cela se lit à l'adresse : c'est fait pour T3 quai de la Fosse seulement\./);
+  assert.match(d, /^À l'échelle des communes, Rennes répond mieux que Nantes pour les nuits fraîches l'été \(qui comptent beaucoup pour vous\) et le calme \(qui compte pour vous\)\./);
+  assert.match(d, /Pour vos logements, cela s'étudie à l'adresse : c'est fait pour T3 quai de la Fosse seulement\./);
 });
 
 test("D : des communes seules ne prétendent rien sur la gare d'un logement, et Rennes est dite à revoir", () => {
@@ -158,8 +158,8 @@ test("arbitrage : deux écarts établis, de sens opposés, sans total", () => {
   const ec = ecarts(e, ps);
   assert.deepEqual(ec.map((x) => `${x.cle}:${x.mieux}>${x.moins}`).sort(), ["calme:T4 rue de la Convention>T3 quai de la Fosse", "quartier:T3 quai de la Fosse>T4 rue de la Convention"]);
   const t = enBref(e, ps).map((x) => x.texte).join(" ");
-  assert.match(t, /Aux abords, T4 rue de la Convention répond mieux que T3 quai de la Fosse pour le calme ; T3 quai de la Fosse répond mieux que T4 rue de la Convention pour la vie de quartier\./);
-  assert.match(t, /Les nuits fraîches l'été dans le logement : T4 rue de la Convention y répond ; à vérifier pour T3 quai de la Fosse \(deux questions prêtes pour la visite\)\./);
+  assert.match(t, /Aux abords, T4 rue de la Convention répond mieux pour le calme, qui compte pour vous ; T3 quai de la Fosse répond mieux pour la vie de quartier, qui compte un peu pour vous\./);
+  assert.match(t, /Pour les nuits fraîches l'été, qui comptent beaucoup pour vous : T4 rue de la Convention y répond dans le logement ; à vérifier pour T3 quai de la Fosse avant de trancher \(deux questions prêtes pour la visite\)\./);
   assert.doesNotMatch(t, /meilleur|recommand|gagnant|au total/i);
 });
 
@@ -217,4 +217,11 @@ test("à faire : le geste court ne répète pas le nom du lieu, et l'on note une
 
 test("et si : le seau inchangé dit un effet estimé, sans « du même côté »", () => {
   assert.equal(TITRE_SEAU5.inchange, "L'effet estimé resterait le même");
+});
+
+test("synthèse : chaque écart porte le poids déclaré de sa condition, des deux côtés, et l'inconnue aussi", () => {
+  const e = etatInitial5("arbitrage");
+  const t = enBref(e, e.logements.map((logement) => ({ type: "logement" as const, logement }))).map((x) => x.texte).join(" ");
+  for (const p of ["le calme, qui compte pour vous", "la vie de quartier, qui compte un peu pour vous", "les nuits fraîches l'été, qui comptent beaucoup pour vous"]) assert.ok(t.includes(p), p);
+  assert.doesNotMatch(t, /gare[^.]*compte/, "la condition sans compromis n'a pas de poids");
 });

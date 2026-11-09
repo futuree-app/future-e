@@ -63,7 +63,7 @@ export function FicheLogement5({ api }: { api: Api5 }) {
         </Plaque>
       ) : null}
 
-      <Section titre="Face à votre Projet" id="projet" sous="Condition par condition : d'abord ce qui est lu à la commune (et vaut pour tous ses logements), puis ce qui se lit depuis l'adresse.">
+      <Section titre="Face à votre Projet" id="projet" sous="Condition par condition : d'abord ce qui est connu pour la commune (et vaut pour tous ses logements), puis ce qui s'étudie depuis l'adresse.">
         <Confrontation colonnes={conf.colonnes} lignes={conf.lignes} projet={etat.projet} seul />
       </Section>
 

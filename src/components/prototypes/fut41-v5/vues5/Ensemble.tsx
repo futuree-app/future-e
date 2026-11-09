@@ -1,13 +1,13 @@
 "use client";
 // VUE D'ENSEMBLE, V5 · l'ordre de lecture est l'ordre des questions d'une personne :
-//   1. où en suis-je ? (titre, Projet en une ligne, trois phrases au plus)
+//   1. où en suis-je ? (titre, Projet en une ligne, une phrase ; le reste se déplie : « Comprendre »)
 //   2. le geste le plus utile maintenant, seul et nettement prioritaire ;
 //   3. mes communes et mes logements, et l'accès à Comparer ; les autres gestes à faire sont posés
 //      sous le logement ou la commune qu'ils concernent (troisième revue Work).
 // Aucun tableau de bord, aucun compteur ; aucun ordre de mérite : on range par commune, ou sur une
 // dimension nommée (prix, surface, trajet mesuré) qui dit d'où vient sa valeur.
 import { useId, useState } from "react";
-import { GlypheGrain, Plaque, Selecteur, releve as s } from "@/components/releve/primitives";
+import { GlypheGrain, Selecteur, releve as s } from "@/components/releve/primitives";
 import {
   aFaire5, analyseServie, type Faire, communeCommeLieu, criteresDepasses, dateCourte, gestePrincipal, libelleCritere, logementsDe, montantAnnonce, ouVousEnEtes, trier,
   LIBELLE_DIMENSION, LIBELLE_STATUT, type Commune, type DimensionTri, type Logement, type Piste,
@@ -41,7 +41,6 @@ export function Ensemble({ api }: { api: Api5 }) {
   return (
     <>
       <div className={v.tete}>
-        <p className={s.surtitre}><span>Ma décision</span></p>
         <h1 className={`${s.titre} ${v.titreAccueil}`} tabIndex={-1} data-titre-vue>{titre}</h1>
         <ProjetCompact api={api} />
       </div>
@@ -67,10 +66,17 @@ export function Ensemble({ api }: { api: Api5 }) {
       ) : (
         <>
           <div className={v.debut}>
-          <Plaque etiquette="Où vous en êtes" className={v.ouPlaque}>
+          {/* Revue « utilisateur » de Work : une phrase pour s'orienter, le développement à la demande. */}
+          <section className={v.ouPlaque} aria-label="Où vous en êtes">
             <p className={s.etiquette}>Où vous en êtes</p>
-            <dl className={v.lignesTitrees}>{resume.map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
-          </Plaque>
+            {resume[0] ? <p className={v.ouCourt}>{lier(resume[0].texte)}</p> : null}
+            {resume.length > 1 ? (
+              <details className={`${s.details} ${v.comprendre}`}>
+                <summary>Comprendre</summary>
+                <dl className={v.lignesTitrees}>{resume.slice(1).map((x) => <div key={x.titre}><dt>{x.titre}</dt><dd>{lier(x.texte)}</dd></div>)}</dl>
+              </details>
+            ) : null}
+          </section>
 
           {faire[0] ? (
             <section className={v.faire} aria-labelledby="faire-t">
@@ -180,7 +186,7 @@ function GroupeCommune({ api, commune, autres }: { api: Api5; commune: Commune; 
         <div className={v.groupeCorps}>
           <h3 className={v.groupeNom} id={`c-${commune.insee}`}><button type="button" className={v.lien} onClick={() => aller({ ecran: "commune", id: `c:${commune.insee}` })}>{commune.nom}</button></h3>
           <p className={v.groupeEtat}>
-            {a ? <>Rapport de territoire du {dateCourte(a.generatedAt)}{a.simulee ? " (simulé)" : ""}</> : commune.lecture === "gratuite" ? "Lecture gratuite : des repères, rien de conclu pour votre Projet" : "Pas encore lue"}
+            {a ? <>Rapport de territoire du {dateCourte(a.generatedAt)}{a.simulee ? " (simulé)" : ""}</> : commune.lecture === "gratuite" ? "Lecture gratuite : des repères, rien de conclu pour votre Projet" : "Pas encore étudiée"}
           </p>
           {a ? (criteresDepasses(a, etat.projet).length
             ? <p className={v.citationAncienne}>Conclusion du {dateCourte(a.generatedAt)}, écrite sous votre Projet d&apos;alors : « {lier(a.conclusion.phrase)} » Elle est à revoir pour {criteresDepasses(a, etat.projet).map((d) => d.apres.toLowerCase()).join(", ")}.</p>
@@ -201,9 +207,9 @@ function GroupeCommune({ api, commune, autres }: { api: Api5; commune: Commune; 
 /** Ce que futur•e sait d'un logement, en une ligne de mots. */
 export function savoirCourt(api: Api5, l: Logement): string {
   const a = analyseServie(l);
-  if (a?.perimetre === "commune+adresse") return `Commune, abords et logement lus · dossier du ${dateCourte(a.generatedAt)}`;
+  if (a?.perimetre === "commune+adresse") return `Adresse analysée · dossier du ${dateCourte(a.generatedAt)}`;
   const c = api.etat.communes.find((x) => x.insee === l.commune.insee);
-  const commune = c?.lecture === "rapport" ? "Commune lue" : "Commune pas encore lue";
+  const commune = c?.lecture === "rapport" ? "Commune étudiée" : "Commune pas encore étudiée";
   return `${commune} · ${l.adresse ? "adresse pas encore analysée" : "adresse inconnue"}`;
 }
 
@@ -226,7 +232,7 @@ function LigneLogement({ api, logement, valeur, raison, autres = [] }: { api: Ap
         <Aussi api={api} gestes={autres.filter((a) => a.pisteId === logement.id)} />
       </div>
       <div className={v.logementGeste}>
-        <BoutonGeste geste={g} faire={faireGeste(api, piste)} apport={g.commercial ? g.court ?? null : g.cle === "adresse" ? "Sans elle, seule la commune est lue." : null} />
+        <BoutonGeste geste={g} faire={faireGeste(api, piste)} apport={g.commercial ? g.court ?? null : g.cle === "adresse" ? "Sans elle, seule la commune peut être étudiée." : null} />
       </div>
     </li>
   );

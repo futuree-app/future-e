@@ -542,3 +542,17 @@ button.navLien { cursor: pointer; }
 .aussiTexte { font-size: var(--r-t-dense, 14px); color: var(--r-encre); }
 .repris { display: grid; gap: 6px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); }
 .repris p, .repris button { margin: 0; justify-self: start; }
+
+/* ── Revue « utilisateur » de Work : lisibilité, accueil court, lieux concrets en tête de colonne ── */
+/* Textes secondaires plus lisibles, dans le prototype seulement (les jetons de production ne changent pas). */
+.racine.racine { --r-discret: var(--fg-2); --r-meta: var(--fg-3); --r-t-nuance: 14.5px; }
+.ouCourt { margin: 6px 0 0; font-size: 18px; line-height: 1.45; color: var(--r-encre); }
+.comprendre { margin-top: 10px; }
+.teteLieu { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.teteLieuTexte { display: grid; gap: 2px; min-width: 0; }
+.confCol .teteLieuTexte strong { font-size: 15px; }
+.confCol .teteLieuSous, .confCol .teteLieuAnnonce { font-family: inherit; font-size: 13px; color: var(--r-discret); }
+.confCol .teteLieuAnnonce { color: var(--r-encre); font-variant-numeric: tabular-nums; }
+@media (max-width: 759px) { .teteLieu > :first-child:not(.teteLieuTexte) { display: none; } }
+/* L'en-tête enrichi échappe au style « mention technique » des spans de .confCol. */
+.confCol .teteLieu, .confCol .teteLieuTexte { font-family: inherit; font-size: 14px; color: var(--r-encre); }

@@ -52,12 +52,12 @@ export function Plan5({ api, communes }: { api: Api5; communes: Commune[] }) {
               <li key={c.insee}>
                 <GlypheGrain grain="commune" taille={10} />
                 <button type="button" className={v.lien} onClick={() => aller({ ecran: "commune", id: `c:${c.insee}` })}>{c.nom}</button>
-                <span>{c.lecture === "rapport" ? "lue pour votre Projet" : "lecture gratuite"} · {n.length ? `${n.length} logement${n.length > 1 ? "s" : ""}${sans ? `, dont ${sans} sans adresse` : ""}` : "aucun logement"}</span>
+                <span>{c.lecture === "rapport" ? "étudiée pour votre Projet" : "lecture gratuite"} · {n.length ? `${n.length} logement${n.length > 1 ? "s" : ""}${sans ? `, dont ${sans} sans adresse` : ""}` : "aucun logement"}</span>
               </li>
             );
           })}
         </ul>
-        <p className={v.planNote}>Cercle continu : commune lue pour votre Projet ; en pointillé : lecture gratuite. Distances à vol d&apos;oiseau, arrondies.</p>
+        <p className={v.planNote}>Cercle continu : commune étudiée pour votre Projet ; en pointillé : lecture gratuite. Distances à vol d&apos;oiseau, arrondies.</p>
       </figcaption>
     </figure>
   );

@@ -10,9 +10,9 @@
 // l'une ou l'autre. Aucun ordre de mérite : les colonnes suivent l'ordre de vos communes.
 import { useId, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { GlypheGrain, Plaque, releve as s } from "@/components/releve/primitives";
-import { bilan, colonnesDe, confronter, dateCourte, enBref, etSi5, logementsDe, simuler, NOM_CRITERE, TITRE_SEAU5, type Bilan, type Logement, type Piste, type SeauEtSi } from "../modele5";
+import { bilan, colonnesDe, confronter, dateCourte, enBref, etSi5, logementsDe, montantAnnonce, simuler, NOM_CRITERE, TITRE_SEAU5, type Bilan, type Colonne, type Logement, type Piste, type SeauEtSi } from "../modele5";
 import { faireGeste, type Api5 } from "../CentreDecision5";
-import { BoutonGeste, Section, Vignette, lier } from "../communs5";
+import { BoutonGeste, Declare, Section, Vignette, lier } from "../communs5";
 import { Confrontation } from "../Confrontation";
 import { Plan5 } from "../Plan5";
 import v from "../v5.module.css";
@@ -58,6 +58,12 @@ export function Comparer5({ api }: { api: Api5 }) {
     const l = etat.logements.find((x) => x.id === ids[0]);
     const n = l ? l.verifications.filter((q) => q.cle === cle && !q.reponse).length : 0;
     return l && n ? <button type="button" className={`${s.action} ${v.cible}`} onClick={() => aller({ ecran: "logement", id: l.id, ancre: "verifier" })}>{n === 1 ? "Voir la question à poser" : `Voir les ${n} questions à poser`}</button> : null;
+  };
+  // Revue « utilisateur » de Work : on compare des logements concrets ; prix, surface et vignette restent
+  // en tête de chaque colonne, déclarés, sans couleur ni ordre.
+  const teteCol = (c: Colonne) => {
+    const l = c.type === "logement" ? etat.logements.find((x) => x.id === c.id) : undefined;
+    return <TeteLieu nom={c.nom} sous={c.sous} logement={l} />;
   };
   const communesVues = [...new Set(montres.map((p) => (p.type === "commune" ? p.commune.insee : p.logement.commune.insee)))].map((i) => etat.communes.find((c) => c.insee === i)!).filter(Boolean);
 
@@ -120,8 +126,8 @@ export function Comparer5({ api }: { api: Api5 }) {
 
           {change.length ? (
             <Section titre="Ce qui change votre choix" id="change"
-              sous={`${distingue && !/^Rien ne les distingue/.test(distingue.texte) ? `${distingue.texte} ` : ""}${resteAVerifier ? "Les cases à vérifier pourraient encore changer votre choix." : ""}`.trim() || undefined}>
-              <Confrontation colonnes={conf.colonnes} lignes={change} projet={etat.projet} compact action={questions} />
+              sous={`${distingue && !/^Rien ne les distingue/.test(distingue.texte) ? `${distingue.texte} ` : ""}${resteAVerifier ? bref.find((x) => x.titre === "Ce qui pourrait changer votre choix")?.texte ?? "Les cases à vérifier pourraient encore changer votre choix." : ""}`.trim() || undefined}>
+              <Confrontation colonnes={conf.colonnes} lignes={change} projet={etat.projet} compact action={questions} tete={teteCol} />
             </Section>
           ) : null}
 
@@ -138,8 +144,8 @@ export function Comparer5({ api }: { api: Api5 }) {
           ) : null}
 
           <Section titre="Le détail, condition par condition" id="detail"
-            sous={mode === "communes" ? "Lu à l'échelle de la commune. La gare, le calme et le quartier se lisent aussi aux abords d'une adresse : pour un logement, la commune n'en donne qu'un repère." : "D'abord ce qui est lu à la commune (une seule case quand deux logements la partagent), puis ce qui se lit depuis l'adresse."}>
-            <Confrontation colonnes={conf.colonnes} lignes={conf.lignes} projet={etat.projet} />
+            sous={mode === "communes" ? "Étudié à l'échelle de la commune. La gare, le calme et le quartier se lisent aussi aux abords d'une adresse : pour un logement, la commune n'en donne qu'un repère." : "D'abord ce qui est connu pour la commune (une seule case quand deux logements la partagent), puis ce qui s'étudie depuis l'adresse."}>
+            <Confrontation colonnes={conf.colonnes} lignes={conf.lignes} projet={etat.projet} tete={teteCol} />
           </Section>
 
           <div className={v.ligneGestes}>
@@ -151,6 +157,21 @@ export function Comparer5({ api }: { api: Api5 }) {
         </>
       )}
     </>
+  );
+}
+
+/** Un lieu en tête de colonne : vignette (photo seulement si vous l'avez ajoutée), nom, commune, prix et surface déclarés. */
+function TeteLieu({ nom, sous, logement }: { nom: string; sous: string; logement?: Logement }) {
+  const annonce = logement ? [montantAnnonce(logement.annonce), logement.annonce?.surface ? `${logement.annonce.surface} m²` : null].filter(Boolean).join(" · ") : "";
+  return (
+    <span className={v.teteLieu}>
+      {logement ? <Vignette logement={logement} taille={40} /> : null}
+      <span className={v.teteLieuTexte}>
+        <strong>{nom}</strong>
+        <span className={v.teteLieuSous}>{sous}</span>
+        {annonce ? <span className={v.teteLieuAnnonce}>{annonce} <Declare /></span> : null}
+      </span>
+    </span>
   );
 }
 
@@ -168,7 +189,7 @@ const RANGS: { cle: keyof Pick<Bilan, "apporte" | "accepte" | "ouvert" | "pasLu"
   { cle: "apporte", titre: "Apporte", genre: "apporte" },
   { cle: "accepte", titre: "Demande d'accepter", genre: "accepte" },
   { cle: "ouvert", titre: "Pourrait changer l'arbitrage", genre: "inconnu" },
-  { cle: "pasLu", titre: "Pas encore examiné", genre: "manque" },
+  { cle: "pasLu", titre: "Pas encore étudié", genre: "manque" },
 ];
 
 function Bilans({ bilans, api, montres, reduit = false }: { bilans: Bilan[]; api: Api5; montres: Piste[]; reduit?: boolean }) {
@@ -181,12 +202,12 @@ function Bilans({ bilans, api, montres, reduit = false }: { bilans: Bilan[]; api
           const p = piste(b.id);
           return (
             <div key={b.id} className={v.bilanNom}>
-              {p.type === "logement" && p.logement.photo ? <Vignette logement={p.logement} taille={32} /> : null}
+              {p.type === "logement" ? <Vignette logement={p.logement} taille={32} /> : null}
               <span className={s.pileSerree}>
                 <button type="button" className={v.lien} onClick={() => api.aller(p.type === "commune" ? { ecran: "commune", id: b.id } : { ecran: "logement", id: b.id })}>{b.nom}</button>
-                <span className={v.bilanSous}>{p.type === "commune" ? "la commune" : p.logement.commune.nom}</span>
-                <span className={v.bilanSous}>{b.lus} examinée{b.lus > 1 ? "s" : ""} sur {b.total}{b.aVerifier ? ` · ${b.aVerifier} à vérifier` : ""}</span>
-                {b.bloque ? <span className={v.etiquetteBloque}>bloque, voir En bref</span> : b.aRevoir ? <span className={v.etiquetteRevoir}>lu sous votre ancien Projet</span> : null}
+                <span className={v.bilanSous}>{p.type === "commune" ? "la commune" : [p.logement.commune.nom, montantAnnonce(p.logement.annonce), p.logement.annonce?.surface ? `${p.logement.annonce.surface} m²` : null].filter(Boolean).join(" · ")}</span>
+                <span className={v.bilanSous}>{b.lus === b.total ? "Tout est étudié" : `${b.lus} condition${b.lus > 1 ? "s" : ""} sur ${b.total} étudiée${b.lus > 1 ? "s" : ""}`}{b.aVerifier ? ` · ${b.aVerifier} à vérifier` : ""}</span>
+                {b.bloque ? <span className={v.etiquetteBloque}>bloque, voir En bref</span> : b.aRevoir ? <span className={v.etiquetteRevoir}>étudié avec votre ancien Projet</span> : null}
               </span>
             </div>
           );
@@ -198,7 +219,7 @@ function Bilans({ bilans, api, montres, reduit = false }: { bilans: Bilan[]; api
           {bilans.map((b) => (
             <div key={b.id} className={v.bilanCell}>
               <span className={v.sr}>{b.nom}, {r.titre.toLowerCase()} : </span>
-              {b[r.cle].length ? (r.cle === "pasLu" ? <span className={v.nonLu}>{b[r.cle].join(", ")}</span> : <ul>{b[r.cle].map((x) => <li key={x}>{lier(x)}</li>)}</ul>) : <span className={v.nonLu}>{r.cle === "pasLu" ? "toutes examinées" : b.lus < b.total ? "aucun, parmi ce qui est examiné" : "aucun"}</span>}
+              {b[r.cle].length ? (r.cle === "pasLu" ? <span className={v.nonLu}>{b[r.cle].join(", ")}</span> : <ul>{b[r.cle].map((x) => <li key={x}>{lier(x)}</li>)}</ul>) : <span className={v.nonLu}>{r.cle === "pasLu" ? "tout est étudié" : r.cle === "ouvert" ? "aucune question ouverte" : `${r.cle === "apporte" ? "aucun avantage" : "aucun compromis"} identifié${b.lus < b.total ? ` pour l'instant ; ${b.total - b.lus} point${b.total - b.lus > 1 ? "s" : ""} pas encore étudié${b.total - b.lus > 1 ? "s" : ""}` : ""}`}</span>}
             </div>
           ))}
         </div>
@@ -259,7 +280,7 @@ function EtSiIci({ api, montres }: { api: Api5; montres: Piste[] }) {
         ) : prio ? (
           <div className={v.seau} data-seau="pourrait_changer">
             <p className={v.seauTitre}>Si {NOM_CRITERE[prio.cle].toLowerCase()} devenait une condition sans compromis</p>
-            {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Parmi ce qui est examiné, aucune de ces possibilités n&apos;y fait un compromis : l&apos;effet estimé serait nul.</p>}
+            {effets.length ? <ul>{effets.map((x, i) => <li key={i}>{lier(x.phrase)}</li>)}</ul> : <p className={s.dense}>Parmi ce qui est étudié, aucune de ces possibilités n&apos;y fait un compromis : l&apos;effet estimé serait nul.</p>}
           </div>
         ) : null}
         <p className={s.nuance}>Effet estimé d&apos;après les mesures déjà faites ; seule une analyse mise à jour le confirmerait.</p>

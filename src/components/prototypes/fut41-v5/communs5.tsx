@@ -14,7 +14,7 @@ export const GLYPHE_COUCHE = { commune: "commune", abords: "secteur", logement: 
 
 /** L'issue : le trait de son registre et un mot simple. */
 export function Marque({ ligne, perime = false }: { ligne: LigneRegistre | null; perime?: boolean }) {
-  if (!ligne) return <span className={v.pasLu}>pas encore lu</span>;
+  if (!ligne) return <span className={v.pasLu}>pas encore étudié</span>;
   // B (revue Work) : une issue écrite sous une autre version de la condition est un fait daté.
   if (perime) return (
     <span className={v.marque} style={{ "--r-teinte": "var(--reg-controle)" } as CSSProperties}>

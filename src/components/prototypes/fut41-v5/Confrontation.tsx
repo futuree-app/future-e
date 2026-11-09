@@ -10,22 +10,24 @@ import { NOM_COUCHE, LIBELLE_VERDICT, type Cellule, type Colonne, type LigneConf
 import { Glyphe, Marque, Mesure, lier } from "./communs5";
 import v from "./v5.module.css";
 
-const ETAT_VIDE = { a_lire: "à lire depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore lue", lu: "" } as const;
+const ETAT_VIDE = { a_lire: "à étudier depuis l'adresse", adresse_manquante: "adresse inconnue", pas_lue: "pas encore étudiée", lu: "" } as const;
 
-export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false, action }: {
+export function Confrontation({ colonnes, lignes, projet, seul = false, enTete = true, compact = false, action, tete }: {
   colonnes: Colonne[]; lignes: LigneConfrontation[]; projet: Projet; seul?: boolean; enTete?: boolean;
   /** Lecture rapide : les marques et les mesures seulement, le verdict en un mot, sans preuves ni origine. */
   compact?: boolean;
   /** Un geste posé dans la cellule même, là où l'incertitude apparaît (ex. les questions de visite). */
   action?: (cle: LigneConfrontation["cle"], ids: string[]) => ReactNode;
+  /** L'en-tête d'une colonne, quand l'écran veut y montrer plus que le nom (prix, surface, vignette). */
+  tete?: (c: Colonne) => ReactNode;
 }) {
   const nomDe = (ids: string[]) => ids.map((id) => colonnes.find((c) => c.id === id)?.nom ?? id).join(" et ");
   return (
     <div className={v.conf} style={{ "--cols": colonnes.length } as CSSProperties} data-seul={seul || undefined} data-compact={compact || undefined}>
       {enTete && !seul ? (
-        <div className={v.confTete} aria-hidden>
+        <div className={v.confTete} aria-hidden={tete ? undefined : true}>
           <span className={v.confCoin} />
-          {colonnes.map((c) => <span key={c.id} className={v.confCol}><strong>{c.nom}</strong><span>{c.sous}</span></span>)}
+          {colonnes.map((c) => <span key={c.id} className={v.confCol}>{tete ? tete(c) : <><strong>{c.nom}</strong><span>{c.sous}</span></>}</span>)}
         </div>
       ) : null}
       {lignes.map((li) => {
@@ -46,7 +48,7 @@ export function Confrontation({ colonnes, lignes, projet, seul = false, enTete =
                     {!seul ? <span className={v.sr}>{nomDe(c.ids)} : </span> : null}
                     <ContenuCellule c={c} limite={x.couche === "commune" ? null : limite} seul={seul} compact={compact} />
                     {action && x.verdict === "pourrait" ? action(li.cle, c.ids) : null}
-                    {c.ids.length > 1 ? <span className={v.partage}>une seule lecture pour {nomDe(c.ids)}</span> : null}
+                    {c.ids.length > 1 ? <span className={v.partage}>même donnée pour {nomDe(c.ids)}</span> : null}
                     {seul && x.couche === "commune" && c.ligne && li.couches.some((y) => y.couche !== "commune" && y.cellules.every((k) => !k.ligne)) ? <span className={v.partage}>Dit pour la commune ; ce logement reste à lire depuis son adresse.</span> : null}
                   </div>
                 ))}
