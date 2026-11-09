@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Construit la VERSION STATIQUE du prototype V4 dans ../../prototype-v4/ (page autonome, sans serveur).
-# Usage : bash construire.sh [v4|v41]   (depuis ce dossier ; esbuild via npx, rien n'est installé dans le dépôt)
+# Usage : bash construire.sh [v4|v41|v5]   (depuis ce dossier ; esbuild via npx, rien n'est installé dans le dépôt)
 set -euo pipefail
 ICI="$(cd "$(dirname "$0")" && pwd)"
 RACINE="$(cd "$ICI/../../../../.." && pwd)"
 VERSION="${1:-v4}"
-ENTREE="$ICI/entree.tsx"; [ "$VERSION" = "v41" ] && ENTREE="$ICI/entree41.tsx"
+ENTREE="$ICI/entree.tsx"; [ "$VERSION" = "v41" ] && ENTREE="$ICI/entree41.tsx"; [ "$VERSION" = "v5" ] && ENTREE="$ICI/entree5.tsx"
 SORTIE="$ICI/../../prototype-$VERSION"
 TMP="$(mktemp -d)"
 rm -rf "$SORTIE" && mkdir -p "$SORTIE/fonts"
@@ -21,6 +21,6 @@ npx -y esbuild@0.23.1 "$ENTREE" --bundle --minify --format=iife --target=es2020 
   --outfile="$SORTIE/app.js" --log-level=warning
 npx -y esbuild@0.23.1 "$TMP/global.css" --bundle --minify --loader:.woff2=file --external:'fonts/*' --outfile="$TMP/global.min.css" --log-level=warning
 cat "$TMP/global.min.css" "$SORTIE/app.css" > "$TMP/app.css" && mv "$TMP/app.css" "$SORTIE/app.css"
-sed "s#prototype V4 (données fictives)#prototype ${VERSION/v41/V4.1} (données fictives)#" "$ICI/index.html" > "$SORTIE/index.html"
+sed "s#prototype V4 (données fictives)#prototype $(echo "$VERSION" | sed "s/v41/V4.1/;s/v5/V5/;s/v4/V4/") (données fictives)#" "$ICI/index.html" > "$SORTIE/index.html"
 rm -rf "$TMP"
 ls -la "$SORTIE"
