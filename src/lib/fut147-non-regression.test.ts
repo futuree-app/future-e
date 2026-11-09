@@ -152,9 +152,91 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 
 // ── Territoire : l'empreinte et le cache de la synthèse ─────────────────────────────────────
 
-// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date.
-const HASH_MAIN = "cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f";
-const CLE_MAIN = "7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9";
+// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date :
+//   empreinte cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f,
+//   clé       7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9.
+// FUT-175 (09/11/2026) les change VOLONTAIREMENT : registre `territoire-facts@2` (parts OSO rapportées aux terres,
+// eau à part, limites de couverture OSO) et contrat `territoire-synthese@5`. Recalculées sur la branche FUT-175
+// (reprise du 09/11/2026, après contre-revue), même entrée, même date ; première version de la PR #140 :
+// c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a / 9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d. Ce que
+// ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
+const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3";
+const CLE_MAIN = "de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930";
+
+/**
+ * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
+ * contrat et le registre, par rapport à 4d75603f, sont écrites UNE FOIS dans `__fixtures__/fut175-lignes-admises.json`.
+ * Elles ne sont plus relues sur un diff vivant : une modification future, même sans rapport avec les feux, y est
+ * étrangère et fait échouer la garde. Chaque ligne admise ne couvre qu'UNE occurrence (multiensemble), et une
+ * ligne admise que le diff ne contient plus fait aussi échouer : la référence ne survit pas à une retouche.
+ * Pour la changer, un ticket la régénère explicitement et le dit dans ce commentaire.
+ */
+const FUT175_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut175-lignes-admises.json", "utf8")) as Record<string, string[]>;
+const FEUX = /bdiff|incendi|feux? de for|MemoireIncendies/i;
+
+function lignesDiff(base: string, f: string): string[] {
+  const diff = execFileSync("git", ["diff", "--no-color", "-U0", base, "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  return diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+}
+
+/** Retire de `lignes` une occurrence de chaque ligne admise ; rend le reste et les admises restées sans emploi. */
+function retirerAdmises(lignes: readonly string[], admises: readonly string[]): { reste: string[]; orphelines: string[] } {
+  const stock = new Map<string, number>();
+  for (const a of admises) stock.set(a, (stock.get(a) ?? 0) + 1);
+  const reste: string[] = [];
+  for (const l of lignes) {
+    const n = stock.get(l) ?? 0;
+    if (n > 0) stock.set(l, n - 1);
+    else reste.push(l);
+  }
+  const orphelines = [...stock].flatMap(([l, n]) => Array<string>(n).fill(l));
+  return { reste, orphelines };
+}
+
+/** Les lignes changées depuis 4d75603f, moins EXACTEMENT celles de FUT-175 ; échoue si la référence est périmée. */
+function horsFut175(f: string, lignes: readonly string[]): string[] {
+  const admises = FUT175_ADMISES[f];
+  assert.ok(admises?.length, `aucune référence FUT-175 pour ${f}`);
+  for (const l of admises) assert.doesNotMatch(l, FEUX, l);
+  const { reste, orphelines } = retirerAdmises(lignes, admises);
+  assert.deepEqual(orphelines, [], `référence FUT-175 périmée pour ${f} : ces lignes admises ne sont plus dans le diff`);
+  return reste;
+}
+
+const CONTRAT = "src/lib/territoire/synthesis-contract.ts";
+const REGISTRE = "src/lib/territoire/facts.ts";
+
+/** La garde du contrat de synthèse, sur une liste de lignes changées depuis 4d75603f. */
+function verifierContrat(lignes: readonly string[]): void {
+  const changees = horsFut175(CONTRAT, lignes);
+  assert.deepEqual(changees, [
+    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
+    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
+    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
+    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
+    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
+  ]);
+  for (const l of changees) assert.doesNotMatch(l, FEUX, l);
+}
+
+/** La garde du registre des faits, sur une liste de lignes changées depuis 4d75603f. */
+function verifierRegistre(lignesChangees: readonly string[]): void {
+  const lignes = horsFut175(REGISTRE, lignesChangees);
+  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
+  const admises = [
+    /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
+    /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
+    /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
+    /^\+ {2}droughtIndisponible\?: boolean;$/,
+    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
+    // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
+    /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
+    /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
+  ];
+  for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${REGISTRE} : ${l}`);
+}
 
 test("Territoire : l'empreinte du snapshot et la clé du cache de synthèse sont celles de main", () => {
   const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
@@ -199,19 +281,11 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 // `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
 // brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
 // parle des feux. Toute autre modification du contrat le fait échouer.
+// FUT-175 (09/11/2026) : la projection de l'occupation des sols (terres, eau à part) ; ses lignes exactes sont figées
+// dans `__fixtures__/fut175-lignes-admises.json` (cf. `horsFut175`).
 test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
-  const f = "src/lib/territoire/synthesis-contract.ts";
-  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  assert.deepEqual(changees, [
-    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
-    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
-    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
-    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
-    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
-  ]);
-  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
-  assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
+  verifierContrat(lignesDiff("4d75603f", CONTRAT));
+  assert.doesNotMatch(readFileSync(CONTRAT, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
 });
 
 // FUT-164 (30/10/2026) a dû réécrire le bloc eau potable de l'assistant (lecture par réseau, FUT-152). Le prompt
@@ -347,22 +421,32 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // et seules ces lignes ajoutées.
 // FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
 // `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
+// FUT-175 (09/11/2026) : les parts OSO lues sur les terres, l'eau à part ; ses lignes exactes sont figées dans
+// `__fixtures__/fut175-lignes-admises.json` (cf. `horsFut175`).
 test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), et l'application de la provenance (FUT-12)", () => {
-  const f = "src/lib/territoire/facts.ts";
-  const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
-  const admises = [
-    /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
-    /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
-    /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
-    /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
-    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
-    /^\+ {2}droughtIndisponible\?: boolean;$/,
-    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
-    // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
-    /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
-    /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
+  verifierRegistre(lignesDiff("4d75603f", REGISTRE));
+});
+
+// Contre-épreuve : les deux gardes rejettent bien une modification étrangère à FUT-175, sans rapport avec les feux.
+test("FUT-175 : une modification étrangère du contrat ou du registre fait échouer la garde", () => {
+  const contrat = lignesDiff("4d75603f", CONTRAT);
+  const registre = lignesDiff("4d75603f", REGISTRE);
+  verifierContrat(contrat);
+  verifierRegistre(registre);
+  const etrangeres = [
+    "+export const SEUIL_NOUVEAU = 42; // sans rapport avec FUT-175",
+    '+      limits: "Une limite reformulée plus tard.",',
   ];
-  for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
+  for (const l of etrangeres) {
+    assert.throws(() => verifierContrat([...contrat, l]), /deepStrictEqual|Expected values/, l);
+    assert.throws(() => verifierRegistre([...registre, l]), /ligne non admise/, l);
+  }
+  // Une ligne retirée sans rapport, ou une ligne FUT-175 dupliquée (elle ne couvre qu'une occurrence).
+  assert.throws(() => verifierRegistre([...registre, "-  const ancienne = true;"]), /aucune ligne retirée/);
+  const dupliquee = FUT175_ADMISES[REGISTRE].find((l) => l.startsWith("+") && l.includes("landShares"))!;
+  assert.ok(dupliquee);
+  assert.throws(() => verifierRegistre([...registre, dupliquee]), /ligne non admise/);
+  // Une ligne FUT-175 retouchée plus tard : la référence est périmée, la garde le dit.
+  const sansUne = registre.filter((l) => l !== dupliquee);
+  assert.throws(() => verifierRegistre(sansUne), /référence FUT-175 périmée/);
 });

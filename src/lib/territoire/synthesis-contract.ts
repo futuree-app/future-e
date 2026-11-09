@@ -26,7 +26,7 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  * TOUT ce qui peut changer le texte : projection, consigne, modèle, contrôles, patrons déterministes.
  * La monter invalide le cache de synthèse (clé = empreinte + horizon + cette version).
  */
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@5:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -47,7 +47,6 @@ const COMPOSITION_KEYS: Record<string, string> = {
   prairies: "prairies",
   landes_pelouses: "landes_et_pelouses",
   mineral_dunes: "roche_et_dunes",
-  eau: "eau",
 };
 
 const ROLE_TEXT: Record<UrbanRole["role"], string> = {
@@ -104,6 +103,7 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
 
   const role = get<UrbanRole>("place.urban_role");
   const composition = get<Record<string, number>>("land.composition");
+  const eau = get<number>("land.water_share");
   const trend = get<{ annualPct: number | null; newcomersPct: number | null; code: string | null }>("demography.trend");
   const demoCat = cat("demography.category");
   const scen = get<GwlScenarios>("climate.scenarios");
@@ -134,14 +134,15 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
     occupation_des_sols: composition
       ? {
           categorie: cat("land.category")?.label ?? null,
-          part_espaces_naturels_pct: get<number>("land.natural_share"),
-          composition_pct: Object.fromEntries(
+          part_espaces_naturels_des_terres_pct: get<number>("land.natural_share"),
+          part_eau_de_la_commune_pct: eau,
+          composition_des_terres_pct: Object.fromEntries(
             Object.entries(composition)
               .filter(([, x]) => typeof x === "number" && x >= 1)
               .sort(([, a], [, b]) => b - a)
               .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, round1(x)]),
           ),
-          definition: "Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes, eau. Les cultures n'en font pas partie. Mesure satellite OSO 2023, à l'échelle de la commune.",
+          definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés = bâti, routes et surfaces imperméabilisées vus par satellite. Mesure OSO 2023, à l'échelle de la commune, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas).",
         }
       : null,
     boisement_ademe_pct: forestAdeme != null
@@ -243,7 +244,7 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 LES FAITS FOURNIS SONT LES SEULS FAITS
 - Chaque affirmation doit se rattacher à un champ du payload. Ne comblez jamais un manque par une connaissance générale de la commune.
 - Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la densité est "Densité intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
-- Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues.
+- Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues. Les parts portent sur les terres ; l'eau est une part de la commune, à part : ne la présentez jamais comme un espace naturel ou vert, et n'additionnez pas une part d'eau à une part des terres.
 - Démographie : décrivez ce qui est mesuré. L'évolution de la population porte sur 2015-2021. La part d'arrivants récents est une situation sur UNE année ("X % des habitants vivaient ailleurs un an plus tôt") : ne l'associez jamais à la période 2015-2021 ni à plusieurs années. N'écrivez jamais que la commune "attire", est "attractive", "recherchée" ou "prisée" : aucune donnée ne mesure l'attractivité.
 - Catastrophes naturelles : la "sécheresse des sols" reconnue en catastrophe naturelle (dommages aux bâtiments, argiles) n'est pas le même objet que les "jours de sols secs" projetés (un indicateur climatique). Citez-les séparément si besoin, sans jamais présenter l'un comme le prolongement ou l'annonce de l'autre.
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.

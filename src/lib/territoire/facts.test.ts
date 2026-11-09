@@ -35,9 +35,12 @@ test("Châtelaillon : la carte d'identité et la face de carte disent LE MÊME c
 test("Châtelaillon : la projection porte la composition OSO et sa catégorie", () => {
   const p = projectForSynthesis(snap(), "gwl20") as Record<string, any>;
   assert.equal(p.occupation_des_sols.categorie, "Occupation mixte");
-  assert.equal(p.occupation_des_sols.part_espaces_naturels_pct, 36.5);
-  assert.equal(p.occupation_des_sols.composition_pct.espaces_urbanises, 49.2);
-  assert.equal(p.occupation_des_sols.composition_pct.prairies, 20.8);
+  // FUT-175 : parts rapportées aux terres (99,8 % du contour, 0,2 % d'eau), l'eau à part.
+  assert.equal(p.occupation_des_sols.part_espaces_naturels_des_terres_pct, 36.4);
+  assert.equal(p.occupation_des_sols.part_eau_de_la_commune_pct, 0.2);
+  assert.equal(p.occupation_des_sols.composition_des_terres_pct.espaces_urbanises, 49.3);
+  assert.equal(p.occupation_des_sols.composition_des_terres_pct.prairies, 20.8);
+  assert.equal(p.occupation_des_sols.composition_des_terres_pct.eau, undefined);
   assert.equal(p.commune.densite.categorie, "Densité intermédiaire");
 });
 
@@ -78,16 +81,20 @@ test("D1 : sans OSO, le boisement ADEME entre dans la projection, avec sa limite
 // ── D4 : la même grille partout, y compris aux cas limites ─────────────────────────────────
 
 test("D4 : sur une grille de compositions limites, identité et carte donnent toujours le même libellé", () => {
-  const cases: [number, Record<string, number>][] = [
-    [30, { artificialise: 45, agricole: 25 }], // l'identité disait « Dominante urbaine » (≥ 40), la carte « mixte »
-    [20, { artificialise: 40, agricole: 40 }],
-    [25, { artificialise: 50, agricole: 25 }],
-    [46, { artificialise: 30, agricole: 24 }],
-    [10, { artificialise: 20, agricole: 70 }],
-    [15, { artificialise: 35, agricole: 50 }],
-    [60, { artificialise: 5, agricole: 35 }],
+  // Compositions complètes (FUT-175 : un poste absent rend la répartition inconnue), sans eau : le naturel
+  // est alors le reste des terres. Les grilles limites restent celles d'avant.
+  const cases: Record<string, number>[] = [
+    { artificialise: 45, agricole: 25 }, // l'identité disait « Dominante urbaine » (≥ 40), la carte « mixte »
+    { artificialise: 40, agricole: 40 },
+    { artificialise: 50, agricole: 25 },
+    { artificialise: 30, agricole: 24 },
+    { artificialise: 20, agricole: 70 },
+    { artificialise: 35, agricole: 50 },
+    { artificialise: 5, agricole: 35 },
   ];
-  for (const [nat, comp] of cases) {
+  for (const c of cases) {
+    const nat = 100 - c.artificialise - c.agricole;
+    const comp = { ...c, foret: nat, prairies: 0, landes_pelouses: 0, mineral_dunes: 0, eau: 0 };
     const i = chatelaillonInputs();
     i.entry = { ...i.entry!, nature: { brut_pct: nat, radius_pct: 30, composition: comp } };
     const s = snap(i);
