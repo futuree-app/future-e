@@ -1,0 +1,379 @@
+avant = 1ab56bfb1fb7dac9ba0de063908593be99598e44
+apres = 2b6c4872be70f50d54f27665e2bdf1140d20eba7
+communes de l'index : 34788 ; appariées à la grille : 34743
+  France (index) : 34788 communes  62 656 870 hab.
+  urbaines Insee 1-4  < 1 500 hab/km² : 3612 communes  20 332 264 hab.
+  rurales Insee 5-7 : 30540 communes  21 669 236 hab.
+
+### France (index) (34788 communes)
+                                                                  mesure  avant  après  hab. avant  hab. après
+                                     catégorie rural_peri_urbain (index)  34134      0    41973046           0
+catégorie rural_peri_urbain (vue par l'accueil, table manuelle comprise)  34115     10    41404928       64210
+                            catégorie periurbain_dependance_auto (index)  12203  12203     9908573     9908573
+                                  accroche : « dépendance à la voiture »  28330      0    31772722           0
+                       intro des questions : « dépendance à la voiture »  12227      0    17284051           0
+                                            état vide : « déplacements »  29848  11213    36310359     9855103
+                     carte Mobilité : « dépend largement de la voiture »  34152      0    43124408           0
+                    carte Mobilité : « transports et courtes distances »    636      0    19532462           0
+                       carte Mobilité sourcée MOBPRO sans lire la mesure  34788      0    62656870           0
+                          carte Mobilité portant la part voiture mesurée      0  30048           0    62257539
+                                                   aucune carte Mobilité      0   4740           0      399331
+                  question quitter_ville (« Quitter la ville pour X ? »)  13371     10    26196751       64210
+                          question acheter_rural (« S'installer à X ? »)  34115     10    41404928       64210
+     question mobilite_fragile (« … repose-t-il trop sur la voiture ? »)  34122  12216    42343449    10875722
+                                             question voiture_electrique      0    386           0      315233
+               intro : « vie agricole » (rural_agricole, hors périmètre)  16105  16105    15271481    15271481
+carte Nature : « espaces agricoles et nature rythment » (hors périmètre)  25217  25217    26829161    26829161
+
+### urbaines Insee 1-4, < 1 500 hab/km² (3612 communes)
+                                                                  mesure  avant  après  hab. avant  hab. après
+                                     catégorie rural_peri_urbain (index)   3612      0    20332264           0
+catégorie rural_peri_urbain (vue par l'accueil, table manuelle comprise)   3596      2    19755027       11723
+                            catégorie periurbain_dependance_auto (index)    799    799     1966141     1966141
+                                  accroche : « dépendance à la voiture »   2792      0    14032469           0
+                       intro des questions : « dépendance à la voiture »   1523      0     9017457           0
+                                            état vide : « déplacements »   3093    698    16513660     1778770
+                     carte Mobilité : « dépend largement de la voiture »   3603      0    19929590           0
+                    carte Mobilité : « transports et courtes distances »      9      0      402674           0
+                       carte Mobilité sourcée MOBPRO sans lire la mesure   3612      0    20332264           0
+                          carte Mobilité portant la part voiture mesurée      0   3612           0    20332264
+                                                   aucune carte Mobilité      0      0           0           0
+                  question quitter_ville (« Quitter la ville pour X ? »)   2266      2    14578554       11723
+                          question acheter_rural (« S'installer à X ? »)   3596      2    19755027       11723
+     question mobilite_fragile (« … repose-t-il trop sur la voiture ? »)   3600    803    19906045     2096002
+                                             question voiture_electrique      0     25           0       54065
+               intro : « vie agricole » (rural_agricole, hors périmètre)   1269   1269     5015012     5015012
+carte Nature : « espaces agricoles et nature rythment » (hors périmètre)   2321   2321    10943541    10943541
+
+### rurales Insee 5-7 (30540 communes)
+                                                                  mesure  avant  après  hab. avant  hab. après
+                                     catégorie rural_peri_urbain (index)  30522      0    21640782           0
+catégorie rural_peri_urbain (vue par l'accueil, table manuelle comprise)  30518      7    21625920       28506
+                            catégorie periurbain_dependance_auto (index)  11404  11404     7942432     7942432
+                                  accroche : « dépendance à la voiture »  25537      0    17716272           0
+                       intro des questions : « dépendance à la voiture »  10702      0     7483784           0
+                                            état vide : « déplacements »  26752  10513    18989908     7293523
+                     carte Mobilité : « dépend largement de la voiture »  30524      0    21637402           0
+                    carte Mobilité : « transports et courtes distances »     16      0       31834           0
+                       carte Mobilité sourcée MOBPRO sans lire la mesure  30540      0    21669236           0
+                          carte Mobilité portant la part voiture mesurée      0  25800           0    21269905
+                                                   aucune carte Mobilité      0   4740           0      399331
+                  question quitter_ville (« Quitter la ville pour X ? »)  11104      7    11594216       28506
+                          question acheter_rural (« S'installer à X ? »)  30518      7    21625920       28506
+     question mobilite_fragile (« … repose-t-il trop sur la voiture ? »)  30519  11410    21630613     7972929
+                                             question voiture_electrique      0    361           0      261168
+               intro : « vie agricole » (rural_agricole, hors périmètre)  14835  14835    10232488    10232488
+carte Nature : « espaces agricoles et nature rythment » (hors périmètre)  22895  22895    15861639    15861639
+
+### Changements de texte et de questions (France)
+  hero modifié : 28330 communes
+  intro modifié : 12227 communes
+  vide modifié : 18635 communes
+  mob_fait modifié : 34788 communes
+  nature_fait modifié : 0 communes
+  liste des 4 questions modifiée : 34105 communes ; ensemble modifié : 34105
+  type d'ambiance Territoire (snapshot) modifié : 0 communes
+  catégories index modifiées autrement que par le retrait de rural_peri_urbain : 0
+
+Questions sorties / entrées dans les 4 affichées (France) :
+                           sorties  entrées
+acheter_rural                34105        0
+mobilite_fragile             21906        0
+quitter_ville                13361        0
+acheter_canicule                 0     1502
+acheter_littoral                 0      791
+air_urbain                       0        1
+acheter_montagne                 0     3483
+canicule_vivable                 0     1575
+baignade_ici                     0      423
+croissance_transformation        0     2943
+eau_potable                      0    16699
+feux                             0     5972
+calme_infra                      0       40
+metier_exterieur                 0    24242
+retraite_ici                     0      264
+risque_vectoriel_emergent        0     4588
+ski_ici                          0     2465
+surfer_ici                       0       75
+tc_sansvoiture                   0     1316
+valeur_immo                      0     2607
+voiture_electrique               0      386
+
+Questions sorties / entrées (rurales Insee 5-7) :
+                           sorties  entrées
+acheter_rural                30511        0
+mobilite_fragile             19109        0
+quitter_ville                11097        0
+acheter_canicule                 0     1207
+acheter_montagne                 0     3197
+acheter_littoral                 0      570
+canicule_vivable                 0     1382
+baignade_ici                     0      284
+croissance_transformation        0     2184
+eau_potable                      0    15305
+feux                             0     5296
+calme_infra                      0       14
+metier_exterieur                 0    21638
+retraite_ici                     0      233
+risque_vectoriel_emergent        0     4040
+ski_ici                          0     2269
+surfer_ici                       0       66
+tc_sansvoiture                   0      368
+valeur_immo                      0     2303
+voiture_electrique               0      361
+
+### 290 cartes « voiture » restantes au contrefactuel FUT-180 : la catégorie montagne
+  urbaines 1-4 peu denses, montagne, carte « dépend largement » avant : 290 ; après : 0
+  toutes communes montagne : 3539 ; carte « dépend largement » avant 3539, après 0
+
+### Part voiture et percentile (mesure MOBPRO de l'index)
+  communes mesurées : 30048 ; médiane 0.874 ; part minimale au 60e percentile (dependance >= 60) : 0.8911
+  communes denses (>= 1 500) au 60e percentile ou plus, que la garde peuDense exclut : 2
+
+### Panel
+
+Nîmes (30189) · grille 1 Grands centres urbains · 929.81 hab/km² · part voiture 0.6586 (pct 5.0)
+  catégories : ['all', 'colonise_albopictus', 'mediterranee', 'reseau_tc', 'rural_forestier', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'mediterranee', 'reseau_tc', 'rural_forestier']
+  hero (inchangé) : futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre à Nîmes veut vraiment dire dans un territoire où les étés se réchauffent.
+  intro (inchangé) : À Nîmes, le futur se joue déjà entre chaleur, nuits tropicales et météo propice aux feux.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Nîmes, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Nîmes, 66 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_canicule', 'enfants_sante', 'canicule_vivable', 'tc_sansvoiture']
+
+Aix-en-Provence (13001) · grille 1 Grands centres urbains · 794.91 hab/km² · part voiture 0.6333 (pct 4.0) · TABLE MANUELLE
+  catégories : ['mediterranee', 'urbain_dense_sud', 'vectoriel'] -> ['mediterranee', 'urbain_dense_sud', 'vectoriel']
+  hero (inchangé) : futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre à Aix-en-Provence veut vraiment dire dans un territoire où les étés se réchauffent.
+  intro (inchangé) : À Aix-en-Provence, le futur se joue déjà entre chaleur, nuits tropicales et météo propice aux feux.
+  vide (inchangé) : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Aix-en-Provence, transports et courtes distances pèsent dans les trajets du quotidien.
+  mob_fait APRÈS : À Aix-en-Provence, 63 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_canicule', 'enfants_sante', 'canicule_vivable', 'metier_exterieur'] -> ['acheter_canicule', 'enfants_sante', 'canicule_vivable', 'metier_exterieur']
+
+Avignon (84007) · grille 1 Grands centres urbains · 1413.87 hab/km² · part voiture 0.6473 (pct 4.0)
+  catégories : ['all', 'colonise_albopictus', 'expose_bruit', 'mediterranee', 'reseau_tc', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'expose_bruit', 'mediterranee', 'reseau_tc']
+  hero (inchangé) : futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre à Avignon veut vraiment dire dans un territoire où les étés se réchauffent.
+  intro (inchangé) : À Avignon, le futur se joue déjà entre chaleur, nuits tropicales et météo propice aux feux.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Avignon, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Avignon, 65 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_canicule', 'enfants_sante', 'canicule_vivable', 'tc_sansvoiture']
+
+Colmar (68066) · grille 1 Grands centres urbains · 1011.41 hab/km² · part voiture 0.6192 (pct 3.0)
+  catégories : ['all', 'colonise_albopictus', 'faible_vie_locale', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'faible_vie_locale', 'rural_agricole']
+  hero AVANT : futur•e lit Colmar à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Colmar à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Colmar, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Colmar, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Colmar, 62 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['vielocale_reelle', 'enfants_sante', 'eau_potable', 'metier_exterieur']
+
+Quimper (29232) · grille 1 Grands centres urbains · 764.57 hab/km² · part voiture 0.7802 (pct 17.0)
+  catégories : ['all', 'reseau_tc', 'rural_peri_urbain'] -> ['all', 'reseau_tc']
+  hero AVANT : futur•e lit Quimper à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Quimper à travers le prisme du climat, de la santé et du logement.
+  intro AVANT : À Quimper, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.
+  intro APRÈS : À Quimper, le futur se joue déjà entre chaleur, logement et qualité de vie.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Quimper, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Quimper, 78 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['enfants_sante', 'metier_exterieur', 'tc_sansvoiture', 'valeur_immo']
+
+Bourges (18033) · grille 1 Grands centres urbains · 935.05 hab/km² · part voiture 0.7284 (pct 10.0)
+  catégories : ['all', 'reseau_tc', 'rural_peri_urbain'] -> ['all', 'reseau_tc']
+  hero AVANT : futur•e lit Bourges à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Bourges à travers le prisme du climat, de la santé et du logement.
+  intro AVANT : À Bourges, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.
+  intro APRÈS : À Bourges, le futur se joue déjà entre chaleur, logement et qualité de vie.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Bourges, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Bourges, 73 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['enfants_sante', 'metier_exterieur', 'tc_sansvoiture', 'valeur_immo']
+
+Niort (79191) · grille 2 Centres urbains intermédiaires · 880.85 hab/km² · part voiture 0.7011 (pct 7.0)
+  catégories : ['all', 'colonise_albopictus', 'reseau_tc', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'reseau_tc', 'rural_agricole']
+  hero AVANT : futur•e lit Niort à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Niort à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Niort, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Niort, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Niort, 70 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['enfants_sante', 'eau_potable', 'metier_exterieur', 'tc_sansvoiture']
+
+La Roche-sur-Yon (85191) · grille 2 Centres urbains intermédiaires · 625.13 hab/km² · part voiture 0.7443 (pct 11.0)
+  catégories : ['all', 'croissance_forte', 'reseau_tc', 'rural_peri_urbain'] -> ['all', 'croissance_forte', 'reseau_tc']
+  hero AVANT : futur•e lit La Roche-sur-Yon à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de La Roche-sur-Yon à travers le prisme du climat, de la santé et du logement.
+  intro AVANT : À La Roche-sur-Yon, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.
+  intro APRÈS : À La Roche-sur-Yon, le futur se joue déjà entre chaleur, logement et qualité de vie.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À La Roche-sur-Yon, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À La Roche-sur-Yon, 74 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['enfants_sante', 'metier_exterieur', 'tc_sansvoiture', 'croissance_transformation']
+
+Sèvremoine (49301) · grille 5 Bourgs ruraux · 120.9 hab/km² · part voiture 0.8804 (pct 53.0)
+  catégories : ['all', 'faible_vie_locale', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'faible_vie_locale', 'rural_agricole']
+  hero AVANT : futur•e lit Sèvremoine à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Sèvremoine à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Sèvremoine, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Sèvremoine, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Sèvremoine, 88 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['vielocale_reelle', 'enfants_sante', 'eau_potable', 'metier_exterieur']
+
+Châtelaillon-Plage (17094) · grille 4 Ceintures urbaines · 975.76 hab/km² · part voiture 0.7188 (pct 8.0)
+  catégories : ['all', 'colonise_albopictus', 'croissance_forte', 'littoral', 'littoral_atlantique', 'reseau_tc', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'croissance_forte', 'littoral', 'littoral_atlantique', 'reseau_tc']
+  hero (inchangé) : futur•e lit Châtelaillon-Plage à travers ses enjeux côtiers : risques recensés, érosion du trait de côte, chaleur estivale et qualité de vie. Pas une carte générale du climat, mais ce que ce territoire change concrètement pour vos décisions.
+  intro (inchangé) : À Châtelaillon-Plage, le futur se joue déjà entre chaleur, littoral et qualité de vie.
+  vide (inchangé) : Les questions porteront ici sur le littoral, la chaleur, le logement et les projets de vie.
+  mob_fait AVANT : À Châtelaillon-Plage, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Châtelaillon-Plage, 72 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_littoral', 'enfants_sante', 'baignade_ici', 'tc_sansvoiture']
+
+Corte (2B096) · grille 3 Petites villes · 51.82 hab/km² · part voiture 0.7185 (pct 8.0)
+  catégories : ['all', 'colonise_albopictus', 'croissance_forte', 'mediterranee', 'montagne', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'croissance_forte', 'mediterranee', 'montagne']
+  hero (inchangé) : futur•e lit Corte à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Corte, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Corte, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Corte, 72 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_montagne', 'enfants_sante', 'canicule_vivable', 'croissance_transformation']
+
+Eguisheim (68078) · grille 4 Ceintures urbaines · 123.05 hab/km² · part voiture 0.713 (pct 8.0)
+  catégories : ['all', 'colonise_albopictus', 'faible_vie_locale', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'faible_vie_locale', 'rural_agricole']
+  hero AVANT : futur•e lit Eguisheim à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution d'Eguisheim à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Eguisheim, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Eguisheim, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Eguisheim, 71 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['vielocale_reelle', 'enfants_sante', 'eau_potable', 'metier_exterieur']
+
+Chamonix-Mont-Blanc (74056) · grille 3 Petites villes · 74.45 hab/km² · part voiture 0.4932 (pct 1.0) · TABLE MANUELLE
+  catégories : ['montagne'] -> ['montagne']
+  hero (inchangé) : futur•e lit Chamonix-Mont-Blanc à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Chamonix-Mont-Blanc, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Chamonix-Mont-Blanc, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Chamonix-Mont-Blanc, 49 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_montagne', 'enfants_sante', 'ski_ici', 'metier_exterieur'] -> ['acheter_montagne', 'enfants_sante', 'ski_ici', 'metier_exterieur']
+
+Briançon (05023) · grille 2 Centres urbains intermédiaires · 382.49 hab/km² · part voiture 0.6067 (pct 3.0)
+  catégories : ['all', 'colonise_albopictus', 'montagne', 'rural_forestier', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'montagne', 'rural_forestier']
+  hero (inchangé) : futur•e lit Briançon à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Briançon, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Briançon, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Briançon, 61 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_montagne', 'enfants_sante', 'ski_ici', 'metier_exterieur']
+
+Grenoble (38185) · grille 1 Grands centres urbains · 8640.28 hab/km² · part voiture 0.3226 (pct 0.0)
+  catégories : ['all', 'colonise_albopictus', 'expose_bruit', 'montagne', 'reseau_tc', 'urbain_dense_sud', 'vallee_industrielle'] -> ['all', 'colonise_albopictus', 'expose_bruit', 'montagne', 'reseau_tc', 'urbain_dense_sud', 'vallee_industrielle']
+  hero (inchangé) : futur•e lit Grenoble à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Grenoble, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Grenoble, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Grenoble, 32 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_montagne', 'enfants_sante', 'canicule_vivable', 'tc_sansvoiture'] -> ['acheter_montagne', 'enfants_sante', 'canicule_vivable', 'tc_sansvoiture']
+
+Chambéry (73065) · grille 1 Grands centres urbains · 2869.1 hab/km² · part voiture 0.5657 (pct 2.0)
+  catégories : ['all', 'colonise_albopictus', 'expose_bruit', 'montagne', 'reseau_tc', 'urbain_dense_nord'] -> ['all', 'colonise_albopictus', 'expose_bruit', 'montagne', 'reseau_tc', 'urbain_dense_nord']
+  hero (inchangé) : futur•e lit Chambéry à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Chambéry, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Chambéry, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Chambéry, 57 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_urbain', 'enfants_sante', 'ski_ici', 'tc_sansvoiture'] -> ['acheter_urbain', 'enfants_sante', 'ski_ici', 'tc_sansvoiture']
+
+Bony (02100) · grille 6 Rural à habitat dispersé · 17.38 hab/km² · part voiture 0.9286 (pct 80.0)
+  catégories : ['all', 'faible_vie_locale', 'periurbain_dependance_auto', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'faible_vie_locale', 'periurbain_dependance_auto', 'rural_agricole']
+  hero AVANT : futur•e lit Bony à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Bony à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Bony, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide (inchangé) : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  mob_fait AVANT : À Bony, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Bony, 93 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['mobilite_fragile', 'vielocale_reelle', 'enfants_sante', 'eau_potable']
+
+Bouffignereux (02104) · grille 6 Rural à habitat dispersé · 21.59 hab/km² · part voiture nan (pct nan)
+  catégories : ['all', 'faible_vie_locale', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'faible_vie_locale', 'rural_agricole']
+  hero AVANT : futur•e lit Bouffignereux à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Bouffignereux à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Bouffignereux, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Bouffignereux, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : nan
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['vielocale_reelle', 'enfants_sante', 'eau_potable', 'metier_exterieur']
+
+Janville-en-Beauce (28199) · grille 5 Bourgs ruraux · 58.68 hab/km² · part voiture 0.7943 (pct 20.0)
+  catégories : ['all', 'faible_vie_locale', 'rural_agricole', 'rural_peri_urbain'] -> ['all', 'faible_vie_locale', 'rural_agricole']
+  hero AVANT : futur•e lit Janville-en-Beauce à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Janville-en-Beauce à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Janville-en-Beauce, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Janville-en-Beauce, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Janville-en-Beauce, 79 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'vielocale_reelle', 'enfants_sante'] -> ['vielocale_reelle', 'enfants_sante', 'eau_potable', 'metier_exterieur']
+
+Bressuire (79049) · grille 5 Bourgs ruraux · 109.97 hab/km² · part voiture 0.8415 (pct 35.0)
+  catégories : ['all', 'colonise_albopictus', 'croissance_forte', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'croissance_forte']
+  hero AVANT : futur•e lit Bressuire à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Bressuire à travers le prisme du climat, de la santé et du logement.
+  intro AVANT : À Bressuire, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.
+  intro APRÈS : À Bressuire, le futur se joue déjà entre chaleur, logement et qualité de vie.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Bressuire, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Bressuire, 84 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['enfants_sante', 'metier_exterieur', 'risque_vectoriel_emergent', 'croissance_transformation']
+
+Mont-Dauphin (05082) · grille 6 Rural à habitat dispersé · 281.67 hab/km² · part voiture 0.6291 (pct 3.0)
+  catégories : ['all', 'colonise_albopictus', 'montagne', 'rural_peri_urbain'] -> ['all', 'colonise_albopictus', 'montagne']
+  hero (inchangé) : futur•e lit Mont-Dauphin à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.
+  intro (inchangé) : À Mont-Dauphin, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.
+  vide (inchangé) : Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.
+  mob_fait AVANT : À Mont-Dauphin, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Mont-Dauphin, 63 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_montagne', 'enfants_sante', 'ski_ici', 'metier_exterieur']
+
+Rodez (12202) · grille 2 Centres urbains intermédiaires · 2155.0 hab/km² · part voiture 0.6743 (pct 5.0) · TABLE MANUELLE
+  catégories : ['rural_agricole', 'rural_peri_urbain'] -> ['rural_agricole', 'rural_peri_urbain']
+  hero AVANT : futur•e lit Rodez à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.
+  hero APRÈS : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Rodez à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Rodez, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.
+  vide AVANT : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  vide APRÈS : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Rodez, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Rodez, 67 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville'] -> ['acheter_rural', 'mobilite_fragile', 'enfants_sante', 'quitter_ville']
+
+Toulouse (31555) · grille 1 Grands centres urbains · 4325.31 hab/km² · part voiture 0.4649 (pct 1.0) · TABLE MANUELLE
+  catégories : ['periurbain_dependance_auto', 'urbain_dense_sud'] -> ['periurbain_dependance_auto', 'urbain_dense_sud']
+  hero (inchangé) : futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre à Toulouse veut vraiment dire dans un territoire où les étés se réchauffent.
+  intro AVANT : À Toulouse, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.
+  intro APRÈS : À Toulouse, le futur se joue entre chaleur urbaine, qualité de l'air, logement et services.
+  vide (inchangé) : Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.
+  mob_fait AVANT : À Toulouse, le quotidien dépend largement de la voiture pour se déplacer.
+  mob_fait APRÈS : À Toulouse, 46 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['mobilite_fragile', 'acheter_canicule', 'enfants_sante', 'canicule_vivable'] -> ['mobilite_fragile', 'acheter_canicule', 'enfants_sante', 'canicule_vivable']
+
+Paris 1er Arrondissement (75101) · grille nan · nan hab/km² · part voiture 0.0649 (pct 0.0)
+  catégories : ['all', 'colonise_albopictus', 'expose_bruit', 'reseau_tc', 'urbain_dense_nord'] -> ['all', 'colonise_albopictus', 'expose_bruit', 'reseau_tc', 'urbain_dense_nord']
+  hero (inchangé) : futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution de Paris 1er Arrondissement à travers le prisme du climat, de la santé et du logement.
+  intro (inchangé) : À Paris 1er Arrondissement, le futur se joue entre chaleur urbaine, qualité de l'air, logement et services.
+  vide (inchangé) : Quatre questions sélectionnées pour votre territoire apparaîtront ici.
+  mob_fait AVANT : À Paris 1er Arrondissement, transports et courtes distances pèsent dans les trajets du quotidien.
+  mob_fait APRÈS : À Paris 1er Arrondissement, 6 % des actifs en emploi qui y habitent vont travailler en voiture.
+  questions : ['acheter_urbain', 'enfants_sante', 'metier_exterieur', 'tc_sansvoiture'] -> ['acheter_urbain', 'enfants_sante', 'metier_exterieur', 'tc_sansvoiture']
