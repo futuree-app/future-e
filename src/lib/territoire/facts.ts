@@ -24,8 +24,11 @@ import type { TerritoryType } from "../territory-mood.ts";
 import { millesimePopulation } from "../population-millesime.ts";
 import { avecProvenances } from "./provenances.ts";
 
-/** Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses. */
-export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@1";
+/**
+ * Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses.
+ * @2 (FUT-175) : les parts d'occupation du sol se lisent sur les TERRES, l'eau est un fait à part.
+ */
+export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@2";
 
 // ── Les entrées : ce que le chargeur serveur a lu, UNE fois ─────────────────────────────────
 
@@ -97,6 +100,56 @@ export const LAND_LABEL: Record<LandCategory, string> = {
   low_natural: "Faible présence d'espaces naturels",
   mixed: "Occupation mixte",
 };
+
+/** Les postes de `nature.composition` (index) qui couvrent des terres ; l'eau est le seul autre poste. */
+export const LAND_KEYS = ["artificialise", "agricole", "foret", "prairies", "landes_pelouses", "mineral_dunes"] as const;
+
+/** En deçà, les terres sont trop réduites pour qu'une part en soit lisible : aucune catégorie. */
+export const MIN_LAND_PCT = 10;
+
+export type LandShares = {
+  /** Part du contour communal couverte d'eau (mer, lagune, étang, lac, cours d'eau), en %. */
+  waterPct: number;
+  /** Milieux naturels terrestres (forêts, prairies, landes et pelouses, roche et dunes), en % des terres. */
+  naturalLandPct: number;
+  /** Les six postes terrestres, en % des terres (somme ≈ 100, aux arrondis de l'index près). */
+  composition: Record<string, number>;
+};
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/**
+ * FUT-175 : L'EAU N'EST NI UNE TERRE NI UN ESPACE NATUREL. L'index (scripts/populate-nature.py) rapporte
+ * chaque poste à TOUS les pixels classés du contour (classes OSO 1 à 23), eau comprise, et compte l'eau
+ * dans `brut_pct`. Sète (50,6 % d'eau, étang de Thau) y lisait « Forte présence naturelle » quand la moitié
+ * de ses terres est urbanisée. On retire donc l'eau du dénominateur : chaque part est rapportée aux terres,
+ * soit `100 − eau` (les sept postes partagent le même dénominateur de pixels).
+ *
+ * Le naturel terrestre part de `brut_pct` (compté sur les pixels, sans arrondi par poste), moins l'eau : c'est
+ * la même définition qu'avant, l'eau en moins. Sans eau, rien ne bouge, pas même d'un dixième.
+ *
+ * `null` : composition absente ou incomplète (un poste, eau comprise, manque), ou terres sous `MIN_LAND_PCT`
+ * (aucune commune aujourd'hui : 71,4 % d'eau au plus, à Paimbœuf).
+ */
+export function landShares(
+  brutPct: number | null | undefined,
+  composition: Record<string, number> | null | undefined,
+): LandShares | null {
+  // Absent ≠ zéro : un poste manquant rend la répartition inconnue, on ne la complète pas.
+  const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v >= 0;
+  if (!composition || !finite(brutPct)) return null;
+  if (!LAND_KEYS.every((k) => finite(composition[k])) || !finite(composition.eau)) return null;
+  const water = composition.eau;
+  const land = 100 - water;
+  if (land < MIN_LAND_PCT) return null;
+  const comp: Record<string, number> = {};
+  for (const k of LAND_KEYS) comp[k] = round1((composition[k] * 100) / land);
+  return {
+    waterPct: round1(water),
+    naturalLandPct: round1(Math.max(0, ((brutPct - water) * 100) / land)),
+    composition: comp,
+  };
+}
 
 /**
  * D4 : LA grille du couvert, celle de la face de carte (ex-`couvertHeadline`, territory-identity.ts).
@@ -213,9 +266,11 @@ function num(v: unknown): number | null {
 
 export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): FactsSnapshot {
   const e = i.entry;
-  const composition = e?.nature?.composition ?? null;
-  const naturalPct = num(e?.nature?.brut_pct);
-  const hasOso = composition != null && naturalPct != null;
+  // FUT-175 : les parts se lisent sur les terres, l'eau à part (cf. `landShares`).
+  const shares = landShares(e?.nature?.brut_pct, e?.nature?.composition);
+  const composition = shares?.composition ?? null;
+  const naturalPct = shares?.naturalLandPct ?? null;
+  const hasOso = shares != null;
   const density = num(e?.densite) ?? num(i.ademe?.densite);
   const demo = e?.demographie ?? null;
 
@@ -269,21 +324,27 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       synthesis: exclude("Distance au rivage marin : montrée sur la carte d'identité, jamais qualifiée par la synthèse."),
     }),
     fact({
-      key: "land.composition", value: composition, unit: "%", scale: "commune", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition" },
-      limits: "Occupation du sol vue par satellite ; « urbanisé » inclut routes et surfaces bâties.",
+      key: "land.composition", value: composition, unit: "% des terres", scale: "commune", vintage: "2023",
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition, eau retirée du dénominateur" },
+      limits: "En % des terres de la commune, l'eau étant comptée à part. Couvert observé par satellite : « urbanisé » inclut routes, parkings et surfaces imperméabilisées, pas seulement l'emprise des bâtiments ; ce n'est pas l'artificialisation réglementaire (OCS GE).",
       card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
-      key: "land.natural_share", value: naturalPct, unit: "%", scale: "commune", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.brut_pct" },
-      limits: "Naturel élargi : forêts, prairies, landes et pelouses, roche et dunes, eau. Les cultures n'en font pas partie.",
+      key: "land.water_share", value: shares?.waterPct ?? null, unit: "% de la commune", scale: "commune", vintage: "2023",
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition.eau" },
+      limits: "Part du contour communal couverte d'eau (mer, lagune, étang, lac, cours d'eau). Elle n'est comptée ni dans les espaces naturels ni dans les parts des terres.",
+      card: card("nature.green_spaces"), synthesis: INCLUDE,
+    }),
+    fact({
+      key: "land.natural_share", value: naturalPct, unit: "% des terres", scale: "commune", vintage: "2023",
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition, hors urbanisé, cultures et eau" },
+      limits: "Milieux naturels terrestres, en % des terres : forêts, prairies, landes et pelouses, roche et dunes. Ni les cultures ni l'eau n'en font partie.",
       card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
       key: "land.natural_share_15km", value: num(e?.nature?.radius_pct), unit: "%", scale: "radius_15km", vintage: "2023",
       source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.radius_pct" },
-      limits: "Mesuré dans un rayon de 15 km, pas sur la commune.",
+      limits: "Mesuré dans un rayon de 15 km, pas sur la commune ; espaces naturels et eau confondus, rapportés à toute la surface (l'eau n'a pas pu en être retirée).",
       card: card("nature.green_spaces"),
       synthesis: exclude("Autre échelle que la commune : sa lecture comme « urbanisation » a produit la contradiction de Châtelaillon."),
     }),
@@ -392,7 +453,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     const c = landCategory(naturalPct!, composition!);
     derived.push({
       key: "land.category", value: c, label: LAND_LABEL[c], from: ["land.natural_share", "land.composition"],
-      rule: "land-category@1", card: card("nature.green_spaces"), synthesis: INCLUDE,
+      rule: "land-category@2", card: card("nature.green_spaces"), synthesis: INCLUDE,
     });
   }
   if (density != null) {

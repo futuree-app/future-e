@@ -718,17 +718,22 @@ export function buildFactors(
           detail: {
             eyebrow: "L'occupation des sols",
             title: "Espaces naturels",
-            headline: `${couvertNaturel.brutPct} % d'espaces naturels`,
+            headline: `${couvertNaturel.naturelTerresPct} % de ses terres en espaces naturels`,
             // D4 (FUT-6) : le volet ne qualifie plus. Sa grille 75 / 50 / 25 était une TROISIÈME
             // lecture du même chiffre (après la face et la carte d'identité), et pouvait les
             // contredire. Il montre la mesure et sa définition ; la catégorie est celle de la face.
-            subhead: `Forêts, prairies, landes et pelouses, roche et dunes, eau : ils couvrent ${couvertNaturel.brutPct} % de la commune. Les cultures n'en font pas partie.${
+            // FUT-175 : les parts portent sur les TERRES ; l'eau est dite à part, jamais comptée comme nature.
+            subhead: `Forêts, prairies, landes et pelouses, roche et dunes couvrent ${couvertNaturel.naturelTerresPct} % des terres de la commune. Ni les cultures ni l'eau n'en font partie.${
+              couvertNaturel.eauPct != null && couvertNaturel.eauPct >= 1
+                ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${couvertNaturel.eauPct} % de la surface communale.`
+                : ""
+            }${
               couvertNaturel.radiusPct != null
-                ? ` Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
+                ? ` Dans un rayon de 15 km, espaces naturels et eau confondus : ${couvertNaturel.radiusPct} %.`
                 : ""
             }`,
             accent: "var(--green)",
-            breakdownLabel: "Ce qui couvre le territoire",
+            breakdownLabel: "Ce qui couvre ses terres",
             breakdown: couvertNaturel.composition.slice(0, 5).map((c) => ({
               label: c.label,
               value: `${c.pct} %`,

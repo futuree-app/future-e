@@ -152,9 +152,25 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 
 // ── Territoire : l'empreinte et le cache de la synthèse ─────────────────────────────────────
 
-// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date.
-const HASH_MAIN = "cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f";
-const CLE_MAIN = "7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9";
+// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date :
+//   empreinte cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f,
+//   clé       7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9.
+// FUT-175 (09/11/2026) les change VOLONTAIREMENT : registre `territoire-facts@2` (parts OSO rapportées aux terres,
+// eau à part) et contrat `territoire-synthese@5`. Recalculées sur la branche FUT-175, même entrée, même date. Ce que
+// ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
+const HASH_MAIN = "c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a";
+const CLE_MAIN = "9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d";
+
+/**
+ * FUT-175 : les lignes que ce chantier change dans `f`, lues sur SON diff (base `main` 51a493d0). Elles sont
+ * admises en bloc par les gardes ci-dessous, à une condition : aucune ne parle des feux.
+ */
+function lignesFut175(f: string): Set<string> {
+  const diff = execFileSync("git", ["diff", "--no-color", "-U0", "51a493d0", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  for (const l of lignes) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
+  return new Set(lignes);
+}
 
 test("Territoire : l'empreinte du snapshot et la clé du cache de synthèse sont celles de main", () => {
   const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
@@ -199,10 +215,12 @@ test("Territoire : la mémoire des incendies est lue à côté du snapshot, jama
 // `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
 // brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
 // parle des feux. Toute autre modification du contrat le fait échouer.
+// FUT-175 (09/11/2026) : la projection de l'occupation des sols (terres, eau à part) ; admise par `lignesFut175`.
 test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
   const f = "src/lib/territoire/synthesis-contract.ts";
   const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  const fut175 = lignesFut175(f);
+  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l) && !fut175.has(l));
   assert.deepEqual(changees, [
     '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
     "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
@@ -347,10 +365,12 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // et seules ces lignes ajoutées.
 // FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
 // `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
+// FUT-175 (09/11/2026) : les parts OSO lues sur les terres, l'eau à part ; ses lignes sont admises par `lignesFut175`.
 test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), et l'application de la provenance (FUT-12)", () => {
   const f = "src/lib/territoire/facts.ts";
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  const fut175 = lignesFut175(f);
+  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l) && !fut175.has(l));
   assert.deepEqual(lignes.filter((l) => l.startsWith("-")), [], "aucune ligne retirée");
   const admises = [
     /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
