@@ -6,7 +6,7 @@ rows = []
 for c in d["communes"]:
     comp = ((c.get("nature") or {}).get("composition") or {})
     rows.append(dict(insee=c["insee"], nom=c["nom"], dept=c["dept"], pop=c.get("population"), densite=c.get("densite"),
-                     uu=c.get("uu"), hors_uu=c.get("hors_uu"), uu_pop=c.get("uu_pop"), uu_count=c.get("uu_count"),
+                     uu=c.get("uu"), uu_statut=c.get("uu_statut"), hors_uu=c.get("hors_uu"), uu_pop=c.get("uu_pop"), uu_count=c.get("uu_count"),
                      artif=comp.get("artificialise"), agri=comp.get("agricole")))
 I = pd.DataFrame(rows)
 G = pd.read_parquet(f"{W}/work/grille2026.parquet")
