@@ -152,7 +152,7 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                 // CE QUI PERMET DE RECONNAÎTRE LE LIEU COMPTÉ (17/08/2026, JL-11). Un nom seulement
                 // quand un seul établissement y est recensé ; sinon l'adresse et la réserve. La
                 // règle vit dans `logement-bpe-lisible.ts`, testée : ce composant ne décide rien.
-                const preuve = preuveEquipement(c.nearest, s.sources.bpeMillesime);
+                const preuve = preuveEquipement(c.nearest);
                 return (
                 <div key={c.category} style={{ display: "grid", gap: 2 }}>
                   <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>

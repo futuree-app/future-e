@@ -24,7 +24,7 @@ try{
  const post=async p=>{const r=await fetch(base+'/api/comparateur-vie/match',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({parsed:p})});assert.equal(r.status,200);return r.json()};
  const without=await post(parsed),withFibre=await post({...parsed,horsMesure:[{term:'fibre',kind:'autre'}]});
  assert.equal(withFibre.results.length,3);assert.ok(withFibre.results.every(r=>r.fibre?.ligne));
- assert.deepEqual(withFibre.results.map(({fibre,...r})=>r),without.results,'la ligne fibre ne change ni scores ni ordre ni autres faits');
+ assert.deepEqual(withFibre.results.map(r=>{const sansFibre={...r};delete sansFibre.fibre;return sansFibre;}),without.results,'la ligne fibre ne change ni scores ni ordre ni autres faits');
  assert.equal(withFibre.comparaisonComplete,undefined);assert.equal(withFibre.pistes,undefined);
  rows.push({path:'/api/comparateur-vie/match',status:200,trio:withFibre.results.map(r=>({insee:r.insee,score:r.score,fibre:r.fibre.ligne,incendiesObserves:r.incendiesObserves})),sameScoresAndOrder:true,noPaidPayload:true});
  const out={date:new Date().toISOString(),applicationCommit:'2447b198',pass:true,checks:rows,scope:'Build de production local : route match réelle, aperçus publics, gardes authentification et bancs dev404 ; aucun paiement/session réelle ni appel modèle.'};

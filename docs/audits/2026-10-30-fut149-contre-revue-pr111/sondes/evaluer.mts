@@ -24,7 +24,7 @@ for (const p of pts) {
     cle = `vérité ${verite} → lib ${lib}${lib === verite ? "" : bande + partage}`;
   }
   n[cle] = (n[cle] ?? 0) + 1;
-  (ex[cle] ??= []).length < 3 && ex[cle].push({ lon: +p.lon.toFixed(6), lat: +p.lat.toFixed(6), d: p.d, dist: p.dist, distIndiv: p.distIndiv, deps: p.deps, distPartage: p.distPartage });
+  if ((ex[cle] ??= []).length < 3) ex[cle].push({ lon: +p.lon.toFixed(6), lat: +p.lat.toFixed(6), d: p.d, dist: p.dist, distIndiv: p.distIndiv, deps: p.deps, distPartage: p.distPartage });
 }
 console.log(JSON.stringify({ points: pts.length, ms: Math.round(performance.now() - t0), msMaxParLecture: Math.round(tmax) }));
 for (const [k, v] of Object.entries(n).sort()) console.log(`${String(v).padStart(6)}  ${k}${k.includes("→ lib en_zone") && k.startsWith("vérité en_zone") ? "" : "  ex. " + JSON.stringify(ex[k][0])}`);

@@ -35,9 +35,7 @@
 // Résultat JSON sur la sortie standard, avancement sur l'erreur standard.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { createReadStream, createWriteStream, existsSync, mkdirSync, rmSync, statSync, readFileSync } from "node:fs";
-import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { createReadStream, existsSync, mkdirSync, rmSync, statSync, readFileSync } from "node:fs";
 import { createGunzip } from "node:zlib";
 import { createInterface } from "node:readline";
 

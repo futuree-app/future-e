@@ -2,7 +2,6 @@
 const racine = process.argv[2];
 const G = await import(`${racine}/src/lib/geometrie-parcelle.ts`);
 const U = await import(`${racine}/src/lib/urbanisme-parcelle.ts`);
-const P = G.projectionAutour(2, 46);
 const xy = (x, y) => [2 + x / (111_320 * Math.cos((46 * Math.PI) / 180)), 46 + y / 110_574];
 const rect = (a, b, c, d) => ({ type: "Polygon", coordinates: [[xy(a, b), xy(c, b), xy(c, d), xy(a, d), xy(a, b)]] });
 // Régions directement en mètres (sans projection) pour la reproduction exacte de Work.

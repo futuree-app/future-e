@@ -12,7 +12,7 @@ import {
   type SoftZone,
 } from "@/lib/geo-zones";
 import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
-import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
+import { resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";

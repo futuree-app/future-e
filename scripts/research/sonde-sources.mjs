@@ -17,8 +17,6 @@ const args = Object.fromEntries(
   process.argv.slice(2).flatMap((a, i, all) => (a.startsWith("--") ? [[a.slice(2), all[i + 1]]] : [])),
 );
 const INSEE = args.insee ?? "17300"; // La Rochelle
-const LAT = 46.16;
-const LON = -1.152;
 
 /**
  * `extract` recoit le corps parse et renvoie une chaine courte : ce qu'on a trouve.

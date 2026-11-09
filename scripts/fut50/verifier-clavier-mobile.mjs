@@ -4,9 +4,9 @@ import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3150";
-// PAGE et API : le prototype par défaut ; `PAGE=/ API=/api/accueil` pour l'accueil public (build de production).
+// PAGE : le prototype par défaut ; `PAGE=/` pour l'accueil public (build de production). La variable
+// `API`, autrefois documentée ici, n'a jamais été lue par ce script : elle est retirée (FUT-121).
 const PAGE = process.env.PAGE ?? "/dev/fut50/c";
-const API = process.env.API ?? "/dev/fut50/api";
 const SORTIE = process.env.SORTIE ?? "docs/audits/2026-10-16-fut50-clavier-mobile";
 mkdirSync(SORTIE, { recursive: true });
 const nav = await chromium.launch({ executablePath: process.env.CHROME });

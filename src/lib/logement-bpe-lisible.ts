@@ -88,7 +88,6 @@ export type PreuveEquipement = {
  */
 export function preuveEquipement(
   identite: BpeNearestIdentity | null | undefined,
-  millesime: string | null | undefined,
 ): PreuveEquipement {
   const adresse = identite?.adresse ? libelleBpeLisible(identite.adresse) : null;
   const plusieurs = typeof identite?.exploitants === "number" && identite.exploitants > 1;

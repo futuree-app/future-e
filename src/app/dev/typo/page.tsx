@@ -23,6 +23,7 @@
 
 import { useState } from "react";
 import { notFound } from "next/navigation";
+import { preinit } from "react-dom";
 
 type Proposition = {
   id: string;
@@ -196,18 +197,24 @@ export default function DevTypoPage() {
   return <Banc />;
 }
 
+// Les familles non embarquées dans le produit sont chargées ICI seulement, pour ce banc (404 en
+// production). Toutes libres. Le produit, lui, héberge ses polices (design-tokens.css) et n'appelle
+// jamais Google Fonts.
+//
+// CHARGÉES PAR `preinit` PLUTÔT QUE PAR UN <link> DANS LE JSX (FUT-121). `preinit` est l'API de
+// React 19 pour une ressource propre à une page : React pose la feuille dans <head>, une seule fois,
+// au rendu serveur comme au client. Un `@import` dans un CSS de route ne convient pas : le bundler
+// fusionne les feuilles, l'`@import` n'y est plus en tête, et le navigateur l'ignore (constaté en
+// recette : aucune requête vers Google Fonts).
+const POLICES_DU_BANC = "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Public+Sans:ital,wght@0,300..700;1,300..700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Archivo:ital,wdth,wght@0,62..125,300..700;1,62..125,300..700&family=Martian+Mono:wght@300..600&display=swap";
+
 function Banc() {
+  preinit(POLICES_DU_BANC, { as: "style", precedence: "default" });
   const [actif, setActif] = useState<Proposition>(PROPOSITIONS[0]);
   const [cote, setCote] = useState<Proposition | null>(null);
 
   return (
     <div className="min-h-screen bg-canvas text-label" style={{ fontFamily: SANS }}>
-      {/* Les familles non embarquées dans le produit sont chargées ICI seulement. Toutes libres. */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Public+Sans:ital,wght@0,300..700;1,300..700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Archivo:ital,wdth,wght@0,62..125,300..700;1,62..125,300..700&family=Martian+Mono:wght@300..600&display=swap"
-      />
-
       <div className="max-w-[1100px] mx-auto px-5 sm:px-7 py-10">
         <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-ghost mb-2">
           Banc d&apos;essai · dev
