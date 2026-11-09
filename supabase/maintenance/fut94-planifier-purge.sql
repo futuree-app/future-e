@@ -56,3 +56,45 @@ select 'aucune exécution réussie depuis 48 h', null
 
 -- 5. RETIRER LA PLANIFICATION (retour arrière, ou avant le down de la migration 39) :
 -- select cron.unschedule('fut94-purge-retours-utilite');
+
+-- 6. SUPERVISION PAR SIGNAL DE VIE (proposée ; prérequis : un service de surveillance de tâches
+--    planifiées choisi par le responsable, qui fournit une URL d'appel et alerte si elle n'est pas
+--    appelée dans le délai de grâce, 26 h conseillé). Remplace la tâche du bloc 2 (même nom).
+--
+--    POURQUOI : une planification ne se surveille pas elle-même. Si la purge échoue, si la tâche
+--    disparaît, si pg_cron s'arrête ou si le projet est mis en pause, la requête du bloc 4 ne le dit
+--    qu'à qui la lance. Ici, la purge APPELLE le service à chaque réussite ; le SILENCE déclenche
+--    l'alerte, hors de Supabase.
+--
+--    UNE SEULE INSTRUCTION : la purge et l'appel sont la même requête. Si la purge lève une erreur,
+--    l'instruction échoue et `net.http_get` n'est jamais mis en file (pg_net n'envoie qu'à la
+--    validation). L'appel ne porte aucune donnée : ni corps, ni paramètre.
+--
+--    6a. Extensions et secret (l'URL fait office de jeton : elle va dans Vault, pas dans cron.job).
+-- create extension if not exists pg_net;
+-- select vault.create_secret('<URL fournie par le service>', 'fut94_purge_signal_de_vie', 'FUT-94 : signal de vie de la purge');
+--
+--    6b. La tâche, purge puis signal :
+-- select cron.schedule(
+--   'fut94-purge-retours-utilite',
+--   '23 3 * * *',
+--   $$select net.http_get((select decrypted_secret from vault.decrypted_secrets where name = 'fut94_purge_signal_de_vie'))
+--       from public.purger_retours_utilite()$$
+-- );
+--
+--    6c. Contrôle le lendemain : bloc 3 (une exécution `succeeded`), puis l'appel reçu côté service,
+--        et la réponse HTTP côté base :
+-- select id, status_code, created from net._http_response order by created desc limit 5;
+--
+--    6d. Épreuve d'échec (une fois) : une tâche d'une minute qui échoue AVANT toute écriture et ne
+--        doit donc jamais appeler un second contrôle du service, réglé à 5 minutes de grâce :
+-- create extension if not exists pg_net;  -- déjà fait en 6a
+-- select vault.create_secret('<URL du contrôle d''épreuve>', 'fut94_epreuve_signal', 'FUT-94 : épreuve');
+-- select cron.schedule('fut94-epreuve-echec', '* * * * *',
+--   $$select net.http_get((select decrypted_secret from vault.decrypted_secrets where name = 'fut94_epreuve_signal'))
+--       from public.purger_retours_utilite('1 hour', '1 minute')$$);
+--    Le contrôle d'épreuve doit avoir reçu UN appel manuel avant (beaucoup de services n'alertent
+--    qu'une fois un premier appel reçu) : ouvrir son URL une fois, à la main.
+--    Attendre l'alerte « manquant » du service (≈ 5 min), puis :
+-- select cron.unschedule('fut94-epreuve-echec');
+-- delete from vault.secrets where name = 'fut94_epreuve_signal';

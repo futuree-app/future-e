@@ -309,8 +309,10 @@ test("la page : la question vient APRÈS le dossier et son geste de clôture, et
 
 // ── Le consentement à la mesure ─────────────────────────────────────────────────────────────
 
+// Depuis FUT-181, le formulaire lit la règle UNIQUE (`mesureConsentie`, mesure-audience-regles.ts)
+// au lieu d'une copie locale. Ces assertions, inchangées, fixent ce que FUT-94 attend de cette règle.
 test("consentement : seule la valeur « granted » de la bannière autorise un nouvel événement", async () => {
-  const { mesureAutorisee, CLE_CONSENTEMENT } = await import("./consentement-mesure.ts");
+  const { mesureConsentie: mesureAutorisee, CLE_CONSENTEMENT_MESURE: CLE_CONSENTEMENT } = await import("./mesure-audience-regles.ts");
   const stock = (v: string | null) => ({ getItem: (k: string) => (k === CLE_CONSENTEMENT ? v : null) });
   assert.equal(mesureAutorisee(stock("granted")), true);
   assert.equal(mesureAutorisee(stock("denied")), false);

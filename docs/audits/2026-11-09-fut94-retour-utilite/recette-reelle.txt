@@ -1,4 +1,4 @@
-FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T11:42:26.683Z
+FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T16:15:54.155Z
 
 ✔ classique · la question est posée sous le dossier, aucune réponse en base
 ✔ classique · première réponse « Oui » sans commentaire : une ligne, réponse seule
@@ -25,15 +25,16 @@ FUT-94 · recette réelle (next dev local + Supabase future-e-test), 2026-11-09T
 ✔ releve · panne réseau puis nouvel essai : texte conservé, envoi réussi
 ✔ releve · clavier : Tab jusqu'à une réponse, Entrée l'enregistre, le focus reste dans le bloc
 ✔ isolation multi-dossiers : l'autre bien de A (D1) n'hérite d'aucune réponse, sa réponse est une ligne distincte
-    6 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
+    0 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
 ✔ consentement absent : événements FUT-94 conformes, aucun texte de commentaire envoyé
-    6 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
+    0 événement(s) tentés ; FUT-94 : 0 [] ; autocapture du bloc : 0 ; texte du commentaire : 0
 ✔ consentement denied : événements FUT-94 conformes, aucun texte de commentaire envoyé
     8 événement(s) tentés ; FUT-94 : 2 [{"answer":"pas_vraiment","has_comment":true,"step":"reponse","scope":"adresse","presentation":"releve"},{"answer":"pas_vraiment","has_comment":true,"step":"commentaire","scope":"adresse","presentation":"releve"}] ; autocapture du bloc : 0 ; texte du commentaire : 0
 ✔ consentement granted : événements FUT-94 conformes, aucun texte de commentaire envoyé
 
+Passe rejouée après fusion de main à 51ee554b (FUT-181 livré) : PostHog n'est plus initialisé sans consentement, d'où 0 événement tenté, tous types confondus, en « absent » et « denied ».
 Passe précédente (même jour, sur 1f3285c5, chemin de lecture inchangé depuis) :
 ✔ table illisible pour le compte : droit SELECT de `authenticated` retiré le temps du cas (projet de test seulement), /rapport s'affiche, la question n'est pas posée (0 bloc)
 ✔ contre-épreuve : droit rétabli, même compte, même page : la question réapparaît (1 bloc)
 
-Journal du serveur (next dev), cette passe : 33 POST /api/dossier/retour-utilite, 33 en 200 ; texte témoin du commentaire et du brouillon présents 0 fois.
+Journal du serveur (next dev), cette passe : 33 POST /api/dossier/retour-utilite, 33 en 200 ; textes témoins du commentaire et du brouillon présents 0 fois.

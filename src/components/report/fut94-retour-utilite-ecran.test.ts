@@ -292,7 +292,8 @@ test("le bloc entier est exclu de l'autocapture et des enregistrements de sessio
   // Et le seul appel à PostHog du composant passe par la garde de consentement.
   const source = fs.readFileSync(`${RACINE}/src/components/report/RetourUtilite.tsx`, "utf8");
   assert.equal(source.match(/posthog\./g)?.length, 1);
-  assert.match(source, /if \(mesureAutorisee\(\)\) posthog\.capture\(/);
+  assert.match(source, /if \(mesureConsentie\(\)\) posthog\.capture\(/);
+  assert.match(source, /from "@\/lib\/mesure-audience-regles"/, "la règle unique de FUT-181, pas une copie");
 });
 
 for (const presentation of ["classique", "releve"] as const) {

@@ -48,58 +48,32 @@ Mêmes textes, même structure et même ordre dans les deux présentations. En c
 - Écriture : uniquement par `POST /api/dossier/retour-utilite`, qui exige une session (401 sinon) et vérifie **sous l'identité du lecteur** que la commune lui est ouverte (`loadTerritoryClaims`) et que le dossier d'adresse est le sien, non révoqué et de cette commune (`getDossier`). Elle écrit ensuite avec le service role (`lib/server/retour-utilite-store.ts`, qui ne rend jamais ce client). `user_id` vient toujours de la session, jamais du corps de la requête.
 - Tant que la migration n'est pas appliquée, la lecture échoue et `/rapport` **cache la question**. Rien ne casse.
 
-## PostHog et consentement
+## PostHog et consentement (FUT-181 livré dans `main` à `51ee554b`)
 
-### Ce que fait FUT-94 (garanti, testé, mesuré)
+### Ce que fait FUT-94
 
-1. **Aucun événement FUT-94 sans consentement valide.** L'unique appel `posthog.capture("dossier_utility_feedback_submitted", …)` passe par `mesureAutorisee()` (`src/lib/consentement-mesure.ts`). Seule la valeur `"granted"` de `localStorage["futuree-consent"]`, écrite par `ConsentBanner`, l'autorise. Une valeur absente, `"denied"` ou autre, un stockage bloqué ou un rendu côté serveur donnent non. Un test lie la clé et les valeurs à celles de la bannière.
-2. **Le bloc n'est jamais autocapturé ni enregistré.** La section porte la classe `ph-no-capture`, que posthog-js 1.375 honore deux fois : l'autocapture l'ignore (vérifié dans `dist/module.js`), et l'enregistreur de session s'en sert comme `blockClass` (vérifié dans `dist/lazy-recorder.js`), ce qui remplace le bloc par un aplat dans un replay.
-3. **Le texte libre ne peut pas partir indirectement.** L'événement ne porte que `{ answer, has_comment, step, is_change, scope, presentation }`. posthog-js ne capture jamais la valeur d'un champ de saisie. Les erreurs d'envoi sont interceptées (rien ne remonte à `capture_exceptions`), et le journal serveur n'écrit que le code d'erreur et la portée.
+1. **Aucun événement FUT-94 sans consentement valide.** L'unique appel `posthog.capture("dossier_utility_feedback_submitted", …)` est gardé par `mesureConsentie()`, **la règle unique de FUT-181** (`src/lib/mesure-audience-regles.ts`) : seule la valeur exacte `"granted"` de `localStorage["futuree-consent"]` vaut accord ; absente, `"denied"`, autre, stockage bloqué ou rendu serveur : non. La copie locale de FUT-94 (`consentement-mesure.ts`, même prédicat mot pour mot) a été **supprimée** à la synchronisation : une seule source de vérité, comportement inchangé (mêmes assertions, toujours vertes ; la garde retirée, 2 tests d'écran échouent).
+2. **Trois protections superposées depuis FUT-181** : sans consentement, PostHog n'est **pas initialisé** (ses `capture` sont sans effet et sans file d'attente) ; `before_send` relit le consentement à chaque événement ; la garde locale de FUT-94 s'y ajoute. Elle est redondante, gardée pour qu'aucun envoi de ce bloc ne dépende d'un réglage lointain.
+3. **Le texte libre ne part jamais, même avec consentement.** L'événement ne porte que `{ answer, has_comment, step, is_change, scope, presentation }`. posthog-js ne lit jamais la valeur d'un champ ; FUT-181 masque en plus tout texte et attribut d'élément cliqué (`mask_all_text`, `mask_all_element_attributes`) et coupe l'enregistrement de session. Le bloc garde `ph-no-capture` : l'autocapture l'ignore entièrement, et l'enregistreur le masquerait s'il était un jour réactivé. Les erreurs d'envoi sont interceptées ; le journal serveur n'écrit que le code d'erreur et la portée.
 
-**Mesure dans le navigateur** (`2026-11-09-fut94-retour-utilite/consentement.cjs`, résultat dans `consentement.txt`). Le banc tourne en local, et toutes les requêtes `/ingest/**` sont interceptées et décodées, sans que rien ne sorte. Le parcours complet (réponse, commentaire témoin, envoi) est joué pour les trois états :
+### Mesures
 
-| Consentement | `dossier_utility_feedback_submitted` | Autocapture dans le bloc | Bouton témoin hors du bloc | Texte du commentaire envoyé |
-|---|---|---|---|---|
-| absent | 0 | 0 | 1 | 0 |
-| `denied` | 0 | 0 | 1 | 0 |
-| `granted` | 2 (réponse, commentaire), sans texte | 0 | 1 | 0 |
+| Mesure | Consentement absent | `denied` | `granted` |
+|---|---|---|---|
+| Banc local, avant FUT-181 (`consentement.cjs`, `consentement.txt`) : événements FUT-94 / autocapture du bloc / texte envoyé | 0 / 0 / 0 | 0 / 0 / 0 | 2 / 0 / 0 |
+| Recette réelle `/rapport`, après fusion de FUT-181 (`recette-reelle.txt`) : événements FUT-94 / autocapture du bloc / texte envoyé | 0 / 0 / 0, et **0 événement de tout type** (PostHog non initialisé) | 0 / 0 / 0, et 0 événement de tout type | 2 (réponse, commentaire) / 0 / 0 |
 
-Contre-épreuve : la classe `ph-no-capture` est retirée le temps d'une mesure. Trois clics du bloc partent alors en autocapture, même sans consentement. C'est donc bien elle qui protège.
+Avant FUT-181, le reste du site envoyait sans consentement `$pageview`, `$set` et l'autocapture (6 événements tentés par parcours en recette réelle). Ce défaut global, relevé par l'audit FUT-94 et traité par FUT-181, est décrit dans `docs/audits/2026-11-09-fut181-consentement-posthog.md`.
 
-### Le défaut global, antérieur à FUT-94 (NON traité ici)
+### Compatibilité avec FUT-181
 
-`PostHogProvider` appelle `posthog.init` sans condition dès que le jeton existe. `ConsentBanner` ne pilote que Google Consent Mode. Mesuré ci-dessus : sans consentement, `$pageview`, `$set` et l'autocapture des clics partent quand même. Périmètre exact :
-
-- **Initialisation** (`src/components/PostHogProvider.tsx`) : `$pageview` à chaque navigation (`PostHogPageView`), `$pageleave`, autocapture (activée par défaut), exceptions (`capture_exceptions`), web vitals, et enregistrement de session si le projet PostHog l'active dans sa configuration distante.
-- **Identification** : `posthog.identify(user.id, { email })` à chaque page d'un compte connecté, sans consentement. **L'e-mail part donc vers PostHog.**
-- **47 appels `capture` côté client, dans 32 fichiers**, tous soumis au même défaut.
-- **6 points de capture côté serveur** (`posthog-node` : `auth/actions.ts`, `qna/route.ts`, `api/comparateur-vie/ask`, `api/inscription-pro`, `api/stripe/webhook`, `api/stripe/create-payment-intent`), hors de portée d'une bannière et à revoir pour leur base légale.
-- **Contradiction avec la politique**, qui annonce PostHog « avec consentement » (finalités, sous-traitants, enregistrements de session).
-
-**Traitement proposé, en ticket séparé** (pas de refonte dans FUT-94) :
-1. `posthog.init(…, { opt_out_capturing_by_default: true, persistence: "memory" })`, puis `posthog.opt_in_capturing()` ou `opt_out_capturing()` dans `ConsentBanner.handleConsent`, et à la lecture d'un choix déjà enregistré.
-2. Ne pas envoyer d'`identify` avant consentement, et retirer l'e-mail des propriétés (`user.id` suffit).
-3. Enregistrement de session : seulement après `granted`, champs masqués (déjà par défaut).
-4. Revoir les six captures serveur (identifiant, nécessité, base légale).
-5. Un test de bout en bout du même type que `consentement.cjs`, étendu au site entier.
-
-Une fois ce ticket livré, la garde `mesureAutorisee()` de FUT-94 devient redondante mais reste sans effet de bord.
-
-### Dépendances avec FUT-181 (ticket du défaut global)
-
-FUT-94 ne modifie ni FUT-181 ni `PostHogProvider`, et ne crée aucune logique de consentement concurrente : `mesureAutorisee()` **lit** la valeur que `ConsentBanner` écrit, sans rien piloter.
-
-| Point | Dépendance | Ordre |
-|---|---|---|
-| Événement `dossier_utility_feedback_submitted` | sûr dès maintenant (garde locale) ; après FUT-181, double garde sans effet de bord | indépendant |
-| `mesureAutorisee()` | à supprimer **ou** à brancher sur l'helper que FUT-181 introduira (`mesure-audience.ts` d'après le ticket) ; un seul appel, dans `RetourUtilite.tsx` | après FUT-181, nettoyage facultatif |
-| `ph-no-capture` sur le bloc | à garder même après FUT-181 : il protège le texte libre d'un enregistrement de session consenti | permanent |
-| Politique de confidentialité | FUT-94 ajoute la ligne « Votre avis sur un dossier », sa base légale et ses durées ; FUT-181 (PR #141) corrige les passages PostHog. **Même fichier, passages distincts** : fusion d'essai de cette branche avec `fut-181-consentement-posthog` (09/11/2026) **sans conflit**, une seule date (`9 novembre 2026`), les deux contenus présents | l'un ou l'autre ; relire la date au second |
-| Recette | `consentement.cjs` et le volet consentement de `recette-reelle.mjs` servent de base au test de bout en bout demandé par FUT-181 | réutilisable |
-
-**Fusion d'essai FUT-94 + FUT-181** (arbre temporaire, rien de poussé) : aucun conflit ; `fut181-consentement-mesure`, `fut94-retour-utilite`, l'écran FUT-94 et `fut147-non-regression` passent ensemble (76/76), TypeScript sans erreur. Même clé (`futuree-consent`) et même règle (`"granted"` seul) des deux côtés.
-
-Ce que FUT-94 ne peut pas garantir tant que FUT-181 n'est pas livré : **le reste du site** envoie `$pageview`, `$set` et l'autocapture sans consentement (mesuré à nouveau en recette réelle : 6 événements tentés sans consentement, aucun ne venant du bloc).
+| Point | État après synchronisation |
+|---|---|
+| Règle de consentement | une seule : `mesureConsentie()` ; même clé, même valeur, test lié à la bannière |
+| Événement du formulaire | inchangé ; passe par `before_send` de FUT-181 (URL nettoyée, aucune donnée ajoutée) |
+| `ph-no-capture` | gardé (permanent) |
+| Politique de confidentialité | fusion sans conflit ; une seule date (`9 novembre 2026`) ; par rapport à `main`, la branche n'ajoute que les passages FUT-94 (avis, base légale, durées) |
+| Tests | FUT-181 (17), FUT-121 (15), FUT-147 non-régression (21) et voisins, octroi FUT-115 (34), FUT-94 (40) : verts sur la branche synchronisée |
 
 ## Consulter les réponses (administrateur)
 
@@ -153,7 +127,7 @@ L'intérêt légitime (art. 6.1.f RGPD) n'est **pas acquis d'office** : il suppo
 
 Les deux tâches ont ensuite été retirées (`cron.unschedule`) et l'extension pg_cron désinstallée du projet de test. **Aucune planification n'existe en production** : elle reste une décision du responsable du traitement (durées), puis une étape de mise en production.
 
-**Limite de l'alerte** : c'est une requête, pas une notification. Tant qu'aucune supervision ne l'appelle, quelqu'un doit la lancer chaque semaine (procédure ci-dessous). Brancher une notification (Edge Function planifiée, ou supervision externe qui lit la requête) est hors du périmètre de FUT-94.
+**Limite de l'alerte** : c'est une requête, pas une notification. Une planification quotidienne ne se surveille pas elle-même : si pg_cron s'arrête, si le projet est mis en pause ou si la tâche disparaît, rien ne le signale. D'où la supervision par signal de vie proposée dans le plan de mise en production (étapes 5 et 6).
 
 **Suppression plutôt qu'anonymisation.** Retirer `user_id` laisserait la ligne rattachée à un dossier d'adresse, donc à son propriétaire : ce serait une pseudonymisation, pas une anonymisation. Ce qui se conserve sans limite, ce sont les décomptes agrégés (requêtes 2 à 4), qui ne désignent personne.
 
@@ -163,20 +137,83 @@ Les deux tâches ont ensuite été retirées (`cron.unschedule`) et l'extension 
 - « Données collectées » : l'avis en fin de dossier, enregistré avec le compte et rattaché au dossier concerné, qui peut être celui d'une adresse (l'adresse n'est pas recopiée, mais reste reliée par le dossier) ; sans le projet ; lu par l'équipe seulement, jamais publié sans accord exprès, modifiable et effaçable depuis le dossier. Les avis ne sont présentés ni comme anonymes ni comme indépendants d'une adresse (contre-revue du 09/11/2026).
 - Finalités : « Intérêt légitime (voir ci-dessous) », suivi d'un paragraphe qui l'explique et donne le moyen de s'opposer.
 - Conservation : 12 mois pour le commentaire, 24 mois pour la réponse, effacement avec le compte, avec le bien ou sur demande.
-- **Non corrigé ici** : la mention « PostHog avec consentement », que le défaut global contredit (voir § PostHog).
+- Les passages PostHog de la politique relèvent de FUT-181, livré : ils décrivent désormais une mesure soumise au consentement, conforme au code.
 
-## Mise en production (hors de cette mission, chaque étape sur accord explicite)
+## Mise en production : plan exécutable (rien n'est exécuté sans accord explicite)
 
-0. **Préalables** : base légale et durées validées par le responsable du traitement (§ Confidentialité) ; PR fusionnée.
-1. **Migration** : appliquer `supabase/39_retours_utilite_dossier.sql` en production (SQL Editor, fichier entier, en une fois). Elle ne touche aucune table existante. Retour arrière : `39_retours_utilite_dossier_down.sql` (détruit les retours et la fonction ; retirer d'abord la planification, étape 5).
-2. **Contrôles, avant tout déploiement** (SQL Editor, production) :
-   - `select grantee, privilege_type from information_schema.role_table_grants where table_name = 'dossier_utility_feedback' and grantee in ('anon','authenticated');` → **une seule ligne** : `authenticated | SELECT` ;
-   - `select has_function_privilege('authenticated', 'public.purger_retours_utilite(interval,interval)', 'execute');` → `false` (idem `anon`) ;
-   - `select policyname, cmd from pg_policies where tablename = 'dossier_utility_feedback';` → `dossier_utility_feedback_select_own | SELECT` ;
-   - avis de sécurité Supabase : aucun avis sur ces deux objets (vérifié sur le projet de test).
-3. **Déploiement** de la branche fusionnée. Sans l'étape 1, la question reste simplement absente.
-4. **Vérification** sur un compte interne qui possède un dossier : la question apparaît sous le dossier ; une réponse « Pas vraiment » + commentaire, puis « Oui », puis « Pas encore lu » ; requête 1 de `fut94-retours-utilite.sql` : une seule ligne, commentaire effacé à la fin, `created_at` inchangé. Puis effacer cette ligne de test (requête 5).
-5. **Purge planifiée** : `supabase/maintenance/fut94-planifier-purge.sql`, blocs 1 à 3 ; le lendemain, bloc 3 (une exécution `succeeded`) ; puis le bloc 4 (alerte) chaque semaine, ou branché sur une supervision.
+**État de la production constaté** (vérification indépendante du 09/11/2026) : `public.dossier_utility_feedback` absente, `public.purger_retours_utilite(interval,interval)` absente, extension `pg_cron` absente. Les commandes ci-dessous partent de cet état. Chaque étape a son contrôle et son retour arrière ; on ne passe à la suivante que si le contrôle est conforme.
+
+### 1. Décisions préalables (responsable du traitement)
+
+- Base légale : intérêt légitime (test en trois temps, § Confidentialité) **ou** consentement. Si consentement : ne pas livrer en l'état, la mention et le recueil changent.
+- Durées : 12 mois (commentaire), 24 mois (réponse). Les changer = changer les valeurs par défaut de la fonction, la politique et cette note, avant l'étape 2.
+- Supervision : choix du service de signal de vie et du destinataire des alertes (étape 5).
+- Inscription au registre des traitements (finalité, données, durées, destinataires : l'équipe).
+
+### 2. Migration 39 (SQL Editor, production)
+
+Avant : vérifier les prérequis (doivent rendre `true`, `true`, `false`, `false`) :
+
+```sql
+select to_regclass('public.address_dossiers') is not null as biens,
+       exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'address_dossiers' and column_name = 'id' and data_type = 'uuid') as id_uuid,
+       to_regclass('public.dossier_utility_feedback') is not null as table_39,
+       to_regprocedure('public.purger_retours_utilite(interval,interval)') is not null as purge_39;
+```
+
+Puis coller **le fichier entier** `supabase/39_retours_utilite_dossier.sql` (SHA-256 `8ff1c99fb65af1cfce9b260360587592ca0a441de02425146cc48eb178a80d40`, identique à celui audité et appliqué sur le projet de test, inchangé depuis `1f3285c5` ; le retour arrière : `d3033dfe81a0050bc704aacc721e2dd8b3680cc39bfe8cf8c5720b92bb37aa1d`), et l'exécuter une fois. Il est transactionnel (`begin … commit`) et ne modifie aucune table existante. Retour arrière : `supabase/39_retours_utilite_dossier_down.sql` (détruit la table, donc les retours, et la fonction ; retirer d'abord toute planification, étape 5).
+
+### 3. Vérification RLS, privilèges et fonction (SQL Editor, production)
+
+```sql
+-- a. Privilèges de table : attendu  authenticated | SELECT  (une ligne, rien pour anon)
+select grantee, string_agg(privilege_type, ',') from information_schema.role_table_grants
+ where table_schema = 'public' and table_name = 'dossier_utility_feedback' and grantee in ('anon', 'authenticated') group by grantee;
+-- b. RLS et policy : attendu  true  puis  dossier_utility_feedback_select_own | SELECT | {authenticated}
+select relrowsecurity from pg_class where oid = 'public.dossier_utility_feedback'::regclass;
+select policyname, cmd, roles from pg_policies where schemaname = 'public' and tablename = 'dossier_utility_feedback';
+-- c. Fonction : attendu  false, false, false, true, security definer = true, search_path=public
+select has_function_privilege('anon', 'public.purger_retours_utilite(interval,interval)', 'execute') as anon,
+       has_function_privilege('authenticated', 'public.purger_retours_utilite(interval,interval)', 'execute') as authenticated,
+       has_function_privilege('public', 'public.purger_retours_utilite(interval,interval)', 'execute') as public,
+       has_function_privilege('service_role', 'public.purger_retours_utilite(interval,interval)', 'execute') as service_role,
+       prosecdef, proconfig
+  from pg_proc where oid = 'public.purger_retours_utilite(interval,interval)'::regprocedure;
+-- d. Contraintes : attendu 12 (relevé sur le projet de test) : address_dossier_id_fkey, answer_check, artifact_version_check,
+--    comment_check, comment_date_ck, insee_code_check, non_lu_ck, one_per_dossier, pkey, presentation_check, scope_ck, user_id_fkey
+select conname from pg_constraint where conrelid = 'public.dossier_utility_feedback'::regclass order by 1;
+-- e. Purge à blanc : attendu  0 | 0  (table vide)
+select * from public.purger_retours_utilite();
+```
+
+Puis Supabase > Advisors > Security : aucun avis sur ces deux objets (aucun sur le projet de test).
+
+### 4. Fusion et déploiement
+
+Fusion de la PR #135 (SHA validé par la contre-revue finale), puis déploiement de `main` (seule branche déployée, `vercel.json`). Contrôle : sur un dossier, la question apparaît sous le dossier ; `/politique-confidentialite` montre la ligne « Votre avis sur un dossier ». Retour arrière : redéployer le déploiement précédent ; la table reste, inerte. Sans l'étape 2, la question reste absente et rien ne casse (ordre inverse toléré).
+
+### 5. Purge planifiée et signal de vie
+
+La planification quotidienne seule ne dit rien de ses échecs, et une requête d'alerte qu'on ne lance pas ne protège rien. Proposition : **un signal de vie (heartbeat) envoyé par la purge elle-même, surveillé hors de Supabase.**
+
+- Un service de surveillance de tâches planifiées (Healthchecks.io, Better Stack, Cronitor… **à choisir**, étape 1) attend un appel par jour et alerte (e-mail, SMS) s'il manque après un délai de grâce (26 h conseillé).
+- La tâche pg_cron enchaîne la purge et l'appel, dans **la même transaction** : si la purge échoue, la transaction est annulée et `pg_net` n'envoie rien (ses requêtes partent à la validation). Le silence déclenche alors l'alerte.
+- Ce schéma détecte ce que la requête d'alerte ne peut pas signaler seule : purge en échec, tâche supprimée ou désactivée, pg_cron arrêté, base indisponible, projet mis en pause.
+- L'appel ne transmet **aucune donnée personnelle** (une URL, aucun corps). Le service est néanmoins un nouveau prestataire, à noter.
+- L'URL, qui fait office de jeton, va dans Supabase Vault, pas en clair dans `cron.job`.
+
+Les commandes exactes sont le bloc 6 de `supabase/maintenance/fut94-planifier-purge.sql` (activation de `pg_cron` et `pg_net`, secret Vault, `cron.schedule` avec signal de vie). Le même schéma vaut pour la purge de la migration 38 (`purge-dossier-intents`), elle aussi non planifiée.
+
+### 6. Contrôle de la supervision effective
+
+- Le jour même : le test d'alerte du service (notification de test reçue par le destinataire désigné).
+- J+1 : bloc 3 (`cron.job_run_details` : une exécution `succeeded`, « 1 row ») ; le service montre un appel reçu.
+- **Épreuve d'échec**, une fois, en production, sans effet sur les données : planifier pour une minute une tâche de test qui appelle la purge avec des délais incohérents (elle échoue avant toute écriture), suivie du même appel de signal vers un **second** contrôle du service, réglé à 5 minutes de grâce et amorcé par un appel manuel ; constater l'alerte « manquant », puis `cron.unschedule` et supprimer ce second contrôle. Sur le projet de test, cette épreuve a montré l'échec et son message dans `cron.job_run_details`, et la requête d'alerte l'a rendu (§ Conservation).
+- Ensuite : bloc 4 (requête d'alerte) en diagnostic quand le service alerte.
+
+### 7. Recette sur un compte interne
+
+Sur un compte interne qui possède un dossier (aucune donnée de client) : « Pas vraiment » + commentaire de test, puis « Oui » (commentaire gardé), puis « Pas encore lu » (commentaire effacé, champ vide au retour à « Oui »). Requête 1 de `fut94-retours-utilite.sql` : une seule ligne, `created_at` inchangé, commentaire nul. Puis **supprimer la ligne d'essai** (requête 5, retour entier) et vérifier qu'elle a disparu. Si le consentement est accordé sur ce navigateur, vérifier dans PostHog que l'événement ne porte aucun texte.
 
 ## Vérifications
 
@@ -213,7 +250,7 @@ Les deux tâches ont ensuite été retirées (`cron.unschedule`) et l'extension 
 
 `2026-11-09-fut94-retour-utilite/recette-reelle.mjs`, résultat dans `recette-reelle.txt`, captures `reel-*.png`. L'application locale (`next dev`) branchée sur le projet de test, deux comptes réels (A en classique, R en Relevé via `DECISION_RELEVE_COMPTES`), connexion par le vrai formulaire, chaque cas vérifié **à l'écran et en base**. Seul PostHog est intercepté dans le navigateur.
 
-**30/30** (rejouée après la contre-revue, sur l'état synchronisé avec `main`), dans chaque présentation : première question sans réponse en base ; « Oui » sans commentaire ; ajout, modification puis effacement du commentaire ; réponse commentée → « Pas encore lu » (retrait annoncé, plus de champ) ; retour à « Oui » (champ vide, rien en base) ; **brouillon jamais envoyé → « Pas encore lu » → « Oui » (champ vide, brouillon jamais parti)** ; rechargement (état relu en base, question non reposée) ; double clic (un seul envoi, une ligne) ; panne réseau puis « Réessayer l'envoi » (texte conservé, rien écrit pendant la panne) ; clavier (Entrée sur « Modifier » puis sur une réponse, focus gardé dans le bloc, statut annoncé). Puis : deux biens d'un même compte isolés ; consentement absent et `denied` (0 événement FUT-94) et `granted` (2 événements, sans texte) ; table illisible (question absente, page intacte) et sa contre-épreuve (question de retour), jouées lors de la première passe. Journal serveur de la dernière passe : 33 envois, tous 200, **textes du commentaire et du brouillon jamais présents**.
+**30/30** (rejouée après la contre-revue, puis à nouveau après la fusion de FUT-181 : 28/28 sur le code courant, les 2 cas « table illisible » venant de la première passe), dans chaque présentation : première question sans réponse en base ; « Oui » sans commentaire ; ajout, modification puis effacement du commentaire ; réponse commentée → « Pas encore lu » (retrait annoncé, plus de champ) ; retour à « Oui » (champ vide, rien en base) ; **brouillon jamais envoyé → « Pas encore lu » → « Oui » (champ vide, brouillon jamais parti)** ; rechargement (état relu en base, question non reposée) ; double clic (un seul envoi, une ligne) ; panne réseau puis « Réessayer l'envoi » (texte conservé, rien écrit pendant la panne) ; clavier (Entrée sur « Modifier » puis sur une réponse, focus gardé dans le bloc, statut annoncé). Puis : deux biens d'un même compte isolés ; consentement absent et `denied` (0 événement FUT-94) et `granted` (2 événements, sans texte) ; table illisible (question absente, page intacte) et sa contre-épreuve (question de retour), jouées lors de la première passe. Journal serveur de la dernière passe : 33 envois, tous 200, **textes du commentaire et du brouillon jamais présents**.
 
 **Défaut trouvé et corrigé.** Après « Pas encore lu », l'écran annonçait « Votre commentaire précédent a été retiré » ; la base était juste (NULL), mais revenir à « Oui » **reproposait l'ancien texte dans le champ**, et un clic sur « Envoyer » l'aurait ré-enregistré. Le composant vide désormais le champ à chaque passage à « Pas encore lu ». La première version de ce correctif ne vidait le champ que si un commentaire **enregistré** était retiré : un brouillon jamais envoyé revenait encore (relevé par la contre-revue sur `1f3285c5`). Deux tests d'écran couvrent les deux cas, dans les deux présentations, chacun rouge sans le correctif (2 échecs) et vert avec. Un test d'écran existant reposait sur un faux serveur qui ne conservait pas le commentaire, contrairement au vrai : il part maintenant du même état que l'écran.
 

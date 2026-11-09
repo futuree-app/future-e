@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import posthog from "posthog-js";
 import { bindOrphans } from "@/lib/typography";
-import { mesureAutorisee } from "@/lib/consentement-mesure";
+import { mesureConsentie } from "@/lib/mesure-audience-regles";
 import {
   LIBELLE_REPONSE, MAX_COMMENTAIRE, QUESTION_COMMENTAIRE, QUESTION_UTILITE, REPONSES_UTILITE,
   longueurCommentaire, type ReponseUtilite, type RetourEnregistre,
@@ -26,11 +26,13 @@ import d from "./autour-du-releve.module.css";
 //     compte et par dossier, de toute façon ;
 //   · une réponse enregistrée ne se redemande pas : à la visite suivante, une ligne la rappelle, avec
 //     de quoi la modifier, et rien d'autre ;
-//   · le commentaire reste privé : il ne part jamais vers PostHog. Le bloc porte `ph-no-capture`, que
-//     posthog-js honore deux fois : l'autocapture l'ignore (aucun clic, aucun texte d'élément), et
-//     l'enregistreur de session le remplace par un aplat (`blockClass`). Le seul événement est celui,
-//     explicite, qui suit un enregistrement confirmé, et il ne part qu'avec le consentement
-//     « granted » de la bannière (`mesureAutorisee`) ;
+//   · le commentaire reste privé : il ne part jamais vers PostHog, même avec le consentement. Le seul
+//     événement est celui, explicite, qui suit un enregistrement confirmé ; il ne porte aucun texte et
+//     ne part qu'avec « granted » (`mesureConsentie`, la règle unique de FUT-181, `mesure-audience-regles`).
+//     Depuis FUT-181, PostHog n'est même pas initialisé sans ce consentement, et `before_send` le relit
+//     à chaque événement : cette garde locale est redondante, gardée pour qu'aucun envoi de ce bloc ne
+//     dépende d'un réglage lointain. Le bloc porte en plus `ph-no-capture` : l'autocapture l'ignore, et
+//     l'enregistreur de session (coupé par FUT-181) le masquerait s'il était un jour réactivé ;
 //   · passer à « Pas encore lu » retire le commentaire enregistré (la route l'efface), et l'écran le dit.
 //
 // Les boutons ne passent JAMAIS en `disabled` pendant un envoi : un bouton désactivé perd le focus,
@@ -112,7 +114,7 @@ export function RetourUtilite({
       // UN ÉVÉNEMENT AGRÉGÉ, SANS LE TEXTE, ET SEULEMENT AVEC CONSENTEMENT. La réponse, la présence d'un
       // commentaire, la portée.
       try {
-        if (mesureAutorisee()) posthog.capture("dossier_utility_feedback_submitted", {
+        if (mesureConsentie()) posthog.capture("dossier_utility_feedback_submitted", {
           answer: json.retour.answer,
           has_comment: json.retour.comment !== null,
           step: type,
