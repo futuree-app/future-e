@@ -43,13 +43,8 @@ import { bindOrphans } from "@/lib/typography";
 // Le contrat de réponse (ApiResponse) vit dans @/lib/logement-report-types (LogementReport),
 // partagé avec la route qui le produit. Importé en alias ci-dessus.
 
-// Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker l'adresse
-// (djb2 -> base36). Sert à compter les adresses DISTINCTES analysées par commune, sans PII.
-function addressToken(banId: string): string {
-  let h = 5381;
-  for (let i = 0; i < banId.length; i++) h = ((h << 5) + h + banId.charCodeAt(i)) | 0;
-  return (h >>> 0).toString(36);
-}
+// FUT-181 : plus de `address_token` dans la mesure. C'était un hachage djb2 de l'identifiant BAN :
+// avec la commune jointe et la BAN publique, il redonnait l'adresse exacte du logement.
 
 // Statut DPE persisté (colonne) -> état runtime du module. Restauré tel quel à la rehydratation
 // (on ne re-dérive JAMAIS l'attribution : le choix figé de l'utilisateur fait autorité).
@@ -258,7 +253,6 @@ export default function LogementModule({
         dpe_selection_status: row.dpe_selection_status,
         insee: row.insee,
         source: rehydrateSource,
-        address_token: addressToken(row.ban_id),
       });
     }
   }

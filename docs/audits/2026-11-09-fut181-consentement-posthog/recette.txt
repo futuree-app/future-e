@@ -1,0 +1,46 @@
+OK   1. Première visite, tout le parcours : 0 événement — aucun
+OK   1. Première visite : 0 requête technique PostHog (SDK non initialisé)
+OK   1. Première visite : identifiant déposé avant FUT-181 effacé, rien de nouveau
+OK   2. Refus explicite (puis parcours et rechargement) : 0 événement, 0 requête — aucun / 0 technique(s)
+OK   2. Refus : aucune trace PostHog dans le navigateur
+OK   3. Acceptation : rien avant le clic
+OK   3. Acceptation : la mesure démarre sans rechargement ($pageview de la page courante) — $set×3, $pageview×3, $autocapture×1, $$heatmap×2, $pageleave×1
+OK   3. Acceptation : autocapture active
+OK   3. Acceptation : aucun $opt_in ni événement antérieur rejoué
+OK   3. Acceptation : l'adresse de l'URL /checkout/dossier ne part pas
+OK   3. Acceptation : /connexion?next=<adresse> part sans son paramètre — /connexion
+OK   3. Acceptation : l'URL garde la commune, perd le dossier et le secret Stripe — /comparateur?communes=17300
+OK   3. Acceptation : autocapture sans texte d'élément
+OK   3. Acceptation : aucun enregistrement de session ($snapshot)
+     trafic technique après acceptation : GET /ingest/static/web-vitals.js | GET /ingest/static/exception-autocapture.js | GET /ingest/array/phc_fut181_test/config.js | POST /ingest/flags/ | GET /ingest/array/phc_fut181_test/config | GET /ingest/static/dead-clicks-autocapture.js
+OK   4. Acceptation puis refus : des événements avant — 4 événement(s), 6 trace(s)
+OK   4. Acceptation puis refus : 0 événement après, navigation et rechargement compris — aucun
+OK   4. Acceptation puis refus : 0 requête technique après
+OK   4. Acceptation puis refus : traces PostHog effacées
+OK   5. Deux onglets : l'onglet B mesurait avant
+OK   5. Deux onglets, refus dans A : plus rien ne part de B — aucun
+OK   5. Deux onglets : traces effacées
+OK   6. Connecté sans consentement : 0 événement, aucune identification — aucun
+OK   6. Connecté sans consentement : 0 requête PostHog
+OK   7. Connecté avec consentement : $identify sur l'UUID — $set×2, $identify×1, $pageview×2, $pageleave×1
+OK   7. Connecté avec consentement : l'e-mail n'apparaît dans aucun envoi
+OK   7. Connecté : les événements suivants portent l'UUID
+OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1c045-696d-78ae-8782-e976f8064ab2
+OK   8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 01a1c045-9b05-78b5-bc54-6c8e3aeae1d3
+OK   9. Champ libre et adresse de dossier : aucun contenu personnel dans les envois — 11 événement(s), 0 fuite(s)
+OK   10. Refus puis rechargements : choix respecté avant toute requête
+OK   10. Acceptation puis rechargement : mesure active dès le chargement
+OK   11. Stockage inaccessible, même après « Accepter » : 0 événement, 0 requête — aucun / 0
+OK   12. Google : refus par défaut avant tout choix — default:denied/denied
+OK   12. Google : acceptation → update accordé — update:granted/granted
+OK   12. Google : réouverture des préférences → update refusé, sans attendre un clic — update:denied/denied ; état interne du tag : update=false
+OK   12. Google : après réouverture, les événements nouveaux partent en refus — /ou-vivre:page_view/G100 (avant : 4 requête(s))
+INFO  12. Google : événements créés AVANT la réouverture et envoyés après (file GA4) — aucun
+OK   12. Google : refus, puis réouverture, puis nouvelle acceptation suivis dans l'ordre — update:denied/denied → update:denied/denied → update:granted/granted
+OK   13. Google, deux onglets : B applique le choix retenu — default:denied/denied | update:granted/granted
+OK   13. Google, deux onglets : préférences rouvertes dans A → B passe en refus — update:denied/denied ; état interne du tag dans B : update=false
+OK   13. Google, deux onglets : les événements nouveaux de B partent en refus — /comparateur:page_view/G100
+INFO  13. Google, deux onglets : événements créés AVANT le retrait et envoyés après (file GA4) — /comparateur:scroll/G111
+OK   13. Google, deux onglets : refus puis nouvelle acceptation dans A suivis par B — update:denied/denied → update:granted/granted
+
+TOUS LES ATTENDUS TENUS

@@ -6,8 +6,6 @@ import { getResend } from "@/lib/resend";
 import { ouvrirEnvoi, fermerEnvoi, dejaEnvoye, type EmailKind } from "@/lib/server/email-log";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe";
-import { getPostHogClient } from "@/lib/posthog-server";
-import { sanitizeDistinctId } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 import { communeParent } from "@/lib/plm";
 import { nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
@@ -240,13 +238,15 @@ async function buildInvoiceAttachment(
 async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   const {
     userId, userEmail, productType, targetInsee, targetCommune, grantSource, grantRank,
-    phDistinctId,
   } = paymentIntent.metadata;
 
-  // LE SEUL POINT DU PARCOURS SANS NAVIGATEUR : l'identité de mesure voyage par les métadonnées
-  // Stripe. Sans elle, `payment_completed` créait une personne distincte de celle qui a cliqué,
-  // parce que le navigateur identifie sur l'UUID Supabase et qu'on émettait sur l'e-mail.
-  const distinctId = sanitizeDistinctId(phDistinctId, userId || paymentIntent.id);
+  // AUCUNE MESURE D'AUDIENCE DANS LE WEBHOOK (FUT-181, contre-revue). Le webhook arrive sans navigateur,
+  // parfois longtemps après l'intention de paiement : il ne peut pas savoir si le consentement donné au
+  // moment du clic tient encore. Un retrait entre l'intention et la confirmation aurait laissé partir
+  // `payment_completed` / `address_dossier_purchased` sous l'ancien identifiant. Ces événements sont
+  // donc retirés tant qu'une règle de consentement actualisé n'existe pas. Le suivi commercial reste
+  // entier hors PostHog : Stripe, tables `payments` / `address_dossiers` / packs, facture, e-mail.
+  // L'entonnoir garde `payment_intent_created`, émis par create-payment-intent pendant la requête du navigateur consentant.
 
   // Territoire ciblé (parcours comparateur). Vide = achat sur la résidence.
   const insee = typeof targetInsee === "string" ? targetInsee.trim() : "";
@@ -288,14 +288,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       // réparer.
       throw new Error(`dossier_intents introuvable pour ${paymentIntent.id}`);
     }
-
-    // Le rang du dossier dans le compte, AVANT l'insertion. C'est la seule valeur d'historique de
-    // l'instrumentation, et elle a une source réelle : la base la connaît, personne ne l'invente.
-    const { count: paidBefore } = await supabaseAdmin
-      .from("address_dossiers")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", intent.user_id)
-      .not("stripe_payment_intent_id", "is", null);
 
     // `upsert` avec `ignoreDuplicates`, JAMAIS `insert`. Un `insert` sur une clé déjà prise lève
     // une erreur, donc un webhook rejoué échouerait à chaque fois.
@@ -393,7 +385,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // achète un SECOND bien dans une commune où il en possède déjà un se verrait rouvrir l'ancien,
     // juste après avoir payé le nouveau.
     //
-    // `created` GOUVERNE CETTE BASCULE, comme il gouverne l'e-mail et l'événement d'achat (revue du
+    // `created` GOUVERNE CETTE BASCULE, comme il gouverne l'e-mail (revue du
     // 11/08/2026). Sans lui, un `payment_intent.succeeded` rejoué par Stripe des jours plus tard
     // remettrait un ancien dossier au premier plan, alors que le lecteur en a ouvert un autre
     // depuis : le contrat « dernier bien effectivement ouvert » tomberait sur un événement que
@@ -417,7 +409,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       }
     }
 
-    // `created` GOUVERNE L'E-MAIL, comme il gouverne déjà l'événement d'achat plus bas. Il ne le
+    // `created` GOUVERNE L'E-MAIL. Il ne le
     // gouvernait pas jusqu'au 31/07/2026 : un rejeu du webhook renvoyait le message à l'acheteur,
     // et le code provoque délibérément des rejeux quand l'intention manque.
     if (userEmail && created) {
@@ -439,25 +431,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       }, { pi: paymentIntent.id, quoi: "dossier d'adresse", kind: "dossier", supabase: supabaseAdmin });
     }
 
-    // ÉMIS À LA CRÉATION SEULEMENT. Un rejeu compterait un second achat, et son
-    // `rank_in_dossiers` serait faux puisque le dossier existe déjà au moment du décompte.
-    // `$insert_id` ajoute une déduplication côté PostHog si deux instances traitaient l'événement.
-    if (created) {
-      const posthog = getPostHogClient();
-      posthog.capture({
-        distinctId,
-        event: "address_dossier_purchased",
-        properties: {
-          $insert_id: `address_dossier_purchased_${paymentIntent.id}`,
-          amount_paid_cents: paymentIntent.amount,
-          deducted: (intent.territory_deduction_cents ?? 0) > 0,
-          insee: intent.insee,
-          dossier_id: dossier.id,
-          rank_in_dossiers: (paidBefore ?? 0) + 1,
-        },
-      });
-      await posthog.shutdown();
-    }
     return;
   }
 
@@ -475,13 +448,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     if (!octroi.ok) {
       throw new Error(`comparatif non octroyé pour ${paymentIntent.id} : ${octroi.motif}`);
     }
-    // Revue FUT-115 : un paiement déjà enregistré signale un REJEU. Il sert à n'émettre `payment_completed`
-    // qu'une fois ; l'e-mail, lui, se garde sur sa propre trace (`dejaEnvoye`), qui seule sait s'il est parti.
-    const { data: dejaEnregistre } = await supabaseAdmin
-      .from("payments")
-      .select("status")
-      .eq("stripe_payment_intent_id", paymentIntent.id)
-      .maybeSingle();
     // L'écriture est vérifiée : ignorée, elle laissait un achat livré sans trace de paiement, et c'est cette
     // table que l'on relit pour rapprocher les comparatifs de leurs encaissements.
     const { error: paiementError } = await supabaseAdmin.from("payments").upsert(
@@ -510,17 +476,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         ...email,
         attachments,
       }, { pi: paymentIntent.id, quoi: "pack décision", kind: "pack", supabase: supabaseAdmin });
-    }
-    // Une seule fois par paiement. Une interruption entre l'enregistrement et cet envoi perd l'événement :
-    // une mesure manquante vaut mieux qu'un achat compté deux fois.
-    if (!dejaEnregistre) {
-      const posthog = getPostHogClient();
-      posthog.capture({
-        distinctId,
-        event: "payment_completed",
-        properties: { product_type: productType, amount: paymentIntent.amount / 100 },
-      });
-      await posthog.shutdown();
     }
     return;
   }
@@ -613,19 +568,6 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}`, kind: "territoire", supabase: supabaseAdmin });
   }
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId,
-    event: "payment_completed",
-    properties: {
-      product_type: productType,
-      amount: paymentIntent.amount / 100,
-      currency: paymentIntent.currency,
-      payment_intent_id: paymentIntent.id,
-      user_id: userId && userId !== "anonymous" ? userId : null,
-    },
-  });
-  await posthog.shutdown();
 }
 
 export async function POST(request: Request) {

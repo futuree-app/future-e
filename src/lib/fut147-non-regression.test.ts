@@ -403,6 +403,20 @@ test("IA : le prompt de l'assistant n'a changé que de son bloc eau (FUT-164), e
 // FUT-138 (02/11/2026) : les prix immobiliers relus par la route /ask dans l'index (le navigateur n'envoie que le
 // code INSEE de chaque carte), et la consigne qui permet enfin de répondre à une question de prix. Aucune ne
 // parle des feux ; la synthèse rédigée n'a pas changé.
+// FUT-181 (09/11/2026) : la route ne mesure plus que sur un identifiant de mesure consenti. Rien d'autre ne change :
+// ni la lecture, ni le prompt, ni le quota.
+const LIGNES_FUT181 = [
+  `+import { identifiantMesureConsenti, MESURE_MUETTE } from "@/lib/posthog-identity";`,
+  `-  const distinctId = typeof body.distinctId === "string" && body.distinctId ? body.distinctId : "anon";`,
+  `+  // FUT-181 : mesuré seulement si le navigateur a consenti, donc transmis son identifiant de mesure.`,
+  `+  // Plus de repli sur « anon » : sans identifiant, aucun événement.`,
+  `+  const distinctId = identifiantMesureConsenti(body.distinctId) ?? "";`,
+  `+  const clientMesure = () => (distinctId ? getPostHogClient() : MESURE_MUETTE);`,
+  `-    const ph = getPostHogClient();`,
+  `+    const ph = clientMesure();`,
+  `-  const ph = getPostHogClient();`,
+  `+  const ph = clientMesure();`,
+];
 const LIGNES_FUT138 = [
   "+import { getLecturesPrix } from \"@/lib/prix-immobiliers-commune\";",
   "+import { blocPrixPourModele, type LecturePrix } from \"@/lib/prix-immobiliers\";",
@@ -502,6 +516,7 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
     `+  const e = etat(globale);`,
     `+  return e === "complete" && nonMesureesParCarte.some((n) => !Array.isArray(n) || n.length > 0) ? "inconnue" : e;`,
     ...LIGNES_FUT138,
+    ...LIGNES_FUT181,
   ]);
   for (const f of ["src/lib/comparateur/lecture-ask.ts", "src/app/api/comparateur-vie/synthesize/route.ts", "src/app/api/comparateur-vie/ask/route.ts"]) {
     const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import posthog from "posthog-js";
+import { identifiantMesure } from "@/lib/mesure-audience";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
 import { PaymentForm } from "@/components/PaymentForm";
@@ -10,12 +10,10 @@ import { paymentIntentDuSecret } from "@/lib/verrou-intention-dossier";
 // L'identité de mesure du navigateur, transmise au serveur pour qu'il émette SOUS LA MÊME
 // PERSONNE. Sans elle, les événements de paiement appartiennent à quelqu'un d'autre que le
 // parcours qui les a produits. Même patron que `ou-vivre` et `comparateur-vie/ask`.
+// FUT-181 : transmise SEULEMENT avec le consentement ; sans elle, ni la création de l'intention ni
+// le webhook n'émettent d'événement de mesure.
 function clientDistinctId(): string | undefined {
-  try {
-    return posthog.get_distinct_id?.() ?? undefined;
-  } catch {
-    return undefined;
-  }
+  return identifiantMesure();
 }
 
 // Territoire ciblé optionnel (parcours comparateur). Sans lui, l'achat porte

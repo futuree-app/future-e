@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Comment futur•e collecte, utilise et protège vos données personnelles.",
 };
 
-const LAST_UPDATED = "22 mai 2026";
+const LAST_UPDATED = "9 novembre 2026";
 
 const NO_SELL_NOTICE = "futur•e ne revend jamais les données personnelles de ses utilisateurs et ne les utilise pas à des fins de publicité comportementale.";
 
@@ -17,7 +17,7 @@ const PROCESSORS = [
   { name: "Vercel", role: "Hébergement et diffusion du site", location: "États-Unis, clauses contractuelles types UE", link: "https://vercel.com/legal/privacy-policy" },
   { name: "Stripe", role: "Traitement des paiements", location: "États-Unis, clauses contractuelles types UE", link: "https://stripe.com/fr/privacy" },
   { name: "Google (GA4 + GTM)", role: "Mesure d'audience (avec consentement)", location: "États-Unis, clauses contractuelles types UE", link: "https://policies.google.com/privacy" },
-  { name: "PostHog", role: "Analytics produit et enregistrements de session (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
+  { name: "PostHog", role: "Mesure d'usage du service (avec consentement)", location: "Union Européenne", link: "https://posthog.com/privacy" },
 ];
 
 export default function PolitiqueConfidentialitePage() {
@@ -150,7 +150,7 @@ export default function PolitiqueConfidentialitePage() {
                 ["Gérer votre compte et l'authentification", "Email", "Exécution du contrat"],
                 ["Traiter le paiement", "Données de paiement (Stripe)", "Exécution du contrat"],
                 ["Mesurer l'audience et améliorer le service", "Navigation, événements", "Consentement"],
-                ["Enregistrements de session et heatmaps", "Navigation (PostHog)", "Consentement"],
+                ["Cartes de clics (heatmaps)", "Position des clics sur une page (PostHog)", "Consentement"],
               ]}
             />
           </Section>
@@ -196,7 +196,13 @@ export default function PolitiqueConfidentialitePage() {
               Par défaut, aucun cookie de mesure ou de publicité n'est déposé sur votre navigateur. La bannière affichée à votre première visite vous permet d'accepter ou de refuser ces traceurs.
             </p>
             <p>
-              Un cookie technique (<code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>) est utilisé pour mémoriser votre choix. Il ne contient aucune donnée personnelle.
+              Votre choix est mémorisé dans le stockage de votre navigateur (<code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>futuree-consent</code>). Il ne contient aucune donnée personnelle.
+            </p>
+            <p>
+              Si vous acceptez, PostHog dépose un identifiant de mesure dans votre navigateur (un cookie et une entrée de stockage dont le nom commence par <code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>ph_</code>). Si vous refusez, ou tant que vous n&apos;avez pas choisi, PostHog n&apos;est pas chargé : votre navigateur ne lui envoie rien et rien n&apos;est déposé.
+            </p>
+            <p>
+              Retirer votre consentement arrête la mesure tout de suite, y compris dans vos autres onglets ouverts sur futur•e, et efface ces identifiants de votre navigateur.
             </p>
             <p>
               Vous pouvez modifier votre choix à tout moment depuis le lien{" "}
@@ -205,13 +211,26 @@ export default function PolitiqueConfidentialitePage() {
             </p>
           </Section>
 
-          {/* Session recordings */}
-          <Section title="Enregistrements de session">
+          {/* Mesure d'usage */}
+          <Section title="Ce que mesure futur•e, avec votre accord">
             <p>
-              Avec votre consentement, futur•e utilise PostHog pour enregistrer des sessions de navigation anonymisées (mouvements, clics, scroll). Ces enregistrements servent uniquement à améliorer l'ergonomie du service.
+              Avec votre consentement, futur•e utilise PostHog pour comprendre comment le service est utilisé : les pages vues, les clics (le type d&apos;élément cliqué, jamais son texte), les étapes franchies, les erreurs techniques et les temps de chargement.
             </p>
             <p>
-              Les enregistrements de session <strong style={{ color: "var(--fg-1)" }}>ne permettent pas de voir les mots de passe, les données bancaires ou tout champ sensible saisi</strong>, ces éléments sont masqués automatiquement avant transmission.
+              Les adresses de pages sont transmises <strong style={{ color: "var(--fg-1)" }}>avec les seuls paramètres que nous avons explicitement autorisés</strong>, qui décrivent une commune ou l&apos;origine d&apos;une visite, jamais une personne : le code des communes consultées, le mode d&apos;affichage, l&apos;horizon de projection, la page ou la liste d&apos;où vient le lien (et le rang dans cette liste), et les paramètres de campagne <code style={{ fontFamily: "monospace", fontSize: 13, background: "var(--bg-elev-3)", padding: "2px 6px", borderRadius: 4 }}>utm_…</code>. Tous les autres paramètres sont retirés : une adresse de logement, un identifiant de dossier ou de paiement présents dans l&apos;adresse de la page ne partent pas. La mesure ne reçoit jamais votre adresse, le texte de votre projet, vos commentaires, le contenu de vos dossiers, ni votre adresse e-mail. Si vous êtes connecté, elle est rattachée à un identifiant interne de compte.
+            </p>
+            <p>
+              futur•e <strong style={{ color: "var(--fg-1)" }}>n&apos;enregistre pas vos sessions de navigation</strong>.
+            </p>
+          </Section>
+
+          {/* Journal technique de l'assistant */}
+          <Section title="Journal technique de l'assistant">
+            <p>
+              Ce qui précède concerne la mesure faite depuis votre navigateur, qui n&apos;a lieu qu&apos;avec votre accord. Indépendamment de ce choix, quand l&apos;assistant répond à une question sur une commune, le serveur de futur•e note dans son journal technique, chez notre hébergeur : le modèle utilisé, la durée et le volume de la réponse, son statut, la commune et le thème concernés, et si la réponse a dû être remplacée par une réponse de secours.
+            </p>
+            <p>
+              Ce journal <strong style={{ color: "var(--fg-1)" }}>ne contient ni votre question, ni la réponse, ni aucun identifiant de compte ou de mesure</strong>. Il sert uniquement à surveiller le coût et le bon fonctionnement de l&apos;assistant. Il n&apos;est pas transmis à PostHog.
             </p>
           </Section>
 
