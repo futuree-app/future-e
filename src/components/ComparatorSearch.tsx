@@ -141,6 +141,21 @@ export function ComparatorSearch({
     [updateState],
   );
 
+  // Stable : ne dépend que d'`updateState`. Déclarée avant `resolveSelection`, qui la cite dans ses
+  // dépendances (FUT-121).
+  const handleSelect = useCallback(
+    (key: InputKey, commune: CommuneResult) => {
+      updateState(key, () => ({
+        value: commune.nom,
+        selected: { code: commune.code, nom: commune.nom },
+        results: [],
+        open: false,
+        loading: false,
+      }));
+    },
+    [updateState],
+  );
+
   const resolveSelection = useCallback(
     async (key: InputKey) => {
       const state = key === 'left' ? left : right;
@@ -177,7 +192,7 @@ export function ComparatorSearch({
         return null;
       }
     },
-    [left, right],
+    [left, right, handleSelect],
   );
 
   function handleChange(key: InputKey, value: string) {
@@ -194,16 +209,6 @@ export function ComparatorSearch({
     debounce.current[key] = setTimeout(() => {
       void search(key, value);
     }, 220);
-  }
-
-  function handleSelect(key: InputKey, commune: CommuneResult) {
-    updateState(key, () => ({
-      value: commune.nom,
-      selected: { code: commune.code, nom: commune.nom },
-      results: [],
-      open: false,
-      loading: false,
-    }));
   }
 
   async function runComparison() {

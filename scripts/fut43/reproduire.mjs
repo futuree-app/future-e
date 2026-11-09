@@ -4,7 +4,6 @@ import { writeFileSync } from "node:fs";
 const racine = process.cwd() + "/";
 const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
 const { loadTerritoireSnapshot } = await jiti.import(racine + "src/lib/server/territoire-snapshot.ts");
-const { screenFromSnapshot } = await jiti.import(racine + "src/lib/territoire/screen.ts");
 const { projectForSynthesis } = await jiti.import(racine + "src/lib/territoire/synthesis-contract.ts");
 const { deterministicSynthesis } = await jiti.import(racine + "src/lib/territoire/synthesis-deterministe.ts");
 const out = {};

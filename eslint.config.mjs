@@ -45,6 +45,25 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": ["error", { forbid: [">", "\"", "}"] }],
     },
   },
+  {
+    // UN `.cjs` EST UN MODULE COMMONJS, PAS UN MODULE ES. Node le charge comme tel quel que soit
+    // `package.json`. Sans ce bloc, ESLint l'analysait avec `sourceType: "module"`, la portée d'un
+    // module ES.
+    //
+    // UNE SEULE RÈGLE EST LEVÉE, ET SEULEMENT ICI. `@typescript-eslint/no-require-imports` demande
+    // de remplacer `require()` par `import`. Or `require()` est la syntaxe d'import de CommonJS :
+    // un `import` statique serait une erreur de syntaxe dans ce fichier. Lever la règle ici, c'est
+    // reconnaître un format de module. Ce n'est pas désactiver un contrôle : la règle reste en
+    // erreur sur tout le code `.ts`, `.tsx`, `.mts` et `.mjs`, et les `.cjs` gardent toutes les
+    // autres règles actives (variables inutilisées, `any`, règles Next…). En particulier,
+    // `@next/next/no-assign-module-variable` reste active : masquer l'objet `module` est aussi un
+    // piège en CommonJS. Ses deux occurrences ont été corrigées dans le code, pas exemptées.
+    files: ["**/*.cjs"],
+    languageOptions: { sourceType: "commonjs" },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -280,6 +280,7 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
   const [justSaved, setJustSaved] = useState(false);
   const [focusedTextarea, setFocusedTextarea] = useState(false);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pretRef = useRef(false);
   // Anti-doublon des événements PostHog dans une même session de page.
   const completedFiredRef = useRef(false);
   const freeTextFiredLenRef = useRef(0);
@@ -301,6 +302,7 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
     let cancelled = false;
     const frame = window.requestAnimationFrame(() => {
       if (cancelled) return;
+      let restaurees = false;
       try {
         const stored = window.localStorage.getItem(storageKey);
         if (stored) {
@@ -312,12 +314,17 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
             change: p.change ?? "",
             note: p.note ?? "",
           });
+          restaurees = true;
         }
       } catch {
         setAnswers(EMPTY);
       } finally {
         setReady(true);
       }
+      // Mêmes déclencheurs que l'ancien effet [answers, ready] : le carnet devient prêt, ou des
+      // réponses restaurées remplacent celles affichées.
+      if (!pretRef.current || restaurees) signalerSauvegarde();
+      pretRef.current = true;
     });
     return () => {
       cancelled = true;
@@ -362,16 +369,18 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
     return () => clearTimeout(timer);
   }, [answers, ready, inseeCode, commune, reportId]);
 
-  // ── feedback visuel "Sauvegardé" (effet indépendant)
-  useEffect(() => {
-    if (!ready) return;
+  // ── feedback visuel "Sauvegardé"
+  // Déclenché là où les réponses changent (FUT-121) : à la fin de l'hydratation et dans les deux
+  // gestionnaires de saisie, plutôt que par un effet qui appelait setState en réaction au rendu.
+  // L'affichage est le même : « Sauvegardé » pendant 1,8 s, relancé à chaque changement.
+  function signalerSauvegarde() {
     setJustSaved(true);
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     savedTimerRef.current = setTimeout(() => setJustSaved(false), 1800);
-    return () => {
-      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
-    };
-  }, [answers, ready]);
+  }
+  useEffect(() => () => {
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+  }, []);
 
   const answeredChoices = useMemo(
     () => [answers.heat, answers.water, answers.shelter, answers.change].filter(Boolean).length,
@@ -414,6 +423,7 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
       });
     }
     setAnswers((c) => ({ ...c, [field]: next }));
+    signalerSauvegarde();
   }
 
   return (
@@ -515,7 +525,10 @@ export function QuartierWorkbook({ userKey, commune, inseeCode, reportId }: Quar
           placeholder="Les nuits sont devenues plus lourdes, certains arbres souffrent davantage, l'eau manque plus souvent, les rues se vident plus tôt l'été..."
           rows={5}
           value={answers.note}
-          onChange={(e) => setAnswers((c) => ({ ...c, note: e.target.value }))}
+          onChange={(e) => {
+            setAnswers((c) => ({ ...c, note: e.target.value }));
+            signalerSauvegarde();
+          }}
           onFocus={() => setFocusedTextarea(true)}
           onBlur={() => {
             setFocusedTextarea(false);

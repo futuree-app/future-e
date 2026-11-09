@@ -31,7 +31,7 @@ test("un équipement 2025 remonte son nom, son adresse et son identifiant", () =
   assert.equal(education.nearest?.nom, "ECOLE PRIMAIRE PUBLIQUE DU MARAIS");
   assert.equal(education.nearest?.adresse, "1 RUE DE LA MAIRIE, 17290 CIRÉ-D'AUNIS");
   assert.equal(education.nearest?.identifiant, "20000797900020");
-  const p = preuveEquipement(education.nearest, "2025");
+  const p = preuveEquipement(education.nearest);
   assert.equal(p.nom, "Ecole Primaire Publique du Marais");
   assert.equal(p.adresse, "1 Rue de la Mairie, 17290 Ciré-d'Aunis");
   assert.equal(p.reserve, null);
@@ -42,7 +42,7 @@ test("deux exploitants au même point : aucun nom n'est choisi, la réserve est 
   assert.equal(alim.nearest?.nom, undefined, "aucun nom ne doit descendre dans le snapshot");
   assert.equal(alim.nearest?.identifiant, undefined);
   assert.equal(alim.nearest?.exploitants, 2);
-  const p = preuveEquipement(alim.nearest, "2025");
+  const p = preuveEquipement(alim.nearest);
   assert.equal(p.nom, null);
   assert.equal(p.adresse, "6 Grande Rue, 17290 Ciré-d'Aunis");
   assert.equal(p.reserve, "2 établissements recensés ici : la BPE ne dit pas lesquels sont ouverts.");
@@ -51,7 +51,7 @@ test("deux exploitants au même point : aucun nom n'est choisi, la réserve est 
   // « lesquels » : la donnée ne dit pas si les établissements se sont succédé ou s'ils partagent
   // les locaux, la phrase ne doit donc pas trancher.
   assert.equal(
-    preuveEquipement({ exploitants: 4, adresse: "4 RUE DU FOUR" }, "2025").reserve,
+    preuveEquipement({ exploitants: 4, adresse: "4 RUE DU FOUR" }).reserve,
     "4 établissements recensés ici : la BPE ne dit pas lesquels sont ouverts.",
   );
   // Ni l'ancienne enseigne, ni la nouvelle : le produit ne tranche pas.
@@ -97,7 +97,7 @@ test("un ancien snapshot, sans identité, reste lisible et ne promet rien", () =
   assert.equal(alim.nearest?.typeLabel, "Boulangerie");
   assert.equal(alim.nearest?.nom, undefined);
   assert.equal(alim.nearest?.adresse, undefined);
-  const p = preuveEquipement(alim.nearest, null);
+  const p = preuveEquipement(alim.nearest);
   assert.deepEqual(p, { nom: null, adresse: null, reserve: null });
 });
 
@@ -115,8 +115,8 @@ test("rien ne promet l'ouverture, les horaires, la qualité ni l'accessibilité"
   const textes = [
     LIMITE_BPE,
     sourceBpe("2025"),
-    preuveEquipement({ nom: "LE LION GOURMAND", adresse: "6 GRANDE RUE" }, "2025").nom!,
-    preuveEquipement({ exploitants: 2, adresse: "6 GRANDE RUE" }, "2025").reserve!,
+    preuveEquipement({ nom: "LE LION GOURMAND", adresse: "6 GRANDE RUE" }).nom!,
+    preuveEquipement({ exploitants: 2, adresse: "6 GRANDE RUE" }).reserve!,
   ].join(" ").toLowerCase();
   // « ouverture » figure dans LIMITE_BPE, pour dire qu'on ne la connaît pas : ce sont les
   // AFFIRMATIONS d'ouverture, d'accès et de qualité qui sont interdites.
@@ -196,6 +196,6 @@ test("FUT-99 : B104 garde sa distinction magasin/drive et son article", () => {
   assert.equal(avecArticle(TYPEQU_LABEL.B104!), "un hypermarché (magasin ou drive)");
   assert.equal(TYPEQU_LABEL.B105, "Supermarché");
   assert.equal(libelleCourant("Supermarché"), "Supermarché");
-  assert.deepEqual(preuveEquipement({ typeLabel: "Supermarché", distanceMeters: 264 }, null),
+  assert.deepEqual(preuveEquipement({ typeLabel: "Supermarché", distanceMeters: 264 }),
     { nom: null, adresse: null, reserve: null });
 });

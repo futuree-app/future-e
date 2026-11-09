@@ -7,7 +7,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const POP_FLOOR = 1500, PERFECT_THRESHOLD = 80, VIABILITY_BASELINE_W = 1;
+const POP_FLOOR = 1500, VIABILITY_BASELINE_W = 1;
 
 function lerp(a, x){ if(x==null) return null; if(x<=a[0][0]) return a[0][1]; const l=a[a.length-1]; if(x>=l[0]) return l[1];
   for(let i=1;i<a.length;i++){ if(x<=a[i][0]){ const [x0,y0]=a[i-1],[x1,y1]=a[i]; return y0+((y1-y0)*(x-x0))/(x1-x0);} } return l[1]; }

@@ -1,6 +1,5 @@
 // FUT-27 · Recette locale (anonyme) : « Où vivre » → session → /rapport. Aucune écriture : pas de compte.
 import { chromium } from "playwright-core";
-import { execSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3127";

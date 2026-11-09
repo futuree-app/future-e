@@ -5,7 +5,6 @@
 // La racine peut être un autre worktree (la base) : les textes y sont classés avec les tables de cette branche.
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
-import { writeFileSync } from "node:fs";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
 const hook = `
@@ -40,8 +39,8 @@ export async function load(url, ctx, next) {
 }`;
 const racineCode = process.argv[2] ?? "../..";
 register(`data:text/javascript,${encodeURIComponent(hook)}`);
-const V: any = await import(`${racineCode}/src/lib/comparateur-vie.ts`); // eslint-disable-line @typescript-eslint/no-explicit-any
-const H: any = await import("../../src/lib/comparateur-vie.ts"); // eslint-disable-line @typescript-eslint/no-explicit-any
+const V: any = await import(`${racineCode}/src/lib/comparateur-vie.ts`);
+const H: any = await import("../../src/lib/comparateur-vie.ts");
 const K = H.PREFERENCE_KEYS as string[];
 const negKeys = (t: string, c: any) => { const x = t.replace(/^En échange, /, "").replace(/\.$/, ""); return K.filter((k) => H.raisonNeg(k, c) === x || (H.COMPROMIS_NEG[k] && x.startsWith(H.COMPROMIS_NEG[k] + " qu'à "))); };
 const PROJ = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "futuree-consent";
 
@@ -16,25 +16,40 @@ function updateGoogleConsent(value: ConsentValue) {
   });
 }
 
+// CE QUE LE NAVIGATEUR A DÉJÀ RETENU, lu sans effet (FUT-121). Le serveur ne connaît pas le
+// stockage du navigateur : il rend le bandeau masqué (`SERVEUR`), et React relit la valeur réelle
+// juste après l'hydratation. C'est la séquence qu'assurait l'ancien affichage déclenché dans un
+// effet, sans le rendu en cascade. Stockage illisible : traité comme « aucun choix », donc bandeau
+// affiché, comme avant.
+const SERVEUR = "serveur";
+const AUCUN_CHOIX = "";
+function lireChoixStocke(): string {
+  try {
+    return localStorage.getItem(STORAGE_KEY) ?? AUCUN_CHOIX;
+  } catch {
+    return AUCUN_CHOIX;
+  }
+}
+// Rien à écouter : dans cet onglet, les changements passent par les décisions ci-dessous.
+const sansAbonnement = () => () => {};
+
 export function ConsentBanner() {
-  const [visible, setVisible] = useState(false);
+  const choixStocke = useSyncExternalStore(sansAbonnement, lireChoixStocke, () => SERVEUR);
+  // Une DÉCISION de cette page (accepter, refuser, rouvrir) prime sur le stockage. Elle tient même
+  // quand le stockage refuse l'écriture : le bandeau se ferme au clic, comme avant.
+  const [decision, setDecision] = useState<"afficher" | "masquer" | null>(null);
+  const visible = decision !== null ? decision === "afficher" : choixStocke === AUCUN_CHOIX;
   const banniere = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        setVisible(true);
-      } else {
-        updateGoogleConsent(stored as ConsentValue);
-      }
-    } catch {
-      setVisible(true);
-    }
+      if (stored) updateGoogleConsent(stored as ConsentValue);
+    } catch {}
 
     const handler = () => {
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
-      setVisible(true);
+      setDecision("afficher");
     };
     window.addEventListener("futuree:show-consent", handler);
     return () => window.removeEventListener("futuree:show-consent", handler);
@@ -74,7 +89,7 @@ export function ConsentBanner() {
       localStorage.setItem(STORAGE_KEY, value);
     } catch {}
     updateGoogleConsent(value);
-    setVisible(false);
+    setDecision("masquer");
   }
 
   if (!visible) return null;
