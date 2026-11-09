@@ -101,7 +101,7 @@ const norm = (t) => t.replace(/[  ]/g, " ");
   t = await txt();
   ok("B", "En bref : ce qui distingue les communes, lu de la même façon", /Ce qui les distingue vraiment : des nuits fraîches l'été et le calme à la commune/.test(t));
   ok("B", "la gare ne se compare pas encore, et le remède est dit", /Votre condition n'était pas la même lors des deux analyses/.test(t) && /Mettre à jour l'analyse la plus ancienne/.test(t));
-  ok("B", "la carte situe les communes sans rien départager", /100 km/.test(t) && /Il ne départage rien/.test(t));
+  ok("B", "la carte situe les communes sans rien départager", /100 km/.test(t) && /Le trajet réel se mesure depuis une adresse/.test(t));
   ok("B", "la commune ne promet rien pour un logement", /pour un logement, la commune n'en donne qu'un repère/.test(t));
 
   // C · Deux appartements à Nantes, un à Rennes

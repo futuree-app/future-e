@@ -106,7 +106,7 @@ export function Comparer5({ api }: { api: Api5 }) {
           </Section>
 
           {mode === "communes" || communesVues.length > 1 ? (
-            <Section titre="Où elles sont" id="carte" sous="Un repère pour situer les communes. Il ne départage rien : le trajet réel se mesure depuis une adresse.">
+            <Section titre="Où elles sont" id="carte" sous="Un repère pour situer les communes l'une par rapport à l'autre. Le trajet réel se mesure depuis une adresse.">
               <Plan5 api={api} communes={communesVues} />
             </Section>
           ) : null}
