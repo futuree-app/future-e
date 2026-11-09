@@ -2,7 +2,7 @@
 // FUT-10 · UN SCHÉMA DE TEST COMPATIBLE AVEC L'APPLICATION, depuis les fichiers SQL numérotés.
 //
 // Le dépôt range ses migrations directement dans `supabase/` (pas dans `supabase/migrations/`) : un
-// `supabase db reset` ne les applique PAS. Ce script les assemble, dans l'ordre (01 → 38, sans les
+// `supabase db reset` ne les applique PAS. Ce script les assemble, dans l'ordre (01 → 39, sans les
 // `_down`), en un seul fichier SQL à rejouer sur une base VIERGE de test :
 //   node scripts/integration/schema-de-test.mjs > /tmp/schema-de-test.sql
 //   (application sur le projet de test : `appliquer-schema-test.mjs`, qui exige le garde-fou et une confirmation)

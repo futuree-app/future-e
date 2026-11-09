@@ -137,6 +137,7 @@ export default function PolitiqueConfidentialitePage() {
               <li><strong style={{ color: "var(--fg-1)" }}>Email et mot de passe</strong>, pour créer et accéder à votre compte.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Commune de référence</strong>, pour personnaliser les projections climatiques.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong>, logement, mobilité, confort de vie, environnement personnel et projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Votre avis sur un dossier</strong>, si vous choisissez de le donner : votre réponse à la question posée en fin de dossier et, facultativement, votre commentaire. Ils sont rattachés au dossier concerné, lus par l&apos;équipe de futur•e seulement, et jamais publiés ni cités comme témoignage sans votre accord exprès.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de paiement</strong>, traitées directement par Stripe. futur•e ne voit ni ne stocke vos coordonnées bancaires.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de navigation</strong>, uniquement si vous avez donné votre consentement via la bannière.</li>
             </ul>
@@ -149,6 +150,7 @@ export default function PolitiqueConfidentialitePage() {
                 ["Fournir le rapport personnalisé", "Email, commune, réponses", "Exécution du contrat"],
                 ["Gérer votre compte et l'authentification", "Email", "Exécution du contrat"],
                 ["Traiter le paiement", "Données de paiement (Stripe)", "Exécution du contrat"],
+                ["Mesurer l'utilité des dossiers et les améliorer", "Avis donnés en fin de dossier", "Intérêt légitime"],
                 ["Mesurer l'audience et améliorer le service", "Navigation, événements", "Consentement"],
                 ["Enregistrements de session et heatmaps", "Navigation (PostHog)", "Consentement"],
               ]}
