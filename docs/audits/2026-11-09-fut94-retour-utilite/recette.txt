@@ -1,0 +1,22 @@
+releve ordinateur : débordement horizontal 0px
+releve ordinateur : hauteurs des boutons 44, 44, 44
+releve mobile-390 : débordement horizontal 0px
+releve mobile-390 : hauteurs des boutons 44, 44, 44
+releve mobile-360 : débordement horizontal 0px
+releve mobile-360 : hauteurs des boutons 44, 44, 44
+releve panne commentaire : texte conservé = true
+releve clavier, Tab depuis le geste de clôture : Oui → Pas vraiment → Pas encore lu → Mon compte
+releve clavier : Espace sur « Pas vraiment » → focus toujours sur « Pas vraiment » (aria-pressed=true)
+releve clavier : champ atteint = TEXTAREA, après envoi le focus est sur « Votre retour sur cette analyse : Pas vraiment, ave »
+releve clavier : contour de focus d'un bouton = solid 2px
+classique ordinateur : débordement horizontal 0px
+classique ordinateur : hauteurs des boutons 44, 44, 44
+classique mobile-390 : débordement horizontal 0px
+classique mobile-390 : hauteurs des boutons 44, 44, 44
+classique mobile-360 : débordement horizontal 0px
+classique mobile-360 : hauteurs des boutons 44, 44, 44
+classique panne commentaire : texte conservé = true
+classique clavier, Tab depuis le geste de clôture : Oui → Pas vraiment → Pas encore lu → Mon compte
+classique clavier : Espace sur « Pas vraiment » → focus toujours sur « Pas vraiment » (aria-pressed=true)
+classique clavier : champ atteint = TEXTAREA, après envoi le focus est sur « Votre retour sur cette analyse : Pas vraiment, ave »
+classique clavier : contour de focus d'un bouton = solid 2px

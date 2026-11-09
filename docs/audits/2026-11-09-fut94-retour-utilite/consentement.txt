@@ -1,0 +1,23 @@
+consentement absent : 3 événement(s) tentés [$set×1, $pageview×1, $autocapture×1]
+  dossier_utility_feedback_submitted : 0
+  autocapture du bouton témoin hors du bloc (« Explorer ») : 1
+  autocapture d'un élément du bloc FUT-94 : 0
+  texte du commentaire présent dans un envoi : 0
+consentement denied : 3 événement(s) tentés [$set×1, $pageview×1, $autocapture×1]
+  dossier_utility_feedback_submitted : 0
+  autocapture du bouton témoin hors du bloc (« Explorer ») : 1
+  autocapture d'un élément du bloc FUT-94 : 0
+  texte du commentaire présent dans un envoi : 0
+consentement granted : 5 événement(s) tentés [$set×1, $pageview×1, $autocapture×1, dossier_utility_feedback_submitted×2]
+  dossier_utility_feedback_submitted : 2 [{"answer":"pas_vraiment","has_comment":true,"step":"reponse"},{"answer":"pas_vraiment","has_comment":true,"step":"commentaire"}]
+  autocapture du bouton témoin hors du bloc (« Explorer ») : 1
+  autocapture d'un élément du bloc FUT-94 : 0
+  texte du commentaire présent dans un envoi : 0
+
+CONTRE-ÉPREUVE (classe `ph-no-capture` retirée temporairement, puis remise) :
+consentement absent : 6 événement(s) tentés [$set×1, $pageview×1, $autocapture×4]
+  dossier_utility_feedback_submitted : 0
+  autocapture d'un élément du bloc FUT-94 : 3
+  texte du commentaire présent dans un envoi : 0
+=> sans la classe, les clics du bloc partiraient en autocapture, même sans consentement (défaut global).
+   La valeur saisie dans le champ n'est jamais capturée par posthog-js (0 dans tous les cas).

@@ -47,6 +47,9 @@ import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types"
 import { Logo } from "@/components/Logo";
 import { EchelleNavigator } from "@/components/report/EchelleNavigator";
 import { presentationPour } from "@/components/releve/activation";
+import { RetourUtilite } from "@/components/report/RetourUtilite";
+import { lireRetourUtilite } from "@/lib/server/retour-utilite-store";
+import { cleDePortee } from "@/lib/retour-utilite";
 
 // LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
@@ -324,6 +327,21 @@ export default async function RapportPage() {
     />
   );
 
+
+  // FUT-94 · LE RETOUR D'UTILITÉ VISE LE DOSSIER LU, sous la clé de son artefact : le bien quand la
+  // lecture est celle d'une adresse, la commune sinon. Le retour déjà donné se lit ici, pour ne pas
+  // reposer la question. UNE LECTURE EN ÉCHEC CACHE LA QUESTION (table absente tant que la migration 39
+  // n'est pas appliquée, panne) : la redemander à quelqu'un qui a peut-être déjà répondu serait pire
+  // que de ne rien demander, et le dossier, lui, ne dépend de rien ici.
+  const retourDossierId = dossier && communeResult && inseeCode && logementForCommune ? logementForCommune.id : null;
+  const retourUtilite = dossier && communeResult && inseeCode
+    ? await lireRetourUtilite(supabase, user.id, inseeCode, cleDePortee(retourDossierId))
+        .then((initial) => ({ initial }))
+        .catch((error: unknown) => {
+          console.error("[rapport] lecture du retour d'utilité échouée", { inseeCode, error });
+          return null;
+        })
+    : null;
 
   // LE CONTENU DU HAUT DE PAGE, décidé par une fonction pure et testée (quatre états). La page ne
   // rejoue pas la règle : elle la consomme.
@@ -618,6 +636,19 @@ export default async function RapportPage() {
           >
             {heroContenu.geste.label}
           </Link>
+        ) : null}
+
+        {/* FUT-94 · LA QUESTION D'UTILITÉ, QUAND LA LECTURE EST FINIE : sous le dossier et sous les gestes
+            qui le suivent (« Préciser cette lecture à une adresse », le geste du verdict), jamais avant :
+            elle ne repousse aucun appel à l'action, ne recouvre rien, et son échec n'affecte qu'elle. */}
+        {retourUtilite && inseeCode ? (
+          <RetourUtilite
+            key={cleDePortee(retourDossierId)}
+            insee={inseeCode}
+            dossierId={retourDossierId}
+            initial={retourUtilite.initial}
+            presentation={presentation}
+          />
         ) : null}
 
         {/* ── CADRAGE CLIMAT, EN TÊTE UNIQUEMENT QUAND RIEN NE LE PRÉCÈDE ─────────────────

@@ -433,8 +433,10 @@ test("schéma de test : seules deux adaptations, dites, et aucun fichier de supa
   const { migrationsDeTest, OMIS } = await import("../../scripts/integration/schema-de-test.mjs");
   const m = migrationsDeTest() as { fichier: string; sql: string }[];
   assert.deepEqual([...OMIS], ["02_init_qna.sql"]);
-  assert.equal(m.at(-1)!.fichier, "38_purge_dossier_intents.sql");
+  // FUT-94 a ajouté la 39 (retours d'utilité) : le schéma de test la reprend sans adaptation.
+  assert.equal(m.at(-1)!.fichier, "39_retours_utilite_dossier.sql");
   assert.ok(m.findIndex((x) => x.fichier.startsWith("37_")) < m.findIndex((x) => x.fichier.startsWith("38_")));
+  assert.ok(m.findIndex((x) => x.fichier.startsWith("38_")) < m.findIndex((x) => x.fichier.startsWith("39_")));
   assert.ok(m.every((x) => !x.fichier.includes("_down")));
   const m25 = m.find((x) => x.fichier === "25_address_dossiers.sql")!;
   assert.match(m25.sql, /if false then -- contrôle de production neutralisé/);
