@@ -154,13 +154,13 @@ const ligneSols = (t: string) => t.split(/(?<=\.)\s+/).find((x) => /terres\.$/.t
 
 test("texte déterministe : la phrase des sols de chaque commune du panel", () => {
   const attendu: Record<string, string> = {
-    "14137": "Les espaces naturels y sont peu présents, ses terres se partageant entre cultures et espaces urbanisés : 41 % d'espaces urbanisés, 45 % de cultures et 14 % d'espaces naturels sur ses terres.",
-    "02100": "Les terres agricoles y dominent : 4 % d'espaces urbanisés, 89 % de cultures et 7 % d'espaces naturels sur ses terres.",
-    "28199": "Les terres agricoles y dominent : 7 % d'espaces urbanisés, 90 % de cultures et 3 % d'espaces naturels sur ses terres.",
-    "17094": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49 % d'espaces urbanisés, 14 % de cultures et 36 % d'espaces naturels sur ses terres.",
-    "34301": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 50 % d'espaces urbanisés, 16 % de cultures et 34 % d'espaces naturels sur ses terres.",
-    "95527": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 55 % d'espaces urbanisés, 14 % de cultures et 31 % d'espaces naturels sur ses terres.",
-    "77390": "Les espaces naturels y tiennent une grande place : 31 % d'espaces urbanisés, 12 % de cultures et 58 % d'espaces naturels sur ses terres.",
+    "14137": "Les espaces naturels y sont peu présents, ses terres se partageant entre cultures et espaces urbanisés : 41,2 % d'espaces urbanisés, 44,8 % de cultures et 13,9 % d'espaces naturels sur ses terres.",
+    "02100": "Les terres agricoles y dominent : 4,1 % d'espaces urbanisés, 89 % de cultures et 6,8 % d'espaces naturels sur ses terres.",
+    "28199": "Les terres agricoles y dominent : 7,2 % d'espaces urbanisés, 90 % de cultures et 2,8 % d'espaces naturels sur ses terres.",
+    "17094": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49,3 % d'espaces urbanisés, 14,3 % de cultures et 36,4 % d'espaces naturels sur ses terres.",
+    "34301": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 50,4 % d'espaces urbanisés, 15,8 % de cultures et 33,8 % d'espaces naturels sur ses terres.",
+    "95527": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 55,2 % d'espaces urbanisés, 14,3 % de cultures et 30,5 % d'espaces naturels sur ses terres.",
+    "77390": "Les espaces naturels y tiennent une grande place : 30,7 % d'espaces urbanisés, 11,5 % de cultures et 57,7 % d'espaces naturels sur ses terres.",
   };
   for (const c of PANEL) assert.equal(ligneSols(deterministicSynthesis(projDe(c.insee), "gwl20")), attendu[c.insee], c.nom);
 });

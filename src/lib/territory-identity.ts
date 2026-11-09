@@ -158,6 +158,7 @@ export type DemographieCardData = {
 
 export type CouvertCardData = {
   headlineLabel: string; // valeur de la carte (« Occupation mixte »…)
+  // FUT-183 : toutes les parts au dixième, à afficher avec `pctOso`.
   naturelTerresPct: number; // FUT-175 : milieux naturels terrestres, en % des TERRES (eau exclue)
   eauPct: number | null; // part de l'eau dans la surface cartographiée de la commune, comptée à part
   radiusPct: number | null; // naturel et eau confondus dans 15 km (l'eau n'a pas pu en être retirée)
@@ -177,6 +178,8 @@ export const COMPOSITION_LABELS: Record<string, string> = {
   landes_pelouses: "Landes et pelouses",
   mineral_dunes: "Roche et dunes",
 };
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
 
 const DEMOGRAPHIE_WINDOW_YEARS = 6; // 2015 -> 2021
 
@@ -206,14 +209,15 @@ export function buildTerritoryCards(snapshot: FactsSnapshot): TerritoryCards {
   if (land && composition && brut != null) {
     const radius = valueOf<number>(snapshot, "land.natural_share_15km");
     const eau = valueOf<number>(snapshot, "land.water_share");
+    // FUT-183 : au dixième, comme la catégorie (cf. `pctOso`, territoire/oso-format.ts) ; le rayon aussi, pour une seule précision par carte.
     couvertNaturel = {
       headlineLabel: land.label,
-      naturelTerresPct: Math.round(brut),
-      eauPct: eau != null ? Math.round(eau) : null,
-      radiusPct: radius != null ? Math.round(radius) : null,
+      naturelTerresPct: round1(brut),
+      eauPct: eau != null ? round1(eau) : null,
+      radiusPct: radius != null ? round1(radius) : null,
       composition: Object.entries(composition)
         .filter(([, v]) => typeof v === "number" && v >= 1)
-        .map(([k, v]) => ({ label: COMPOSITION_LABELS[k] ?? k, pct: Math.round(v) }))
+        .map(([k, v]) => ({ label: COMPOSITION_LABELS[k] ?? k, pct: round1(v) }))
         .sort((a, b) => b.pct - a.pct),
     };
   }

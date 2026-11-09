@@ -16,7 +16,7 @@ const CHATELAILLON_2050 = `Châtelaillon-Plage à l'horizon 2050
 
 ## Le territoire aujourd'hui
 
-Châtelaillon-Plage, 6\u202f227 habitants dans l'agglomération de La Rochelle, a une densité intermédiaire (976 habitants au km²). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49 % d'espaces urbanisés, 14 % de cultures et 36 % d'espaces naturels sur ses terres. Sa population a progressé de 0,62 % par an entre 2015 et 2021.
+Châtelaillon-Plage, 6\u202f227 habitants dans l'agglomération de La Rochelle, a une densité intermédiaire (976 habitants au km²). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49,3 % d'espaces urbanisés, 14,3 % de cultures et 36,4 % d'espaces naturels sur ses terres. Sa population a progressé de 0,62 % par an entre 2015 et 2021.
 
 ## Ce qui évolue d'ici 2050
 

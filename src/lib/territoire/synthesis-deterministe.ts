@@ -18,6 +18,7 @@
 import { HORIZON_META, ROLE_TEXT, ROLE_TEXT_ARRONDISSEMENT, type HorizonKey } from "./synthesis-contract.ts";
 import { aleaDominant } from "../georisques-flags.ts";
 import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
+import { pctOso } from "./oso-format.ts";
 
 type P = Record<string, unknown>;
 type Metric = { valeur: number; ecart_par_rapport_a_1976_2005?: number } | null;
@@ -125,15 +126,16 @@ function blocTerritoire(p: P): string[] {
     // FUT-175 : les parts portent sur les terres ; l'eau, quand elle compte, est dite dans sa propre phrase.
     // FUT-177 : les TROIS familles des terres, cultures comprises. Sans elles, « 41 % d'espaces urbanisés et 14 %
     // d'espaces naturels » laissait le lecteur deviner les 45 % restants (Carpiquet), et y lire du bâti.
+    // FUT-183 : parts au dixième, la précision de la catégorie (« 44,9 % » reste une occupation mixte, cf. `pctOso`).
     const parts: string[] = [];
     const urb = land.composition_des_terres_pct?.espaces_urbanises;
     const agri = land.composition_des_terres_pct?.terres_agricoles;
-    if (urb != null) parts.push(`${frNum(urb)} % d'espaces urbanisés`);
-    if (agri != null) parts.push(`${frNum(agri)} % de cultures`);
-    if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${frNum(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
+    if (urb != null) parts.push(`${pctOso(urb)} % d'espaces urbanisés`);
+    if (agri != null) parts.push(`${pctOso(agri)} % de cultures`);
+    if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${pctOso(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
     out.push(`${LAND_PHRASE[land.categorie](land.composition_des_terres_pct)}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
     const eau = land.part_eau_de_la_commune_pct;
-    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de sa surface cartographiée.`);
+    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${pctOso(eau)} % de sa surface cartographiée.`);
   }
 
   // L'évolution porte sur 2015-2021 ; la part d'arrivants (une seule année) n'est pas reprise ici,
