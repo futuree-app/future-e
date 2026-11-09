@@ -1,0 +1,499 @@
+fichier_diffusion_2026.xlsx: OK
+fichier_diffusion_2025.xlsx: OK
+note.pdf: OK
+def2025.pdf: OK
+dt2022-18.pdf: OK
+methode-constitution.pdf: OK
+degurba-2021.pdf: OK
+grille : (34875, 12) | classes 7 postes : {1: 699, 2: 637, 3: 947, 4: 1996, 5: 5072, 6: 18288, 7: 7236}
+Prêt : <dossier_de_travail> (révision 51a493d0b096b9e14c49036e5d837e0cd607a2df)
+
+################ 07_accueil_textes (code de la révision, exécuté tel quel)
+accueil : 34788 communes évaluées -> <dossier_de_travail>/work/accueil.jsonl
+
+################ 02_jointure
+DROM écartés : 129
+index 34788 | grille métropole 34746
+{'both': 34743, 'left_only': 45, 'right_only': 3}
+
+INDEX sans grille :
+       insee                           nom       pop
+4403   13201  Marseille 1er Arrondissement   39436.0
+4404   13202   Marseille 2e Arrondissement   23627.0
+4405   13203   Marseille 3e Arrondissement   53115.0
+4406   13204   Marseille 4e Arrondissement   50068.0
+4407   13205   Marseille 5e Arrondissement   45449.0
+4408   13206   Marseille 6e Arrondissement   39647.0
+4409   13207   Marseille 7e Arrondissement   34633.0
+4410   13208   Marseille 8e Arrondissement   82609.0
+4411   13209   Marseille 9e Arrondissement   77106.0
+4412   13210  Marseille 10e Arrondissement   59002.0
+4413   13211  Marseille 11e Arrondissement   57924.0
+4414   13212  Marseille 12e Arrondissement   63108.0
+4415   13213  Marseille 13e Arrondissement   92261.0
+4416   13214  Marseille 14e Arrondissement   59948.0
+4417   13215  Marseille 15e Arrondissement   79656.0
+4418   13216  Marseille 16e Arrondissement   15487.0
+27207  69381       Lyon 1er Arrondissement   29016.0
+27208  69382        Lyon 2e Arrondissement   30485.0
+27209  69383        Lyon 3e Arrondissement  101302.0
+27210  69384        Lyon 4e Arrondissement   35603.0
+27211  69385        Lyon 5e Arrondissement   48711.0
+27212  69386        Lyon 6e Arrondissement   52007.0
+27213  69387        Lyon 7e Arrondissement   85897.0
+27214  69388        Lyon 8e Arrondissement   86326.0
+27215  69389        Lyon 9e Arrondissement   52903.0
+29220  75101      Paris 1er Arrondissement   15919.0
+29221  75102       Paris 2e Arrondissement   21119.0
+29222  75103       Paris 3e Arrondissement   32793.0
+29223  75104       Paris 4e Arrondissement   28324.0
+29224  75105       Paris 5e Arrondissement   56841.0
+29225  75106       Paris 6e Arrondissement   40209.0
+29226  75107       Paris 7e Arrondissement   47947.0
+29227  75108       Paris 8e Arrondissement   35123.0
+29228  75109       Paris 9e Arrondissement   58951.0
+29229  75110      Paris 10e Arrondissement   83543.0
+29230  75111      Paris 11e Arrondissement  142583.0
+29231  75112      Paris 12e Arrondissement  140954.0
+29232  75113      Paris 13e Arrondissement  178350.0
+29233  75114      Paris 14e Arrondissement  136368.0
+29234  75115      Paris 15e Arrondissement  227746.0
+29235  75116      Paris 16e Arrondissement  162061.0
+29236  75117      Paris 17e Arrondissement  164413.0
+29237  75118      Paris 18e Arrondissement  188446.0
+29238  75119      Paris 19e Arrondissement  181616.0
+29239  75120      Paris 20e Arrondissement  189805.0
+
+GRILLE sans index :
+      CODGEO     LIBGEO     PMUN23                LIBDENS7
+4338   13055  Marseille   886040.0  Grands centres urbains
+27055  69123       Lyon   519127.0  Grands centres urbains
+29219  75056      Paris  2103778.0  Grands centres urbains
+
+################ 03_tableau_croise
+                                  communes  pop_%
+g7                                               
+1 Grands centres urbains               689   34.2
+2 Centres urbains intermédiaires       617   14.4
+3 Petites villes                       932    6.4
+4 Ceintures urbaines                  1965   10.4
+5 Bourgs ruraux                       5038   16.1
+6 Rural à habitat dispersé           18267   15.8
+7 Rural à habitat très dispersé       7235    2.6
+
+Tableau croisé (communes)
+ cat                               dense  intermediaire  peu_dense  absente  Total
+g7                                                                               
+1 Grands centres urbains            460            229          0        0    689
+2 Centres urbains intermédiaires    108            496         13        0    617
+3 Petites villes                      6            683        243        0    932
+4 Ceintures urbaines                 16           1663        285        1   1965
+5 Bourgs ruraux                       4           1636       3396        2   5038
+6 Rural à habitat dispersé            0            484      17780        3  18267
+7 Rural à habitat très dispersé       0              2       7224        9   7235
+
+Tableau croisé (millions d'habitants)
+ cat                               absente  dense  intermediaire  peu_dense
+g7                                                                        
+1 Grands centres urbains              NaN  18.39           3.02        NaN
+2 Centres urbains intermédiaires      NaN   2.14           6.72       0.19
+3 Petites villes                      NaN   0.03           3.33       0.66
+4 Ceintures urbaines                 0.00   0.10           5.99       0.42
+5 Bourgs ruraux                      0.02   0.01           4.03       6.04
+6 Rural à habitat dispersé           0.00    NaN           0.57       9.34
+7 Rural à habitat très dispersé      0.00    NaN           0.00       1.65
+
+Grille 3 postes × nos catégories (base du chiffre 3 026)
+ cat                   absente  dense  intermediaire  peu_dense
+LIBDENS                                                       
+Rural                      14      4           2122      28400
+Urbain dense                0    460            229          0
+Urbain intermédiaire        1    130           2842        541
+
+Densité absente chez nous, classée par la grille
+        insee                       nom   PMUN23                               g7
+4201   12218       Conques-en-Rouergue   1540.0  7 Rural à habitat très dispersé
+4821   14581                Aurseulles   1896.0       6 Rural à habitat dispersé
+4974   15031                    Celles    217.0                  5 Bourgs ruraux
+4978   15035              Chalinargues    304.0       6 Rural à habitat dispersé
+4988   15047                 Chavagnac     88.0  7 Rural à habitat très dispersé
+5103   15171          Sainte-Anastasie    122.0  7 Rural à habitat très dispersé
+12382  33103      Castelmoron-d'Albret     50.0       6 Rural à habitat dispersé
+17553  49126              Orée d'Anjou  17162.0                  5 Bourgs ruraux
+20013  55039     Beaumont-en-Verdunois      0.0  7 Rural à habitat très dispersé
+20024  55050                 Bezonvaux      0.0  7 Rural à habitat très dispersé
+20099  55139    Cumières-le-Mort-Homme      0.0  7 Rural à habitat très dispersé
+20142  55189   Fleury-devant-Douaumont      0.0  7 Rural à habitat très dispersé
+20179  55239    Haumont-près-Samogneux      0.0  7 Rural à habitat très dispersé
+20238  55307  Louvemont-Côte-du-Poivre      0.0  7 Rural à habitat très dispersé
+27046  69114  Porte des Pierres Dorées   4185.0             4 Ceintures urbaines
+
+Densité hab/km² par classe
+                                     count    mean     std    min    10%     50%     90%      max
+g7                                                                                              
+1 Grands centres urbains            689.0  3480.0  3743.0  170.0  788.0  2259.0  7545.0  28505.0
+2 Centres urbains intermédiaires    617.0   995.0   709.0   65.0  315.0   804.0  1871.0   4439.0
+3 Petites villes                    932.0   286.0   282.0   37.0   91.0   219.0   509.0   5122.0
+4 Ceintures urbaines               1964.0   384.0   301.0   32.0  128.0   301.0   728.0   4261.0
+5 Bourgs ruraux                    5036.0   141.0   123.0    5.0   47.0   110.0   258.0   1800.0
+6 Rural à habitat dispersé        18264.0    49.0    44.0    1.0   13.0    37.0    96.0   1200.0
+7 Rural à habitat très dispersé    7226.0    15.0    11.0    0.0    5.0    13.0    27.0    467.0
+
+################ 04_ecarts_et_libelles
+                                            n         pop  pct_n  pct_pop
+grp                                                                      
+A peu dense -> urbain Insee               541   1268233.0    1.6      2.0
+B peu dense -> bourg rural               3396   6044080.0    9.8      9.6
+C intermédiaire -> rural dispersé         486    570264.0    1.4      0.9
+D intermédiaire -> grand centre urbain    229   3018877.0    0.7      4.8
+E dense -> pas grand centre               134   2270662.0    0.4      3.6
+F intermédiaire -> bourg rural           1636   4033625.0    4.7      6.4
+Y cohérent                              28306  45425565.0   81.5     72.5
+Z absente chez nous                        15     25564.0    0.0      0.0
+
+Total A-F (convention du rapport) : 6422 communes = 18.5 % ; population 27.5 %
+Variante sans E (désaccord de vocabulaire seulement) : 6288 communes = 18.1 % ; population 23.8 %
+
+## A peu dense -> urbain Insee
+       insee                   nom   PMUN23  densite                                g7   P1    P2     P3  hors_uu
+4287   13004                 Arles  51811.0     67.4  2 Centres urbains intermédiaires  0.0  74.2   25.8    False
+4130   12145                Millau  22044.0    130.0  2 Centres urbains intermédiaires  0.0  92.6    7.4    False
+4943   14762        Vire Normandie  17457.0    125.7  2 Centres urbains intermédiaires  0.0  61.7   38.3    False
+15049  40046           Biscarrosse  15836.0     96.0                  3 Petites villes  0.0  72.5   27.5    False
+30122  77186         Fontainebleau  15583.0     91.7  2 Centres urbains intermédiaires  0.0  98.6    1.4    False
+11140  30258          Saint-Gilles  14734.0     93.9  2 Centres urbains intermédiaires  0.0  87.5   12.5    False
+4380   13097  Saint-Martin-de-Crau  14145.0     65.0  2 Centres urbains intermédiaires  0.0  85.9   14.1    False
+11223  30341               Vauvert  11671.0    107.1  2 Centres urbains intermédiaires  0.0  83.0   17.0    False
+10611  2A247         Porto-Vecchio  11198.0     68.4                  3 Petites villes  0.0   0.0  100.0    False
+17552  49125         Doué-en-Anjou  11029.0     75.6                  3 Petites villes  0.0  64.2   35.8    False
+29125  74208                 Passy  10856.0    135.6              4 Ceintures urbaines  0.0  90.3    9.7    False
+32314  83071   La Londe-les-Maures  10584.0    138.8                  3 Petites villes  0.0  76.4   23.6    False
+
+## B peu dense -> bourg rural
+       insee                    nom   PMUN23  densite               g7   P1    P2     P3  hors_uu
+17627  49301             Sèvremoine  25797.0    120.9  5 Bourgs ruraux  0.0  34.1   65.9    False
+17507  49023    Beaupréau-en-Mauges  23989.0    103.7  5 Bourgs ruraux  0.0  29.5   70.5    False
+17539  49092      Chemillé-en-Anjou  21999.0     66.5  5 Bourgs ruraux  0.0  30.9   69.1    False
+30744  79049              Bressuire  19970.0    110.0  5 Bourgs ruraux  0.0  49.6   50.4    False
+17603  49244       Mauges-sur-Loire  18695.0     96.5  5 Bourgs ruraux  0.0   0.0  100.0    False
+17639  49331    Segré-en-Anjou Bleu  17667.0     73.0  5 Bourgs ruraux  0.0  40.9   59.1    False
+7356   22093         Lamballe-Armor  17241.0    129.4  5 Bourgs ruraux  0.0  47.7   52.3    False
+17630  49307          Loire-Authion  16765.0    145.9  5 Bourgs ruraux  0.0   0.0  100.0    False
+17589  49218   Montrevault-sur-Èvre  15726.0     78.9  5 Bourgs ruraux  0.0   0.0  100.0    False
+32350  83107  Roquebrune-sur-Argens  15442.0    141.4  5 Bourgs ruraux  0.0   4.2   95.8    False
+12558  33284                   Mios  12043.0     85.6  5 Bourgs ruraux  0.0  49.6   50.4    False
+17519  49050  Brissac Loire Aubance  10878.0     91.0  5 Bourgs ruraux  0.0   3.8   96.2    False
+
+## C intermédiaire -> rural dispersé
+       insee                   nom  PMUN23  densite                          g7   P1    P2     P3  hors_uu
+16373  44212                Vallet  9495.0    161.4  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+20704  56240               Sarzeau  9212.0    150.6  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+16202  44029     Divatte-sur-Loire  7252.0    211.2  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+20567  56094             Kervignac  7204.0    178.9  6 Rural à habitat dispersé  0.0  18.3   81.7    False
+9026   26088  Chatuzange-le-Goubet  6523.0    226.1  6 Rural à habitat dispersé  0.0  29.3   70.7    False
+32270  83027     La Cadière-d'Azur  5739.0    151.3  6 Rural à habitat dispersé  0.0   2.8   97.2    False
+30743  79048             La Crèche  5662.0    164.7  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+20638  56169             Plouhinec  5400.0    150.1  6 Rural à habitat dispersé  0.0  31.9   68.1    False
+20487  56008                 Baden  5086.0    207.0  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+32686  85163  Noirmoutier-en-l'Île  4505.0    229.7  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+8164   24340           Prigonrieux  4374.0    167.1  6 Rural à habitat dispersé  0.0   0.0  100.0    False
+7345   22081               Hillion  4335.0    173.6  6 Rural à habitat dispersé  0.0   3.9   96.1     True
+
+## D intermédiaire -> grand centre urbain
+       insee                    nom    PMUN23  densite                        g7    P1    P2    P3  hors_uu
+11072  30189                  Nîmes  151839.0    929.8  1 Grands centres urbains  80.9  15.8   3.3    False
+4284   13001        Aix-en-Provence  149695.0    794.9  1 Grands centres urbains  69.4  19.9  10.7    False
+32404  84007                Avignon   92188.0   1413.9  1 Grands centres urbains  81.6  16.2   2.1    False
+12848  34032                Béziers   81545.0    846.2  1 Grands centres urbains  91.3   5.0   3.8    False
+17753  50129  Cherbourg-en-Cotentin   78258.0   1139.1  1 Grands centres urbains  72.0  25.2   2.8    False
+10530  2A004                Ajaccio   76320.0    918.8  1 Grands centres urbains  82.1  16.1   1.8    False
+26635  68066                 Colmar   66970.0   1011.4  1 Grands centres urbains  95.0   3.9   1.1    False
+10462  29232                Quimper   64385.0    764.6  1 Grands centres urbains   0.0  92.7   7.3    False
+6048   18033                Bourges   64186.0    935.0  1 Grands centres urbains  79.4  16.8   3.9    False
+32304  83061                 Fréjus   59719.0    571.8  1 Grands centres urbains  62.3  29.8   7.9    False
+4339   13056              Martigues   48298.0    683.7  1 Grands centres urbains  75.6   5.5  18.9    False
+4288   13005                Aubagne   47529.0    869.3  1 Grands centres urbains   0.0  95.2   4.8    False
+
+## E dense -> pas grand centre
+       insee                   nom   PMUN23  densite                                g7   P1    P2   P3  hors_uu
+16346  44184         Saint-Nazaire  74568.0   1562.2  2 Centres urbains intermédiaires  0.0  97.4  2.6    False
+22464  60057              Beauvais  55550.0   1678.9  2 Centres urbains intermédiaires  0.0  97.9  2.1    False
+1051   02691         Saint-Quentin  52813.0   2344.9  2 Centres urbains intermédiaires  0.0  99.6  0.4    False
+9498   27229                Évreux  49360.0   1824.0  2 Centres urbains intermédiaires  0.0  99.6  0.4    False
+10668  2B033                Bastia  46867.0   2446.3  2 Centres urbains intermédiaires  0.0  98.5  1.5    False
+10895  30007                  Alès  46125.0   1940.7  2 Centres urbains intermédiaires  0.0  99.3  0.7    False
+13115  34301                  Sète  45337.0   1863.2  2 Centres urbains intermédiaires  0.0  99.8  0.2    False
+27824  71076      Chalon-sur-Saône  45102.0   2933.7  2 Centres urbains intermédiaires  0.0  99.5  0.5    False
+18213  51108  Châlons-en-Champagne  42971.0   1662.2  2 Centres urbains intermédiaires  0.0  99.7  0.3    False
+13532  36044           Châteauroux  42963.0   1689.4  2 Centres urbains intermédiaires  0.0  98.3  1.7    False
+47     01053       Bourg-en-Bresse  42372.0   1760.0  2 Centres urbains intermédiaires  0.0  99.1  0.9    False
+5206   16015             Angoulême  41908.0   1891.5  2 Centres urbains intermédiaires  0.0  99.8  0.2    False
+
+## F intermédiaire -> bourg rural
+       insee                             nom   PMUN23  densite               g7   P1    P2     P3  hors_uu
+25351  64545                         Urrugne  10661.0    209.4  5 Bourgs ruraux  3.6  35.9   60.5    False
+13271  35126                         Guichen   9412.0    214.0  5 Bourgs ruraux  0.0   0.0  100.0    False
+16350  44188    Saint-Philbert-de-Grand-Lieu   9400.0    159.7  5 Bourgs ruraux  0.0   0.0  100.0    False
+10300  29051                   Ergué-Gabéric   8606.0    214.9  5 Bourgs ruraux  0.0  45.7   54.3    False
+20715  56251                    Theix-Noyalo   8500.0    162.7  5 Bourgs ruraux  0.0   0.0  100.0    False
+16222  44052                          Donges   8219.0    167.4  5 Bourgs ruraux  0.0   0.0  100.0    False
+26204  67152                    Geispolsheim   7919.0    352.7  5 Bourgs ruraux  2.2  39.9   58.0    False
+14020  38022  Les Avenières Veyrins-Thuellin   7698.0    185.1  5 Bourgs ruraux  0.0   0.0  100.0    False
+7497   22251                          Pordic   7454.0    220.0  5 Bourgs ruraux  0.0   0.1   99.9    False
+15134  40133                         Labenne   7183.0    289.6  5 Bourgs ruraux  0.0   0.0  100.0    False
+13367  35228                       Pleurtuit   7167.0    237.8  5 Bourgs ruraux  0.0   0.6   99.4    False
+16234  44066        Grandchamp-des-Fontaines   7062.0    203.8  5 Bourgs ruraux  0.0   2.2   97.8    False
+
+## Z absente chez nous
+       insee                       nom   PMUN23  densite                               g7   P1    P2     P3  hors_uu
+17553  49126              Orée d'Anjou  17162.0      NaN                  5 Bourgs ruraux  0.0   0.0  100.0     True
+27046  69114  Porte des Pierres Dorées   4185.0      NaN             4 Ceintures urbaines  0.0  78.0   22.0     True
+4821   14581                Aurseulles   1896.0      NaN       6 Rural à habitat dispersé  0.0   0.0  100.0     True
+4201   12218       Conques-en-Rouergue   1540.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+4978   15035              Chalinargues    304.0      NaN       6 Rural à habitat dispersé  0.0   0.0  100.0     True
+4974   15031                    Celles    217.0      NaN                  5 Bourgs ruraux  0.0   0.0  100.0     True
+5103   15171          Sainte-Anastasie    122.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+4988   15047                 Chavagnac     88.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+12382  33103      Castelmoron-d'Albret     50.0      NaN       6 Rural à habitat dispersé  0.0   0.0  100.0     True
+20024  55050                 Bezonvaux      0.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+20013  55039     Beaumont-en-Verdunois      0.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+20099  55139    Cumières-le-Mort-Homme      0.0      NaN  7 Rural à habitat très dispersé  0.0   0.0  100.0     True
+
+## Portée des seuils de population : ils portent sur les TACHES de carreaux, pas sur la commune
+(DT Insee 2022-18 §1.2 ; Eurostat 2021 §7.1.3). Population COMMUNALE par classe :
+                                    count    min     10%      50%      90%       max
+g7                                                                                  
+1 Grands centres urbains            689.0  876.0  4677.0  17435.0  67044.0  514819.0
+2 Centres urbains intermédiaires    617.0  892.0  4480.0  11590.0  30024.0   74568.0
+3 Petites villes                    932.0  184.0   788.0   3194.0   8736.0   49603.0
+4 Ceintures urbaines               1965.0  327.0   820.0   2463.0   6798.0   26227.0
+5 Bourgs ruraux                    5038.0   96.0   685.0   1546.0   3955.0   25797.0
+6 Rural à habitat dispersé        18267.0    9.0   119.0    372.0   1089.0   11712.0
+7 Rural à habitat très dispersé    7235.0    0.0    46.0    160.0    464.0    6207.0
+grands centres urbains (centre >= 50 000) : 689 communes ; sous 50000 hab. : 581 ; à - hab. ou plus : 0
+centres urbains intermédiaires (tache dense 5 000-49 999) : 617 communes ; sous 5000 hab. : 73 ; à 50000 hab. ou plus : 12
+petites villes (tache semi-dense >= 5 000) : 932 communes ; sous 5000 hab. : 611 ; à 50000 hab. ou plus : 0
+ceintures urbaines (cellules d'une tache >= 5 000) : 1965 communes ; sous 5000 hab. : 1564 ; à 50000 hab. ou plus : 0
+bourgs ruraux (tache rurale 500-4 999) : 5038 communes ; sous 500 hab. : 188 ; à 5000 hab. ou plus : 231
+rural à habitat dispersé >= 500 hab : 6861 | >= 2000 : 490
+
+## Unités urbaines (FUT-176)
+source du statut : hors_uu (index d'avant FUT-176 : absent du référentiel = hors UU, statut perdu)
+en UU : 7460 | hors UU : 27283 | statut inconnu : 0
+en UU, < 1000 hab (pop. index) : 1392 | dont rural Insee : 1138
+en UU mais rural Insee (5-7) : 3610
+hors UU mais urbain Insee (1-4) : 353
+villes isolées par classe :
+ g7
+5 Bourgs ruraux                     852
+3 Petites villes                    140
+4 Ceintures urbaines                113
+6 Rural à habitat dispersé           74
+2 Centres urbains intermédiaires     40
+7 Rural à habitat très dispersé       1
+1 Grands centres urbains              1
+Name: count, dtype: int64
+
+(règle « ville » de FUT-176 non évaluable : index sans uu_statut)
+
+################ 05_coherence_et_millesimes
+discordances avec la règle officielle (seuil dense >= 50 %) : 80
+discordances avec la règle officielle (seuil dense > 50 %) : 80
+
+idxmax (ancienne analyse) × règle officielle :
+ disc_regle   False  True 
+disc_idxmax              
+False        34664      2
+True             2     78
+
+Faux positifs d'idxmax (la règle retrouve la classe) :
+      CODGEO          LIBGEO               LIBDENS    P1    P2    P3
+22076  59340  Leffrinckoucke  Urbain intermédiaire  49.6  44.3   6.0
+33093  87075            Isle  Urbain intermédiaire  46.1  26.0  28.0
+
+Discordances que seule la règle fait apparaître :
+      CODGEO             LIBGEO               LIBDENS    P1    P2    P3
+19287  53174  Parigné-sur-Braye  Urbain intermédiaire   0.0  50.0  50.0
+32950  86214       Saint-Benoît          Urbain dense  46.2  37.1  16.7
+
+Discordances selon la règle officielle, par nature :
+                                                     communes  population
+nature                                                                  
+a. classée dense, moins de 50 % dans un centre ...        30      370766
+b. 50 % ou plus dans un centre urbain, classée ...         1        7233
+c. bascule urbain/rural à moins de 2 points de ...        13       27508
+d. bascule urbain/rural nette (2 points ou plus)          36       63756
+                                                             nature CODGEO                     LIBGEO  PMUN23                        LIBDENS7    P1     P2     P3  regle
+10446         a. classée dense, moins de 50 % dans un centre urbain  29232                    Quimper   64385          Grands centres urbains   0.0   92.7    7.3      2
+4288          a. classée dense, moins de 50 % dans un centre urbain  13005                    Aubagne   47529          Grands centres urbains   0.0   95.2    4.8      2
+7505          a. classée dense, moins de 50 % dans un centre urbain  22278               Saint-Brieuc   44364          Grands centres urbains   0.0   99.1    0.9      2
+8705          a. classée dense, moins de 50 % dans un centre urbain  25388                Montbéliard   24672          Grands centres urbains   0.0   99.3    0.7      2
+1943          a. classée dense, moins de 50 % dans un centre urbain  06079       Mandelieu-la-Napoule   21640          Grands centres urbains   0.0   96.2    3.8      2
+13187         a. classée dense, moins de 50 % dans un centre urbain  35051             Cesson-Sévigné   18761          Grands centres urbains   0.0   90.5    9.5      2
+8389          a. classée dense, moins de 50 % dans un centre urbain  25031                 Audincourt   14071          Grands centres urbains   0.0   99.7    0.3      2
+7447          a. classée dense, moins de 50 % dans un centre urbain  22215                 Ploufragan   11507          Grands centres urbains   0.0   77.6   22.4      2
+16438         a. classée dense, moins de 50 % dans un centre urbain  45075   La Chapelle-Saint-Mesmin   11017          Grands centres urbains   3.5   93.4    3.1      2
+13190         a. classée dense, moins de 50 % dans un centre urbain  35055                  Chantepie   10670          Grands centres urbains   0.0   92.6    7.4      2
+8879          a. classée dense, moins de 50 % dans un centre urbain  25580                Valentigney   10501          Grands centres urbains   0.0  100.0    0.0      2
+34671         a. classée dense, moins de 50 % dans un centre urbain  95394              Méry-sur-Oise    9983          Grands centres urbains  42.8   55.1    2.1      2
+13398         a. classée dense, moins de 50 % dans un centre urbain  35278             Saint-Grégoire    9957          Grands centres urbains   5.5   87.6    6.9      2
+7576          a. classée dense, moins de 50 % dans un centre urbain  22360                   Trégueux    8450          Grands centres urbains   0.0   82.9   17.1      2
+7351          a. classée dense, moins de 50 % dans un centre urbain  22106                   Langueux    7939          Grands centres urbains   0.0   92.6    7.4      2
+32950         a. classée dense, moins de 50 % dans un centre urbain  86214               Saint-Benoît    7375          Grands centres urbains  46.2   37.1   16.7      2
+4353          a. classée dense, moins de 50 % dans un centre urbain  13070      La Penne-sur-Huveaune    6605          Grands centres urbains   0.0  100.0    0.0      2
+8614          a. classée dense, moins de 50 % dans un centre urbain  25284             Grand-Charmont    5873          Grands centres urbains   0.0   99.4    0.6      2
+8413          a. classée dense, moins de 50 % dans un centre urbain  25057                Bethoncourt    5308          Grands centres urbains   0.0   90.1    9.9      2
+34369         a. classée dense, moins de 50 % dans un centre urbain  91458                      Nozay    4471          Grands centres urbains  10.3   79.3   10.5      2
+9967          a. classée dense, moins de 50 % dans un centre urbain  28110                 Le Coudray    4038          Grands centres urbains   7.7   90.3    1.9      2
+8850          a. classée dense, moins de 50 % dans un centre urbain  25547                    Sochaux    3721          Grands centres urbains   0.0   98.3    1.7      2
+25034         a. classée dense, moins de 50 % dans un centre urbain  64237                      Gelos    3637          Grands centres urbains  30.8   47.6   21.7      2
+8564          a. classée dense, moins de 50 % dans un centre urbain  25230                  Exincourt    3277          Grands centres urbains   0.0   97.7    2.3      2
+8906          a. classée dense, moins de 50 % dans un centre urbain  25614             Vieux-Charmont    2786          Grands centres urbains   0.0   98.1    1.9      2
+34432         a. classée dense, moins de 50 % dans un centre urbain  91666                  Villejust    2558          Grands centres urbains   0.0   61.6   38.4      2
+34686         a. classée dense, moins de 50 % dans un centre urbain  95450          Neuville-sur-Oise    2058          Grands centres urbains  34.8   65.0    0.2      2
+21985         a. classée dense, moins de 50 % dans un centre urbain  59247          Forest-sur-Marque    1662          Grands centres urbains   0.0   99.2    0.8      2
+30412         a. classée dense, moins de 50 % dans un centre urbain  78007                  Aigremont    1075          Grands centres urbains   0.0   63.1   36.9      2
+8381          a. classée dense, moins de 50 % dans un centre urbain  25020                   Arbouans     876          Grands centres urbains   0.0   90.4    9.6      2
+15702  b. 50 % ou plus dans un centre urbain, classée intermédiaire  42127                      Mably    7233  Centres urbains intermédiaires  52.5   20.8   26.7      1
+16280           c. bascule urbain/rural à moins de 2 points de 50 %  44129                Pontchâteau   11474                  Petites villes   0.0   49.8   50.2      3
+10606           c. bascule urbain/rural à moins de 2 points de 50 %  2A271          Sarrola-Carcopino    3278        Rural à habitat dispersé   0.0   51.4   48.6      2
+12425           c. bascule urbain/rural à moins de 2 points de 50 %  33164                    Fargues    1655                  Petites villes   0.0   48.2   51.8      3
+23963           c. bascule urbain/rural à moins de 2 points de 50 %  62524                  Longfossé    1528                  Petites villes   0.0   48.3   51.7      3
+2243            c. bascule urbain/rural à moins de 2 points de 50 %  07225                Saint-Clair    1348        Rural à habitat dispersé   0.0   50.3   49.7      2
+5977            c. bascule urbain/rural à moins de 2 points de 50 %  17463                  Vergeroux    1279                   Bourgs ruraux   0.0   50.7   49.3      2
+13160           c. bascule urbain/rural à moins de 2 points de 50 %  35021                     Beaucé    1256              Ceintures urbaines   0.0   49.7   50.3      3
+29962           c. bascule urbain/rural à moins de 2 points de 50 %  77063         La Celle-sur-Morin    1235              Ceintures urbaines   0.0   48.5   51.5      3
+11790           c. bascule urbain/rural à moins de 2 points de 50 %  31575           Vieille-Toulouse    1230              Ceintures urbaines   0.0   48.7   51.3      3
+1280            c. bascule urbain/rural à moins de 2 points de 50 %  03093           Creuzier-le-Neuf    1225              Ceintures urbaines   0.0   49.7   50.3      3
+19287           c. bascule urbain/rural à moins de 2 points de 50 %  53174          Parigné-sur-Braye     848              Ceintures urbaines   0.0   50.0   50.0      3
+15892           c. bascule urbain/rural à moins de 2 points de 50 %  42327                      Vérin     666        Rural à habitat dispersé   0.0   51.8   48.2      2
+27115           c. bascule urbain/rural à moins de 2 points de 50 %  69212      Saint-Jean-des-Vignes     486              Ceintures urbaines   0.0   48.6   51.4      3
+10595              d. bascule urbain/rural nette (2 points ou plus)  2A247              Porto-Vecchio   11198                  Petites villes   0.0    0.0  100.0      3
+6548               d. bascule urbain/rural nette (2 points ou plus)  19274                      Ussac    4322              Ceintures urbaines   0.0   47.0   53.0      3
+14942              d. bascule urbain/rural nette (2 points ou plus)  39526                     Tavaux    3888                  Petites villes   0.0    0.0  100.0      3
+13873              d. bascule urbain/rural nette (2 points ou plus)  37163            Nazelles-Négron    3776                  Petites villes   0.0   44.7   55.3      3
+14333              d. bascule urbain/rural nette (2 points ou plus)  38388  Saint-Georges-de-Commiers    2699                   Bourgs ruraux   0.0   93.3    6.7      2
+14660              d. bascule urbain/rural nette (2 points ou plus)  39189                   Damparis    2587                  Petites villes   0.0    0.0  100.0      3
+13373              d. bascule urbain/rural nette (2 points ou plus)  35250                Saint-Armel    2433                   Bourgs ruraux   0.0   88.9   11.1      2
+17056              d. bascule urbain/rural nette (2 points ou plus)  47051               Castelculier    2382                   Bourgs ruraux   0.0   55.9   44.1      2
+29080              d. bascule urbain/rural nette (2 points ou plus)  74185           Monnetier-Mornex    2362        Rural à habitat dispersé   0.0   55.2   44.8      2
+29017              d. bascule urbain/rural nette (2 points ou plus)  74116                      Etaux    2180              Ceintures urbaines   0.0   45.8   54.2      3
+30820              d. bascule urbain/rural nette (2 points ou plus)  79213                   Pompaire    2049                  Petites villes   0.0   47.9   52.1      3
+14346              d. bascule urbain/rural nette (2 points ou plus)  38401      Saint-Jean-de-Soudain    1714  Centres urbains intermédiaires   0.0   45.3   54.7      3
+8758               d. bascule urbain/rural nette (2 points ou plus)  25448                   Pelousey    1617                   Bourgs ruraux   0.0   80.8   19.2      2
+30745              d. bascule urbain/rural nette (2 points ou plus)  79114                   Exireuil    1578                   Bourgs ruraux   0.0   55.3   44.7      2
+10544              d. bascule urbain/rural nette (2 points ou plus)  2A085                      Cauro    1486                  Petites villes   0.0   36.1   63.9      3
+20672              d. bascule urbain/rural nette (2 points ou plus)  56223      Saint-Jean-la-Poterie    1429                   Bourgs ruraux   0.0   56.6   43.4      2
+5666               d. bascule urbain/rural nette (2 points ou plus)  17136              Croix-Chapeau    1418                   Bourgs ruraux   0.0   58.7   41.3      2
+5503               d. bascule urbain/rural nette (2 points ou plus)  16385                     Touvre    1150                  Petites villes   0.0   36.1   63.9      3
+24811              d. bascule urbain/rural nette (2 points ou plus)  64007                      Agnos    1044                  Petites villes   0.0   47.7   52.3      3
+34245              d. bascule urbain/rural nette (2 points ou plus)  90104                   Vézelois    1029                   Bourgs ruraux   0.0   87.7   12.3      2
+29136              d. bascule urbain/rural nette (2 points ou plus)  74253                 Saint-Sixt    1016              Ceintures urbaines   0.0   33.8   66.2      3
+34230              d. bascule urbain/rural nette (2 points ou plus)  90088                Rougegoutte     987                   Bourgs ruraux   0.0   52.3   47.7      2
+30634              d. bascule urbain/rural nette (2 points ou plus)  78588             Saulx-Marchais     950                   Bourgs ruraux   0.0   84.6   15.4      2
+14778              d. bascule urbain/rural nette (2 points ou plus)  39327           Messia-sur-Sorne     911                  Petites villes   0.0   43.5   56.5      3
+25259              d. bascule urbain/rural nette (2 points ou plus)  64467                  Rontignon     875              Ceintures urbaines   0.0   33.9   66.1      3
+25340              d. bascule urbain/rural nette (2 points ou plus)  64550                       Uzos     874        Rural à habitat dispersé   0.0   74.3   25.7      2
+29948              d. bascule urbain/rural nette (2 points ou plus)  77049                   Boutigny     874              Ceintures urbaines   0.0   43.5   56.5      3
+15163              d. bascule urbain/rural nette (2 points ou plus)  40178                 Mazerolles     715              Ceintures urbaines   0.0   15.4   84.6      3
+12482              d. bascule urbain/rural nette (2 points ou plus)  33222         Lalande-de-Pomerol     618              Ceintures urbaines   0.0    6.7   93.3      3
+34149              d. bascule urbain/rural nette (2 points ou plus)  90004                  Argiésans     607              Ceintures urbaines   0.0   42.3   57.7      3
+28895              d. bascule urbain/rural nette (2 points ou plus)  73308                    Venthon     606              Ceintures urbaines   0.0   25.0   75.0      3
+8481               d. bascule urbain/rural nette (2 points ou plus)  25136                  Chaucenne     529                   Bourgs ruraux   0.0   68.2   31.8      2
+14231              d. bascule urbain/rural nette (2 points ou plus)  38277     Notre-Dame-de-Commiers     519        Rural à habitat dispersé   0.0   55.5   44.5      2
+14361              d. bascule urbain/rural nette (2 points ou plus)  38417      Sainte-Marie-d'Alloix     486                   Bourgs ruraux   0.0   66.0   34.0      2
+14795              d. bascule urbain/rural nette (2 points ou plus)  39348                   Montaigu     427                   Bourgs ruraux   0.0   84.8   15.2      2
+30850              d. bascule urbain/rural nette (2 points ou plus)  79258   Saint-Jacques-de-Thouars     421                   Bourgs ruraux   0.0   95.2    4.8      2
+
+Cas demandés par la contre-revue :
+  Isle            classe 2 (Ceintures urbaines) | P = 46.1 / 26.0 / 28.0 | règle -> 2 | idxmax -> 1
+  Quimper         classe 1 (Grands centres urbains) | P = 0.0 / 92.7 / 7.3 | règle -> 2 | idxmax -> 2
+  Aubagne         classe 1 (Grands centres urbains) | P = 0.0 / 95.2 / 4.8 | règle -> 2 | idxmax -> 2
+  Saint-Brieuc    classe 1 (Grands centres urbains) | P = 0.0 / 99.1 / 0.9 | règle -> 2 | idxmax -> 2
+  Porto-Vecchio   classe 2 (Petites villes) | P = 0.0 / 0.0 / 100.0 | règle -> 3 | idxmax -> 3
+
+19 communes ajustées (DT 2022-18 §1.4), classe 2026 : {'Petites villes': 19} | parmi les discordances de niveau 1 : 0
+
+2025 vs 2026 : {'both': 34875, 'left_only': 0, 'right_only': 0} | classe 7 postes modifiée : 0
+
+################ 06_panel_et_voisins
+« intermédiaire » chez nous :
+ g7
+1 Grands centres urbains             229
+2 Centres urbains intermédiaires     496
+3 Petites villes                     683
+4 Ceintures urbaines                1663
+5 Bourgs ruraux                     1636
+6 Rural à habitat dispersé           484
+7 Rural à habitat très dispersé        2
+Name: count, dtype: int64
+« peu dense » chez nous : 28941 communes
+ g7
+2 Centres urbains intermédiaires       13
+3 Petites villes                      243
+4 Ceintures urbaines                  285
+5 Bourgs ruraux                      3396
+6 Rural à habitat dispersé          17780
+7 Rural à habitat très dispersé      7224
+Name: count, dtype: int64
+
+Panel
+        insee                 nom   PMUN23  densite            cat                                g7     P1    P2     P3               LIBDENS uu_statut  hors_uu     uu
+486    02100                Bony    137.0     17.4      peu_dense        6 Rural à habitat dispersé    0.0   0.0  100.0                 Rural      None     True    NaN
+1773   05082        Mont-Dauphin    162.0    281.7  intermediaire        6 Rural à habitat dispersé    0.0   0.0  100.0                 Rural      None    False  05104
+4287   13004               Arles  51811.0     67.4      peu_dense  2 Centres urbains intermédiaires    0.0  74.2   25.8  Urbain intermédiaire      None    False  00552
+5642   17094  Châtelaillon-Plage   6653.0    975.8  intermediaire              4 Ceintures urbaines    0.0  99.6    0.4  Urbain intermédiaire      None    False  17601
+9961   28085            Chartres  38324.0   2247.9          dense          1 Grands centres urbains   93.1   6.9    0.0          Urbain dense      None    False  28501
+10058  28199  Janville-en-Beauce   2464.0     58.7      peu_dense                   5 Bourgs ruraux    0.0   0.0  100.0                 Rural      None     True    NaN
+10462  29232             Quimper  64385.0    764.6  intermediaire          1 Grands centres urbains    0.0  92.7    7.3          Urbain dense      None    False  29501
+10709  2B096               Corte   7819.0     51.8      peu_dense                  3 Petites villes    0.0  92.0    8.0  Urbain intermédiaire      None    False  2B202
+13115  34301                Sète  45337.0   1863.2          dense  2 Centres urbains intermédiaires    0.0  99.8    0.2  Urbain intermédiaire      None    False  34501
+16373  44212              Vallet   9495.0    161.4  intermediaire        6 Rural à habitat dispersé    0.0   0.0  100.0                 Rural      None    False  44223
+21848  59090             Bondues   9747.0    737.9  intermediaire              4 Ceintures urbaines    7.1  86.1    6.8  Urbain intermédiaire      None    False  59702
+26646  68078           Eguisheim   1729.0    123.0      peu_dense              4 Ceintures urbaines    0.0  97.7    2.3  Urbain intermédiaire      None     True    NaN
+32404  84007             Avignon  92188.0   1413.9  intermediaire          1 Grands centres urbains   81.6  16.2    2.1          Urbain dense      None    False  00754
+34504  92044    Levallois-Perret  68092.0  28505.0          dense          1 Grands centres urbains  100.0   0.0    0.0          Urbain dense      None    False  00851
+
+PLM dans la grille :
+       CODGEO     LIBGEO                LIBDENS7
+4338   13055  Marseille  Grands centres urbains
+27039  69123       Lyon  Grands centres urbains
+29194  75056      Paris  Grands centres urbains
+
+################ 08_accueil_croisement
+PÉRIMÈTRE : urbaines Insee (1-4) sous 1 500 hab/km² : 3612 communes  20 332 264 hab.
+  dont classes 1-2 (ancien décompte) : 738 communes, 9 923 856 hab.
+  par classe : {'1 Grands centres urbains': 229, '2 Centres urbains intermédiaires': 509, '3 Petites villes': 926, '4 Ceintures urbaines': 1948}
+  portent rural_peri_urbain : 3612
+                                                           texte  communes  habitants  imputables à la densité  habitants imputables
+                   accroche (hero) : « dépendance à la voiture »      2792   14032469                     2792              14032469
+               intro des questions : « dépendance à la voiture »      1523    9017457                     1523               9017457
+                                    état vide : « déplacements »      3094   16640057                     3094              16640057
+carte Mobilité : « le quotidien dépend largement de la voiture »      3612   20332264                     3322              19108182
+au moins une phrase « voiture » : 3612 communes ; imputable à la densité : 3322
+carte Mobilité présente dans l'aperçu : 3612 / 3612
+
+Pourquoi l'accroche ne parle pas toujours de voiture (premier cas qui passe avant, recits.ts getHeroCopy) :
+cats
+aucun (rural_peri_urbain atteint)    2792
+mediterranee                          302
+montagne                              288
+littoral                              230
+
+Exemples (plus peuplées) :
+                  nom   PMUN23  densite                               g7  hero_voiture  intro_voiture  carte_voiture  sans_carte_voiture
+                Nîmes 151839.0    930.0         1 Grands centres urbains         False          False           True               False
+      Aix-en-Provence 149695.0    795.0         1 Grands centres urbains         False          False           True               False
+              Avignon  92188.0   1414.0         1 Grands centres urbains         False          False           True               False
+              Béziers  81545.0    846.0         1 Grands centres urbains         False          False           True               False
+Cherbourg-en-Cotentin  78258.0   1139.0         1 Grands centres urbains         False          False           True               False
+              Ajaccio  76320.0    919.0         1 Grands centres urbains         False          False           True               False
+               Colmar  66970.0   1011.0         1 Grands centres urbains          True          False           True               False
+              Quimper  64385.0    765.0         1 Grands centres urbains          True           True           True               False
+              Bourges  64186.0    935.0         1 Grands centres urbains          True           True           True               False
+            Montauban  62945.0    462.0 2 Centres urbains intermédiaires          True          False           True               False
+                Niort  59854.0    881.0 2 Centres urbains intermédiaires          True          False           True               False
+               Fréjus  59719.0    572.0         1 Grands centres urbains         False          False           True               False
+             Narbonne  57587.0    328.0 2 Centres urbains intermédiaires         False          False           True               False
+               Hyères  55858.0    418.0 2 Centres urbains intermédiaires         False          False           True               False
+     La Roche-sur-Yon  54849.0    625.0 2 Centres urbains intermédiaires          True           True           True               False

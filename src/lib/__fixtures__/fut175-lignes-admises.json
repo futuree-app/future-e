@@ -1,7 +1,6 @@
 {
   "src/lib/territoire/synthesis-contract.ts": [
     "-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;",
-    "+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@5:${SYNTHESIS_MODEL}`;",
     "-  eau: \"eau\",",
     "+  const eau = get<number>(\"land.water_share\");",
     "-          part_espaces_naturels_pct: get<number>(\"land.natural_share\"),",

@@ -9,7 +9,7 @@
 // ── LA RÈGLE : AGRÉGER CE QUI S'AGRÈGE, TAIRE LE RESTE ───────────────────────────────────────
 // Jamais « Paris = Paris 1er ». Chaque champ est décidé :
 //   population        SOMME de tous les arrondissements (`populationCommunalePLM`, un seul manquant = inconnu)
-//   unité urbaine     commune à tous les arrondissements (sinon inconnue), population de l'UU idem
+//   unité urbaine     commune à tous les arrondissements (sinon inconnue), population de l'UU et statut idem
 //   taux démographique RECALCULÉ sur les sommes : P2015 de chaque arrondissement reconstruite depuis son
 //                     taux (P2015 = P2021 / (1 + t)^6), puis t = (ΣP2021 / ΣP2015)^(1/6) − 1. Jamais une
 //                     moyenne de taux.
@@ -50,6 +50,7 @@ export type ArrondissementIndex = {
   insee: string;
   population?: number | null;
   uu?: string | null;
+  uu_statut?: string | null;
   uu_pop?: number | null;
   demographie?: { taux_total?: number | null } | null;
 };
@@ -57,6 +58,8 @@ export type ArrondissementIndex = {
 export type LectureCommunalePLM = {
   population: number | null;
   uu: string | null;
+  // FUT-176 : le statut Insee de la commune, commun à tous les arrondissements (sinon inconnu).
+  uuStatut: string | null;
   uuPop: number | null;
   demographie: { taux_total: number; part_nouveaux: null; recit: "perd" | null } | null;
 };
@@ -73,6 +76,7 @@ export function lectureCommunalePLM(insee: string, communes: readonly Arrondisse
 
   const uu = unique(tous.map((a) => a.uu ?? null));
   const uuPop = uu ? unique(tous.map((a) => a.uu_pop ?? null)) : null;
+  const uuStatut = unique(tous.map((a) => a.uu_statut ?? null));
 
   let demographie: LectureCommunalePLM["demographie"] = null;
   const complets = tous.every((a) => typeof a.population === "number" && a.population > 0 && typeof a.demographie?.taux_total === "number");
@@ -87,7 +91,7 @@ export function lectureCommunalePLM(insee: string, communes: readonly Arrondisse
     demographie = { taux_total: taux, part_nouveaux: null, recit: taux < -BANDE_STABLE_PCT ? "perd" : null };
   }
 
-  return { population: populationCommunalePLM(ville.cle, tous), uu, uuPop, demographie };
+  return { population: populationCommunalePLM(ville.cle, tous), uu, uuStatut, uuPop, demographie };
 }
 
 /**

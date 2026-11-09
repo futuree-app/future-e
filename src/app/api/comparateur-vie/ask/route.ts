@@ -33,6 +33,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { identifiantMesureConsenti, MESURE_MUETTE } from "@/lib/posthog-identity";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 import { contexteIrrecevable, lectureDuContexte, longueurQuestion, MAX_QUESTION_ASK, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
@@ -411,14 +412,17 @@ export async function POST(request: NextRequest) {
       ? body.focus.rang
       : null;
 
-  const distinctId = typeof body.distinctId === "string" && body.distinctId ? body.distinctId : "anon";
+  // FUT-181 : mesuré seulement si le navigateur a consenti, donc transmis son identifiant de mesure.
+  // Plus de repli sur « anon » : sans identifiant, aucun événement.
+  const distinctId = identifiantMesureConsenti(body.distinctId) ?? "";
+  const clientMesure = () => (distinctId ? getPostHogClient() : MESURE_MUETTE);
 
   // ─── Compteur 2 questions gratuites (global parcours) ──────────────────────
   const rawCount = Number.parseInt(request.cookies.get(COUNT_COOKIE)?.value ?? "0", 10);
   const used = Number.isFinite(rawCount) && rawCount > 0 ? rawCount : 0;
 
   if (used >= FREE_COMPARATEUR_QUESTIONS) {
-    const ph = getPostHogClient();
+    const ph = clientMesure();
     ph.capture({
       distinctId,
       event: "life_ask_limit_reached",
@@ -433,7 +437,7 @@ export async function POST(request: NextRequest) {
 
   const questionIndex = used + 1; // 1 ou 2
 
-  const ph = getPostHogClient();
+  const ph = clientMesure();
   ph.capture({
     distinctId,
     event: "life_ask_submitted",

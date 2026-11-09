@@ -3,7 +3,7 @@ import { cardinalPackValide } from "@/lib/comparaison-cardinal";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { sanitizeDistinctId } from "@/lib/posthog-identity";
+import { identifiantMesureConsenti } from "@/lib/posthog-identity";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { fetchBanFeaturesByLabel } from "@/lib/ban";
 import { pickFeatureById } from "@/lib/ban-verify";
@@ -154,10 +154,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // L'IDENTITÉ DE MESURE, transmise par le navigateur. Le repli est l'UUID Supabase, celui-là
-    // même que `PostHogProvider` passe à `identify()`, donc un client qui n'envoie rien reste
-    // rattaché à la bonne personne.
-    const phDistinctId = sanitizeDistinctId(phDistinctIdRaw, user.id);
+    // L'IDENTITÉ DE MESURE, transmise par le navigateur (la même que celle de ses événements).
+    // FUT-181 : PLUS DE REPLI SUR L'UUID. Sans consentement, le navigateur n'envoie rien, et rien n'est
+    // mesuré ici. Elle sert à CET appel seulement, pendant que le navigateur est là pour consentir : elle
+    // n'est plus confiée à Stripe (contre-revue FUT-181, voir le webhook).
+    const phDistinctId = identifiantMesureConsenti(phDistinctIdRaw);
 
     const stripe = getStripe();
 
@@ -344,8 +345,8 @@ export async function POST(request: Request) {
         packCommune2: isPack ? packTrio[1].commune : "",
         packCommune3: isPack ? (packTrio[2]?.commune ?? "") : "",
         packProjetLabel,
-        // Voyage jusqu'au webhook, seul point du parcours sans navigateur.
-        phDistinctId,
+        // FUT-181 (contre-revue) : PLUS D'IDENTIFIANT DE MESURE DANS LES MÉTADONNÉES. Il voyageait
+        // jusqu'au webhook, qui émettait sous lui même si le consentement avait été retiré entre-temps.
         // Le tarif appliqué, figé lui aussi : la facture le porte, et il ne se recalcule pas.
         promoLabel: dossierPromoLabel ?? "",
         // Le nom de facturation, FIGÉ AU MOMENT DE L'ACHAT. Le webhook ne relit pas le compte :
@@ -452,26 +453,27 @@ export async function POST(request: Request) {
       }
     }
 
-    const posthog = getPostHogClient();
-    posthog.capture({
-      distinctId: phDistinctId,
-      event: "payment_intent_created",
-      properties: {
-        product_type: productType.trim(),
-        amount: isDossier ? dossierAmountCents / 100 : priceConfig.amountEur,
-        currency: "eur",
-        user_id: user.id,
-        // FUT-10 : SI le lecteur a répondu, jamais CE qu'il a répondu (ni texte, ni projet).
-        ...(colonnesContexte
-          ? {
-              context_relation_declared: colonnesContexte.place_relation != null,
-              context_objective_declared: colonnesContexte.place_objective != null,
-              context_project_confirmed: colonnesContexte.project_snapshot != null,
-            }
-          : {}),
-      },
-    });
-    await posthog.shutdown();
+    if (phDistinctId) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: phDistinctId,
+        event: "payment_intent_created",
+        properties: {
+          product_type: productType.trim(),
+          amount: isDossier ? dossierAmountCents / 100 : priceConfig.amountEur,
+          currency: "eur",
+          // FUT-10 : SI le lecteur a répondu, jamais CE qu'il a répondu (ni texte, ni projet).
+          ...(colonnesContexte
+            ? {
+                context_relation_declared: colonnesContexte.place_relation != null,
+                context_objective_declared: colonnesContexte.place_objective != null,
+                context_project_confirmed: colonnesContexte.project_snapshot != null,
+              }
+            : {}),
+        },
+      });
+      await posthog.shutdown();
+    }
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

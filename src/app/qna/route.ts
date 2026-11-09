@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { telemetrieQnaPostHogActive } from "@/lib/posthog-identity";
 import { getCommuneEntry, buildTerritorySignals } from "@/lib/comparateur-vie";
 import { chargerGaresBpe } from "@/lib/gares-bpe";
 import { garesDeLaCommune } from "@/lib/gares-commune";
@@ -171,30 +172,49 @@ export async function POST(request: Request) {
 
     const finale = finaliserReponseQna(text, contexte);
 
-    const posthog = getPostHogClient();
-    posthog.capture({
-      distinctId: "anonymous",
-      event: "$ai_generation",
-      properties: {
-        $ai_trace_id: traceId,
-        $ai_provider: "anthropic",
-        $ai_model: model,
-        $ai_input_tokens: anthropicJson?.usage?.input_tokens ?? null,
-        $ai_output_tokens: anthropicJson?.usage?.output_tokens ?? null,
-        $ai_latency: latency,
-        $ai_http_status: anthropicResponse.status,
-        $ai_base_url: "https://api.anthropic.com",
-        $ai_span_name: "qna",
-        question_category: resolveQuestionCategory(tension.id),
-        module_id: tension.id ?? null,
-        module_context: tension.id ?? null,
-        report_id: inseeCode ?? null,
-        // FUT-37 : la réponse affichée vient-elle du modèle, ou du repli après une violation ?
-        qna_source: finale.source,
-        qna_violations: finale.violations,
-      },
-    });
-    await posthog.shutdown();
+    // Le corps vient du navigateur : un client modifié pourrait glisser du texte libre dans ces deux champs.
+    // Seuls un code commune et un identifiant de module bien formés sont journalisés ou transmis.
+    const moduleId = typeof tension.id === "string" && /^[a-z0-9_-]{1,40}$/i.test(tension.id) ? tension.id : null;
+    const insee = typeof inseeCode === "string" && /^[0-9][0-9AB][0-9]{3}$/.test(inseeCode) ? inseeCode : null;
+
+    // DIAGNOSTIC INTERNE, toujours : coût, latence, statut et garde de sortie, dans le journal du serveur.
+    // Aucune donnée du lecteur (ni question, ni texte, ni identifiant), la commune et le module seuls.
+    console.info("[qna] génération", JSON.stringify({
+      trace: traceId, model, status: anthropicResponse.status, latency,
+      input_tokens: anthropicJson?.usage?.input_tokens ?? null, output_tokens: anthropicJson?.usage?.output_tokens ?? null,
+      module: moduleId, insee, source: finale.source, violations: finale.violations,
+    }));
+
+    // PostHog : seulement si le fondement est validé (voir `telemetrieQnaPostHogActive`). Coupé par défaut.
+    if (telemetrieQnaPostHogActive()) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: "anonymous",
+        event: "$ai_generation",
+        // FUT-181 : télémétrie du modèle (coût, latence, statut, garde de sortie), sans personne :
+        // identifiant constant, aucun profil créé, aucune donnée du lecteur (la commune seule).
+        properties: {
+          $process_person_profile: false,
+          $ai_trace_id: traceId,
+          $ai_provider: "anthropic",
+          $ai_model: model,
+          $ai_input_tokens: anthropicJson?.usage?.input_tokens ?? null,
+          $ai_output_tokens: anthropicJson?.usage?.output_tokens ?? null,
+          $ai_latency: latency,
+          $ai_http_status: anthropicResponse.status,
+          $ai_base_url: "https://api.anthropic.com",
+          $ai_span_name: "qna",
+          question_category: resolveQuestionCategory(moduleId ?? ""),
+          module_id: moduleId,
+          module_context: moduleId,
+          report_id: insee,
+          // FUT-37 : la réponse affichée vient-elle du modèle, ou du repli après une violation ?
+          qna_source: finale.source,
+          qna_violations: finale.violations,
+        },
+      });
+      await posthog.shutdown();
+    }
 
     return NextResponse.json({ ...finale, model_used: model });
   }

@@ -51,6 +51,7 @@ import {
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, villeDeArrondissement, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
+import { peutDireVille, roleUrbain, type RoleUrbain } from "@/lib/territoire/statut-urbain";
 import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
 import { chargerTableIncendies } from "@/lib/bdiff-incendies-commune";
 import { memoireIncendiesDeLaCommune, type TableIncendies } from "@/lib/data/bdiff-incendies";
@@ -533,9 +534,12 @@ export type IndexCommune = {
   // du comptage d'équipements ; count = brut conservé pour un futur rapport. Accès, pas qualité.
   ecoles?: { score: number | null; count: number } | null;
   culture?: { score: number | null; count: number } | null;
-  // Unité urbaine INSEE (UU2020, cf. scripts/populate-unite-urbaine.py). null = commune hors
-  // unité urbaine (isolée/rurale). Sert à « quitter {ville} » (exclusion par agglomération).
+  // Unité urbaine INSEE (UU2020, cf. scripts/populate-unite-urbaine.py). null = commune hors unité urbaine OU
+  // statut inconnu : c'est `uu_statut` qui tranche (FUT-176). Sert à « quitter {ville} » (exclusion par agglomération).
   uu?: string | null;
+  // FUT-176 : statut Insee de la commune dans son unité urbaine. C ville-centre, B banlieue, I ville isolée
+  // (agglomération d'une seule commune), H hors unité urbaine ; null = inconnu. Cf. territoire/statut-urbain.ts.
+  uu_statut?: string | null;
   // Risque inondation (cf. scripts/gaspar/collecter-catnat.mts). catnat = nb de reconnaissances CatNat (lignes GASPAR)
   // inondation (hors submersion marine) ; tri réservé (false en V1) ; risque 0-100 (haut = exposé).
   inondation?: { catnat: number; tri: boolean; risque: number } | null;
@@ -743,16 +747,17 @@ export async function getLectureCommunalePLM(insee: string): Promise<{
   const lecture = lectureCommunalePLM(insee.trim(), communes);
   if (!lecture) return null;
   const uuLabel = lecture.uu ? uuLabelCache!.get(lecture.uu) ?? null : null;
-  const role: TerritoryContext["role"] = !lecture.uu ? "isolee"
-    : uuLabel && normalizeName(uuLabel) === normalizeName(ville.nom) ? "pole" : "agglo";
-  return { lecture, uuLabel, role };
+  return { lecture, uuLabel, role: roleUrbain(lecture.uu, lecture.uuStatut) };
 }
 
 export type TerritoryContext = {
   entry: IndexCommune;
   uuLabel: string | null; // nom de l'agglomération (commune la plus peuplée de l'UU)
   uuPop: number | null; // population de l'unité urbaine
-  role: "isolee" | "pole" | "agglo"; // place de la commune dans son agglomération
+  role: RoleUrbain; // FUT-176 : le statut Insee de la commune, jamais déduit d'un code absent ni d'un nom
+  // FUT-176 : un arrondissement de Paris, Lyon ou Marseille porte le statut de sa ville (ville-centre) sans être la
+  // ville-centre lui-même. Le nom de la ville, pour le dire ; null pour toute autre commune.
+  arrondissementDe: string | null;
 };
 
 export async function getTerritoryContext(insee: string): Promise<TerritoryContext | null> {
@@ -764,12 +769,10 @@ export async function getTerritoryContext(insee: string): Promise<TerritoryConte
 
   const uuLabel = entry.uu ? uuLabelCache!.get(entry.uu) ?? null : null;
   const uuPop = entry.uu ? uuPopCache?.get(entry.uu) ?? null : null;
-  let role: TerritoryContext["role"];
-  if (!entry.uu) role = "isolee";
-  else if (uuLabel && normalizeName(uuLabel) === normalizeName(entry.nom)) role = "pole";
-  else role = "agglo";
-
-  return { entry, uuLabel, uuPop, role };
+  return {
+    entry, uuLabel, uuPop, role: roleUrbain(entry.uu, entry.uu_statut),
+    arrondissementDe: villeDeArrondissement(entry.insee)?.nom ?? null,
+  };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1125,8 +1128,12 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // « aux portes d'une grande ville, sans en habiter le centre ». La règle reste celle des communes ; seul
   // l'arrondissement en est exclu. Narratif seulement : population, taille de ville et scores ne changent pas.
   const arrondissementPLM = communeParent(c.insee) !== c.insee;
+  // FUT-176 : ni une ville-centre au sens de l'Insee (Béthune, Bruay-la-Buissière, Nogent-sur-Oise, Audincourt : « sans
+  // en habiter le centre » y était faux). La phrase exige que l'Insee classe la commune en BANLIEUE : un statut inconnu
+  // ne prouve pas qu'elle n'est pas au centre (contre-revue).
+  const role = roleUrbain(c.uu, c.uu_statut);
   const periurbain =
-    !arrondissementPLM && c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
+    !arrondissementPLM && role === "banlieue" && c.population != null && uuPop != null && uuPop >= 100000 && c.population < 25000;
   // « Grande ville » : la COMMUNE elle-même est grande (pas l'UU), sinon un village
   // dans une grande agglo serait mal étiqueté (Espelette).
   const grandeVille = c.population != null && c.population >= 50000;
@@ -1172,7 +1179,12 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
   // phrase dit le fait observé, sans lui prêter de cause.
   if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");
-  if (vieLocaleForte && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
+  // FUT-176 : « petite ville » parle de la COMMUNE. La taille d'agglomération ne suffit pas : Mont-Dauphin
+  // (171 habitants) appartient à une agglomération de 3 258 habitants sans être une ville. La règle est celle de tout
+  // le produit (`peutDireVille`) : ville-centre ou ville isolée, ET 2 000 habitants dans la commune. Une commune de
+  // banlieue de 5 000 habitants n'est pas « une petite ville » ; un arrondissement non plus.
+  const villeElleMeme = !arrondissementPLM && peutDireVille(role, c.population);
+  if (vieLocaleForte && villeElleMeme && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
   if ((natureForte || calmeForte) && petit) push("Pour un cadre rural préservé, loin de l'agitation.");
   if (calmeForte) push("Pour un quotidien au calme, loin de l'agitation.");
   if (natureForte) push("Pour vivre au plus près de la nature.");
@@ -1575,7 +1587,9 @@ export const DIMENSIONS: ComparaisonDim[] = [
   { id: "services", label: "Niveau de services", themeId: "services", key: "acces_services", paliers: ["Pôle de services", "Centre de proximité", "Hors pôle de services"], gp: "le niveau de services", forte: "son niveau de services", aide: "Ce que la commune concentre en commerces et services pour son bassin de vie (classification INRAE-CESAER / ANCT).", risque: false, directionnel: true },
   { id: "ecoles", label: "Collèges / lycées", themeId: "services", key: "acces_ecoles", paliers: ["Collèges et lycées accessibles", "Accès intermédiaire", "Accès limité"], gp: "l'accès aux collèges et lycées", forte: "son accès aux collèges et lycées", aide: "L'accès aux collèges et lycées alentour.", risque: false, directionnel: true },
   { id: "culture", label: "Culture", themeId: "services", key: "acces_culture", paliers: ["Offre culturelle présente", "Offre intermédiaire", "Offre limitée"], gp: "l'offre culturelle", forte: "son offre culturelle", aide: "La présence d'équipements culturels à proximité.", risque: false, directionnel: true },
-  { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"], gp: "le bassin de vie", forte: "son bassin de vie étendu", aide: "La taille du bassin de vie qui dessert le territoire.", risque: false, directionnel: true },
+  // FUT-176 : la mesure est la population de l'agglomération (unité urbaine Insee), ou de la commune hors agglomération.
+  // Ni « bassin de vie » (un autre zonage de l'Insee), ni « qui dessert » (aucune offre de services n'est mesurée).
+  { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Grande agglomération", "Agglomération moyenne", "Petite agglomération ou commune"], gp: "la taille de l'agglomération", forte: "sa grande agglomération", aide: "Le nombre d'habitants de l'agglomération, ou de la commune quand elle est hors agglomération. Il ne mesure pas à lui seul l'accès aux services ni aux transports.", risque: false, directionnel: true },
   { id: "emploi", label: "Emploi", themeId: "vitalite", key: "viabilite_emploi", paliers: ["Bassin d'emploi étendu", "Bassin d'emploi intermédiaire", "Bassin d'emploi resserré"], gp: "le bassin d'emploi", forte: "son bassin d'emploi étendu", aide: "L'étendue et la diversité du bassin d'emploi.", risque: false, directionnel: true },
   { id: "vie_locale", label: "Vie locale", themeId: "vitalite", key: "vie_locale", paliers: ["Vie locale animée", "Vie locale intermédiaire", "Vie locale discrète"], gp: "la vie locale", forte: "sa vie locale animée", aide: "L'intensité de la vie sociale (cafés, marchés, sport, associations).", risque: false, directionnel: true },
   { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante limitée"], gp: "la vie étudiante", forte: "sa vie étudiante", aide: "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.", risque: false, directionnel: true },
@@ -2474,15 +2488,22 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // FUT-33 : la distance est l'information, le seul qualificatif honnête (lagunes comprises, jamais « plage »).
   proximite_mer: (c) => (c.mer_centre_km != null ? `rivage marin à ${kmLisible(c.mer_centre_km)}` : "rivage marin proche"),
   cadre_calme: "cadre calme et habitable",
-  // On nomme, on ne mesure pas : paliers qualitatifs sur la taille du bassin de vie,
-  // jamais le nombre d'habitants brut (le chiffre cassait le récit). Détail au rapport.
+  // On nomme, on ne mesure pas : paliers qualitatifs sur la taille de l'AGGLOMÉRATION (unité urbaine Insee, ou
+  // la commune hors agglomération), jamais le nombre d'habitants brut. Détail au rapport. FUT-176 : la mesure est
+  // une population, pas un « bassin de vie » (autre zonage Insee) ni une offre de services : ni « bien pourvu », ni
+  // « au cœur » (une commune de banlieue n'est pas au cœur de son agglomération).
+  // Contre-revue : « hors agglomération » exige le statut Insee H. Sans code ni statut, on dit la population de la commune.
   eviter_isolement: (c) => {
     const t = tailleVille(c) ?? 0;
+    const role = roleUrbain(c.uu, c.uu_statut);
+    if (!c.uu && role !== "hors_uu") {
+      return t >= 25_000 ? "commune de plus de 25 000 habitants" : "commune de moins de 25 000 habitants";
+    }
     return t >= 100_000
-      ? "au cœur d'un vaste bassin de vie"
+      ? "dans une grande agglomération"
       : t >= 25_000
-        ? "bassin de vie bien pourvu"
-        : "bassin de vie de proximité";
+        ? "dans une agglomération de taille moyenne"
+        : c.uu ? "dans une petite agglomération" : "commune hors agglomération";
   },
   air_sain: "air de fond plus pur",
   acces_soins: "bon accès aux médecins",
@@ -2539,7 +2560,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   proximite_mer: "éloignée du littoral",
   eloignement_mer: "plus proche de la mer que souhaité",
   cadre_calme: "plus dense que recherché",
-  eviter_isolement: "bassin de vie réduit, plus isolé",
+  eviter_isolement: "commune ou agglomération plus petite que souhaité", // FUT-176 : une population, pas un isolement ; hors agglomération, c'est la commune
   air_sain: "air plus chargé en particules",
   acces_soins: "accès aux soins limité",
   acces_services: "commune hors pôle de services",
@@ -2586,7 +2607,7 @@ export const REASON_NEG_INTERMEDIAIRE: Partial<Record<PreferenceKey, string>> = 
   acces_services: "centre de proximité, hors des pôles de services",
   acces_ecoles: "accès intermédiaire aux collèges et lycées",
   acces_culture: "offre culturelle intermédiaire",
-  eviter_isolement: "bassin de proximité, plutôt qu'étendu",
+  eviter_isolement: "agglomération moyenne, plutôt que grande", // FUT-176 : la taille mesurée, pas un « bassin »
   viabilite_emploi: "bassin d'emploi intermédiaire",
   vie_locale: "vie locale intermédiaire",
   croissance_demographique: "population stable, sans gagner d'habitants",

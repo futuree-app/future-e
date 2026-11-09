@@ -102,7 +102,11 @@ test("Thurins : accès 20, agglomération de Lyon 92, score 63, palier interméd
 
 test("les 487 de FUT-135 : 11 restent au palier fort, aucune n'est dite ville étudiante ni desservie", async () => {
   assert.equal(LES_487.length, 487);
-  const apres = LES_487.map((x) => ({ ...x, c: commune(x.insee), s: vie(commune(x.insee)) }));
+  // FUT-176 : quatre communes rejoignent leur agglomération officielle (Porte des Pierres Dorées, L'Oie, Sainte-Florence) ;
+  // l'échelle des rangs de part étudiante s'en déplace d'un point pour la seule agglomération de Mulhouse (68701 :
+  // 68 → 67, même palier). La liste figée du 29/10 garde sa valeur d'alors : on lui applique ce seul décalage.
+  const dynFUT176 = (x: { insee: string; dyn: number }) => (commune(x.insee).uu === "68701" ? x.dyn - 1 : x.dyn);
+  const apres = LES_487.map((x) => ({ ...x, dyn: dynFUT176(x), c: commune(x.insee), s: vie(commune(x.insee)) }));
   // Seul l'accès change, de 40 à 20 ; la part de l'agglomération est intacte.
   for (const x of apres) assert.deepEqual([x.acces, x.c.etudes_acces, x.c.etudes_dyn], [40, 20, x.dyn], x.insee);
   assert.equal(apres.filter((x) => x.vie >= PALIER_FORTE).length, 255);
@@ -172,7 +176,8 @@ test("grain : le niveau de présence ne dépasse jamais la part étudiante du ba
     if (etat === "absence") assert.ok(phrase.endsWith(`, aucun établissement supérieur recensé à moins de ${rayon} km`), c.insee);
   }
   // 948 phrases hors pôle et 488 de pôles disaient, sur main, un niveau au-dessus de la part de leur bassin.
-  assert.deepEqual(n, { mesurees: 5555, plafonnees: 649, poles: 135, aucun: 1280, accesDit: 1635 });
+  // FUT-176 : 5 556 mesurées (5 555 avant) — Porte des Pierres Dorées, désormais dans l'agglomération de Lyon, est mesurée.
+  assert.deepEqual(n, { mesurees: 5556, plafonnees: 649, poles: 135, aucun: 1280, accesDit: 1635 });
 });
 
 test("pôles : Montluçon, Gap, Vichy disent la présence de leur part étudiante et l'accès à part ; Vidauban, personne d'inscrit", async () => {

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { signOutAction } from "@/app/auth/actions";
 import { purgerRecherchesDuNavigateur } from "@/components/interaction/purge-recherche-navigateur";
 import { CHAMP_PURGE, PURGE_PAR_LE_NAVIGATEUR } from "@/lib/purge-recherche";
+import { ChampMesure } from "@/components/ChampMesure";
 
 // SE DÉCONNECTER (FUT-27). La fermeture de la session Supabase et la redirection restent à la Server Action ;
 // le serveur n'atteint pas le stockage du navigateur. Avant qu'elle parte, ce formulaire efface les
@@ -23,6 +24,7 @@ export function FormulaireDeconnexion({ className = "", children }: { className?
   return (
     <form action={signOutAction} onSubmit={() => purgerRecherchesDuNavigateur()} className={className}>
       <input type="hidden" name={CHAMP_PURGE} value={hydrate ? PURGE_PAR_LE_NAVIGATEUR : "serveur"} />
+      <ChampMesure />
       {children}
     </form>
   );

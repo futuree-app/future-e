@@ -293,6 +293,62 @@ test("ConsentBanner : stockage illisible → bandeau affiché ; écriture refus�
   }
 });
 
+// ── FUT-181 (contre-revue) : rouvrir les préférences révoque Google, dans cet onglet et les autres ──
+const GOOGLE = (v: "granted" | "denied") => ["consent", "update", { analytics_storage: v, ad_storage: v, ad_user_data: v, ad_personalization: v }];
+const evenementStockage = (key: string | null, newValue: string | null) => Object.assign(new Event("storage"), { key, newValue });
+
+test("ConsentBanner · FUT-181 : accepter → rouvrir révoque Google ; refuser → rouvrir → accepter, chaque étape suivie par Google", async () => {
+  const nav = installerNavigateur();
+  let r: Rendu | undefined;
+  try {
+    const ConsentBanner = chargerBandeau();
+    await act(async () => { r = create(React.createElement(ConsentBanner), { createNodeMock: mockNoeud }); });
+    await act(async () => { (bouton(r!, "Accepter").props.onClick as () => void)(); });
+    assert.deepEqual(nav.gtag, [GOOGLE("granted")]);
+    await act(async () => { nav.fenetre.dispatchEvent(new Event("futuree:show-consent")); });
+    assert.equal(nav.local.getItem("futuree-consent"), null);
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"), "choix effacé : Google revient au refus, sans attendre un clic");
+    await act(async () => { (bouton(r!, "Refuser").props.onClick as () => void)(); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"));
+    await act(async () => { nav.fenetre.dispatchEvent(new Event("futuree:show-consent")); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"));
+    await act(async () => { (bouton(r!, "Accepter").props.onClick as () => void)(); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("granted"), "nouvelle acceptation");
+    assert.deepEqual(nav.gtag, [GOOGLE("granted"), GOOGLE("denied"), GOOGLE("denied"), GOOGLE("denied"), GOOGLE("granted")]);
+  } finally {
+    if (r) await act(async () => r!.unmount());
+    nav.restaurer();
+  }
+});
+
+test("ConsentBanner · FUT-181 : deux onglets, l'onglet B suit l'effacement, le refus et la nouvelle acceptation faits dans A", async () => {
+  const nav = installerNavigateur();
+  nav.local.setItem("futuree-consent", "granted");
+  let r: Rendu | undefined;
+  try {
+    const ConsentBanner = chargerBandeau();
+    await act(async () => { r = create(React.createElement(ConsentBanner), { createNodeMock: mockNoeud }); });
+    assert.deepEqual(nav.gtag, [GOOGLE("granted")], "B réapplique le choix retenu");
+    // A rouvre ses préférences : le navigateur prévient B par `storage`, valeur nulle.
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage("futuree-consent", null)); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"), "choix effacé dans A : B révoque Google");
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage("futuree-consent", "denied")); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"));
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage("futuree-consent", "granted")); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("granted"), "nouvelle acceptation dans A");
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage(null, null)); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"), "stockage vidé (`clear()`) : refus");
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage("futuree-consent", "n'importe quoi")); });
+    assert.deepEqual(nav.gtag.at(-1), GOOGLE("denied"), "valeur inconnue : refus, comme PostHog");
+    const avant = nav.gtag.length;
+    await act(async () => { nav.fenetre.dispatchEvent(evenementStockage("autre-cle", "granted")); });
+    assert.equal(nav.gtag.length, avant, "une autre clé ne touche pas au consentement");
+  } finally {
+    if (r) await act(async () => r!.unmount());
+    nav.restaurer();
+  }
+});
+
 // ── QuartierWorkbook : « Sauvegardé » ────────────────────────────────────────────────────────────
 
 test("QuartierWorkbook : « Sauvegardé » apparaît à la restauration et à chaque saisie, puis s'éteint après 1,8 s ; les réponses restent sauvegardées", async () => {

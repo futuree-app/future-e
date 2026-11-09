@@ -331,6 +331,36 @@ const RULES: Rule[] = [
     polarity: "affirmative",
     patterns: [/\brur(al|ale|aux|ales)\b/],
   },
+  // FUT-176 : un statut d'agglomération n'est ni un isolement, ni un rôle de pôle, ni une offre de services.
+  {
+    id: "interdit:statut-urbain-surinterprete",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\b(commune|ville|village|bourg|territoire)s? (très |plutôt |assez |relativement )?isolée?s?\b/,
+      /\b(la commune|la ville|le village|le bourg|le territoire|elle|il) (est|reste|semble|demeure) (très |plutôt |assez |relativement )?isolée?s?\b/,
+      /\bpôles? (urbain|local|de services|d'attraction|de vie)s?\b/,
+      /\bprincipal pôle\b/,
+      /\bstructure (la vie locale|son territoire|les environs)\b/,
+      /\bconcentre (les|des) (fonctions|services|commerces|équipements)\b/,
+    ],
+  },
+  // FUT-176 (contre-revue) : le statut de ville-centre est celui de Paris, Lyon ou Marseille, pas de l'arrondissement lu.
+  {
+    id: "interdit:arrondissement-ville-centre",
+    when: (p) => /^arrondissement\b/.test(String(at(p, "commune.role_territorial.role") ?? "")),
+    polarity: "affirmative",
+    patterns: [
+      // RÈGLE SUR LE SUJET de l'affirmation, jamais une exception sur la phrase entière (contre-revues FUT-176). Toute
+      // attribution du rôle de ville-centre est refusée, SAUF quand son sujet est la ville elle-même, nommée seule juste
+      // avant le verbe (« Paris est la ville-centre », « Paris, ville-centre, est au centre de son agglomération »).
+      // « Paris 20e est la ville-centre », « Le 20e arrondissement est la ville-centre », « Lyon 9e constitue la
+      // ville-centre », « l'arrondissement est la ville-centre », « il est au centre de son agglomération » : refusés.
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|constitue|forme|reste|demeure|devient) (la |une |lui-même |elle-même )?ville-centre\b/,
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
+      /\barrondissement,? ville-centre\b/,
+    ],
+  },
   {
     id: "interdit:station-balneaire",
     when: always,
@@ -615,6 +645,8 @@ const CONSIGNES: [RegExp, string][] = [
   [/^catnat:/, "citez les jours de sols secs projetés et la sécheresse reconnue en catastrophe naturelle dans deux phrases séparées, sans lien entre elles"],
   [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],
   [/^format:/, "respectez le format : un titre puis exactement trois blocs « ## »"],
+  [/^interdit:arrondissement-ville-centre$/, "le statut de ville-centre est celui de la commune entière (Paris, Lyon, Marseille) : ne le prêtez pas à l'arrondissement"],
+  [/^interdit:statut-urbain-surinterprete$/, "reprenez le rôle territorial tel quel : ni « isolée », ni « pôle », ni services ou animation déduits d'un statut statistique"],
 ];
 
 /** Les violations, dites au modèle pour sa seconde tentative : la règle, la phrase, et quoi corriger. */
