@@ -108,10 +108,12 @@ superficie `f0a04a8c…` (CSV extrait de `comparateur_csv.zip`, zip `6d7fff2d…
   arrondissement en particulier ». Pour un arrondissement : « …de l'arrondissement… ; celle de Paris entière est différente ».
 - `provenances.ts` : provenance Insee (sans ADEME comme diffuseur), avec la même limite.
 - `territoire-snapshot.ts` : transmet `densiteInsee` du code lu (75056 ou 75111).
-- `territory-identity.ts` : un arrondissement lit « Arrondissement dense », plus « Commune dense ». C'était un libellé
-  latent tant que la densité d'arrondissement était nulle : la règle « un champ qui devient présent rend présent tout ce qui le cite » s'applique.
-- Garde `fut147-non-regression` : les 25 lignes changées du registre sont figées dans `__fixtures__/fut179-lignes-admises.json`
-  (multiensemble, avec contrôle des lignes orphelines). Aucune ne parle des feux.
+- Le **périmètre est porté par le fait** (contre-revue, § 10) : `place.density` a l'échelle `arrondissement` pour un
+  arrondissement, `commune` sinon. La catégorie dérivée du registre se nomme par ce périmètre (« Arrondissement dense »),
+  et la carte d'identité, la synthèse déterministe et la projection du modèle lisent toutes ce même libellé.
+- Garde `fut147-non-regression` : les 38 lignes changées du registre sont figées dans `__fixtures__/fut179-lignes-admises.json`
+  (multiensemble, avec contrôle des lignes orphelines). Quatre sont des lignes retirées : densité, source, échelle et libellé,
+  devenus conditionnels. Aucune ne parle des feux. Le contrat de synthèse (`synthesis-contract.ts`) n'est pas modifié.
 
 Rendu réel (synthèse déterministe, `scripts/fut179/reproduire.mjs`) :
 - « Paris, 2 133 111 habitants, au centre de son agglomération, est une commune dense (20 054 habitants au km²). »
@@ -131,10 +133,11 @@ Rendu réel (synthèse déterministe, `scripts/fut179/reproduire.mjs`) :
 
 ## 7. Limites restantes
 
-- **Projection vers le modèle.** Pour un arrondissement, `commune.densite.categorie` vaut encore « Commune dense ». Le
-  contrat de synthèse n'a pas été touché : le changer invaliderait tout le cache national. Le rôle transmis dit
-  « arrondissement » et la consigne (FUT-176) le cadre, mais le modèle peut écrire « une commune dense » au lieu
-  d'« un arrondissement dense ». Le chiffre reste juste ; le mot est imprécis. Une correction propre passe par une version de contrat.
+- **Le nom du champ de projection** reste `commune.densite`, y compris pour un arrondissement : le renommer changerait le
+  contrat. La catégorie et le rôle transmis disent le périmètre, et deux garde-fous refusent toute confusion (§ 10).
+- **Les autres faits d'un snapshot d'arrondissement** (population, démographie) gardent l'échelle `commune`, alors qu'ils
+  décrivent l'arrondissement. Ce n'est pas nouveau (FUT-43, FUT-176), et rien ne lit `Fact.scale` à l'exécution. Mais
+  leur passage à `arrondissement` changerait les références de FUT-43 et FUT-176 : c'est hors de ce lot, à traiter avec elles.
 - **Millésimes.** La densité porte sur 2022, la population affichée sur 2021. C'est déjà la convention nationale (Toulouse : 504 078 habitants affichés, densité calculée sur 511 684).
 - **Moyenne sur toute la superficie.** Le 16e de Paris (bois de Boulogne), le 12e (bois de Vincennes) et le 9e de Marseille
   (Calanques) sont moins denses que leur bâti. La limite le dit, sans chiffrer la part non bâtie.
@@ -143,11 +146,22 @@ Rendu réel (synthèse déterministe, `scripts/fut179/reproduire.mjs`) :
 
 ## 8. Impacts
 
-- **Snapshots** : l'empreinte change pour 48 périmètres (3 villes, 45 arrondissements). Leur synthèse rédigée sera
-  régénérée à la prochaine visite, soit au plus 48 appels modèle, à la visite seulement. Toutes les autres communes gardent la même empreinte.
+- **Invalidations logiques** : l'empreinte change pour 48 snapshots (3 villes, 45 arrondissements). La clé du cache de
+  synthèse vaut `empreinte | horizon | version du contrat`, avec 3 horizons : **jusqu'à 144 clés nouvelles**. Les anciennes
+  entrées restent en base, orphelines. Elles ne coûtent rien et ne sont jamais resservies. Toutes les autres communes
+  gardent leur empreinte et la version du contrat ne change pas : le cache national reste valide.
+- **Appels modèle : seulement à la consultation.** Rien ne part au déploiement. L'horizon par défaut (`gwl20`) est préparé
+  après la réponse quand un lecteur ayant droit à ce territoire ouvre `/rapport` ou Territoire : au plus 48 générations,
+  une par périmètre réellement consulté. Les deux autres horizons ne sont générés que si un lecteur les choisit
+  (`/api/synthesize-quartier`) : au plus 96 de plus. Une génération fait 1 appel, ou 2 si le premier texte est refusé
+  par les contrôles (`MAX_MODEL_CALLS = 2`). Le pire cas théorique est donc de 288 appels, et le cas sans refus de 144 si les
+  48 périmètres sont lus sur les 3 horizons.
+- **Coût réellement engagé.** Il est égal aux appels effectifs (Sonnet, `SYNTHESIS_MODEL`). Chaque appel réserve un poids de 2
+  dans le budget journalier partagé (1 000, `LLM_BUDGET_JOUR`). Au-delà du budget, la lecture déterministe est servie et la
+  génération est reportée. Le pire cas, 288 appels × 2 = 576, ne tiendrait pas en un jour avec le reste du trafic : il
+  s'étalerait, plafonné. Je ne chiffre pas ce coût en euros, faute de mesure des jetons par synthèse.
 - **Index, Où vivre, comparateur, dossiers** : inchangés. Aucune donnée distante ni migration.
-- **Suite** (`--test-concurrency=1`, seule) : `main` 4 525 tests, tête 4 540 (+15, `fut179-plm-densite.test.ts`). Les deux
-  ont les mêmes 5 échecs locaux connus (fut27, chemin avec « · »).
+- **Suite** (`--test-concurrency=1`, seule) : voir § 10 pour les comptes après contre-revue.
 
 ## 9. Reproduire
 
@@ -156,3 +170,40 @@ node scripts/fut179/densite-plm.mjs <comparateur.csv> <donnees_communes.csv>   #
 node scripts/fut179/reproduire.mjs /tmp/fut179.json                             # snapshots réels, sans modèle
 node --test src/lib/territoire/fut179-plm-densite.test.ts src/lib/territoire/plm-communal.test.ts src/lib/fut147-non-regression.test.ts
 ```
+
+## 10. Reprises après contre-revue (09/11/2026)
+
+**1. Synthèse IA.** Avant, la projection transmettait « Commune dense » pour un arrondissement, alors que la carte et la
+synthèse déterministe disaient « Arrondissement dense ». Correction ciblée, au registre : la catégorie dérivée se nomme par
+le périmètre de la densité (`DENSITY_LABEL_ARRONDISSEMENT`). La projection la transmet telle quelle, **sans toucher au
+contrat** : la version reste `territoire-synthese@6` et le cache des autres communes reste valide.
+Pourquoi aucune synthèse en cache ne peut porter l'ancien libellé : avant cette PR, aucun arrondissement n'avait de
+densité (index et ADEME nuls pour les 45), donc aucune projection d'arrondissement ne portait de catégorie de densité. Et
+les 48 snapshots changent d'empreinte, donc de clé.
+Les libellés sont cités à trois endroits, tous mis à jour (`grep` sur `Commune dense`, `density.category`, `DENSITY_LABEL`) :
+- `synthesis-deterministe.ts` : `DENSITY_VERB` ;
+- `synthesis-checks.ts` : `densite:requalifiee-*`. « Arrondissement dense » est désormais refusé quand la catégorie est
+  intermédiaire, ce qui couvre Marseille 9e et 16e ;
+- `territory-identity.ts` : le remplacement local est retiré, le libellé vient du registre.
+
+Deux garde-fous, avec leur consigne de seconde tentative :
+- `interdit:densite-arrondissement-pretee-a-la-commune` : lu à un arrondissement, le texte ne parle ni de « commune
+  dense », ni de « ville dense », ni de « densité de la commune » ou « de Paris ».
+- `interdit:densite-ville-pretee-a-un-arrondissement` : lu à Paris, Lyon ou Marseille entière, aucune phrase ne relie
+  densité et arrondissement.
+
+**2. Grain structuré.** `FactScale` gagne `arrondissement`. `place.density` porte `arrondissement` pour 75101 à 13216, et
+`commune` pour les trois villes et toutes les autres communes. Consommateurs audités : aucun code d'exécution ne lit
+`Fact.scale` (seulement le type et deux fixtures de test). Le champ entre dans l'empreinte, donc il ne change que pour
+les arrondissements, dont l'empreinte change déjà. Références préservées : l'empreinte de Châtelaillon (FUT-147, FUT-175),
+les tests FUT-43, FUT-176 et FUT-60, et l'empreinte réelle de Toulouse (`a3ef7edd…`, identique).
+
+**3. Chiffrage.** Corrigé au § 8 : 144 clés logiques, appels à la consultation seulement, coût plafonné par le budget journalier.
+
+**Tests ajoutés** (D9 à D12, en plus des contrôles d'échelle dans D4 et D5) :
+- projection pour les 45 arrondissements (aucun libellé « Commune… »), Paris 11e, Lyon 1er, Marseille 9e et les trois villes ;
+- garde-fous sur Paris 11e, Marseille 9e et Paris entière, avec des textes fautifs refusés et la synthèse déterministe acceptée ;
+- version du contrat inchangée.
+
+Mutations vérifiées : revenir au libellé « Commune » ou à l'échelle `commune` fait échouer 7 tests ; désactiver l'un ou
+l'autre garde-fou fait échouer D10 et D11, ou D12.

@@ -313,7 +313,8 @@ const LIGNES_CONTRAT_FUT176: string[] = [
 /** La garde du registre des faits, sur une liste de lignes changées depuis 4d75603f. */
 function verifierRegistre(lignesChangees: readonly string[]): void {
   // FUT-179 (09/11/2026) : la densité Insee de Paris, Lyon, Marseille et de leurs arrondissements, lue à défaut d'ADEME,
-  // avec sa source et ses limites. Ses lignes exactes (deux retirées, celles de la densité ADEME qu'elles conditionnent)
+  // avec sa source et ses limites ; contre-revue : l'échelle `arrondissement` du fait et le libellé de sa catégorie suivent
+  // le périmètre lu. Ses lignes exactes (quatre retirées : densité, source, échelle et libellé, devenus conditionnels)
   // sont figées dans `__fixtures__/fut179-lignes-admises.json`, une occurrence chacune ; aucune ne parle des feux.
   const fut179 = retirerAdmises(horsFut175(REGISTRE, lignesChangees), FUT179_ADMISES[REGISTRE]!);
   assert.deepEqual(fut179.orphelines, [], `référence FUT-179 périmée pour ${REGISTRE} : ces lignes admises ne sont plus dans le diff`);

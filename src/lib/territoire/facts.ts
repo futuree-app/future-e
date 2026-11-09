@@ -238,6 +238,13 @@ export const DENSITY_LABEL: Record<DensityCategory, string> = {
   low: "Commune peu dense",
 };
 
+/** FUT-179 : les mêmes catégories, dites d'un arrondissement (Paris 11e), qui n'est pas une commune. */
+export const DENSITY_LABEL_ARRONDISSEMENT: Record<DensityCategory, string> = {
+  dense: "Arrondissement dense",
+  intermediate: "Densité intermédiaire",
+  low: "Arrondissement peu dense",
+};
+
 /** D3 : grille existante de la carte d'identité (1 500 / 150 hab/km²). */
 export function densityCategory(d: number): DensityCategory {
   return d >= 1500 ? "dense" : d >= 150 ? "intermediate" : "low";
@@ -352,6 +359,8 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
   // FUT-179 : à défaut d'ADEME seulement, la densité Insee du périmètre lu (cf. `densiteInsee`).
   const densitePLM = densiteInseeRetenue(i);
   const density = num(e?.densite) ?? num(i.ademe?.densite) ?? num(densitePLM?.habitantsParKm2);
+  // FUT-179 : le périmètre de cette densité, porté par le fait (`scale`) et par le libellé de sa catégorie.
+  const densiteArrondissement = densitePLM ? densitePLM.perimetre === "arrondissement" : Boolean(i.urbanRole?.arrondissementDe);
   const demo = e?.demographie ?? null;
 
   // VigiEau : la date de consultation sort de la valeur pour aller dans `observedAt`, hors empreinte.
@@ -373,7 +382,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
-      key: "place.density", value: density, unit: "hab/km²", scale: "commune", vintage: "2022",
+      key: "place.density", value: density, unit: "hab/km²", scale: densiteArrondissement ? "arrondissement" : "commune", vintage: "2022",
       source: densitePLM
         ? { producer: "INSEE", dataset: "Populations légales 2022 ; superficie, base du comparateur de territoires", field: "PMUN / SUP" }
         : { producer: "INSEE via ADEME", dataset: "Données communales", field: "densite_de_population_2022" },
@@ -542,7 +551,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
   if (density != null) {
     const c = densityCategory(density);
     derived.push({
-      key: "density.category", value: c, label: DENSITY_LABEL[c], from: ["place.density"],
+      key: "density.category", value: c, label: (densiteArrondissement ? DENSITY_LABEL_ARRONDISSEMENT : DENSITY_LABEL)[c], from: ["place.density"],
       rule: "density-category@1", card: card("identity"), synthesis: INCLUDE,
     });
   }

@@ -136,8 +136,8 @@ export function buildTerritoryIdentity(snapshot: FactsSnapshot): TerritoryIdenti
   return {
     summary: verbe ? `${head}, ${name} ${verbe}.` : `${name}, ${head.charAt(0).toLowerCase()}${head.slice(1)}.`,
     typologie: typeLabel,
-    // FUT-179 : un arrondissement a désormais sa densité ; son libellé ne l'appelle pas « commune ».
-    densite: densityCat ? { label: role?.arrondissementDe ? densityCat.label.replace(/^Commune\b/, "Arrondissement") : densityCat.label, value: densityValue ? `${densityValue} hab/km²` : null } : null,
+    // FUT-179 : le libellé vient du registre (« Arrondissement dense » pour un arrondissement), comme pour la synthèse.
+    densite: densityCat ? { label: densityCat.label, value: densityValue ? `${densityValue} hab/km²` : null } : null,
     population: frInt(population) ? `${frInt(population)} habitants` : null,
     role: role ? roleLabel(role, population) : null,
     geo: geoLabel(valueOf<Position>(snapshot, "place.position")),

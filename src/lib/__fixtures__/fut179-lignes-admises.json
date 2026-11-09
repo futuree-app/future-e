@@ -7,6 +7,13 @@
   "+   * l'un pour l'autre. Elle n'est lue qu'à défaut de densité ADEME. Absent pour toute autre commune.",
   "+   */",
   "+  densiteInsee?: DensitePLM | null;",
+  "+/** FUT-179 : les mêmes catégories, dites d'un arrondissement (Paris 11e), qui n'est pas une commune. */",
+  "+export const DENSITY_LABEL_ARRONDISSEMENT: Record<DensityCategory, string> = {",
+  "+  dense: \"Arrondissement dense\",",
+  "+  intermediate: \"Densité intermédiaire\",",
+  "+  low: \"Arrondissement peu dense\",",
+  "+};",
+  "+",
   "+/** FUT-179 : le périmètre de la densité Insee, dit au lecteur ; un chiffre de ville ne vaut pour aucun arrondissement. */",
   "+function limiteDensitePLM(d: DensitePLM): string {",
   "+  const entier = (n: number) => String(Math.round(n)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, \"\\u202f\");",
@@ -20,10 +27,16 @@
   "+  // FUT-179 : à défaut d'ADEME seulement, la densité Insee du périmètre lu (cf. `densiteInsee`).",
   "+  const densitePLM = densiteInseeRetenue(i);",
   "+  const density = num(e?.densite) ?? num(i.ademe?.densite) ?? num(densitePLM?.habitantsParKm2);",
+  "+  // FUT-179 : le périmètre de cette densité, porté par le fait (`scale`) et par le libellé de sa catégorie.",
+  "+  const densiteArrondissement = densitePLM ? densitePLM.perimetre === \"arrondissement\" : Boolean(i.urbanRole?.arrondissementDe);",
+  "-      key: \"place.density\", value: density, unit: \"hab/km²\", scale: \"commune\", vintage: \"2022\",",
   "-      source: { producer: \"INSEE via ADEME\", dataset: \"Données communales\", field: \"densite_de_population_2022\" },",
+  "+      key: \"place.density\", value: density, unit: \"hab/km²\", scale: densiteArrondissement ? \"arrondissement\" : \"commune\", vintage: \"2022\",",
   "+      source: densitePLM",
   "+        ? { producer: \"INSEE\", dataset: \"Populations légales 2022 ; superficie, base du comparateur de territoires\", field: \"PMUN / SUP\" }",
   "+        : { producer: \"INSEE via ADEME\", dataset: \"Données communales\", field: \"densite_de_population_2022\" },",
-  "+      ...(densitePLM ? { limits: limiteDensitePLM(densitePLM) } : {}),"
+  "+      ...(densitePLM ? { limits: limiteDensitePLM(densitePLM) } : {}),",
+  "-      key: \"density.category\", value: c, label: DENSITY_LABEL[c], from: [\"place.density\"],",
+  "+      key: \"density.category\", value: c, label: (densiteArrondissement ? DENSITY_LABEL_ARRONDISSEMENT : DENSITY_LABEL)[c], from: [\"place.density\"],"
  ]
 }
