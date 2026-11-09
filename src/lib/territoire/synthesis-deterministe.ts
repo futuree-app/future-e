@@ -58,6 +58,9 @@ const DENSITY_VERB: Record<string, string> = {
   "Commune peu dense": "est une commune peu dense",
 };
 
+/** FUT-175 : en deçà, l'eau n'est pas nommée par la synthèse déterministe (la carte la dit dès 1 %). */
+const EAU_NOTABLE_PCT = 10;
+
 const LAND_PHRASE: Record<string, string> = {
   "Occupation mixte": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures",
   "Majoritairement urbanisé": "Ses sols sont majoritairement urbanisés",
@@ -98,13 +101,21 @@ function blocTerritoire(p: P): string[] {
     out.push(`${nom} compte ${frNum(pop)} habitants${roleClause}.`);
   }
 
-  const land = at<{ categorie: string | null; part_espaces_naturels_pct: number | null; composition_pct: Record<string, number> }>(p, "occupation_des_sols");
+  const land = at<{
+    categorie: string | null;
+    part_espaces_naturels_des_terres_pct: number | null;
+    part_eau_de_la_commune_pct: number | null;
+    composition_des_terres_pct: Record<string, number>;
+  }>(p, "occupation_des_sols");
   if (land?.categorie && LAND_PHRASE[land.categorie]) {
+    // FUT-175 : les parts portent sur les terres ; l'eau, quand elle compte, est dite dans sa propre phrase.
     const parts: string[] = [];
-    const urb = land.composition_pct?.espaces_urbanises;
+    const urb = land.composition_des_terres_pct?.espaces_urbanises;
     if (urb != null) parts.push(`${frNum(urb)} % d'espaces urbanisés`);
-    if (land.part_espaces_naturels_pct != null) parts.push(`${frNum(land.part_espaces_naturels_pct)} % d'espaces naturels`);
-    out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)}` : ""}.`);
+    if (land.part_espaces_naturels_des_terres_pct != null) parts.push(`${frNum(land.part_espaces_naturels_des_terres_pct)} % d'espaces naturels`);
+    out.push(`${LAND_PHRASE[land.categorie]}${parts.length ? ` : ${joinFr(parts)} sur ses terres` : ""}.`);
+    const eau = land.part_eau_de_la_commune_pct;
+    if (eau != null && eau >= EAU_NOTABLE_PCT) out.push(`L'eau (mer, étangs, lacs, rivières) couvre par ailleurs ${frNum(eau)} % de sa surface cartographiée.`);
   }
 
   // L'évolution porte sur 2015-2021 ; la part d'arrivants (une seule année) n'est pas reprise ici,

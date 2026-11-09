@@ -162,68 +162,87 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 
 // ── Territoire : l'empreinte et le cache de la synthèse ─────────────────────────────────────
 
-// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date.
-const HASH_MAIN = "cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f";
-// FUT-176 (09/11/2026) monte le contrat de synthèse à @5 : une synthèse en cache peut dire « commune isolée » ou
-// « principal pôle », que le rôle territorial ne permet plus. L'empreinte du snapshot est intacte (HASH_MAIN) ; seule
-// la clé change, volontairement. Clé de main avant FUT-176 : 7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9.
-const CLE_MAIN = "75ca849669cf31ca651cf4780d3c00987ad34ad2dc116d3e2173cbad5d79b98a";
+// Calculés sur `main` (4d75603f) avant FUT-147, avec la même entrée et la même date :
+//   empreinte cc3ac648613039db2c467665f3cb3102cf4097490b6884da6b1f3731aa93b53f,
+//   clé       7f7921d5b9e6f3060e3e327655130e9a808dfefd97d7cac576c43c5833adc5f9.
+// FUT-175 (09/11/2026) les change VOLONTAIREMENT : registre `territoire-facts@2` (parts OSO rapportées aux terres,
+// eau à part, limites de couverture OSO) et contrat `territoire-synthese@5`. Recalculées sur la branche FUT-175
+// (reprise du 09/11/2026, après contre-revue), même entrée, même date ; première version de la PR #140 :
+// c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a / 9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d. Ce que
+// ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
+const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3";
+// Convergence FUT-175 + FUT-176 : l'empreinte est celle de FUT-175 (registre `territoire-facts@2`, FUT-176 ne change que
+// le type du rôle) ; la clé suit le contrat commun `territoire-synthese@6`. Clé de la PR #140 seule (@5) :
+// de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930.
+const CLE_MAIN = "5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72";
 
-test("Territoire : l'empreinte du snapshot et la clé du cache de synthèse sont celles de main", () => {
-  const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
-  assert.equal(s.hash, HASH_MAIN);
-  assert.equal(synthesisCacheKey(s.hash, "gwl20"), CLE_MAIN);
-  assert.ok(!s.facts.some((f) => /incendie|bdiff|wildfire_history/i.test(f.key)), "aucun fait BDIFF dans le snapshot");
-});
+/**
+ * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
+ * contrat et le registre, par rapport à 4d75603f, sont écrites UNE FOIS dans `__fixtures__/fut175-lignes-admises.json`.
+ * Elles ne sont plus relues sur un diff vivant : une modification future, même sans rapport avec les feux, y est
+ * étrangère et fait échouer la garde. Chaque ligne admise ne couvre qu'UNE occurrence (multiensemble), et une
+ * ligne admise que le diff ne contient plus fait aussi échouer : la référence ne survit pas à une retouche.
+ * Pour la changer, un ticket la régénère explicitement et le dit dans ce commentaire.
+ * Convergence FUT-176 (09/11/2026) : la ligne « +… territoire-synthese@5 » en est retirée ; la version commune @6 est
+ * admise avec les lignes de FUT-176 (`LIGNES_CONTRAT_FUT176`). Le « -… @4 » retiré y reste.
+ */
+const FUT175_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut175-lignes-admises.json", "utf8")) as Record<string, string[]>;
+const FEUX = /bdiff|incendi|feux? de for|MemoireIncendies/i;
 
-test("Territoire : une synthèse encore valide est servie sans AUCUN appel au modèle", async () => {
-  const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
-  let appels = 0;
-  const store: TerritoireStore = {
-    persistSnapshot: async () => true,
-    readSnapshot: async () => s,
-    readSynthesis: async (key) => (key === CLE_MAIN ? { status: "ready", text: "Synthèse déjà rédigée.", origin: "model" } : null),
-    readSyntheses: async () => new Map(),
-    claim: async () => { throw new Error("claim ne doit pas être appelé"); },
-    complete: async () => { throw new Error("complete ne doit pas être appelé"); },
-    fail: async () => { throw new Error("fail ne doit pas être appelé"); },
-    release: async () => {},
-  };
-  const r = await ensureTerritoireSynthesis(s, "gwl20", {
-    store,
-    reserveBudget: async () => { appels++; return true; },
-    generate: async () => { appels++; throw new Error("appel au modèle interdit"); },
-  });
-  assert.equal(r.status, "ready");
-  assert.equal(r.status === "ready" && r.modelCalls, 0);
-  assert.equal(appels, 0);
-});
+function lignesDiff(base: string, f: string): string[] {
+  const diff = execFileSync("git", ["diff", "--no-color", "-U0", base, "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
+  return diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+}
 
-test("Territoire : la mémoire des incendies est lue à côté du snapshot, jamais dedans", () => {
-  const page = readFileSync("src/app/(account)/rapport/quartier/page.tsx", "utf8");
-  assert.match(page, /getMemoireIncendies\(inseeCode\)/);
-  assert.match(page, /incendies=\{incendies\}/);
-  for (const f of ["src/lib/server/territoire-snapshot.ts", "src/lib/territoire/facts.ts", "src/lib/territoire/synthesis-contract.ts", "src/lib/territoire/screen.ts"]) {
-    assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i, f);
+/** Retire de `lignes` une occurrence de chaque ligne admise ; rend le reste et les admises restées sans emploi. */
+function retirerAdmises(lignes: readonly string[], admises: readonly string[]): { reste: string[]; orphelines: string[] } {
+  const stock = new Map<string, number>();
+  for (const a of admises) stock.set(a, (stock.get(a) ?? 0) + 1);
+  const reste: string[] = [];
+  for (const l of lignes) {
+    const n = stock.get(l) ?? 0;
+    if (n > 0) stock.set(l, n - 1);
+    else reste.push(l);
   }
-});
+  const orphelines = [...stock].flatMap(([l, n]) => Array<string>(n).fill(l));
+  return { reste, orphelines };
+}
 
-// FUT-163 (01/11/2026, contre-revue de la PR #124) a dû toucher la projection : `cours_eau_a_sec_observe` lisait
-// `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
-// brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
-// parle des feux. Toute autre modification du contrat le fait échouer.
+/** Les lignes changées depuis 4d75603f, moins EXACTEMENT celles de FUT-175 ; échoue si la référence est périmée. */
+function horsFut175(f: string, lignes: readonly string[]): string[] {
+  const admises = FUT175_ADMISES[f];
+  assert.ok(admises?.length, `aucune référence FUT-175 pour ${f}`);
+  for (const l of admises) assert.doesNotMatch(l, FEUX, l);
+  const { reste, orphelines } = retirerAdmises(lignes, admises);
+  assert.deepEqual(orphelines, [], `référence FUT-175 périmée pour ${f} : ces lignes admises ne sont plus dans le diff`);
+  return reste;
+}
+
+const CONTRAT = "src/lib/territoire/synthesis-contract.ts";
+const REGISTRE = "src/lib/territoire/facts.ts";
+
+/** La garde du contrat de synthèse, sur une liste de lignes changées depuis 4d75603f. */
+function verifierContrat(lignes: readonly string[]): void {
+  const changees = horsFut175(CONTRAT, lignes);
+  // Convergence FUT-175 + FUT-176 : la version commune @6 et les lignes du rôle territorial sont celles de FUT-176
+  // (`LIGNES_CONTRAT_FUT176`) ; la ligne « @5 » de FUT-175 a été retirée de sa référence figée, qui garde le « @4 » retiré.
+  assert.deepEqual(changees.filter((l) => FUT163.includes(l)), FUT163);
+  assert.deepEqual(changees.filter((l) => !FUT163.includes(l)), LIGNES_CONTRAT_FUT176);
+  for (const l of changees) assert.doesNotMatch(l, FEUX, l);
+}
+
 const FUT163 = [
-  '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
-  "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
-  "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
-  "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
-  '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
+    '+import { lireEcoulement } from "../eaufrance-ecoulement.ts";',
+    "-    cours_eau_a_sec_observe: river?.isDry ? { nom: river.riverName ?? null } : null,",
+    "+    // FUT-163 (01/11/2026) : l'état BRUT décide, jamais `isDry`. Un snapshot enregistré garde le booléen du jour de",
+    "+    // sa collecte ; « Ecoulement non visible » avec `isDry: true` n'y est pas un assec.",
+    '+    cours_eau_a_sec_observe: river && lireEcoulement(river).etat === "assec" ? { nom: river.riverName ?? null } : null,',
 ];
-const LIGNES_CONTRAT_FUT176 = [
+const LIGNES_CONTRAT_FUT176: string[] = [
   "+import { normaliserRoleUrbain, type RoleUrbain } from \"./statut-urbain.ts\";",
-  "-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;",
-  "+// @5 (FUT-176) : rôle territorial lu au statut Insee, consigne et contrôle contre sa surinterprétation.",
-  "+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@5:${SYNTHESIS_MODEL}`;",
+  "+// @6 (FUT-175 + FUT-176) : parts OSO rapportées aux terres, eau à part (FUT-175) ; rôle territorial lu au statut Insee,",
+  "+// arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.",
+  "+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@6:${SYNTHESIS_MODEL}`;",
   "-const ROLE_TEXT: Record<UrbanRole[\"role\"], string> = {",
   "-  isolee: \"commune isolée, hors agglomération\",",
   "-  pole: \"principal pôle de son agglomération\",",
@@ -276,17 +295,80 @@ const LIGNES_CONTRAT_FUT176 = [
   "+- Rôle territorial (\"role_territorial\") : c'est un classement statistique de l'Insee, qui dit seulement si la commune fait partie d'un ensemble bâti continu d'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N'en déduisez jamais la présence de services ou de commerces, l'animation, l'isolement, ni un rôle de \"pôle\" ou de \"centre de vie\" pour les environs. N'écrivez jamais que la commune est \"isolée\", et n'appelez pas \"ville\" une commune que le payload ne présente pas comme telle. Quand le rôle présente un arrondissement, c'est la commune nommée (\"commune\"), pas l'arrondissement, qui est au centre de l'agglomération : n'écrivez jamais que l'arrondissement est une ville-centre ou au centre de l'agglomération. S'il est absent, n'en parlez pas.",
 ];
 
-test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163) et du rôle territorial (FUT-176), et rien sur les feux", () => {
-  const f = "src/lib/territoire/synthesis-contract.ts";
-  const diff = execFileSync("git", ["diff", "--unified=0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const changees = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  // FUT-176 (09/11/2026) : le rôle territorial au statut Insee, sa consigne, et la version @5. Reprise après contre-revue
-  // (même jour) : la projection d'un arrondissement (`roleTerritorialPourSynthese`) et sa consigne. Aucune ligne sur les feux.
-  const fut176 = changees.filter((l) => !FUT163.includes(l));
-  assert.deepEqual(changees.filter((l) => FUT163.includes(l)), FUT163);
-  assert.deepEqual(fut176, LIGNES_CONTRAT_FUT176);
-  for (const l of changees) assert.doesNotMatch(l, /bdiff|incendi|feux? de for|MemoireIncendies/i, l);
-  assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
+/** La garde du registre des faits, sur une liste de lignes changées depuis 4d75603f. */
+function verifierRegistre(lignesChangees: readonly string[]): void {
+  const lignes = horsFut175(REGISTRE, lignesChangees);
+  // FUT-176 : le type du rôle territorial suit le statut Insee ; c'est la seule ligne retirée admise.
+  const RETIREE_FUT176 = '-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };';
+  assert.deepEqual(lignes.filter((l) => l.startsWith("-") && l !== RETIREE_FUT176), [], "aucune ligne retirée (hors le type du rôle, FUT-176)");
+  const admises = [
+    /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
+    /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
+    /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
+    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
+    /^\+ {2}droughtIndisponible\?: boolean;$/,
+    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
+    // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
+    /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
+    /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
+    // FUT-176 : le rôle territorial au statut Insee (type seulement ; le fait et sa source sont intacts).
+    /^\+import type \{ RoleUrbain, RoleUrbainAncien \} from "\.\/statut-urbain\.ts";$/,
+    /^\+\/\/ FUT-176 : le rôle suit le STATUT Insee/, /^\+\/\/ Un snapshot ancien peut encore porter/, /^\+\/\/ `normaliserRoleUrbain`\. `arrondissementDe` : la ville d'un arrondissement/,
+    /^\+export type UrbanRole = \{ role: RoleUrbain \| RoleUrbainAncien; uuLabel: string \| null; uuPop: number \| null; arrondissementDe\?: string \};$/,
+    /^-export type UrbanRole = \{ role: "isolee" \| "pole" \| "agglo"; uuLabel: string \| null; uuPop: number \| null \};$/,
+  ];
+  for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${REGISTRE} : ${l}`);
+}
+
+test("Territoire : l'empreinte du snapshot et la clé du cache de synthèse sont celles de main", () => {
+  const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
+  assert.equal(s.hash, HASH_MAIN);
+  assert.equal(synthesisCacheKey(s.hash, "gwl20"), CLE_MAIN);
+  assert.ok(!s.facts.some((f) => /incendie|bdiff|wildfire_history/i.test(f.key)), "aucun fait BDIFF dans le snapshot");
+});
+
+test("Territoire : une synthèse encore valide est servie sans AUCUN appel au modèle", async () => {
+  const s = withHash(buildTerritoireSnapshot(chatelaillonInputs(), "2026-10-01T00:00:00.000Z"));
+  let appels = 0;
+  const store: TerritoireStore = {
+    persistSnapshot: async () => true,
+    readSnapshot: async () => s,
+    readSynthesis: async (key) => (key === CLE_MAIN ? { status: "ready", text: "Synthèse déjà rédigée.", origin: "model" } : null),
+    readSyntheses: async () => new Map(),
+    claim: async () => { throw new Error("claim ne doit pas être appelé"); },
+    complete: async () => { throw new Error("complete ne doit pas être appelé"); },
+    fail: async () => { throw new Error("fail ne doit pas être appelé"); },
+    release: async () => {},
+  };
+  const r = await ensureTerritoireSynthesis(s, "gwl20", {
+    store,
+    reserveBudget: async () => { appels++; return true; },
+    generate: async () => { appels++; throw new Error("appel au modèle interdit"); },
+  });
+  assert.equal(r.status, "ready");
+  assert.equal(r.status === "ready" && r.modelCalls, 0);
+  assert.equal(appels, 0);
+});
+
+test("Territoire : la mémoire des incendies est lue à côté du snapshot, jamais dedans", () => {
+  const page = readFileSync("src/app/(account)/rapport/quartier/page.tsx", "utf8");
+  assert.match(page, /getMemoireIncendies\(inseeCode\)/);
+  assert.match(page, /incendies=\{incendies\}/);
+  for (const f of ["src/lib/server/territoire-snapshot.ts", "src/lib/territoire/facts.ts", "src/lib/territoire/synthesis-contract.ts", "src/lib/territoire/screen.ts"]) {
+    assert.doesNotMatch(readFileSync(f, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i, f);
+  }
+});
+
+// FUT-163 (01/11/2026, contre-revue de la PR #124) a dû toucher la projection : `cours_eau_a_sec_observe` lisait
+// `isDry`, qu'un snapshot ancien peut porter à vrai pour « Ecoulement non visible ». Elle lit désormais l'état
+// brut ONDE. Le contrat n'est donc plus identique à 4d75603f : ce test admet EXACTEMENT ces lignes, et aucune ne
+// parle des feux. Toute autre modification du contrat le fait échouer.
+// FUT-175 (09/11/2026) : la projection de l'occupation des sols (terres, eau à part) ; ses lignes exactes sont figées
+// dans `__fixtures__/fut175-lignes-admises.json` (cf. `horsFut175`).
+test("IA : le contrat de synthèse n'a changé que de la lecture ONDE (FUT-163), et rien sur les feux", () => {
+  verifierContrat(lignesDiff("4d75603f", CONTRAT));
+  assert.doesNotMatch(readFileSync(CONTRAT, "utf8"), /bdiff|incendies-observes|MemoireIncendies/i);
 });
 
 // FUT-164 (30/10/2026) a dû réécrire le bloc eau potable de l'assistant (lecture par réseau, FUT-152). Le prompt
@@ -422,28 +504,32 @@ test("IA : les routes du comparateur n'ont changé que de la frontière de confi
 // et seules ces lignes ajoutées.
 // FUT-165 (30/10/2026) applique la même règle à l'écoulement des cours d'eau (ONDE) : une panne devient
 // `source_unavailable`, plus « aucune observation ». Trois lignes ajoutées, aucune ne parle des feux.
-test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), de l'application de la provenance (FUT-12) et du type du rôle territorial (FUT-176)", () => {
-  const f = "src/lib/territoire/facts.ts";
-  const diff = execFileSync("git", ["diff", "--no-color", "-U0", "4d75603f", "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  const lignes = diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
-  // FUT-176 : le type du rôle territorial suit le statut Insee ; c'est la seule ligne retirée.
-  assert.deepEqual(lignes.filter((l) => l.startsWith("-")), ['-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };'], "seul le type du rôle est retiré");
-  const admises = [
-    /^\+ {2}\/\*\*$/, /^\+ {3}\* FUT-160 · /, /^\+ {3}\* comme VigiEau, et plus `missing`\./, /^\+ {3}\*\/$/,
-    /^\+ {2}georisquesIndisponible\?: boolean;$/, /^\+ {2}catnatIndisponible\?: boolean;$/,
-    /^\+ {6}status: i\.georisques \? "ok" : i\.georisquesIndisponible \? "source_unavailable" : "missing",$/,
-    /^\+ {6}status: i\.catnat \? "ok" : i\.catnatIndisponible \? "source_unavailable" : "missing",$/,
-    /^\+ {2}\/\*\* FUT-165 : la lecture de l'écoulement a échoué ; le fait passe `source_unavailable`, jamais « aucune observation »\. \*\/$/,
-    /^\+ {2}droughtIndisponible\?: boolean;$/,
-    /^\+ {6}\.\.\.\(i\.drought == null && i\.droughtIndisponible \? \{ status: "source_unavailable" as const \} : \{\}\),$/,
-    // FUT-12 : la provenance s'applique depuis `provenances.ts`, en une ligne, sans toucher un fait.
-    /^\+import \{ avecProvenances \} from "\.\/provenances\.ts";$/,
-    /^\+ {2}facts\.splice\(0, facts\.length, \.\.\.avecProvenances\(facts, i\)\); \/\/ FUT-12 : .*$/,
-    // FUT-176 : le rôle territorial au statut Insee (type seulement ; le fait et sa source sont intacts).
-    /^\+import type \{ RoleUrbain, RoleUrbainAncien \} from "\.\/statut-urbain\.ts";$/,
-    /^\+\/\/ FUT-176 : le rôle suit le STATUT Insee/, /^\+\/\/ Un snapshot ancien peut encore porter/, /^\+\/\/ `normaliserRoleUrbain`\. `arrondissementDe` : la ville d'un arrondissement/,
-    /^\+export type UrbanRole = \{ role: RoleUrbain \| RoleUrbainAncien; uuLabel: string \| null; uuPop: number \| null; arrondissementDe\?: string \};$/,
-    /^-export type UrbanRole = \{ role: "isolee" \| "pole" \| "agglo"; uuLabel: string \| null; uuPop: number \| null \};$/,
+// FUT-175 (09/11/2026) : les parts OSO lues sur les terres, l'eau à part ; ses lignes exactes sont figées dans
+// `__fixtures__/fut175-lignes-admises.json` (cf. `horsFut175`).
+test("IA : le registre des faits Territoire n'a changé que des statuts de panne Géorisques (FUT-160) et ONDE (FUT-165), et l'application de la provenance (FUT-12)", () => {
+  verifierRegistre(lignesDiff("4d75603f", REGISTRE));
+});
+
+// Contre-épreuve : les deux gardes rejettent bien une modification étrangère à FUT-175, sans rapport avec les feux.
+test("FUT-175 : une modification étrangère du contrat ou du registre fait échouer la garde", () => {
+  const contrat = lignesDiff("4d75603f", CONTRAT);
+  const registre = lignesDiff("4d75603f", REGISTRE);
+  verifierContrat(contrat);
+  verifierRegistre(registre);
+  const etrangeres = [
+    "+export const SEUIL_NOUVEAU = 42; // sans rapport avec FUT-175",
+    '+      limits: "Une limite reformulée plus tard.",',
   ];
-  for (const l of lignes) assert.ok(admises.some((a) => a.test(l)), `ligne non admise dans ${f} : ${l}`);
+  for (const l of etrangeres) {
+    assert.throws(() => verifierContrat([...contrat, l]), /deepStrictEqual|Expected values/, l);
+    assert.throws(() => verifierRegistre([...registre, l]), /ligne non admise/, l);
+  }
+  // Une ligne retirée sans rapport, ou une ligne FUT-175 dupliquée (elle ne couvre qu'une occurrence).
+  assert.throws(() => verifierRegistre([...registre, "-  const ancienne = true;"]), /aucune ligne retirée/);
+  const dupliquee = FUT175_ADMISES[REGISTRE].find((l) => l.startsWith("+") && l.includes("landShares"))!;
+  assert.ok(dupliquee);
+  assert.throws(() => verifierRegistre([...registre, dupliquee]), /ligne non admise/);
+  // Une ligne FUT-175 retouchée plus tard : la référence est périmée, la garde le dit.
+  const sansUne = registre.filter((l) => l !== dupliquee);
+  assert.throws(() => verifierRegistre(sansUne), /référence FUT-175 périmée/);
 });

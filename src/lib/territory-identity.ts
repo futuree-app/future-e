@@ -157,9 +157,10 @@ export type DemographieCardData = {
 
 export type CouvertCardData = {
   headlineLabel: string; // valeur de la carte (« Occupation mixte »…)
-  brutPct: number; // couvert naturel sur la commune
-  radiusPct: number | null; // couvert naturel dans 15 km
-  composition: { label: string; pct: number }[]; // classes triées, décroissant
+  naturelTerresPct: number; // FUT-175 : milieux naturels terrestres, en % des TERRES (eau exclue)
+  eauPct: number | null; // part de l'eau dans la surface cartographiée de la commune, comptée à part
+  radiusPct: number | null; // naturel et eau confondus dans 15 km (l'eau n'a pas pu en être retirée)
+  composition: { label: string; pct: number }[]; // postes terrestres, en % des terres, triés décroissant
 };
 
 export type TerritoryCards = {
@@ -174,7 +175,6 @@ export const COMPOSITION_LABELS: Record<string, string> = {
   prairies: "Prairies",
   landes_pelouses: "Landes et pelouses",
   mineral_dunes: "Roche et dunes",
-  eau: "Eau",
 };
 
 const DEMOGRAPHIE_WINDOW_YEARS = 6; // 2015 -> 2021
@@ -204,9 +204,11 @@ export function buildTerritoryCards(snapshot: FactsSnapshot): TerritoryCards {
   const brut = valueOf<number>(snapshot, "land.natural_share");
   if (land && composition && brut != null) {
     const radius = valueOf<number>(snapshot, "land.natural_share_15km");
+    const eau = valueOf<number>(snapshot, "land.water_share");
     couvertNaturel = {
       headlineLabel: land.label,
-      brutPct: Math.round(brut),
+      naturelTerresPct: Math.round(brut),
+      eauPct: eau != null ? Math.round(eau) : null,
       radiusPct: radius != null ? Math.round(radius) : null,
       composition: Object.entries(composition)
         .filter(([, v]) => typeof v === "number" && v >= 1)

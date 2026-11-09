@@ -14,10 +14,21 @@ Doctrine figée (2026-06-02) :
  - On mesure un PAYSAGE perçu naturel, pas la biodiversité (cf. limites du doc).
 
 Sorties (pas de courbe de score figée ici, volontairement) :
- - brut_pct      : % couvert naturel élargi DANS la commune
- - radius_pct    : % couvert naturel élargi dans 15 km (pondéré surface)
+ - brut_pct      : % couvert naturel élargi DANS la commune, EAU COMPRISE
+ - radius_pct    : % couvert naturel élargi dans 15 km (pondéré surface), EAU COMPRISE
  - composition   : ventilation (forêt / prairies / landes-pelouses / minéral-dunes /
-                   eau / agricole / artificialisé), en % de la surface terrestre
+                   eau / agricole / artificialisé), en % de TOUS les pixels classés (1 à 23)
+                   du contour communal, EAU COMPRISE (et non de la surface terrestre).
+
+DÉNOMINATEUR (FUT-175, 09/11/2026) : pixels de valeur 1 à 23 dans le contour geo.api.gouv.fr
+(mer, lagunes et étangs inclus quand le contour administratif les couvre). Les valeurs 0, 24 et
+255 éventuelles sont exclues du numérateur ET du dénominateur, sans trace. Nomenclature Theia :
+eau = 23 ; Theia annonce « 24 classes » pour 2023 sans publier de code 24 (hypothèse : « Autres »).
+Le raster n'étant plus en cache, la part de pixels hors 1-23 n'a pas été mesurée.
+
+L'écran Territoire ne lit PAS ces parts telles quelles : il retire l'eau du dénominateur et du
+naturel (src/lib/territoire/facts.ts, `landShares`). Le rayon 15 km et le score (Où vivre) gardent
+l'eau : la retirer exige de refaire le calcul raster.
 Le mapping de classes reste lisible/ajustable (vignes/vergers en exclusion par défaut).
 
 Entrées attendues (cache gitignoré data/cache-nature/) :
@@ -52,7 +63,7 @@ LANDE = {19}
 MINERAL = {20}
 DUNE = {21}
 GLACIER = {22}
-EAU = {23}
+EAU = {23}      # compté dans NAT_STRICT ci-dessous : cf. FUT-175, la lecture Territoire l'en retire
 NAT_STRICT = FORET | PELOUSE | LANDE | MINERAL | DUNE | GLACIER | EAU
 ELARGI = NAT_STRICT | PRAIRIE        # définition V1 figée
 

@@ -28,6 +28,7 @@ export const PROVENANCES_TERRITOIRE: Record<string, (i: TerritoireInputs) => Pro
   "place.urban_role": () => provenance({ producer: "Insee", dataset: "Zonage en unités urbaines", version: "Zonage 2020" }),
   "land.composition": () => OSO,
   "land.natural_share": () => OSO,
+  "land.water_share": () => OSO,
   "land.natural_share_15km": () => OSO,
   "land.forest_ademe": () => provenance({ producer: "ADEME", dataset: "Données communales, taux de boisement" }),
   "demography.trend": () => provenance({ producer: "Insee", dataset: "Recensement de la population, évolution de la population", nature: "observation", period: "2015-2021" }),
