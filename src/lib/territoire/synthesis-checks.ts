@@ -112,10 +112,49 @@ const COUVERT_PEU_NATUREL: RegExp[] = [
   /\b(presque|quasi(ment)?) (pas|plus|aucun) d?(e |')?(nature|verdure|végétation|espaces? verts?|terre)/,
 ];
 const OSO_PRESENT = (p: Projection) => at(p, "occupation_des_sols") != null;
-// Une phrase qui dit que l'urbanisé compte aussi les routes ou les parkings donne la bonne définition (FUT-177).
-const DEFINITION_URBANISE = /\b(routes?|voiries?|parkings?|zones? d'activités?|voies? ferrées?|pistes?)\b/;
-// Ce qui relève du quartier ou de l'adresse se renvoie aux autres modules, il n'est pas affirmé ici.
-const RENVOI_ADRESSE = /\b(adresse|quartier|autour de l'adresse)\b/;
+// Une phrase qui RANGE routes et parkings DANS l'urbanisé en donne la bonne définition (FUT-177). Nommer les routes
+// ne suffit pas : « couverte de bâtiments, sans compter les routes » les met à part et laisse entier le contresens.
+// L'exception exige une tournure d'inclusion (« compris », « confondus », « comptent… routes ») et aucune d'exclusion.
+const INFRA = "(routes?|voiries?|parkings?|zones? d'activités?|voies? ferrées?|pistes?)";
+const INCLUSION_INFRA: RegExp[] = [
+  new RegExp(`\\b${INFRA}[^.]{0,60}\\b(compris|comprises|confondus|inclus|incluses)${FIN}`),
+  new RegExp(`\\by compris (les |des |la |le )?${INFRA}`),
+  new RegExp(`\\burbanisée?s?${FIN}[^.]{0,30}\\b(compte|comptent|comprend|comprennent|inclut|incluent|englobe|englobent|regroupe|regroupent|réunit|réunissent|rassemble|rassemblent|mêle|mêlent|désigne|désignent|recouvre|recouvrent)\\b[^.]{0,80}\\b${INFRA}`),
+  new RegExp(`\\b${INFRA}[^.]{0,40}\\b(autant que|aussi bien que|au même titre que)\\b`),
+];
+const EXCLUSION_INFRA: RegExp[] = [
+  new RegExp(`\\b(sans compter|sans parler|sans|hors|en dehors|à l'exclusion|excepté|exceptées?|sauf|outre|en plus|à part|non compris|non comprises)${FIN}[^.]{0,15}\\b${INFRA}`),
+  new RegExp(`\\b${INFRA}[^.]{0,20}\\b(exclus|exclue?s?|non compris|non comprises|à part|en plus|en sus|mis à part)${FIN}`),
+];
+const DEFINITION_URBANISE = (s: string): boolean =>
+  INCLUSION_INFRA.some((r) => r.test(s)) && !EXCLUSION_INFRA.some((r) => r.test(s));
+
+// Le cadre de vie : ce qu'une mesure des sols à l'échelle communale ne dit pas.
+// « à deux pas » n'y figure pas : son « pas » se lit comme une négation (`isNegated`), la règle ne le verrait jamais.
+const CADRE_DE_VIE: RegExp[] = [
+  /\baccès (direct |facile |rapide |immédiat )?(à la |aux |à des |à une )(nature|espaces? (naturels?|verts?)|forêts?|campagne|bois)\b/,
+  /\b(nature|forêts?|campagne|espaces? naturels?|bois)( est| sont| reste| restent)? (à portée( de main)?|à proximité( immédiate)?|tout proches?|toute proches?|aux portes|accessibles?|à quelques minutes)\b/,
+  /\bespaces? verts?\b/,
+  /\bverdure\b|\bverdoyante?s?\b|\bpoumons? verts?\b/,
+  /\bcadre de vie\b/,
+  new RegExp(`\\b(commune|ville|territoire|lieu|village|environnement|cadre)s? (calme|paisible|tranquille|préservé${A}|bucolique|champêtre)s?${FIN}`),
+  new RegExp(`\\b(au |du |le )calme\\b|\\btranquillité${FIN}|\\bquiétude\\b`),
+];
+// Le RENVOI à l'adresse ou au quartier reste permis : c'est là que ces questions se posent. Une RÉSERVE ne l'est pas :
+// « La commune offre un accès direct à la nature, mais cela dépend du quartier » affirme d'abord, puis nuance.
+// La phrase est coupée en propositions (virgule, point-virgule, deux-points, « mais », « même si »…) : chaque
+// proposition qui parle du cadre de vie doit elle-même le renvoyer à l'adresse, sans rien en affirmer.
+const PROPOSITIONS = /[,;:()]|\b(?:mais|cependant|toutefois|néanmoins|pourtant|même si|bien que|quoique|alors que|tandis que)\b/;
+const RENVOI = new RegExp(
+  `\\b(dépend|dépendent|dépendra|dépendront|varie|varient|variera|se (vérifie|vérifient|mesure|mesurent|juge|jugent|lit|lisent|regarde|regardent|apprécie|apprécient|joue|jouent)|relève|relèvent|(est|sont) à (vérifier|regarder|apprécier)|examine|examinent|regardez|consultez|vérifiez)${FIN}[^.]{0,40}\\b(adresses?|quartiers?|rues?)${FIN}`,
+);
+const AFFIRMATION = new RegExp(
+  `\\b(offre|offrent|garde|gardent|conserve|conservent|bénéficie|bénéficient|jouit|jouissent|profite|profitent|dispose|disposent|propose|proposent|possède|possèdent|assure|assurent|garantit|garantissent)${FIN}`,
+);
+const RENVOI_ADRESSE = (s: string): boolean => {
+  const concernees = s.split(PROPOSITIONS).filter((c) => c != null && CADRE_DE_VIE.some((r) => r.test(c)));
+  return concernees.length > 0 && concernees.every((c) => RENVOI.test(c) && !AFFIRMATION.test(c));
+};
 
 const RULES: Rule[] = [
   // ── Couvert (D4) ──
@@ -162,8 +201,8 @@ const RULES: Rule[] = [
   {
     // FUT-177 (A7) : la part « urbanisée » d'OSO compte routes, parkings, zones d'activité et pistes autant que les
     // bâtiments (Roissy-en-France : 55 % d'urbanisé, l'aéroport en tête, pour une densité intermédiaire). Elle ne dit
-    // ni la part couverte de bâtiments, ni une densité de constructions. Une phrase qui nomme routes ou parkings en
-    // donne la bonne définition et passe.
+    // ni la part couverte de bâtiments, ni une densité de constructions. Une phrase qui range routes ou parkings dans
+    // l'urbanisé en donne la bonne définition et passe ; une phrase qui les met à part, non (voir DEFINITION_URBANISE).
     id: "couvert:urbanise-lu-comme-batiments",
     when: OSO_PRESENT,
     polarity: "affirmative",
@@ -171,6 +210,7 @@ const RULES: Rule[] = [
     patterns: [
       /(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)[^.]{0,40}\b(de |des )?(bâtiments|constructions|immeubles|maisons)\b/,
       /\b(couvert|couverte|couverts|couvertes|occupée?s?) (de|par des|par les) (bâtiments|constructions|immeubles|maisons)/,
+      /\b(les )?(bâtiments|constructions|immeubles|maisons) (couvrent|occupent|recouvrent|représentent)[^.]{0,30}(\d+(,\d+)? ?%|la moitié|un tiers|un quart|l'essentiel|la majeure partie|la majorité)/,
       new RegExp(`\\b(majoritairement|essentiellement|en majorité|pour moitié|à moitié|largement|principalement) (bâti${A}|construit${A})${FIN}`),
       /\b(espaces|surfaces) urbanisée?s?,? (c'est-à-dire|soit|autrement dit|donc|autant de) (des |les |de )?(bâtiments|constructions|immeubles|maisons)/,
       /\bdensité (du bâti|des constructions|des bâtiments|bâtie|de construction)\b/,
@@ -180,21 +220,12 @@ const RULES: Rule[] = [
   {
     // FUT-177 : une mesure satellite des sols, à l'échelle de la commune, ne dit ni l'accès à la nature, ni les
     // espaces verts urbains (parcs, jardins : la carte ne les distingue pas), ni le calme, ni le cadre de vie. Le renvoi au
-    // quartier ou à l'adresse reste permis : c'est là que ces questions se posent.
+    // quartier ou à l'adresse reste permis, une réserve ajoutée à une affirmation ne l'est pas (voir RENVOI_ADRESSE).
     id: "couvert:cadre-de-vie-non-mesure",
     when: always,
     polarity: "affirmative",
     unless: RENVOI_ADRESSE,
-    // « à deux pas » n'y figure pas : son « pas » se lit comme une négation (`isNegated`), la règle ne le verrait jamais.
-    patterns: [
-      /\baccès (direct |facile |rapide |immédiat )?(à la |aux |à des |à une )(nature|espaces? (naturels?|verts?)|forêts?|campagne|bois)\b/,
-      /\b(nature|forêts?|campagne|espaces? naturels?|bois)( est| sont| reste| restent)? (à portée( de main)?|à proximité( immédiate)?|tout proches?|toute proches?|aux portes|accessibles?|à quelques minutes)\b/,
-      /\bespaces? verts?\b/,
-      /\bverdure\b|\bverdoyante?s?\b|\bpoumons? verts?\b/,
-      /\bcadre de vie\b/,
-      new RegExp(`\\b(commune|ville|territoire|lieu|village|environnement|cadre)s? (calme|paisible|tranquille|préservé${A}|bucolique|champêtre)s?${FIN}`),
-      new RegExp(`\\b(au |du |le )calme\\b|\\btranquillité${FIN}|\\bquiétude\\b`),
-    ],
+    patterns: CADRE_DE_VIE,
   },
   {
     // FUT-177 : la composition des sols n'est pas une mesure écologique.

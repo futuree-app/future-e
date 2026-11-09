@@ -393,3 +393,74 @@ L'effet concret dépendra du quartier et du logement.`;
   for (const r of ["couvert:faible-nature-lue-comme-bati", "couvert:peu-naturel-donc-urbanise", "couvert:cadre-de-vie-non-mesure"]) assert.ok(rf.includes(r), r);
   assert.deepEqual(checkSynthesis(juste, p), []);
 });
+
+// ── Contre-revue du 09/11 (SHA audité dbb45803) : deux exceptions trop larges et la carte ──
+// Chaque cas « refusé » ci-dessous PASSAIT sur dbb45803 ; chaque cas « permis » doit le rester.
+const COMMUNES_CONTRE_REVUE = ["14137", "02100", "28199", "17094", "34301", "95527", "77390"];
+
+test("contre-revue 1 : nommer les routes pour les mettre à part ne rachète pas « couverte de bâtiments »", () => {
+  const refuse = [
+    "La moitié de ses terres est couverte de bâtiments, sans compter les routes.",
+    "La moitié de ses terres est couverte de bâtiments, hors routes et parkings.",
+    "55 % de ses terres sont des bâtiments, sans parler des parkings.",
+    "Les bâtiments couvrent la moitié de ses terres, les routes en plus.",
+    "La moitié de ses terres est couverte de bâtiments ; les routes sont à part.",
+    "La moitié de ses terres est couverte de bâtiments, près des routes.",
+  ];
+  const permis = [
+    "La moitié de ses terres est urbanisée, routes et parkings compris.",
+    "Les espaces urbanisés comptent bâtiments, routes et parkings : ils couvrent la moitié de ses terres.",
+    "Les espaces urbanisés, routes, parkings et zones d'activité compris, couvrent 55 % de ses terres.",
+    "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 55 % d'espaces urbanisés.",
+    "La moitié de ses terres est urbanisée, y compris les routes, les parkings et les bâtiments.",
+    "Les espaces urbanisés regroupent bâtiments, routes et parkings ; ils couvrent la moitié de ses terres.",
+  ];
+  for (const insee of COMMUNES_CONTRE_REVUE) {
+    const p = projDe(insee);
+    for (const phrase of refuse) assert.ok(regles(phrase, p).includes("couvert:urbanise-lu-comme-batiments"), `${par.get(insee)!.nom} : « ${phrase} »`);
+    for (const phrase of permis) assert.ok(!regles(phrase, p).includes("couvert:urbanise-lu-comme-batiments"), `${par.get(insee)!.nom} : « ${phrase} »`);
+  }
+});
+
+test("contre-revue 2 : une réserve sur le quartier ne rachète pas une affirmation sur l'accès à la nature", () => {
+  const refuse = [
+    "La commune offre un accès direct à la nature, mais cela dépend du quartier.",
+    "La commune offre un accès direct à la nature, même si cela varie selon le quartier.",
+    "La commune offre un accès direct à la nature qui dépend du quartier.",
+    "Le cadre de vie est verdoyant ; tout dépend de l'adresse.",
+    "Les espaces verts y sont nombreux, à vérifier selon l'adresse.",
+    "Dans certains quartiers, la nature reste toute proche.",
+    "La commune garde un cadre de vie paisible, quel que soit le quartier.",
+  ];
+  const permis = [
+    "L'accès à la nature dépend de l'adresse et ne peut pas être déduit de la composition communale des sols.",
+    "La proximité d'un espace vert dépend de l'adresse, qu'examine le module Autour de l'adresse.",
+    "L'accès aux espaces verts se vérifie à l'adresse.",
+    "Le cadre de vie dépend du quartier.",
+    "La composition des sols ne dit rien du cadre de vie.",
+  ];
+  for (const insee of COMMUNES_CONTRE_REVUE) {
+    const p = projDe(insee);
+    for (const phrase of refuse) assert.ok(regles(phrase, p).includes("couvert:cadre-de-vie-non-mesure"), `${par.get(insee)!.nom} : « ${phrase} »`);
+    for (const phrase of permis) assert.ok(!regles(phrase, p).includes("couvert:cadre-de-vie-non-mesure"), `${par.get(insee)!.nom} : « ${phrase} »`);
+  }
+});
+
+test("contre-revue 3 : la carte et son repli expliquent la composition des terres sans lui prêter d'effet climatique ou écologique", () => {
+  const source = readFileSync(new URL("src/components/report/QuartierClimatData.tsx", racine), "utf8");
+  const debutCarte = source.indexOf('title: "Espaces naturels"');
+  const why = /why: "([^"]+)"/.exec(source.slice(debutCarte))![1];
+  const debutRepli = source.indexOf('label: "Taux de boisement"');
+  const tip = /tip: "([^"]+)"/.exec(source.slice(debutRepli))![1];
+  for (const texte of [why, tip]) {
+    assert.doesNotMatch(texte, /rafraîchiss|retien(nen)?t l'eau|abrit|confort|en dit long|quotidien/, texte);
+  }
+  // L'explication pédagogique reste : les trois familles, et « peu de nature » n'est pas « très urbanisé ».
+  assert.match(why, /espaces naturels, cultures et espaces urbanisés/);
+  assert.match(why, /sans être très urbanisée : les cultures/);
+  // Et elle passe elle-même les contrôles de la synthèse, commune par commune.
+  for (const insee of COMMUNES_CONTRE_REVUE) {
+    const p = projDe(insee);
+    for (const texte of [why, tip]) assert.deepEqual(reglesCouvert(texte, p), [], `${par.get(insee)!.nom} : « ${texte} »`);
+  }
+});
