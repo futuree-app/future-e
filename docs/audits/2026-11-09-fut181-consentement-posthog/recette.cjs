@@ -81,6 +81,19 @@ async function contexte(browser, { consentement = null, user = null, stockageBlo
     if (/\/config/.test(u)) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ token: "phc_fut181_test", supportedCompression: [], sessionRecording: { endpoint: "/s/" }, heatmaps: true, autocaptureExceptions: true }) });
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: 1 }) });
   };
+  // GOOGLE (contre-revue) : les scripts GTM/gtag se chargent comme pour un visiteur ; toute requête de
+  // MESURE vers Google (collect, pings Consent Mode, régies) est relevée puis bloquée, jamais transmise,
+  // pour ne pas polluer la propriété GA4 réelle. `gcs` porte l'état de consentement envoyé (G1<pub><mesure>).
+  const google = [];
+  await ctx.route(/google-analytics\.com|analytics\.google\.com|googletagmanager\.com\/(?:a|g\/collect)|doubleclick\.net|googleadservices\.com|google\.[a-z.]+\/(?:ccm|pagead|ads)\//, (route) => {
+    const u = new URL(route.request().url());
+    const corps = route.request().postData() ?? "";
+    const champ = (k) => u.searchParams.get(k) ?? corps.match(new RegExp(`(?:^|[&\\n])${k}=([^&\\n]+)`))?.[1] ?? null;
+    let onglet = "?";
+    try { onglet = new URL(route.request().frame().url()).pathname; } catch {}
+    google.push({ url: u.origin + u.pathname, gcs: champ("gcs"), en: champ("en"), dl: champ("dl"), onglet, t: Date.now() });
+    return route.fulfill({ status: 204, body: "" });
+  });
   await ctx.route("**/ingest/**", surRequete);
   await ctx.route(/posthog\.com/, surRequete);
   await ctx.route(`${SUPABASE}/**`, (route) => {
@@ -92,7 +105,7 @@ async function contexte(browser, { consentement = null, user = null, stockageBlo
     if (/\/auth\/v1\//.test(u)) return route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ message: "no session" }) });
     return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
   });
-  return { ctx, evenements, technique, fuites, etat };
+  return { ctx, evenements, technique, fuites, etat, google };
 }
 
 const pause = (p, ms) => p.waitForTimeout(ms);
@@ -123,6 +136,26 @@ async function tracesPostHog(page) {
     return t;
   });
 }
+// Les commandes de consentement Google réellement poussées dans la page (`gtag("consent", …)` → dataLayer).
+async function consentementsGoogle(page) {
+  return page.evaluate(() => (window.dataLayer || [])
+    .filter((a) => a && a[0] === "consent")
+    .map((a) => `${a[1]}:${a[2]?.analytics_storage ?? "?"}/${a[2]?.ad_storage ?? "?"}`));
+}
+const dernier = (l) => l[l.length - 1];
+// Une requête de mesure Google qui se dit autorisée (stockage mesure ou pub accordé).
+const googleAccorde = (l) => l.filter((r) => r.gcs && /^G1(1.|.1)/.test(r.gcs));
+// GA4 garde des événements déjà créés jusqu'à son prochain envoi, et chacun porte l'état de consentement du
+// moment où il a été créé. Constaté (09/11/2026) : la `page_view` d'un onglet chargé pendant le consentement
+// part jusqu'à 4 s APRÈS le retrait, marquée G111, au premier envoi suivant ; l'événement créé ensuite part
+// en G100. Ce code ne peut pas vider cette file. L'attendu porte donc sur les événements CRÉÉS après le
+// retrait, reconnus à leur page (`dl`, une adresse ouverte seulement après le retrait) ; ce qui sort de la
+// file est relevé à part (INFO).
+const VIDANGE_GOOGLE = 1500;
+const creesApres = (l, marque) => l.filter((r) => (r.dl ?? "").includes(marque));
+const sortisDeLaFile = (l, marque) => googleAccorde(l).filter((r) => !(r.dl ?? "").includes(marque));
+const decrire = (l) => l.map((r) => `${r.onglet}:${r.en ?? r.url.split("/")[2]}/${r.gcs}`).join(", ") || "aucun";
+const internesGoogle = (p) => p.evaluate(() => JSON.stringify(window.google_tag_data?.ics?.entries?.analytics_storage?.update ?? null));
 async function accepter(page) { await page.getByRole("button", { name: "Accepter" }).click(); }
 async function refuser(page) { await page.getByRole("button", { name: "Refuser" }).click(); }
 async function rouvrirPreferences(page) { await page.evaluate(() => window.dispatchEvent(new Event("futuree:show-consent"))); }
@@ -131,6 +164,8 @@ const PARCOURS = ["/", "/ou-vivre", "/comparateur", "/dossier", "/politique-conf
 
 const resultats = [];
 let echecs = 0;
+// Constat sans attendu : écrit dans le rapport, ne compte ni pour ni contre.
+function constater(nom, detail) { resultats.push(`INFO  ${nom}${detail ? ` — ${detail}` : ""}`); }
 function attendre(nom, ok, detail) {
   resultats.push(`${ok ? "OK  " : "ÉCHEC"} ${nom}${detail ? ` — ${detail}` : ""}`);
   if (!ok) echecs++;
@@ -341,6 +376,84 @@ const SCENARIOS = {
     await aller(page, "/comparateur");
     await vider(page);
     attendre("11. Stockage inaccessible, même après « Accepter » : 0 événement, 0 requête", s.evenements.length + s.technique.length === 0, `${resume(s.evenements)} / ${s.technique.length}`);
+    await s.ctx.close();
+  },
+  async google_reouverture(browser) {
+    const s = await contexte(browser);
+    const page = await s.ctx.newPage();
+    await aller(page, "/");
+    const c0 = await consentementsGoogle(page);
+    await accepter(page);
+    await pause(page, 300);
+    const c1 = await consentementsGoogle(page);
+    await cliquerUnBouton(page);
+    await vider(page);
+    const g1 = s.google.length;
+    await rouvrirPreferences(page);
+    await pause(page, 300);
+    const c2 = await consentementsGoogle(page);
+    const tRetrait = Date.now();
+    await pause(page, VIDANGE_GOOGLE);
+    const etat2 = await internesGoogle(page);
+    // Choix effacé : les événements créés désormais ne partent plus comme « accordés ».
+    const tRouvert = Date.now();
+    const vidange = s.google.filter((r) => r.t >= tRetrait - 300 && r.t < tRouvert);
+    await page.evaluate(() => window.history.pushState({}, "", "/ou-vivre"));
+    await cliquerUnBouton(page);
+    await vider(page);
+    const apresReouverture = s.google.filter((r) => r.t >= tRouvert);
+    await refuser(page);
+    await pause(page, 300);
+    const c3 = await consentementsGoogle(page);
+    await rouvrirPreferences(page);
+    await pause(page, 300);
+    const c4 = await consentementsGoogle(page);
+    await accepter(page);
+    await pause(page, 300);
+    const c5 = await consentementsGoogle(page);
+    attendre("12. Google : refus par défaut avant tout choix", c0[0] === "default:denied/denied" && c0.length === 1, c0.join(" | "));
+    attendre("12. Google : acceptation → update accordé", dernier(c1) === "update:granted/granted", dernier(c1));
+    attendre("12. Google : réouverture des préférences → update refusé, sans attendre un clic", dernier(c2) === "update:denied/denied" && c2.length === c1.length + 1 && etat2 === "false", `${c2.slice(c1.length).join(" | ")} ; état interne du tag : update=${etat2}`);
+    const nouveaux12 = creesApres(apresReouverture, "/ou-vivre");
+    attendre("12. Google : après réouverture, les événements nouveaux partent en refus", nouveaux12.length > 0 && googleAccorde(nouveaux12).length === 0, `${decrire(nouveaux12)} (avant : ${g1} requête(s))`);
+    constater("12. Google : événements créés AVANT la réouverture et envoyés après (file GA4)", decrire([...vidange.filter((r) => googleAccorde([r]).length), ...sortisDeLaFile(apresReouverture, "/ou-vivre")]));
+    attendre("12. Google : refus, puis réouverture, puis nouvelle acceptation suivis dans l'ordre", dernier(c3) === "update:denied/denied" && dernier(c4) === "update:denied/denied" && dernier(c5) === "update:granted/granted", [dernier(c3), dernier(c4), dernier(c5)].join(" → "));
+    await s.ctx.close();
+  },
+  async google_deux_onglets(browser) {
+    const s = await contexte(browser, { consentement: "granted" });
+    const a = await s.ctx.newPage();
+    const b = await s.ctx.newPage();
+    await aller(a, "/");
+    await aller(b, "/comparateur");
+    const b0 = await consentementsGoogle(b);
+    const tRetrait = Date.now();
+    await rouvrirPreferences(a);
+    await pause(b, 500);
+    const b1 = await consentementsGoogle(b);
+    await pause(b, VIDANGE_GOOGLE);
+    const etatB = await internesGoogle(b);
+    const tRouvert = Date.now();
+    const vidange = s.google.filter((r) => r.t >= tRetrait && r.t < tRouvert);
+    await b.bringToFront();
+    await cliquerUnBouton(b);
+    await b.evaluate(() => window.history.pushState({}, "", "/comparateur?communes=17300"));
+    await vider(b);
+    const apres = s.google.filter((r) => r.t >= tRouvert);
+    await a.bringToFront();
+    await refuser(a);
+    await pause(b, 500);
+    const b2 = await consentementsGoogle(b);
+    await rouvrirPreferences(a);
+    await accepter(a);
+    await pause(b, 500);
+    const b3 = await consentementsGoogle(b);
+    attendre("13. Google, deux onglets : B applique le choix retenu", dernier(b0) === "update:granted/granted", b0.join(" | "));
+    attendre("13. Google, deux onglets : préférences rouvertes dans A → B passe en refus", dernier(b1) === "update:denied/denied" && etatB === "false", `${b1.slice(b0.length).join(" | ") || "aucune commande"} ; état interne du tag dans B : update=${etatB}`);
+    const nouveaux13 = creesApres(apres, "communes=17300");
+    attendre("13. Google, deux onglets : les événements nouveaux de B partent en refus", nouveaux13.length > 0 && googleAccorde(nouveaux13).length === 0, decrire(nouveaux13));
+    constater("13. Google, deux onglets : événements créés AVANT le retrait et envoyés après (file GA4)", decrire([...vidange.filter((r) => googleAccorde([r]).length), ...sortisDeLaFile(apres, "communes=17300")]));
+    attendre("13. Google, deux onglets : refus puis nouvelle acceptation dans A suivis par B", dernier(b2) === "update:denied/denied" && dernier(b3) === "update:granted/granted", `${dernier(b2)} → ${dernier(b3)}`);
     await s.ctx.close();
   },
 };

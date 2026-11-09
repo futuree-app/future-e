@@ -25,11 +25,22 @@ OK   6. Connecté sans consentement : 0 requête PostHog
 OK   7. Connecté avec consentement : $identify sur l'UUID — $set×2, $identify×1, $pageview×2, $pageleave×1
 OK   7. Connecté avec consentement : l'e-mail n'apparaît dans aucun envoi
 OK   7. Connecté : les événements suivants portent l'UUID
-OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1be6a-b932-7dc0-98bf-4acb15e6e13e
-OK   8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 01a1be6a-e9d6-7e56-95dd-e21320b7bc4b
+OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1c03e-a55c-7336-b80c-1d3b70daa637
+OK   8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 01a1c03e-d979-7639-b712-e7c37c932fc1
 OK   9. Champ libre et adresse de dossier : aucun contenu personnel dans les envois — 11 événement(s), 0 fuite(s)
 OK   10. Refus puis rechargements : choix respecté avant toute requête
 OK   10. Acceptation puis rechargement : mesure active dès le chargement
 OK   11. Stockage inaccessible, même après « Accepter » : 0 événement, 0 requête — aucun / 0
+OK   12. Google : refus par défaut avant tout choix — default:denied/denied
+OK   12. Google : acceptation → update accordé — update:granted/granted
+OK   12. Google : réouverture des préférences → update refusé, sans attendre un clic — update:denied/denied ; état interne du tag : update=false
+OK   12. Google : après réouverture, les événements nouveaux partent en refus — /ou-vivre:page_view/G100 (avant : 4 requête(s))
+INFO  12. Google : événements créés AVANT la réouverture et envoyés après (file GA4) — aucun
+OK   12. Google : refus, puis réouverture, puis nouvelle acceptation suivis dans l'ordre — update:denied/denied → update:denied/denied → update:granted/granted
+OK   13. Google, deux onglets : B applique le choix retenu — default:denied/denied | update:granted/granted
+OK   13. Google, deux onglets : préférences rouvertes dans A → B passe en refus — update:denied/denied ; état interne du tag dans B : update=false
+OK   13. Google, deux onglets : les événements nouveaux de B partent en refus — /comparateur:page_view/G100
+INFO  13. Google, deux onglets : événements créés AVANT le retrait et envoyés après (file GA4) — /comparateur:scroll/G111
+OK   13. Google, deux onglets : refus puis nouvelle acceptation dans A suivis par B — update:denied/denied → update:granted/granted
 
 TOUS LES ATTENDUS TENUS
