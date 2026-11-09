@@ -85,6 +85,7 @@ await refuse(ins("user_id, insee_code, scope_key, answer, comment, commented_at"
 await refuse(ins("user_id, insee_code, scope_key, answer, comment", `'${BOB}', '44109', 'commune', 'oui', 'x'`), /comment_date_ck/, "commentaire sans date : refusé");
 await ins("user_id, insee_code, scope_key, answer, comment, commented_at", `'${BOB}', '44109', 'commune', 'oui', repeat('é', 2000), now()`);
 ok("commentaire de 2 000 caractères accentués : accepté (char_length, pas octets)");
+await refuse(ins("user_id, insee_code, scope_key, answer, comment, commented_at", `'${BOB}', '75056', 'commune', 'pas_encore_lu', 'x', now()`), /non_lu_ck/, "« pas encore lu » avec un commentaire : refusé");
 await refuse(ins("user_id, insee_code, scope_key, address_dossier_id, answer", `'${BOB}', '44109', 'logement:cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'oui'`), /foreign key/, "bien inexistant : refusé par la clé étrangère");
 
 // ── Le lecteur : ses seules lignes, aucune écriture ─────────────────────────────────────────
@@ -106,6 +107,27 @@ const pol = await db.query(`select polname, polcmd from pg_policy where polrelid
 assert.deepEqual(pol.rows, [{ polname: "dossier_utility_feedback_select_own", polcmd: "r" }]);
 ok("une seule policy, en lecture");
 
+// ── Conservation : la purge efface les commentaires à 12 mois, supprime les réponses à 24 mois ──
+await db.exec(`
+  insert into public.dossier_utility_feedback (user_id, insee_code, scope_key, answer, comment, commented_at, updated_at) values
+    ('${BOB}', '33063', 'commune', 'oui',          'récent', now() - interval '11 months', now() - interval '11 months'),
+    ('${BOB}', '31555', 'commune', 'pas_vraiment', 'ancien', now() - interval '13 months', now() - interval '13 months'),
+    ('${BOB}', '06088', 'commune', 'oui',          null,     null,                         now() - interval '25 months');
+`);
+await refuse(en("authenticated", BOB, `select * from public.purger_retours_utilite()`), /permission denied/, "purge : interdite à authenticated");
+await refuse(en("anon", null, `select * from public.purger_retours_utilite()`), /permission denied/, "purge : interdite à anon");
+await refuse(en("service_role", null, `select * from public.purger_retours_utilite(interval '2 years', interval '1 year')`), /incohérents/, "purge : délais incohérents refusés");
+const purge = await en("service_role", null, `select * from public.purger_retours_utilite()`);
+assert.deepEqual(purge.rows, [{ commentaires_effaces: 1, retours_supprimes: 1 }]);
+const apresPurge = await db.query(`select insee_code, answer, comment, commented_at from public.dossier_utility_feedback where insee_code in ('33063', '31555', '06088') order by insee_code`);
+assert.deepEqual(apresPurge.rows.map((r) => [r.insee_code, r.answer, r.comment, r.commented_at === null]), [
+  ["31555", "pas_vraiment", null, true], ["33063", "oui", "récent", false],
+]);
+ok("purge : le commentaire de 13 mois effacé avec sa date (réponse gardée), celui de 11 mois gardé, la réponse de 25 mois supprimée");
+const rejeu = await en("service_role", null, `select * from public.purger_retours_utilite()`);
+assert.deepEqual(rejeu.rows, [{ commentaires_effaces: 0, retours_supprimes: 0 }]);
+ok("purge : idempotente (un second passage ne fait rien)");
+
 // ── Le cycle de vie suit le compte et le bien ───────────────────────────────────────────────
 await db.exec(`delete from public.address_dossiers where id = '${DA}'`);
 const apresBien = await db.query(`select scope_key from public.dossier_utility_feedback where user_id = '${ALICE}'`);
@@ -118,9 +140,10 @@ ok("compte supprimé : ses retours partent avec lui");
 
 // ── Le retour arrière ─────────────────────────────────────────────────────────────────────────
 await db.exec(readFileSync("supabase/39_retours_utilite_dossier_down.sql", "utf8"));
-const reste = await db.query(`select to_regclass('public.dossier_utility_feedback') as t`);
+const reste = await db.query(`select to_regclass('public.dossier_utility_feedback') as t, to_regprocedure('public.purger_retours_utilite(interval, interval)') as f`);
 assert.equal(reste.rows[0].t, null);
-ok("39_down : la table disparaît");
+assert.equal(reste.rows[0].f, null);
+ok("39_down : la table et la fonction de purge disparaissent");
 await db.exec(readFileSync("supabase/39_retours_utilite_dossier.sql", "utf8"));
 await db.exec(readFileSync("supabase/39_retours_utilite_dossier.sql", "utf8"));
 ok("39 se rejoue deux fois sans erreur (idempotente)");

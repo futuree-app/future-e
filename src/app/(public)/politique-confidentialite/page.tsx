@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Comment futur•e collecte, utilise et protège vos données personnelles.",
 };
 
-const LAST_UPDATED = "22 mai 2026";
+const LAST_UPDATED = "9 novembre 2026";
 
 const NO_SELL_NOTICE = "futur•e ne revend jamais les données personnelles de ses utilisateurs et ne les utilise pas à des fins de publicité comportementale.";
 
@@ -137,7 +137,7 @@ export default function PolitiqueConfidentialitePage() {
               <li><strong style={{ color: "var(--fg-1)" }}>Email et mot de passe</strong>, pour créer et accéder à votre compte.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Commune de référence</strong>, pour personnaliser les projections climatiques.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Réponses au questionnaire</strong>, logement, mobilité, confort de vie, environnement personnel et projets. Elles restent dans votre espace et ne sont jamais revendues.</li>
-              <li><strong style={{ color: "var(--fg-1)" }}>Votre avis sur un dossier</strong>, si vous choisissez de le donner : votre réponse à la question posée en fin de dossier et, facultativement, votre commentaire. Ils sont rattachés au dossier concerné, lus par l&apos;équipe de futur•e seulement, et jamais publiés ni cités comme témoignage sans votre accord exprès.</li>
+              <li><strong style={{ color: "var(--fg-1)" }}>Votre avis sur un dossier</strong>, si vous choisissez de le donner : votre réponse à la question posée en fin de dossier et, facultativement, votre commentaire. Ils sont rattachés au dossier concerné, sans votre adresse ni votre projet, lus par l&apos;équipe de futur•e seulement, et jamais publiés ni cités comme témoignage sans votre accord exprès. Vous pouvez modifier votre réponse ou effacer votre commentaire à tout moment depuis le dossier.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de paiement</strong>, traitées directement par Stripe. futur•e ne voit ni ne stocke vos coordonnées bancaires.</li>
               <li><strong style={{ color: "var(--fg-1)" }}>Données de navigation</strong>, uniquement si vous avez donné votre consentement via la bannière.</li>
             </ul>
@@ -150,17 +150,27 @@ export default function PolitiqueConfidentialitePage() {
                 ["Fournir le rapport personnalisé", "Email, commune, réponses", "Exécution du contrat"],
                 ["Gérer votre compte et l'authentification", "Email", "Exécution du contrat"],
                 ["Traiter le paiement", "Données de paiement (Stripe)", "Exécution du contrat"],
-                ["Mesurer l'utilité des dossiers et les améliorer", "Avis donnés en fin de dossier", "Intérêt légitime"],
+                ["Mesurer l'utilité des dossiers et les améliorer", "Avis donnés en fin de dossier", "Intérêt légitime (voir ci-dessous)"],
                 ["Mesurer l'audience et améliorer le service", "Navigation, événements", "Consentement"],
                 ["Enregistrements de session et heatmaps", "Navigation (PostHog)", "Consentement"],
               ]}
             />
+            <p style={{ marginTop: 16 }}>
+              L&apos;avis donné en fin de dossier repose sur notre intérêt légitime à vérifier que nos dossiers
+              apprennent réellement quelque chose à leurs lecteurs et à les corriger. Il est facultatif, limité à
+              une réponse et à un commentaire libre, et n&apos;est utilisé à aucune autre fin : ni publicité, ni
+              profilage, ni publication. Vous pouvez vous y opposer à tout moment : effacez votre commentaire depuis
+              le dossier, ou écrivez-nous pour que votre réponse soit supprimée, sans conséquence sur votre accès.
+            </p>
           </Section>
 
           {/* Conservation */}
           <Section title="Conservation des données">
             <p>
               Les données de votre compte sont conservées tant que celui-ci est actif. En cas d'inactivité prolongée, elles sont supprimées au bout de <strong style={{ color: "var(--fg-1)" }}>4 ans</strong>. Vous pouvez demander la suppression à tout moment en écrivant à <a href="mailto:hello@futur-e.fr" style={{ color: "var(--orange)" }}>hello@futur-e.fr</a>.
+            </p>
+            <p>
+              Les avis donnés en fin de dossier suivent des durées plus courtes : le <strong style={{ color: "var(--fg-1)" }}>commentaire libre est effacé au bout de 12 mois</strong>, la <strong style={{ color: "var(--fg-1)" }}>réponse au bout de 24 mois</strong>. Ils sont aussi effacés avec votre compte, avec le dossier concerné, ou sur simple demande.
             </p>
             <p>
               Les données de navigation collectées via les outils analytiques (avec consentement) suivent les politiques de conservation propres à chaque outil, généralement entre 13 et 24 mois.

@@ -33,6 +33,7 @@ function base() {
     // Les contraintes de la table : la base refuse ce que la migration refuse.
     if (apres.comment !== null && (typeof apres.comment !== "string" || [...apres.comment].length > 2000 || apres.comment === "")) return null;
     if ((apres.comment === null) !== (apres.commented_at === null)) return null;
+    if (apres.answer === "pas_encore_lu" && apres.comment !== null) return null; // dossier_utility_feedback_non_lu_ck
     lignes.set(k, apres);
     return lireLigneRetour(apres);
   };
@@ -73,7 +74,12 @@ test("les trois réponses s'enregistrent, chacune sous sa valeur propre, sans co
     assert.deepEqual(r.body, { ok: true, retour: { answer, comment: null } });
     assert.equal(b.lignes.size, 1);
     assert.equal(b.ecritures[0].answer, answer);
-    assert.equal("comment" in b.ecritures[0], false, "sans clé `comment`, la colonne n'est pas envoyée");
+    if (answer === "pas_encore_lu") {
+      assert.equal(b.ecritures[0].comment, null, "« pas encore lu » efface toujours le commentaire");
+      assert.equal(b.ecritures[0].commented_at, null);
+    } else {
+      assert.equal("comment" in b.ecritures[0], false, "sans clé `comment`, la colonne n'est pas envoyée");
+    }
   }
   // « Pas vraiment » et « Pas encore lu » ne se confondent jamais.
   assert.notEqual(LIBELLE_REPONSE.pas_vraiment, LIBELLE_REPONSE.pas_encore_lu);
@@ -130,6 +136,32 @@ test("une réponse par compte et par dossier : la suivante REMPLACE, le commenta
   const e = await enregistrerRetourUtilite({ insee: NANTES, answer: "oui", comment: "" }, D);
   assert.deepEqual(e.body, { ok: true, retour: { answer: "oui", comment: null } });
   assert.equal(b.lignes.get(`${ALICE}|${NANTES}|commune`)!.commented_at, null);
+});
+
+test("transitions : le commentaire reste entre « Oui » et « Pas vraiment », part avec sa date sur « Pas encore lu »", async () => {
+  const b = base();
+  const D = deps(ALICE, b);
+  const ligne = () => b.lignes.get(`${ALICE}|${NANTES}|commune`)!;
+  await enregistrerRetourUtilite({ insee: NANTES, answer: "oui", comment: "La carte des écoles." }, D);
+  const date = ligne().commented_at;
+  assert.equal(date, "2026-11-09T10:00:00.000Z");
+  // Oui → Pas vraiment → Oui : le commentaire et SA date sont gardés.
+  for (const answer of ["pas_vraiment", "oui"] as const) {
+    const r = await enregistrerRetourUtilite({ insee: NANTES, answer }, { ...D, now: new Date("2026-11-10T08:00:00.000Z") });
+    assert.deepEqual(r.body, { ok: true, retour: { answer, comment: "La carte des écoles." } });
+    assert.equal(ligne().commented_at, date, "la date du commentaire ne bouge pas quand seule la réponse change");
+  }
+  // → Pas encore lu : effacé, date comprise, même si le corps porte un commentaire.
+  const nonLu = await enregistrerRetourUtilite({ insee: NANTES, answer: "pas_encore_lu", comment: "texte forcé" }, D);
+  assert.deepEqual(nonLu.body, { ok: true, retour: { answer: "pas_encore_lu", comment: null } });
+  assert.equal(ligne().comment, null);
+  assert.equal(ligne().commented_at, null);
+  // Pas encore lu → Oui : rien ne ressuscite ; un nouveau commentaire se donne de nouveau.
+  const relu = await enregistrerRetourUtilite({ insee: NANTES, answer: "oui" }, D);
+  assert.deepEqual(relu.body, { ok: true, retour: { answer: "oui", comment: null } });
+  const recommente = await enregistrerRetourUtilite({ insee: NANTES, answer: "pas_vraiment", comment: "Rien sur le bruit." }, D);
+  assert.deepEqual(recommente.body, { ok: true, retour: { answer: "pas_vraiment", comment: "Rien sur le bruit." } });
+  assert.equal(b.lignes.size, 1);
 });
 
 test("double clic, envoi rejoué : la même ligne, jamais deux", async () => {
@@ -228,11 +260,17 @@ test("migration 39 : RLS, lecture de ses seules lignes, aucune écriture pour le
   assert.match(sql, /revoke all on table public\.dossier_utility_feedback from anon, authenticated/);
   assert.match(sql, /grant select on table public\.dossier_utility_feedback to authenticated/);
   assert.doesNotMatch(sql, /grant (insert|update|delete|all)[^;]*dossier_utility_feedback/i);
-  assert.doesNotMatch(sql, /for (insert|update|delete|all)/i, "aucune policy d'écriture");
+  assert.doesNotMatch(sql, /create policy[^;]*for (insert|update|delete|all)/i, "aucune policy d'écriture");
   assert.match(sql, /for select\s+to authenticated\s+using \(auth\.uid\(\) = user_id\)/);
   assert.match(sql, /unique \(user_id, insee_code, scope_key\)/);
   assert.match(sql, /answer in \('oui', 'pas_vraiment', 'pas_encore_lu'\)/);
   assert.match(sql, /char_length\(comment\) between 1 and 2000/);
+  assert.match(sql, /check \(answer <> 'pas_encore_lu' or comment is null\)/);
+  // La purge de conservation : délais par défaut, réservée au service role.
+  assert.match(sql, /p_delai_commentaire interval default interval '12 months'/);
+  assert.match(sql, /p_delai_reponse\s+interval default interval '24 months'/);
+  assert.match(sql, /revoke all on function public\.purger_retours_utilite\(interval, interval\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.purger_retours_utilite\(interval, interval\) to service_role/);
   assert.match(sql, /references public\.address_dossiers\(id\) on delete cascade/);
   assert.match(sql, /references auth\.users\(id\) on delete cascade/);
   // Ni adresse, ni projet, ni e-mail dans la table.
@@ -267,4 +305,22 @@ test("la page : la question vient APRÈS le dossier et son geste de clôture, et
   assert.match(page, /presentation=\{presentation\}\s*\/>/);
   // Le bien lu est le bien de la lecture d'adresse, et seulement lui.
   assert.match(page, /const retourDossierId = dossier && communeResult && inseeCode && logementForCommune \? logementForCommune\.id : null;/);
+});
+
+// ── Le consentement à la mesure ─────────────────────────────────────────────────────────────
+
+test("consentement : seule la valeur « granted » de la bannière autorise un nouvel événement", async () => {
+  const { mesureAutorisee, CLE_CONSENTEMENT } = await import("./consentement-mesure.ts");
+  const stock = (v: string | null) => ({ getItem: (k: string) => (k === CLE_CONSENTEMENT ? v : null) });
+  assert.equal(mesureAutorisee(stock("granted")), true);
+  assert.equal(mesureAutorisee(stock("denied")), false);
+  assert.equal(mesureAutorisee(stock(null)), false, "absent : non");
+  assert.equal(mesureAutorisee(stock("GRANTED")), false);
+  assert.equal(mesureAutorisee({ getItem: () => { throw new Error("SecurityError"); } }), false, "stockage bloqué : non");
+  assert.equal(mesureAutorisee(), false, "hors navigateur : non");
+  // La clé et les valeurs sont celles qu'écrit la bannière : si elle change, ce test casse.
+  const banniere = readFileSync("src/components/ConsentBanner.tsx", "utf8");
+  assert.match(banniere, new RegExp(`const STORAGE_KEY = "${CLE_CONSENTEMENT}";`));
+  assert.match(banniere, /type ConsentValue = "granted" \| "denied";/);
+  assert.match(banniere, /localStorage\.setItem\(STORAGE_KEY, value\)/);
 });

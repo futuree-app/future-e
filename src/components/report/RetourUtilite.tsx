@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import posthog from "posthog-js";
 import { bindOrphans } from "@/lib/typography";
+import { mesureAutorisee } from "@/lib/consentement-mesure";
 import {
   LIBELLE_REPONSE, MAX_COMMENTAIRE, QUESTION_COMMENTAIRE, QUESTION_UTILITE, REPONSES_UTILITE,
   longueurCommentaire, type ReponseUtilite, type RetourEnregistre,
@@ -25,7 +26,12 @@ import d from "./autour-du-releve.module.css";
 //     compte et par dossier, de toute façon ;
 //   · une réponse enregistrée ne se redemande pas : à la visite suivante, une ligne la rappelle, avec
 //     de quoi la modifier, et rien d'autre ;
-//   · le commentaire reste privé : il ne part jamais vers PostHog.
+//   · le commentaire reste privé : il ne part jamais vers PostHog. Le bloc porte `ph-no-capture`, que
+//     posthog-js honore deux fois : l'autocapture l'ignore (aucun clic, aucun texte d'élément), et
+//     l'enregistreur de session le remplace par un aplat (`blockClass`). Le seul événement est celui,
+//     explicite, qui suit un enregistrement confirmé, et il ne part qu'avec le consentement
+//     « granted » de la bannière (`mesureAutorisee`) ;
+//   · passer à « Pas encore lu » retire le commentaire enregistré (la route l'efface), et l'écran le dit.
 //
 // Les boutons ne passent JAMAIS en `disabled` pendant un envoi : un bouton désactivé perd le focus,
 // et le lecteur au clavier se retrouverait en haut de la page. `aria-disabled` et le verrou suffisent.
@@ -60,6 +66,7 @@ export function RetourUtilite({
   const [brouillon, setBrouillon] = useState(initial?.comment ?? "");
   const [erreur, setErreur] = useState<Envoi | null>(null);
   const [confirme, setConfirme] = useState<Envoi | null>(null);
+  const [commentaireRetire, setCommentaireRetire] = useState(false);
   const verrou = useRef(false);
   const titreRef = useRef<HTMLHeadingElement>(null);
   const resumeRef = useRef<HTMLParagraphElement>(null);
@@ -96,9 +103,11 @@ export function RetourUtilite({
       const precedent = enregistre;
       setEnregistre(json.retour);
       setConfirme(type);
-      // UN ÉVÉNEMENT AGRÉGÉ, SANS LE TEXTE. La réponse, la présence d'un commentaire, la portée.
+      setCommentaireRetire(type === "reponse" && Boolean(precedent?.comment) && json.retour.comment === null);
+      // UN ÉVÉNEMENT AGRÉGÉ, SANS LE TEXTE, ET SEULEMENT AVEC CONSENTEMENT. La réponse, la présence d'un
+      // commentaire, la portée.
       try {
-        posthog.capture("dossier_utility_feedback_submitted", {
+        if (mesureAutorisee()) posthog.capture("dossier_utility_feedback_submitted", {
           answer: json.retour.answer,
           has_comment: json.retour.comment !== null,
           step: type,
@@ -157,6 +166,8 @@ export function RetourUtilite({
     envoi === "reponse" ? "Enregistrement…"
     : envoi === "commentaire" ? "Envoi…"
     : confirme === "commentaire" ? "Merci, votre commentaire est enregistré."
+    : confirme === "reponse" && reponseCourante === "pas_encore_lu" && commentaireRetire
+      ? "Merci, c'est noté. Votre commentaire précédent a été retiré."
     : confirme === "reponse" && reponseCourante === "pas_encore_lu" ? "Merci, c'est noté."
     : confirme === "reponse" ? "Merci, votre réponse est enregistrée."
     : "";
@@ -205,7 +216,7 @@ export function RetourUtilite({
   );
 
   return (
-    <section aria-labelledby={idQuestion} className={c.section} data-retour-utilite="">
+    <section aria-labelledby={idQuestion} className={`${c.section} ph-no-capture`} data-retour-utilite="">
       {ouvert ? (
         <>
           <h2 id={idQuestion} ref={titreRef} tabIndex={-1} className={`${c.titre} outline-none`}>

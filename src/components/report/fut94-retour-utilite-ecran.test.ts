@@ -17,6 +17,11 @@ const { act, create } = require("react-test-renderer");
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 const RACINE = process.cwd();
+// Le consentement de la bannière (`localStorage["futuree-consent"]`), réglé par chaque test.
+let consentement: string | null = "granted";
+(globalThis as Record<string, unknown>).window = {
+  localStorage: { getItem: (k: string) => (k === "futuree-consent" ? consentement : null) },
+};
 type Mod = { exports: Record<string, unknown> };
 const cache = new Map<string, Mod>();
 const captures: { evenement: string; proprietes: Record<string, unknown> }[] = [];
@@ -78,18 +83,20 @@ let file: Array<Reponse | (() => Promise<Reponse>)> = [];
 function simulerFetch(reponses: Array<Reponse | (() => Promise<Reponse>)> = []) {
   appels = [];
   file = [...reponses];
-  let commentaire: string | null = null;
+  let commentaire: string | null = initialServeur?.comment ?? null;
   (globalThis as Record<string, unknown>).fetch = async (url: string, init: { body: string }) => {
     const corps = JSON.parse(init.body) as Record<string, unknown>;
     appels.push({ url, corps });
     const prevue = file.shift();
     const r = typeof prevue === "function" ? await prevue() : prevue;
     if (r) return { status: r.status, ok: r.status < 300, json: async () => { if (r.json === undefined) throw new Error("pas de JSON"); return r.json; } };
-    if ("comment" in corps) commentaire = typeof corps.comment === "string" && corps.comment.trim() ? corps.comment.trim() : null;
+    if (corps.answer === "pas_encore_lu") commentaire = null; // la règle de la route
+    else if ("comment" in corps) commentaire = typeof corps.comment === "string" && corps.comment.trim() ? corps.comment.trim() : null;
     return { status: 200, ok: true, json: async () => ({ ok: true, retour: { answer: corps.answer, comment: commentaire } }) };
   };
 }
 
+let initialServeur: { answer: string; comment: string | null } | null = null;
 async function ecran(props: Record<string, unknown> = {}): Promise<Rendu> {
   let r!: Rendu;
   await act(async () => {
@@ -247,6 +254,76 @@ for (const presentation of ["classique", "releve"] as const) {
     assert.equal(appels.length, 1);
     await saisir(r, "court");
     assert.doesNotMatch(texte(r), /caractères/, "en deçà du seuil, aucun compte");
+  });
+}
+
+test("consentement : sans « granted », l'enregistrement marche et RIEN ne part vers PostHog", async () => {
+  for (const valeur of [null, "denied", "n'importe quoi"]) {
+    consentement = valeur;
+    simulerFetch();
+    captures.length = 0;
+    const r = await ecran({ presentation: "releve" });
+    await cliquer(bouton(r, /Pas vraiment/));
+    await saisir(r, "Rien sur le bruit.");
+    await cliquer(bouton(r, /Envoyer/));
+    assert.equal(appels.length, 2, "les deux envois sont faits");
+    assert.match(texte(r), /Pas vraiment, avec un commentaire/);
+    assert.deepEqual(captures, [], `consentement ${valeur} : aucun événement`);
+  }
+  consentement = "granted";
+  simulerFetch();
+  captures.length = 0;
+  const r = await ecran({ presentation: "releve" });
+  await cliquer(bouton(r, /Pas vraiment/));
+  assert.equal(captures.length, 1, "avec consentement : l'événement agrégé");
+});
+
+test("le bloc entier est exclu de l'autocapture et des enregistrements de session (ph-no-capture)", async () => {
+  for (const presentation of ["classique", "releve"]) {
+    simulerFetch();
+    const r = await ecran({ presentation });
+    const section = r.root.findAll((n) => n.type === "section")[0];
+    assert.match(String(section.props.className), /(^| )ph-no-capture( |$)/);
+  }
+  // Et le seul appel à PostHog du composant passe par la garde de consentement.
+  const source = fs.readFileSync(`${RACINE}/src/components/report/RetourUtilite.tsx`, "utf8");
+  assert.equal(source.match(/posthog\./g)?.length, 1);
+  assert.match(source, /if \(mesureAutorisee\(\)\) posthog\.capture\(/);
+});
+
+for (const presentation of ["classique", "releve"] as const) {
+  test(`${presentation} · « Pas encore lu » après un commentaire : retiré, et l'écran le dit`, async () => {
+    initialServeur = { answer: "pas_vraiment", comment: "Rien sur les écoles." };
+    simulerFetch();
+    const r = await ecran({ presentation, initial: initialServeur });
+    await cliquer(bouton(r, /Modifier/));
+    await cliquer(bouton(r, /Pas encore lu/));
+    assert.deepEqual(appels.at(-1)!.corps, { insee: "44109", dossierId: null, presentation, answer: "pas_encore_lu" });
+    assert.match(texte(r), /Merci, c'est noté\. Votre commentaire précédent a été retiré\./);
+    assert.equal(champ(r), undefined);
+    // Oui ↔ Pas vraiment, lui, garde le commentaire et n'annonce aucun retrait.
+    initialServeur = { answer: "oui", comment: "La carte des écoles." };
+    simulerFetch();
+    const r2 = await ecran({ presentation, initial: initialServeur });
+    await cliquer(bouton(r2, /Modifier/));
+    await cliquer(bouton(r2, /Pas vraiment/));
+    await cliquer(bouton(r2, /^\["Oui"\]$/));
+    assert.doesNotMatch(texte(r2), /retiré/);
+    assert.equal(champ(r2).props.value, "La carte des écoles.");
+    initialServeur = null;
+  });
+
+  test(`${presentation} · effacer son commentaire depuis l'écran : champ vidé, envoi permis, plus de commentaire`, async () => {
+    initialServeur = { answer: "oui", comment: "La carte des écoles." };
+    simulerFetch();
+    const r = await ecran({ presentation, initial: initialServeur });
+    await cliquer(bouton(r, /Modifier/));
+    await saisir(r, "");
+    assert.equal(bouton(r, /Envoyer/).props["aria-disabled"], undefined, "vider efface : l'envoi est permis");
+    await cliquer(bouton(r, /Envoyer/));
+    assert.deepEqual(appels.at(-1)!.corps, { insee: "44109", dossierId: null, presentation, answer: "oui", comment: "" });
+    assert.match(texte(r), /Votre retour sur cette analyse : Oui\. Merci\./);
+    initialServeur = null;
   });
 }
 

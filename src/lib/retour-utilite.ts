@@ -11,6 +11,7 @@
 //      lisible par ce compte, une commune doit lui être ouverte ;
 //   3. ce qu'un nouvel envoi remplace. UNE réponse par compte et par dossier : la suivante la remplace.
 //      Un envoi SANS clé `comment` garde le commentaire déjà enregistré ; `comment: null` l'efface.
+//      « Pas encore lu » l'efface toujours, avec sa date (il ne peut pas décrire une lecture non faite).
 //
 // CE QUI N'EST JAMAIS ÉCRIT : l'adresse, le projet, le texte du dossier. Le commentaire est privé et
 // ne part jamais vers PostHog (l'événement de l'écran ne porte que la réponse et « a un commentaire »).
@@ -153,7 +154,14 @@ export async function enregistrerRetourUtilite(body: unknown, deps: DepsRetourUt
     presentation: b.presentation === "classique" || b.presentation === "releve" ? b.presentation : null,
     updated_at: quand,
   };
-  if (commentaire && commentaire.ok) {
+  if (b.answer === "pas_encore_lu") {
+    // UN DOSSIER PAS ENCORE LU N'A PAS DE COMMENTAIRE. Celui d'une réponse précédente (« ce qui m'a
+    // manqué ») décrirait une lecture que la réponse en vigueur dit ne pas avoir eu lieu : il est
+    // effacé avec sa date, quel que soit le corps. La base le garantit aussi (contrainte
+    // `dossier_utility_feedback_non_lu_ck`). Entre « Oui » et « Pas vraiment », il est gardé.
+    ligne.comment = null;
+    ligne.commented_at = null;
+  } else if (commentaire && commentaire.ok) {
     ligne.comment = commentaire.valeur;
     ligne.commented_at = commentaire.valeur === null ? null : quand;
   }

@@ -31,6 +31,9 @@
 -- patron de la migration 25. `anon` n'a rien. L'administrateur consulte par le SQL Editor
 -- (`supabase/maintenance/fut94-retours-utilite.sql`), aucune route HTTP ne liste les retours.
 --
+-- CONSERVATION : `purger_retours_utilite()` (bas de fichier) efface les commentaires à 12 mois et
+-- supprime les réponses à 24 mois. Non planifiée ici.
+--
 -- NON APPLIQUÉE EN PRODUCTION PAR LA PR QUI L'APPORTE. Tant qu'elle ne l'est pas, la page `/rapport`
 -- ne montre pas la question (la lecture échoue, le bloc s'efface) : rien ne casse.
 -- Retour arrière : 39_retours_utilite_dossier_down.sql.
@@ -59,6 +62,9 @@ create table if not exists public.dossier_utility_feedback (
     or (address_dossier_id is not null and scope_key = 'logement:' || address_dossier_id::text)
   ),
   constraint dossier_utility_feedback_comment_date_ck check ((comment is null) = (commented_at is null)),
+  -- Un dossier pas encore lu n'a pas de commentaire : « ce qui m'a manqué » décrirait une lecture que
+  -- la réponse en vigueur dit ne pas avoir eu lieu. La route l'efface en passant à « pas encore lu ».
+  constraint dossier_utility_feedback_non_lu_ck check (answer <> 'pas_encore_lu' or comment is null),
   constraint dossier_utility_feedback_one_per_dossier unique (user_id, insee_code, scope_key)
 );
 
@@ -86,5 +92,53 @@ create policy dossier_utility_feedback_select_own
   on public.dossier_utility_feedback for select
   to authenticated
   using (auth.uid() = user_id);
+
+-- ── CONSERVATION ─────────────────────────────────────────────────────────────────────────────
+-- Durées proposées (à valider par le responsable du traitement, voir
+-- docs/audits/2026-11-09-fut94-retour-utilite.md, « Confidentialité ») :
+--   · le COMMENTAIRE libre, la donnée la plus personnelle, est effacé (avec sa date) 12 mois après
+--     son envoi ; la réponse reste ;
+--   · la RÉPONSE est supprimée 24 mois après son dernier envoi.
+-- Avant ces délais : suppression du compte ou du bien (cascades), ou demande de la personne
+-- (requête 5 de supabase/maintenance/fut94-retours-utilite.sql).
+--
+-- POURQUOI SUPPRIMER PLUTÔT QU'ANONYMISER. Une ligne sans `user_id` resterait rattachée à un
+-- dossier d'adresse (`scope_key`, `address_dossier_id`), donc à son propriétaire : ce serait une
+-- pseudonymisation, pas une anonymisation. Ce qui se garde sans limite, ce sont les DÉCOMPTES
+-- agrégés (requêtes 2 à 4), qui ne désignent personne.
+--
+-- IDEMPOTENTE, OBSERVABLE (elle rend ce qu'elle a fait), réservée au service role. NON PLANIFIÉE ICI
+-- (patron de la migration 38). Configuration proposée, à appliquer à la main après revue :
+--   select cron.schedule('purge-retours-utilite', '23 3 * * *',
+--     $$select * from public.purger_retours_utilite()$$);
+create or replace function public.purger_retours_utilite(
+  p_delai_commentaire interval default interval '12 months',
+  p_delai_reponse     interval default interval '24 months'
+)
+returns table (commentaires_effaces integer, retours_supprimes integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  c integer;
+  r integer;
+begin
+  if p_delai_commentaire < interval '1 day' or p_delai_reponse < p_delai_commentaire then
+    raise exception 'Délais incohérents : commentaire %, réponse %', p_delai_commentaire, p_delai_reponse;
+  end if;
+  update public.dossier_utility_feedback
+     set comment = null, commented_at = null
+   where comment is not null and commented_at < now() - p_delai_commentaire;
+  get diagnostics c = row_count;
+  delete from public.dossier_utility_feedback
+   where updated_at < now() - p_delai_reponse;
+  get diagnostics r = row_count;
+  return query select c, r;
+end;
+$$;
+
+revoke all on function public.purger_retours_utilite(interval, interval) from public, anon, authenticated;
+grant execute on function public.purger_retours_utilite(interval, interval) to service_role;
 
 commit;
