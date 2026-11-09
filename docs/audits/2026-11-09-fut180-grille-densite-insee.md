@@ -1,7 +1,10 @@
 # FUT-180 · Grille communale de densité Insee 2025 : phase A (lecture seule)
 
 Date : 09/11/2026. Index étudié : `data/comparateur-index.json.gz` de `origin/main` (51a493d0), 34 788 entrées.
-Aucune modification de l'index, du code, des bases, de Linear. Scripts de reproduction dans le dossier jumeau.
+`main` a reçu FUT-175 (6fc48f7b) pendant l'étude : l'index n'a pas changé, et les points de code cités ici sont identiques (numéros de ligne de `facts.ts` décalés).
+Aucune modification de l'index, du code, des bases, de Linear.
+
+**Reproduction :** dossier jumeau [`2026-11-09-fut180-grille-densite-insee/`](2026-11-09-fut180-grille-densite-insee/README.md). `./lancer_tout.sh <dossier>` retélécharge les sources (empreintes vérifiées), relit l'index à la révision étudiée et réimprime chaque chiffre ; `sortie-attendue.txt` sert de référence.
 
 ## 1. La source
 
