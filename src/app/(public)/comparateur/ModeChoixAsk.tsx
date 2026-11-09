@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import posthog from "posthog-js";
+import { identifiantMesure } from "@/lib/mesure-audience";
 import { bindOrphans } from "@/lib/typography";
 import { avisRefusAsk, longueurQuestion, MAX_QUESTION_ASK } from "@/lib/comparateur/lecture-ask";
 import { LigneQuestionAsk } from "@/components/LigneQuestionAsk";
@@ -28,12 +28,10 @@ type AskMessage = { role: "user" | "assistant"; content: string };
 
 const FREE_ASK = 2;
 
-function distinctId(): string {
-  try {
-    return posthog.get_distinct_id?.() ?? "anon";
-  } catch {
-    return "anon";
-  }
+// FUT-181 : l'identifiant de mesure n'est transmis qu'avec le consentement (sinon absent, et la
+// route ne mesure rien).
+function distinctId(): string | undefined {
+  return identifiantMesure();
 }
 
 export function ModeChoixAsk({ trio }: { trio: AskCommune[] }) {

@@ -6,6 +6,7 @@ import type { AuthActionState } from "@/app/auth/shared";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { CHAMP_IDENTIFIANT_MESURE, identifiantMesureConsenti } from "@/lib/posthog-identity";
 import { destinationApresConnexion } from "@/lib/auth-destination";
 import { CHAMP_PURGE, COOKIE_PURGE_DIFFEREE, purgeFaiteParLeNavigateur } from "@/lib/purge-recherche";
 
@@ -103,10 +104,7 @@ export async function signInWithPasswordAction(
     };
   }
 
-  const posthog = getPostHogClient();
-  posthog.identify({ distinctId: email, properties: { email } });
-  posthog.capture({ distinctId: email, event: "user_logged_in", properties: { email, method: "password" } });
-  await posthog.shutdown();
+  await mesurerAuthentification(formData, "user_logged_in", { method: "password" });
 
   redirect(next);
 }
@@ -168,14 +166,7 @@ export async function signUpWithPasswordAction(
     };
   }
 
-  const posthog = getPostHogClient();
-  posthog.identify({ distinctId: email, properties: { email } });
-  posthog.capture({
-    distinctId: email,
-    event: "user_signed_up",
-    properties: { email, method: "password", email_confirmation_required: !data.session },
-  });
-  await posthog.shutdown();
+  await mesurerAuthentification(formData, "user_signed_up", { method: "password", email_confirmation_required: !data.session });
 
   if (data.session) {
     redirect(next);
@@ -206,11 +197,24 @@ export async function signOutAction(formData?: FormData) {
     });
   }
 
-  if (user?.email) {
-    const posthog = getPostHogClient();
-    posthog.capture({ distinctId: user.email, event: "user_signed_out" });
-    await posthog.shutdown();
-  }
+  if (user && formData) await mesurerAuthentification(formData, "user_signed_out", {});
 
   redirect("/");
+}
+
+// FUT-181 : LA CONNEXION, L'INSCRIPTION ET LA DÉCONNEXION NE SONT MESURÉES QU'AVEC LE CONSENTEMENT.
+// Avant, ces trois événements partaient pour tout le monde, identifiés par l'e-mail et le portant en
+// propriété (avec un `identify` sur l'e-mail). Désormais : l'identifiant de mesure du navigateur, que
+// le formulaire ne transmet que si la mesure est consentie (`ChampMesure`), et jamais l'e-mail. Sans
+// lui, rien n'est émis. Le navigateur rattache ensuite son identifiant anonyme au compte (UUID).
+async function mesurerAuthentification(formData: FormData, event: string, properties: Record<string, unknown>) {
+  const distinctId = identifiantMesureConsenti(formData.get(CHAMP_IDENTIFIANT_MESURE));
+  if (!distinctId) return;
+  try {
+    const posthog = getPostHogClient();
+    posthog.capture({ distinctId, event, properties });
+    await posthog.shutdown();
+  } catch {
+    // La mesure ne doit jamais empêcher de se connecter.
+  }
 }

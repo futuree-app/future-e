@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { identifiantMesure } from '@/lib/mesure-audience';
 
 const ACCENT = '#c8b89a';
 const ACCENT_WARM = '#d4a574';
@@ -20,6 +21,8 @@ export function ProForm() {
       email: fd.get('email') as string,
       cabinet: fd.get('cabinet') as string,
       besoin: fd.get('besoin') as string,
+      // FUT-181 : absent sans consentement ; le serveur ne mesure alors rien.
+      distinctId: identifiantMesure(),
     };
 
     try {

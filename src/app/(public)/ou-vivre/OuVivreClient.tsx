@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { motCardinal, packReplayProposable } from "@/lib/comparaison-cardinal";
 import { RepriseRecherche } from "@/components/report/RepriseRecherche";
 import posthog from "posthog-js";
+import { identifiantMesure } from "@/lib/mesure-audience";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
 import {
   preferencesToLabels,
@@ -227,12 +228,10 @@ function capture(event: string, props?: Record<string, unknown>) {
   }
 }
 
-function distinctId(): string {
-  try {
-    return posthog.get_distinct_id?.() ?? "anon";
-  } catch {
-    return "anon";
-  }
+// FUT-181 : l'identifiant de mesure n'est transmis qu'avec le consentement (sinon absent, et la
+// route ne mesure rien).
+function distinctId(): string | undefined {
+  return identifiantMesure();
 }
 
 // ── Panneau d'interprétation (« ce produit m'a compris ») ─────────────────────

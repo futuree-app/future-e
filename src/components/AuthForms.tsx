@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { EMPTY_STATE, type AuthActionState } from "@/app/auth/shared";
 import { Logo } from "@/components/Logo";
+import { ChampMesure } from "@/components/ChampMesure";
 
 type ActionFn = (
   state: AuthActionState,
@@ -92,6 +93,8 @@ export function PasswordForm({
 
       <form action={formAction} className="flex flex-col gap-5">
         {nextDestination ? <input type="hidden" name="next" value={nextDestination} /> : null}
+        {/* FUT-181 : identifiant de mesure, transmis seulement avec le consentement. */}
+        <ChampMesure />
         {askFullName && (
           <div>
             <label className={labelCls} htmlFor="auth-full-name">Nom et prénom</label>

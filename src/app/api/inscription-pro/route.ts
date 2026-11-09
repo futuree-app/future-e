@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getPostHogClient } from '@/lib/posthog-server';
+import { identifiantMesureConsenti } from '@/lib/posthog-identity';
 
 export async function POST(request: Request) {
-  const { profession, email, cabinet, besoin } = await request.json();
+  const body = await request.json();
+  const { profession, email, cabinet, besoin } = body;
 
   if (!profession || !email) {
     return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
@@ -23,17 +25,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: email.trim().toLowerCase(),
-    event: 'pro_inscription_submitted',
-    properties: {
-      profession,
-      cabinet: cabinet || null,
-      besoin: besoin || null,
-    },
-  });
-  await posthog.shutdown();
+  // FUT-181 : mesuré seulement avec le consentement du navigateur (identifiant de mesure transmis),
+  // et sans rien de ce que la personne a écrit : ni l'e-mail (il servait d'identifiant), ni le nom du
+  // cabinet, ni le besoin en texte libre. Tout cela reste dans `pro_inscriptions`, la seule trace utile.
+  const distinctId = identifiantMesureConsenti(body.distinctId);
+  if (distinctId) {
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId,
+      event: 'pro_inscription_submitted',
+      properties: { profession, cabinet_renseigne: Boolean(cabinet), besoin_renseigne: Boolean(besoin) },
+    });
+    await posthog.shutdown();
+  }
 
   return NextResponse.json({ ok: true });
 }
