@@ -56,6 +56,9 @@ const DENSITY_VERB: Record<string, string> = {
   "Commune dense": "est une commune dense",
   "Densité intermédiaire": "a une densité intermédiaire",
   "Commune peu dense": "est une commune peu dense",
+  // FUT-179 : le registre nomme la catégorie d'un arrondissement par son périmètre.
+  "Arrondissement dense": "est un arrondissement dense",
+  "Arrondissement peu dense": "est un arrondissement peu dense",
 };
 
 /** FUT-175 : en deçà, l'eau n'est pas nommée par la synthèse déterministe (la carte la dit dès 1 %). */

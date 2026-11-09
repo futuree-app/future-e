@@ -16,6 +16,7 @@
 import type { Fact } from "../facts/contract.ts";
 import { provenance, type Provenance } from "../facts/provenance.ts";
 import { millesimePopulation } from "../population-millesime.ts";
+import { densiteInseeRetenue } from "./plm-densite.ts";
 import type { TerritoireInputs } from "./facts.ts";
 
 /** OSO : une classification satellitaire annuelle (raster 10 m) du CESBIO. */
@@ -24,7 +25,20 @@ const GASPAR = (dataset: string) => provenance({ producer: "Ministère de la Tra
 
 export const PROVENANCES_TERRITOIRE: Record<string, (i: TerritoireInputs) => Provenance> = {
   "place.population": (i) => provenance({ producer: "Insee", dataset: "Recensement de la population", distributor: "ADEME", nature: "observation", period: String(millesimePopulation(i.insee)) }),
-  "place.density": () => provenance({ producer: "Insee", dataset: "Recensement de la population, densité", distributor: "ADEME", nature: "derive", period: "2022" }),
+  // FUT-179 : Paris, Lyon, Marseille et leurs arrondissements, sans densité ADEME, lisent celle de l'Insee (population
+  // 2022 / superficie), sur le périmètre lu. La provenance suit la valeur réellement retenue par le registre.
+  "place.density": (i) => {
+    const plm = densiteInseeRetenue(i);
+    return plm
+      ? provenance({
+          producer: "Insee", dataset: "Populations légales 2022 et superficie (base du comparateur de territoires)", nature: "derive", period: "2022",
+          sourceUrl: "https://www.insee.fr/fr/statistiques/2521169",
+          limits: plm.perimetre === "commune"
+            ? `Moyenne de toute la commune de ${plm.ville} : elle ne décrit aucun arrondissement en particulier.`
+            : `Moyenne de l'arrondissement, parcs et bois compris ; celle de ${plm.ville} entière est différente.`,
+        })
+      : provenance({ producer: "Insee", dataset: "Recensement de la population, densité", distributor: "ADEME", nature: "derive", period: "2022" });
+  },
   "place.urban_role": () => provenance({ producer: "Insee", dataset: "Zonage en unités urbaines", version: "Zonage 2020" }),
   "land.composition": () => OSO,
   "land.natural_share": () => OSO,

@@ -24,6 +24,7 @@ import type { CatnatInondation } from "../decision/catnat-evidence.ts";
 import type { TerritoryType } from "../territory-mood.ts";
 import { millesimePopulation } from "../population-millesime.ts";
 import { avecProvenances } from "./provenances.ts";
+import { densiteInseeRetenue, type DensitePLM } from "./plm-densite.ts";
 
 /**
  * Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses.
@@ -91,6 +92,12 @@ export type TerritoireInputs = {
   era5: Era5Trend | null;
   saisonnalitePct: number | null;
   distinctiveTrait: string | null;
+  /**
+   * FUT-179 : Paris, Lyon, Marseille et leurs arrondissements n'ont pas de densité ADEME. Celle-ci est recalculée
+   * par l'Insee (population 2022 / superficie), sur le périmètre lu : la commune entière OU l'arrondissement, jamais
+   * l'un pour l'autre. Elle n'est lue qu'à défaut de densité ADEME. Absent pour toute autre commune.
+   */
+  densiteInsee?: DensitePLM | null;
 };
 
 // ── Les règles déterministes (grilles EXISTANTES, reprises telles quelles) ──────────────────
@@ -231,6 +238,13 @@ export const DENSITY_LABEL: Record<DensityCategory, string> = {
   low: "Commune peu dense",
 };
 
+/** FUT-179 : les mêmes catégories, dites d'un arrondissement (Paris 11e), qui n'est pas une commune. */
+export const DENSITY_LABEL_ARRONDISSEMENT: Record<DensityCategory, string> = {
+  dense: "Arrondissement dense",
+  intermediate: "Densité intermédiaire",
+  low: "Arrondissement peu dense",
+};
+
 /** D3 : grille existante de la carte d'identité (1 500 / 150 hab/km²). */
 export function densityCategory(d: number): DensityCategory {
   return d >= 1500 ? "dense" : d >= 150 ? "intermediate" : "low";
@@ -317,6 +331,15 @@ const card = (id: string): CardPolicy => ({ card: id });
 const noCard = (reason: "redundant" | "context_only" | "too_granular" | "low_standalone_value" | "other", note: string): CardPolicy =>
   ({ noCard: { reason, note } });
 
+/** FUT-179 : le périmètre de la densité Insee, dit au lecteur ; un chiffre de ville ne vaut pour aucun arrondissement. */
+function limiteDensitePLM(d: DensitePLM): string {
+  const entier = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+  const mesure = `${entier(d.population2022)} habitants sur ${String(d.superficieKm2).replace(".", ",")} km², parcs, bois et espaces non bâtis compris`;
+  return d.perimetre === "commune"
+    ? `Densité moyenne de toute la commune de ${d.ville} (${mesure}) : elle ne décrit aucun arrondissement en particulier.`
+    : `Densité moyenne de l'arrondissement (${mesure}) ; celle de ${d.ville} entière est différente.`;
+}
+
 function num(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
@@ -333,7 +356,11 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
   const composition = shares?.composition ?? null;
   const naturalPct = shares?.naturalLandPct ?? null;
   const hasOso = shares != null;
-  const density = num(e?.densite) ?? num(i.ademe?.densite);
+  // FUT-179 : à défaut d'ADEME seulement, la densité Insee du périmètre lu (cf. `densiteInsee`).
+  const densitePLM = densiteInseeRetenue(i);
+  const density = num(e?.densite) ?? num(i.ademe?.densite) ?? num(densitePLM?.habitantsParKm2);
+  // FUT-179 : le périmètre de cette densité, porté par le fait (`scale`) et par le libellé de sa catégorie.
+  const densiteArrondissement = densitePLM ? densitePLM.perimetre === "arrondissement" : Boolean(i.urbanRole?.arrondissementDe);
   const demo = e?.demographie ?? null;
 
   // VigiEau : la date de consultation sort de la valeur pour aller dans `observedAt`, hors empreinte.
@@ -355,8 +382,11 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
-      key: "place.density", value: density, unit: "hab/km²", scale: "commune", vintage: "2022",
-      source: { producer: "INSEE via ADEME", dataset: "Données communales", field: "densite_de_population_2022" },
+      key: "place.density", value: density, unit: "hab/km²", scale: densiteArrondissement ? "arrondissement" : "commune", vintage: "2022",
+      source: densitePLM
+        ? { producer: "INSEE", dataset: "Populations légales 2022 ; superficie, base du comparateur de territoires", field: "PMUN / SUP" }
+        : { producer: "INSEE via ADEME", dataset: "Données communales", field: "densite_de_population_2022" },
+      ...(densitePLM ? { limits: limiteDensitePLM(densitePLM) } : {}),
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
@@ -521,7 +551,7 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
   if (density != null) {
     const c = densityCategory(density);
     derived.push({
-      key: "density.category", value: c, label: DENSITY_LABEL[c], from: ["place.density"],
+      key: "density.category", value: c, label: (densiteArrondissement ? DENSITY_LABEL_ARRONDISSEMENT : DENSITY_LABEL)[c], from: ["place.density"],
       rule: "density-category@1", card: card("identity"), synthesis: INCLUDE,
     });
   }
