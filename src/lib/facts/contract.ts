@@ -18,7 +18,8 @@
 import type { Provenance } from "./provenance.ts";
 
 /** L'échelle RÉELLE de la mesure. Une valeur ne se lit jamais à une autre échelle que la sienne. */
-export type FactScale = "commune" | "radius_15km" | "urban_unit" | "department" | "point";
+// FUT-179 : `arrondissement` = un arrondissement municipal de Paris, Lyon ou Marseille, jamais la commune entière.
+export type FactScale = "commune" | "arrondissement" | "radius_15km" | "urban_unit" | "department" | "point";
 
 export type FactSource = {
   /** Qui produit la donnée (CESBIO, INSEE, Météo-France…). */

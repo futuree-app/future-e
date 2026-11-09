@@ -202,6 +202,7 @@ const CLE_MAIN = "5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c
  */
 const FUT175_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut175-lignes-admises.json", "utf8")) as Record<string, string[]>;
 const FEUX = /bdiff|incendi|feux? de for|MemoireIncendies/i;
+const FUT179_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut179-lignes-admises.json", "utf8")) as Record<string, string[]>;
 
 function lignesDiff(base: string, f: string): string[] {
   const diff = execFileSync("git", ["diff", "--no-color", "-U0", base, "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
@@ -311,7 +312,14 @@ const LIGNES_CONTRAT_FUT176: string[] = [
 
 /** La garde du registre des faits, sur une liste de lignes changées depuis 4d75603f. */
 function verifierRegistre(lignesChangees: readonly string[]): void {
-  const lignes = horsFut175(REGISTRE, lignesChangees);
+  // FUT-179 (09/11/2026) : la densité Insee de Paris, Lyon, Marseille et de leurs arrondissements, lue à défaut d'ADEME,
+  // avec sa source et ses limites ; contre-revue : l'échelle `arrondissement` du fait et le libellé de sa catégorie suivent
+  // le périmètre lu. Ses lignes exactes (quatre retirées : densité, source, échelle et libellé, devenus conditionnels)
+  // sont figées dans `__fixtures__/fut179-lignes-admises.json`, une occurrence chacune ; aucune ne parle des feux.
+  const fut179 = retirerAdmises(horsFut175(REGISTRE, lignesChangees), FUT179_ADMISES[REGISTRE]!);
+  assert.deepEqual(fut179.orphelines, [], `référence FUT-179 périmée pour ${REGISTRE} : ces lignes admises ne sont plus dans le diff`);
+  for (const l of FUT179_ADMISES[REGISTRE]!) assert.doesNotMatch(l, FEUX, l);
+  const lignes = fut179.reste;
   // FUT-176 : le type du rôle territorial suit le statut Insee ; c'est la seule ligne retirée admise.
   const RETIREE_FUT176 = '-export type UrbanRole = { role: "isolee" | "pole" | "agglo"; uuLabel: string | null; uuPop: number | null };';
   assert.deepEqual(lignes.filter((l) => l.startsWith("-") && l !== RETIREE_FUT176), [], "aucune ligne retirée (hors le type du rôle, FUT-176)");

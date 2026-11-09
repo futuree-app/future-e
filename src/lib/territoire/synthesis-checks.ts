@@ -115,17 +115,17 @@ const RULES: Rule[] = [
   // ── Densité (D3) ──
   {
     id: "densite:requalifiee-dense",
-    when: catIs(DENSITY, "Densité intermédiaire", "Commune peu dense"),
+    when: catIs(DENSITY, "Densité intermédiaire", "Commune peu dense", "Arrondissement peu dense"),
     polarity: "affirmative",
     patterns: [
       /\btrès denses?\b/,
       new RegExp(`\\bdensément (bâti${A}|peuplé${A}|construit${A})`),
-      /\b(commune|ville|territoire|agglomération)s? (très )?denses?\b/,
+      /\b(commune|ville|territoire|agglomération|arrondissement)s? (très )?denses?\b/,
     ],
   },
   {
     id: "densite:requalifiee-peu-dense",
-    when: catIs(DENSITY, "Densité intermédiaire", "Commune dense"),
+    when: catIs(DENSITY, "Densité intermédiaire", "Commune dense", "Arrondissement dense"),
     polarity: "affirmative",
     patterns: [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})\\b`)],
   },
@@ -360,6 +360,26 @@ const RULES: Rule[] = [
       /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
       /\barrondissement,? ville-centre\b/,
     ],
+  },
+  // FUT-179 (contre-revue) : une densité ne change jamais de périmètre. Lu à l'arrondissement, le texte ne la prête
+  // ni à une « commune » ni à la ville ; lu à Paris, Lyon ou Marseille entière, il ne la prête à aucun arrondissement
+  // (la projection d'une ville ne porte aucune densité d'arrondissement).
+  {
+    id: "interdit:densite-arrondissement-pretee-a-la-commune",
+    when: (p) => /^arrondissement\b/.test(String(at(p, "commune.role_territorial.role") ?? "")) && at(p, "commune.densite") != null,
+    polarity: "affirmative",
+    patterns: [
+      /\b(commune|ville)s? (très |peu |plutôt |assez |relativement |moyennement )?denses?\b/,
+      /\b(commune|ville)s? (de|à) (forte |faible |moyenne )?densité\b/,
+      /\bdensité (moyenne )?(de la|d'une|de cette) (commune|ville)\b/,
+      /\bdensité (moyenne )?(de|à) (paris|lyon|marseille)\b/,
+    ],
+  },
+  {
+    id: "interdit:densite-ville-pretee-a-un-arrondissement",
+    when: (p) => /^(paris|lyon|marseille)$/i.test(String(at(p, "commune.nom") ?? "").trim()) && at(p, "commune.densite") != null,
+    polarity: "affirmative",
+    patterns: [/\barrondissements?\b.*\bdens/, /\bdens.*\barrondissements?\b/],
   },
   {
     id: "interdit:station-balneaire",
@@ -646,6 +666,8 @@ const CONSIGNES: [RegExp, string][] = [
   [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],
   [/^format:/, "respectez le format : un titre puis exactement trois blocs « ## »"],
   [/^interdit:arrondissement-ville-centre$/, "le statut de ville-centre est celui de la commune entière (Paris, Lyon, Marseille) : ne le prêtez pas à l'arrondissement"],
+  [/^interdit:densite-arrondissement-pretee-a-la-commune$/, "la densité transmise est celle de l'arrondissement, pas de la commune entière : dites « arrondissement », ni « commune » ni « ville »"],
+  [/^interdit:densite-ville-pretee-a-un-arrondissement$/, "la densité transmise est celle de la commune entière : ne l'attribuez à aucun arrondissement, et n'en citez aucune autre"],
   [/^interdit:statut-urbain-surinterprete$/, "reprenez le rôle territorial tel quel : ni « isolée », ni « pôle », ni services ou animation déduits d'un statut statistique"],
 ];
 
