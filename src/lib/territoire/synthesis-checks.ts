@@ -351,13 +351,14 @@ const RULES: Rule[] = [
     when: (p) => /^arrondissement\b/.test(String(at(p, "commune.role_territorial.role") ?? "")),
     polarity: "affirmative",
     patterns: [
-      /\b(l'arrondissement|cet arrondissement|il) (est|constitue|forme|reste|demeure) (la |une |lui-même )?ville-centre\b/,
-      /\b(l'arrondissement|cet arrondissement|il) (est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
+      // RÈGLE SUR LE SUJET de l'affirmation, jamais une exception sur la phrase entière (contre-revues FUT-176). Toute
+      // attribution du rôle de ville-centre est refusée, SAUF quand son sujet est la ville elle-même, nommée seule juste
+      // avant le verbe (« Paris est la ville-centre », « Paris, ville-centre, est au centre de son agglomération »).
+      // « Paris 20e est la ville-centre », « Le 20e arrondissement est la ville-centre », « Lyon 9e constitue la
+      // ville-centre », « l'arrondissement est la ville-centre », « il est au centre de son agglomération » : refusés.
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|constitue|forme|reste|demeure|devient) (la |une |lui-même |elle-même )?ville-centre\b/,
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|se situe|se trouve|reste) au (centre|cœur) de (son |l')agglomération\b/,
       /\barrondissement,? ville-centre\b/,
-      // « Paris est au centre de son agglomération » dit le statut de la commune entière : il est exact. L'exception
-      // porte sur CETTE affirmation seulement (le sujet est la ville), jamais sur la phrase entière : « Paris est au
-      // centre de son agglomération, mais l'arrondissement est la ville-centre » reste refusée (contre-revue).
-      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|se situe|se trouve) au (centre|cœur) de (son |l')agglomération\b/,
     ],
   },
   {

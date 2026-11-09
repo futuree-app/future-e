@@ -485,3 +485,31 @@ test("taille, source commune : jamais « ville » tiré d'une population — La 
   }
   assert.equal(categoryStatementFragment("La Hague", "petite", "commune"), "La Hague est classée comme une petite commune selon sa population communale");
 });
+
+test("contrôle PLM : la règle porte sur le SUJET — un arrondissement nommé n'est jamais la ville-centre, la ville peut l'être", async () => {
+  const cas = [["75120", "Paris", "20e"], ["69389", "Lyon", "9e"], ["13216", "Marseille", "16e"]] as const;
+  for (const [insee, ville, n] of cas) {
+    const { projection } = await identiteReelle(insee);
+    const refuse = (t: string) => checkAssertions(t, projection).some((v) => v.rule === "interdit:arrondissement-ville-centre");
+    // Refusées : le sujet est l'arrondissement.
+    for (const t of [
+      "Paris 20e est la ville-centre de son agglomération.",
+      "Le 20e arrondissement est la ville-centre de son agglomération.",
+      "Lyon 9e constitue la ville-centre.",
+      "Marseille 16e est une ville-centre.",
+      `${ville} ${n} Arrondissement est la ville-centre de son agglomération.`,
+      `${ville} ${n} reste lui-même ville-centre.`,
+      "Il est la ville-centre de son agglomération.",
+    ]) assert.equal(refuse(t), true, `${insee} : ${t}`);
+    // Admises : le sujet est la ville, ou l'affirmation est niée, ou elle ne parle pas du statut.
+    for (const t of [
+      `${ville} est la ville-centre de son agglomération.`,
+      `${ville}, ville-centre de son agglomération, compte plusieurs arrondissements.`,
+      `${ville} ${n} est un arrondissement de ${ville}.`,
+      "L'arrondissement n'est pas lui-même une ville-centre.",
+      `${ville} est la ville-centre de son agglomération ; le ${n} en est un arrondissement.`,
+    ]) assert.equal(refuse(t), false, `${insee} : ${t}`);
+    // Composée : la ville admise ne couvre pas l'arrondissement qui suit.
+    assert.equal(refuse(`${ville} est la ville-centre de son agglomération, et le ${n} arrondissement est la ville-centre.`), true, insee);
+  }
+});
