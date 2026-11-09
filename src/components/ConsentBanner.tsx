@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { EVENEMENT_CHANGEMENT_CONSENTEMENT } from "@/lib/mesure-audience-regles";
 
 const STORAGE_KEY = "futuree-consent";
 
@@ -14,6 +15,13 @@ function updateGoogleConsent(value: ConsentValue) {
     ad_user_data: value,
     ad_personalization: value,
   });
+}
+
+// FUT-181 : la bannière écrit le choix, SEULE source de vérité ; PostHog le relit
+// (`@/lib/mesure-audience-regles`, même clé, liée par un test). Ce signal prévient seulement que le
+// choix a changé dans cet onglet (les autres onglets reçoivent l'événement `storage`).
+function annoncerChangement() {
+  try { window.dispatchEvent(new Event(EVENEMENT_CHANGEMENT_CONSENTEMENT)); } catch {}
 }
 
 // CE QUE LE NAVIGATEUR A DÉJÀ RETENU, lu sans effet (FUT-121). Le serveur ne connaît pas le
@@ -49,10 +57,21 @@ export function ConsentBanner() {
 
     const handler = () => {
       try { localStorage.removeItem(STORAGE_KEY); } catch {}
+      // Rouvrir les préférences efface le choix : la mesure s'arrête jusqu'au prochain clic.
+      annoncerChangement();
       setDecision("afficher");
     };
+    // FUT-181 : un choix fait dans un AUTRE onglet s'applique aussi à Google dans celui-ci. PostHog
+    // écoute le même événement de son côté (`PostHogProvider`).
+    const autreOnglet = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && (e.newValue === "granted" || e.newValue === "denied")) updateGoogleConsent(e.newValue);
+    };
     window.addEventListener("futuree:show-consent", handler);
-    return () => window.removeEventListener("futuree:show-consent", handler);
+    window.addEventListener("storage", autreOnglet);
+    return () => {
+      window.removeEventListener("futuree:show-consent", handler);
+      window.removeEventListener("storage", autreOnglet);
+    };
   }, []);
 
   // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -89,6 +108,9 @@ export function ConsentBanner() {
       localStorage.setItem(STORAGE_KEY, value);
     } catch {}
     updateGoogleConsent(value);
+    // PostHog relit le stockage : une écriture refusée (stockage bloqué) laisse donc la mesure
+    // éteinte, même après « Accepter ». Google, lui, reçoit le choix de la page, comme avant.
+    annoncerChangement();
     setDecision("masquer");
   }
 

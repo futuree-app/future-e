@@ -175,7 +175,10 @@ export async function POST(request: Request) {
     posthog.capture({
       distinctId: "anonymous",
       event: "$ai_generation",
+      // FUT-181 : télémétrie du modèle (coût, latence, statut, garde de sortie), sans personne :
+      // identifiant constant, aucun profil créé, aucune donnée du lecteur (la commune seule).
       properties: {
+        $process_person_profile: false,
         $ai_trace_id: traceId,
         $ai_provider: "anthropic",
         $ai_model: model,

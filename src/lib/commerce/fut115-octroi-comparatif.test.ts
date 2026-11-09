@@ -200,10 +200,12 @@ beforeEach(() => {
 });
 
 const TRIO = ["75056", "69123", "13055"];
-async function commanderComparatif(insees = TRIO): Promise<string> {
+async function commanderComparatif(insees = TRIO, mesure = true): Promise<string> {
   const res = await creerPaiement(new Request("http://localhost/api/stripe/create-payment-intent", {
     method: "POST", headers: { "content-type": "application/json" },
-    body: JSON.stringify({ productType: "pack-decision", pack: { mode: "choix", trio: insees.map((insee) => ({ insee, commune: insee })), projetLabel: "" } }),
+    // FUT-181 : un navigateur qui a consenti à la mesure transmet son identifiant ; sans lui, le webhook ne
+    // compterait aucun `payment_completed` et ces tests ne pourraient plus vérifier qu'il n'est compté qu'une fois.
+    body: JSON.stringify({ productType: "pack-decision", ...(mesure ? { phDistinctId: "ph-fut115-alice" } : {}), pack: { mode: "choix", trio: insees.map((insee) => ({ insee, commune: insee })), projetLabel: "" } }),
   }));
   const corps = await res.json() as { clientSecret: string };
   assert.equal(res.status, 200, JSON.stringify(corps));
@@ -548,6 +550,18 @@ test("rejeux · trois webhooks identiques : une confirmation, un payment_complet
   assert.equal(confirmations(), 1);
   assert.equal(paiementsComptes(), 1);
   assert.equal(tables.payments?.length, 1);
+});
+
+test("FUT-181 · sans consentement à la mesure : livré et confirmé comme les autres, mais aucun événement PostHog", async () => {
+  const pi = await commanderComparatif(TRIO, false);
+  stripeConfirme(pi);
+  assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(confirmations(), 1, "la livraison et la confirmation ne dépendent pas de la mesure");
+  assert.equal(tables.payments?.length, 1, "le paiement est enregistré");
+  assert.deepEqual(evenements, [], "ni payment_intent_created, ni payment_completed");
+  const metadata = (await getStripe().paymentIntents.retrieve(pi)).metadata;
+  assert.equal(metadata.phMesure, "", "pas de marqueur de mesure");
+  assert.equal(metadata.phDistinctId, "", "ni l'UUID du compte en repli");
 });
 
 test("rejeux · confirmation refusée par le fournisseur : le rejeu suivant la renvoie, elle n'est pas perdue", async () => {

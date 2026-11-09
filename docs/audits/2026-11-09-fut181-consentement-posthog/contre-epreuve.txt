@@ -1,0 +1,41 @@
+CONTRE-ÉPREUVE 1 : PostHog démarre sans condition (synchroniserMesure → demarrer toujours ; before_send et identité sans test de consentement)
+ÉCHEC 1. Première visite, tout le parcours : 0 événement — $set×7, $pageview×7, $autocapture×6, $$heatmap×6, $pageleave×6
+ÉCHEC 1. Première visite : 0 requête technique PostHog (SDK non initialisé) — GET /ingest/static/web-vitals.js?v=1.375.0 | GET /ingest/static/exception-autocapture.js?v=1.375.0 | GET /ingest/array/phc_fut181_test/config.js | GET /ingest/static/web-vitals.js?v=1.375.0
+ÉCHEC 1. Première visite : identifiant déposé avant FUT-181 effacé, rien de nouveau — local:ph_debug, local:ph_phc_fut181_test_posthog, local:__ph_opt_in_out_phc_fut181_test, session:ph_phc_fut181_test_primary_window_exists, session:ph_phc_fut181_test_window_id, session:ph_phc_fut181_test_posthog, cookie:ph_phc_fut181_test_posthog
+ÉCHEC 2. Refus explicite (puis parcours et rechargement) : 0 événement, 0 requête — $set×8, $autocapture×8, $pageview×8, $$heatmap×8, $pageleave×7 / 56 technique(s)
+ÉCHEC 2. Refus : aucune trace PostHog dans le navigateur
+ÉCHEC 6. Connecté sans consentement : 0 événement, aucune identification — $pageview×2, $set×2, $identify×1, $pageleave×1
+ÉCHEC 6. Connecté sans consentement : 0 requête PostHog
+
+7 ATTENDU(S) EN ÉCHEC
+
+code de sortie : 1
+
+CONTRE-ÉPREUVE 2 : l'e-mail réintroduit dans les propriétés de la personne (setPersonProperties({ email }))
+OK   7. Connecté avec consentement : $identify sur l'UUID — $set×4, $identify×1, $pageview×2, $pageleave×1
+ÉCHEC 7. Connecté avec consentement : l'e-mail n'apparaît dans aucun envoi
+OK   7. Connecté : les événements suivants portent l'UUID
+OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1be5b-f5c3-7dde-804b-83e5240540b9
+
+1 ATTENDU(S) EN ÉCHEC
+
+code de sortie : 1
+
+CONTRE-ÉPREUVE 3 : envoi groupé rétabli (request_batching: true)
+OK   4. Acceptation puis refus : des événements avant — 3 événement(s), 6 trace(s)
+OK   4. Acceptation puis refus : 0 événement après, navigation et rechargement compris — aucun
+OK   4. Acceptation puis refus : 0 requête technique après
+OK   4. Acceptation puis refus : traces PostHog effacées
+OK   5. Deux onglets : l'onglet B mesurait avant
+ÉCHEC 5. Deux onglets, refus dans A : plus rien ne part de B — $$heatmap×1
+OK   5. Deux onglets : traces effacées
+
+1 ATTENDU(S) EN ÉCHEC
+
+code de sortie : 1
+
+CONTRE-ÉPREUVE 4 (involontaire, constatée pendant la recette) : `PostHogProvider` revenu à une version
+où le $pageview n'attend pas la relecture de la session.
+ÉCHEC 8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 0197f3a2-1b2c-7000-8000-fut181000001
+(Ordre relevé dans la page : demarrer t=483 → $pageview t=613 sous l'UUID → session lue « aucun compte » t=652.)
+Le scénario 8 détecte donc la régression ; il repasse avec l'attente (`identiteConnue`), test de source ajouté.

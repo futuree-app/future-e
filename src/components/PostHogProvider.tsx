@@ -1,66 +1,73 @@
 "use client";
 
 import posthog from "posthog-js";
-import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
+import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useEffect, useSyncExternalStore, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { definirCompte, identiteConnue, mesureActive, souscrireMesure, synchroniserMesure } from "@/lib/mesure-audience";
+import { CLE_CONSENTEMENT_MESURE, EVENEMENT_CHANGEMENT_CONSENTEMENT } from "@/lib/mesure-audience-regles";
+
+// FUT-181 : PostHog ne démarre qu'avec le consentement (`@/lib/mesure-audience`). Ce composant ne
+// fait que brancher ce module sur la page : le choix de la bannière, les autres onglets, la session.
+
+const sansMesureCoteServeur = () => false;
+// Mesure active ET session relue : l'identité du $pageview est alors la bonne (cf. `identiteConnue`).
+const pretAMesurer = () => mesureActive() && identiteConnue();
 
 function PostHogPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const ph = usePostHog();
+  const active = useSyncExternalStore(souscrireMesure, pretAMesurer, sansMesureCoteServeur);
 
+  // Une vue par navigation, et seulement mesure active : la page où l'on accepte est comptée à
+  // partir de l'acceptation, jamais avant. L'URL est réduite par `before_send` (paramètres retirés).
   useEffect(() => {
-    if (!pathname || !ph) return;
-    const url = searchParams.toString()
-      ? `${pathname}?${searchParams.toString()}`
-      : pathname;
-    ph.capture("$pageview", { $current_url: url });
-  }, [pathname, searchParams, ph]);
+    if (!pathname || !active) return;
+    const url = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+    posthog.capture("$pageview", { $current_url: url });
+  }, [pathname, searchParams, active]);
 
   return null;
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
-    if (!key || posthog.__loaded) return;
+    // L'état du choix au chargement : démarre si « granted », sinon efface les traces éventuelles.
+    synchroniserMesure();
 
-    posthog.init(key, {
-      api_host: "/ingest",
-      ui_host: "https://eu.posthog.com",
-      capture_pageview: false,
-      capture_pageleave: true,
-      capture_exceptions: true,
-      capture_performance: { web_vitals: true },
-      defaults: "2026-01-30",
-      debug: process.env.NODE_ENV === "development",
-    });
+    const surChoix = () => synchroniserMesure();
+    // Un autre onglet a accepté, refusé ou rouvert la bannière (`null` : stockage vidé).
+    const surStockage = (e: StorageEvent) => {
+      if (e.key === null || e.key === CLE_CONSENTEMENT_MESURE) synchroniserMesure();
+    };
+    window.addEventListener(EVENEMENT_CHANGEMENT_CONSENTEMENT, surChoix);
+    window.addEventListener("storage", surStockage);
+    return () => {
+      window.removeEventListener(EVENEMENT_CHANGEMENT_CONSENTEMENT, surChoix);
+      window.removeEventListener("storage", surStockage);
+    };
   }, []);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        // Identify de base — email uniquement.
-        // Les propriétés CAS (climate_awareness_score, cas_segment, total_modules_opened,
-        // total_ai_questions, wizard_completed_at) sont calculées en SQL PostHog
-        // et devront être envoyées ici via posthog.identify() une fois que la
-        // fonction de scoring côté app sera disponible.
-        posthog.identify(user.id, { email: user.email });
-      }
-    });
-
+    // Le compte connecté, transmis au module qui décide seul s'il peut l'identifier (consentement)
+    // et avec quoi (l'UUID Supabase, jamais l'e-mail).
+    // Une session illisible vaut « aucun compte » : au pire, l'identité de mesure repart à neuf.
+    let supabase: ReturnType<typeof createClient>;
+    try {
+      supabase = createClient();
+    } catch {
+      definirCompte(null);
+      return;
+    }
+    supabase.auth.getUser().then(
+      ({ data: { user } }) => definirCompte(user?.id ?? null),
+      () => definirCompte(null),
+    );
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        posthog.identify(session.user.id, { email: session.user.email });
-      } else if (event === "SIGNED_OUT") {
-        posthog.reset();
-      }
+      if (event === "SIGNED_OUT") definirCompte(null);
+      else if (session?.user) definirCompte(session.user.id);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 

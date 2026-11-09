@@ -38,14 +38,8 @@ import { EchelleVisual } from "@/components/report/EchelleVisual";
 import { bindOrphans } from "@/lib/typography";
 import { prochaineRepriseOsm, snapshotAffiche } from "@/lib/autour-osm-reprise";
 
-// Jeton d'adresse non réversible pour l'analytics : distingue deux adresses sans stocker
-// l'adresse (djb2 -> base36). Même fonction que dans LogementModule, volontairement dupliquée :
-// quatre lignes, aucune dépendance, plutôt qu'un module partagé pour un détail d'instrumentation.
-function addressToken(banId: string): string {
-  let h = 5381;
-  for (let i = 0; i < banId.length; i++) h = ((h << 5) + h + banId.charCodeAt(i)) | 0;
-  return (h >>> 0).toString(36);
-}
+// FUT-181 : plus de `address_token` dans la mesure. C'était un hachage djb2 de l'identifiant BAN :
+// avec la commune jointe et la BAN publique, il redonnait l'adresse exacte du logement.
 
 // Le strict nécessaire pour interroger l'« autour » d'un point : une adresse BAN géocodée.
 type AnalyzedAddress = {
@@ -124,7 +118,6 @@ export default function AutourModule({
       setAnalyzed(a);
       posthog?.capture("autour_analyzed", {
         insee: a.citycode,
-        address_token: addressToken(a.id),
         status_bpe: payload.snapshot.sourceStatus.bpe,
         status_osm_infra: payload.snapshot.sourceStatus.osmInfrastructure,
         status_osm_green: payload.snapshot.sourceStatus.osmGreenSpaces,
@@ -207,7 +200,6 @@ export default function AutourModule({
         setAnalyzed(address);
         posthog?.capture("autour_restored", {
           insee: dossier.insee,
-          address_token: addressToken(dossier.ban_id),
         });
         // LE RATTRAPAGE DES PERMIS. Un snapshot figé avant le 01/08/2026 ne porte pas le champ, et
         // rien ne le recalculera : cette branche-ci n'appelait la route dans AUCUN cas, donc le

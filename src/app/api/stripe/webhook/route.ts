@@ -7,7 +7,7 @@ import { ouvrirEnvoi, fermerEnvoi, dejaEnvoye, type EmailKind } from "@/lib/serv
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { sanitizeDistinctId } from "@/lib/posthog-identity";
+import { identifiantMesureConsenti, MESURE_MUETTE, METADATA_MESURE_CONSENTIE } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 import { communeParent } from "@/lib/plm";
 import { nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
@@ -246,7 +246,11 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   // LE SEUL POINT DU PARCOURS SANS NAVIGATEUR : l'identité de mesure voyage par les métadonnées
   // Stripe. Sans elle, `payment_completed` créait une personne distincte de celle qui a cliqué,
   // parce que le navigateur identifie sur l'UUID Supabase et qu'on émettait sur l'e-mail.
-  const distinctId = sanitizeDistinctId(phDistinctId, userId || paymentIntent.id);
+  // FUT-181 : mesuré seulement si l'intention est née d'un navigateur consentant (marqueur posé par
+  // create-payment-intent). Plus de repli sur l'UUID ni sur l'identifiant de paiement. Le suivi du
+  // paiement lui-même (Stripe, tables payments / address_dossiers, facture) ne dépend pas de PostHog.
+  const distinctId = paymentIntent.metadata[METADATA_MESURE_CONSENTIE] === "1" ? identifiantMesureConsenti(phDistinctId) : null;
+  const clientMesure = () => (distinctId ? getPostHogClient() : MESURE_MUETTE);
 
   // Territoire ciblé (parcours comparateur). Vide = achat sur la résidence.
   const insee = typeof targetInsee === "string" ? targetInsee.trim() : "";
@@ -443,16 +447,15 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // `rank_in_dossiers` serait faux puisque le dossier existe déjà au moment du décompte.
     // `$insert_id` ajoute une déduplication côté PostHog si deux instances traitaient l'événement.
     if (created) {
-      const posthog = getPostHogClient();
+      const posthog = clientMesure();
       posthog.capture({
-        distinctId,
+        distinctId: distinctId ?? "",
         event: "address_dossier_purchased",
         properties: {
           $insert_id: `address_dossier_purchased_${paymentIntent.id}`,
           amount_paid_cents: paymentIntent.amount,
           deducted: (intent.territory_deduction_cents ?? 0) > 0,
           insee: intent.insee,
-          dossier_id: dossier.id,
           rank_in_dossiers: (paidBefore ?? 0) + 1,
         },
       });
@@ -514,9 +517,9 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     // Une seule fois par paiement. Une interruption entre l'enregistrement et cet envoi perd l'événement :
     // une mesure manquante vaut mieux qu'un achat compté deux fois.
     if (!dejaEnregistre) {
-      const posthog = getPostHogClient();
+      const posthog = clientMesure();
       posthog.capture({
-        distinctId,
+        distinctId: distinctId ?? "",
         event: "payment_completed",
         properties: { product_type: productType, amount: paymentIntent.amount / 100 },
       });
@@ -613,16 +616,15 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     }, { pi: paymentIntent.id, quoi: `territoire ${commune || insee || "?"}`, kind: "territoire", supabase: supabaseAdmin });
   }
 
-  const posthog = getPostHogClient();
+  const posthog = clientMesure();
   posthog.capture({
-    distinctId,
+    distinctId: distinctId ?? "",
     event: "payment_completed",
     properties: {
       product_type: productType,
       amount: paymentIntent.amount / 100,
       currency: paymentIntent.currency,
       payment_intent_id: paymentIntent.id,
-      user_id: userId && userId !== "anonymous" ? userId : null,
     },
   });
   await posthog.shutdown();
