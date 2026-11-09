@@ -39,3 +39,38 @@ où le $pageview n'attend pas la relecture de la session.
 ÉCHEC 8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 0197f3a2-1b2c-7000-8000-fut181000001
 (Ordre relevé dans la page : demarrer t=483 → $pageview t=613 sous l'UUID → session lue « aucun compte » t=652.)
 Le scénario 8 détecte donc la régression ; il repasse avec l'attente (`identiteConnue`), test de source ajouté.
+
+═══ Contre-revue (09/11/2026, après fusion de main) ═══
+
+CONTRE-ÉPREUVE 5 : la réouverture des préférences ne révoque plus Google (ligne updateGoogleConsent("denied") retirée)
+✖ ConsentBanner · FUT-181 : accepter → rouvrir révoque Google ; refuser → rouvrir → accepter, chaque étape suivie par Google (28.088435ms)
+ℹ fail 1
+ℹ pass 14
+ÉCHEC 12. Google : réouverture des préférences → update refusé, sans attendre un clic —  ; état interne du tag : update=true
+ÉCHEC 12. Google : après réouverture, les événements nouveaux partent en refus — aucun (avant : 4 requête(s))
+2 ATTENDU(S) EN ÉCHEC
+code de sortie : 1
+
+CONTRE-ÉPREUVE 6 : autre onglet, règle d'avant (seules les valeurs granted/denied sont appliquées ; choix effacé ignoré)
+✖ ConsentBanner · FUT-181 : deux onglets, l'onglet B suit l'effacement, le refus et la nouvelle acceptation faits dans A (35.542471ms)
+ℹ fail 1
+ℹ pass 14
+ÉCHEC 13. Google, deux onglets : préférences rouvertes dans A → B passe en refus — aucune commande ; état interne du tag dans B : update=true
+ÉCHEC 13. Google, deux onglets : les événements nouveaux de B partent en refus — aucun
+2 ATTENDU(S) EN ÉCHEC
+code de sortie : 1
+
+CONTRE-ÉPREUVE 7 : webhook et intention de paiement remis à la version auditée 099c205a (identifiant de mesure dans Stripe, payment_completed au webhook)
+ℹ fail 3
+✖ failing tests:
+✖ FUT-181 · consentement retiré entre l'intention et le webhook : le webhook n'émet rien, la livraison est entière (1.856771ms)
+✖ FUT-181 · sans consentement à la mesure : livré et confirmé comme les autres, mais aucun événement PostHog (3.30482ms)
+ℹ pass 48
+✖ sources : les captures serveur n'émettent que sur un identifiant de mesure consenti (3.849745ms)
+
+CONTRE-ÉPREUVE 8 : télémétrie /qna rallumée par défaut (telemetrieQnaPostHogActive rend toujours vrai)
+ℹ fail 2
+✖ failing tests:
+ℹ pass 15
+✖ politique (contre-revue) : elle décrit les paramètres réellement gardés et la télémétrie /qna réellement émise (0.677746ms)
+✖ qna (contre-revue) : la télémétrie PostHog du modèle est coupée tant que son fondement n'est pas validé (4.140193ms)

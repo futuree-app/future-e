@@ -98,11 +98,13 @@ Au passage, la recette a corrigé deux défauts de la première version du corre
 
 1. **Données déjà collectées sans consentement** dans PostHog : personnes identifiées avec la propriété `email`, événements anonymes, éventuels replays. Rien n'a été supprimé à distance. À décider : suppression des propriétés `email`, purge des personnes/événements antérieurs, durée de conservation du projet.
 2. **IP** : PostHog conserve l'IP et la géolocalisation par défaut (réglage de projet, pas du SDK). Recommandé : activer « Discard client IP data ».
-3. **Google** : GTM et GA4 se chargent sans condition ; Consent Mode « default denied » peut émettre des pings sans cookie (mode avancé). Hors périmètre (finalités Google inchangées), à examiner.
+3. **Google** : GTM et GA4 se chargent sans condition. Avec Consent Mode « default denied », des pings sans cookie partent : constaté en recette, `gcs=G100` vers `region1.google-analytics.com` avant tout choix et après un retrait. Par ailleurs, un événement GA4 créé sous consentement peut partir jusqu'à 4 s après un retrait, marqué accordé (§7.2). Hors périmètre (finalités Google inchangées), à décider en lot B.
 4. **Envoi non groupé** (`request_batching: false`) : un événement par requête, pour qu'aucun événement capté avant un retrait ne parte après lui (le SDK n'expose pas de moyen d'abandonner sa file ; ses champs internes sont renommés dans le bundle). Coût : plus de requêtes vers `/ingest`. Un envoi déjà en vol au moment du clic peut encore aboutir.
-5. **Propriétés de profil** : `wizard_completed` (secteur, mobilité, projets en valeurs fermées, commune), `workbook_answered` (réponses fermées) : valeurs d'énumération, pas de texte libre ; à revoir en lot B.
-6. **Heatmaps** : actives si le projet les active ; clés d'URL réduites.
-7. **Enregistrement de session** : désactivé ; s'il doit revenir, avec `maskTextSelector: "*"` et un masquage des attributs `href`, après revue.
+5. **Suivi des achats dans PostHog** : depuis la contre-revue, seule l'intention de paiement est mesurée (§7.1). Pour rétablir `payment_completed`, il faudra une règle de consentement relue au moment du webhook.
+6. **Anthropic** absent de la liste des sous-traitants alors que les questions posées à l'assistant lui sont transmises (§7.3).
+7. **Propriétés de profil** : `wizard_completed` (secteur, mobilité, projets en valeurs fermées, commune), `workbook_answered` (réponses fermées) : valeurs d'énumération, pas de texte libre ; à revoir en lot B.
+8. **Heatmaps** : actives si le projet les active ; clés d'URL réduites.
+9. **Enregistrement de session** : désactivé ; s'il doit revenir, avec `maskTextSelector: "*"` et un masquage des attributs `href`, après revue.
 
 ## 7. Reprises après contre-revue indépendante (SHA audité `099c205a`)
 
@@ -126,7 +128,12 @@ Défaut : `futuree:show-consent` effaçait le choix et arrêtait PostHog, mais G
 
 Correction (`ConsentBanner.tsx`) : la réouverture envoie `gtag("consent", "update", …denied)`. Dans les autres onglets, l'événement `storage` suit la même règle que PostHog : seule la valeur exacte `granted` ouvre ; une valeur effacée, inconnue, ou un `clear()` (clé nulle) vaut refus.
 
-Tests (exécutés, `fut121-sans-cascade`, harnais existant de la bannière) : un onglet, accepter → rouvrir → refuser → rouvrir → accepter, avec la suite exacte des commandes Google ; deux onglets, effacement, refus, nouvelle acceptation, `clear()`, valeur inconnue, autre clé. Réseau : recette Playwright, scénario 12 (§7.4).
+Tests (exécutés, `fut121-sans-cascade`, harnais existant de la bannière) : un onglet, accepter → rouvrir → refuser → rouvrir → accepter, avec la suite exacte des commandes Google ; deux onglets, effacement, refus, nouvelle acceptation, `clear()`, valeur inconnue, autre clé. Réseau (recette Playwright, scénarios 12 et 13, vrai conteneur GTM chargé, toute requête de mesure vers Google relevée puis bloquée pour ne pas polluer GA4) :
+- commandes poussées dans `dataLayer` : `default denied` → `update granted` → réouverture `update denied` → refus → réouverture → `update granted`, dans un onglet ; dans deux onglets, B suit l'effacement, le refus et la nouvelle acceptation faits dans A ;
+- état interne du tag (`google_tag_data.ics`, `analytics_storage.update`) : `false` dès la réouverture, dans A comme dans B ;
+- requêtes : les événements créés après la réouverture partent en `gcs=G100` (refus ; ce sont les pings sans cookie du Consent Mode avancé, voir risque 3).
+
+**Limite constatée, hors de portée de la page** : GA4 garde des événements déjà créés jusqu'à son envoi suivant, et chacun porte l'état de consentement du moment de sa création. Reproduit trois fois : la `page_view` d'un onglet chargé pendant le consentement part jusqu'à 4 s **après** le retrait, marquée `G111`, avec ou sans interaction ; l'événement créé juste après part en `G100`. Une fois, c'est un `scroll` de la page ouverte avant le retrait qui est sorti ainsi ; il est rattaché à cette file par sa page, sans preuve individuelle de son heure de création. La recette le relève en `INFO`, sans le compter comme réussite. Rien dans l'API publique de gtag ne permet de vider cette file. La seule parade connue est `window['ga-disable-G-MLT5Y4TC6W'] = true` au refus : elle couperait aussi les pings sans cookie, ce qui change la configuration Google et revient au responsable (lot B).
 
 ### 7.3 Politique de confidentialité et télémétrie `/qna`
 
@@ -162,6 +169,18 @@ Ni la question (prédéfinie ou libre), ni la réponse, ni un identifiant de com
 
 `origin/main` (FUT-175, FUT-176, FUT-178, FUT-180) fusionné dans la branche sans conflit : seul `fut147-non-regression.test.ts` était touché des deux côtés, et la fusion automatique l'a résolu. Les tests FUT-147 (contrats de synthèse, registre Territoire, garde FUT-175), FUT-121, FUT-115, FUT-119, FUT-10 et FUT-181 passent.
 
-FUT-94 (#135, non fusionnée) : une fusion d'essai locale, ensuite abandonnée, a été faite pour vérifier les conflits sur la politique (résultat ci-dessous).
+FUT-94 (#135, non fusionnée, tête `1b53571b`) : fusion d'essai sans écrire (`git merge-tree`) avec la branche : **aucun conflit**. Dans la politique fusionnée, la date est identique, la ligne « avis de fin de dossier » de FUT-94 s'ajoute et la ligne « Cartes de clics (heatmaps) » de FUT-181 la suit. Le texte reste cohérent. Seul fichier modifié des deux côtés hors politique : `fut147-non-regression.test.ts`, fusionné sans conflit.
 
 Résultats : voir §7.5.
+
+### 7.5 Résultats de la reprise
+
+- Recette réseau : 13 scénarios, 41 attendus, **tous tenus** sur deux exécutions complètes (`recette.txt`), plus 2 constats `INFO` (file GA4, §7.2).
+- Contre-épreuves 5 à 8 (`contre-epreuve.txt`), toutes en échec comme attendu :
+  - 5. réouverture sans révocation Google : 1 test FUT-121 et 2 attendus de recette (scénario 12) en échec ;
+  - 6. autre onglet à l'ancienne règle : 1 test et 2 attendus (scénario 13) ;
+  - 7. webhook et intention remis à `099c205a` : 3 tests (FUT-115 ×2, sources FUT-181) ;
+  - 8. `/qna` rallumé par défaut : 2 tests (garde `/qna`, politique).
+- TypeScript : 0 erreur. ESLint : 0 problème. Build de production réussi.
+- Suite complète (`--test-concurrency=1`, deux exécutions de chaque côté, comptes stables) : `main` (`bab5eb49`) 4 525 tests, 5 échecs ; branche 4 546 tests (+21 : 16 du premier lot, plus 5 nouveaux : FUT-181 ×2, FUT-121 ×2, FUT-115 ×1), **les 5 mêmes échecs** (`fut27-*`, « · » du chemin). fut27 rejoué dans une copie de la branche sans « · » : 32/32.
+- Statique seulement : la garde `/qna` et le bloc `metadata` de l'intention de paiement (lecture des sources). La route `/qna` n'a pas été exécutée contre le modèle.

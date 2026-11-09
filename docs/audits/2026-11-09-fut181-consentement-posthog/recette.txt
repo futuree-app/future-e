@@ -25,8 +25,8 @@ OK   6. Connecté sans consentement : 0 requête PostHog
 OK   7. Connecté avec consentement : $identify sur l'UUID — $set×2, $identify×1, $pageview×2, $pageleave×1
 OK   7. Connecté avec consentement : l'e-mail n'apparaît dans aucun envoi
 OK   7. Connecté : les événements suivants portent l'UUID
-OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1c03e-a55c-7336-b80c-1d3b70daa637
-OK   8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 01a1c03e-d979-7639-b712-e7c37c932fc1
+OK   7. Changement de compte : identité neuve, jamais l'ancien compte comme alias — $anon_distinct_id=01a1c045-696d-78ae-8782-e976f8064ab2
+OK   8. Déconnexion : l'identité de mesure est réinitialisée (plus l'UUID du compte) — 01a1c045-9b05-78b5-bc54-6c8e3aeae1d3
 OK   9. Champ libre et adresse de dossier : aucun contenu personnel dans les envois — 11 événement(s), 0 fuite(s)
 OK   10. Refus puis rechargements : choix respecté avant toute requête
 OK   10. Acceptation puis rechargement : mesure active dès le chargement
