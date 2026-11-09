@@ -80,7 +80,7 @@ const plan = buildConclusionPlan({
 // LECTEUR VERRA : tant qu'elle recopiait le `topic`, elle affichait « la distance à la mer » là où la
 // production dit « la proximité de la mer », soit exactement l'inversion que le champ corrige.
 const HEADLINE_SUBJECTS: Record<string, string> = {
-  nature: "l'accès aux espaces naturels",
+  nature: "les espaces naturels alentour",
   cadre_calme: "le calme",
   ensoleillement_recherche: "l'ensoleillement",
   mobilite_quotidienne: "les transports en commun du quotidien",

@@ -729,7 +729,9 @@ export function buildFactors(
                 : ""
             }${
               couvertNaturel.radiusPct != null
-                ? ` Dans un rayon de 15 km, espaces naturels et eau confondus : ${couvertNaturel.radiusPct} %.`
+                ? // FUT-178 : ce chiffre agrège des communes ENTIÈRES retenues par la distance de leur centre (parfois
+                  // aucune, parfois pas toutes), pas un cercle de 15 km. FUT-175 : l'eau y reste comptée.
+                  ` Sur son secteur (la commune et, s'il y en a, des communes voisines retenues), espaces naturels et eau confondus : ${couvertNaturel.radiusPct} %.`
                 : ""
             }`,
             accent: "var(--green)",
@@ -743,7 +745,7 @@ export function buildFactors(
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
             // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
-            sources: "OSO 2023 (CESBIO, couverture des sols). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés · ADEME (taux de boisement)",
+            sources: "OSO 2023 (CESBIO, couverture des sols). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
           },
         }
       : {
