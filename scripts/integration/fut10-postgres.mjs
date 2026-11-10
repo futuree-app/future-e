@@ -324,7 +324,7 @@ await cas("retours arrière : 38 puis 37 s'appliquent, la base revient à son sc
   await db.exec(sql("37_contexte_checkout_dossier.sql"));
 });
 
-await cas("schéma complet : les migrations 01 → 39 s'appliquent dans l'ordre sur une base vierge (adaptations de test dites)", async () => {
+await cas("schéma complet : les migrations 01 → 40 s'appliquent dans l'ordre sur une base vierge (adaptations de test dites)", async () => {
   const db = new PGlite();
   await db.exec(PREAMBULE);
   for (const { fichier, sql: contenu } of migrationsDeTest()) {

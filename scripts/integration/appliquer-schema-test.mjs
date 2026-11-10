@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// FUT-10 · APPLIQUER LE SCHÉMA DE TEST (migrations 01 → 39) SUR LE PROJET SUPABASE DE TEST, ET LUI SEUL.
+// FUT-10 · APPLIQUER LE SCHÉMA DE TEST (migrations 01 → 40) SUR LE PROJET SUPABASE DE TEST, ET LUI SEUL.
 //
 //   node scripts/integration/appliquer-schema-test.mjs                         → plan, rien n'est écrit
 //   node scripts/integration/appliquer-schema-test.mjs --confirmer <référence> → application
