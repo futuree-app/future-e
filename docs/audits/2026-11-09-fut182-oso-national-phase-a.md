@@ -1368,13 +1368,16 @@ En moyenne nationale, pondérée par le bâti, le disque se répartit ainsi : te
 sous un contour français 0,000 %** (0,016 % au plus, dans une seule commune). **Le raster n'a pratiquement pas de
 trous** : ce qui manque à un disque n'est jamais un défaut de la carte, c'est de la mer ou l'étranger.
 
-| Palier provisoire (part du disque couverte par des données françaises) | Communes | Cause : mer | Cause : frontière |
-|---|---|---|---|
-| ≥ 75 % | 33 173 | — | — |
-| 50 à 75 % | 1 234 | 731 | 503 |
-| < 50 % | 329 | 220 | 109 |
+> **Corrigé le 10/11 (§ 48).** Le tableau publié ici portait 1 234 communes entre 50 et 75 %, et une répartition
+> « 731 mer / 503 frontière » et « 220 mer / 109 frontière ». Ces chiffres ne venaient d'aucune sortie versionnée : un
+> calcul à la main, qui comptait une commune de trop (Paris, Lyon ou Marseille, hors de l'univers) et qui rangeait
+> d'office « hors carte » en mer ou à l'étranger. Le tableau juste, et la méthode qui établit la cause, sont au § 48.
 
-La cause est classée « frontière » quand les terres étrangères pèsent plus que la mer, et « mer » sinon.
+| Palier provisoire (part du disque couverte par des données françaises) | Communes |
+|---|---|
+| ≥ 75 % | 33 173 |
+| 50 à 75 % | **1 233** |
+| < 50 % | 329 |
 
 - **Côté mer**, sous 50 % : les îles et les presqu'îles. Hœdic (1,0 %), Ouessant (2,5 %), Sein, Yeu, Houat, Molène,
   les communes de Ré et de Noirmoutier, Quiberon, la Corse littorale. Pour Ouessant, il ne manque pas 97,5 % de
@@ -1413,7 +1416,9 @@ publié réunit tous les changements à la fois : l'eau retirée, la géographie
 - **Plus forts écarts à l'index** :
   - Saintes-Maries-de-la-Mer : de 87 à 48 (l'eau de Camargue comptée comme nature) ;
   - l'estuaire de la Gironde : Barzan de 57 à 20, Arces de 50 à 16 ;
-  - Granville, dans l'autre sens : de 17 à 52 (le point de l'index tombait dans la mer).
+  - Granville, dans l'autre sens : de 17 à 52 (le point de l'index tombait dans la mer). *Corrigé le 10/11 : cette
+    ligne vaut « toutes communes classées » ; Granville a 44,4 % de son disque sous contour français et sort du
+    classement avec la règle du § 47 (§ 48).*
 - **Distribution** : médiane 58,8 %, 10ᵉ centile 29,9 %, 90ᵉ centile 93,8 %.
 - **Dispersion** (p10-p90 pondérés) : 1,35 point en médiane ; 4,2 points au 90ᵉ centile ; 20 points ou plus dans
   4 communes seulement (31,4 au plus).
@@ -1481,3 +1486,139 @@ dans les communes à bâti dispersé, d'au plus 5,4 points dans l'échantillon. 
 3. **Libellés ruraux** (FUT-184, FUT-190), avant que B3 recalcule `rural_agricole` et `rural_forestier` sur les terres.
 4. **Contre-revue du tableau national** (§ 44), puis B3 : une seule PR, sous `engine-9`, avec la nouvelle identité de
    rang ; aucun dossier figé réécrit.
+
+---
+
+# Partie V — Corrections de B2 après la troisième contre-revue (10/11/2026)
+
+## 48. Comptes réconciliés et causes établies par un masque indépendant
+
+### 48.1 Le compte des paliers
+
+`resultats-b2-national.json`, sortie versionnée de `b2_analyse.py`, porte **33 173 / 1 233 / 329** communes, soit
+34 735 communes valorisées (34 743 de l'univers nature moins les 8 sans bâti OSO). Le « 1 234 » des § 43, de la PR #146
+et de mon compte rendu venait d'un calcul fait à la main hors du script, qui incluait une commune parente de Paris, Lyon
+ou Marseille. Le calcul n'a pas changé ; seul le texte est corrigé.
+
+### 48.2 Pourquoi « hors carte » ne suffit pas
+
+`hors_carte` est l'absence de pixel classé dans le disque : la mer au-delà de la bande côtière que la carte classe, mais
+aussi le territoire étranger au-delà de la bande frontalière qu'elle classe (Charnois : 36,8 % de « hors carte »,
+presque tout en Belgique). La première version de l'analyse nommait une « cause dominante » parmi des familles de
+pixels OSO, dont celle-ci ; le rapport en avait tiré, à la main, une répartition mer / frontière. **Ni l'une ni l'autre
+n'établissait la cause.** Les familles OSO restent publiées sous leur nom, sans valeur de cause :
+
+| Palier | Mer et eaux classées hors contours | Terres étrangères classées | Hors carte |
+|---|---:|---:|---:|
+| 50 à 75 % | 688 | 489 | 56 |
+| < 50 % | 162 | 46 | 121 |
+
+### 48.3 La méthode retenue : un masque géographique indépendant et reproductible
+
+`b2_national.py --gisco` lit les pays d'Eurostat GISCO, « Countries 2020 », au 1:1 000 000
+(`CNTR_RG_01M_2020_4326.geojson`, 64,8 Mo, sha256 `891836294e780ab726b1f710735f1568c3eb1e1e9df4f525646c71683e42fd92`,
+stocké dans `~/Documents/futuree-oso/gisco/`). Il est indépendant du raster. Les géométries sont découpées au voisinage de
+la France (−12° à 20° E, 34° à 56° N) **avant** reprojection en Lambert-93.
+
+*Premier essai écarté* : sans ce découpage, un pays qui franchit l'antiméridien recouvrait toute la grille (« France :
+0 cellule »). Le calcul a été arrêté, et un test sur sept points témoins (large d'Ouessant, Dinant, Berne, Bourges, Léman,
+Gérone, Méditerranée) a été fait avant de le relancer.
+
+Méthode :
+1. **Classement des cellules.** Chaque cellule de 100 m est « étranger » si son centre tombe dans un pays autre que la
+   France, « non attribuée » s'il tombe dans le polygone France sans être sous un contour communal (estran, ports, bords
+   de contours), et « mer » sinon.
+2. **Répartition du disque.** Tout ce qui, dans le disque, n'est pas sous un contour communal français est réparti
+   dans ces trois familles : pixels classés ou non, et ce qui est au-delà de l'emprise du raster.
+3. **Règle de cause** (`b2_analyse.py`, `integrer-oso-2023.py`) :
+   - « mer » ou « étranger » quand cette famille fait au moins 80 % de ce qui manque ;
+   - « mer et étranger » quand les deux font 80 %, chacune au moins 20 % ;
+   - « non attribuée » sinon ;
+   - aucune cause quand il manque moins de 1 % du disque.
+
+Les colonnes de mesure de cette seconde exécution sont **identiques** à la première sur les 34 791 lignes (0 écart) ;
+seules les colonnes GISCO s'ajoutent. La première sortie est conservée sous `secteur-habite-2023.v1-sans-gisco.csv.gz`.
+
+| Palier | Communes | Mer | Étranger | Mer et étranger | Non attribuée | Rien ne manque (< 1 %) |
+|---|---:|---:|---:|---:|---:|---:|
+| ≥ 75 % | 33 173 | 1 274 | 1 165 | 12 | 40 | 30 682 |
+| 50 à 75 % | **1 233** | 697 | 496 | 13 | 27 | — |
+| < 50 % | **329** | 191 | 107 | 16 | 15 | — |
+
+Moyenne nationale, pondérée par le bâti, de ce qui n'est pas sous contour français : mer 1,51 %, étranger 1,08 %, non
+attribué 0,06 % du disque.
+
+**Précision.** Celle du 1:1 000 000 et de la cellule de 100 m : une bande côtière ou frontalière de quelques centaines
+de mètres peut être mal attribuée. Les causes se lisent en proportions du disque, pas au pixel. Quand elles ne sont pas
+établies (« non attribuée », 15 communes sous 50 %), la phrase reste neutre : « environ X % du rayon de 15 km est hors du
+territoire français étudié ».
+
+### 48.4 Les cas demandés
+
+| Commune | Disque sous contour français | Cause GISCO | Mer / étranger / non attribué | Familles OSO (eaux hors contours / terres étrangères / hors carte) |
+|---|---:|---|---|---|
+| Hœdic | 1,0 % | mer | 98,9 / 0 / 0,1 | 41,2 / 0,1 / 57,7 |
+| Ouessant | 2,5 % | mer | 97,4 / 0 / 0,1 | 35,8 / 0,3 / 61,5 |
+| L'Île-d'Yeu | 3,4 % | mer | 96,4 / 0 / 0,2 | 28,6 / 0,1 / 68,0 |
+| Ars-en-Ré | 9,2 % | mer | 90,4 / 0 / 0,3 | 52,5 / 0,3 / 38,0 |
+| Charnois (Ardennes) | 25,2 % | étranger | 0 / 74,7 / 0,2 | 0,1 / 37,9 / 36,8 |
+| Chooz | 27,3 % | étranger | 0 / 72,5 / 0,2 | 0,1 / 40,8 / 31,8 |
+| Montancy (Doubs) | 28,5 % | étranger | 0 / 71,3 / 0,2 | 0,0 / 42,7 / 28,8 |
+| Granville | 44,4 % | mer | 55,3 / 0 / 0,2 | 39,5 / 0,5 / 15,5 |
+| Saintes-Maries-de-la-Mer | 68,2 % | mer | 31,3 / 0 / 0,5 | 18,5 / 0,1 / 13,2 |
+| Lille | 94,7 % | étranger | 0 / 5,2 / 0,1 | 0,1 / 5,2 / 0,0 |
+
+À Charnois, la moitié de ce qui manque est « hors carte » : c'est de la Belgique que la carte ne classe plus. Le masque
+GISCO l'établit ; l'absence de pixel seule ne le pouvait pas. **Granville a moins de la moitié de son disque sous un
+contour français** : avec la règle validée, sa valeur (59,8 %) est gardée, mais son classement national n'est pas
+établi.
+
+### 48.5 L'extrait d'audit
+
+`extrait-b2-audit.csv` (dans ce dossier, sha256 `6d61cbce267aa0f01ca8b17be77dd7a80bc0b5bdbdc7381a0859c5e54b1e883f`) compte
+510 lignes, sans le raster ni les gros fichiers :
+- les 329 communes sous 50 % ;
+- les 8 communes sans bâti OSO ;
+- les 164 communes à ± 1 point des paliers de 50 et 75 % ;
+- les cas de recette restants.
+
+Chaque ligne porte la valeur, p10, p90, la couverture française, la cause GISCO, les trois parts GISCO, les trois
+familles OSO, le score publié aujourd'hui, et le score et le verdict simulés avec la règle validée.
+
+### 48.6 Empreintes et reproduction
+
+| Fichier | sha256 |
+|---|---|
+| `b2_national.py` (avec `--gisco`) | `34d72ce2ffcac3f766e212edddb63e41fe944e80eff7a7147d8760d8231047a6` |
+| `b2_analyse.py` (causes GISCO, extrait) | `290e15027f5d11d800b7fe0b353083d7fd855e1cc22f8915dcb8e64157a5fad6` |
+| `secteur-habite-2023.csv.gz` (hors dépôt) | `2c2c2ff3bd2a8128dba765047f1ae67cbf1fcbe9405fa675695b465918c22eda` |
+| `paires-bati-2023.npz` (hors dépôt : pixels bâtis par commune et cellule) | `9422ed539366b85ab910a4a002d811bbc4669827e358dcdca377e6d6093698f9` |
+
+```
+python -I b2_national.py OCS_2023.tif data/cache-nature arrondissements.json ~/Documents/futuree-oso/b2 \
+    --gisco CNTR_RG_01M_2020_4326.geojson                                                   # 14 min
+python -I b2_analyse.py ~/Documents/futuree-oso/b2/secteur-habite-2023.csv.gz \
+    --out resultats-b2-national.json --extrait extrait-b2-audit.csv
+```
+
+Dépendances : Python 3.13, numpy, rasterio (GDAL), shapely, pyproj.
+
+**Une contre-revue ne peut pas reproduire ces résultats sans les fichiers hors dépôt.** Il lui faut :
+- le raster OSO 2023 (archive de 5,6 Go, MD5 au § 18) ;
+- les contours du cache `data/cache-nature/contours` (sha256 au § 32) ;
+- le fichier GISCO.
+
+Le dépôt contient les scripts, les résumés et l'extrait, et permet d'en vérifier la logique et les chiffres de synthèse.
+
+### 48.7 Règle définitive pour B3 (validée le 10/11/2026)
+
+| Couverture française du disque | Valeur | Score, rang, verdict | Ce que lit le lecteur |
+|---|---|---|---|
+| ≥ 75 % | oui | oui | la mesure |
+| 50 à 75 % | oui | oui | la mesure et sa limite géographique, cause nommée si elle est établie |
+| < 50 % (329) | oui, sur les terres françaises du rayon | **non** | « classement national non établi », avec la cause seulement si elle est établie |
+| Aucun bâti OSO (8) | **non** | non | « non calculable avec cette méthode » |
+
+C'est une convention de comparabilité, pas une défaillance du raster. Conséquence à porter au rapport de livraison :
+**74 des 329 communes avaient un verdict de rang favorable**, et le perdent. 221 avaient un verdict neutre, 34 un verdict
+défavorable.

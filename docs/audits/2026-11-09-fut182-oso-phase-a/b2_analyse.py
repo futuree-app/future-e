@@ -3,7 +3,16 @@
 Lecture seule. N'écrit que le fichier de résultats (--out). Dépendance : numpy.
 
 Usage (depuis la racine du dépôt) :
-    python -I docs/audits/2026-11-09-fut182-oso-phase-a/b2_analyse.py SECTEUR_CSV_GZ [--out JSON]
+    python -I docs/audits/2026-11-09-fut182-oso-phase-a/b2_analyse.py SECTEUR_CSV_GZ [--out JSON] [--extrait CSV]
+
+CAUSES (corrigé après la contre-revue du 10/11/2026). La première version nommait une « cause dominante » parmi des
+familles de pixels OSO, dont « hors_carte », qui n'est qu'une absence de pixel (mer OU étranger), et le rapport en avait
+tiré à la main une répartition mer / frontière que rien de versionné ne portait. Désormais :
+  - la cause n'est établie que par le masque GISCO (pays d'Eurostat au 1:1 000 000), indépendant du raster, calculé par
+    b2_national.py --gisco : part du disque hors contours français en mer, à l'étranger, ou non attribuée ;
+  - « mer » ou « étranger » exige que cette part fasse au moins 80 % de ce qui manque au disque ; « mer et étranger »
+    exige que les deux réunies en fassent 80 %, chacune au moins 20 % ; sinon « non attribuée » ;
+  - les familles OSO restent rapportées, sous leur nom, sans valeur de cause.
 
 Ce que le script mesure, sans rien trancher :
   1. la couverture des disques, en paliers provisoires (≥ 75 %, 50-75 %, < 50 % du disque couvert par des données
@@ -29,6 +38,7 @@ args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if not args:
     sys.exit(__doc__)
 OUT = Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else None
+EXTRAIT = Path(sys.argv[sys.argv.index("--extrait") + 1]) if "--extrait" in sys.argv else None
 lignes = list(csv.DictReader(gzip.open(args[0], "rt", encoding="utf8")))
 f = lambda x: float(x) if x not in ("", None) else None
 idx = {c["insee"]: c for c in json.load(gzip.open(RACINE / "data/comparateur-index.json.gz"))["communes"]}
@@ -46,23 +56,44 @@ CAUSES = {"couv_eaux_hors_contours": "mer_et_eaux_hors_contours", "couv_hors_car
           "couv_terres_etrangeres": "terres_etrangeres", "couv_non_classe_fr": "non_classe_fr"}
 
 
+def cause_gisco(l):
+    """La cause établie par le masque GISCO, ou « aucune » / « non_attribuee » (voir l'en-tête)."""
+    etr, mer, na = (max(0.0, f(l[k])) for k in ("couv_hors_fr_etranger", "couv_hors_fr_mer", "couv_hors_fr_non_attribue"))
+    hors = etr + mer + na
+    if hors + max(0.0, f(l["couv_non_classe_fr"])) < 1:
+        return "aucune"
+    if hors <= 0:
+        return "non_attribuee"
+    if mer / hors >= 0.8:
+        return "mer"
+    if etr / hors >= 0.8:
+        return "etranger"
+    if (mer + etr) / hors >= 0.8 and mer / hors >= 0.2 and etr / hors >= 0.2:
+        return "mer_et_etranger"
+    return "non_attribuee"
+
+
 def couverture(l):
     fr = f(l["couv_terres_fr"]) + f(l["couv_eaux_fr"])
-    manque = {v: f(l[k]) for k, v in CAUSES.items()}
-    # Une cause n'est nommée que si ce qui manque atteint 1 % du disque : en deçà, ce sont des bords de pixels.
-    cause = max(manque, key=manque.get) if sum(max(0.0, v) for v in manque.values()) >= 1 else "aucune"
-    return fr, cause, manque
+    oso = {v: f(l[k]) for k, v in CAUSES.items()}
+    return fr, cause_gisco(l), oso
 
 
 cv = [(l, *couverture(l)) for l in com if f(l["valeur"]) is not None]
 palier = lambda x: "ge75" if x >= 75 else ("50_75" if x >= 50 else "lt50")
 R["couverture"] = {
     "paliers": dict(Counter(palier(x[1]) for x in cv)),
-    "cause_dominante_par_palier": {p: dict(Counter(x[2] for x in cv if palier(x[1]) == p)) for p in ("ge75", "50_75", "lt50")},
-    "national_moyen_pct": {k: round(float(np.mean([f(x[0][k]) for x in cv])), 3) for k in ["couv_terres_fr", "couv_eaux_fr"] + list(CAUSES)},
+    "cause_gisco_par_palier": {p: dict(Counter(x[2] for x in cv if palier(x[1]) == p)) for p in ("ge75", "50_75", "lt50")},
+    "familles_oso_dominantes_par_palier_sans_valeur_de_cause": {p: dict(Counter(
+        (max(x[3], key=x[3].get) if sum(max(0.0, v) for v in x[3].values()) >= 1 else "aucune") for x in cv if palier(x[1]) == p))
+        for p in ("ge75", "50_75", "lt50")},
+    "national_moyen_pct": {k: round(float(np.mean([f(x[0][k]) for x in cv])), 3) for k in ["couv_terres_fr", "couv_eaux_fr"] + list(CAUSES)
+                           + ["couv_hors_fr_etranger", "couv_hors_fr_mer", "couv_hors_fr_non_attribue"]},
     "non_classe_fr_max_pct": round(max(f(x[0]["couv_non_classe_fr"]) for x in cv), 3),
     "terres_etrangeres_ge_10pct": sum(1 for x in cv if f(x[0]["couv_terres_etrangeres"]) >= 10),
-    "lt50_liste": sorted([(x[0]["code"], x[0]["nom"], round(x[1], 1), x[2], {k: round(v, 1) for k, v in x[3].items()}) for x in cv if x[1] < 50], key=lambda t: t[2]),
+    "lt50_liste": sorted([(x[0]["code"], x[0]["nom"], round(x[1], 1), x[2],
+                           {k: round(f(x[0][k]), 1) for k in ("couv_hors_fr_mer", "couv_hors_fr_etranger", "couv_hors_fr_non_attribue")})
+                          for x in cv if x[1] < 50], key=lambda t: t[2]),
     "50_75_exemples": sorted([(x[0]["code"], x[0]["nom"], round(x[1], 1), x[2]) for x in cv if 50 <= x[1] < 75], key=lambda t: t[2])[:40],
     "poids_sans_mesure_max_pct": max(f(x[0]["poids_sans_mesure_pct"]) for x in cv),
 }
@@ -134,6 +165,40 @@ R["distribution"] = {"quantiles_valeur": {q: round(float(np.percentile(val, q)),
 R["arrondissements"] = {l["code"]: {"nom": l["nom"], "valeur": f(l["valeur"]), "p10": f(l["p10"]), "p90": f(l["p90"]),
                                     "couvert_fr": round(f(l["couv_terres_fr"]) + f(l["couv_eaux_fr"]), 2)} for l in arr}
 print("distribution", json.dumps(R["distribution"], ensure_ascii=False), flush=True)
+# ── 5. Extrait d'audit compact : les 329, les 8, les voisins des paliers, les cas de recette ──────────────
+RECETTE = ["29155", "56085", "85113", "17019", "17121", "17318", "17369", "17051", "17140", "17286", "17297", "17207",
+           "08106", "08122", "59350", "13004", "13096", "50218", "17034", "85104", "76353", "75056", "69123", "13055"]
+if EXTRAIT:
+    pos = {k: i for i, k in enumerate(codes)}
+    motif = {}
+    for i, k in enumerate(codes):
+        if fr[i] < 50:
+            motif[k] = "couverture_lt50"
+        elif abs(fr[i] - 50) <= 1 or abs(fr[i] - 75) <= 1:
+            motif[k] = "voisin_palier_50_ou_75"
+    for k in RECETTE:
+        motif.setdefault(k, "cas_de_recette")
+    with open(EXTRAIT, "w", encoding="utf8", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["code", "nom", "motif", "valeur", "p10", "p90", "couvert_fr_pct", "cause_gisco", "hors_fr_mer", "hors_fr_etranger",
+                    "hors_fr_non_attribue", "oso_eaux_hors_contours", "oso_terres_etrangeres", "oso_hors_carte", "score_index",
+                    "score_simule_exclusion", "verdict_index", "verdict_simule_exclusion"])
+        for k in sorted(motif):
+            if k in pos:
+                i = pos[k]; l = cv[i][0]
+                w.writerow([k, l["nom"], motif[k], l["valeur"], l["p10"], l["p90"], round(float(fr[i]), 2), cv[i][2],
+                            l["couv_hors_fr_mer"], l["couv_hors_fr_etranger"], l["couv_hors_fr_non_attribue"],
+                            l["couv_eaux_hors_contours"], l["couv_terres_etrangeres"], l["couv_hors_carte"],
+                            int(sc_idx[i]), (int(S_ex[i]) if garde[i] else ""), V_idx[i], V_ex[i]])
+            elif k in par:
+                l = par[k]
+                w.writerow([k, l["nom"], "sans_bati_oso" if f(l["valeur"]) is None else "hors_univers_nature", "", "", "", "", "", "", "", "",
+                            "", "", "", idx.get(k, {}).get("nature", {}).get("score", "") if idx.get(k, {}).get("nature") else "", "", "", ""])
+        for l in sans_bati:
+            if l["code"] not in motif:
+                w.writerow([l["code"], l["nom"], "sans_bati_oso"] + [""] * 11 + [idx[l["code"]]["nature"]["score"] if idx.get(l["code"], {}).get("nature") else "", "", "", ""])
+    print("extrait écrit :", EXTRAIT, flush=True)
+
 if OUT:
     OUT.write_text(json.dumps(R, ensure_ascii=False, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o)) + "\n", encoding="utf8")
     print("écrit :", OUT)

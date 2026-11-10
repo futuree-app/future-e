@@ -27,6 +27,16 @@ moyenne pondérée par le bâti :
                        (le plus souvent la mer au-delà de la bande côtière classée)
 Les six parts somment à 100 (au bord exact du raster près).
 
+« hors_carte » ne dit PAS ce qu'il y a : c'est l'absence de pixel classé, en mer comme à l'étranger. Pour l'attribuer
+sans le deviner (contre-revue du 10/11/2026), l'option --gisco fournit un masque géographique INDÉPENDANT : les pays
+GISCO d'Eurostat au 1:1 000 000 (CNTR_RG_01M_2020). Chaque cellule de 100 m dont le centre tombe dans un pays autre que
+la France est « étranger », dans le polygone France « non attribué » (estran, ports, bords de contours), dans aucun
+pays « mer ». Tout ce qui, dans le disque, n'est pas sous un contour communal français (pixels classés ou non, et
+au-delà de l'emprise du raster) est réparti ainsi :
+  hors_fr_etranger, hors_fr_mer, hors_fr_non_attribue     (somment à 100 − terres_fr − eaux_fr − non_classe_fr)
+Précision : celle du 1:1 000 000 et de la cellule de 100 m ; une bande côtière ou frontalière de quelques centaines de
+mètres peut être attribuée à tort. Les causes se lisent en proportions, pas au pixel.
+
 Étapes : (1) bandes de lignes de 10 m : étiquette de commune par rasterisation, comptes par famille sur la grille
 nationale de 100 m, pixels bâtis par (commune, cellule) ; (2) convolutions par FFT, en tuiles, avec le disque de 15 km ;
 (3) agrégation par commune ; puis les 45 arrondissements, sur leurs propres pixels.
@@ -51,6 +61,7 @@ if len(args) < 4:
     sys.exit(__doc__)
 TIF, CACHE_DIR, ARR, SORTIE = Path(args[0]), Path(args[1]), Path(args[2]), Path(args[3])
 BANDE = int(sys.argv[sys.argv.index("--bandes") + 1]) if "--bandes" in sys.argv else 2000
+GISCO = Path(sys.argv[sys.argv.index("--gisco") + 1]) if "--gisco" in sys.argv else None
 SORTIE.mkdir(parents=True, exist_ok=True)
 t0 = time.time()
 log = lambda *m: print(f"[{time.time() - t0:6.0f}s]", *m, flush=True)
@@ -159,6 +170,36 @@ for k in FAM:
     log("convolution", k)
 pos = np.searchsorted(cellules, P[:, 1])
 
+# ── Attribution du hors-France par le masque GISCO (indépendant du raster) ──────────────────────────────────
+if GISCO:
+    pays = json.load(open(GISCO, encoding="utf8"))["features"]
+    tp = ds.transform * rasterio.Affine.scale(CELL) * rasterio.Affine.translation(-rc, -rc)  # grille 100 m élargie
+    shp_pad = (NR + 2 * rc, NC + 2 * rc)
+    zone_pad = shapely.box(tp.c, tp.f + tp.e * shp_pad[0], tp.c + tp.a * shp_pad[1], tp.f)
+    # Les géométries sont DÉCOUPÉES au voisinage de la France en degrés AVANT reprojection : un pays qui franchit
+    # l'antiméridien (Russie, Fidji) ou les outre-mer projetés en Lambert-93 donnent sinon des polygones déformés qui
+    # recouvrent toute la grille (vu au premier essai : « France 0 cellule »).
+    voisinage = shapely.box(-12.0, 34.0, 20.0, 56.0)
+    etr, fra = [], []
+    for ft in pays:
+        g0 = shapely.geometry.shape(ft["geometry"]).intersection(voisinage)
+        if g0.is_empty:
+            continue
+        g = transform_geom("EPSG:4326", ds.crs, shapely.geometry.mapping(g0))
+        if not shapely.geometry.shape(g).intersects(zone_pad):
+            continue
+        (fra if ft["properties"]["CNTR_ID"] == "FR" else etr).append(g)
+    E = rasterize([(g, 1) for g in etr], out_shape=shp_pad, transform=tp, fill=0, dtype="uint8").astype(bool)
+    F = rasterize([(g, 1) for g in fra], out_shape=shp_pad, transform=tp, fill=0, dtype="uint8").astype(bool) & ~E
+    log("GISCO", len(etr), "pays étrangers dans l'emprise ; cellules étranger", int(E.sum()), "France", int(F.sum()))
+    # Pixels hors contours français par cellule : 100 moins les pixels français ; 100 au-delà de la grille.
+    Npad = np.full(shp_pad, 100, dtype=np.int32)
+    Npad[rc:rc + NR, rc:rc + NC] = 100 - (G["terres_nat_fr"] + G["terres_autres_fr"] + G["eaux_fr"] + G["non_classe_fr"])
+    for nom_, masque in (("hors_fr_etranger", E), ("hors_fr_mer", ~E & ~F), ("hors_fr_non_attribue", F)):
+        C[nom_] = conv_tuiles(np.where(masque, Npad, 0))[rc:rc + NR, rc:rc + NC].ravel()[cellules]
+        log("convolution", nom_)
+    del Npad, E, F
+
 
 def aggreger(idx_cell, w):
     """idx_cell : indices dans `cellules` ; w : pixels bâtis. Rend la mesure et sa couverture."""
@@ -183,6 +224,9 @@ def aggreger(idx_cell, w):
     somme = sum(parts.values()) + C["autres"][idx_cell][valide]
     # Valeur 0 hors contours, et disque au-delà de l'emprise : tout ce qui n'est compté dans aucune autre famille.
     parts["hors_carte"] = DISQUE_PX - somme
+    if GISCO:
+        for k in ("hors_fr_etranger", "hors_fr_mer", "hors_fr_non_attribue"):
+            parts[k] = C[k][idx_cell][valide]
     for k, x in parts.items():
         out[f"couv_{k}"] = round(100 * float((x / DISQUE_PX * wv).sum()), 3)
     # Centre bâti (repli nommé) : la cellule du barycentre bâti, si elle est bâtie et mesurée ; sinon la plus proche.
@@ -224,7 +268,7 @@ log("arrondissements agrégés")
 
 cols = ["code", "type", "nom", "valeur", "p10", "p50", "p90", "poids_bati_px", "cellules", "poids_sans_mesure_pct",
         "couv_terres_fr", "couv_eaux_fr", "couv_eaux_hors_contours", "couv_terres_etrangeres", "couv_non_classe_fr",
-        "couv_hors_carte", "centre_bati_valeur"]
+        "couv_hors_carte", "couv_hors_fr_etranger", "couv_hors_fr_mer", "couv_hors_fr_non_attribue", "centre_bati_valeur"]
 out = SORTIE / "secteur-habite-2023.csv.gz"
 with gzip.open(out, "wt", encoding="utf8", newline="") as f:
     w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
@@ -246,10 +290,14 @@ meta = {"objet": "FUT-182 B2 : secteur habité national, hors application ; aucu
                    "pixels sous contour communal français seulement ; quantiles pondérés",
         "lignes": len(res), "grille": [NR, NC], "disque_px_10m": DISQUE_PX, "paires_commune_cellule": int(len(P)),
         "pixels_autres_valeurs": int(G["autres"].sum()),
-        "sources": {"raster_sha256": sha(TIF), "arrondissements_sha256": sha(ARR)},
+        "sources": {"raster_sha256": sha(TIF), "arrondissements_sha256": sha(ARR),
+                    "gisco": {"fichier": GISCO.name, "sha256": sha(GISCO),
+                              "source": "Eurostat GISCO, Countries 2020, 1:1 000 000 (CNTR_RG_01M_2020_4326.geojson)"} if GISCO else None},
         "sortie": {"fichier": out.name, "sha256": sha(out)}, "script_sha256": sha(Path(__file__)),
         "environnement": {"python": platform.python_version(), "numpy": np.__version__, "rasterio": rasterio.__version__,
                           "gdal": rasterio.__gdal_version__, "shapely": shapely.__version__},
         "duree_s": round(time.time() - t0), "date": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
 (SORTIE / "secteur-habite-2023.meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf8")
+np.savez_compressed(SORTIE / "paires-bati-2023.npz", etiquette=P[:, 0], cellule=P[:, 1], pixels=P[:, 2],
+                    codes=np.array(codes), grille=np.array([NR, NC]))
 log("écrit", out)
