@@ -58,7 +58,17 @@ QUESTION DE PROFIL
 N'incluez profile_question QUE si l'information manquante améliorerait substantiellement votre prochaine réponse, et UNE SEULE par message. Le champ "contextualization" est obligatoire et doit dire en une phrase pourquoi vous demandez. Choisissez "field" dans la liste autorisée du schéma.`;
 
 // ─── Référentiel interne (texte) ───────────────────────────────────────────
-// FUT-16 : le référentiel ne porte plus que l'identité de la commune et ses catégories territoriales.
+// FUT-185 : le référentiel ne porte plus que l'IDENTITÉ de la commune (code INSEE, nom). Il écrivait aussi
+// « Catégories territoriales : … », c'est-à-dire les clés d'angle de l'accueil, lues dans la table manuelle
+// `communes_categorization` ou devinées par département (`deriveCategories`) : `rural_peri_urbain` pour Rodez,
+// `periurbain_dependance_auto` pour Toulouse et Bordeaux sans la mesure qui la fonde, `montagne` pour toute
+// commune de l'Isère ou du Puy-de-Dôme, `urbain_dense_sud` pour Aix-en-Provence (795 hab/km²),
+// `tension_hydrique_connue` sans donnée. Le modèle les lisait comme la géographie de la commune. Ce qu'il peut
+// affirmer vient des blocs mesurés, avec leur source (densité ADEME, part motorisée des trajets, DRIAS,
+// Géorisques…), comme pour /qna, qui ne reçoit plus non plus ces catégories. AskFuture ne lit plus la table
+// du tout (`referentielAskFuture`) : son nom y était faux pour 15 lignes sur 44.
+//
+// FUT-16 : le référentiel portait l'identité de la commune et ses catégories territoriales.
 // Il recevait aussi les lignes de `communes_tension` (« score », « exposition », « vulnérabilité »,
 // « adaptation », « occurrence » sur 100) : des colonnes DRIAS ou ADEME normalisées et rebaptisées, dont
 // 99 lignes climat sur 267 contredisaient la mesure transmise dans le même prompt, et que le modèle
@@ -67,9 +77,9 @@ N'incluez profile_question QUE si l'information manquante améliorerait substant
 //
 // LE CONTRAT EST FERMÉ : une clé inattendue est refusée. On ne réinjecte pas une couche de notation en
 // l'ajoutant discrètement à un argument existant.
-const CLES_REFERENTIEL = ["insee", "nomCommune", "categories"] as const;
+const CLES_REFERENTIEL = ["insee", "nomCommune"] as const;
 
-export type EntreeReferentiel = { insee: string; nomCommune: string | null; categories: string[] };
+export type EntreeReferentiel = { insee: string; nomCommune: string | null };
 
 function refuserClesInattendues(objet: object, permises: readonly string[], contexte: string) {
   const inattendues = Object.keys(objet).filter((k) => !permises.includes(k));
@@ -84,10 +94,14 @@ export function construireReferentiel(args: EntreeReferentiel): string {
   if (args.nomCommune) {
     lines.push(`Nom commune (référentiel interne) : ${args.nomCommune}`);
   }
-  if (args.categories.length > 0) {
-    lines.push(`Catégories territoriales : ${args.categories.join(", ")}`);
-  }
   return lines.join("\n");
+}
+
+/** Le référentiel interne qu'AskFuture transmet (FUT-185) : le code INSEE seul. La table manuelle
+ *  `communes_categorization` n'est plus lue : catégories sans mesure, et 15 lignes sur 44 dont le code
+ *  désigne une autre commune que le nom. Le nom de la commune figure déjà dans l'en-tête des données. */
+export function referentielAskFuture(insee: string): string {
+  return construireReferentiel({ insee, nomCommune: null });
 }
 
 // ─── Formatage des blocs d'enrichissement pour le system prompt ────────────

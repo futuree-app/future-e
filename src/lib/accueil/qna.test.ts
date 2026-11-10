@@ -107,7 +107,6 @@ test("T17 : les chiffres nationaux sourcés du prompt restent permis, les autres
 test("T15 : le message envoyé au modèle pour Brest ne contient aucune base éditoriale ni aucune autre commune", () => {
   const prompt = construirePromptUtilisateur({
     contexte: ctx("29019", "acheter_littoral", "Acheter à Brest ?"),
-    categories: PANEL["29019"].categories,
     questionType: "preset",
     freeTextQuestion: null,
     territorySignals: null,

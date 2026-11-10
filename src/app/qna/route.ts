@@ -85,7 +85,7 @@ function resolveQuestionCategory(tensionId: string): string {
 // plus rien ne la lit.
 export async function POST(request: Request) {
   const body = await request.json();
-  const { categories, tension, questionType = "preset", freeTextQuestion = null, inseeCode = null } = body ?? {};
+  const { tension, questionType = "preset", freeTextQuestion = null, inseeCode = null } = body ?? {};
 
   // Les faits sont reconstruits côté serveur depuis l'INSEE ; un champ `faits` du corps est ignoré.
   const contexte = await contexteDepuisCorps(body, SOURCES_FAITS);
@@ -121,7 +121,6 @@ export async function POST(request: Request) {
 
   const userPrompt = construirePromptUtilisateur({
     contexte,
-    categories: Array.isArray(categories) ? categories.filter((c: unknown) => typeof c === "string") : [],
     questionType: questionType === "free" ? "free" : "preset",
     freeTextQuestion: typeof freeTextQuestion === "string" ? freeTextQuestion : null,
     territorySignals,

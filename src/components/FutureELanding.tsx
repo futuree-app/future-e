@@ -19,12 +19,15 @@ import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import {
   apercuCommune,
   carteMachineASous,
+  carteMobiliteMachineASous,
   getDriaSub,
   getEmptyStateCopy,
   getHeroCopy,
   getQuestionIntro,
 } from "@/lib/accueil/recits";
 import { construireFaitsCommune } from "@/lib/accueil/faits";
+import { categoriesAccueil, ligneManuelleConcorde } from "@/lib/accueil/categories-accueil";
+import { buildTensions } from "@/lib/accueil/questions";
 import { reponseDeRepli } from "@/lib/accueil/reponses";
 import { CLE_LANDING_COMMUNE } from '@/lib/purge-recherche';
 import { appliquerPurgeDifferee } from '@/components/interaction/purge-recherche-navigateur';
@@ -52,16 +55,17 @@ const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
 
 // La machine à sous du hero (avant toute commune). Ses cartes climat et risques sont construites par
 // les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis des valeurs DRIAS figées et
-// testées (src/lib/accueil/recits.ts). Les cartes de cadre de vie sont restées telles quelles : elles
-// relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte submersion :
-// l'État n'y recense pas ce risque.
+// testées (src/lib/accueil/recits.ts). Les cartes Mobilité portent la part voiture MOBPRO de la ville
+// (FUT-185 : elles étaient rédigées à la main sous cette source). Les cartes Nature et Vie locale sont restées
+// telles quelles : elles relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte
+// submersion : l'État n'y recense pas ce risque.
 const slotCard = (cle, titre, fait, col, source) => ({ cle, titre, fait, col, source });
 const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
       carteMachineASous('Lyon', 'chaleur'),
-      slotCard('mobilite', 'Mobilité à Lyon', 'Métro, tram et train dessinent un quotidien moins dépendant de la voiture à Lyon.', C.violet, 'INSEE MOBPRO / SNCF'),
+      carteMobiliteMachineASous('Lyon'),
       slotCard('vie-locale', 'Vie locale à Lyon', 'Commerces, écoles et vie associative restent denses dans le quotidien lyonnais.', C.green, 'INSEE BPE / RNA'),
       carteMachineASous('Lyon', 'nuits'),
     ].filter(Boolean),
@@ -71,7 +75,7 @@ const SLOT_CITIES = [
     cards: [
       carteMachineASous('Marseille', 'nuits'),
       slotCard('nature', 'Nature à Marseille', 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.', C.green, 'OSM / IGN'),
-      slotCard('mobilite', 'Mobilité à Marseille', 'Au quotidien, se déplacer à Marseille tient encore beaucoup à la voiture.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('Marseille'),
       carteMachineASous('Marseille', 'risque'),
     ].filter(Boolean),
   },
@@ -80,14 +84,14 @@ const SLOT_CITIES = [
     cards: [
       carteMachineASous('Vannes', 'chaleur'),
       slotCard('vie-locale', 'Vie locale à Vannes', 'À taille humaine, Vannes garde un centre dense en commerces et en services.', C.green, 'INSEE BPE'),
-      slotCard('mobilite', 'Mobilité à Vannes', 'Courtes distances : à Vannes, une partie des trajets du quotidien se fait à pied ou à vélo.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('Vannes'),
     ].filter(Boolean),
   },
   {
     name: 'La Rochelle',
     cards: [
       carteMachineASous('La Rochelle', 'risque'),
-      slotCard('mobilite', 'Mobilité à La Rochelle', 'La Rochelle reste une ville où le vélo tient une vraie place dans les trajets.', C.violet, 'INSEE MOBPRO'),
+      carteMobiliteMachineASous('La Rochelle'),
       slotCard('nature', 'Nature à La Rochelle', 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.', C.green, 'OSM / IGN'),
       carteMachineASous('La Rochelle', 'chaleur'),
     ].filter(Boolean),
@@ -98,13 +102,6 @@ const SLOT_SCHEDULE: [number, number][] = [
   [1,  5000], // Marseille
   [2, 10000], // Vannes
   [3, 15000], // La Rochelle — atterrissage final
-];
-
-const FALLBACK_TENSION_IDS = [
-  'enfants_sante',
-  'metier_general',
-  'valeur_immo',
-  'retraite_ici',
 ];
 
 const LANDING_QNA_STORAGE_KEY = 'futuree:landing-qna-count';
@@ -122,90 +119,6 @@ function glass(extra = {}) {
     border: `1px solid ${C.border}`,
     ...extra,
   };
-}
-
-// Famille « vie / territoire » : les questions en tension qui ne sont ni climat ni
-// risque (calme, transports, croissance, vie locale, départ de la ville). Sans
-// règle de diversité, les questions climat (prioritaires et nombreuses) saturent
-// les 4 slots et celles-ci ne surfacent jamais. On leur RÉSERVE un slot.
-const TERRITORY_TENSION_IDS = new Set([
-  'calme_infra',
-  'tc_sansvoiture',
-  'croissance_transformation',
-  'vielocale_reelle',
-  'quitter_ville',
-]);
-
-// Dédup par préfixe d'id (avant le premier « _ ») : évite 5 variantes « Acheter à X ? ».
-function dedupeByPrefix(tensions) {
-  const seen = new Set();
-  const result = [];
-  for (const tension of tensions) {
-    const key = tension.id.split('_')[0];
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(tension);
-  }
-  return result;
-}
-
-const MAX_TENSIONS = 4;
-
-function buildTensions(catalog, categories) {
-  const safeCategories =
-    categories && categories.length > 0 ? categories : ['all'];
-
-  const matching = catalog
-    .filter(
-      (tension) =>
-        tension.is_active &&
-        (tension.categories.includes('all') ||
-          tension.categories.some((category) =>
-            safeCategories.includes(category),
-          )),
-    )
-    .sort((a, b) => a.priority - b.priority);
-
-  const deduped = dedupeByPrefix(matching);
-  const isTerritory = (t) => TERRITORY_TENSION_IDS.has(t.id);
-  const bestTerritory = deduped.find(isTerritory) ?? null;
-
-  // Règle de diversité : le climat reste dominant (3 slots), mais si une question
-  // « vie / territoire » s'applique, on lui garantit le dernier slot plutôt que
-  // de laisser une 4e question climat le prendre.
-  const result = [];
-  for (const tension of deduped) {
-    if (result.length >= MAX_TENSIONS) break;
-    const reserveLastForTerritory =
-      result.length === MAX_TENSIONS - 1 &&
-      bestTerritory &&
-      !result.some(isTerritory) &&
-      !isTerritory(tension);
-    if (reserveLastForTerritory) continue; // on saute cette question climat pour réserver le slot
-    result.push(tension);
-  }
-  if (
-    result.length < MAX_TENSIONS &&
-    bestTerritory &&
-    !result.some(isTerritory)
-  ) {
-    result.push(bestTerritory);
-  }
-
-  // Complément si moins de 4 questions ont matché.
-  for (const t of deduped) {
-    if (result.length >= MAX_TENSIONS) break;
-    if (!result.includes(t)) result.push(t);
-  }
-  for (const id of FALLBACK_TENSION_IDS) {
-    if (result.length >= MAX_TENSIONS) break;
-    const fallback = catalog.find((item) => item.id === id && item.is_active);
-    if (fallback && !result.find((item) => item.id === fallback.id)) {
-      result.push(fallback);
-    }
-  }
-
-  return result.slice(0, MAX_TENSIONS);
 }
 
 function getCommuneMetaCopy(communeName, usedFallback) {
@@ -612,46 +525,50 @@ export default function FutureELanding() {
 
     let matchedRow = null;
 
+    // FUT-185 : une ligne ne vaut que pour la commune qu'elle nomme (15 lignes sur 44 portent le code d'une autre
+    // commune), et son code INSEE n'est jamais repris : voir src/lib/accueil/categories-accueil.ts.
     for (const query of queries) {
       const { data, error } = await query;
-      if (!error && data) {
+      if (!error && data && ligneManuelleConcorde(data, nextCommune)) {
         matchedRow = data;
         break;
       }
     }
 
-    const inseeCode = nextCommune.citycode || matchedRow?.insee_code || null;
+    const inseeCode = nextCommune.citycode || null;
     // Catégorisation manuelle (44 communes affinées à la main) prioritaire ; sinon
     // on tire les catégories de la VRAIE donnée commune via /api/landing-signals
     // (index A), au lieu du préfixe département qui laissait dormir le catalogue.
-    let categories: string[];
-    if (matchedRow?.categories && matchedRow.categories.length > 0) {
-      categories = matchedRow.categories;
-    } else if (inseeCode) {
+    // FUT-185 : /api/landing-signals est lu pour toute commune connue, manuelle comprise, car il porte aussi la
+    // part voiture MOBPRO, seule base de la carte Mobilité. Sans elle (échec, commune hors index), pas de carte.
+    let signaux = null;
+    if (inseeCode) {
       try {
         const res = await fetch(`/api/landing-signals?insee=${inseeCode}`);
-        const payload = res.ok ? await res.json() : null;
-        categories = Array.isArray(payload?.categories) && payload.categories.length > 0
-          ? payload.categories
-          : deriveCategories(inseeCode); // repli dept si l'endpoint échoue
+        signaux = res.ok ? await res.json() : null;
       } catch {
-        categories = deriveCategories(inseeCode);
+        signaux = null;
       }
-    } else {
-      categories = ['all'];
     }
-
-    // usedFallback controls generic vs contextual copy: false when we have
-    // meaningful categories (either from DB or derived from dept code).
-    const hasContextualCategories = categories.length > 0 && !categories.every((c) => c === 'all');
+    // FUT-185 : la table manuelle reste prioritaire, mais ses clés sans mesure (`rural_peri_urbain`,
+    // `periurbain_dependance_auto`) sont assainies à la lecture : voir src/lib/accueil/categories-accueil.ts.
+    const { categories, usedFallback } = categoriesAccueil({
+      manuelles: matchedRow?.categories ?? null,
+      index: Array.isArray(signaux?.categories) ? signaux.categories : null,
+      departement: inseeCode ? deriveCategories(inseeCode) : null, // repli dept si l'endpoint échoue
+    });
+    const mobilite = typeof signaux?.mobilite?.partVoitureDomicileTravail === 'number'
+      ? { partVoitureDomicileTravail: signaux.mobilite.partVoitureDomicileTravail }
+      : null;
 
     setCommuneMeta({
       inseeCode,
       categories,
-      usedFallback: !matchedRow && !hasContextualCategories,
+      mobilite,
+      usedFallback,
     });
 
-    const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
+    const indicatorInseeCode = nextCommune.citycode;
 
     if (indicatorInseeCode) {
       // GisSol n'est plus lu ici : sa seule carte (« Qualité des sols ») disait « les sols de X » depuis
@@ -1777,6 +1694,7 @@ export default function FutureELanding() {
         indicators: communeIndicators,
         georisques: communeGeorisques,
         horizon,
+        mobilite: communeMeta?.mobilite ?? null,
       })
     : { etat: 'cartes', cartes: activeSlotCity.cards };
   const previewCards = apercu.etat === 'cartes' ? apercu.cartes : [];

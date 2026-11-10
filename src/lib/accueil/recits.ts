@@ -390,25 +390,53 @@ export function cartesClimat(
   return out.filter((c): c is CarteApercu => c != null);
 }
 
-/** Les cartes de profondeur : textes d'avant FUT-37, inchangés. Non prospectives, hors périmètre
- *  (dette notée dans l'audit : proxy de densité pour la voiture, vie locale servie aux communes classées
- *  `faible_vie_locale`). Elles relèvent de FUT-50. */
-function cartesProfondeur(name: string, categories: readonly string[]): CarteApercu[] {
+// ── Mobilité : une MESURE, jamais une catégorie (FUT-185) ───────────────────────────────────
+//
+// Avant FUT-185, la carte « Mobilité » disait « le quotidien dépend largement de la voiture » dès qu'une
+// commune portait l'une de six catégories (densité moyenne sous 1 500 hab/km², couvert agricole ou
+// forestier, montagne…), et « transports et courtes distances » sinon, les deux sous la source « INSEE
+// MOBPRO », qu'aucune ne lisait. Nîmes, Aix-en-Provence ou Quimper recevaient la première ; Chamonix la
+// recevait par sa seule altitude. La carte porte désormais la part réelle des trajets domicile-travail
+// faits en voiture, ou n'existe pas.
+
+/** La part des actifs en emploi d'une commune qui vont travailler en voiture (RP 2022, MOBPRO), de 0 à 1. */
+export type MobiliteAccueil = { partVoitureDomicileTravail: number | null } | null | undefined;
+
+export const SOURCE_MOBPRO = "Insee · recensement 2022 (MOBPRO)";
+
+const LIMITE_MOBPRO =
+  "Ce chiffre ne couvre que les trajets domicile-travail des actifs en emploi, voiture, camion et fourgonnette compris, à l'échelle de la commune. Il ne dit rien des autres déplacements, ni de ce qu'une adresse permet de faire sans voiture.";
+
+/** La part voiture affichable, ou `null` : une valeur absente ou hors de [0, 1] ne fait pas de carte. */
+function partVoiture(m: MobiliteAccueil): number | null {
+  const p = m?.partVoitureDomicileTravail;
+  return fini(p) && p >= 0 && p <= 1 ? Math.round(p * 100) : null;
+}
+
+/** La carte Mobilité d'une commune, construite sur la mesure MOBPRO, ou `null` sans mesure. */
+export function carteMobilite(name: string, mobilite: MobiliteAccueil): CarteApercu | null {
+  const pct = partVoiture(mobilite);
+  if (pct == null) return null;
+  return {
+    cle: "mobilite",
+    titre: "Aller travailler en voiture",
+    valeur: `${pct} %`,
+    fait: `${majuscule(aCommune(name))}, ${pct} % des actifs en emploi qui y habitent vont travailler en voiture.`,
+    limite: LIMITE_MOBPRO,
+    source: SOURCE_MOBPRO,
+    col: COL.violet,
+  };
+}
+
+/** Les cartes de profondeur. La carte Mobilité ne naît que de la mesure (FUT-185). Les cartes Nature et
+ *  Vie locale gardent leurs textes d'avant FUT-37 : génériques et sans lecture de leur source affichée,
+ *  elles restent une dette relevée par l'audit FUT-185 (FUT-50 pour l'aperçu, FUT-182 pour le couvert OSO). */
+function cartesProfondeur(name: string, categories: readonly string[], mobilite: MobiliteAccueil): CarteApercu[] {
   const has = (c: string) => categories.includes(c);
   const hasAny = (...cats: string[]) => cats.some(has);
-  const carDependent = hasAny(
-    "periurbain_dependance_auto", "rural_peri_urbain", "rural_agricole",
-    "rural_forestier", "rural_viticole", "montagne",
-  );
-  const depth: CarteApercu[] = [{
-    cle: "mobilite",
-    titre: `Mobilité à ${name}`,
-    fait: carDependent
-      ? `À ${name}, le quotidien dépend largement de la voiture pour se déplacer.`
-      : `À ${name}, transports et courtes distances pèsent dans les trajets du quotidien.`,
-    source: "INSEE MOBPRO",
-    col: COL.violet,
-  }];
+  const depth: CarteApercu[] = [];
+  const mob = carteMobilite(name, mobilite);
+  if (mob) depth.push(mob);
   if (hasAny("littoral", "littoral_atlantique")) {
     depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
   } else if (has("montagne")) {
@@ -429,12 +457,13 @@ export function getPreviewCards(
   indicators: Indicators,
   georisques: GeorisquesAccueil,
   horizon: HorizonAccueil,
+  mobilite?: MobiliteAccueil,
 ): CarteApercu[] {
   const name = communeName || "votre commune";
   const cats = categories && categories.length > 0 ? categories : ["all"];
 
   const climate = cartesClimat(cats, indicators, georisques, horizon);
-  const depth = cartesProfondeur(name, cats);
+  const depth = cartesProfondeur(name, cats, mobilite);
 
   // Assemblage d'avant FUT-37 : accroche climat en position 1, puis un climat et deux profondeurs,
   // entrelacés selon le nom (stable par commune, insensible à l'horizon).
@@ -473,9 +502,10 @@ export function apercuCommune(args: {
   indicators: Indicators;
   georisques: GeorisquesAccueil;
   horizon: HorizonAccueil;
+  mobilite?: MobiliteAccueil;
 }): ApercuCommune {
   if (args.chargement) return { etat: "squelette" };
-  return { etat: "cartes", cartes: getPreviewCards(args.commune, args.categories, args.indicators, args.georisques, args.horizon) };
+  return { etat: "cartes", cartes: getPreviewCards(args.commune, args.categories, args.indicators, args.georisques, args.horizon, args.mobilite) };
 }
 
 // ── Sous-titres chiffrés des questions ───────────────────────────────────────────────────────
@@ -505,6 +535,11 @@ export function getDriaSub(tensionId: string, horizon: HorizonAccueil, indicator
 // ── Cadrage (hero, intro des questions, état vide) ──────────────────────────────────────────
 // Ne promet que des sujets que futur•e couvre : plus d'enneigement, d'assurance, d'accès à l'eau ni de
 // « tension sur l'eau ». La structure reste celle d'avant ; le fond est l'affaire de FUT-50.
+//
+// FUT-185 : plus aucune phrase de cadrage ne parle de « dépendance à la voiture ». Elle venait de
+// `rural_peri_urbain` (densité moyenne sous 1 500 hab/km²) ou de `periurbain_dependance_auto`, deux
+// catégories, dont la seconde peut aussi venir de la table manuelle (Toulouse, Bordeaux) sans aucune mesure.
+// Ces communes reçoivent le cadrage général ; la part voiture mesurée a sa carte (`carteMobilite`).
 
 export function getHeroCopy(communeName: string, categories: readonly string[] | null | undefined, usedFallback: boolean | undefined): string {
   const name = communeName || "votre commune";
@@ -523,9 +558,6 @@ export function getHeroCopy(communeName: string, categories: readonly string[] |
   if (has("urbain_dense_sud") || has("mediterranee")) {
     return `futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre ${aCommune(name)} veut vraiment dire dans un territoire où les étés se réchauffent.`;
   }
-  if (has("rural_peri_urbain") || has("periurbain_dependance_auto")) {
-    return `futur•e lit ${name} à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.`;
-  }
   return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et du logement.`;
 }
 
@@ -540,9 +572,6 @@ export function getQuestionIntro(communeName: string, categories: readonly strin
   if (has("montagne")) return `${lieu}, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.`;
   if (has("mediterranee")) return `${lieu}, le futur se joue déjà entre chaleur, nuits tropicales et météo propice aux feux.`;
   if (has("rural_agricole")) return `${lieu}, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.`;
-  if (has("periurbain_dependance_auto") || has("rural_peri_urbain")) {
-    return `${lieu}, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.`;
-  }
   if (has("urbain_dense_sud") || has("urbain_dense_nord")) return `${lieu}, le futur se joue entre chaleur urbaine, qualité de l'air, logement et services.`;
   return `${lieu}, le futur se joue déjà entre chaleur, logement et qualité de vie.`;
 }
@@ -551,7 +580,8 @@ export function getEmptyStateCopy(categories: readonly string[] | null | undefin
   const cats = categories && categories.length > 0 ? categories : ["all"];
   if (cats.includes("littoral")) return "Les questions porteront ici sur le littoral, la chaleur, le logement et les projets de vie.";
   if (cats.includes("montagne")) return "Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.";
-  if (cats.includes("periurbain_dependance_auto") || cats.includes("rural_peri_urbain")) {
+  // Annonce des sujets, pas un constat : `periurbain_dependance_auto` ouvre les questions sur la voiture.
+  if (cats.includes("periurbain_dependance_auto")) {
     return "Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.";
   }
   return "Quatre questions sélectionnées pour votre territoire apparaîtront ici.";
@@ -635,4 +665,22 @@ export function carteMachineASous(
     comparaison: [`en ${HORIZON_MACHINE_A_SOUS}`, carte.comparaison].filter(Boolean).join(" · "),
     source: `${carte.source}${maille}`,
   };
+}
+
+/** Part des actifs en emploi qui vont travailler en voiture (RP 2022, base MOBPRO, pondération IPONDI),
+ *  à l'échelle de la ville ENTIÈRE : Lyon (69123) et Marseille (13055) agrègent leurs arrondissements de
+ *  résidence. Vannes et La Rochelle sont les valeurs de l'index (un test vérifie qu'elles n'ont pas dérivé) ;
+ *  Lyon et Marseille se recalculent par docs/audits/2026-11-10-fut185-libelles-densite/mobpro-villes.py.
+ *  Avant FUT-185, ces quatre cartes étaient rédigées à la main sous la source « INSEE MOBPRO ». */
+export const MACHINE_A_SOUS_MOBPRO = {
+  Lyon: 0.2916,
+  Marseille: 0.5178,
+  Vannes: 0.6754,
+  "La Rochelle": 0.5328,
+} as const;
+
+/** La carte Mobilité d'une ville de la machine à sous : la même que celle d'une commune, ville nommée. */
+export function carteMobiliteMachineASous(ville: keyof typeof MACHINE_A_SOUS_MOBPRO): CarteApercu {
+  const carte = carteMobilite(ville, { partVoitureDomicileTravail: MACHINE_A_SOUS_MOBPRO[ville] })!;
+  return { ...carte, titre: `${carte.titre} · ${ville}` };
 }

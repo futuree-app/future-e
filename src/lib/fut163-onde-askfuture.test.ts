@@ -9,7 +9,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { construireReferentiel, construireSystemPrompt } from "./ask/system-prompt.ts";
-import { deriveCategories } from "./commune-categories.ts";
 import type { EaufranceSummary } from "./eaufrance.ts";
 
 type Enrichment = Parameters<typeof construireSystemPrompt>[0]["enrichment"];
@@ -18,7 +17,8 @@ const INSEE = "74056";
 
 /** Le `system` exact, pour l'enrichissement réel de Chamonix dont seul `eau` change. */
 function system(eau: EaufranceSummary | null): string {
-  const referentiel = construireReferentiel({ insee: INSEE, nomCommune: "Chamonix-Mont-Blanc", categories: deriveCategories(INSEE) });
+  // FUT-185 : le référentiel ne porte plus de catégories.
+  const referentiel = construireReferentiel({ insee: INSEE, nomCommune: "Chamonix-Mont-Blanc" });
   return construireSystemPrompt({ communeName: F[INSEE]!.nom, communeInsee: INSEE, referentiel, enrichment: { ...F[INSEE]!.enrichment, eau }, profile: null });
 }
 /** Le bloc ONDE seul, tel qu'il apparaît dans le `system`. */

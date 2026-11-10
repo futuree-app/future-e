@@ -1,0 +1,342 @@
+{
+ "releve": "2026-11-10",
+ "requete": "tensions_catalog?select=id,label_template,subtitle,categories,priority,is_active&is_active=eq.true&order=priority.asc (clé publique, lecture seule)",
+ "lignes": [
+  {
+   "id": "acheter_rural",
+   "label_template": "S'installer à {commune} ?",
+   "subtitle": "Qualité de vie, ressources, valeur",
+   "categories": [
+    "rural_peri_urbain"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "acheter_littoral",
+   "label_template": "Acheter à {commune} ?",
+   "subtitle": "Risque côtier, valeur à 20 ans",
+   "categories": [
+    "littoral"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "acheter_urbain",
+   "label_template": "Acheter à {commune} ?",
+   "subtitle": "Climat urbain, valeur à 20 ans",
+   "categories": [
+    "urbain_dense_nord"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "acheter_montagne",
+   "label_template": "Acheter en altitude à {commune} ?",
+   "subtitle": "Neige, saisons, attractivité",
+   "categories": [
+    "montagne"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "mobilite_fragile",
+   "label_template": "Mon mode de vie à {commune} repose-t-il trop sur la voiture ?",
+   "subtitle": "Dépendance auto, coût carburant, alternatives",
+   "categories": [
+    "rural_peri_urbain",
+    "periurbain_dependance_auto"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "vielocale_reelle",
+   "label_template": "Une vraie vie locale à {commune} ?",
+   "subtitle": "Commerces, cafés, associations",
+   "categories": [
+    "faible_vie_locale"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "acheter_canicule",
+   "label_template": "Acheter à {commune} ?",
+   "subtitle": "Chaleur extrême, valeur à 20 ans",
+   "categories": [
+    "urbain_dense_sud",
+    "mediterranee"
+   ],
+   "priority": 1,
+   "is_active": true
+  },
+  {
+   "id": "enfants_sante",
+   "label_template": "Élever mes enfants à {commune} ?",
+   "subtitle": "Air, cadmium, école, chaleur",
+   "categories": [
+    "all"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "enfants_littoral",
+   "label_template": "Élever mes enfants face au littoral ?",
+   "subtitle": "Submersion, érosion, école",
+   "categories": [
+    "littoral"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "eau_potable",
+   "label_template": "L'eau du robinet va-t-elle rester bonne ?",
+   "subtitle": "Ressource, qualité, restrictions",
+   "categories": [
+    "rural_agricole",
+    "tension_hydrique_connue"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "baignade_ici",
+   "label_template": "Se baigner à {commune} l'été ?",
+   "subtitle": "Plages, rivières, qualité sanitaire",
+   "categories": [
+    "littoral_mediterranee",
+    "littoral_atlantique",
+    "rural_lacs"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "canicule_vivable",
+   "label_template": "Vivre les étés à {commune} dans 20 ans ?",
+   "subtitle": "Chaleur, nuits tropicales, santé",
+   "categories": [
+    "urbain_dense_sud",
+    "mediterranee"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "quitter_ville",
+   "label_template": "Quitter la ville pour {commune} ?",
+   "subtitle": "Cadre de vie, services, isolement",
+   "categories": [
+    "rural_peri_urbain"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "surfer_ici",
+   "label_template": "Surfer à {commune} dans 20 ans ?",
+   "subtitle": "Saisons, qualité de l'eau, tempêtes",
+   "categories": [
+    "littoral_atlantique"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "ski_ici",
+   "label_template": "Skier à {commune} dans 20 ans ?",
+   "subtitle": "Enneigement, stations, saisons",
+   "categories": [
+    "montagne"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "metier_exterieur",
+   "label_template": "Mon métier en extérieur va-t-il tenir ?",
+   "subtitle": "BTP, agriculture, voirie",
+   "categories": [
+    "all"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "metier_tourisme",
+   "label_template": "Mon métier du tourisme va-t-il tenir ?",
+   "subtitle": "Hôtellerie, restauration",
+   "categories": [
+    "littoral",
+    "montagne",
+    "tourisme_urbain"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "metier_agricole",
+   "label_template": "L'agriculture locale va-t-elle survivre ?",
+   "subtitle": "Filières, eau, rendements",
+   "categories": [
+    "rural_agricole"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "enfants_chaleur",
+   "label_template": "Élever mes enfants ici face à la chaleur ?",
+   "subtitle": "École, air, canicule",
+   "categories": [
+    "urbain_dense_sud",
+    "mediterranee"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "vignobles",
+   "label_template": "Mon vignoble va-t-il tenir à {commune} ?",
+   "subtitle": "Cépages, rendements, AOC",
+   "categories": [
+    "rural_viticole"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "feux",
+   "label_template": "Les feux vont-ils atteindre {commune} ?",
+   "subtitle": "Risque, évolution, protection",
+   "categories": [
+    "mediterranee",
+    "rural_forestier"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "voiture_electrique",
+   "label_template": "Passer à l'électrique a-t-il du sens à {commune} ?",
+   "subtitle": "Recharge, trajets, coût, usage réel",
+   "categories": [
+    "periurbain_dependance_auto",
+    "bonne_couverture_irve"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "risque_vectoriel_emergent",
+   "label_template": "Le moustique tigre est-il établi à {commune} ?",
+   "subtitle": "Aedes albopictus, dengue, chikungunya",
+   "categories": [
+    "colonise_albopictus",
+    "mediterranee",
+    "urbain_dense_sud"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "tc_sansvoiture",
+   "label_template": "Vivre sans voiture à {commune} ?",
+   "subtitle": "Tram, métro, marche",
+   "categories": [
+    "reseau_tc"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "croissance_transformation",
+   "label_template": "S'installer à {commune} pendant qu'elle change ?",
+   "subtitle": "Nouveaux arrivants, prix, écoles",
+   "categories": [
+    "croissance_forte"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "valeur_immo",
+   "label_template": "Mon logement va-t-il perdre de la valeur ?",
+   "subtitle": "DPE, risques, assurance",
+   "categories": [
+    "all"
+   ],
+   "priority": 2,
+   "is_active": true
+  },
+  {
+   "id": "air_urbain",
+   "label_template": "Qualité de l'air à {commune} dans 20 ans ?",
+   "subtitle": "Ozone, particules, santé respiratoire",
+   "categories": [
+    "urbain_dense_sud",
+    "vallee_industrielle"
+   ],
+   "priority": 3,
+   "is_active": true
+  },
+  {
+   "id": "demenager_vers",
+   "label_template": "Partir vers le Nord ou rester à {commune} ?",
+   "subtitle": "Comparer les climats futurs",
+   "categories": [
+    "urbain_dense_sud",
+    "mediterranee"
+   ],
+   "priority": 3,
+   "is_active": true
+  },
+  {
+   "id": "metier_general",
+   "label_template": "Mon métier est-il menacé par le climat ?",
+   "subtitle": "Secteur, structure, évolutions",
+   "categories": [
+    "all"
+   ],
+   "priority": 3,
+   "is_active": true
+  },
+  {
+   "id": "randonner_ici",
+   "label_template": "Randonner autour de {commune} ?",
+   "subtitle": "Feux de forêt, chaleur, accès",
+   "categories": [
+    "mediterranee",
+    "rural_forestier"
+   ],
+   "priority": 3,
+   "is_active": true
+  },
+  {
+   "id": "calme_infra",
+   "label_template": "Trouver le calme à {commune} ?",
+   "subtitle": "Routes, voie ferrée, avions",
+   "categories": [
+    "expose_bruit"
+   ],
+   "priority": 3,
+   "is_active": true
+  },
+  {
+   "id": "retraite_ici",
+   "label_template": "Ma retraite à {commune} est-elle viable ?",
+   "subtitle": "Santé, climat, coût de la vie",
+   "categories": [
+    "all"
+   ],
+   "priority": 3,
+   "is_active": true
+  }
+ ]
+}
