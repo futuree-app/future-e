@@ -128,7 +128,9 @@ async function lireRelationsAuLieu(
  * `version` : la place à réserver. Elle vaut 1 pour un premier figement (webhook, rattrapage d'un
  * dossier antérieur). Elle vaut la suivante quand une version PRÊTE existe et qu'une pièce apportée
  * par le lecteur l'a périmée : la précédente reste en base, et `readLatestArtifact` sert la plus
- * haute. Une version prête ne se réécrit jamais, c'est la promesse de la migration 28.
+ * haute. Une version prête ne se réécrit jamais, c'est la promesse de la migration 28, garantie en
+ * base par la 40 (FUT-173) : le marquage d'échec du `catch` ci-dessous ne peut plus repasser en
+ * `failed` une version que `completeArtifact` aurait déjà rendue prête.
  */
 export async function generateDecisionArtifact(
   sb: SupabaseClient, userId: string, project: UserProject, cible: Cible, version = 1,
@@ -151,7 +153,7 @@ export async function generateDecisionArtifact(
     // LA PLACE SE RÉSERVE AVANT DE TRAVAILLER. Deux webhooks concurrents, ou un rejeu Stripe,
     // constateraient sinon tous deux qu'aucun artefact n'existe et généreraient deux fois. Le perdant
     // s'arrête ici, sur la contrainte unique de la table.
-    const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
+    const reserve = await claimArtifactSlot(userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
     // ÉCHEC SIMULÉ, RÉSERVÉ AU TEST DE BOUT EN BOUT (FUT-10, parcours dégradé). La première tentative d'un
@@ -159,7 +161,7 @@ export async function generateDecisionArtifact(
     // pour prouver que la reprise suit le contexte de l'achat. Jamais actif en production : il exige une
     // variable explicite ET un environnement qui n'est ni la production Next, ni la production Vercel.
     if (echecSimuleDeTest(cible.kind, version)) {
-      await failArtifact(sb, userId, insee, scopeKey, version);
+      await failArtifact(userId, insee, scopeKey, version);
       return { status: "failed", reason: "échec simulé (test de bout en bout)" };
     }
 
@@ -173,7 +175,7 @@ export async function generateDecisionArtifact(
       relation: relations.commune,
     });
     if (!commune) {
-      await failArtifact(sb, userId, insee, scopeKey, version);
+      await failArtifact(userId, insee, scopeKey, version);
       return { status: "failed", reason: `commune ${insee} introuvable` };
     }
 
@@ -188,7 +190,7 @@ export async function generateDecisionArtifact(
       const artefact = buildDecisionArtifact(
         commune.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
       );
-      await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
+      await completeArtifact(userId, insee, scopeKey, artefact, version);
       return { status: "ready" };
     }
 
@@ -230,7 +232,7 @@ export async function generateDecisionArtifact(
     //
     // L'échec est donc marqué, la place reste prise, et la génération se rejoue.
     if (vue.status !== "done") {
-      await failArtifact(sb, userId, insee, scopeKey, version);
+      await failArtifact(userId, insee, scopeKey, version);
       return { status: "failed", reason: "lecture Logement indisponible, repli communal non figé" };
     }
 
@@ -247,7 +249,7 @@ export async function generateDecisionArtifact(
     // précédente reste servie, l'écran le dit déjà (« la mise à jour n'a pas abouti »), et la
     // génération se rejoue au prochain essai.
     if (vue.verificationsIndisponibles.length > 0) {
-      await failArtifact(sb, userId, insee, scopeKey, version);
+      await failArtifact(userId, insee, scopeKey, version);
       return {
         status: "failed",
         reason: `vérifications structurantes sans réponse de leur source : ${vue.verificationsIndisponibles.join(", ")}`,
@@ -259,12 +261,12 @@ export async function generateDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
       contexteDuBien(relations.adresse),
     );
-    await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
+    await completeArtifact(userId, insee, scopeKey, artefact, version);
     return { status: "ready" };
   } catch (error) {
     // Le marquage lui-même peut échouer (base injoignable) : on ne laisse pas cette seconde panne
     // remonter, sinon elle masquerait la première et ferait tomber le webhook.
-    await failArtifact(sb, userId, insee, scopeKey, version).catch(() => {});
+    await failArtifact(userId, insee, scopeKey, version).catch(() => {});
     return { status: "failed", reason: error instanceof Error ? error.message : String(error) };
   }
 }

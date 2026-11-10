@@ -433,8 +433,10 @@ test("schéma de test : seules deux adaptations, dites, et aucun fichier de supa
   const { migrationsDeTest, OMIS } = await import("../../scripts/integration/schema-de-test.mjs");
   const m = migrationsDeTest() as { fichier: string; sql: string }[];
   assert.deepEqual([...OMIS], ["02_init_qna.sql"]);
-  // FUT-94 a ajouté la 39 (retours d'utilité) : le schéma de test la reprend sans adaptation.
-  assert.equal(m.at(-1)!.fichier, "39_retours_utilite_dossier.sql");
+  // FUT-94 a ajouté la 39 (retours d'utilité), FUT-173 la 40 (immutabilité de decision_artifact) :
+  // le schéma de test les reprend sans adaptation.
+  assert.equal(m.at(-1)!.fichier, "40_decision_artifact_immuable.sql");
+  assert.ok(m.findIndex((x) => x.fichier.startsWith("39_")) < m.findIndex((x) => x.fichier.startsWith("40_")));
   assert.ok(m.findIndex((x) => x.fichier.startsWith("37_")) < m.findIndex((x) => x.fichier.startsWith("38_")));
   assert.ok(m.findIndex((x) => x.fichier.startsWith("38_")) < m.findIndex((x) => x.fichier.startsWith("39_")));
   assert.ok(m.every((x) => !x.fichier.includes("_down")));

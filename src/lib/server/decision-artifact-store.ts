@@ -1,5 +1,5 @@
 import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   parseDecisionArtifact, etatArtefact,
   type DecisionArtifactV1, type ArtifactStatus, type StoredArtifact, type ArtifactRow,
@@ -7,10 +7,12 @@ import {
 } from "@/lib/decision/decision-artifact";
 import { communeParent } from "@/lib/plm";
 import { catnatFigeAffichable } from "@/lib/decision/catnat-evidence";
+import { reserverPlace, figerVersion, marquerEchec } from "@/lib/decision/decision-artifact-ecriture";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // L'ACCÈS À L'ARTEFACT DE DÉCISION. Aucune règle métier ici : la génération vit chez l'appelant,
-// ce module ne fait qu'écrire, relire et refuser.
+// ce module ne fait qu'écrire, relire et refuser. On LIT avec le client de l'appelant (RLS : ses
+// seules lignes) ; on ÉCRIT avec le service role, ici seulement (FUT-173, plus bas).
 //
 // Le patron est celui de `decision-narrative-store` : le JSON de la base est VALIDÉ, jamais casté,
 // et un artefact écrit sous un contrat antérieur est IGNORÉ plutôt que de faire tomber le rendu.
@@ -159,6 +161,28 @@ export async function readLatestDataSnapshot(
   return null;
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LES ÉCRITURES PASSENT PAR LE SERVICE ROLE, ET SEULEMENT ICI (FUT-173, migration 40).
+//
+// Elles prenaient le client de l'appelant : le jeton du LECTEUR sur `/rapport`, ce qui obligeait la
+// base à lui laisser INSERT, UPDATE et DELETE sur ses lignes. Il pouvait donc, sans passer par le
+// serveur, réécrire ou supprimer une version prête, ou en fabriquer une. Le navigateur n'écrit plus
+// rien ; ce module ne rend jamais le client service role à l'appelant (patron de
+// `retour-utilite-store.ts`). Les appelants vérifient le droit AVANT de générer, et l'identité écrite
+// (`userId`) vient toujours de leur session, jamais d'une entrée du client.
+//
+// La base reste la garde : le trigger de la migration 40 refuse, y compris au service role, toute
+// transition autre que `generating → ready | failed`. Le code, lui, ne vise que les places en cours,
+// et LÈVE quand aucune ligne n'a changé (`decision/decision-artifact-ecriture.ts`).
+// ════════════════════════════════════════════════════════════════════════════════════════════
+let ecrivain: SupabaseClient | null = null;
+function client(): SupabaseClient {
+  ecrivain ??= createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
+  return ecrivain;
+}
+
 /**
  * RÉSERVE la place d'un artefact, sans son contenu.
  *
@@ -166,55 +190,37 @@ export async function readLatestDataSnapshot(
  * ou deux appels concurrents ne peuvent pas créer deux lignes pour la même version. Rend `false`
  * quand la place est déjà prise, ce qui dit à l'appelant de ne PAS générer.
  */
-export async function claimArtifactSlot(
-  sb: SupabaseClient, userId: string, insee: string, scopeKey: string, version = 1,
+export function claimArtifactSlot(
+  userId: string, insee: string, scopeKey: string, version = 1,
 ): Promise<boolean> {
-  const { error } = await sb
-    .from("decision_artifact")
-    .insert({
-      user_id: userId, insee_code: insee, scope_key: scopeKey, version, status: "generating",
-    });
-  if (!error) return true;
-  // 23505 : violation de contrainte unique. C'est le cas NORMAL d'un rejeu, pas une panne.
-  if ((error as { code?: string }).code === "23505") return false;
-  throw error;
-}
-
-/** Le contenu arrive. Une version PRÊTE ne se réécrit jamais ensuite : la suivante sera une v2. */
-export async function completeArtifact(
-  sb: SupabaseClient, userId: string, insee: string, scopeKey: string,
-  artifact: DecisionArtifactV1, version = 1,
-): Promise<void> {
-  const { error } = await sb
-    .from("decision_artifact")
-    .update({
-      status: "ready",
-      payload: artifact,
-      schema_version: artifact.schemaVersion,
-      engine_version: artifact.engineVersion,
-      generated_at: artifact.generatedAt,
-    })
-    .eq("user_id", userId).eq("insee_code", insee)
-    .eq("scope_key", scopeKey).eq("version", version);
-  if (error) throw error;
+  return reserverPlace(client(), userId, insee, scopeKey, version);
 }
 
 /**
- * LA GÉNÉRATION A ÉCHOUÉ, ET LE DROIT RESTE OUVERT.
+ * Le contenu arrive : `generating → ready`. Une version PRÊTE ne se réécrit jamais ensuite, la
+ * suivante sera une v2. LÈVE si la place n'est pas (ou plus) en cours.
+ */
+export function completeArtifact(
+  userId: string, insee: string, scopeKey: string,
+  artifact: DecisionArtifactV1, version = 1,
+): Promise<void> {
+  return figerVersion(client(), userId, insee, scopeKey, artifact, version);
+}
+
+/**
+ * LA GÉNÉRATION A ÉCHOUÉ, ET LE DROIT RESTE OUVERT : `generating → failed`.
  *
  * On marque plutôt que de supprimer : une ligne effacée serait indistinguable d'un dossier
  * antérieur au lot, et personne ne saurait qu'il y a eu une tentative. Surtout, on n'écrit JAMAIS
  * un dossier de repli comme artefact : si l'augmentation Adresse a échoué, le dossier communal qui
  * s'affiche à l'écran est un repli acceptable, il ne doit pas devenir la version définitive d'un
  * dossier d'adresse payé.
+ *
+ * LÈVE si la place n'est pas (ou plus) en cours : le marquage de rattrapage qui suit une exception
+ * ne peut donc plus repasser en `failed` une version que `completeArtifact` venait de rendre prête.
  */
-export async function failArtifact(
-  sb: SupabaseClient, userId: string, insee: string, scopeKey: string, version = 1,
+export function failArtifact(
+  userId: string, insee: string, scopeKey: string, version = 1,
 ): Promise<void> {
-  const { error } = await sb
-    .from("decision_artifact")
-    .update({ status: "failed" })
-    .eq("user_id", userId).eq("insee_code", insee)
-    .eq("scope_key", scopeKey).eq("version", version);
-  if (error) throw error;
+  return marquerEchec(client(), userId, insee, scopeKey, version);
 }

@@ -58,7 +58,7 @@ test("le générateur lit le snapshot ENTIER, jamais une seule de ses pièces", 
 test("le générateur consulte les vérifications muettes, et avant d'écrire la version", () => {
   const src = readFileSync("src/lib/server/generate-decision-artifact.ts", "utf8");
   const garde = src.indexOf("vue.verificationsIndisponibles.length > 0");
-  const ecriture = src.lastIndexOf("await completeArtifact(sb, userId, insee, scopeKey, artefact, version);");
+  const ecriture = src.lastIndexOf("await completeArtifact(userId, insee, scopeKey, artefact, version);");
   assert.ok(garde >= 0, "le générateur ne vérifie plus les pannes partielles");
   assert.ok(garde < ecriture, "la garde doit précéder l'écriture de la version");
   // Et elle refuse vraiment : elle marque l'échec au lieu de seulement le journaliser.
