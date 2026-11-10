@@ -5,7 +5,7 @@
 //
 // Schéma de sortie strict via Anthropic tool use → pas de parsing texte fragile.
 // Périmètre strict : on s'appuie uniquement sur les données futur•e disponibles
-// (communes_categorization, sources publiques de l'enrichissement, user_profiles). Si une donnée
+// (nom de la commune dans communes_categorization, sources publiques de l'enrichissement, user_profiles). Si une donnée
 // manque, Claude doit le dire explicitement, jamais inventer.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -14,11 +14,10 @@ import { canAccessTerritory, loadTerritoryClaims } from "@/lib/active-territory"
 import { quotaQuestions } from "@/lib/territory-claims";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { deriveCategories } from "@/lib/commune-categories";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import {
-  construireReferentiel,
   construireSystemPrompt,
+  referentielDepuisLigne,
   type ProfileRow,
 } from "@/lib/ask/system-prompt";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
@@ -110,28 +109,21 @@ type ToolInput = {
 // Le prompt de base, le référentiel, les blocs d'enrichissement, le profil et leur assemblage vivent dans
 // src/lib/ask/system-prompt.ts (fonctions pures, testées) : ce qui part chez Anthropic s'y construit.
 
-// ─── Référentiel interne : identité et catégories de la commune ────────────
+// ─── Référentiel interne : identité de la commune ───────────────────────────
 // FUT-16 : `communes_tension` n'est plus lue. Ses notes « sur 100 » ne font plus partie de ce que le
 // modèle reçoit ; les mesures correspondantes sont dans les blocs DRIAS et ADEME.
+// FUT-185 : seul le nom est lu dans `communes_categorization`. Ses catégories (et le repli par département)
+// n'atteignent plus le modèle : ce sont des clés d'angle de l'accueil, pas des faits (voir system-prompt.ts).
 type SupabaseServer = Awaited<ReturnType<typeof createClient>>;
 
 async function lireReferentielInterne(insee: string, supabase: SupabaseServer): Promise<string> {
-  const { data: catRow } = await supabase
+  const { data: ligne } = await supabase
     .from("communes_categorization")
-    .select("commune_name, insee_code, categories")
+    .select("commune_name, insee_code")
     .eq("insee_code", insee)
     .maybeSingle();
 
-  const categories =
-    catRow?.categories && catRow.categories.length > 0
-      ? catRow.categories
-      : deriveCategories(insee);
-
-  return construireReferentiel({
-    insee,
-    nomCommune: catRow?.commune_name ?? null,
-    categories,
-  });
+  return referentielDepuisLigne(insee, ligne);
 }
 
 // ─── POST : génération d'une réponse ───────────────────────────────────────

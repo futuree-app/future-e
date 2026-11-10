@@ -13,7 +13,7 @@ const enrichment = {
 };
 const system = construireSystemPrompt({
   communeName: "Marseille", communeInsee: "13055",
-  referentiel: construireReferentiel({ insee: "13055", nomCommune: "Marseille", categories: [] }),
+  referentiel: construireReferentiel({ insee: "13055", nomCommune: "Marseille" }),
   enrichment, profile: null,
 });
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
