@@ -51,9 +51,16 @@ const catalogue: Question[] = JSON.parse(readFileSync(catalogueJson, "utf8")).li
     id: r.id, categories: r.categories || [], priority: r.priority ?? 3, is_active: r.is_active ?? true,
   }),
 );
-const manuelle = new Map<string, string[]>(
-  JSON.parse(readFileSync(manuelleJson, "utf8")).lignes.map((r: { insee_code: string; categories: string[] }) => [r.insee_code, r.categories]),
-);
+type LigneManuelle = { commune_name: string; insee_code: string; categories: string[] };
+const lignesManuelles: LigneManuelle[] = JSON.parse(readFileSync(manuelleJson, "utf8")).lignes;
+// Le parcours de FutureELanding : ligne cherchée par code, puis par nom (`ilike` exact). Avant la reprise de FUT-185,
+// la première trouvée s'applique ; depuis, seulement si elle NOMME la commune (`ligneManuelleConcorde`).
+function ligneManuelle(c: { insee: string; nom: string }, concorde: ((a: string, b: string) => boolean) | null): string[] | undefined {
+  const parCode = lignesManuelles.find((r) => r.insee_code === c.insee);
+  const parNom = lignesManuelles.find((r) => r.commune_name.toLowerCase() === c.nom.toLowerCase());
+  const l = concorde ? [parCode, parNom].find((r) => r && concorde(r.commune_name, c.nom)) : (parCode ?? parNom);
+  return l?.categories;
+}
 
 // ── Copie de buildTensions (FutureELanding.tsx jusqu'à 00fe22ec), pour les révisions antérieures ────
 const TERRITORY = new Set(["calme_infra", "tc_sansvoiture", "croissance_transformation", "vielocale_reelle", "quitter_ville"]);
@@ -86,7 +93,7 @@ function choisirQuestions(categories: string[]): string[] {
 const lignes: string[] = [];
 for (const c of communes) {
   const catsIndex: string[] = vie.deriveCategoriesFromEntry(c);
-  const man = manuelle.get(c.insee);
+  const man = ligneManuelle(c, categoriesReelles?.ligneManuelleConcorde ?? null);
   let cats: string[];
   let usedFallback: boolean;
   if (categoriesReelles) {

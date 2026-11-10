@@ -65,7 +65,8 @@ N'incluez profile_question QUE si l'information manquante améliorerait substant
 // commune de l'Isère ou du Puy-de-Dôme, `urbain_dense_sud` pour Aix-en-Provence (795 hab/km²),
 // `tension_hydrique_connue` sans donnée. Le modèle les lisait comme la géographie de la commune. Ce qu'il peut
 // affirmer vient des blocs mesurés, avec leur source (densité ADEME, part motorisée des trajets, DRIAS,
-// Géorisques…), comme pour /qna, qui ne reçoit plus non plus ces catégories.
+// Géorisques…), comme pour /qna, qui ne reçoit plus non plus ces catégories. AskFuture ne lit plus la table
+// du tout (`referentielAskFuture`) : son nom y était faux pour 15 lignes sur 44.
 //
 // FUT-16 : le référentiel portait l'identité de la commune et ses catégories territoriales.
 // Il recevait aussi les lignes de `communes_tension` (« score », « exposition », « vulnérabilité »,
@@ -96,12 +97,11 @@ export function construireReferentiel(args: EntreeReferentiel): string {
   return lines.join("\n");
 }
 
-/** La ligne `communes_categorization` lue par AskFuture : seul son nom sert, ses catégories sont ignorées. */
-export type LigneReferentiel = { commune_name?: string | null } | null | undefined;
-
-/** Le référentiel interne d'une commune, depuis sa ligne de la table manuelle (ou son absence). */
-export function referentielDepuisLigne(insee: string, ligne: LigneReferentiel): string {
-  return construireReferentiel({ insee, nomCommune: ligne?.commune_name ?? null });
+/** Le référentiel interne qu'AskFuture transmet (FUT-185) : le code INSEE seul. La table manuelle
+ *  `communes_categorization` n'est plus lue : catégories sans mesure, et 15 lignes sur 44 dont le code
+ *  désigne une autre commune que le nom. Le nom de la commune figure déjà dans l'en-tête des données. */
+export function referentielAskFuture(insee: string): string {
+  return construireReferentiel({ insee, nomCommune: null });
 }
 
 // ─── Formatage des blocs d'enrichissement pour le system prompt ────────────

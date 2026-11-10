@@ -26,7 +26,7 @@ import {
   getQuestionIntro,
 } from "@/lib/accueil/recits";
 import { construireFaitsCommune } from "@/lib/accueil/faits";
-import { categoriesAccueil } from "@/lib/accueil/categories-accueil";
+import { categoriesAccueil, ligneManuelleConcorde } from "@/lib/accueil/categories-accueil";
 import { buildTensions } from "@/lib/accueil/questions";
 import { reponseDeRepli } from "@/lib/accueil/reponses";
 import { CLE_LANDING_COMMUNE } from '@/lib/purge-recherche';
@@ -525,15 +525,17 @@ export default function FutureELanding() {
 
     let matchedRow = null;
 
+    // FUT-185 : une ligne ne vaut que pour la commune qu'elle nomme (15 lignes sur 44 portent le code d'une autre
+    // commune), et son code INSEE n'est jamais repris : voir src/lib/accueil/categories-accueil.ts.
     for (const query of queries) {
       const { data, error } = await query;
-      if (!error && data) {
+      if (!error && data && ligneManuelleConcorde(data.commune_name, nextCommune.name)) {
         matchedRow = data;
         break;
       }
     }
 
-    const inseeCode = nextCommune.citycode || matchedRow?.insee_code || null;
+    const inseeCode = nextCommune.citycode || null;
     // Catégorisation manuelle (44 communes affinées à la main) prioritaire ; sinon
     // on tire les catégories de la VRAIE donnée commune via /api/landing-signals
     // (index A), au lieu du préfixe département qui laissait dormir le catalogue.
@@ -566,7 +568,7 @@ export default function FutureELanding() {
       usedFallback,
     });
 
-    const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
+    const indicatorInseeCode = nextCommune.citycode;
 
     if (indicatorInseeCode) {
       // GisSol n'est plus lu ici : sa seule carte (« Qualité des sols ») disait « les sols de X » depuis

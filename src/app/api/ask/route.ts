@@ -5,7 +5,7 @@
 //
 // Schéma de sortie strict via Anthropic tool use → pas de parsing texte fragile.
 // Périmètre strict : on s'appuie uniquement sur les données futur•e disponibles
-// (nom de la commune dans communes_categorization, sources publiques de l'enrichissement, user_profiles). Si une donnée
+// (sources publiques de l'enrichissement, user_profiles). Si une donnée
 // manque, Claude doit le dire explicitement, jamais inventer.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -17,7 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
 import {
   construireSystemPrompt,
-  referentielDepuisLigne,
+  referentielAskFuture,
   type ProfileRow,
 } from "@/lib/ask/system-prompt";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
@@ -112,19 +112,10 @@ type ToolInput = {
 // ─── Référentiel interne : identité de la commune ───────────────────────────
 // FUT-16 : `communes_tension` n'est plus lue. Ses notes « sur 100 » ne font plus partie de ce que le
 // modèle reçoit ; les mesures correspondantes sont dans les blocs DRIAS et ADEME.
-// FUT-185 : seul le nom est lu dans `communes_categorization`. Ses catégories (et le repli par département)
-// n'atteignent plus le modèle : ce sont des clés d'angle de l'accueil, pas des faits (voir system-prompt.ts).
-type SupabaseServer = Awaited<ReturnType<typeof createClient>>;
-
-async function lireReferentielInterne(insee: string, supabase: SupabaseServer): Promise<string> {
-  const { data: ligne } = await supabase
-    .from("communes_categorization")
-    .select("commune_name, insee_code")
-    .eq("insee_code", insee)
-    .maybeSingle();
-
-  return referentielDepuisLigne(insee, ligne);
-}
+// FUT-185 : `communes_categorization` n'est plus lue non plus. Ses catégories (et le repli par département)
+// sont des clés d'angle de l'accueil, pas des faits, et 15 de ses 44 lignes portent le code INSEE d'une
+// autre commune (« Sanary-sur-Mer » sur 83117, Saint-Paul-en-Forêt) : le modèle recevait un nom faux. Le
+// référentiel ne porte plus que le code ; le nom vient de la requête, dans l'en-tête des données.
 
 // ─── POST : génération d'une réponse ───────────────────────────────────────
 export async function POST(request: NextRequest) {
@@ -232,10 +223,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Les 4 sources tournent en parallèle. Supabase (rapide, déjà ouvert)
-    // + ADEME/DRIAS/Hub'Eau (caches framework côté lib).
-    const [referentiel, enrichment, lecturePrix] = await Promise.all([
-      lireReferentielInterne(communeInsee, supabase),
+    // Les sources tournent en parallèle : ADEME/DRIAS/Hub'Eau (caches framework côté lib) et les prix.
+    const referentiel = referentielAskFuture(communeInsee);
+    const [enrichment, lecturePrix] = await Promise.all([
       gatherCommuneEnrichment(communeInsee, { avecEauPotable: true }),
       // FUT-138 : les prix immobiliers de la commune, lus dans l'index (aucun appel externe).
       getLecturePrix(askInsee, communeName).catch(() => null),

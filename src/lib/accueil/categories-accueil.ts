@@ -16,6 +16,25 @@
 //     pas : l'assainissement retire ce qu'aucune mesure ne confirme, il ne réécrit pas la table.
 // Les autres clés de la table sont gardées telles quelles. Si plus rien ne reste de la ligne manuelle, l'accueil
 // prend l'index, puis le département, exactement comme pour une commune hors table.
+//
+// UNE LIGNE NE VAUT QUE POUR LA COMMUNE QU'ELLE NOMME. 15 des 44 lignes portent le code INSEE d'une autre commune
+// (« Sanary-sur-Mer » sur 83117, Saint-Paul-en-Forêt, dans les terres ; « La Crau » sur 83048, La Croix-Valmer).
+// L'accueil cherchait d'abord par code : Saint-Paul-en-Forêt recevait `littoral_mediterranee`. Une ligne n'est donc
+// retenue que si son nom concorde avec la commune choisie (`ligneManuelleConcorde`), et son code n'est jamais lu.
+
+/** Un nom de commune comparable : sans accents, casse ni ponctuation. */
+export function normaliserNomCommune(nom: string): string {
+  return nom.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/** La ligne manuelle nomme-t-elle la commune choisie ? Égalité des noms normalisés, ou nom court de la ligne
+ *  suivi d'un mot (« Chamonix » pour Chamonix-Mont-Blanc). Un nom absent ne concorde jamais. */
+export function ligneManuelleConcorde(nomLigne: string | null | undefined, nomCommune: string | null | undefined): boolean {
+  if (!nomLigne || !nomCommune) return false;
+  const a = normaliserNomCommune(nomLigne);
+  const b = normaliserNomCommune(nomCommune);
+  return a.length > 0 && (a === b || b.startsWith(`${a} `));
+}
 
 /** Les clés de la table manuelle qu'aucune mesure ne fonde par elle-même (voir ci-dessus). */
 export const CLES_MANUELLES_SANS_MESURE: ReadonlySet<string> = new Set(["rural_peri_urbain", "periurbain_dependance_auto"]);

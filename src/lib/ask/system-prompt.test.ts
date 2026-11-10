@@ -10,7 +10,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { aDesDonneesDetaillees, construireReferentiel, construireSystemPrompt, formatEnrichmentBlock, referentielDepuisLigne, SYSTEM_PROMPT_BASE } from "./system-prompt.ts";
+import { aDesDonneesDetaillees, construireReferentiel, construireSystemPrompt, formatEnrichmentBlock, referentielAskFuture, SYSTEM_PROMPT_BASE } from "./system-prompt.ts";
 
 type LigneTension = { slug: string; score: number; ind_exposition: number | null; ind_vulnerabilite: number | null; ind_adaptation: number | null; ind_occurrence: number | null };
 type Commune = {
@@ -21,11 +21,11 @@ type Commune = {
 };
 const F = JSON.parse(readFileSync(new URL("./__fixtures__/communes.json", import.meta.url), "utf8")).communes as Record<string, Commune>;
 
-/** Ce que la route construit, à l'identique (lireReferentielInterne puis construireSystemPrompt). FUT-185 : la
- *  ligne de la table manuelle est passée entière, catégories comprises ; seul son nom doit en sortir. */
+/** Ce que la route construit, à l'identique (referentielAskFuture puis construireSystemPrompt). FUT-185 : la
+ *  table manuelle n'est plus lue, sa ligne (`c.categorization`) ne peut donc rien apporter. */
 function systemDe(insee: string, enrichment = F[insee].enrichment, profile: Record<string, unknown> | null = null): string {
   const c = F[insee];
-  const referentiel = referentielDepuisLigne(insee, c.categorization);
+  const referentiel = referentielAskFuture(insee);
   return construireSystemPrompt({ communeName: c.nom, communeInsee: insee, referentiel, enrichment, profile });
 }
 
@@ -124,7 +124,7 @@ test("T3 : le prompt de base, le référentiel et le profil restent assemblés c
   const s = systemDe("06088", F["06088"].enrichment, { home_commune: "Nice", housing_type: "appartement" });
   assert.ok(s.startsWith(SYSTEM_PROMPT_BASE));
   assert.match(s, /DONNÉES TERRITORIALES DISPONIBLES — Nice \(INSEE 06088\)/);
-  assert.match(blocReferentiel(s), /^\[Référentiel interne futur•e\]\nINSEE : 06088\nNom commune \(référentiel interne\) : Nice\n$/);
+  assert.match(blocReferentiel(s), /^\[Référentiel interne futur•e\]\nINSEE : 06088\n$/);
   assert.match(s, /PROFIL UTILISATEUR CONNU\nCommune de résidence : Nice\nType de logement : appartement$/);
 });
 
@@ -156,7 +156,7 @@ test("T5 : Chamonix (aucune ligne en base) ne reçoit plus de phrase sur l'absen
   assert.equal(F["74056"].tensions.length, 0);
   const s = systemDe("74056");
   assert.doesNotMatch(s, /Pas de scores|scores? de tension|base interne pour cette commune/);
-  assert.match(blocReferentiel(s), /^\[Référentiel interne futur•e\]\nINSEE : 74056\nNom commune \(référentiel interne\) : Chamonix-Mont-Blanc\n$/);
+  assert.match(blocReferentiel(s), /^\[Référentiel interne futur•e\]\nINSEE : 74056\n$/);
   assert.doesNotMatch(s, /\n\n\n\n/); // plus de trou laissé par les lignes retirées
 });
 
@@ -184,6 +184,7 @@ test("T7 : /api/ask ne lit plus communes_tension et envoie à Anthropic le résu
   const route = readFileSync(new URL("../../app/api/ask/route.ts", import.meta.url), "utf8");
   const code = route.replace(/\/\/.*$/gm, ""); // les commentaires peuvent nommer la table, pas le code
   assert.doesNotMatch(code, /communes_tension/);
+  assert.doesNotMatch(code, /communes_categorization/); // FUT-185
   assert.doesNotMatch(code, /ind_(exposition|vulnerabilite|adaptation|occurrence)|hasTensionData/);
   // Un seul appel au modèle, et son `system` est celui que les tests ci-dessus inspectent.
   assert.equal(code.match(/anthropic\.messages\.create\(/g)?.length, 1);
