@@ -1,0 +1,40 @@
+const { chromium } = require("/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/fut190-envies/node_modules/playwright-core");
+(async () => {
+  const b = await chromium.launch({ channel: "chrome" });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.route((u) => !/^https?:\/\/localhost(:\d+)?\//.test(u.href), (r) => r.abort());
+  const p = await ctx.newPage(); const ok = (n, c) => console.log(c ? "OK " : "ECHEC ", n);
+  const txt = async () => (await p.locator("main").innerText()).replace(/[  ]/g, " ");
+  await p.goto("http://localhost:3190/dev/envies?s=depart"); await p.waitForSelector("[data-titre-vue]");
+  const refus = p.getByRole("button", { name: /refuser/i }); if (await refus.count()) await refus.first().click();
+  ok("accueil : invitation facultative", /Pour aller plus loin, si vous le souhaitez/.test(await txt()));
+  await p.getByRole("button", { name: "Ajouter une envie" }).click();
+  await p.waitForSelector("text=J'aimerais donner plus de place à");
+  await p.fill("input[placeholder]", "cultiver un potager");
+  ok("saisie : envie reconnue", /Cultiver une partie de votre alimentation/.test(await txt()));
+  await p.getByRole("button", { name: "Pas encore" }).click();
+  await p.getByRole("button", { name: "chaque semaine" }).click();
+  await p.getByRole("button", { name: "Ajouter à mon Projet" }).click();
+  ok("projet : envie listée", /À découvrir/.test(await txt()));
+  await p.getByRole("button", { name: "Voir ce qu'elle change entre vos lieux" }).click();
+  await p.waitForSelector("text=La question qui peut départager");
+  let t = await txt();
+  ok("comparer : incertitude dite", /pourrait les distinguer : il manque une réponse/.test(t) && /futur•e ne le sait pas/.test(t));
+  await p.getByRole("button", { name: "Oui, mais plusieurs années d'attente" }).click();
+  t = await txt();
+  ok("réponse : lecture réévaluée et attribuée", /D'après votre vérification du 10 nov\., seul Chalonnes-sur-Loire/.test(t) && /les données publiques ne changent pas/.test(t));
+  await p.getByRole("button", { name: "Vue d'ensemble" }).click();
+  await p.getByRole("button", { name: "Chalonnes-sur-Loire", exact: true }).click();
+  t = await txt();
+  ok("retour au candidat : vérification du lieu listée", /À vérifier pour ce lieu/.test(t) && /Le jardin a-t-il un point d'eau/.test(t));
+  await p.goBack(); await p.waitForTimeout(300);
+  ok("retour navigateur : vue d'ensemble", /Vos communes et vos logements/.test(await txt()));
+  // texte libre non lu
+  await p.goto("http://localhost:3190/dev/envies?s=depart#/projet"); await p.reload(); await p.waitForSelector("input[placeholder]");
+  await p.fill("input[placeholder]", "observer les oiseaux");
+  ok("texte libre : aucune lecture inventée", /n'a pas de donnée pour lire cette envie/.test(await txt()));
+  // clavier : focus visible
+  await p.keyboard.press("Tab"); const f = await p.evaluate(() => getComputedStyle(document.activeElement).outlineStyle);
+  ok("clavier : contour de focus (" + f + ")", f !== "none");
+  await b.close();
+})();
