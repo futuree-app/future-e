@@ -2,6 +2,17 @@
 
 10 novembre 2026. Audit, reproduction sur base isolée, correctif. Rien n'a été écrit en production.
 
+**Révision 2 (même jour, après contre-revue)** : audit réel des droits de production intégré (§ 1), privilèges réduits au strict nécessaire et `search_path` vide pour la fonction privilégiée (§ 2), banc rejoué sous PostgreSQL 17.5 et 18.3 (§ 3), protocole de recette Supabase préparé mais **non exécuté** (§ 8).
+
+**Ce qui est établi, et ce qui ne l'est pas encore :**
+
+| Conclusion | Statut |
+|---|---|
+| Les droits réels de production sont ceux de la migration 28 (le défaut existe en production) | **vérifié**, audit catalogue en lecture seule du 10/11 |
+| La migration 40 protège l'invariant sur PostgreSQL | **vérifié sur base isolée** (PGlite, PostgreSQL 17.5 et 18.3) |
+| La migration 40 fonctionne sur Supabase (PostgREST, supabase-js, Auth, concurrence réelle) | **non vérifié** : recette du projet de test à faire (§ 8) |
+| Une version vendue a été altérée en production | **non observé** : risque prouvé, exploitation non constatée |
+
 ## En une phrase
 
 Une version `ready` pouvait être réécrite, repassée en `failed` ou supprimée : par son propriétaire, directement avec son jeton et sans passer par le serveur, et par le serveur lui-même dans un cas d'erreur. Désormais, PostgreSQL le refuse à tous les rôles, et le navigateur n'a plus aucun droit d'écriture sur la table.
@@ -15,7 +26,7 @@ Une version `ready` pouvait être réécrite, repassée en `failed` ou supprimé
 | RLS `decision_artifact_own_update` (28) | `using (auth.uid() = user_id)`, sans condition de statut ni `with check` | le propriétaire réécrit tout champ de ses lignes, `ready` comprises |
 | RLS `decision_artifact_own_delete` (28) | `using (auth.uid() = user_id)` | le propriétaire supprime ses versions prêtes |
 | RLS `decision_artifact_own_insert` (28) | `with check (auth.uid() = user_id)`, statut libre | le propriétaire insère une version `ready` au contenu de son choix, ou réserve une place avant le webhook |
-| Privilèges | ceux que Supabase pose par défaut : tout pour `anon`, `authenticated`, `service_role` (observé en production : `anon` a SELECT) | TRUNCATE ouvert à tous les rôles au niveau SQL (non exposé par PostgREST) |
+| Privilèges | ceux que Supabase pose par défaut, **relevés en production** : SELECT, INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER, REFERENCES pour `anon`, `authenticated` et `service_role` | TRUNCATE ouvert à tous les rôles au niveau SQL (non exposé par PostgREST) |
 | `service_role` | BYPASSRLS | aucune policy ne s'applique au webhook ; seul un trigger l'arrête |
 | Code (`decision-artifact-store.ts`) | `completeArtifact` / `failArtifact` filtrent l'identité, pas le statut `generating` ; un UPDATE à zéro ligne rend `error: null` | voir les deux chemins fautifs ci-dessous |
 
@@ -35,6 +46,7 @@ Pour que ces écritures marchent, la migration 28 devait laisser au propriétair
 ### Les deux chemins fautifs du serveur
 
 1. **Le rattrapage d'exception** (`generate-decision-artifact.ts`, bloc `catch`) appelle `failArtifact` sans filtre de statut. Si `completeArtifact` a été validé en base mais que sa réponse s'est perdue (coupure réseau), le `catch` repasse la version **prête** en `failed`. Le lecteur perd sa version vendue jusqu'à la suivante. Possible, jamais observé : la production ne compte aucune ligne `failed` avec une date de génération.
+   **Après correctif**, ce même cas ne détruit plus rien : `failArtifact` ne vise que les places `generating` et le trigger refuse `ready → failed`. Il reste un effet bénin, accepté pour ce ticket : le générateur peut encore **déclarer** `failed` à son appelant (journal « génération échouée », réponse 502 de « Mettre à jour l'analyse ») alors que la version est prête en base. C'est un diagnostic erroné transitoire ; la page suivante sert la version prête. Pas de refonte de l'orchestration ici.
 2. **Zéro ligne = succès.** Un UPDATE qui ne trouve rien rend `error: null` : un `completeArtifact` sur une place disparue ou déjà terminée était un succès silencieux.
 
 ### Nature du risque
@@ -43,30 +55,42 @@ Intégrité et traçabilité des conclusions vendues, **sans accès inter-compte
 
 ### Production : ce qui a été vérifié, et comment
 
-Aucun connecteur Supabase n'était disponible dans la session (outil MCP absent, CLI non liée). Vérifié par des **décomptes HEAD en lecture seule** sur l'API REST (aucun payload, aucun identifiant lu), le 10/11/2026 :
+**Audit du catalogue, en lecture seule** (contre-revue, 10/11/2026, transaction `READ ONLY` sur le projet Supabase de production ; aucun payload, aucun identifiant de compte lu, aucune donnée modifiée) :
 
-| Mesure | Valeur |
+| Point | Constat en production |
 |---|---|
-| lignes | 96 |
-| `ready` / `failed` / `generating` | 80 / 16 / 0 |
-| `ready` sans payload ou sans `generated_at` | 0 / 0 |
-| non-`ready` avec payload ; `failed` avec `generated_at` | 0 / 0 |
-| versions > 1 | 50 |
-| `generating` abandonnées (> 15 min) | 0 |
-| `anon` : SELECT accordé (HTTP 200, 0 ligne par RLS) | oui |
+| Version de PostgreSQL | **17.6** |
+| `public.decision_artifact` | propriétaire `postgres` ; RLS active, non forcée |
+| Policies | `own_select`, `own_insert`, `own_update`, `own_delete`, toutes `auth.uid() = user_id` : **exactement la migration 28** |
+| Privilèges | `anon`, `authenticated`, `service_role` : SELECT, INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER, REFERENCES |
+| Contournement de RLS | `service_role` oui ; `authenticated` et `anon` non |
+| Triggers | aucun trigger d'immutabilité |
+| Contraintes | unicité (user, commune, scope, version) ; clé étrangère `user_id → auth.users` `ON DELETE CASCADE` |
+| Fonctions citant la table | `etat_livraison_intention` seule (migration 38), lecture `exists(... status = 'ready')`, non exécutable par `authenticated` |
+| Lignes | 80 `ready`, 16 `failed`, 0 `generating` ; aucune `ready` sans contenu ni date |
 
-**Non vérifié en production** : les policies réellement en place, les privilèges d'écriture par rôle, l'absence de trigger existant. Le diagnostic les suppose conformes à la migration 28 et aux privilèges par défaut de Supabase, ce que confirme le SELECT d'`anon`. À faire avant la migration : `supabase/maintenance/fut173-audit-lecture-seule.sql` (transaction `read only`, catalogue seulement).
+**Décomptes complémentaires** (HEAD en lecture seule sur l'API REST, première livraison) : 96 lignes, 50 versions > 1, aucune ligne non `ready` avec payload, aucune `failed` avec date de génération, aucune `generating` abandonnée.
+
+**Conclusion.** Le diagnostic est confirmé sur les droits réels : le défaut existe en production tel que décrit. Cet audit **ne dit rien** du comportement de la migration 40 sur Supabase ; il fixe l'état de départ que le retour arrière doit rétablir.
 
 ## 2. Le correctif
 
 **Migration `40_decision_artifact_immuable.sql`**, un trigger et des droits :
 
-- **Trigger `decision_artifact_integrite`** (BEFORE INSERT/UPDATE/DELETE, pour toutes les lignes, tous les rôles, y compris `service_role`) :
+- **Trigger `decision_artifact_integrite`** (BEFORE INSERT/UPDATE/DELETE, pour toutes les lignes, tous les rôles, y compris `service_role`). Sa fonction est `SECURITY DEFINER` pour lire `auth.users` ; elle a un `search_path` **vide** (tout ce qu'elle cite est qualifié, le reste vient de `pg_catalog`) et son EXECUTE est retiré à `PUBLIC`, `anon`, `authenticated` et `service_role` (un trigger se déclenche sans ce droit, et une fonction trigger ne s'appelle pas directement). Aucune autre fonction privilégiée, aucune RPC :
   - une ligne naît `generating`, sans payload ni date ;
   - l'identité (`id`, `user_id`, `insee_code`, `scope_key`, `version`, `created_at`) ne change jamais ;
   - transitions permises : `generating → ready` (avec payload et date) et `generating → failed` (sans contenu) ; `ready` et `failed` sont terminaux ;
   - une version `ready` ne se supprime que si son compte n'existe plus (cascade de `auth.users`).
-- **Droits** : les policies own insert/update/delete sont retirées ; `authenticated` garde SELECT (RLS inchangée), `anon` n'a plus rien, TRUNCATE est retiré à `service_role`.
+- **Droits**, remis à zéro puis rendus au strict nécessaire (`revoke all` puis `grant`) :
+
+  | Rôle | Avant (relevé en production) | Après |
+  |---|---|---|
+  | `anon` | les 7 privilèges | aucun |
+  | `authenticated` | les 7 privilèges | **SELECT seul**, filtré par `decision_artifact_own_select` (inchangée) |
+  | `service_role` | les 7 privilèges | SELECT, INSERT, UPDATE, DELETE (réserver, terminer, lire, nettoyer une ligne non prête) |
+
+  Les policies own insert/update/delete sont retirées. TRUNCATE (qui ne déclenche aucun trigger de ligne), TRIGGER et REFERENCES ne sont plus accordés qu'au propriétaire `postgres`. Dépendances vérifiées : aucune vue ne lit la table, et la seule fonction qui la lit (`etat_livraison_intention`) est `SECURITY DEFINER`, propriété de `postgres`, donc indépendante de ces privilèges.
 
 **Serveur, strictement nécessaire :**
 
@@ -88,7 +112,7 @@ Le trigger tient l'invariant pour tous les rôles ; les droits séparent qui éc
 
 ## 3. Matrice avant / après
 
-Reproduite par `scripts/integration/fut173-decision-artifact-postgres.mjs` : PostgreSQL 18.3 (PGlite), rôles et privilèges par défaut de Supabase, `auth.uid()` lu dans les claims JWT comme PostgREST. Comptes fictifs A et B ; A possède v1 `ready`, v2 `failed`, v3 `generating` sur la même commune ; B possède v1 `ready`. Chaque cas tourne sous le rôle réellement utilisé, dans une transaction annulée.
+Reproduite par `scripts/integration/fut173-decision-artifact-postgres.mjs`, exécuté sous **PostgreSQL 17.5** (PGlite 0.3.14, la version la plus proche de la 17.6 de production) **et 18.3** (PGlite 0.5.8), avec des résultats identiques : rôles et privilèges par défaut de Supabase, `auth.uid()` lu dans les claims JWT comme PostgREST. Comptes fictifs A et B ; A possède v1 `ready`, v2 `failed`, v3 `generating` sur la même commune ; B possède v1 `ready`. Chaque cas tourne sous le rôle réellement utilisé, dans une transaction annulée.
 
 Codes : `42501` privilège refusé, `23514` refus du trigger, `23001` suppression refusée par le trigger, `23505` contrainte unique. « 0 LIGNE » est un **succès silencieux** pour supabase-js (aucune erreur rendue).
 
@@ -132,7 +156,7 @@ Codes : `42501` privilège refusé, `23514` refus du trigger, `23001` suppressio
 
 ### Parcours avec le vrai code d'écriture du serveur (après correctif)
 
-Les fonctions de `decision-artifact-ecriture.ts` exécutées sous `service_role` par un client minimal qui émet le SQL de PostgREST. Les 17 passent :
+Les fonctions de `decision-artifact-ecriture.ts` exécutées sous `service_role` par un client minimal qui émet le SQL de PostgREST. Les 19 passent, sous 17.5 comme sous 18.3 :
 
 1. le propriétaire ne peut pas modifier une version ready (payload, statut, versions, date, identité) ;
 2. il ne peut pas la supprimer par une requête ordinaire (ni le service role) ;
@@ -142,14 +166,18 @@ Les fonctions de `decision-artifact-ecriture.ts` exécutées sous `service_role`
 6. une v2 se crée sans mutation de la v1 (ni de la v1 de B) ;
 7. transitions et mutations d'identité interdites refusées, même en service role ;
 8. le rattrapage `marquerEchec` sur une version déjà prête lève, la version reste prête ; 8b. l'ancien chemin (jeton du lecteur) est refusé ; 8c. une écriture à zéro ligne lève ;
-9. suppression de compte : la cascade emporte toutes les versions de B, `ready` comprise, rien de A ; 9b. effacement ciblé par la procédure de maintenance, trigger réactivé ensuite, protection intacte hors procédure ; 9c. la purge 38 lit toujours l'état de livraison ;
+9. suppression de compte, exécutée sous un rôle `supabase_auth_admin` non superutilisateur qui n'a aucun droit sur la table (comme le service Auth) : la cascade emporte toutes les versions de B, `ready` comprise, rien de A ; 9b. effacement ciblé par la procédure de maintenance, trigger réactivé ensuite, protection intacte hors procédure ; 9c. la purge 38 lit toujours l'état de livraison ;
 10. le retour arrière rétablit exactement les droits de la 28 ;
-11. la migration s'applique sur une base qui porte déjà des lignes de tous statuts **sans les modifier**, et se rejoue.
+11. la migration s'applique sur une base qui porte déjà des lignes de tous statuts **sans les modifier**, et se rejoue ;
+12. privilèges exacts (lus par `has_table_privilege`) : avant = les 7 pour les 3 rôles (l'état de production) ; après = `authenticated` SELECT seul, `anon` rien, `service_role` SELECT/INSERT/UPDATE/DELETE ; la lecture du propriétaire marche encore sous RLS ; seule `own_select` reste ; après le retour arrière, privilèges identiques à l'état de départ ;
+13. fonction privilégiée : `SECURITY DEFINER`, `search_path=""`, EXECUTE refusé à `anon`, `authenticated`, `service_role` ; le trigger se déclenche quand même, y compris quand l'appelant pose un `search_path` hostile.
 
 ### Reproduire
 
 ```
-mkdir -p /tmp/pg && (cd /tmp/pg && npm i @electric-sql/pglite@0.5.8)
+mkdir -p /tmp/pg17 && (cd /tmp/pg17 && npm i @electric-sql/pglite@0.3.14)   # PostgreSQL 17.5
+PGLITE_MODULE=/tmp/pg17/node_modules/@electric-sql/pglite/dist/index.js node scripts/integration/fut173-decision-artifact-postgres.mjs
+mkdir -p /tmp/pg && (cd /tmp/pg && npm i @electric-sql/pglite@0.5.8)       # PostgreSQL 18.3
 PGLITE_MODULE=/tmp/pg/node_modules/@electric-sql/pglite/dist/index.js node scripts/integration/fut173-decision-artifact-postgres.mjs
 node --test src/lib/decision/decision-artifact-ecriture.test.ts
 ```
@@ -159,6 +187,11 @@ Sortie 0 = conforme, 1 = écart, 3 = non exécuté. Le banc FUT-10 (`fut10-postg
 Suite complète `npm test` : 4 306 tests, les 69 échecs sont identiques sur `main` ; 5 échecs de plus n'apparaissent que dans un chemin contenant « · » (tests FUT-27 qui lisent un chemin d'URL encodé, sans lien avec ce ticket).
 
 ### Ce que le banc ne prouve pas
+
+La réussite de ces tests isolés **n'est pas une validation du déploiement Supabase**.
+
+- l'écart de version : PGlite 17.5 et 18.3, production 17.6. Rien dans le correctif ne dépend d'une fonctionnalité récente (trigger PL/pgSQL, `has_table_privilege`, `revoke`/`grant`), mais l'équivalence n'est pas démontrée sur Supabase ;
+- le propriétaire réel de la fonction : dans PGlite, `postgres` est superutilisateur ; sur Supabase il ne l'est pas tout à fait. La lecture de `auth.users` par la fonction `SECURITY DEFINER` doit donc être vérifiée en recette (cascade de `deleteUser`) ;
 
 - PostgREST et supabase-js eux-mêmes (le client minimal en reproduit les requêtes) ;
 - la concurrence réelle : PGlite n'a qu'une connexion. Le raisonnement : deux `figerVersion` concurrents sur la même place se sérialisent sur le verrou de ligne ; le second relit la condition `status = generating` après le premier (READ COMMITTED) et ne trouve rien (il lève), et sans ce filtre le trigger verrait `old.status = ready` et refuserait ;
@@ -198,22 +231,19 @@ Suite complète `npm test` : 4 306 tests, les 69 échecs sont identiques sur `ma
 
 ## 6. Déploiement et retour arrière
 
-**Avant toute action en production (GO du porteur requis à chaque étape) :**
+Aucune de ces étapes n'est autorisée à ce jour ; chacune demande un GO explicite du porteur.
 
-1. Contre-revue indépendante de la PR.
-2. Lancer `supabase/maintenance/fut173-audit-lecture-seule.sql` en production et comparer : policies = les 4 de la 28, privilèges = défaut Supabase, aucun trigger, colonnes = celles de la 28. Tout écart arrête le déploiement.
-3. Recette sur le projet Supabase de test (schéma 01 → 40) : achat de test, rattrapage `/rapport`, « Mettre à jour l'analyse », dépôt d'un diagnostic, suppression du compte de test.
-
-**Déploiement :**
-
-4. Fusionner la PR : le code (écritures en service role) part en production. Il fonctionne avec la migration 28 comme avec la 40.
-5. Vérifier en production un rattrapage ou une mise à jour réelle (une version naît).
-6. Appliquer `40_decision_artifact_immuable.sql` (SQL Editor), puis relancer l'audit : trigger présent et actif (`O`), policies réduites à `own_select`, `authenticated` = SELECT seul, `anon` = rien.
+1. Dernière contre-revue indépendante.
+2. GO pour fusionner : le code (écritures en service role) part en production. Il fonctionne avec la migration 28 comme avec la 40.
+3. Vérifier le déploiement et une génération réelle (une version naît par un rattrapage ou « Mettre à jour l'analyse »).
+4. GO distinct pour appliquer `40_decision_artifact_immuable.sql` (SQL Editor). Juste avant, relancer `supabase/maintenance/fut173-audit-lecture-seule.sql` : tout écart avec l'état relevé le 10/11 (§ 1) arrête l'opération.
+5. Relancer l'audit : trigger présent et actif (`O`), seule `own_select` reste, `authenticated` = SELECT, `anon` = rien, `service_role` = SELECT/INSERT/UPDATE/DELETE, fonction avec `search_path=""`.
+6. Vérifier les parcours de lecture (un dossier figé s'ouvre) et de génération (une nouvelle version naît).
 
 **Retour arrière :**
 
-- Code seul : revert de la PR ; à faire **après** `40_decision_artifact_immuable_down.sql` si la 40 est déjà appliquée (le code antérieur écrit avec le jeton du lecteur).
-- Migration seule : `40_decision_artifact_immuable_down.sql` rétablit les policies et privilèges de la 28 (testé, cas 10). Aucune donnée n'est touchée dans un sens comme dans l'autre.
+- Migration seule : `40_decision_artifact_immuable_down.sql` rétablit les policies et les privilèges relevés en production (les 7 pour les 3 rôles), retire le trigger et sa fonction. Testé (cas 10 et 12). Aucune donnée touchée.
+- Code : la migration doit être annulée **avant** de redéployer l'ancien code, qui écrit avec le jeton du lecteur. Le code FUT-173 fonctionne avec ou sans la migration.
 
 ## 7. Fichiers
 
@@ -221,5 +251,46 @@ Suite complète `npm test` : 4 306 tests, les 69 échecs sont identiques sur `ma
 - `supabase/maintenance/fut173-audit-lecture-seule.sql`, `supabase/maintenance/fut173-effacement-controle.sql`
 - `src/lib/decision/decision-artifact-ecriture.ts` (+ `.test.ts`)
 - `src/lib/server/decision-artifact-store.ts`, `src/lib/server/generate-decision-artifact.ts`
-- `scripts/integration/fut173-decision-artifact-postgres.mjs`
+- `scripts/integration/fut173-decision-artifact-postgres.mjs` (banc isolé), `scripts/integration/fut173-recette-supabase.mjs` (recette réelle, non exécutée)
 - ajustements de libellés : `src/lib/fut10-livraison.test.ts`, `src/lib/decision/artefact-voisinage.test.ts`, `scripts/integration/schema-de-test.mjs`, `appliquer-schema-test.mjs`, `fut10-postgres.mjs`, `supabase/README.md`
+
+## 8. Recette sur le projet Supabase de test
+
+### Statut au 10/11/2026 : NON exécutée
+
+Un projet de test distinct de la production existe : `future-e-test` (réf. `atvknbgahcuovcyqapfx`), utilisé par FUT-10 et FUT-94 (09/11). Ses clés vivaient dans `.env.fut10-test`, **absent de ce poste** ; aucune variable `FUT10_*` n'est définie, aucune instance Supabase locale n'existe (pas de Docker). Sans ces clés, la recette n'a pas été lancée, et rien n'a été improvisé en production. Aucun projet distant n'a été créé, aucune migration distante lancée.
+
+### Ce qui est prêt
+
+`scripts/integration/fut173-recette-supabase.mjs`, protégé par le garde-fou FUT-10 : il refuse de démarrer sans un projet déclaré dans `FUT10_SUPABASE_REF_TEST`, refuse la production en dur et d'après les `.env` du poste, et refuse des clés d'un autre projet. Vérifié : avec la référence de production déclarée « de test », il s'arrête (sortie 2) avant tout appel réseau.
+
+Il utilise le **vrai** supabase-js, PostgREST et Auth : deux comptes fictifs `fut173+…@futuree.test` connectés par mot de passe, et le vrai code d'écriture du serveur avec un vrai client service role. Il nettoie tout en fin de course (`deleteUser`), y compris en cas d'échec.
+
+### Protocole (sur le projet de TEST uniquement, chaque étape sur GO)
+
+1. Charger l'environnement de test : `set -a; . ./.env.fut10-test; set +a` (jamais `.env.local`).
+2. Vérifier l'état du schéma du projet de test (migrations 01 → 39, comme la production ; relancer `fut173-audit-lecture-seule.sql` dessus).
+3. `node scripts/integration/fut173-recette-supabase.mjs --phase=avant` : reproduit le défaut à travers PostgREST (le propriétaire réécrit sa version prête, insère une version fabriquée).
+4. Appliquer `40_decision_artifact_immuable.sql` **sur le projet de test**.
+5. `node scripts/integration/fut173-recette-supabase.mjs --phase=apres`.
+6. Appliquer `40_decision_artifact_immuable_down.sql` sur le projet de test, puis relancer `--phase=avant` : le comportement d'origine revient.
+7. Réappliquer la 40 sur le projet de test si la recette applicative (étape suivante) doit suivre.
+8. Recette applicative, application locale (`next dev`) branchée sur le projet de test : achat de test Stripe (première livraison), rejeu du webhook (`stripe events resend`), rattrapage commune et adresse au rendu, « Mettre à jour l'analyse », dépôt d'un diagnostic, suppression du compte de test.
+
+### Ce que couvre `--phase=apres`
+
+| Vérification | Couvert |
+|---|---|
+| authentification et isolement entre deux comptes fictifs | oui |
+| écriture par le vrai supabase-js et PostgREST (service role) | oui |
+| réservation et génération normales | oui |
+| rejeu d'une même version | oui |
+| mise à jour créant une nouvelle version, l'ancienne intacte | oui |
+| concurrence : deux réservations, puis deux terminaisons simultanées (connexions distinctes) | oui |
+| lecture de la dernière version prête après un échec | oui |
+| zéro ligne modifiée = erreur applicative | oui |
+| refus de modifier ou supprimer une version prête (propriétaire 42501, service role 23514 / 23001) | oui |
+| suppression d'un compte fictif et cascade | oui |
+| retour arrière sur données fictives | oui (étape 6) |
+| parcours applicatifs (Stripe, `/rapport`, actualisation) | non : recette manuelle, étape 8 |
+

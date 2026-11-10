@@ -23,8 +23,8 @@
 --   4. une version `ready` ne se supprime pas tant que son compte existe. La suppression du compte
 --      (Auth, `auth.admin.deleteUser`) la supprime par la cascade de `user_id`, et c'est le seul
 --      effacement ordinaire : il est tracé par le journal d'Auth.
--- Et, par les droits : `anon` et `authenticated` LISENT (leurs lignes, RLS inchangée) et n'écrivent
--- plus rien. Les écritures passent par le serveur, en service role, dans `decision-artifact-store.ts`.
+-- Et, par les droits : `authenticated` LIT ses lignes (RLS inchangée) et ne peut rien d'autre ; `anon`
+-- n'a plus aucun droit. Les écritures passent par le serveur, en service role, dans `decision-artifact-store.ts`.
 --
 -- CE QU'ELLE NE FAIT PAS. Aucune ligne existante n'est lue, modifiée ni supprimée : le trigger ne
 -- juge que les écritures FUTURES. Une version `ready` déjà en base reste telle quelle ; une ligne
@@ -45,8 +45,11 @@ begin;
 create or replace function public.decision_artifact_integrite() returns trigger
 language plpgsql
 -- SECURITY DEFINER pour lire `auth.users` (suppression), que les rôles appelants ne voient pas.
+-- `search_path` VIDE : la fonction s'exécute avec les droits du propriétaire, aucun objet ne doit donc
+-- pouvoir être résolu par un schéma que l'appelant contrôlerait. Tout ce qu'elle cite est qualifié
+-- (`auth.users`) ; le reste vient de `pg_catalog`, toujours consulté en premier.
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 begin
   if tg_op = 'INSERT' then
@@ -95,7 +98,7 @@ begin
 end;
 $$;
 
-revoke all on function public.decision_artifact_integrite() from public, anon, authenticated;
+revoke all on function public.decision_artifact_integrite() from public, anon, authenticated, service_role;
 
 drop trigger if exists decision_artifact_integrite on public.decision_artifact;
 create trigger decision_artifact_integrite
@@ -103,13 +106,21 @@ create trigger decision_artifact_integrite
   for each row execute function public.decision_artifact_integrite();
 
 -- LE NAVIGATEUR LIT, LE SERVEUR ÉCRIT (patron des migrations 35 et 39).
+-- Chaque rôle exposé reçoit EXACTEMENT ce dont il a besoin, à partir de zéro : les privilèges par défaut
+-- de Supabase (relevés en production le 10/11/2026 : SELECT, INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER,
+-- REFERENCES pour les trois rôles) sont retirés en bloc, puis seuls les nécessaires sont rendus.
+--   anon           rien ;
+--   authenticated  SELECT, filtré par la policy `decision_artifact_own_select` (inchangée) ;
+--   service_role   SELECT, INSERT, UPDATE, DELETE : réserver, terminer, lire, nettoyer une ligne non
+--                  prête. Pas TRUNCATE (il ne déclenche aucun trigger de ligne), ni TRIGGER ni REFERENCES
+--                  (aucun code ne crée d'objet sur cette table).
+-- Aucune vue ni fonction appelée par ces rôles ne dépend de ces privilèges : la seule fonction qui lit la
+-- table (`etat_livraison_intention`, migration 38) est SECURITY DEFINER, propriété de `postgres`.
 drop policy if exists "decision_artifact_own_insert" on public.decision_artifact;
 drop policy if exists "decision_artifact_own_update" on public.decision_artifact;
 drop policy if exists "decision_artifact_own_delete" on public.decision_artifact;
-revoke all on table public.decision_artifact from anon;
-revoke insert, update, delete, truncate on table public.decision_artifact from authenticated;
+revoke all on table public.decision_artifact from anon, authenticated, service_role;
 grant select on table public.decision_artifact to authenticated;
--- TRUNCATE ne déclenche aucun trigger de ligne : personne d'autre que le propriétaire ne le garde.
-revoke truncate on table public.decision_artifact from service_role;
+grant select, insert, update, delete on table public.decision_artifact to service_role;
 
 commit;

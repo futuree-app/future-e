@@ -41,6 +41,11 @@ if (!modPath) {
   process.exit(3);
 }
 const { PGlite } = await import(pathToFileURL(modPath).href);
+{
+  const t = new PGlite();
+  console.log((await t.query("select version() v")).rows[0].v.split(" on ")[0]);
+  await t.close();
+}
 const sql = (f) => readFileSync(new URL(`../../supabase/${f}`, import.meta.url), "utf8");
 
 const A = "aaaaaaaa-0000-4000-8000-00000000000a";
@@ -57,6 +62,10 @@ async function base({ avecFut173 }) {
     grant usage on schema public to anon, authenticated, service_role;
     create schema auth; grant usage on schema auth to anon, authenticated, service_role;
     create table auth.users (id uuid primary key);
+    -- Comme sur Supabase : la suppression d'un compte est faite par le service Auth, sous son propre rôle
+    -- (non superutilisateur), qui ne possède QUE le schéma auth.
+    create role supabase_auth_admin nologin; grant usage on schema auth to supabase_auth_admin;
+    grant select, delete on auth.users to supabase_auth_admin;
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub', '')::uuid $$;
     insert into auth.users values ('${A}'), ('${B}');
@@ -282,7 +291,10 @@ const servie = async (db, user) => (await db.query(
   });
   await cas("9a · suppression du compte (Auth) : la cascade emporte toutes les versions de B, ready comprise, et rien de A", async () => {
     const avantA = (await db.query(`select count(*)::int n from public.decision_artifact where user_id = $1`, [A])).rows[0].n;
-    await db.query(`delete from auth.users where id = $1`, [B]);
+    // Sous le rôle du service Auth, pas en superutilisateur : la cascade et le trigger (SECURITY DEFINER,
+    // search_path vide) doivent passer sans qu'il ait le moindre droit sur decision_artifact.
+    await db.exec("set role supabase_auth_admin");
+    try { await db.query(`delete from auth.users where id = $1`, [B]); } finally { await db.exec("reset role"); }
     assert.equal((await db.query(`select count(*)::int n from public.decision_artifact where user_id = $1`, [B])).rows[0].n, 0);
     assert.equal((await db.query(`select count(*)::int n from public.decision_artifact where user_id = $1`, [A])).rows[0].n, avantA);
   });
@@ -314,6 +326,48 @@ await cas("10 · retour arrière : 40_down rétablit les droits de la 28 (le pro
   assert.equal(await resultat(db, "service_role", null, CAS.find((c) => c.id === "S2").q), "AUTORISÉ (1)");
   const pol = (await db.query(`select count(*)::int n from pg_policies where tablename = 'decision_artifact'`)).rows[0].n;
   assert.equal(pol, 4);
+  await db.close();
+});
+
+// LES PRIVILÈGES EXACTS, par rôle. AVANT = ce qu'a relevé l'audit de production du 10/11/2026 (privilèges
+// par défaut de Supabase : les 7 pour les 3 rôles) ; APRÈS = le strict nécessaire ; DOWN = retour à AVANT.
+const privileges = async (db) => Object.fromEntries((await db.query(
+  `select r.rolname as role, coalesce((select string_agg(p, ',' order by p) from unnest(array['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']) p
+      where has_table_privilege(r.rolname, 'public.decision_artifact', p)), '') as privs
+     from pg_roles r where r.rolname in ('anon', 'authenticated', 'service_role') order by 1`)).rows.map((l) => [l.role, l.privs]));
+const TOUS = "DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE";
+
+await cas("12 · privilèges exacts : authenticated = SELECT seul, anon = rien, service_role = SELECT/INSERT/UPDATE/DELETE ; le retour arrière rend l'état relevé en production", async () => {
+  const db = await base({ avecFut173: false });
+  const avant = await privileges(db);
+  assert.deepEqual(avant, { anon: TOUS, authenticated: TOUS, service_role: TOUS });
+  await db.exec(sql("40_decision_artifact_immuable.sql"));
+  assert.deepEqual(await privileges(db), { anon: "", authenticated: "SELECT", service_role: "DELETE,INSERT,SELECT,UPDATE" });
+  // La lecture du propriétaire, seule permise, marche encore sous RLS.
+  assert.equal(await resultat(db, "authenticated", A, `select * from public.decision_artifact`), "AUTORISÉ (3)");
+  const pol = (await db.query(`select policyname from pg_policies where tablename = 'decision_artifact' order by 1`)).rows.map((l) => l.policyname);
+  assert.deepEqual(pol, ["decision_artifact_own_select"]);
+  await db.exec(sql("40_decision_artifact_immuable_down.sql"));
+  assert.deepEqual(await privileges(db), avant);
+  await db.close();
+});
+
+await cas("13 · la fonction SECURITY DEFINER : search_path vide, exécution refusée à tous les rôles exposés, et elle marche quand même sous chacun", async () => {
+  const db = await base({ avecFut173: true });
+  const f = (await db.query(`select prosecdef, proconfig from pg_proc where proname = 'decision_artifact_integrite'`)).rows[0];
+  assert.equal(f.prosecdef, true);
+  assert.deepEqual(f.proconfig, ['search_path=""']);
+  for (const r of ["anon", "authenticated", "service_role"]) {
+    const ok = (await db.query(`select has_function_privilege($1, 'public.decision_artifact_integrite()', 'EXECUTE') e`, [r])).rows[0].e;
+    assert.equal(ok, false, r);
+  }
+  // Le trigger se déclenche malgré tout (l'EXECUTE n'est pas vérifié au déclenchement), et un search_path
+  // hostile chez l'appelant n'y change rien.
+  await db.exec("begin");
+  await db.exec("create schema piege; set local search_path = piege");
+  await db.exec("set local role service_role");
+  await assert.rejects(db.query(`update public.decision_artifact set payload = '{}' ${OU(A, 1)}`), (e) => e.code === "23514");
+  await db.exec("rollback");
   await db.close();
 });
 
