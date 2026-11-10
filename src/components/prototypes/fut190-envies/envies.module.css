@@ -1,0 +1,183 @@
+/* FUT-190 · prototype « envies ». S'ajoute aux feuilles V5 et V5.1 (même racine, mêmes jetons du Relevé).
+   Une seule forme nouvelle : la RÈGLE DE PORTÉE. Le signal passe par la position et la longueur
+   (DESIGN.md § 3.6) ; la zone d'inconnu se dessine (§ 3.4) ; aucune teinte nouvelle. */
+
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* L'invitation, sur la vue d'ensemble : une ligne, jamais une étape. */
+.invitation { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 18px 0; border-top: 1px solid var(--r-filet); }
+.invitation p { margin: 0; }
+.invitationTexte { display: grid; gap: 2px; flex: 1 1 320px; }
+.invitationTitre { font-size: 17px; font-weight: 600; color: var(--r-encre); }
+
+/* Mon Projet : les envies, et leur saisie. */
+.envies { list-style: none; margin: 0; padding: 0; display: grid; }
+.envie { display: grid; gap: 6px; padding: 16px 0; border-top: 1px solid var(--r-filet); }
+.envie:first-child { border-top: 0; padding-top: 0; }
+.envie p { margin: 0; }
+.envieTete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.envieNom { font-size: 17px; font-weight: 600; color: var(--r-encre); }
+.intention { font-size: 13.5px; font-weight: 500; color: var(--r-discret); border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 1px 8px; white-space: nowrap; }
+.intention[data-intention="garder"] { color: var(--r-encre); border-color: var(--r-encre); }
+.saisie { display: grid; gap: 16px; padding: 20px 22px; margin-top: 18px; border: 1px solid var(--r-filet-fort); border-radius: calc(var(--r-rayon) * 2); }
+.saisie p { margin: 0; }
+.saisieTitre { font-size: 20px; font-weight: 600; color: var(--r-encre); }
+.saisieChamp { display: grid; gap: 6px; }
+.saisieChamp input, .note textarea { font: inherit; font-size: 16px; color: var(--r-encre); background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 10px 12px; min-height: 48px; width: 100%; box-sizing: border-box; }
+.saisieChamp input:focus-visible, .note textarea:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 1px; }
+.exemples { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; }
+.compris { display: grid; gap: 6px; padding: 14px 16px; background: var(--r-plaque); border-radius: var(--r-rayon); }
+.comprisCle { font-size: 14px; font-weight: 600; color: var(--r-discret); }
+
+/* Comparer : le tableau d'ensemble des envies, en mots. */
+.table { display: grid; border-top: 1px solid var(--r-filet-fort); border-bottom: 1px solid var(--r-filet-fort); margin-bottom: 8px; }
+.rang { display: grid; grid-template-columns: minmax(150px, 1.1fr) repeat(3, minmax(0, 1fr)); gap: 4px 18px; padding: 14px 0; border-top: 1px solid var(--r-filet); align-items: start; }
+.rang:first-child { border-top: 0; }
+.rang[data-tete] { padding: 10px 0; border-bottom: 1px solid var(--r-filet-fort); }
+.rang[data-tete] + .rang { border-top: 0; }
+.rangCol { font-size: 14px; font-weight: 600; color: var(--r-encre); }
+.rangColSous { display: block; font-weight: 400; font-size: 13px; color: var(--r-discret); }
+.rangNom { display: grid; gap: 4px; justify-items: start; }
+.rangLien { font: inherit; font-weight: 600; font-size: 16px; color: var(--r-encre); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); }
+.rangLien:hover { text-decoration-color: var(--r-encre); }
+.rangLien:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.cell { display: grid; gap: 2px; font-size: 15px; color: var(--r-encre); min-width: 0; }
+.cellNom { display: none; font-size: 13px; font-weight: 600; color: var(--r-discret); }
+.cell[data-etat="non_su"] { color: var(--r-discret); }
+.cellSous { font-size: 13px; color: var(--r-discret); }
+.etat { display: inline-flex; align-items: center; gap: 8px; }
+.pastille { flex: none; width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--r-encre); box-sizing: border-box; }
+.pastille[data-etat="a_portee"], .pastille[data-etat="sur_place"] { background: var(--r-encre); }
+.pastille[data-etat="hors_portee"] { border-color: var(--reg-ecart); }
+.pastille[data-etat="non_su"] { border-style: dashed; border-color: var(--r-discret); }
+.pastille[data-etat="declare"] { border-radius: 2px; transform: rotate(45deg); width: 9px; height: 9px; }
+@media (max-width: 759px) {
+  .rang { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .rang[data-tete] { display: none; }
+  .cell { grid-template-columns: 96px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+  .cellNom { display: block; }
+  .cell > :not(.cellNom) { grid-column: 2; }
+}
+
+/* Une envie : son bloc dans Comparer. */
+.bloc { padding: 36px 0 8px; border-top: 1px solid var(--r-filet-fort); scroll-margin-top: 130px; display: grid; gap: 22px; }
+.bloc p { margin: 0; }
+.blocTete { display: grid; gap: 8px; }
+.blocTitre { margin: 0; font-size: clamp(22px, 2.6vw, 28px); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; color: var(--r-encre); }
+.blocTitre:focus { outline: none; }
+.capacite { padding-left: 14px; border-left: 2px solid var(--r-filet-fort); color: var(--r-texte); font-size: 15px; margin: 12px 0 20px !important; }
+.blocSous { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.detail > summary { font-size: 16px; font-weight: 600; color: var(--r-encre); min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+.reglages { display: grid; gap: 4px 40px; }
+@media (min-width: 760px) { .reglages { grid-template-columns: repeat(2, minmax(0, max-content)); } }
+.ecart { font-size: clamp(18px, 2vw, 21px); line-height: 1.45; color: var(--r-encre); display: grid; gap: 4px; }
+.ecartCle { font-size: 14px; font-weight: 600; color: var(--r-discret); }
+.ecart[data-ecart="a_verifier"] .ecartCle, .ecart[data-ecart="non_lu"] .ecartCle { color: var(--reg-controle); }
+
+/* LA RÈGLE DE PORTÉE */
+.regle { display: grid; gap: 0; }
+.regleLegende { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 13.5px; color: var(--r-discret); margin-bottom: 10px; }
+.regleLegende span { display: inline-flex; align-items: center; gap: 7px; }
+.ligne { display: grid; grid-template-columns: minmax(150px, 0.34fr) minmax(0, 1fr); gap: 4px 20px; padding: 14px 0 12px; border-top: 1px solid var(--r-filet); align-items: start; }
+.ligneNom { display: grid; gap: 2px; }
+.ligneNom strong { font-size: 16px; font-weight: 600; color: var(--r-encre); }
+.ligneDepart { font-size: 13px; line-height: 1.4; color: var(--r-discret); }
+.piste { position: relative; height: 34px; margin: 2px 9px 0; }
+.piste::before { content: ""; position: absolute; left: 0; right: 0; top: 16px; height: 2px; background: var(--r-filet-fort); }
+.pisteInconnue::before { height: 10px; top: 12px; background: repeating-linear-gradient(135deg, var(--r-filet-fort) 0 2px, transparent 2px 7px); border: 1px dashed var(--r-filet-fort); box-sizing: border-box; }
+.trait { position: absolute; left: 0; top: 14px; height: 6px; background: var(--r-encre); border-radius: 1px; }
+.traitAuDela { position: absolute; top: 14px; height: 6px; background: var(--reg-ecart); border-radius: 1px; }
+.limite { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--r-encre); }
+.repere { position: absolute; top: 9px; width: 16px; height: 16px; margin-left: -8px; box-sizing: border-box; border: 2px solid var(--r-encre); background: var(--r-fond); border-radius: 50%; }
+.repere[data-mode="a_pied"] { background: var(--r-encre); }
+.repere[data-mode="en_voiture"] { border-radius: 2px; }
+.repere[data-dehors] { border-color: var(--reg-ecart); }
+.repere[data-declare] { border-radius: 2px; transform: rotate(45deg); background: var(--r-fond); width: 13px; height: 13px; margin-left: -6.5px; top: 10.5px; }
+.graduations { position: relative; height: 18px; margin: 0 9px; font-size: 12px; color: var(--r-meta); font-variant-numeric: tabular-nums; }
+.graduations span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.graduations span[data-bord="debut"] { transform: none; }
+.graduations span[data-bord="fin"] { transform: translateX(-100%); }
+@media (max-width: 759px) { .graduations span:not(.graduationLimite):not([data-bord]) { display: none; } }
+.graduationLimite { color: var(--r-encre); font-weight: 600; }
+.ligneListe { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 3px; font-size: 14.5px; color: var(--r-texte); }
+.ligneListe li { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
+.ligneListe strong { color: var(--r-encre); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ligneListe li[data-dehors] strong { color: var(--reg-ecart); }
+.ligneInconnu { margin: 8px 0 0; font-size: 14.5px; color: var(--r-discret); }
+@media (max-width: 759px) { .ligne { grid-template-columns: minmax(0, 1fr); } }
+
+/* Les deux lieux, côte à côte : rend possible, demande, reste inconnu. */
+.lieux { display: grid; gap: 28px; }
+@media (min-width: 860px) { .lieux { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; } }
+.lieuCol { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.lieuNom { margin: 0; font-size: 19px; font-weight: 600; color: var(--r-encre); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.groupe { display: grid; gap: 8px; }
+.groupeCle { font-size: 14px; font-weight: 600; color: var(--r-discret); display: flex; gap: 8px; align-items: baseline; }
+.groupeCle::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--r-teinte, var(--r-meta)); }
+.groupe[data-genre="possible"] { --r-teinte: var(--reg-alignement); }
+.groupe[data-genre="demande"] { --r-teinte: var(--reg-compromis); }
+.groupe[data-genre="inconnu"] { --r-teinte: var(--reg-non-su); }
+.groupe[data-genre="verifie"] { --r-teinte: var(--reg-controle); }
+.faits { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fait { display: grid; gap: 2px; font-size: 15.5px; line-height: 1.5; color: var(--r-encre); }
+.groupe[data-genre="inconnu"] .fait { color: var(--r-texte); }
+.faitMeta { font-size: 13px; color: var(--r-discret); }
+.vide { font-size: 14.5px; color: var(--r-discret); font-style: italic; }
+.change { display: grid; gap: 4px; padding-top: 12px; border-top: 1px dashed var(--r-filet-fort); font-size: 15px; color: var(--r-texte); }
+.changeCle { font-size: 14px; font-weight: 600; color: var(--r-encre); }
+
+/* La question qui peut départager. */
+.question { display: grid; gap: 12px; padding: 20px 22px; background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: calc(var(--r-rayon) * 2); }
+.questionCle { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--r-discret); }
+.questionTexte { font-size: 19px; line-height: 1.4; font-weight: 600; color: var(--r-encre); }
+.questionMeta { font-size: 14px; color: var(--r-discret); }
+.reponses { display: flex; flex-wrap: wrap; gap: 8px; }
+.reponse { font: inherit; font-size: 15px; color: var(--r-encre); background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 8px 14px; min-height: 44px; cursor: pointer; text-align: left; }
+.reponse:hover { border-color: var(--r-encre); }
+.reponse[aria-pressed="true"] { border-color: var(--r-encre); box-shadow: inset 0 0 0 1px var(--r-encre); font-weight: 600; }
+.reponse:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.effet { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--r-filet-fort); }
+.effetCle { display: block; font-size: 14px; font-weight: 600; color: var(--r-discret); }
+.autres { display: grid; gap: 14px; padding-top: 8px; }
+.autre { display: grid; gap: 10px; padding: 14px 0; border-top: 1px solid var(--r-filet); }
+
+.adresse { display: grid; gap: 8px; padding-top: 10px; }
+.adresse ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15px; color: var(--r-texte); }
+.sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.sources li { display: grid; gap: 2px; font-size: 14.5px; color: var(--r-discret); }
+.sources strong { color: var(--r-encre); font-weight: 600; }
+
+/* La version minimale : ce que le moteur actuel sait dire, et une note libre. */
+.minimal { display: grid; gap: 14px; }
+.note { display: grid; gap: 6px; }
+.note textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+
+/* Fiche d'un lieu. */
+.annonce { display: grid; gap: 4px; padding: 14px 0; border-top: 1px solid var(--r-filet); border-bottom: 1px solid var(--r-filet); }
+.annonce p { margin: 0; }
+.fictif { font-size: 12.5px; color: var(--r-discret); border: 1px dashed var(--r-filet-fort); border-radius: var(--r-rayon); padding: 0 6px; white-space: nowrap; }
+.verifs { list-style: none; margin: 0; padding: 0; display: grid; }
+.verif { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; padding: 14px 0; border-top: 1px solid var(--r-filet); }
+.verif:first-child { border-top: 0; padding-top: 0; }
+.verif p { margin: 0; }
+.verifTexte { display: grid; gap: 2px; flex: 1 1 320px; }
+.lieuEnvie { display: grid; gap: 12px; padding: 18px 0; border-top: 1px solid var(--r-filet); }
+.lieuEnvie:first-child { border-top: 0; padding-top: 0; }
+.lieuEnvie p { margin: 0; }
+
+.lignesProjet { display: grid; border-top: 1px solid var(--r-filet-fort); }
+.ligneProjet { display: grid; grid-template-columns: minmax(150px, 0.8fr) repeat(2, minmax(0, 1fr)); gap: 4px 18px; padding: 14px 0; border-top: 1px solid var(--r-filet); }
+.ligneProjet:first-child { border-top: 0; }
+.ligneProjet p { margin: 0; }
+.ligneProjetNom { font-weight: 600; color: var(--r-encre); }
+.ligneProjetPoids { display: block; font-weight: 400; font-size: 13.5px; color: var(--r-discret); }
+@media (max-width: 759px) { .ligneProjet { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
+.candidats { display: grid; gap: 0; }
+.candidat { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 6px 14px; padding: 18px 0; border-top: 1px solid var(--r-filet); align-items: start; }
+.candidat:first-child { border-top: 0; }
+.candidat p { margin: 0; }
+@media (min-width: 760px) { .candidat { grid-template-columns: 28px minmax(0, 1fr) auto; } }
+.candidatNom { margin: 0; font-size: 24px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+.candidatCorps { display: grid; gap: 6px; min-width: 0; }
+.candidatGeste { grid-column: 2; }
+@media (min-width: 760px) { .candidatGeste { grid-column: 3; grid-row: 1; } }
