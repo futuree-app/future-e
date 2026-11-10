@@ -84,27 +84,35 @@ Ces cas sont des tests (`src/lib/territoire/fut184-grille-densite.test.ts`) : ch
 |---|---|---|---|
 | Registre | `territoire-facts@2` | `territoire-facts@3` | toutes les empreintes changent ; un snapshot `@2` stocké reste en base, non relu |
 | Contrat de synthèse | `territoire-synthese@7` | `territoire-synthese@8` | clé de cache nouvelle ; les synthèses `@7` restent en base, non servies pour un snapshot `@3` |
-| Régénération | | à la visite suivante, par commune et horizon, sous le garde de budget existant | volume connu au 09/11 (audit FUT-182, lecture seule) : 34 snapshots sur 16 communes, 45 synthèses, aucune au-delà de `@4`. Non recompté ici : aucune lecture de la base de production dans ce lot |
+| Régénération | | à la visite suivante, par commune et horizon, sous le garde de budget existant | volume non mesuré dans ce lot (aucune lecture de la base de production). Seul repère : l'audit FUT-182 du 09/11 relevait 34 snapshots sur 16 communes et 45 synthèses ; chiffre daté, non revérifié, qui ne vaut pas état actuel |
 | Dossiers et artefacts figés | | inchangés | le snapshot Territoire est relu à chaque visite ; les artefacts de dossier ne portent pas l'identité Territoire |
 | Garde FUT-147 | | `__fixtures__/fut184-lignes-admises.json` (45 lignes du contrat, 52 du registre), produit par `scripts/fut184/figer-lignes-admises.mjs` ; empreinte et clé de référence recalculées (Châtelaillon) | la garde restaure les lignes de FUT-177 (« @7 ») et FUT-179 que FUT-184 remplace |
 
 ## 6. Coordination avec FUT-182
 
-**État réel (10/11, lu sur GitHub et Linear) :** FUT-182 est *In Progress* avec deux PR ouvertes. #146 (`324bed79`) est documentaire (audit phase A, scripts). #148 (`6d791840`, lot L0) change des libellés nature dans l'accueil, AskFuture et le comparateur, **sans toucher** ni `territoire/facts.ts` ni `synthesis-contract.ts`. La phase B (recalcul OSO, `territoire-facts@3` et `territoire-synthese@8` dans le plan de #146) n'a pas commencé : elle attend le téléchargement du raster et un GO.
+**État vérifié le 10/11/2026 sur GitHub** (`main` toujours à 6972d5a4) :
 
-**Recouvrement :** un seul fichier commun avec #148, `fut147-non-regression.test.ts`, dans des zones distinctes ; fusion à blanc sans conflit. Aucun fichier commun avec #146.
+| Lot FUT-182 | État | Effet sur les contrats Territoire |
+|---|---|---|
+| B1 | **terminé** : comptes nationaux exacts | aucun (documentaire) |
+| B2 | **terminé** : calcul national du secteur habité, comparé à Filosofi 2021 | aucun (documentaire) |
+| PR #146 | ouverte, documentaire, tête `df87faa979c32c900d7c3de3dcaf06407d326d9e`. Sa contre-revue (GO méthodologique pour la mesure, pas pour fusion) demande encore de réconcilier des décomptes (paliers 50-75 %) et la classification géographique des portions hors emprise (`hors_carte` ≠ mer ni étranger) | aucun : aucun fichier applicatif |
+| PR #148 (lot L0) | ouverte, tête `955b0c8ce4b4147447e7b265875b52b43d551992`, GO technique de contre-revue, non fusionnée | aucun : ne touche ni `territoire/facts.ts` ni `synthesis-contract.ts` |
+| B3 | **à réaliser**, dans une PR indépendante : intégration applicative du secteur habité | seul lot FUT-182 qui changera le registre et le contrat |
 
-**Ordre proposé :**
-1. **FUT-184 d'abord**, avec `@3` / `@8`. FUT-182 L0 (#148) peut passer avant ou après : il ne change aucune version.
-2. **FUT-182 phase B ensuite, renumérotée `territoire-facts@4` / `territoire-synthese@9`**, rebasée sur `main`. Elle devra, comme FUT-184 l'a fait pour FUT-177 et FUT-179, figer son propre delta : ses retouches des lignes FUT-184 (version, `place.density_grid` voisin) rendront la référence FUT-184 « périmée » tant qu'elle ne les annule pas.
-3. **La dette FUT-183** (dixième exact des parts OSO dans la synthèse générée, contrôle Rochefort) reste à FUT-182 : `@8` ne la contient pas, conformément à la séparation des chantiers.
+**Recouvrement :** un seul fichier commun avec #148, `fut147-non-regression.test.ts`, dans des zones distinctes ; fusion à blanc (`git merge-tree`) sans conflit avec la tête actuelle `955b0c8c`. Aucun fichier commun avec #146 (`df87faa9`), fusion à blanc sans conflit.
 
-**Pourquoi pas une seule version commune :** attendre la phase B retiendrait la correction de l'identité (Corte, Arles, Avignon, 1 374 « Ville » contredites) pour une durée inconnue. Coder la grille sans monter les versions n'est pas possible : le nouveau fait change déjà toutes les empreintes, et la consigne change le texte (règle du contrat : tout ce qui change la sortie monte la version). **Coût de la double invalidation :** deux régénérations successives par commune visitée, à la demande ; au volume connu (16 communes visitées), quelques dizaines d'appels au plus, avant ouverture. **Si la personne qui porte le produit préfère une seule invalidation**, la branche est prête : il suffit de fusionner FUT-184 et la phase B dans la même fenêtre de déploiement, sans fusionner les PR.
+**Ordre retenu :**
+1. **FUT-184** : `territoire-facts@3` et `territoire-synthese@8`. #148 peut passer avant ou après : il ne change aucune version.
+2. **FUT-182 B3 ensuite** : `territoire-facts@4` et `territoire-synthese@9`, **à confirmer sur le `main` effectif au moment de l'intégration** (la contre-revue de #146 parle encore de `@3`/`@8` : ces numéros sont pris par FUT-184 s'il est fusionné d'abord). B3 devra, comme FUT-184 l'a fait pour FUT-177 et FUT-179, figer son propre delta dans la garde FUT-147 : ses retouches des lignes FUT-184 rendront la référence FUT-184 « périmée » tant qu'elle ne les annule pas.
+3. **La dette FUT-183** (dixième exact des parts OSO dans la synthèse générée, contrôle Rochefort) reste à FUT-182 : `@8` ne la contient pas.
 
-## 7. Risques nouveaux et décisions à prendre
+**Deux invalidations successives sont acceptées.** Chacune renouvelle l'empreinte de chaque commune ; la synthèse se régénère à la visite suivante, à la demande, sous le garde de budget. Leur coût réel n'est pas mesuré ici (voir § 5). Les snapshots, synthèses historiques et dossiers achetés restent inchangés.
 
-1. **Classe et densité moyenne côte à côte.** La carte montre désormais les deux. 2 126 communes classées rurales ont 150 hab/km² ou plus en moyenne, dont 36 en « faible densité » (classes 6-7) à 300 hab/km² ou plus (Mont-Dauphin 282, Boussac 826) ; 541 communes classées urbaines ont moins de 150 hab/km² (Arles 67). Les deux sont vraies : la grille lit la répartition des habitants par carreaux de 1 km², la moyenne divise par toute la surface. Le libellé « Commune rurale **de faible densité** » à côté de « 826 hab/km² » peut se lire comme une contradiction. **À arbitrer :** garder les libellés du ticket, ou en choisir qui ne parlent pas de densité pour les classes 6 et 7.
-2. **Le mot « ville » change sur 1 374 communes**, dont des communes de 10 000 à 25 000 habitants (Sèvremoine, Bressuire, Lamballe-Armor). C'est la règle proposée par le ticket (grille en tête, statut à part, jamais « ville » au-dessus de « Bourg rural »). Le comparateur, hors périmètre, garde `peutDireVille` seul : Sèvremoine reste « ville » dans ses textes. **À arbitrer** pour FUT-185/FUT-50 si la cohérence entre surfaces est voulue.
+## 7. Risques nouveaux et arbitrages
+
+1. **Classe et densité moyenne côte à côte.** La carte montre désormais les deux. 2 126 communes classées rurales ont 150 hab/km² ou plus en moyenne, dont 36 en « faible densité » (classes 6-7) à 300 hab/km² ou plus (Mont-Dauphin 282, Boussac 826) ; 541 communes classées urbaines ont moins de 150 hab/km² (Arles 67). Les deux sont vraies : la grille lit la répartition des habitants par carreaux de 1 km², la moyenne divise par toute la surface. Le libellé « Commune rurale **de faible densité** » à côté de « 826 hab/km² » peut se lire comme une contradiction. **Arbitré (10/11) : libellés conservés**, choisis pour leur compréhension par le grand public ; les libellés officiels Insee restent dans les métadonnées (`LIBELLE_INSEE_GRILLE`).
+2. **Le mot « ville » change sur 1 374 communes**, dont des communes de 10 000 à 25 000 habitants (Sèvremoine, Bressuire, Lamballe-Armor). C'est la règle proposée par le ticket (grille en tête, statut à part, jamais « ville » au-dessus de « Bourg rural »). Le comparateur, hors périmètre, garde `peutDireVille` seul : Sèvremoine reste « ville » dans ses textes. **Arbitré (10/11) : comparateur inchangé** ; une commune peut être « ville » dans le comparateur et « Bourg rural » dans Territoire (deux zonages). Harmonisation éventuelle étudiée dans FUT-50/FUT-190.
 3. **« Densité moyenne » pour un arrondissement** garde son propre chiffre (FUT-179) sans palier ; la grille n'apparaît qu'« à l'échelle de » la ville. Les 43 « Arrondissement dense » disparaissent.
 4. **Fixture Châtelaillon** : elle porte désormais la classe officielle (4). Les tests qui partent d'elle pour d'autres communes doivent poser la grille de leur code (fait pour FUT-176, FUT-177, FUT-179, PLM) ; un test futur qui l'oublierait hériterait de la classe 4.
 5. **Champ mort** : `TerritoryMood.density` (paliers 150 / 1 500, `territory-mood.ts`) n'a aucun lecteur. Laissé en place, signalé.
