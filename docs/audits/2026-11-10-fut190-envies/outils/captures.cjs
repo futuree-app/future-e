@@ -2,7 +2,7 @@
 // Usage : node shots.cjs <dossier> [filtre]
 const path = require("path");
 const fs = require("fs");
-const { chromium } = require("/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/fut190-envies/node_modules/playwright-core");
+const { chromium } = require("playwright-core");
 const BASE = process.env.BASE ?? "http://localhost:3190/dev/envies";
 const SORTIE = process.argv[2];
 const FILTRE = process.argv[3] ?? "";
@@ -12,7 +12,7 @@ const VUES = [
   ["01-ensemble-depart", "?s=depart", null],
   ["02-projet-saisie", "?s=depart#/projet", async (p) => { await p.fill("input[placeholder]", "aller plus souvent au théâtre"); await p.getByRole("button", { name: "Un peu, j'en voudrais plus" }).click(); await p.getByRole("button", { name: "chaque mois" }).click(); }],
   ["03-comparer-theatre-mois", "?s=theatre", null],
-  ["04-comparer-theatre-semaine", "?s=theatre", async (p) => { await p.getByRole("button", { name: "chaque semaine" }).click(); }],
+  ["04-comparer-theatre-semaine", "?s=theatre", async (p) => { await p.getByRole("button", { name: "chaque semaine" }).click(); await p.getByRole("button", { name: "20 min", exact: true }).click(); }],
   ["05-comparer-potager", "?s=potager", null],
   ["06-comparer-nager", "?s=nager", null],
   ["07-comparer-trois", "?s=trois", null],
@@ -20,18 +20,18 @@ const VUES = [
   ["09-comparer-apres-verifications", "?s=apres", null],
   ["10-fiche-chalonnes", "?s=trois#/lieu/chalonnes", null],
   ["11-ensemble-trois", "?s=trois#/", null],
-  ["12-minimale-trois", "?s=trois", async (p) => { await p.getByRole("button", { name: "minimale (moteur actuel)" }).click(); }],
+  ["12-minimale-trois", "?s=trois", async (p) => { await p.getByRole("button", { name: "minimale (index local)" }).click(); }],
   ["13-projet-trois", "?s=trois#/projet", null],
 ];
 
 (async () => {
-  const b = await chromium.launch({ channel: "chrome" });
+  const b = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH, args: ["--no-sandbox"] } : { channel: "chrome" });
   const bilan = [];
   for (const [largeur, hauteur] of [[1440, 900], [390, 844]]) {
     for (const theme of ["light", "dark"]) {
       if (theme === "dark" && !process.env.SOMBRE) continue;
       const ctx = await b.newContext({ viewport: { width: largeur, height: hauteur }, deviceScaleFactor: 1, reducedMotion: "reduce" });
-      await ctx.route((u) => !/^https?:\/\/localhost(:\d+)?\//.test(u.href), (r) => r.abort());
+      await ctx.route((u) => u.origin !== new URL(BASE).origin, (r) => r.abort());
       const p = await ctx.newPage();
       const erreurs = [];
       p.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|ERR_FAILED/.test(m.text())) erreurs.push(m.text().slice(0, 200)); });
@@ -59,4 +59,5 @@ const VUES = [
   fs.writeFileSync(path.join(SORTIE, "bilan.json"), JSON.stringify(bilan, null, 1));
   const pb = bilan.filter((x) => x.deborde || x.interdit || x.cadratin || x.exclamation || x.erreurs);
   console.log(`${bilan.length} vues ; problèmes : ${JSON.stringify(pb)}`);
-})();
+  if (pb.length) process.exitCode = 1;
+})().catch((error) => { console.error(error); process.exitCode = 1; });

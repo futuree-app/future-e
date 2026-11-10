@@ -1,18 +1,18 @@
 # « J'aimerais donner plus de place à… » : recherche produit, prototype et évaluation
 
 10 novembre 2026 · branche `explore/fut-190-envies` (partie de la V5.1 `cc4077bb`), worktree `.claude/worktrees/fut190-envies`.
-Exploration seulement : aucun changement du moteur, des droits, de Stripe, de Supabase ni des pages de production. Rien n'est fusionné, poussé ni déployé. **Aucune personne réelle n'a utilisé ce prototype.**
+Exploration seulement : aucun changement du moteur, des droits, de Stripe, de Supabase ni des pages de production. PR #149 ouverte en brouillon, base `explore/fut-41-v51-experience`. Rien n'est fusionné ni déployé. **Aucune personne réelle n'a utilisé ce prototype.**
 
 ## 0. En bref
 
-**Recommandation : PIVOT.** L'intuition tient, mais pas sous la forme imaginée. Ce qui a une valeur de décision n'est pas « l'aspiration », c'est **la portée** : ce qui doit rester, ou devenir, accessible au rythme où l'on veut le vivre. Et la moitié la plus solide de l'idée est celle que la formulation met en second : **ce que l'on ne veut pas perdre**.
+**Recommandation : PIVOT, validé à titre d'hypothèse.** La portée peut rendre certaines envies concrètes ; l'apport à tester réside dans les compromis entre lieux, pratiques, habitudes et priorités personnelles. « J'aimerais donner plus de place à… ou ne pas perdre » reste une entrée facultative. L'intérêt de privilégier les habitudes à préserver reste lui aussi une hypothèse.
 
 **Ce que le prototype a établi, sur des données réelles.**
 
-1. **Le moteur actuel est aveugle à cette question.** Il donne exactement la même valeur d'accès à la culture à Angers et à Chalonnes-sur-Loire (88 sur 100 pour les deux, dans l'index local). Pourtant, depuis le quartier de la Doutre, un centre dramatique national est à 5 minutes à pied ; depuis Chalonnes, tous les lieux de spectacle recensés sont à 35 à 39 minutes en voiture. La différence existe dans les données ; le critère actuel ne la pose pas.
-2. **Le rythme transforme une donnée en réponse.** « Chaque semaine » (20 minutes au plus) : le théâtre distingue les deux lieux. « Chaque mois » (40 minutes) : possible des deux côtés, pas de la même façon. La donnée n'a pas changé, la question oui.
-3. **Le point de comparaison « aujourd'hui » révèle des pertes que rien d'autre ne montre.** Pour quelqu'un qui nage deux fois par semaine à 10 minutes à pied, les deux lieux candidats demandent la voiture. Aucune comparaison de communes ne le dirait.
-4. **La transversalité échoue sur les données, pas sur la méthode.** Sur les six envies citées dans FUT-190, deux se lisent avec les sources locales (spectacle, sport adossé à un équipement). Cultiver, rejoindre un collectif, s'engager, observer le vivant : rien de comparable n'existe à l'échelle nationale. Pour celles-là, futur•e ne peut offrir qu'une question bien posée.
+1. **Sur l'index local examiné**, le critère donne exactement la même valeur d'accès à la culture à Angers et à Chalonnes-sur-Loire (88 sur 100 pour les deux, dans l'index local). Pourtant, depuis le quartier de la Doutre, un centre dramatique national est à 5 minutes à pied ; depuis le centre de Chalonnes, les lieux de spectacle présentés sont à 35 à 39 minutes en voiture, sans temps en transports collectifs. Ces origines asymétriques ne sont pas les logements fictifs. La différence existe dans les données ; le critère actuel ne la pose pas.
+2. **Le rythme transforme une donnée en réponse.** Avec les hypothèses initiales : semaine et limite de 20 minutes, les trajets diffèrent face à la limite ; mois et limite de 40 minutes, les deux trajets la respectent, mais celui retenu à Chalonnes utilise la voiture, en tension avec le Projet. Le rythme et la limite se règlent séparément ; changer le rythme ne remplace plus une limite choisie. La donnée n'a pas changé, la question oui.
+3. **Le point de comparaison « aujourd'hui » révèle des pertes que rien d'autre ne montre.** Pour quelqu'un qui nage deux fois par semaine à 10 minutes à pied, les trajets retenus vers les bassins sont en voiture. Les autres modes restent à vérifier ; cela ne démontre pas une dépendance inévitable à la voiture.
+4. **La transversalité échoue sur les données, pas sur la méthode.** Sur les six envies citées dans FUT-190, deux se lisent avec les sources locales (spectacle, sport adossé à un équipement). Cultiver, rejoindre un collectif, s'engager, observer le vivant : les sources locales examinées ne permettent pas de les comparer. Ce constat n'est pas un audit exhaustif des données nationales. Pour celles-là, futur•e ne peut offrir qu'une question bien posée.
 
 **Ce qui reste non prouvé.** Qu'une personne en recherche exprime une envie concrète, fasse la vérification proposée, et que cela change son choix. Et, plus encore, qu'elle paie pour cela.
 
@@ -63,7 +63,7 @@ Presque aucune, et c'est la découverte la plus utile du travail. Lecture de l'i
 | Vie locale | 91 | 90 | « Ne les distingue pas » |
 | Nature (couvert dans 15 km) | 48 | 56 | Une nuance, sans rapport avec cultiver |
 
-Ces valeurs sont justes pour ce qu'elles mesurent. Elles répondent à « y a-t-il une offre accessible ? », pas à « pourrai-je le vivre au rythme que je veux ? ». Le prototype embarque cette comparaison : le sélecteur « Version : minimale (moteur actuel) » montre ce que l'on saurait dire aujourd'hui.
+Ces valeurs sont justes pour ce qu'elles mesurent. Elles répondent à « y a-t-il une offre accessible ? », pas à « pourrai-je le vivre au rythme que je veux ? ». Le prototype embarque cette comparaison : le sélecteur « Version : minimale (index local) » montre ce que l'on saurait dire aujourd'hui.
 
 ### 2.3 La conversation AskFuture a-t-elle un rôle ?
 
@@ -71,7 +71,7 @@ Un seul, étroit : **comprendre une phrase libre** et la rattacher à ce que fut
 
 ### 2.4 L'interface peut-elle faire mieux qu'un assistant ?
 
-Oui, par une forme : **la règle de portée**. Une ligne par lieu (aujourd'hui, puis chaque candidat), les lieux recensés placés à leur temps de trajet, la limite de la personne en pointillé. Changer le rythme déplace la limite ; les repères ne bougent pas. On voit, sans phrase, que la réponse dépend de soi. Quand futur•e ne sait rien, la ligne est hachurée et le dit. C'est la seule forme nouvelle du prototype ; elle suit la règle « le signal passe par la position et la longueur » et dessine la zone d'inconnu.
+Oui, par une forme : **la règle de portée**. Une ligne par lieu (aujourd'hui, puis chaque candidat), les lieux recensés placés à leur temps de trajet, la limite de la personne en pointillé. Changer la limite déplace son repère ; les lieux recensés ne bougent pas. Changer le rythme conserve la limite, qui reste ajustable. On voit, sans phrase, que la réponse dépend de soi. Quand futur•e ne sait rien, la ligne est hachurée et le dit. C'est la seule forme nouvelle du prototype ; elle suit la règle « le signal passe par la position et la longueur » et dessine la zone d'inconnu.
 
 ### 2.5 Le plus petit parcours qui démontre la proposition
 
@@ -106,7 +106,7 @@ Cet objet se compare, se garde, s'applique à chaque nouveau candidat, et hérit
 | Dire | Une phrase libre, puis deux questions : est-ce déjà dans votre vie ? à quel rythme ? | « Ce que futur•e en comprend » : ce qu'il sait lire, ce qu'il ne lira pas, avant toute promesse |
 | Comparer | Ouvre Comparer : l'envie y est une section, sous les priorités du Projet | La règle de portée, une phrase d'écart, la question qui peut départager |
 | Ajuster | Change le rythme ou la limite | La lecture bascule ; les faits restent |
-| Vérifier | Répond à la question (simulé) | « D'après votre vérification du 6 nov. … » ; ce qui reste inconnu ; le fait public inchangé |
+| Vérifier | Répond à la question (simulé) | « Votre réponse du 6 nov. (source non renseignée)… » ; conclusion conditionnelle, inconnues maintenues et fait public inchangé |
 | Revenir | Vue d'ensemble, fiche du lieu, Mon Projet | Les vérifications ouvertes figurent sous le lieu concerné |
 
 **Trois états de preuve, montrés.**
@@ -117,7 +117,7 @@ Cet objet se compare, se garde, s'applique à chaque nouveau candidat, et hérit
 | Partielle | Théâtre : lieux recensés oui, programmation et retour du soir non ; potager à Chalonnes : jardin déclaré, sol et eau inconnus | Le possible et l'inconnu séparés ; une question |
 | Absente | Potager à Angers (aucun recensement des jardins familiaux) ; « m'engager dans la vie de ma commune » | Ligne hachurée, « futur•e ne sait pas », jamais compté contre le lieu ; pour l'envie non lue, une note à soi et aucune conclusion |
 
-**Garde-fous tenus par des tests** (`modele.test.ts`, 9 sur 9) : aucun score ni gagnant dans aucune phrase produite, pour tous les réglages ; ce qui est ignoré n'est ni défaut ni atout ; une réponse s'ajoute sans toucher au fait public ; chaque fait réel porte sa source, chaque fait fictif est marqué ; un texte libre non reconnu n'est jamais forcé dans une envie connue.
+**Garde-fous tenus par des tests** (`modele.test.ts`, 15 sur 15 après reprise) : aucun score ni gagnant dans aucune phrase produite, pour tous les réglages ; ce qui est ignoré n'est ni défaut ni atout ; une réponse s'ajoute sans toucher au fait public ; chaque fait réel porte sa source, chaque fait fictif est marqué ; les exemples non reconnus restent non lus. La reconnaissance par mots reste limitée et peut mal interpréter une négation ou une aspiration ambiguë.
 
 ---
 
@@ -148,9 +148,9 @@ Le bandeau du haut propose sept situations, et un sélecteur de version.
 | Nager | `?s=nager` | Une habitude à garder ; la perte commune aux deux lieux |
 | Trois envies | `?s=trois` | Le tableau d'ensemble en mots ; blocs repliés |
 | Envie non lue | `?s=libre` | Aucune donnée inventée |
-| Après deux vérifications | `?s=apres` | Réponses attribuées et datées |
+| Après deux vérifications | `?s=apres` | Réponses personnelles simulées et datées, sans source vérifiée |
 
-« Version : minimale (moteur actuel) » remplace la lecture par ce que le moteur de production saurait dire, plus une note libre : c'est la comparaison demandée au § 5.
+« Version : minimale (index local) » remplace la lecture par les critères de l'index local examiné, sans garantir la version actuellement publiée, plus une note libre : c'est la comparaison demandée au § 5.
 
 ### Fichiers
 
@@ -176,7 +176,38 @@ Le prototype réutilise la coquille, la plaque « À retenir », les signes et l
 
 Limites à connaître : le fichier d'équipements local est l'édition du 16/08, l'Insee en a republié une le 05/10 (non recontrôlé ici). Le décompte d'associations « jardin » ou « théâtre » vient d'un filtre de mots écrit pour ce prototype, non validé. Les limites de 20, 40 et 60 minutes par rythme sont une hypothèse de conception.
 
-### Contrôles faits (automatiques, pas un test avec des personnes)
+### Reprise ciblée après contre-revue du 10/11/2026
+
+Contre-revue lue intégralement : [revue de la PR #149 au SHA initial](https://github.com/futuree-app/future-e/pull/149#pullrequestreview-5840145757).
+
+- **Temps et modes** : l'état de portée désigne le respect d'une limite de trajet, jamais une pratique acquise. Les trajets retenus en voiture sont confrontés à la seule priorité modale fictive du Projet, « moins dépendre de la voiture ». La réserve TC vaut aussi quand la personne signale un retour : sa durée, ses jours et l'aller ne sont pas établis.
+- **Réponses** : seule la valeur et sa date sont conservées. Ni auteur, ni lien consulté, ni justificatif ne sont enregistrés ; aucune réponse n'est donc attribuée à la mairie, au vendeur ou au centre. Le contact suggéré est distinct. Les réponses ne changent pas les faits publics ; leurs conditions et inconnues apparaissent dans la comparaison, le résumé et les lectures des lieux. Un jardin d'annonce fictive, même accompagné d'une réponse favorable sur l'eau, ne prouve pas une possibilité de cultiver.
+- **Index local relu** : `data/comparateur-index.json.gz` au SHA de référence `c1a742fd299b9ff2f607ffa17db3a8b24c75abd7`, SHA-256 `75f18e7d6c63616142778033ab72ffacdc10184552eaf36ded062a197bccd1ee`. Les communes `49007` et `49063` portent toutes deux `culture.score = 88`. Aucun artefact de l'index effectivement déployé n'a été vérifié ; le dépôt ne suffit pas à établir l'état de production. La formule « sur l'index local examiné » est conservée.
+- **Origines et reproductibilité** : point de quartier à la Doutre contre centre communal de Chalonnes, jamais les adresses des annonces. Les destinations et durées sont dans `donnees.ts`. Les coordonnées exactes et les réponses brutes des requêtes IGN initiales ne sont pas archivées dans cette PR : les temps repris sont les estimations de l'exploration initiale, pas un calcul réexécuté ou indépendamment validé lors de cette reprise. Ne pas fabriquer ces traces manquantes ; pour les fiches des participants, noter les points et la provenance réellement utilisés.
+- **Limites maintenues** : BPE locale du 16/08, republication du 05/10 non contrôlée ; RNA filtré par mots, méthode non validée ; recensement non exhaustif, sans programmation, places ni horaires vérifiés. Les valeurs 20/40/60 sont des hypothèses ajustables, sans norme d'usage. « Garder » avant « développer » reste un pari à tester.
+
+Les corrections ne constituent ni une preuve d'utilité, ni une preuve de paiement. Les captures initiales ci-dessous décrivent le SHA initial, pas cette reprise. Le protocole révisé est au § 7 ; aucune nouvelle exploration produit ou source nationale n'a été ajoutée.
+
+### Contrôles de cette reprise
+
+- `node --test src/components/prototypes/fut190-envies/modele.test.ts` : **15/15**. Assertions sur les phrases, théâtre mensuel/hebdomadaire, voiture et TC inconnus, natation avec créneaux favorables/défavorables, 16 combinaisons de réponses sur le potager, dates et provenance absente, envie non mesurable et limite personnelle conservée. Aucune suite nationale lancée.
+- TypeScript : **sans erreur**, contrôle ciblé incluant les tests, la route et les imports, puis `npx tsc --noEmit --incremental false` à l'échelle du dépôt. Une première tentative avait rencontré des types `.next` locaux mal générés pendant le démarrage ; régénération du cache local avec `npx next typegen`, puis contrôle réussi. Aucune configuration du dépôt modifiée.
+- ESLint : **sans erreur** sur `Envies.tsx`, `donnees.ts`, `modele.ts` et la route `src/app/dev/envies/page.tsx`. Les tests sont exclus par la configuration ESLint existante, mais exécutés et vérifiés par TypeScript.
+- Scripts `outils/parcours.cjs` et `outils/captures.cjs` adaptés aux nouvelles phrases et à une installation portable de `playwright-core` déjà présente ; `node --check` réussi. Le parcours exige des assertions sur le texte rendu à 390 et 1 440 px, y compris les réponses croisées et la limite conservée.
+- **Contrôle visuel actualisé non réalisé** : le serveur Next a démarré avec des paramètres fictifs ; Chromium a échoué avant d'ouvrir une page (`socket() failed: Operation not permitted`). Aucun parcours navigateur ni aucune capture de cette reprise ne sont déclarés réussis. Les anciennes captures restent des archives. À rejouer sur un poste permettant Chromium, avant la séance ; rien n'a été modifié dans Supabase ou déployé.
+
+Commandes pour rejouer les contrôles visuels, serveur local démarré :
+
+```bash
+BASE=http://localhost:3190/dev/envies node docs/audits/2026-11-10-fut190-envies/outils/parcours.cjs
+BASE=http://localhost:3190/dev/envies node docs/audits/2026-11-10-fut190-envies/outils/captures.cjs /tmp/fut190-reprise comparer
+```
+
+Chrome est utilisé par défaut ; `CHROMIUM_PATH` permet de désigner un autre exécutable Chromium installé. Les requêtes hors de l'origine locale sont bloquées par les scripts. Le filtre `comparer` couvre notamment théâtre mensuel/hebdomadaire, natation, potager et après réponses, sur ordinateur et mobile.
+
+**Verdict de reprise : prêt sur le raisonnement et le protocole pour une expérimentation modérée, après la nouvelle contre-revue prévue. La validation visuelle de cette révision reste à faire avant la séance.** Aucune intégration produit, aucun chantier supplémentaire ni organisation du test n'est déclenché par cette livraison.
+
+### Contrôles faits (automatiques, pas un test avec des personnes) · version initiale
 
 - 56 captures (13 écrans × 1 440 et 390 px × clair et sombre) : aucun débordement horizontal, aucun mot interdit, aucun tiret cadratin ni point d'exclamation.
 - Parcours complet sur téléphone, 9 vérifications sur 9 : invitation facultative, saisie reconnue, envie dans le Projet, incertitude dite, réponse réévaluée et attribuée, retour au candidat, retour du navigateur, texte libre non lu, contour de focus au clavier.
@@ -193,8 +224,8 @@ La version minimale n'ajoute aucune donnée ni aucun calcul : l'envie est une no
 | | Version minimale | Proposition (portée) |
 |---|---|---|
 | Ce que la personne saisit | Une note libre | Une phrase, puis deux réponses |
-| Théâtre, Angers ou Chalonnes | « Le moteur ne les distingue pas » (88 et 88) | 5 minutes à pied contre 35 en voiture ; bascule selon le rythme |
-| Nager | Non mesuré | Bassins couverts à 9 et 14 minutes en voiture ; la marche d'aujourd'hui est perdue dans les deux cas |
+| Théâtre, Angers ou Chalonnes | « Sur l'index local examiné, ce critère ne les distingue pas » (88 et 88) | 5 minutes à pied contre 35 en voiture ; bascule selon le rythme |
+| Nager | Non mesuré | Bassins couverts à 9 et 14 minutes en voiture ; compromis avec la marche d'aujourd'hui ; autres modes inconnus |
 | Cultiver | Non mesuré | Jardin déclaré d'un côté, inconnu de l'autre ; une question précise |
 | Envie non lue | Une note | Une note (identique) |
 | Par rapport à aujourd'hui | Rien | Une ligne de référence |
@@ -275,29 +306,52 @@ Ce qui ferait exploser la charge, et qu'il faut refuser : tenir des horaires ou 
 
 ---
 
-## 7. Premier test avec de vraies personnes
+## 7. Protocole révisé : comparer trois approches sur cinq ou six projets réels
 
-**Principe : faire le travail à la main avant de le construire.**
+**Question à éprouver.** À information de départ comparable, la mémoire du Projet, la comparaison avec aujourd'hui et les contradictions entre priorités apportent-elles quelque chose qu'une note ou une recherche ordinaire ne donnent pas ? La portée est une hypothèse utile pour certaines envies, pas une définition universelle de l'aspiration. L'entrée reste facultative. Ce protocole prépare les entretiens ; aucun recrutement ni entretien n'a été effectué.
 
-**Qui.** Cinq ou six personnes en recherche active, qui hésitent réellement entre deux communes. Au moins deux en location. Aucun proche du projet.
+### Échantillon et préparation
 
-**Avant l'entretien (un message, deux minutes pour elles).** « Entre quelles communes hésitez-vous ? Où vivez-vous aujourd'hui ? Citez une chose que vous faites régulièrement et ne voudriez pas perdre, et une chose à laquelle vous aimeriez donner plus de place. »
+- Cinq ou six personnes en recherche résidentielle réelle, sans proches du projet, dont au moins deux en location. Ne pas recruter uniquement des personnes déjà sensibles à notre proposition.
+- Parmi leurs projets : au moins une paire de grandes villes, une paire de lieux assez semblables, et une aspiration que les données examinées ne permettent pas de lire. Ces cas peuvent se recouper ; ne pas sélectionner seulement les contrastes favorables.
+- Avant de montrer le prototype, recueillir librement : « Qu'est-ce qui compte dans votre choix ? », puis « Quelle habitude aimeriez-vous préserver ? Quelle envie aimeriez-vous développer ? ». Pas de liste d'exemples, de catégories ni de suggestion sur la voiture ou le jardin. Demander les fréquences, contraintes et limites acceptables dans leurs mots, sans proposer d'abord 20/40/60 minutes.
+- Relever la situation actuelle, les deux candidats, les informations déjà connues, les démarches déjà faites et le choix provisoire. Une envie non lisible reste telle quelle ; ne pas la remplacer par un équipement qui arrangerait le scénario. Noter aussi les personnes qui ne souhaitent pas ajouter d'envie.
+- Préparation manuelle, estimée à une à deux heures par personne, à mesurer : une fiche commune aux trois approches avec ses priorités, habitudes, candidats et informations existantes. Pour la lecture enrichie, séparer faits publics sourcés, estimations avec origine exacte, déclarations et inconnues. Ne pas alimenter un nouveau catalogue ou une base nationale.
+- Le prototype interactif reste la démonstration **fictive** Angers/Chalonnes. Les projets réels sont traités sur des fiches de séance manuelles reprenant sa lecture ; ne jamais faire passer les annonces ou temps fictifs pour ceux du participant. Distinguer dans le compte rendu la compréhension de la démonstration et la valeur de l'analyse manuelle. Ne montrer la démonstration qu'après le recueil libre.
 
-**Préparation (une à deux heures par personne).** Rejouer pour leurs communes ce qui a été fait pour Angers et Chalonnes : requête sur les équipements, temps de trajet, une question. Noter les envies qui ne se lisent pas : c'est la mesure de H4, obtenue avant même de leur parler.
+### Trois approches, sans construire trois nouveaux parcours
 
-**Entretien (30 minutes).**
+| Approche | Support et tâche | Ce qu'on cherche à distinguer |
+|---|---|---|
+| A · Note dans le Projet | Informations existantes et simple note personnelle. « Avec cela, comment examineriez-vous vos deux lieux pour cette habitude et cette envie ? » | Ce que la mémoire seule et les données existantes permettent déjà de découvrir |
+| B · Lecture enrichie | Même Projet, avec portée, comparaison à aujourd'hui, compromis entre priorités et questions/réponses conditionnelles | Ce que le rapprochement ajoute réellement, et ce qui reste seulement séduisant ou redondant |
+| C · Carte et itinéraires ordinaires | La même question et les mêmes lieux, avec la carte et le calculateur que la personne utilise habituellement ; navigation libre, sans requêtes préparées par l'animateur | Ce qu'elle retrouve seule, le temps et l'effort nécessaires, les informations absentes de notre lecture |
 
-1. Avant de montrer quoi que ce soit : « Comment avez-vous vérifié cela jusqu'ici ? » (mesure H6).
-2. Montrer leur lecture, dans la forme du prototype. Faire penser à voix haute.
-3. « Qu'est-ce que vous ne saviez pas ? » « Qu'est-ce qui vous semble exagéré ou inutile ? »
-4. Proposer la vérification. Ne pas insister.
-5. En dernier seulement, montrer deux versions de l'offre d'analyse d'adresse, avec et sans la ligne sur leur envie, et demander laquelle ils comprendraient le mieux. Ne pas demander « paieriez-vous ? ».
+Le bouton « minimale » du prototype illustre A, mais ne remplace pas l'observation du Projet et des outils habituels de la personne. Aucun moteur de production n'est appelé par cette version minimale.
 
-**Une semaine après (un message).** « Avez-vous fait la vérification ? Quelque chose a-t-il changé dans vos candidats ? »
+**Déroulement, environ 50 à 60 minutes.** Répartir les ordres A–B–C, B–C–A et C–A–B aussi régulièrement que possible (deux personnes par ordre si six), avant de connaître leurs envies. Donner un temps comparable à chaque approche, par exemple huit minutes, et noter le temps effectivement utilisé. L'animateur ne révèle pas la contradiction attendue et n'enseigne pas la règle de portée avant la première reformulation spontanée.
 
-**Ce qu'on note, séparément.** Utilité constatée (a appris quelque chose de vérifiable). Action réelle (vérification faite). Effet sur la décision. Intention d'achat déclarée, tenue pour ce qu'elle vaut. Temps de préparation, qui donne le coût réel du service.
+Après chaque approche : « Qu'en retenez-vous ? », « Qu'avez-vous appris de nouveau ? », « Qu'est-ce qui reste à vérifier ? », « Cela change-t-il quelque chose pour vous ? ». Noter les mots exacts et le moment où une information apparaît pour la première fois. Les approches suivantes bénéficient forcément de l'apprentissage : une information déjà vue ne compte pas à nouveau comme découverte. Cette rotation limite un biais d'ordre ; elle n'en fait pas une expérience causale. Consigner les aides données et les incompréhensions, notamment « trajet dans ma limite » confondu avec « activité accessible » ou réponse personnelle prise pour preuve.
 
-**Seuil pour continuer.** Au moins trois personnes sur cinq apprennent un fait qu'elles n'avaient pas, au moins deux font la vérification, au moins une modifie sa liste. En dessous : s'arrêter à la version minimale.
+En fin de séance seulement, présenter à toutes les personnes **la même offre existante d'analyse d'adresse**, avec son prix en vigueur et ses limites réelles. Observer, sans relance commerciale, l'ouverture volontaire de l'offre, le choix d'une adresse à analyser ou une démarche d'achat initiée sur le parcours existant. Ne créer ni offre, ni fausse caisse, ni paiement dans le prototype. Distinguer une phrase aimable, une intention déclarée, une action et, uniquement s'il a réellement eu lieu, un achat. Noter aussi pourquoi une carte ou la note suffisent et pourquoi la personne ne poursuit pas.
+
+### Observations séparées et suivi
+
+| Dimension | Trace à recueillir | Ce qui ne suffit pas |
+|---|---|---|
+| Compréhension spontanée | Première reformulation, sans explication ; distinction entre estimation, déclaration, réponse et inconnue | « C'est clair » après une explication |
+| Information nouvelle | Fait précis, source, déjà connu ou non, première approche qui l'a révélé ; retrouvable seul dans C ou non | Une reformulation flatteuse de ce qu'elle savait |
+| Vérification ensuite | À J+7 : démarche réellement faite, date, résultat et provenance si la personne la communique ; inconnues restantes | Cliquer une réponse simulée ou promettre d'appeler |
+| Décision | Évolution documentée du choix provisoire, de la liste, des critères ou d'une question à traiter ; autres causes possibles | « Intéressant », sans conséquence observable |
+| Intérêt commercial | Action volontaire face à l'offre réelle et à son prix ; abandon, motif et recours à une solution gratuite | Déclarer « je paierais » ou préférer une formulation |
+
+Demander l'accord pour un unique suivi à J+7, puis poser la même question à tous, sans rappeler la réponse souhaitée : « Qu'avez-vous fait depuis notre échange ? Quelque chose a-t-il changé dans votre recherche ? ». L'absence de réponse au suivi reste une observation manquante, pas une absence d'action prouvée. La provenance recueillie pour l'étude reste dans les notes de séance, pas dans un nouveau système du prototype. Une déclaration sur un jardin ne prouve toujours pas sa cultivabilité.
+
+### Lecture des résultats et décision suivante
+
+Établir une fiche par personne et par approche, y compris les cas où **rien n'est découvert**, où la carte suffit, où les lieux se ressemblent et où l'envie reste non mesurable. Examiner le bénéfice propre de la mémoire, d'aujourd'hui et des contradictions, ainsi que le temps de préparation et l'entretien que cela demanderait à un fondateur seul.
+
+Les anciens seuils « trois apprennent / deux vérifient / une change » sont retirés : cinq ou six entretiens servent à repérer des mécanismes, des échecs et des questions, **pas à estimer un taux de conversion**. Continuer seulement si l'analyse qualitative montre une valeur additionnelle concrète et répétée, avec des actions observables, face à A **et** C. Si A ou C suffisent, réduire à la note ; si la lecture induit des certitudes fausses, la corriger avant de poursuivre. Un intérêt commercial encore incertain reste incertain. Aucun résultat de ce petit échantillon n'autorise automatiquement les lots du § 8, une intégration ou un déploiement : nouvelle contre-revue et arbitrage explicite d'abord.
 
 ---
 
@@ -309,7 +363,7 @@ Ce qui ferait exploser la charge, et qu'il faut refuser : tenir des horaires ou 
 
 > **« Ce qui doit rester à votre portée »** : dans le Projet, une à trois pratiques, chacune avec un rythme, lues en temps de trajet depuis chaque lieu candidat et depuis aujourd'hui, avec une question quand futur•e ne sait pas. L'entrée garde la phrase « J'aimerais donner plus de place à… », suivie de « ou ne pas perdre ».
 
-**Découpage, seulement si le test du § 7 atteint son seuil.**
+**Découpage historique, conditionnel à une nouvelle décision après le test qualitatif du § 7. Aucun lot autorisé par cette reprise.**
 
 | Lot | Contenu | Dépend de |
 |---|---|---|

@@ -16,8 +16,8 @@ import {
   type CleSource, type Fait, type IdLieu, type Question,
 } from "./donnees";
 import {
-  LIBELLE_INTENTION, LIBELLE_RYTHME, LIMITES, LIMITE_PAR_RYTHME, MODE, QUESTION_INTENTION, SITUATIONS, TITRE_CHANGEMENT, TITRE_ECART,
-  aRetenir, catalogue, comparer, dateFr, faceAAujourdhui, lireLieu, nouvelleEnvie, ordonner, ouVousEnEtes, questionUtile, questionsDe, reconnaitre, titreEnvie,
+  LIBELLE_INTENTION, LIBELLE_RYTHME, LIMITES, MODE, QUESTION_INTENTION, SITUATIONS, TITRE_CHANGEMENT, TITRE_ECART,
+  aRetenir, catalogue, comparer, dateFr, faceAAujourdhui, lireLieu, nouvelleEnvie, ordonner, ouVousEnEtes, questionUtile, questionsDe, reconnaitre, reglerEnvie, texteReponse, titreEnvie,
   type Envie, type Intention, type LecturePortee, type Reponses, type Rythme, type Vue,
 } from "./modele";
 import v from "../fut41-v5/v5.module.css";
@@ -54,7 +54,7 @@ function reduire(e: Etat, g: Geste): Etat {
     }
     case "retirer": return { ...e, envies: e.envies.filter((z) => z.id !== g.id), annonce: "Envie retirée de votre Projet." };
     case "regler":
-      return { ...e, envies: e.envies.map((z) => (z.id !== g.id ? z : { ...z, ...(g.intention ? { intention: g.intention } : {}), ...(g.rythme ? { rythme: g.rythme, limite: LIMITE_PAR_RYTHME[g.rythme] } : {}), ...(g.limite ? { limite: g.limite } : {}) })) };
+      return { ...e, envies: e.envies.map((z) => (z.id !== g.id ? z : reglerEnvie(z, { ...(g.intention ? { intention: g.intention } : {}), ...(g.rythme ? { rythme: g.rythme } : {}), ...(g.limite ? { limite: g.limite } : {}) }))) };
     case "repondre": {
       const reponses = { ...e.reponses };
       if (g.valeur) reponses[g.question] = { valeur: g.valeur, date: DATE_DU_JOUR }; else delete reponses[g.question];
@@ -138,7 +138,7 @@ export function Envies() {
           <span className={v.demoChamp} role="group" aria-label="Version comparée">
             <span>Version</span>
             {(["envies", "minimale"] as const).map((d) => (
-              <button key={d} type="button" className={v.demoOption} aria-pressed={etat.version === d} onClick={() => envoyer({ type: "version", version: d })}>{d === "envies" ? "avec la lecture des envies" : "minimale (moteur actuel)"}</button>
+              <button key={d} type="button" className={v.demoOption} aria-pressed={etat.version === d} onClick={() => envoyer({ type: "version", version: d })}>{d === "envies" ? "avec la lecture des envies" : "minimale (index local)"}</button>
             ))}
           </span>
           <button type="button" className={v.demoOption} onClick={() => charger(etat.situation)}>Réinitialiser</button>
@@ -249,7 +249,7 @@ function Ensemble({ api }: { api: Api }) {
               <>
                 <span className={s.pileSerree}>
                   <span className={v.actionTexte}>Comparer vos deux communes pour votre Projet.</span>
-                  <span className={s.nuance}>{etat.envies.length ? "Vos vérifications sont faites, ou votre envie ne se lit pas encore." : "Elles se distinguent déjà sur trois de vos priorités."}</span>
+                  <span className={s.nuance}>{etat.envies.length ? "Vos questions ont reçu une réponse, ou votre envie ne se lit pas encore. Des inconnues peuvent rester." : "Elles se distinguent déjà sur trois de vos priorités."}</span>
                 </span>
                 <button type="button" className={`${s.bouton} ${s.boutonMarque}`} onClick={() => aller({ ecran: "comparer" })}>Comparer</button>
               </>
@@ -270,7 +270,7 @@ function Ensemble({ api }: { api: Api }) {
                   <p className={s.nuance}>{l.population} · lecture de la commune</p>
                   <p className={s.dense}><strong className={s.encre}>{l.annonce.libelle}</strong> · {l.annonce.prix} · {l.annonce.surface} <span className={x.fictif}>annonce fictive</span></p>
                   {etat.envies.length && etat.version === "envies" ? (
-                    <p className={s.dense}>{ordonner(etat.envies).map((e) => `${titreEnvie(e)} : ${lireLieu(e, l.id, etat.reponses).court}`).join(" · ")}</p>
+                    <p className={s.dense}>{ordonner(etat.envies).map((e) => { const lecture = lireLieu(e, l.id, etat.reponses); return `${titreEnvie(e)} : ${lecture.court}. ${lecture.reserve}`; }).join(" · ")}</p>
                   ) : null}
                 </div>
                 <div className={x.candidatGeste}>
@@ -419,9 +419,9 @@ function Comparer({ api }: { api: Api }) {
       <section className={w.aRetenir} aria-labelledby="retenir-t">
         <h2 className={w.aRetenirTitre} id="retenir-t">À retenir</h2>
         <ul className={w.retenirListe}>
-          <Retenir genre="fait" titre="Ce que votre Projet distingue déjà">{lier("Angers demande moins la voiture et coûte plus cher au mètre carré. Chalonnes-sur-Loire est moins bâtie et moins chère, et la voiture y sert à presque tous les trajets de travail.")}</Retenir>
-          {minimale && envies.length ? <Retenir genre="incertain" titre="Vos envies">{lier("Le moteur actuel ne les lit pas, ou ne les distingue pas. Elles restent des notes à vous.")}</Retenir> : null}
-          {!minimale && lecture.perte ? <Retenir genre="fait" titre="Ce que vous perdriez dans les deux cas">{lier(lecture.perte)}</Retenir> : null}
+          <Retenir genre="fait" titre="Ce que votre Projet distingue déjà">{lier("À Angers, 54 % des actifs vont travailler en voiture, contre 81 % à Chalonnes-sur-Loire. Les maisons vendues sont plus chères au mètre carré à Angers ; Chalonnes est moins bâtie. Ces faits communaux ne décrivent pas vos propres déplacements.")}</Retenir>
+          {minimale && envies.length ? <Retenir genre="incertain" titre="Vos envies">{lier("Sur l'index local examiné, ces envies sont non mesurées ou ne distinguent pas ces communes. Elles restent des notes à vous.")}</Retenir> : null}
+          {!minimale && lecture.perte ? <Retenir genre="fait" titre="Le compromis avec votre habitude actuelle">{lier(lecture.perte)}</Retenir> : null}
           {!minimale && lecture.distinguent.length ? <Retenir genre="fait" titre="Ce que vos envies changent">{lecture.distinguent.map((p, i) => <p key={i} style={{ margin: i ? "6px 0 0" : 0 }}>{lier(p)}</p>)}</Retenir> : null}
           {!minimale && lecture.aVerifier.length ? <Retenir genre="incertain" titre="Ce qui peut encore changer votre choix">{lecture.aVerifier.map((p, i) => <p key={i} style={{ margin: i ? "6px 0 0" : 0 }}>{lier(p)}</p>)}</Retenir> : null}
           {!minimale && lecture.nonLus.length ? <Retenir genre="incertain" titre="Ce que futur•e ne sait pas lire">{lecture.nonLus.map((p, i) => <p key={i} style={{ margin: i ? "6px 0 0" : 0 }}>{lier(p)}</p>)}</Retenir> : null}
@@ -451,7 +451,7 @@ function Comparer({ api }: { api: Api }) {
       </Section>
 
       {envies.length ? (
-        <Section titre="Pour ce que vous aimeriez y vivre" id="vos-envies" sous={minimale ? "Version minimale : seulement ce que le moteur actuel sait dire, et vos notes." : "Lieu par lieu, en mots. Rien n'est additionné ; ce que futur•e ignore n'est compté contre personne."}>
+        <Section titre="Pour ce que vous aimeriez y vivre" id="vos-envies" sous={minimale ? "Version minimale : les indicateurs de l'index local examiné, et vos notes. Version publiée non vérifiée." : "Départs différents : un point du quartier de la Doutre à Angers, le centre communal à Chalonnes. Ces temps ne sont pas ceux des logements fictifs. Transports collectifs non calculés."}>
           {!minimale && envies.length > 1 ? <Tableau api={api} envies={envies} /> : null}
           {envies.map((e) => (minimale ? <BlocMinimal key={e.id} api={api} envie={e} /> : <BlocEnvie key={e.id} api={api} envie={e} seule={envies.length === 1} ouvertAuDepart={envies.length === 1 || utile?.envie.id === e.id || (!utile && e === envies[0])} />))}
         </Section>
@@ -462,7 +462,7 @@ function Comparer({ api }: { api: Api }) {
   );
 }
 
-const MOT_ETAT: Record<LecturePortee["etat"], string> = { sur_place: "Sur place", a_portee: "À votre portée", hors_portee: "Au-delà de votre limite", non_su: "futur•e ne sait pas" };
+const MOT_ETAT: Record<LecturePortee["etat"], string> = { sur_place: "Déclaré sur place", a_portee: "Trajet dans votre limite", hors_portee: "Au-delà de votre limite", non_su: "futur•e ne sait pas" };
 
 function Tableau({ api, envies }: { api: Api; envies: Envie[] }) {
   return (
@@ -470,7 +470,7 @@ function Tableau({ api, envies }: { api: Api; envies: Envie[] }) {
       <div className={x.rang} data-tete role="row">
         <span role="columnheader" className={x.rangCol}><span className={x.sr}>Envie</span></span>
         <span role="columnheader" className={x.rangCol}>Aujourd&apos;hui<span className={x.rangColSous}>{AUJOURDHUI_LIEU.nom}, déclaré par vous</span></span>
-        {LIEUX.map((l) => <span key={l.id} role="columnheader" className={x.rangCol}>{l.nom}<span className={x.rangColSous}>{l.annonce.libelle}</span></span>)}
+        {LIEUX.map((l) => <span key={l.id} role="columnheader" className={x.rangCol}>{l.nom}<span className={x.rangColSous}>{l.depart}</span></span>)}
       </div>
       {envies.map((e) => {
         const c = catalogue(e);
@@ -486,13 +486,12 @@ function Tableau({ api, envies }: { api: Api; envies: Envie[] }) {
             </div>
             {LIEUX.map((l) => {
               const r = lireLieu(e, l.id, api.etat.reponses);
-              const tranchee = r.verifiees.find((z) => z.question.departage);
               return (
                 <div key={l.id} className={x.cell} data-etat={r.etat} role="cell">
                   <span className={x.cellNom}>{l.nom}</span>
                   <span className={x.etat}><span className={x.pastille} data-etat={r.etat} aria-hidden />{MOT_ETAT[r.etat]}</span>
-                  <span className={x.cellSous}>{r.etat === "sur_place" ? (r.plusProche?.illustratif ? "d'après l'annonce fictive" : "recensé") : r.court}{r.deJustesse ? ", tout près de votre limite" : ""}</span>
-                  {tranchee ? <span className={x.cellSous}>Vérifié le {dateFr(tranchee.date)} : {tranchee.reponse.libelle.toLowerCase()}</span> : null}
+                  <span className={x.cellSous}>{r.court}{r.deJustesse ? ", tout près de votre limite" : ""}</span>
+                  <span className={x.cellSous}>{r.reserve}</span>
                 </div>
               );
             })}
@@ -575,12 +574,15 @@ function BlocEnvie({ api, envie, ouvertAuDepart, seule }: { api: Api; envie: Env
       <>
 
       {c.porteeUtile ? (
+        <>
+        <p className={s.nuance}>20, 40 ou 60 min au départ : hypothèses ajustables, pas des normes. Changer le rythme conserve votre limite ; ajustez-la si nécessaire.</p>
         <div className={x.reglages}>
           <Selecteur id={`${id}-r`} question="À quel rythme ?" valeur={envie.rythme} onChoisir={(r) => envoyer({ type: "regler", id: envie.id, rythme: r })}
             options={(["semaine", "mois", "annee"] as const).map((k) => ({ valeur: k, libelle: LIBELLE_RYTHME[k] }))} />
           <Selecteur id={`${id}-l`} question="Jusqu'où iriez-vous, à ce rythme ?" valeur={String(envie.limite)} onChoisir={(l) => envoyer({ type: "regler", id: envie.id, limite: Number(l) })}
             options={LIMITES.map((k) => ({ valeur: String(k), libelle: `${k} min` }))} />
         </div>
+        </>
       ) : null}
 
       <Regle envie={envie} lectures={comp.lectures} />
@@ -593,7 +595,7 @@ function BlocEnvie({ api, envie, ouvertAuDepart, seule }: { api: Api; envie: Env
       {principale ? <UneQuestion api={api} question={principale} principale /> : null}
 
       <details className={`${s.details} ${x.detail}`} open={seule}>
-      <summary>Lieu par lieu : ce qu&apos;il rend possible, ce qu&apos;il demande, ce qu&apos;on ignore</summary>
+      <summary>Lieu par lieu : les repères, les compromis, les inconnues</summary>
       <p className={x.capacite}>{lier(`futur•e sait lire : ${c.capacite.lit.toLowerCase()} Il ne lit pas : ${c.capacite.neLitPas.toLowerCase()}`)}</p>
       <div className={x.lieux}>
         {comp.lectures.map((l) => {
@@ -601,13 +603,13 @@ function BlocEnvie({ api, envie, ouvertAuDepart, seule }: { api: Api; envie: Env
           return (
             <div key={l.lieu} className={x.lieuCol}>
               <h4 className={x.lieuNom}>{l.nom}</h4>
-              <Groupe genre="possible" titre="Ce que ce lieu rend possible" faits={l.lecture!.possible} vide="Rien d'établi. Ce n'est pas un défaut du lieu : futur•e n'a pas de quoi le dire." />
+              <Groupe genre="possible" titre="Les repères recensés ou déclarés" faits={l.lecture!.possible} vide="Rien d'établi. Ce n'est pas un défaut du lieu : futur•e n'a pas de quoi le dire." />
               <Groupe genre="demande" titre="Ce qu'il demande" faits={l.lecture!.demande} vide="Rien de particulier d'après ce qui est connu." />
               <Groupe genre="inconnu" titre="Ce que futur•e ne sait pas" faits={l.lecture!.inconnu} vide="Rien d'important." />
               {l.verifiees.length ? (
                 <div className={x.groupe} data-genre="verifie">
-                  <p className={x.groupeCle}>Ce que vous avez vérifié</p>
-                  <ul className={x.faits}>{l.verifiees.map((z) => <li key={z.question.id} className={x.fait}><span>{lier(z.reponse.effet)}</span><span className={x.faitMeta}>votre vérification du {dateFr(z.date)} · auprès de : {z.question.aQui.toLowerCase()}</span></li>)}</ul>
+                  <p className={x.groupeCle}>Vos réponses personnelles</p>
+                  <ul className={x.faits}>{l.verifiees.map((z) => <li key={z.question.id} className={x.fait}><span>{lier(texteReponse(z))}</span><span className={x.faitMeta}>réponse simulée, sans source vérifiée</span></li>)}</ul>
                 </div>
               ) : null}
               <div className={x.change}><span className={x.changeCle}>{TITRE_CHANGEMENT[f.changement]}</span><span>{lier(f.phrase)}</span></div>
@@ -657,7 +659,7 @@ function UneQuestion({ api, question, principale = false }: { api: Api; question
         <div className={x.effet} aria-live="polite">
           <p className={s.dense}><span className={x.effetCle}>Ce que cela change pour vous</span>{lier(choisie.effet)}</p>
           {choisie.reste ? <p className={s.dense}><span className={x.effetCle}>Ce qui reste inconnu</span>{lier(choisie.reste)}</p> : null}
-          <p className={s.nuance}>Votre réponse du {dateFr(rep.date)}, simulée dans ce prototype. Elle s&apos;ajoute à la lecture ; les données publiques ne changent pas.</p>
+          <p className={s.nuance}>Votre réponse du {dateFr(rep.date)}, simulée dans ce prototype, sans source renseignée ni vérifiée. Elle s&apos;ajoute à la lecture ; les données publiques ne changent pas.</p>
         </div>
       ) : <p className={s.nuance}>Répondez quand vous saurez. Dans ce prototype, choisissez une réponse pour voir ce qu&apos;elle changerait.</p>}
     </div>
@@ -742,7 +744,7 @@ function Regle({ envie, lectures }: { envie: Envie; lectures: LecturePortee[] })
 
 // ── Version minimale : le moteur actuel et une note ──────────────────────────────────────────
 
-const MOT_MOTEUR = { ne_distingue_pas: "Le moteur actuel ne distingue pas les deux communes", non_mesure: "Le moteur actuel ne mesure pas cela", distingue: "Le moteur actuel les distingue" } as const;
+const MOT_MOTEUR = { ne_distingue_pas: "Sur l'index local examiné, ce critère ne distingue pas les deux communes", non_mesure: "Les critères de l'index local examiné ne mesurent pas cela", distingue: "Sur l'index local examiné, ce critère distingue les deux communes" } as const;
 
 function BlocMinimal({ api, envie }: { api: Api; envie: Envie }) {
   const { etat, envoyer } = api;
@@ -777,7 +779,7 @@ function sourcesDe(envies: Envie[]): CleSource[] {
     const c = catalogue(e);
     if (!c) { cles.add(HORS_LECTURE.source); continue; }
     for (const l of Object.values(c.lieux)) {
-      for (const r of l.reperes) cles.add(r.source);
+      for (const r of l.reperes) if (r.source) cles.add(r.source);
       for (const f of [...l.possible, ...l.demande, ...l.inconnu]) if (f.source) cles.add(f.source);
     }
   }
@@ -836,6 +838,7 @@ function FicheLieu({ api, id }: { api: Api; id: IdLieu }) {
               <div key={e.id} className={x.lieuEnvie}>
                 <p className={x.envieTete}><span className={x.envieNom}>{titreEnvie(e)}</span><span className={x.intention} data-intention={e.intention}>{LIBELLE_INTENTION[e.intention]}</span></p>
                 <p className={s.dense}><span className={x.etat}><span className={x.pastille} data-etat={r.etat} aria-hidden /><strong className={s.encre}>{MOT_ETAT[r.etat]}</strong></span> · {r.court}</p>
+                <p className={s.dense}>{r.reserve}</p>
                 <p className={s.dense}>{TITRE_CHANGEMENT[f.changement]} · {lier(f.phrase)}</p>
                 <div className={v.ligneGestes}><button type="button" className={`${s.action} ${v.cible}`} onClick={() => aller({ ecran: "comparer" }, `envie-${e.id}`)}>Voir le détail, face à {LIEUX.find((z) => z.id !== id)!.nom}</button></div>
               </div>

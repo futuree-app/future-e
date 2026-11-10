@@ -59,7 +59,7 @@ export const SOURCES: Record<CleSource, { nom: string; detail: string; limite: s
   index: {
     nom: "Moteur actuel du comparateur futur•e (index local)",
     detail: "Valeurs des critères « accès à une offre culturelle », « vie locale » et « nature », relues dans l'index local le 10/11/2026.",
-    limite: "L'accès à la culture agrège tous les équipements culturels dans un rayon de 5 à 25 km. Il ne distingue ni le type de lieu, ni le temps pour s'y rendre.",
+    limite: "L'accès à la culture agrège tous les équipements culturels dans un rayon de 5 à 25 km. Il ne distingue ni le type de lieu, ni le temps pour s'y rendre. Ces valeurs locales ne sont pas confirmées sur la version actuellement publiée.",
   },
 };
 
@@ -73,7 +73,7 @@ export const NOM_STATUT: Record<Statut, string> = { constate: "recensé", calcul
 export type Fait = { texte: string; echelle: Echelle; statut: Statut; source?: CleSource; illustratif?: boolean };
 
 /** Un repère sur la règle de portée : un lieu réel, et le temps estimé pour s'y rendre. */
-export type Repere = { nom: string; precision?: string; minutes: number; mode: "a_pied" | "en_voiture"; source: CleSource; illustratif?: boolean };
+export type Repere = { nom: string; precision?: string; minutes: number; mode: "a_pied" | "en_voiture"; source?: CleSource; illustratif?: boolean };
 
 export type IdLieu = "angers" | "chalonnes";
 export type CleEnvie = "theatre" | "potager" | "nager" | "libre";
@@ -219,7 +219,7 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         ],
         demande: [
           { texte: "Aucun lieu de spectacle n'est recensé dans la commune. Une salle municipale peut exister sans figurer dans ce recensement.", echelle: "commune", statut: "constate", source: "bpe" },
-          { texte: "Chaque sortie demande la voiture, et un retour de nuit d'environ 35 minutes. Cela pèse sur votre priorité « moins dépendre de la voiture ».", echelle: "commune", statut: "calcule", source: "ign" },
+          { texte: "Les itinéraires calculés vers ces lieux utilisent la voiture (35 à 39 minutes à l’aller, hors trafic et stationnement). Cela entre en tension avec votre priorité « moins dépendre de la voiture ». Le retour et les transports collectifs restent à vérifier.", echelle: "commune", statut: "calcule", source: "ign" },
         ],
         inconnu: [
           { texte: "L'existence d'un train ou d'un car pour rentrer d'Angers après un spectacle.", echelle: "commune", statut: "inconnu" },
@@ -234,8 +234,8 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         pourquoi: "Depuis Chalonnes, tous les lieux recensés sont à plus de 30 minutes en voiture. Un retour possible en train ou en car changerait ce que cette envie vous demande.",
         aQui: "Les horaires du réseau régional, ou la gare d'Angers", moment: "avant la visite",
         reponses: [
-          { valeur: "oui", libelle: "Oui, il existe un retour tardif", bascule: "ouvre", effet: "D'après ce que vous avez vérifié, une sortie à Angers reste possible sans voiture certains soirs. L'envie tient à Chalonnes sans peser autant sur votre priorité « moins dépendre de la voiture ».", reste: "La fréquence de ce retour, et s'il existe toute l'année." },
-          { valeur: "non", libelle: "Non, aucun retour le soir", bascule: "ferme", effet: "D'après ce que vous avez vérifié, chaque sortie demandera la voiture à l'aller et au retour. À Chalonnes, cette envie et votre priorité « moins dépendre de la voiture » se contredisent.", reste: "Une programmation locale à Chalonnes, que futur•e ne connaît pas." },
+          { valeur: "oui", libelle: "Oui, il existe un retour tardif", bascule: "ouvre", effet: "Vous signalez un retour tardif sans voiture. S'il est confirmé et compatible avec le spectacle, il pourrait réduire la tension avec votre priorité ; le trajet en voiture calculé reste inchangé.", reste: "La source, la durée totale, l'aller, les correspondances, la fréquence et les jours de circulation de ce retour." },
+          { valeur: "non", libelle: "Non, aucun retour le soir", bascule: "ferme", effet: "Vous ne signalez aucun retour tardif sans voiture. Cela renforce le compromis avec votre priorité pour les sorties à Angers, sans prouver que toute sortie exige une voiture.", reste: "La source consultée, les dates et destinations couvertes, d'autres solutions et une programmation locale." },
         ],
       },
       {
@@ -244,8 +244,8 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         pourquoi: "Le recensement national suit les lieux labellisés. Une programmation locale n'y figure pas forcément.",
         aQui: "La mairie ou la médiathèque", moment: "pendant la visite",
         reponses: [
-          { valeur: "oui", libelle: "Oui, plusieurs dates par an", bascule: "ouvre", effet: "D'après la mairie, des spectacles ont lieu sur place plusieurs fois par an. Cela complète les sorties à Angers, sans les remplacer.", reste: "Le genre de spectacles proposés, et s'ils vous correspondent." },
-          { valeur: "non", libelle: "Non, rien de régulier", bascule: "rien", effet: "D'après la mairie, il n'y a pas de programmation régulière sur place. La lecture ne change pas.", reste: "" },
+          { valeur: "oui", libelle: "Oui, plusieurs dates par an", bascule: "ouvre", effet: "Vous signalez plusieurs spectacles locaux par an. S'ils sont confirmés et vous correspondent, ils pourraient compléter les sorties plus lointaines.", reste: "La source, les dates, les genres, les places et le trajet réel." },
+          { valeur: "non", libelle: "Non, rien de régulier", bascule: "rien", effet: "Vous ne signalez pas de programmation régulière sur place. Cela n'établit pas l'absence de spectacles locaux.", reste: "La source, la période couverte et les événements occasionnels." },
         ],
       },
     ],
@@ -255,7 +255,7 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
     },
     moteurActuel: {
       critere: "Accès à une offre culturelle",
-      lecture: "Angers et Chalonnes-sur-Loire reçoivent la même valeur interne (88 sur 100, jamais affichée dans le produit). Le critère additionne cinémas, bibliothèques, conservatoires, musées et lieux de spectacle dans un rayon de 5 à 25 km, pondérés par la distance.",
+      lecture: "Sur l'index local examiné, Angers et Chalonnes-sur-Loire reçoivent la même valeur interne (88 sur 100, jamais affichée dans le produit). Le critère additionne cinémas, bibliothèques, conservatoires, musées et lieux de spectacle dans un rayon de 5 à 25 km, pondérés par la distance.",
       verdict: "ne_distingue_pas",
     },
   },
@@ -265,14 +265,14 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
     mots: ["cultiver", "potager", "jardin", "alimentation", "légumes", "legumes", "autonomie", "autosuffisance", "poules", "verger"],
     capacite: {
       lit: "Ce que l'annonce déclare (un jardin, sa surface), et ce que la commune dit du climat et des sols à venir.",
-      neLitPas: "La qualité du sol d'une parcelle, son accès à l'eau, son exposition, et les jardins familiaux ou partagés : il n'en existe aucun recensement national.",
+      neLitPas: "La qualité du sol d'une parcelle, son accès à l'eau, son exposition, et les jardins familiaux ou partagés : aucune source exploitable n'a été examinée ici pour les recenser.",
     },
     aujourdhui: { texte: "Pas d'extérieur aujourd'hui. Quelques aromatiques sur un rebord de fenêtre.", minutes: null },
     porteeUtile: false,
     lieux: {
       angers: {
         reperes: [],
-        inconnuRegle: "Aucun recensement national des jardins familiaux ou partagés : futur•e ne peut pas placer de repère.",
+        inconnuRegle: "Les sources examinées ne recensent pas les jardins familiaux ou partagés : futur•e ne peut pas placer de repère. Cela ne prouve pas leur absence.",
         possible: [
           { texte: "63 associations déclarées à Angers mentionnent un jardin, un potager ou une AMAP. 36 ont mis à jour leur déclaration depuis 2021.", echelle: "commune", statut: "constate", source: "rna" },
         ],
@@ -284,12 +284,12 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         ],
       },
       chalonnes: {
-        reperes: [{ nom: "Jardin de l'annonce", precision: "400 m² déclarés", minutes: 0, mode: "a_pied", source: "ign", illustratif: true }],
+        reperes: [{ nom: "Jardin de l'annonce", precision: "400 m² déclarés", minutes: 0, mode: "a_pied", illustratif: true }],
         possible: [
           { texte: "L'annonce déclare un jardin de 400 m².", echelle: "logement", statut: "declare", illustratif: true },
         ],
         demande: [
-          { texte: "Les projections placent Chalonnes parmi les 2 % de communes de France où les sols seraient le plus souvent secs à l'horizon 2050 (+2,7 °C en France). Angers est dans les 4 %. Un potager y demandera de l'eau l'été.", echelle: "commune", statut: "projete", source: "drias" },
+          { texte: "Les projections placent Chalonnes parmi les 2 % de communes de France où les sols seraient le plus souvent secs à l'horizon 2050 (+2,7 °C en France). Angers est dans les 4 %. Cette projection invite à vérifier l'accès à l'eau ; elle n'établit pas les besoins actuels de cette parcelle.", echelle: "commune", statut: "projete", source: "drias" },
           { texte: "La commune borde la Loire et compte 11 arrêtés de catastrophe naturelle pour inondation. Cela ne dit pas si ce jardin est inondable.", echelle: "commune", statut: "constate", source: "gaspar" },
         ],
         inconnu: [
@@ -305,9 +305,9 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         pourquoi: "À Angers, l'annonce n'a pas d'extérieur. Cette envie n'y tient que par une parcelle proche, que futur•e ne sait pas recenser.",
         aQui: "La mairie d'Angers, ou une association de jardins du quartier", moment: "avant la visite",
         reponses: [
-          { valeur: "court", libelle: "Oui, une parcelle en moins d'un an", bascule: "ouvre", effet: "D'après la mairie, une parcelle serait accessible en moins d'un an près de la Doutre. L'envie devient possible à Angers aussi : elle ne distingue plus autant les deux lieux.", reste: "La taille de la parcelle, et le temps réel pour s'y rendre." },
-          { valeur: "long", libelle: "Oui, mais plusieurs années d'attente", bascule: "ferme", effet: "D'après la mairie, il faudrait attendre plusieurs années. Pour cette envie, seul Chalonnes offre une possibilité dès l'emménagement.", reste: "D'autres formes de jardin (toit partagé, jardin d'une association)." },
-          { valeur: "aucun", libelle: "Non, rien à proximité", bascule: "ferme", effet: "D'après la mairie, il n'y a pas de jardin accessible près de la Doutre. Pour cette envie, seul Chalonnes offre une possibilité.", reste: "Un autre quartier d'Angers pourrait en avoir." },
+          { valeur: "court", libelle: "Oui, une parcelle en moins d'un an", bascule: "ouvre", effet: "Vous signalez une parcelle à Angers avec un délai annoncé de moins d'un an. C'est une piste, si l'attribution et les conditions de culture sont confirmées ; cela ne garantit pas de cultiver dès l'emménagement.", reste: "La source, l'attribution effective, la date, le droit d'usage, le sol, l'eau, l'exposition et le trajet." },
+          { valeur: "long", libelle: "Oui, mais plusieurs années d'attente", bascule: "ferme", effet: "Vous signalez plusieurs années d'attente à Angers. Si ce délai est confirmé, cette piste serait différée. Cela ne rend pas le jardin déclaré à Chalonnes disponible ou cultivable pour autant.", reste: "La source et la liste concernée, d'autres jardins à Angers, et les conditions réelles du jardin de l'annonce fictive à Chalonnes." },
+          { valeur: "aucun", libelle: "Non, rien à proximité", bascule: "ferme", effet: "Vous n'avez pas trouvé de parcelle près de la Doutre. Cela ne prouve pas l'absence de jardins, ni une possibilité de cultiver à Chalonnes.", reste: "La source, le périmètre de la recherche, d'autres quartiers et la cultivabilité du jardin déclaré à Chalonnes." },
         ],
       },
       {
@@ -316,9 +316,9 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         pourquoi: "Les étés secs sont projetés plus fréquents, et la commune borde la Loire. Les deux réponses se trouvent sur place.",
         aQui: "Le vendeur ou l'agence, puis vos yeux pendant la visite", moment: "pendant la visite",
         reponses: [
-          { valeur: "eau", libelle: "Un puits ou une cuve, jamais inondé", bascule: "ouvre", effet: "D'après le vendeur, le jardin dispose d'un point d'eau et n'a pas été inondé. C'est une déclaration : elle vaut pour ce qu'il sait.", reste: "La zone réglementaire d'inondation, que l'analyse de l'adresse lirait." },
-          { valeur: "sec", libelle: "Pas de point d'eau", bascule: "rien", effet: "D'après le vendeur, il n'y a ni puits ni cuve. L'arrosage dépendra du réseau, et des restrictions d'été quand il y en a.", reste: "Le coût d'une récupération d'eau de pluie." },
-          { valeur: "inonde", libelle: "Déjà inondé", bascule: "ferme", effet: "D'après le vendeur, le jardin a déjà été sous l'eau. Cela concerne aussi la maison : à regarder avant tout.", reste: "La fréquence, et la hauteur atteinte." },
+          { valeur: "eau", libelle: "Un puits ou une cuve, jamais inondé", bascule: "ouvre", effet: "Vous signalez un point d'eau et aucune inondation connue. Cette réponse ne prouve ni la ressource utilisable ni l'absence de risque ; la cultivabilité du jardin reste à établir.", reste: "La source, le sol, l'exposition, le droit d'usage, l'eau utilisable et la zone réglementaire d'inondation." },
+          { valeur: "sec", libelle: "Pas de point d'eau", bascule: "rien", effet: "Vous signalez l'absence de puits ou de cuve. Si elle est confirmée, l'accès à une ressource utilisable pour arroser reste à examiner.", reste: "La source, les autres ressources possibles, les restrictions, le sol, l'exposition et le droit d'usage." },
+          { valeur: "inonde", libelle: "Déjà inondé", bascule: "ferme", effet: "Vous signalez une inondation passée du jardin. Si elle est confirmée, ses conséquences sur la culture sont à examiner ; rien n'établit ici que la maison a été touchée.", reste: "La source, la date, la fréquence, la hauteur atteinte, les zones touchées et l'état du sol." },
         ],
       },
     ],
@@ -350,7 +350,7 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         ],
         possible: [
           { texte: "Quatre bassins couverts, ouverts toute l'année, sont recensés dans la commune.", echelle: "commune", statut: "constate", source: "bpe" },
-          { texte: "Depuis la Doutre, ils sont à 9 à 11 minutes en voiture.", echelle: "quartier", statut: "calcule", source: "ign" },
+          { texte: "Depuis le point de la Doutre, les deux bassins présentés sont à 9 et 11 minutes en voiture.", echelle: "quartier", statut: "calcule", source: "ign" },
         ],
         demande: [
           { texte: "À pied depuis la Doutre, le bassin le plus proche est à 41 minutes. Votre trajet à pied d'aujourd'hui ne se retrouve pas dans ce quartier.", echelle: "quartier", statut: "calcule", source: "ign" },
@@ -370,7 +370,7 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         ],
         demande: [
           { texte: "La piscine de Chalonnes est recensée comme découverte et saisonnière : elle ne porte pas une habitude d'hiver.", echelle: "commune", statut: "constate", source: "bpe" },
-          { texte: "Deux fois par semaine, cela représente environ une heure de voiture en plus chaque semaine.", echelle: "commune", statut: "calcule", source: "ign" },
+          { texte: "Avec le trajet calculé en voiture, deux allers-retours par semaine représenteraient environ une heure de conduite. Les autres modes ne sont pas établis.", echelle: "commune", statut: "calcule", source: "ign" },
         ],
         inconnu: [
           { texte: "Les créneaux ouverts à la nage libre, en particulier tôt le matin ou le soir.", echelle: "commune", statut: "inconnu" },
@@ -384,18 +384,18 @@ export const CATALOGUE: Record<Exclude<CleEnvie, "libre">, CatalogueEnvie> = {
         pourquoi: "Un bassin à 14 minutes ne porte votre habitude que s'il est ouvert quand vous êtes disponible.",
         aQui: "Le site ou l'accueil du centre aquatique", moment: "avant la visite",
         reponses: [
-          { valeur: "oui", libelle: "Oui, matin et soir", bascule: "ouvre", effet: "D'après le centre, des créneaux existent matin et soir. Votre habitude tient à Chalonnes, en voiture.", reste: "L'affluence à ces heures-là." },
-          { valeur: "non", libelle: "Non, horaires réduits", bascule: "ferme", effet: "D'après le centre, la nage libre n'est ouverte qu'en journée. Votre habitude ne tient pas à Chalonnes sans changer de rythme.", reste: "D'autres bassins plus lointains." },
+          { valeur: "oui", libelle: "Oui, matin et soir", bascule: "ouvre", effet: "Vous signalez des créneaux matin et soir à Aqualoire. S'ils sont confirmés aux jours souhaités, ils pourraient convenir ; préserver votre habitude reste à vérifier, avec le compromis du trajet en voiture.", reste: "La source, les jours exacts, l'accès effectif, les tarifs, l'affluence et les autres modes de transport." },
+          { valeur: "non", libelle: "Non, horaires réduits", bascule: "ferme", effet: "Vous signalez des horaires réduits à Aqualoire. S'ils excluent vos créneaux habituels, ce bassin ne permettrait pas de préserver votre habitude à ces heures-là, même avec un trajet de 14 minutes.", reste: "La source, les jours et horaires précis, les autres bassins et les alternatives de transport." },
         ],
       },
       {
         id: "q-nager-quartier", lieu: "angers", departage: false,
         question: "Un logement à moins de 15 minutes à pied d'une piscine couverte existe-t-il dans votre budget à Angers ?",
-        pourquoi: "À Angers, tout dépend du quartier. Quatre bassins couverts sont recensés : chercher près de l'un d'eux garderait votre trajet à pied.",
+        pourquoi: "À Angers, tout dépend du quartier. Quatre bassins couverts sont recensés : chercher près de l'un d'eux pourrait préserver un trajet à pied, sous réserve de l'itinéraire et des créneaux.",
         aQui: "Votre recherche d'annonces", moment: "avant la visite",
         reponses: [
-          { valeur: "oui", libelle: "Oui, j'en ai trouvé", bascule: "ouvre", effet: "Vous avez repéré un logement proche d'un bassin. Ajoutez-le : la comparaison le lira comme les autres.", reste: "Son analyse d'adresse." },
-          { valeur: "non", libelle: "Non, hors budget", bascule: "rien", effet: "D'après votre recherche, ces quartiers dépassent votre budget. La lecture ne change pas.", reste: "" },
+          { valeur: "oui", libelle: "Oui, j'en ai trouvé", bascule: "ouvre", effet: "Vous signalez un logement proche d'un bassin. C'est une piste à vérifier ; les temps depuis le point de la Doutre ne décrivent pas ce logement.", reste: "L'annonce, son prix, sa disponibilité, l'itinéraire depuis son adresse et les créneaux du bassin." },
+          { valeur: "non", libelle: "Non, hors budget", bascule: "rien", effet: "Vous signalez que les logements trouvés près des bassins dépassent votre budget. Cela ne prouve pas que tous les logements de ces quartiers sont hors budget.", reste: "Les annonces, leurs dates et le périmètre de votre recherche." },
         ],
       },
     ],

@@ -1,8 +1,7 @@
 // FUT-190 · PROTOTYPE « ENVIES » · MODÈLE PUR.
 //
-// L'idée éprouvée ici : une envie ne devient utile à une décision résidentielle que si elle est
-// traduite en PORTÉE. « Aller au théâtre » ne compare rien ; « y aller chaque mois, donc à 40 minutes
-// au plus » se compare entre deux lieux, et se compare à aujourd'hui.
+// Hypothèse : la portée éclaire certaines envies, avec les compromis du Projet et aujourd'hui.
+// Un rythme ne prouve ni une limite acceptable ni l'accessibilité réelle d'une pratique.
 //
 //   envie + rythme  →  une limite de trajet déclarée  →  ce qui est recensé en deçà, lieu par lieu
 //                   →  ce que le lieu demande, ce qu'on ignore  →  la question qui peut départager.
@@ -10,10 +9,10 @@
 // Invariants (testés dans `modele.test.ts`) :
 //   - aucun score, aucun total, aucun décompte d'envies « tenues » ; aucun lieu n'est dit meilleur ;
 //   - ce que futur•e ne sait pas lire n'est jamais rangé comme un défaut du lieu, ni comme un atout ;
-//   - une réponse de vérification ne modifie pas le fait public : elle s'ajoute, attribuée et datée ;
+//   - une réponse personnelle ne modifie pas le fait public ; sa date ne prouve pas sa provenance ;
 //   - la limite est celle de la personne : le rythme n'en propose qu'une valeur de départ.
 import {
-  CATALOGUE, LIEUX, type CatalogueEnvie, type CleEnvie, type IdLieu, type LectureLieu, type Question, type Repere, type Reponse,
+  CATALOGUE, LIEUX, PROJET, type CatalogueEnvie, type CleEnvie, type IdLieu, type LectureLieu, type Question, type Repere, type Reponse,
 } from "./donnees.ts";
 
 export type Intention = "garder" | "developper" | "decouvrir";
@@ -42,6 +41,11 @@ export function nouvelleEnvie(texte: string, intention: Intention, rythme: Rythm
   return { id: `e${n}`, cle, texte: texte.trim(), intention, rythme, limite: LIMITE_PAR_RYTHME[rythme] };
 }
 
+/** Le rythme ne remplace jamais la limite déjà présentée ou choisie. */
+export function reglerEnvie(e: Envie, reglage: Partial<Pick<Envie, "rythme" | "limite" | "intention">>): Envie {
+  return { ...e, ...reglage };
+}
+
 export const catalogue = (e: Envie): CatalogueEnvie | null => (e.cle === "libre" ? null : CATALOGUE[e.cle]);
 export const titreEnvie = (e: Envie) => catalogue(e)?.compris ?? majuscule(e.texte);
 const majuscule = (t: string) => (t ? t[0]!.toUpperCase() + t.slice(1) : t);
@@ -58,25 +62,38 @@ export type LecturePortee = {
   deJustesse: boolean;
   /** Une phrase courte, pour le tableau d'ensemble. */
   court: string;
+  /** Réserves pratiques, distinctes de l'état temporel et des faits publics. */
+  reserve: string;
   lecture: LectureLieu | null;
   /** Les vérifications déjà répondues pour ce lieu : elles s'ajoutent à la lecture, sans la remplacer. */
   verifiees: { question: Question; reponse: Reponse; date: string }[];
 };
 
+export function texteReponse(r: LecturePortee["verifiees"][number]): string {
+  return `Votre réponse du ${dateFr(r.date)} (source non renseignée) : ${r.reponse.effet} Reste à vérifier : ${r.reponse.reste}`;
+}
+
 export function lireLieu(e: Envie, id: IdLieu, reponses: Reponses = {}): LecturePortee {
   const nom = LIEUX.find((l) => l.id === id)!.nom;
   const c = catalogue(e);
-  if (!c) return { lieu: id, nom, etat: "non_su", plusProche: null, deJustesse: false, court: "futur•e ne sait pas le lire", lecture: null, verifiees: [] };
+  if (!c) return { lieu: id, nom, etat: "non_su", plusProche: null, deJustesse: false, court: "futur•e ne sait pas le lire", reserve: "Aucune conclusion sur ce lieu.", lecture: null, verifiees: [] };
   const lecture = c.lieux[id];
   const verifiees = c.questions.filter((q) => q.lieu === id && reponses[q.id]).map((q) => ({ question: q, reponse: q.reponses.find((r) => r.valeur === reponses[q.id]!.valeur)!, date: reponses[q.id]!.date })).filter((v) => v.reponse);
   const plusProche = lecture.reperes.length ? [...lecture.reperes].sort((a, b) => a.minutes - b.minutes)[0]! : null;
-  if (!plusProche) return { lieu: id, nom, etat: "non_su", plusProche: null, deJustesse: false, court: "aucun repère connu de futur•e", lecture, verifiees };
-  if (!c.porteeUtile || plusProche.minutes === 0) return { lieu: id, nom, etat: "sur_place", plusProche, deJustesse: false, court: `sur place (${plusProche.illustratif ? "déclaré par l'annonce" : "recensé"})`, lecture, verifiees };
+  const tension = plusProche?.mode === "en_voiture" && PROJET.priorites.includes("moins dépendre de la voiture")
+    ? `À ${nom}, le trajet retenu se fait en voiture : il entre en tension avec votre priorité « moins dépendre de la voiture », pour une pratique ${LIBELLE_RYTHME[e.rythme]}. ` : "";
+  const reserve = [
+    c.porteeUtile ? `${tension}Les trajets en transports collectifs ne sont pas calculés : une autre solution reste inconnue, pas impossible. Le trajet ne garantit ni les horaires, ni les places, ni la pratique réelle.`
+      : "La disponibilité et la cultivabilité restent à établir : sol, eau, exposition et droit d'usage ne sont pas vérifiés.",
+    ...verifiees.map(texteReponse),
+  ].join(" ");
+  if (!plusProche) return { lieu: id, nom, etat: "non_su", plusProche: null, deJustesse: false, court: "aucun repère connu de futur•e", reserve, lecture, verifiees };
+  if (!c.porteeUtile || plusProche.minutes === 0) return { lieu: id, nom, etat: "sur_place", plusProche, deJustesse: false, court: `sur place (${plusProche.illustratif ? "jardin déclaré dans une annonce fictive, cultivabilité non établie" : "recensé"})`, reserve, lecture, verifiees };
   const dedans = plusProche.minutes <= e.limite;
   const trajet = `${plusProche.minutes} min ${MODE[plusProche.mode]}`;
   return {
     lieu: id, nom, etat: dedans ? "a_portee" : "hors_portee", plusProche, deJustesse: dedans && e.limite - plusProche.minutes <= 5,
-    court: dedans ? `à ${trajet}` : `à ${trajet}, au-delà de vos ${e.limite} min`, lecture, verifiees,
+    court: dedans ? `à ${trajet}, dans votre limite de ${e.limite} min` : `à ${trajet}, au-delà de vos ${e.limite} min`, reserve, lecture, verifiees,
   };
 }
 
@@ -86,44 +103,35 @@ export type Ecart = "distingue" | "nuance" | "pareil" | "a_verifier" | "non_lu";
 export type Comparaison = { envie: Envie; lectures: [LecturePortee, LecturePortee]; ecart: Ecart; phrase: string };
 
 export const TITRE_ECART: Record<Ecart, string> = {
-  distingue: "Cette envie distingue les deux lieux",
-  nuance: "Possible des deux côtés, pas de la même façon",
-  pareil: "Cette envie ne distingue pas les deux lieux",
-  a_verifier: "Cette envie pourrait les distinguer : il manque une réponse",
+  distingue: "Des trajets différents face à votre limite",
+  nuance: "Des trajets et des compromis différents",
+  pareil: "Des temps proches, une pratique à confirmer",
+  a_verifier: "Des possibilités qui restent à vérifier",
   non_lu: "futur•e ne sait pas comparer les deux lieux sur ce point",
 };
 
-const possible = (l: LecturePortee) => l.etat === "a_portee" || l.etat === "sur_place";
+const dansLaLimite = (l: LecturePortee) => l.etat === "a_portee";
 
 export function comparer(e: Envie, reponses: Reponses = {}): Comparaison {
   const [a, b] = LIEUX.map((l) => lireLieu(e, l.id, reponses)) as [LecturePortee, LecturePortee];
   const base = { envie: e, lectures: [a, b] as [LecturePortee, LecturePortee] };
   const c = catalogue(e);
   if (!c) return { ...base, ecart: "non_lu", phrase: "futur•e n'a aucune donnée pour lire cette envie. Elle reste dans votre Projet, avec vos propres vérifications." };
-  const v = c.verbe;
-  const inconnus = [a, b].filter((l) => l.etat === "non_su");
-  if (inconnus.length) {
-    const connu = [a, b].find((l) => l.etat !== "non_su");
-    const x = inconnus[0]!;
-    const tranchee = x.verifiees.find((r) => r.question.departage);
-    if (tranchee) {
-      return tranchee.reponse.bascule === "ouvre"
-        ? { ...base, ecart: "nuance", phrase: `D'après votre vérification du ${dateFr(tranchee.date)}, ${v} devient possible à ${x.nom} aussi. ${connu && possible(connu) ? `À ${connu.nom}, c'est ${connu.court}.` : ""}`.trim() }
-        : { ...base, ecart: "distingue", phrase: `D'après votre vérification du ${dateFr(tranchee.date)}, ${connu && possible(connu) ? `seul ${connu.nom} vous permet de ${v} dès l'emménagement.` : `${v} reste hors de portée à ${x.nom}.`}` };
-    }
-    return { ...base, ecart: "a_verifier", phrase: connu && possible(connu) ? `À ${connu.nom}, ${v} est possible ${connu.court}. À ${x.nom}, futur•e ne le sait pas : une vérification peut le dire.` : `futur•e ne sait pas si ${v} est possible à ${inconnus.map((l) => l.nom).join(" ni à ")}.` };
-  }
-  if (possible(a) !== possible(b)) {
-    const oui = possible(a) ? a : b, non = possible(a) ? b : a;
-    return { ...base, ecart: "distingue", phrase: `Au rythme que vous indiquez (${LIBELLE_RYTHME[e.rythme]}, ${e.limite} min au plus), ${v} est à votre portée à ${oui.nom} (${oui.court.replace(/^à /, "")}), et ne l'est pas à ${non.nom} (${non.plusProche!.minutes} min ${MODE[non.plusProche!.mode]}).` };
-  }
-  if (!possible(a)) return { ...base, ecart: "pareil", phrase: `À ce rythme (${e.limite} min au plus), aucun des deux lieux ne met ${v} à votre portée : ${a.nom} est ${a.court.split(",")[0]}, ${b.nom} ${b.court.split(",")[0]}.` };
-  const modes = a.plusProche!.mode !== b.plusProche!.mode;
-  const ecartMin = Math.abs(a.plusProche!.minutes - b.plusProche!.minutes);
-  if (modes || ecartMin >= 15) {
-    return { ...base, ecart: "nuance", phrase: `${majuscule(v)} est à votre portée des deux côtés : ${a.court} depuis ${a.nom}, ${b.court} depuis ${b.nom}${b.deJustesse || a.deJustesse ? `, tout près de votre limite de ${e.limite} min` : ""}.` };
-  }
-  return { ...base, ecart: "pareil", phrase: `${majuscule(v)} est à votre portée des deux côtés, à des temps proches (${a.court.replace(/^à /, "")} et ${b.court.replace(/^à /, "")}).` };
+  const reponsesPersonnelles = [a, b].flatMap((l) => l.verifiees.map(texteReponse)).join(" ");
+  if (!c.porteeUtile) return {
+    ...base, ecart: "a_verifier",
+    phrase: `À Chalonnes-sur-Loire, le jardin de 400 m² est déclaré dans une annonce fictive : une piste pour cultiver, si sa disponibilité et sa cultivabilité sont confirmées. À Angers, aucun jardin partagé n'est recensé dans les sources examinées ; ce n'est pas une preuve d'absence. Sol, eau, exposition et droit d'usage restent à vérifier. ${reponsesPersonnelles}`.trim(),
+  };
+  const avecReponse = a.verifiees.length + b.verifiees.length > 0;
+  const ecart: Ecart = avecReponse ? "a_verifier" : dansLaLimite(a) !== dansLaLimite(b) ? "distingue"
+    : a.plusProche?.mode !== b.plusProche?.mode || Math.abs((a.plusProche?.minutes ?? 0) - (b.plusProche?.minutes ?? 0)) >= 15 ? "nuance" : "pareil";
+  const voiture = [a, b].filter((l) => l.plusProche?.mode === "en_voiture");
+  const compromis = voiture.length && PROJET.priorites.includes("moins dépendre de la voiture")
+    ? `À ${voiture.map((l) => l.nom).join(" et à ")}, ce trajet exige la voiture et entre en tension avec votre priorité « moins dépendre de la voiture ».` : "";
+  return {
+    ...base, ecart,
+    phrase: `Pour ${c.verbe} ${LIBELLE_RYTHME[e.rythme]}, le trajet calculé est ${a.court} depuis ${a.nom} ; ${b.court} depuis ${b.nom}. ${compromis} Les temps en transports collectifs ne sont pas disponibles : une autre solution reste inconnue, pas impossible. Ces temps ne prouvent pas que la pratique est accessible : horaires et places restent à vérifier. ${reponsesPersonnelles}`.trim(),
+  };
 }
 
 // ── Par rapport à aujourd'hui ────────────────────────────────────────────────────────────────
@@ -140,7 +148,7 @@ export function faceAAujourdhui(e: Envie, l: LecturePortee): { changement: Chang
   const auj = c.aujourdhui;
   if (auj.minutes == null) {
     return l.etat === "sur_place"
-      ? { changement: "nouveau", phrase: `À ${l.nom}, vous auriez ce que vous n'avez pas aujourd'hui, si l'annonce dit vrai.` }
+      ? { changement: "nouveau", phrase: `À ${l.nom}, l'annonce fictive déclare un jardin, contrairement à aujourd'hui. Cela ne prouve pas que vous pourriez le cultiver : sol, eau, exposition et droit d'usage restent à vérifier.` }
       : { changement: "inconnu", phrase: `À ${l.nom}, rien n'est établi.` };
   }
   const p = l.plusProche!;
@@ -191,7 +199,7 @@ export function aRetenir(envies: Envie[], reponses: Reponses): ARetenir {
     else r.nonLus.push(`« ${majuscule(e.texte)} » : ${c.phrase}`);
     if (e.intention === "garder") {
       const f = c.lectures.map((l) => faceAAujourdhui(e, l));
-      if (c.lectures.every((l, i) => f[i]!.changement === "plus_loin" || f[i]!.changement === "perdu" || (f[i]!.changement === "autrement" && l.plusProche?.mode === "en_voiture"))) pertes.push(`${titreEnvie(e)} : dans les deux cas, ce sera moins simple qu'aujourd'hui (${c.lectures.map((l) => `${l.nom}, ${l.court.replace(/^à /, "")}`).join(" ; ")}).`);
+      if (c.lectures.every((l, i) => f[i]!.changement === "plus_loin" || f[i]!.changement === "perdu" || (f[i]!.changement === "autrement" && l.plusProche?.mode === "en_voiture"))) pertes.push(`${titreEnvie(e)} : dans les deux cas, les trajets retenus utilisent la voiture, contre la marche aujourd'hui (${c.lectures.map((l) => `${l.nom}, ${l.court.replace(/^à /, "")}`).join(" ; ")}). Cela entre en tension avec votre priorité « moins dépendre de la voiture ». Les alternatives en transports collectifs et la pratique réelle restent à vérifier.`);
     }
   }
   r.perte = pertes[0] ?? null;
@@ -202,7 +210,7 @@ export function ouVousEnEtes(envies: Envie[], reponses: Reponses): string {
   if (!envies.length) return "Deux communes, une annonce dans chacune. Votre Projet les distingue déjà sur la voiture, le prix et la verdure.";
   const n = envies.flatMap(questionsDe).filter((q) => reponses[q.id]).length;
   const k = envies.length === 1 ? `l'envie que vous avez ajoutée` : `vos ${["", "", "deux", "trois", "quatre", "cinq"][envies.length] ?? envies.length} envies`;
-  return `Deux communes, une annonce dans chacune, et ${k}. ${n ? `${n === 1 ? "Une vérification est faite" : `${n} vérifications sont faites`}.` : "Aucune vérification n'est encore faite."}`;
+  return `Deux communes, une annonce dans chacune, et ${k}. ${n ? `${n === 1 ? "Une réponse personnelle est enregistrée" : `${n} réponses personnelles sont enregistrées`}, sans source vérifiée.` : "Aucune réponse personnelle n'est encore enregistrée."}`;
 }
 
 export function dateFr(iso: string): string {
@@ -223,10 +231,10 @@ const E_LIBRE = nouvelleEnvie("m'engager dans la vie de ma commune", "decouvrir"
 
 export const SITUATIONS: Situation[] = [
   { id: "depart", titre: "Point de départ : aucune envie", resume: "Deux communes déjà gardées. L'entrée par les envies est facultative : elle se trouve dans Mon Projet et, discrètement, sur la vue d'ensemble.", envies: [], reponses: {}, vue: { ecran: "ensemble" } },
-  { id: "theatre", titre: "Une envie culturelle : le théâtre (preuve disponible)", resume: "Les lieux de spectacle sont recensés et les trajets estimés. Changez le rythme : la même donnée ne dit plus la même chose.", envies: [E_THEATRE], reponses: {}, vue: { ecran: "comparer" } },
+  { id: "theatre", titre: "Une envie culturelle : le théâtre (lieux recensés, pratique à vérifier)", resume: "Les lieux sont recensés et les trajets estimés. Ajustez rythme et limite : le compromis avec la voiture reste visible.", envies: [E_THEATRE], reponses: {}, vue: { ecran: "comparer" } },
   { id: "potager", titre: "Une envie d'autonomie : cultiver (preuve partielle ou absente)", resume: "Un jardin déclaré d'un côté, aucun recensement de l'autre. La comparaison s'arrête sur une question.", envies: [E_POTAGER], reponses: {}, vue: { ecran: "comparer" } },
-  { id: "nager", titre: "Une habitude à garder : nager", resume: "Ce que la personne vit déjà sert de référence. Les deux lieux la lui rendent moins simple.", envies: [E_NAGER], reponses: {}, vue: { ecran: "comparer" } },
+  { id: "nager", titre: "Une habitude à garder : nager", resume: "La marche d'aujourd'hui est comparée aux trajets calculés en voiture. Les autres solutions restent inconnues.", envies: [E_NAGER], reponses: {}, vue: { ecran: "comparer" } },
   { id: "trois", titre: "Trois envies ensemble", resume: "Garder, développer, développer. Les lieux ne répondent pas aux mêmes.", envies: [E_NAGER, E_THEATRE, E_POTAGER], reponses: {}, vue: { ecran: "comparer" } },
   { id: "libre", titre: "Une envie que futur•e ne sait pas lire", resume: "L'envie est gardée, sans donnée inventée. Rien n'est conclu.", envies: [E_LIBRE], reponses: {}, vue: { ecran: "comparer" } },
-  { id: "apres", titre: "Après deux vérifications", resume: "Les réponses s'ajoutent, attribuées et datées. Les faits publics ne changent pas.", envies: [E_NAGER, E_THEATRE, E_POTAGER], reponses: { "q-potager-parcelle": { valeur: "long", date: "2026-11-06" }, "q-theatre-retour": { valeur: "non", date: "2026-11-07" } }, vue: { ecran: "comparer" } },
+  { id: "apres", titre: "Après deux vérifications", resume: "Deux réponses personnelles simulées et datées, sans source vérifiée. Les faits publics et les inconnues restent visibles.", envies: [E_NAGER, E_THEATRE, E_POTAGER], reponses: { "q-potager-parcelle": { valeur: "long", date: "2026-11-06" }, "q-theatre-retour": { valeur: "non", date: "2026-11-07" } }, vue: { ecran: "comparer" } },
 ];
