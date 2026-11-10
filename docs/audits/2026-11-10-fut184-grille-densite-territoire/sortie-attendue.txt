@@ -1,0 +1,258 @@
+################ 1. sources et table
+fichier_diffusion_2025.xlsx: OK
+fichier_diffusion_2026.xlsx: OK
+écrit src/lib/territoire/grille-densite.generated.ts : 34875 communes, géographie 01/01/2025, contre-épreuve 01/01/2026 identique
+par classe : {1: 699, 2: 637, 3: 947, 4: 1996, 5: 5072, 6: 18288, 7: 7236}
+table régénérée identique à celle du dépôt
+################ 2. textes rendus, base 6972d5a4 puis branche
+34791 lignes -> <dossier_de_travail>/avant.jsonl
+34791 lignes -> <dossier_de_travail>/apres.jsonl
+################ 3. comparaison
+
+################ 1. Couverture de la grille dans le registre
+entrées : 34791 = 34743 communes + 45 arrondissements + 3 villes PLM
+communes sans classe : 0
+arrondissements à l'échelle de leur ville : 45 / 45
+villes PLM : {'Paris': 'Grand centre urbain', 'Lyon': 'Grand centre urbain', 'Marseille': 'Grand centre urbain'}
+  Grand centre urbain                         689
+  Centre urbain intermédiaire                 617
+  Petite ville — classification Insee         932
+  Ceinture urbaine                           1965
+  Bourg rural                                5038
+  Commune rurale de faible densité          18267
+  Commune rurale de très faible densité      7235
+registre : Counter({'territoire-facts@3': 34791}) | avant : Counter({'territoire-facts@2': 34791})
+règle de la catégorie après : Counter({'density-grid-insee-2025@1': 34791})
+empreintes changées : 34791 / 34791
+
+################ 2. Ancienne catégorie (palier de densité moyenne) × classe de la grille, communes
+                                                   Commune dense   Densité intermédiaire       Commune peu dense                    None
+Grand centre urbain                                          460                     229                       0                       0
+Centre urbain intermédiaire                                  108                     496                      13                       0
+Petite ville — classification Insee                            6                     683                     243                       0
+Ceinture urbaine                                              16                    1663                     285                       1
+Bourg rural                                                    4                    1636                    3396                       2
+Commune rurale de faible densité                               0                     484                   17780                       3
+Commune rurale de très faible densité                          0                       2                    7224                       9
+arrondissements, avant : Counter({'Arrondissement dense': 43, 'Densité intermédiaire': 2}) → après : Counter({"Grand centre urbain, à l'échelle de Paris": 20, "Grand centre urbain, à l'échelle de Marseille": 16, "Grand centre urbain, à l'échelle de Lyon": 9})
+
+################ 3. Ce qui change à l'écran (carte d'identité, résumé, ligne « Rôle », phrase déterministe)
+resume   changé :   2012 / 34791
+role     changé :    450 / 34791
+bloc1    changé :  34785 / 34791
+résumé « Ville… » : avant 2380, après 1006 ; perdu 1374, gagné 0
+résumé « … dense … » (palier 1 500 hab/km²) : avant 640, après 0
+ligne « Ville-centre de… » : avant 1165, après 715 (devenues « Commune-centre » : 450)
+changement du résumé autre que « Ville » → « Commune » et le retrait de « dense » : 0
+
+################ 4. Cohabitation « ville » (FUT-176) × grille rurale : les 1 374
+communes « Ville » avant ET classées rurales : 1374
+  Bourg rural                            statut C  10 000-19 999      2
+  Bourg rural                            statut C  2 000-4 999      359
+  Bourg rural                            statut C  5 000-9 999       42
+  Bourg rural                            statut I  10 000-19 999      8
+  Bourg rural                            statut I  2 000-4 999      698
+  Bourg rural                            statut I  20 000 ou plus     3
+  Bourg rural                            statut I  5 000-9 999      140
+  Commune rurale de faible densité       statut C  2 000-4 999       43
+  Commune rurale de faible densité       statut C  5 000-9 999        4
+  Commune rurale de faible densité       statut I  10 000-19 999      1
+  Commune rurale de faible densité       statut I  2 000-4 999       50
+  Commune rurale de faible densité       statut I  5 000-9 999       23
+  Commune rurale de très faible densité  statut I  5 000-9 999        1
+par classe : Counter({'Bourg rural': 1252, 'Commune rurale de faible densité': 121, 'Commune rurale de très faible densité': 1}) | par statut : Counter({'I': 924, 'C': 450})
+après : résumé « Ville » : 0 | ligne « Ville-centre » : 0 | statut toujours dit (ligne Rôle non vide) : 1374
+  Sèvremoine (49301) : « Commune de l'intérieur, Sèvremoine forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+  Beaupréau-en-Mauges (49023) : « Commune de l'intérieur, Beaupréau-en-Mauges forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+  Chemillé-en-Anjou (49092) : « Commune de l'intérieur, Chemillé-en-Anjou forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+  Bressuire (79049) : « Commune de l'intérieur, Bressuire forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+  Mauges-sur-Loire (49244) : « Commune de l'intérieur, Mauges-sur-Loire forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+  Segré-en-Anjou Bleu (49331) : « Commune de l'intérieur, Segré-en-Anjou Bleu forme à elle seule une agglomération. » | Forme à elle seule une agglomération | grille : Bourg rural
+
+################ 5. Contradictions à l'écran après FUT-184 (attendu : 0 partout)
+résumé « Ville » sous une grille rurale : 0
+« Ville-centre » sous une grille rurale : 0
+phrase déterministe disant « ville » sous une grille rurale : 0
+ancien palier encore écrit (« commune dense », « peu dense », « densité intermédiaire ») : 0
+« habitat dispersé » écrit : 0
+arrondissement avec la classe de sa ville sans le nom de la ville : 0
+
+################ 6. Synthèse déterministe : contrôles de cohérence (toutes les entrées)
+avant : 0 textes refusés ; règles : {}
+après : 0 textes refusés ; règles : {}
+
+################ 7. Classe et densité moyenne affichées côte à côte : écarts apparents
+classée rurale, 150 hab/km² ou plus en moyenne : 2126 ; ex. Urrugne (209), Vallet (161), Saint-Philbert-de-Grand-Lieu (160), Guichen (214), Sarzeau (151), Ergué-Gabéric (215)
+« faible densité » (6-7), 300 hab/km² ou plus : 36 ; ex. Loctudy (318), Jury (432), Myans (359), Boussac (826), Donneville (421), Pasly (354)
+classée urbaine, moins de 150 hab/km² : 541 ; ex. Arles (67), Millau (130), Vire Normandie (126), Fontainebleau (92), Biscarrosse (96), Saint-Gilles (94)
+communes sans densité dans l'index (densité ADEME en production) : 15
+
+################ 8. Panel FUT-184 : ce qui est réellement rendu
+
+Corte (2B096) · 7654 hab. · statut UU I
+  avant  catégorie : Commune peu dense | résumé : Ville de montagne, Corte forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Petite ville — classification Insee | densité : 52 hab/km²
+         résumé    : Ville de montagne, Corte forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Corte, 7 654 habitants, seule commune de son agglomération, relève de la catégorie « Petite ville » de la grille communale de densité de l'Insee (52 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 99,1 % d'espaces naturels sur ses terres. Sa population a progressé de 0,72 % par an entre 2015 et 2021.
+
+Arles (13004) · 50415 hab. · statut UU C
+  avant  catégorie : Commune peu dense | résumé : Ville méditerranéenne, Arles est au centre de son agglomération. | rôle : Ville-centre de l'agglomération d'Arles (53 134 habitants)
+  après  grille    : Centre urbain intermédiaire | densité : 67 hab/km²
+         résumé    : Ville méditerranéenne, Arles est au centre de son agglomération. | rôle : Ville-centre de l'agglomération d'Arles (53 134 habitants)
+         phrase    : Arles, 50 415 habitants, au centre de son agglomération, relève de la catégorie « Centre urbain intermédiaire » de la grille communale de densité de l'Insee (67 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 5,1 % d'espaces urbanisés, 43,2 % de cultures et 51,7 % d'espaces naturels sur ses terres. L'eau (mer, étangs, lacs, rivières) couvre par ailleurs 29,8 % de sa surface cartographiée. Sa population a reculé de 0,79 % par an entre 2015 et 2021.
+
+Avignon (84007) · 90330 hab. · statut UU C
+  avant  catégorie : Densité intermédiaire | résumé : Ville méditerranéenne, Avignon est au centre de son agglomération. | rôle : Ville-centre de l'agglomération d'Avignon (462 747 habitants)
+  après  grille    : Grand centre urbain | densité : 1 414 hab/km²
+         résumé    : Ville méditerranéenne, Avignon est au centre de son agglomération. | rôle : Ville-centre de l'agglomération d'Avignon (462 747 habitants)
+         phrase    : Avignon, 90 330 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (1 414 habitants au km² en moyenne). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 37,1 % d'espaces urbanisés, 29 % de cultures et 33,9 % d'espaces naturels sur ses terres. Sa population a reculé de 0,33 % par an entre 2015 et 2021.
+
+Nîmes (30189) · 148104 hab. · statut UU C
+  avant  catégorie : Densité intermédiaire | résumé : Ville méditerranéenne, Nîmes est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Nîmes (183 327 habitants)
+  après  grille    : Grand centre urbain | densité : 930 hab/km²
+         résumé    : Ville méditerranéenne, Nîmes est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Nîmes (183 327 habitants)
+         phrase    : Nîmes, 148 104 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (930 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 24,4 % d'espaces urbanisés, 21,1 % de cultures et 54,5 % d'espaces naturels sur ses terres. Sa population a reculé de 0,29 % par an entre 2015 et 2021.
+
+Eguisheim (68078) · 1732 hab. · statut UU H
+  avant  catégorie : Commune peu dense | résumé : Commune de l'intérieur, Eguisheim se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+  après  grille    : Ceinture urbaine | densité : 123 hab/km²
+         résumé    : Commune de l'intérieur, Eguisheim se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+         phrase    : Eguisheim, 1 732 habitants, hors de toute agglomération, relève de la catégorie « Ceinture urbaine » de la grille communale de densité de l'Insee (123 habitants au km² en moyenne). Les terres agricoles y dominent : 12,1 % d'espaces urbanisés, 53,6 % de cultures et 34,2 % d'espaces naturels sur ses terres. Sa population est restée globalement stable entre 2015 et 2021.
+
+Janville-en-Beauce (28199) · 2512 hab. · statut UU H
+  avant  catégorie : Commune peu dense | résumé : Commune de l'intérieur, Janville-en-Beauce se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+  après  grille    : Bourg rural | densité : 59 hab/km²
+         résumé    : Commune de l'intérieur, Janville-en-Beauce se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+         phrase    : Janville-en-Beauce, 2 512 habitants, hors de toute agglomération, relève de la catégorie « Bourg rural » de la grille communale de densité de l'Insee (59 habitants au km² en moyenne). Les terres agricoles y dominent : 7,2 % d'espaces urbanisés, 90 % de cultures et 2,8 % d'espaces naturels sur ses terres. Sa population a reculé de 0,37 % par an entre 2015 et 2021.
+
+Mont-Dauphin (05082) · 171 hab. · statut UU B
+  avant  catégorie : Densité intermédiaire | résumé : Commune de montagne, Mont-Dauphin s'inscrit dans l'agglomération de Guillestre. | rôle : Commune de banlieue de l'agglomération de Guillestre (3 258 habitants)
+  après  grille    : Commune rurale de faible densité | densité : 282 hab/km²
+         résumé    : Commune de montagne, Mont-Dauphin s'inscrit dans l'agglomération de Guillestre. | rôle : Commune de banlieue de l'agglomération de Guillestre (3 258 habitants)
+         phrase    : Mont-Dauphin, 171 habitants dans l'agglomération de Guillestre, relève de la catégorie « Commune rurale de faible densité » de la grille communale de densité de l'Insee (282 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 19,7 % d'espaces urbanisés et 80,2 % d'espaces naturels sur ses terres. Sa population a progressé de 2,67 % par an entre 2015 et 2021.
+
+Vallet (44212) · 9468 hab. · statut UU I
+  avant  catégorie : Densité intermédiaire | résumé : Ville de l'intérieur, Vallet forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Commune rurale de faible densité | densité : 161 hab/km²
+         résumé    : Commune de l'intérieur, Vallet forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Vallet, 9 468 habitants, seule commune de son agglomération, relève de la catégorie « Commune rurale de faible densité » de la grille communale de densité de l'Insee (161 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 13,2 % d'espaces urbanisés, 32,7 % de cultures et 54 % d'espaces naturels sur ses terres. Sa population a progressé de 1,15 % par an entre 2015 et 2021.
+
+Bony (02100) · 139 hab. · statut UU H
+  avant  catégorie : Commune peu dense | résumé : Commune de l'intérieur, Bony se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+  après  grille    : Commune rurale de faible densité | densité : 17 hab/km²
+         résumé    : Commune de l'intérieur, Bony se situe hors de toute agglomération. | rôle : Hors agglomération : aucun ensemble bâti continu de 2 000 habitants
+         phrase    : Bony, 139 habitants, hors de toute agglomération, relève de la catégorie « Commune rurale de faible densité » de la grille communale de densité de l'Insee (17 habitants au km² en moyenne). Les terres agricoles y dominent : 4,1 % d'espaces urbanisés, 89 % de cultures et 6,8 % d'espaces naturels sur ses terres. Sa population a progressé de 0,61 % par an entre 2015 et 2021.
+
+Sète (34301) · 44712 hab. · statut UU C
+  avant  catégorie : Commune dense | résumé : Ville dense méditerranéenne, Sète est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Sète (94 088 habitants)
+  après  grille    : Centre urbain intermédiaire | densité : 1 863 hab/km²
+         résumé    : Ville méditerranéenne, Sète est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Sète (94 088 habitants)
+         phrase    : Sète, 44 712 habitants, au centre de son agglomération, relève de la catégorie « Centre urbain intermédiaire » de la grille communale de densité de l'Insee (1 863 habitants au km² en moyenne). Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 50,4 % d'espaces urbanisés, 15,8 % de cultures et 33,8 % d'espaces naturels sur ses terres. L'eau (mer, étangs, lacs, rivières) couvre par ailleurs 50,6 % de sa surface cartographiée. Sa population a progressé de 0,41 % par an entre 2015 et 2021.
+
+Quimper (29232) · 63642 hab. · statut UU C
+  avant  catégorie : Densité intermédiaire | résumé : Ville de l'intérieur, Quimper est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Quimper (76 408 habitants)
+  après  grille    : Grand centre urbain | densité : 765 hab/km²
+         résumé    : Ville de l'intérieur, Quimper est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Quimper (76 408 habitants)
+         phrase    : Quimper, 63 642 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (765 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 30,9 % d'espaces urbanisés, 14,8 % de cultures et 54,4 % d'espaces naturels sur ses terres. Sa population est restée globalement stable entre 2015 et 2021.
+
+Aubagne (13005) · 47342 hab. · statut UU B
+  avant  catégorie : Densité intermédiaire | résumé : Commune méditerranéenne, Aubagne s'inscrit dans l'agglomération de Marseille. | rôle : Commune de banlieue de l'agglomération de Marseille (1 625 845 habitants)
+  après  grille    : Grand centre urbain | densité : 869 hab/km²
+         résumé    : Commune méditerranéenne, Aubagne s'inscrit dans l'agglomération de Marseille. | rôle : Commune de banlieue de l'agglomération de Marseille (1 625 845 habitants)
+         phrase    : Aubagne, 47 342 habitants dans l'agglomération de Marseille, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (869 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 30,3 % d'espaces urbanisés, 8,7 % de cultures et 61 % d'espaces naturels sur ses terres. Sa population a progressé de 0,7 % par an entre 2015 et 2021.
+
+Sèvremoine (49301) · 25806 hab. · statut UU I
+  avant  catégorie : Commune peu dense | résumé : Ville de l'intérieur, Sèvremoine forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Bourg rural | densité : 121 hab/km²
+         résumé    : Commune de l'intérieur, Sèvremoine forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Sèvremoine, 25 806 habitants, seule commune de son agglomération, relève de la catégorie « Bourg rural » de la grille communale de densité de l'Insee (121 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 9,4 % d'espaces urbanisés, 30,8 % de cultures et 59,8 % d'espaces naturels sur ses terres. Sa population a progressé de 0,15 % par an entre 2015 et 2021.
+
+Bressuire (79049) · 19906 hab. · statut UU I
+  avant  catégorie : Commune peu dense | résumé : Ville de l'intérieur, Bressuire forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Bourg rural | densité : 110 hab/km²
+         résumé    : Commune de l'intérieur, Bressuire forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Bressuire, 19 906 habitants, seule commune de son agglomération, relève de la catégorie « Bourg rural » de la grille communale de densité de l'Insee (110 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 10,1 % d'espaces urbanisés, 20,9 % de cultures et 69 % d'espaces naturels sur ses terres. Sa population a progressé de 0,42 % par an entre 2015 et 2021.
+
+Lamballe-Armor (22093) · 16845 hab. · statut UU C
+  avant  catégorie : Commune peu dense | résumé : Ville, Lamballe-Armor est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Lamballe-Armor (17 807 habitants)
+  après  grille    : Bourg rural | densité : 129 hab/km²
+         résumé    : Commune, Lamballe-Armor est au centre de son agglomération. | rôle : Commune-centre de l'agglomération de Lamballe-Armor (17 807 habitants)
+         phrase    : Lamballe-Armor, 16 845 habitants, au centre de son agglomération, relève de la catégorie « Bourg rural » de la grille communale de densité de l'Insee (129 habitants au km² en moyenne). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 13,2 % d'espaces urbanisés, 46,4 % de cultures et 40,3 % d'espaces naturels sur ses terres. Sa population a progressé de 0,2 % par an entre 2015 et 2021.
+
+Porte des Pierres Dorées (69114) · 4185 hab. · statut UU B
+  avant  catégorie : None | résumé : Commune de l'intérieur, Porte des Pierres Dorées s'inscrit dans l'agglomération de Lyon. | rôle : Commune de banlieue de l'agglomération de Lyon (1 703 131 habitants)
+  après  grille    : Ceinture urbaine | densité : None
+         résumé    : Commune de l'intérieur, Porte des Pierres Dorées s'inscrit dans l'agglomération de Lyon. | rôle : Commune de banlieue de l'agglomération de Lyon (1 703 131 habitants)
+         phrase    : Porte des Pierres Dorées, 4 185 habitants dans l'agglomération de Lyon, relève de la catégorie « Ceinture urbaine » de la grille communale de densité de l'Insee. Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 22,5 % d'espaces urbanisés, 33,1 % de cultures et 44,4 % d'espaces naturels sur ses terres. Sa population a progressé de 1,4 % par an entre 2015 et 2021.
+
+Orée d'Anjou (49126) · 17162 hab. · statut UU I
+  avant  catégorie : None | résumé : Ville de l'intérieur, Orée d'Anjou forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Bourg rural | densité : None
+         résumé    : Commune de l'intérieur, Orée d'Anjou forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Orée d'Anjou, 17 162 habitants, seule commune de son agglomération, relève de la catégorie « Bourg rural » de la grille communale de densité de l'Insee. Les espaces naturels y tiennent une grande place : 8,7 % d'espaces urbanisés, 27,1 % de cultures et 64,1 % d'espaces naturels sur ses terres. Sa population a progressé de 0,47 % par an entre 2015 et 2021.
+
+Saint-Brieuc (22278) · 44224 hab. · statut UU C
+  avant  catégorie : Commune dense | résumé : Ville dense, Saint-Brieuc est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Saint-Brieuc (96 268 habitants)
+  après  grille    : Grand centre urbain | densité : 2 037 hab/km²
+         résumé    : Ville, Saint-Brieuc est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Saint-Brieuc (96 268 habitants)
+         phrase    : Saint-Brieuc, 44 224 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (2 037 habitants au km² en moyenne). Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 61,4 % d'espaces urbanisés, 3,9 % de cultures et 34,5 % d'espaces naturels sur ses terres. Sa population a reculé de 0,33 % par an entre 2015 et 2021.
+
+Porto-Vecchio (2A247) · 11229 hab. · statut UU I
+  avant  catégorie : Commune peu dense | résumé : Ville méditerranéenne, Porto-Vecchio forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Petite ville — classification Insee | densité : 68 hab/km²
+         résumé    : Ville méditerranéenne, Porto-Vecchio forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Porto-Vecchio, 11 229 habitants, seule commune de son agglomération, relève de la catégorie « Petite ville » de la grille communale de densité de l'Insee (68 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 1,5 % d'espaces urbanisés et 98 % d'espaces naturels sur ses terres. Sa population a reculé de 0,86 % par an entre 2015 et 2021.
+
+Mably (42127) · 7382 hab. · statut UU B
+  avant  catégorie : Densité intermédiaire | résumé : Commune de l'intérieur, Mably s'inscrit dans l'agglomération de Roanne. | rôle : Commune de banlieue de l'agglomération de Roanne (80 810 habitants)
+  après  grille    : Centre urbain intermédiaire | densité : 221 hab/km²
+         résumé    : Commune de l'intérieur, Mably s'inscrit dans l'agglomération de Roanne. | rôle : Commune de banlieue de l'agglomération de Roanne (80 810 habitants)
+         phrase    : Mably, 7 382 habitants dans l'agglomération de Roanne, relève de la catégorie « Centre urbain intermédiaire » de la grille communale de densité de l'Insee (221 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 19,4 % d'espaces urbanisés, 9 % de cultures et 71,5 % d'espaces naturels sur ses terres. Sa population a reculé de 0,67 % par an entre 2015 et 2021.
+
+Pontchâteau (44129) · 11075 hab. · statut UU I
+  avant  catégorie : Densité intermédiaire | résumé : Ville de l'intérieur, Pontchâteau forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+  après  grille    : Petite ville — classification Insee | densité : 202 hab/km²
+         résumé    : Ville de l'intérieur, Pontchâteau forme à elle seule une agglomération. | rôle : Forme à elle seule une agglomération
+         phrase    : Pontchâteau, 11 075 habitants, seule commune de son agglomération, relève de la catégorie « Petite ville » de la grille communale de densité de l'Insee (202 habitants au km² en moyenne). Les espaces naturels y tiennent une grande place : 11,4 % d'espaces urbanisés, 10,6 % de cultures et 78 % d'espaces naturels sur ses terres. Sa population a progressé de 0,73 % par an entre 2015 et 2021.
+
+Châtelaillon-Plage (17094) · 6227 hab. · statut UU B
+  avant  catégorie : Densité intermédiaire | résumé : Commune, Châtelaillon-Plage s'inscrit dans l'agglomération de La Rochelle. | rôle : Commune de banlieue de l'agglomération de La Rochelle (138 236 habitants)
+  après  grille    : Ceinture urbaine | densité : 976 hab/km²
+         résumé    : Commune, Châtelaillon-Plage s'inscrit dans l'agglomération de La Rochelle. | rôle : Commune de banlieue de l'agglomération de La Rochelle (138 236 habitants)
+         phrase    : Châtelaillon-Plage, 6 227 habitants dans l'agglomération de La Rochelle, relève de la catégorie « Ceinture urbaine » de la grille communale de densité de l'Insee (976 habitants au km² en moyenne). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49,3 % d'espaces urbanisés, 14,3 % de cultures et 36,4 % d'espaces naturels sur ses terres. Sa population a progressé de 0,62 % par an entre 2015 et 2021.
+
+Paris (75056) · 2133111 hab. · statut UU C
+  avant  catégorie : Commune dense | résumé : Ville dense de l'intérieur, Paris est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Paris (10 893 507 habitants)
+  après  grille    : Grand centre urbain | densité : 20 054 hab/km²
+         résumé    : Ville de l'intérieur, Paris est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Paris (10 893 507 habitants)
+         phrase    : Paris, 2 133 111 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (20 054 habitants au km² en moyenne). Sa population a reculé de 0,56 % par an entre 2015 et 2021.
+
+Lyon (69123) · 522250 hab. · statut UU C
+  avant  catégorie : Commune dense | résumé : Ville dense de l'intérieur, Lyon est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Lyon (1 703 131 habitants)
+  après  grille    : Grand centre urbain | densité : 10 879 hab/km²
+         résumé    : Ville de l'intérieur, Lyon est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Lyon (1 703 131 habitants)
+         phrase    : Lyon, 522 250 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (10 879 habitants au km² en moyenne).
+
+Marseille (13055) · 873076 hab. · statut UU C
+  avant  catégorie : Commune dense | résumé : Ville dense méditerranéenne, Marseille est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Marseille (1 625 845 habitants)
+  après  grille    : Grand centre urbain | densité : 3 646 hab/km²
+         résumé    : Ville méditerranéenne, Marseille est au centre de son agglomération. | rôle : Ville-centre de l'agglomération de Marseille (1 625 845 habitants)
+         phrase    : Marseille, 873 076 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee (3 646 habitants au km² en moyenne).
+
+Paris 11e Arrondissement (75111) · 142583 hab. · statut UU C
+  avant  catégorie : Arrondissement dense | résumé : Arrondissement dense de l'intérieur, Paris 11e Arrondissement appartient à Paris, ville-centre de son agglomération. | rôle : Arrondissement de Paris, ville-centre de son agglomération (10 893 507 habitants)
+  après  grille    : Grand centre urbain, à l'échelle de Paris | densité : 38 143 hab/km² (arrondissement)
+         résumé    : Arrondissement de l'intérieur, Paris 11e Arrondissement appartient à Paris, ville-centre de son agglomération. | rôle : Arrondissement de Paris, ville-centre de son agglomération (10 893 507 habitants)
+         phrase    : Paris 11e Arrondissement, 142 583 habitants, arrondissement de Paris (ville-centre de son agglomération), compte 38 143 habitants au km² en moyenne. La grille communale de densité de l'Insee range Paris entière dans la catégorie « Grand centre urbain » ; elle ne classe pas les arrondissements. Sa population a reculé de 0,82 % par an entre 2015 et 2021.
+
+Lyon 9e Arrondissement (69389) · 52903 hab. · statut UU C
+  avant  catégorie : Arrondissement dense | résumé : Arrondissement dense de l'intérieur, Lyon 9e Arrondissement appartient à Lyon, ville-centre de son agglomération. | rôle : Arrondissement de Lyon, ville-centre de son agglomération (1 703 131 habitants)
+  après  grille    : Grand centre urbain, à l'échelle de Lyon | densité : 7 401 hab/km² (arrondissement)
+         résumé    : Arrondissement de l'intérieur, Lyon 9e Arrondissement appartient à Lyon, ville-centre de son agglomération. | rôle : Arrondissement de Lyon, ville-centre de son agglomération (1 703 131 habitants)
+         phrase    : Lyon 9e Arrondissement, 52 903 habitants, arrondissement de Lyon (ville-centre de son agglomération), compte 7 401 habitants au km² en moyenne. La grille communale de densité de l'Insee range Lyon entière dans la catégorie « Grand centre urbain » ; elle ne classe pas les arrondissements. Sa population a progressé de 1,02 % par an entre 2015 et 2021.
+
+Marseille 9e Arrondissement (13209) · 77106 hab. · statut UU C
+  avant  catégorie : Densité intermédiaire | résumé : Arrondissement méditerranéen, Marseille 9e Arrondissement appartient à Marseille, ville-centre de son agglomération. | rôle : Arrondissement de Marseille, ville-centre de son agglomération (1 625 845 habitants)
+  après  grille    : Grand centre urbain, à l'échelle de Marseille | densité : 1 207 hab/km² (arrondissement)
+         résumé    : Arrondissement méditerranéen, Marseille 9e Arrondissement appartient à Marseille, ville-centre de son agglomération. | rôle : Arrondissement de Marseille, ville-centre de son agglomération (1 625 845 habitants)
+         phrase    : Marseille 9e Arrondissement, 77 106 habitants, arrondissement de Marseille (ville-centre de son agglomération), compte 1 207 habitants au km² en moyenne. La grille communale de densité de l'Insee range Marseille entière dans la catégorie « Grand centre urbain » ; elle ne classe pas les arrondissements. Sa population a progressé de 0,74 % par an entre 2015 et 2021.
