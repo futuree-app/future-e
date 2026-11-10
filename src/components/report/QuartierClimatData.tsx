@@ -714,7 +714,8 @@ export function buildFactors(
       targets: ["nature.green_spaces"],
           val: couvertNaturel.headlineLabel,
           col: "var(--green)",
-          src: "OSO · ADEME · échelle communale",
+          // FUT-182 (lot L0) : la carte OSO n'affiche aucune donnée ADEME ; le boisement ADEME a sa propre carte, en repli.
+          src: "OSO 2023 · échelle communale",
           missing: false,
           detail: {
             eyebrow: "L'occupation des sols",
@@ -750,7 +751,7 @@ export function buildFactors(
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
             // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
-            sources: "OSO 2023 (CESBIO, couverture des sols vue par satellite). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments ; ce n'est pas la mesure réglementaire de l'OCS GE. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
+            sources: "OSO 2023 (CESBIO, couverture des sols vue par satellite). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments ; ce n'est pas la mesure réglementaire de l'OCS GE. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier.",
           },
         }
       : {

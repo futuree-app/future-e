@@ -1154,7 +1154,7 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // Condition EXPLICITE (pas de repli `?? 0` : une donnée absente n'établit pas l'identité « hivers doux »).
   const doux = douceurScore != null && douceurScore >= WINTER_MILDNESS_CONVENTION.identityThreshold;
   const vieLocaleForte = (subScore("vie_locale", c) ?? 0) >= 60;
-  const natureForte = (subScore("nature", c) ?? 0) >= 60;
+  // FUT-182 (lot L0) : `natureForte` (score nature ≥ 60) ne déclenche plus aucune promesse ; voir plus bas.
   const calmeForte = Math.max(subScore("cadre_calme", c) ?? 0, subScore("calme_sonore", c) ?? 0) >= 62;
   const etudianteForte = (subScore("vie_etudiante", c) ?? 0) >= 55;
   const croissanceForte = (subScore("croissance_demographique", c) ?? 0) >= 62;
@@ -1193,9 +1193,13 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   // banlieue de 5 000 habitants n'est pas « une petite ville » ; un arrondissement non plus.
   const villeElleMeme = !arrondissementPLM && peutDireVille(role, c.population);
   if (vieLocaleForte && villeElleMeme && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
-  if ((natureForte || calmeForte) && petit) push("Pour un cadre rural préservé, loin de l'agitation.");
+  // FUT-182 (lot L0) : « Pour un cadre rural préservé, loin de l'agitation. » est retirée. Ni « rural » (la taille de
+  // la commune), ni « préservé » (aucune mesure de protection ni de qualité), ni le calme quand seule la nature la
+  // déclenchait ne sont établis. Le calme garde sa propre promesse, juste dessous.
   if (calmeForte) push("Pour un quotidien au calme, loin de l'agitation.");
-  if (natureForte) push("Pour vivre au plus près de la nature.");
+  // FUT-182 (lot L0) : « Pour vivre au plus près de la nature. » est retirée. Le score nature classe la part
+  // d'espaces naturels (eau comprise) des communes voisines retenues ; il ne mesure ni proximité ni accès. Une
+  // promesse mesurée viendra avec le recalcul OSO (B3), pas avant.
   if (grandeVille) push("Pour la vie d'une grande ville et tous ses services.");
   if (petit) push("Pour la tranquillité d'une commune à taille humaine.");
   // Repli neutre, toujours disponible en dernier recours.

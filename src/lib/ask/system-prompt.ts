@@ -180,7 +180,13 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
   // SANTÉ. Donnée au modèle sous ce libellé, elle lui faisait produire des phrases sur l'accès aux
   // commerces à partir d'un chiffre qui compte peut-être des médecins. Un contexte qu'on ne sait
   // pas nommer ne se donne pas à un modèle : il ne se tait pas, il extrapole.
-  push("Taux boisement (%)", pct(commune.territoire.taux_boisement));
+  // FUT-182 (lot L0) : ce boisement est celui de l'ADEME, de définition et de millésime non documentés. L'écran
+  // Territoire montre une autre forêt, celle d'OSO 2023, rapportée aux terres : le modèle ne doit ni les confondre,
+  // ni présenter l'une comme une correction de l'autre. Châtelaillon : 1,5 % ici, 10,3 % de forêt selon OSO.
+  push(
+    "Taux de boisement selon l'ADEME (%, définition et millésime non documentés ; ce n'est pas le couvert forestier OSO de l'écran Territoire, ne les comparez pas)",
+    pct(commune.territoire.taux_boisement),
+  );
   // La ligne « Incendies récents (nombre) » a été retirée le 27/10/2026 (FUT-145) : le champ ADEME
   // `nombre_dincendies` n'a ni période ni source primaire documentées, il manque pour des communes
   // que la base nationale BDIFF compte à 9-11 feux, et « récents » promettait une période que

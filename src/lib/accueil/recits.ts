@@ -431,24 +431,99 @@ export function carteMobilite(name: string, mobilite: MobiliteAccueil): CarteApe
 /** Les cartes de profondeur. La carte Mobilité ne naît que de la mesure (FUT-185). Les cartes Nature et
  *  Vie locale gardent leurs textes d'avant FUT-37 : génériques et sans lecture de leur source affichée,
  *  elles restent une dette relevée par l'audit FUT-185 (FUT-50 pour l'aperçu, FUT-182 pour le couvert OSO). */
-function cartesProfondeur(name: string, categories: readonly string[], mobilite: MobiliteAccueil): CarteApercu[] {
+function cartesProfondeur(
+  name: string,
+  categories: readonly string[],
+  mobilite: MobiliteAccueil,
+  natureMesuree: readonly string[] | null | undefined,
+): CarteApercu[] {
   const has = (c: string) => categories.includes(c);
-  const hasAny = (...cats: string[]) => cats.some(has);
   const depth: CarteApercu[] = [];
   const mob = carteMobilite(name, mobilite);
   if (mob) depth.push(mob);
-  if (hasAny("littoral", "littoral_atlantique")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
-  } else if (has("montagne")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
-  } else if (hasAny("rural_forestier", "rural_agricole", "rural_viticole")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `Autour ${deCommune(name)}, espaces agricoles et nature rythment le quotidien.`, source: "OSM / IGN", col: COL.vert });
+  const nature = carteNatureMesuree(name, natureMesuree);
+  if (nature) {
+    depth.push(nature);
   } else if (has("tourisme_urbain")) {
     depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   } else {
     depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie associative font le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   }
   return depth;
+}
+
+// ── Carte « Nature » : un CLASSEMENT dit tel quel, sous sa vraie source (FUT-182, lot L0) ─────────────
+//
+// Avant, les trois variantes affirmaient un effet que rien ne mesure (« façonnent le cadre de vie »,
+// « rythment le quotidien ») et citaient « OSM / IGN », qu'aucune ne lisait : elles naissent d'une catégorie
+// de la commune, jamais d'une carte. Chacune dit désormais le classement qui la déclenche, la source de ce
+// classement et ce qu'il ne dit pas. Aucune ne parle d'accès à la nature, de proximité ni de qualité.
+//
+// LA CARTE NE LIT QUE DES CATÉGORIES MESURÉES (contre-revue L0, 10/11/2026). La table manuelle peut porter une
+// catégorie que la mesure contredit : Rodez et Lambesc y sont `rural_agricole` avec 0,7 % et 23,5 % de cultures selon
+// OSO. Le repli par département pose `montagne` sur tout un département (DEPT_MONTAGNE). Une carte qui cite OSO ou
+// l'IGN ne peut donc naître que des catégories que l'index a DÉRIVÉES de ses mesures (`deriveCategoriesFromEntry`,
+// `/api/landing-signals` avec `source: "index"`). Sans elles, pas de carte Nature : la carte Vie locale reprend sa
+// place, comme pour une commune sans classement.
+
+export type VarianteNature = "littoral" | "montagne" | "cultures_forets";
+
+/** Ce que la variante « cultures et forêts » sait de la mesure : quel seuil l'index a constaté. */
+export type CouvertMesure = { cultures: boolean; foret: boolean };
+
+export const SOURCE_NATURE: Record<VarianteNature, string> = {
+  littoral: "Loi Littoral (DGALN) · communes classées « Mer »",
+  montagne: "IGN (altitudes) · classement futur•e",
+  cultures_forets: "OSO 2023 (CESBIO) · occupation des sols",
+};
+
+/** La carte Nature d'une commune, ou `null`, depuis les seules catégories que l'index a mesurées. */
+export function carteNatureMesuree(name: string, natureMesuree: readonly string[] | null | undefined): CarteApercu | null {
+  if (!natureMesuree || natureMesuree.length === 0) return null;
+  const has = (c: string) => natureMesuree.includes(c);
+  if (has("littoral")) return carteNature(name, "littoral");
+  if (has("montagne")) return carteNature(name, "montagne");
+  const couvert = { cultures: has("rural_agricole"), foret: has("rural_forestier") };
+  if (couvert.cultures || couvert.foret) return carteNature(name, "cultures_forets", couvert);
+  return null;
+}
+
+/** La carte Nature d'une variante. Pour « cultures et forêts », `couvert` dit le seuil constaté. */
+export function carteNature(name: string, variante: VarianteNature, couvert: CouvertMesure = { cultures: true, foret: true }): CarteApercu {
+  const base = { cle: "nature", source: SOURCE_NATURE[variante], col: COL.vert };
+  if (variante === "littoral") {
+    return {
+      ...base,
+      titre: "Commune littorale",
+      fait: `${majuscule(name)} est classée commune littorale maritime au titre de la loi Littoral.`,
+      limite: "Ce classement administratif dit que la commune borde la mer. Il ne dit pas à quelle distance du rivage se trouve un logement.",
+    };
+  }
+  if (variante === "montagne") {
+    return {
+      ...base,
+      titre: "Montagne ou relief proche",
+      fait: `${majuscule(name)} est en altitude, ou proche d'un relief élevé.`,
+      limite: "futur•e retient l'altitude de la commune (800 m ou plus, IGN) ou l'altitude la plus haute des communes situées à environ 35 km. Cela ne dit rien de l'accès aux espaces naturels.",
+    };
+  }
+  // Le seuil dit est celui que l'index a constaté, et lui seul (FUT-182, contre-revue L0). Les parts portent sur la
+  // surface que la carte classe dans le contour, eau comprise : c'est ce que dit « de la surface cartographiée ».
+  const constat = couvert.cultures && couvert.foret
+    ? "les cultures couvrent au moins 30 % et la forêt au moins 35 %"
+    : couvert.cultures ? "les cultures couvrent au moins 30 %" : "la forêt couvre au moins 35 %";
+  return {
+    ...base,
+    titre: couvert.cultures && couvert.foret ? "Cultures et forêts" : couvert.cultures ? "Cultures" : "Forêts",
+    fait: `Selon la carte OSO 2023, ${constat} de la surface cartographiée ${deCommune(name)}.`,
+    limite: "Une mesure satellitaire de l'occupation des sols dans le contour de la commune. Elle ne dit rien de l'accès aux espaces naturels ni de leur qualité, et ne fait pas de la commune une commune rurale.",
+  };
+}
+
+/** La carte Nature d'une ville de la machine à sous de l'accueil (Marseille et La Rochelle sont classées « Mer »). */
+export function carteNatureMachineASous(ville: "Marseille" | "La Rochelle"): CarteApercu {
+  const carte = carteNature(ville, "littoral");
+  return { ...carte, titre: `${carte.titre} · ${ville}` };
 }
 
 export function getPreviewCards(
@@ -458,12 +533,13 @@ export function getPreviewCards(
   georisques: GeorisquesAccueil,
   horizon: HorizonAccueil,
   mobilite?: MobiliteAccueil,
+  natureMesuree?: readonly string[] | null,
 ): CarteApercu[] {
   const name = communeName || "votre commune";
   const cats = categories && categories.length > 0 ? categories : ["all"];
 
   const climate = cartesClimat(cats, indicators, georisques, horizon);
-  const depth = cartesProfondeur(name, cats, mobilite);
+  const depth = cartesProfondeur(name, cats, mobilite, natureMesuree);
 
   // Assemblage d'avant FUT-37 : accroche climat en position 1, puis un climat et deux profondeurs,
   // entrelacés selon le nom (stable par commune, insensible à l'horizon).
@@ -503,9 +579,12 @@ export function apercuCommune(args: {
   georisques: GeorisquesAccueil;
   horizon: HorizonAccueil;
   mobilite?: MobiliteAccueil;
+  /** Catégories que l'index a dérivées de ses mesures (`/api/landing-signals`, `source: "index"`), seules à fonder
+   *  la carte Nature (FUT-182). Absentes : pas de carte Nature. */
+  natureMesuree?: readonly string[] | null;
 }): ApercuCommune {
   if (args.chargement) return { etat: "squelette" };
-  return { etat: "cartes", cartes: getPreviewCards(args.commune, args.categories, args.indicators, args.georisques, args.horizon, args.mobilite) };
+  return { etat: "cartes", cartes: getPreviewCards(args.commune, args.categories, args.indicators, args.georisques, args.horizon, args.mobilite, args.natureMesuree) };
 }
 
 // ── Sous-titres chiffrés des questions ───────────────────────────────────────────────────────
