@@ -1620,5 +1620,10 @@ Le dépôt contient les scripts, les résumés et l'extrait, et permet d'en vér
 | Aucun bâti OSO (8) | **non** | non | « non calculable avec cette méthode » |
 
 C'est une convention de comparabilité, pas une défaillance du raster. Conséquence à porter au rapport de livraison :
-**74 des 329 communes avaient un verdict de rang favorable**, et le perdent. 221 avaient un verdict neutre, 34 un verdict
-défavorable.
+les communes sans classement perdent leur verdict de rang.
+
+> **Corrigé le 10/11 par B3 (PR #152).** Le « 74 favorables » de la simulation recalculait les bandes depuis le score,
+> sur 34 735 communes. Sur les bandes **réellement publiées**, celles que lit le Projet, les 337 communes sans classement
+> (329 + 8) avaient **82** verdicts favorables, 221 neutres et 34 défavorables. Tableau national complet :
+> `docs/audits/2026-11-10-fut182-b3/avant-apres.json` (PR #152). Cas notables : La Rochelle (47,2 %), Saint-Malo (49,0 %)
+> et Granville (44,4 %) passent en « classement national non établi ».
