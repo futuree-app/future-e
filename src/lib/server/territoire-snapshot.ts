@@ -20,6 +20,7 @@ import { getEra5Trend } from "@/lib/era5-trend";
 import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
 import { buildTerritoireSnapshot, type TerritoireInputs } from "@/lib/territoire/facts";
 import { densiteInseePLM } from "@/lib/territoire/plm-densite";
+import { grilleDensiteDe } from "@/lib/territoire/grille-densite";
 import { withHash } from "@/lib/facts/hash";
 import type { HashedSnapshot } from "@/lib/facts/contract";
 import { SYNTHESIS_MODEL, type HorizonKey } from "@/lib/territoire/synthesis-contract";
@@ -109,6 +110,8 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     distinctiveTrait: entry ? getCommuneDistinctive(entry) : null,
     // FUT-179 : la densité Insee du périmètre lu (Paris entière pour 75056, le 11e pour 75111), lue à défaut d'ADEME.
     densiteInsee: densiteInseePLM(insee),
+    // FUT-184 : la classe officielle de la grille de densité Insee, à la commune (celle de sa ville pour un arrondissement).
+    grilleDensite: grilleDensiteDe(insee),
   };
   return withHash(buildTerritoireSnapshot(inputs, new Date().toISOString()));
 }

@@ -19,6 +19,7 @@ import { HORIZON_META, ROLE_TEXT, ROLE_TEXT_ARRONDISSEMENT, type HorizonKey } fr
 import { aleaDominant } from "../georisques-flags.ts";
 import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
 import { pctOso } from "./oso-format.ts";
+import { CLASSES_GRILLE, LIBELLE_GRILLE, LIBELLE_GRILLE_PHRASE } from "./grille-densite.ts";
 
 type P = Record<string, unknown>;
 type Metric = { valeur: number; ecart_par_rapport_a_1976_2005?: number } | null;
@@ -53,14 +54,12 @@ function deCommune(nom: string): string {
 
 // ── Bloc 1 : le territoire aujourd'hui (trois informations au plus) ─────────────────────────
 
-const DENSITY_VERB: Record<string, string> = {
-  "Commune dense": "est une commune dense",
-  "Densité intermédiaire": "a une densité intermédiaire",
-  "Commune peu dense": "est une commune peu dense",
-  // FUT-179 : le registre nomme la catégorie d'un arrondissement par son périmètre.
-  "Arrondissement dense": "est un arrondissement dense",
-  "Arrondissement peu dense": "est un arrondissement peu dense",
-};
+// FUT-184 : la catégorie citée est la classe de la grille Insee, au libellé du registre ; dans une phrase qui nomme
+// déjà l'Insee, « Petite ville » perd sa mention « classification Insee » (cf. `LIBELLE_GRILLE_PHRASE`).
+function grillePhrase(categorie: string | null | undefined): string | null {
+  const c = CLASSES_GRILLE.find((k) => LIBELLE_GRILLE[k] === categorie);
+  return c ? LIBELLE_GRILLE_PHRASE[c] : null;
+}
 
 /** FUT-175 : en deçà, l'eau n'est pas nommée par la synthèse déterministe (la carte la dit dès 1 %). */
 const EAU_NOTABLE_PCT = 10;
@@ -88,7 +87,8 @@ function blocTerritoire(p: P): string[] {
   const nom = at<string>(p, "commune.nom") ?? "Cette commune";
   const pop = at<number>(p, "commune.population_habitants");
   const role = at<{ role: string; agglomeration: string | null; commune?: string | null }>(p, "commune.role_territorial");
-  const d = at<{ habitants_par_km2: number; categorie: string | null }>(p, "commune.densite");
+  const d = at<{ habitants_par_km2: number }>(p, "commune.densite");
+  const g = at<{ categorie: string; echelle: string }>(p, "commune.grille_densite_insee");
   const out: string[] = [];
 
   // FUT-176 : les rôles tels que synthesis-contract.ts les écrit (ROLE_TEXT), au statut Insee.
@@ -107,13 +107,20 @@ function blocTerritoire(p: P): string[] {
             ? ", hors de toute agglomération"
             : "";
   const who = pop != null ? `${nom}, ${frNum(pop)} habitants${roleClause},` : nom;
-  // La densité est celle de l'arrondissement : on ne l'appelle pas « commune » (FUT-176, contre-revue).
-  const estArrondissement = role?.role === ROLE_TEXT_ARRONDISSEMENT;
-  const verbeDensite = (cat: string) => estArrondissement ? DENSITY_VERB[cat].replace("une commune", "un arrondissement") : DENSITY_VERB[cat];
-  if (d?.categorie && DENSITY_VERB[d.categorie]) {
-    out.push(`${who} ${verbeDensite(d.categorie)} (${frNum(d.habitants_par_km2)} habitants au km²).`);
+  // FUT-184 : la classe de la grille Insee, puis la densité moyenne en chiffre, deux faits distincts. La densité d'un
+  // arrondissement est la sienne (FUT-179) ; la grille, elle, classe la ville entière, et la phrase le dit à part.
+  const classe = grillePhrase(g?.categorie);
+  const villeDeLaGrille = g?.echelle.match(/^commune entière de ([^ :]+)/)?.[1] ?? null;
+  const densiteMoyenne = d ? `${frNum(d.habitants_par_km2)} habitants au km² en moyenne` : null;
+  if (classe && !villeDeLaGrille) {
+    out.push(`${who} relève de la catégorie « ${classe} » de la grille communale de densité de l'Insee${densiteMoyenne ? ` (${densiteMoyenne})` : ""}.`);
+  } else if (densiteMoyenne) {
+    out.push(`${who} compte ${densiteMoyenne}.`);
   } else if (pop != null) {
     out.push(`${nom} compte ${frNum(pop)} habitants${roleClause}.`);
+  }
+  if (classe && villeDeLaGrille) {
+    out.push(`La grille communale de densité de l'Insee range ${villeDeLaGrille} entière dans la catégorie « ${classe} » ; elle ne classe pas les arrondissements.`);
   }
 
   const land = at<{

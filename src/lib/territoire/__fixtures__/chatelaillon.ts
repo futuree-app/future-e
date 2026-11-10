@@ -2,6 +2,8 @@
 // les sources de production (index du comparateur, ADEME, DRIAS, Géorisques, GASPAR, VigiEau,
 // littoral, ERA5), et les cinq synthèses réellement générées pendant l'audit du 27/09. Figées ici
 // pour que les tests tournent sans réseau.
+// FUT-184 (10/11/2026) : `grilleDensite` ajouté, la classe officielle DENS7 de 17094 (4, « Ceintures urbaines »), que le
+// chargeur lit désormais (grilleDensiteDe) ; aucune autre entrée n'a changé.
 import { readFileSync } from "node:fs";
 import type { TerritoireInputs } from "../facts.ts";
 

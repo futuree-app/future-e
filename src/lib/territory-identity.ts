@@ -12,13 +12,17 @@ import { DEMOGRAPHY_PHRASE, isDemographyCode, type UrbanRole } from "./territoir
 import { REPERE_PRES_DU_RIVAGE_KM } from "./mer-recherche.ts";
 import { kmLisible } from "./hard-constraints.ts";
 import { deCommune } from "./typography.ts";
-import { normaliserRoleUrbain, peutDireVille, SEUIL_HABITANTS_VILLE } from "./territoire/statut-urbain.ts";
+import { normaliserRoleUrbain, peutDireVille, SEUIL_HABITANTS_VILLE, type RoleUrbain } from "./territoire/statut-urbain.ts";
+import { estGrilleDensite, grilleUrbaine, type GrilleDensite } from "./territoire/grille-densite.ts";
 
 export type TerritoryIdentity = {
   // Phrase de synthèse descriptive (compose les champs, sans interprétation).
   summary: string;
   typologie: string;
-  densite: { label: string; value: string | null } | null;
+  /** FUT-184 : la classe de la grille communale de densité Insee, au libellé lecteur (« Bourg rural »). */
+  grille: string | null;
+  /** La densité moyenne, en chiffre et à son périmètre (« 1 234 hab/km² » ; « … (arrondissement) »). Fait à part. */
+  densite: string | null;
   population: string | null;
   role: string | null;
   geo: string | null;
@@ -37,7 +41,7 @@ export function frInt(n: number | null | undefined): string | null {
 // d'Anjou, dont la donnée manquait), et « Principal pôle urbain local » pour la commune la plus peuplée de son
 // unité urbaine (Corte, qui forme seule son agglomération). Un statut statistique ne dit ni services, ni
 // animation, ni isolement ; un statut inconnu ne dit rien.
-function roleLabel(r: UrbanRole, communePop: number | null): string | null {
+function roleLabel(r: UrbanRole, ville: boolean): string | null {
   const role = normaliserRoleUrbain(r.role);
   const uuPop = frInt(r.uuPop);
   const habitants = uuPop ? ` (${uuPop} habitants)` : "";
@@ -49,7 +53,7 @@ function roleLabel(r: UrbanRole, communePop: number | null): string | null {
   }
   switch (role) {
     case "ville_centre":
-      return `${peutDireVille(role, communePop) ? "Ville-centre" : "Commune-centre"} de ${agglo}${habitants}`;
+      return `${ville ? "Ville-centre" : "Commune-centre"} de ${agglo}${habitants}`;
     case "banlieue":
       return `Commune de banlieue de ${agglo}${habitants}`;
     case "ville_isolee":
@@ -79,7 +83,7 @@ function geoLabel(p: Position | null): string | null {
 
 // Phrase de synthèse : une amorce qui situe le territoire (nature + typologie + densité), puis la place de la
 // commune dans le zonage en agglomérations. Strictement factuelle (rien d'inventé, pas de « portuaire » deviné).
-// Ex : « Ville dense de la façade atlantique, La Rochelle est au centre de son agglomération. » ; « Commune de
+// Ex : « Ville de la façade atlantique, La Rochelle est au centre de son agglomération. » ; « Commune de
 // l'intérieur, Bony se situe hors de toute agglomération. »
 const TYPE_TRAIT: Record<string, string> = {
   "Littoral atlantique": "de la façade atlantique",
@@ -88,14 +92,28 @@ const TYPE_TRAIT: Record<string, string> = {
   "Intérieur": "de l'intérieur",
 };
 
-function summaryHead(typeLabel: string, ville: boolean, dense: boolean, arrondissement = false): string {
+// FUT-184 : l'amorce ne dit plus « dense » : ce mot venait du palier de 1 500 hab/km², que la grille Insee remplace. La
+// classe de la grille a sa ligne sur la carte ; la phrase garde le nom (ville, commune, arrondissement) et la typologie.
+function summaryHead(typeLabel: string, ville: boolean, arrondissement = false): string {
   const noun = arrondissement ? "Arrondissement" : ville ? "Ville" : "Commune";
-  const d = dense ? "dense " : "";
   const trait = TYPE_TRAIT[typeLabel];
-  if (!trait) return `${noun} ${d}`.trim();
+  if (!trait) return noun;
   // « méditerranéenne » est un adjectif (accord direct) ; les autres sont « de X ».
-  if (typeLabel === "Méditerranéen") return `${noun} ${d}${arrondissement ? "méditerranéen" : "méditerranéenne"}`.trim();
-  return `${noun} ${d}${trait}`.trim();
+  if (typeLabel === "Méditerranéen") return `${noun} ${arrondissement ? "méditerranéen" : "méditerranéenne"}`;
+  return `${noun} ${trait}`;
+}
+
+/**
+ * FUT-184 · LE MOT « VILLE », AU CROISEMENT DE DEUX ZONAGES. FUT-176 l'exige du statut d'unité urbaine (centre, ou
+ * agglomération à elle seule) et de 2 000 habitants. La grille de densité peut classer rurale une telle commune
+ * (Sèvremoine, Bressuire, Lamballe-Armor : bourgs ruraux, 1 374 cas) : les deux sont vrais, l'un mesure la continuité
+ * du bâti, l'autre la concentration des habitants. Écrire « Ville » au-dessus de « Bourg rural » ferait se contredire la
+ * carte : le mot n'est dit que si la grille ne classe pas la commune rurale. Grille inconnue : la règle FUT-176 seule.
+ * Le statut reste dit, à sa ligne (« Commune-centre de l'agglomération de… »).
+ */
+export function peutDireVilleTerritoire(role: RoleUrbain, population: number | null | undefined, grille: GrilleDensite | null): boolean {
+  if (!peutDireVille(role, population)) return false;
+  return grille == null || grille.perimetre !== "commune" || grilleUrbaine(grille.classe);
 }
 
 // Le verbe de la phrase de synthèse : la place de la commune dans le zonage, sans rôle prêté (FUT-176 : ni
@@ -128,22 +146,46 @@ export function buildTerritoryIdentity(snapshot: FactsSnapshot): TerritoryIdenti
   const population = valueOf<number>(snapshot, "place.population");
   const density = valueOf<number>(snapshot, "place.density");
   const densityCat = derivedOf(snapshot, "density.category");
+  const grilleBrute = valueOf<unknown>(snapshot, "place.density_grid");
+  const grille = estGrilleDensite(grilleBrute) ? grilleBrute : null;
+  const densityScale = snapshot.facts.find((f) => f.key === "place.density")?.scale;
   const land = derivedOf(snapshot, "land.category");
   const densityValue = frInt(density);
-  const ville = role != null && peutDireVille(normaliserRoleUrbain(role.role), population);
-  const head = summaryHead(typeLabel, ville, densityCat?.value === "dense", Boolean(role?.arrondissementDe));
+  const ville = role != null && peutDireVilleTerritoire(normaliserRoleUrbain(role.role), population, grille);
+  const head = summaryHead(typeLabel, ville, Boolean(role?.arrondissementDe));
   const verbe = summaryRole(role, name);
   return {
     summary: verbe ? `${head}, ${name} ${verbe}.` : `${name}, ${head.charAt(0).toLowerCase()}${head.slice(1)}.`,
     typologie: typeLabel,
-    // FUT-179 : le libellé vient du registre (« Arrondissement dense » pour un arrondissement), comme pour la synthèse.
-    densite: densityCat ? { label: densityCat.label, value: densityValue ? `${densityValue} hab/km²` : null } : null,
+    // FUT-184 : la classe de la grille vient du registre (« …, à l'échelle de Paris » pour un arrondissement), comme pour
+    // la synthèse ; ancien snapshot (catégorie « Commune peu dense » de la densité moyenne) : aucune ligne, pas d'ancien palier.
+    grille: grille && densityCat?.rule.startsWith("density-grid-insee") ? densityCat.label : null,
+    // FUT-179 : le chiffre de l'arrondissement est celui de l'arrondissement, et la ligne le dit.
+    densite: densityValue ? `${densityValue} hab/km²${densityScale === "arrondissement" ? " (arrondissement)" : ""}` : null,
     population: frInt(population) ? `${frInt(population)} habitants` : null,
-    role: role ? roleLabel(role, population) : null,
+    role: role ? roleLabel(role, ville) : null,
     geo: geoLabel(valueOf<Position>(snapshot, "place.position")),
     // D4 : le même libellé que la face de la carte « Espaces naturels ».
     solDominant: land?.label ?? null,
   };
+}
+
+/**
+ * LES CHAMPS DU PASSEPORT, dans l'ordre affiché par `TerritoryIdentityCard` (qui les lit ici). FUT-184 : la classe de la
+ * grille Insee décrit d'abord la commune ; le statut d'agglomération vient ensuite, à sa ligne ; la densité moyenne, en
+ * chiffre, est un autre fait, sous un autre intitulé.
+ */
+export type ChampIdentite = { kind: string; label: string; value: string };
+
+export function champsIdentite(identity: TerritoryIdentity): ChampIdentite[] {
+  const fields: ChampIdentite[] = [{ kind: "type", label: "Type", value: identity.typologie }];
+  if (identity.grille) fields.push({ kind: "densite", label: "Grille de densité Insee", value: identity.grille });
+  if (identity.role) fields.push({ kind: "role", label: "Rôle", value: identity.role });
+  if (identity.population) fields.push({ kind: "population", label: "Population", value: identity.population });
+  if (identity.densite) fields.push({ kind: "densite", label: "Densité moyenne", value: identity.densite });
+  if (identity.geo) fields.push({ kind: "geo", label: "Position", value: identity.geo });
+  if (identity.solDominant) fields.push({ kind: "sol", label: "Occupation des sols", value: identity.solDominant });
+  return fields;
 }
 
 // ── Bloc 4 : données riches des cartes Territoire ────────────────────────────────────────────

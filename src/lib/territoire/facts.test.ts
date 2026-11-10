@@ -14,12 +14,15 @@ const snap = (i: TerritoireInputs = chatelaillonInputs()) => buildTerritoireSnap
 
 // ── Châtelaillon-Plage ───────────────────────────────────────────────────────────────────────
 
-test("Châtelaillon : land.category = mixte, density.category = intermédiaire", () => {
+test("Châtelaillon : land.category = mixte, density.category = la grille Insee (ceinture urbaine), pas un palier de densité", () => {
   const s = snap();
   assert.equal(derivedOf(s, "land.category")?.value, "mixed");
   assert.equal(derivedOf(s, "land.category")?.label, "Occupation mixte");
-  assert.equal(derivedOf(s, "density.category")?.value, "intermediate");
-  assert.equal(derivedOf(s, "density.category")?.label, "Densité intermédiaire");
+  // FUT-184 : 976 hab/km² donnait « Densité intermédiaire » (palier 150 / 1 500) ; la classe officielle est 4.
+  assert.equal(derivedOf(s, "density.category")?.value, "dens7_4");
+  assert.equal(derivedOf(s, "density.category")?.label, "Ceinture urbaine");
+  assert.deepEqual(derivedOf(s, "density.category")?.from, ["place.density_grid"]);
+  assert.equal(factOf(s, "place.density")?.value, 975.76, "le chiffre reste un fait à part");
 });
 
 test("Châtelaillon : la carte d'identité et la face de carte disent LE MÊME couvert (D4)", () => {
@@ -29,7 +32,8 @@ test("Châtelaillon : la carte d'identité et la face de carte disent LE MÊME c
   // Avant FUT-6 : identité « Dominante urbaine » (grille à 40 %), carte « Occupation mixte » (grille à 50 %).
   assert.equal(identity.solDominant, "Occupation mixte");
   assert.equal(cards.couvertNaturel?.headlineLabel, "Occupation mixte");
-  assert.equal(identity.densite?.label, "Densité intermédiaire");
+  assert.equal(identity.grille, "Ceinture urbaine");
+  assert.equal(identity.densite, "976 hab/km²");
 });
 
 test("Châtelaillon : la projection porte la composition OSO et sa catégorie", () => {
@@ -41,7 +45,9 @@ test("Châtelaillon : la projection porte la composition OSO et sa catégorie", 
   assert.equal(p.occupation_des_sols.composition_des_terres_pct.espaces_urbanises, 49.3);
   assert.equal(p.occupation_des_sols.composition_des_terres_pct.prairies, 20.8);
   assert.equal(p.occupation_des_sols.composition_des_terres_pct.eau, undefined);
-  assert.equal(p.commune.densite.categorie, "Densité intermédiaire");
+  assert.deepEqual(p.commune.densite, { habitants_par_km2: 975.8 });
+  assert.equal(p.commune.grille_densite_insee.categorie, "Ceinture urbaine");
+  assert.equal(p.commune.grille_densite_insee.echelle, "commune entière");
 });
 
 test("Châtelaillon : boisement ADEME, trait distinctif, vieillissement et rayon 15 km hors de la projection, CHACUN avec sa raison", () => {

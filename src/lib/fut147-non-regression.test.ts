@@ -184,13 +184,17 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 // (reprise du 09/11/2026, après contre-revue), même entrée, même date ; première version de la PR #140 :
 // c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a / 9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d. Ce que
 // ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
-const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3";
+// FUT-184 (10/11/2026) les change VOLONTAIREMENT : registre `territoire-facts@3` (fait `place.density_grid`, catégorie de
+// densité lue sur la grille Insee) et contrat `territoire-synthese@8`. Entrée de Châtelaillon complétée de sa classe
+// officielle (4) ; même date. Valeurs de main avant FUT-184 : 6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3
+// / fd9b97308224b1cef6dbf86d637d8f316b5f1741d77c0fc16aba121115135b4b.
+const HASH_MAIN = "f7d5f5a9aafd76380cc28555ba731d946b6f7c3d8537ecd95e7e35ff90f0d01c";
 // Convergence FUT-175 + FUT-176 : l'empreinte est celle de FUT-175 (registre `territoire-facts@2`, FUT-176 ne change que
 // le type du rôle) ; la clé suit le contrat commun `territoire-synthese@6`. Clé de la PR #140 seule (@5) :
 // de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930.
 // FUT-177 (09/11/2026) : l'empreinte ne bouge pas (registre intact) ; la clé suit le contrat `territoire-synthese@7`.
 // Clé de main au contrat @6 : 5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72.
-const CLE_MAIN = "fd9b97308224b1cef6dbf86d637d8f316b5f1741d77c0fc16aba121115135b4b";
+const CLE_MAIN = "6d334d3b03a3d1252679f1ccb23441cbf699e2e7aa112177ca47c1726ed04611";
 
 /**
  * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
@@ -247,9 +251,43 @@ const REGISTRE = "src/lib/territoire/facts.ts";
  * Aucune ligne FUT-177 ne parle des feux ; le registre (facts.ts) n'est pas touché par FUT-177.
  */
 const FUT177_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut177-lignes-admises.json", "utf8")) as Record<string, string[]>;
+/**
+ * FUT-184 · RÉFÉRENCE FIGÉE, même principe que FUT-177, pour le contrat ET le registre : les lignes que FUT-184 change
+ * par rapport à 6972d5a4 (main après FUT-185), écrites par `scripts/fut184/figer-lignes-admises.mjs`. La grille de
+ * densité Insee remplace la catégorie de densité ; elle retire des lignes de FUT-177 (« @7 ») et de FUT-179
+ * (libellés « Arrondissement dense ») que `avantFut184` restaure avant les gardes de ces tickets. Aucune ne parle des feux.
+ */
+const FUT184_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut184-lignes-admises.json", "utf8")) as Record<string, string[]>;
 
 function avantFut177(f: string, lignes: readonly string[]): string[] {
-  const delta = FUT177_ADMISES[f] ?? [];
+  return annulerDelta("FUT-177", FUT177_ADMISES[f] ?? [], f, lignes);
+}
+
+function avantFut184(f: string, lignes: readonly string[]): string[] {
+  return annulerDelta("FUT-184", FUT184_ADMISES[f] ?? [], f, lignes);
+}
+
+/**
+ * Le même delta, annulé en MULTIENSEMBLE, pour le registre : sa garde ne compare pas des listes ordonnées, et
+ * `git diff` n'aligne pas les blocs répétés (« fact({ », « }), ») de la même façon selon la base (4d75603f ou 6972d5a4).
+ * Chaque « + » de FUT-184 retire une occurrence (absente : référence périmée) ; chaque « - » retire la ligne d'origine
+ * qu'il supprime, ou restaure celle qu'un ticket précédent avait ajoutée.
+ */
+function avantFut184Registre(lignes: readonly string[]): string[] {
+  const delta = (FUT184_ADMISES[REGISTRE] ?? []).filter((l) => !l.startsWith("@@"));
+  for (const l of delta) assert.doesNotMatch(l, FEUX, l);
+  const { reste, orphelines } = retirerAdmises(lignes, delta.filter((l) => l.startsWith("+")));
+  assert.deepEqual(orphelines, [], `référence FUT-184 périmée pour ${REGISTRE} : ces lignes admises ne sont plus dans le diff`);
+  for (const l of delta.filter((x) => x.startsWith("-"))) {
+    const i = reste.indexOf(l);
+    if (i !== -1) reste.splice(i, 1);
+    else reste.push(`+${l.slice(1)}`);
+  }
+  return reste;
+}
+
+/** Annule sur `lignes` (diff depuis 4d75603f) le delta figé d'un ticket : ses « + » retirées, ses « - » restaurées. */
+function annulerDelta(ticket: string, delta: readonly string[], f: string, lignes: readonly string[]): string[] {
   const reste = [...lignes];
   // Le delta, au format `git diff -U0`, garde ses en-têtes « @@ » : chaque bloc a ses lignes « - » puis ses lignes « + ».
   // La ligne restaurée reprend la place du bloc : la garde du contrat compare des listes ORDONNÉES.
@@ -268,14 +306,14 @@ function avantFut177(f: string, lignes: readonly string[]): string[] {
       for (let i = 0; i + plus.length <= reste.length && place === -1; i++) {
         if (plus.every((l, k) => reste[i + k] === l)) place = i;
       }
-      assert.ok(place !== -1, `référence FUT-177 périmée pour ${f} : ${plus[0]}`);
+      assert.ok(place !== -1, `référence ${ticket} périmée pour ${f} : ${plus[0]}`);
       reste.splice(place, plus.length);
     }
     const restaurees: string[] = [];
     for (const l of moins) {
       const i = reste.indexOf(l);
-      if (i !== -1) reste.splice(i, 1); // une ligne d'origine (4d75603f) que FUT-177 retire
-      else restaurees.push(`+${l.slice(1)}`); // une ligne que main avait ajoutée et que FUT-177 remplace
+      if (i !== -1) reste.splice(i, 1); // une ligne d'origine (4d75603f) que le ticket retire
+      else restaurees.push(`+${l.slice(1)}`); // une ligne que main avait ajoutée et que le ticket remplace
     }
     reste.splice(place === -1 ? reste.length : place, 0, ...restaurees);
   }
@@ -284,6 +322,11 @@ function avantFut177(f: string, lignes: readonly string[]): string[] {
 
 /** La garde du contrat de synthèse, sur une liste de lignes changées depuis 4d75603f. */
 function verifierContrat(lignes: readonly string[]): void {
+  verifierContratAvantFut184(avantFut184(CONTRAT, lignes));
+}
+
+/** La garde du contrat telle qu'elle était avant FUT-184 (FUT-163, 175, 176, 177), sur des lignes où FUT-184 est annulé. */
+function verifierContratAvantFut184(lignes: readonly string[]): void {
   const changees = horsFut175(CONTRAT, avantFut177(CONTRAT, lignes));
   // Convergence FUT-175 + FUT-176 : la version commune @6 et les lignes du rôle territorial sont celles de FUT-176
   // (`LIGNES_CONTRAT_FUT176`) ; la ligne « @5 » de FUT-175 a été retirée de sa référence figée, qui garde le « @4 » retiré.
@@ -362,7 +405,8 @@ function verifierRegistre(lignesChangees: readonly string[]): void {
   // avec sa source et ses limites ; contre-revue : l'échelle `arrondissement` du fait et le libellé de sa catégorie suivent
   // le périmètre lu. Ses lignes exactes (quatre retirées : densité, source, échelle et libellé, devenus conditionnels)
   // sont figées dans `__fixtures__/fut179-lignes-admises.json`, une occurrence chacune ; aucune ne parle des feux.
-  const fut179 = retirerAdmises(horsFut175(REGISTRE, lignesChangees), FUT179_ADMISES[REGISTRE]!);
+  // FUT-184 (10/11/2026) : la grille de densité Insee ; son delta figé est annulé d'abord (cf. `avantFut184`).
+  const fut179 = retirerAdmises(horsFut175(REGISTRE, avantFut184Registre(lignesChangees)), FUT179_ADMISES[REGISTRE]!);
   assert.deepEqual(fut179.orphelines, [], `référence FUT-179 périmée pour ${REGISTRE} : ces lignes admises ne sont plus dans le diff`);
   for (const l of FUT179_ADMISES[REGISTRE]!) assert.doesNotMatch(l, FEUX, l);
   const lignes = fut179.reste;
@@ -620,10 +664,29 @@ test("FUT-175 : une modification étrangère du contrat ou du registre fait éch
 // FUT-177 : la référence figée du contrat ne couvre que ses propres lignes. Une ligne FUT-177 retouchée ou absente la
 // rend périmée ; une ligne étrangère ajoutée à côté reste refusée par la garde.
 test("FUT-177 : la référence figée du contrat est exacte, et ne couvre aucune ligne étrangère", () => {
-  const contrat = lignesDiff("4d75603f", CONTRAT);
-  verifierContrat(contrat);
+  // FUT-184 remplace la ligne « @7 » de FUT-177 : la garde FUT-177 se vérifie sur le diff où FUT-184 est annulé.
+  const contrat = avantFut184(CONTRAT, lignesDiff("4d75603f", CONTRAT));
+  verifierContratAvantFut184(contrat);
   const ligne177 = FUT177_ADMISES[CONTRAT].find((l) => l.startsWith("+") && l.includes("territoire-synthese@7"))!;
   assert.ok(ligne177);
-  assert.throws(() => verifierContrat(contrat.filter((l) => l !== ligne177)), /référence FUT-177 périmée/);
-  assert.throws(() => verifierContrat([...contrat, "+  ce_que_dit_la_categorie_bis: null,"]), /deepStrictEqual|Expected values/);
+  assert.throws(() => verifierContratAvantFut184(contrat.filter((l) => l !== ligne177)), /référence FUT-177 périmée/);
+  assert.throws(() => verifierContratAvantFut184([...contrat, "+  ce_que_dit_la_categorie_bis: null,"]), /deepStrictEqual|Expected values/);
+});
+
+// FUT-184 : sa référence figée couvre exactement ses lignes, dans le contrat comme dans le registre. Une ligne FUT-184
+// retouchée la rend périmée ; une ligne étrangère reste refusée.
+test("FUT-184 : la référence figée du contrat et du registre est exacte, et ne couvre aucune ligne étrangère", () => {
+  const contrat = lignesDiff("4d75603f", CONTRAT);
+  const registre = lignesDiff("4d75603f", REGISTRE);
+  verifierContrat(contrat);
+  verifierRegistre(registre);
+  const ligneContrat = FUT184_ADMISES[CONTRAT].find((l) => l.startsWith("+") && l.includes("territoire-synthese@8"))!;
+  const ligneRegistre = FUT184_ADMISES[REGISTRE].find((l) => l.startsWith("+") && l.includes("territoire-facts@3"))!;
+  assert.ok(ligneContrat && ligneRegistre);
+  assert.throws(() => verifierContrat(contrat.filter((l) => l !== ligneContrat)), /référence FUT-184 périmée/);
+  assert.throws(() => verifierRegistre(registre.filter((l) => l !== ligneRegistre)), /référence FUT-184 périmée/);
+  assert.throws(() => verifierContrat([...contrat, "+  grille_bis: null,"]), /deepStrictEqual|Expected values/);
+  assert.throws(() => verifierRegistre([...registre, "+  grille_bis: null,"]), /ligne non admise/);
+  // Aucune ligne de FUT-184 ne parle des feux, et sa référence ne touche que ces deux fichiers.
+  assert.deepEqual(Object.keys(FUT184_ADMISES).sort(), [REGISTRE, CONTRAT].sort());
 });

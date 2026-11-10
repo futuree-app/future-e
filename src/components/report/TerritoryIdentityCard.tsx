@@ -5,7 +5,7 @@
 // page de données. Présentation seule (props sérialisables).
 
 import type { ReactNode } from "react";
-import type { TerritoryIdentity } from "@/lib/territory-identity";
+import { champsIdentite, type TerritoryIdentity } from "@/lib/territory-identity";
 import type { TerritoryType } from "@/lib/territory-mood";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 
@@ -112,13 +112,8 @@ export function TerritoryIdentityCard({
   tint: string;
   accent: string;
 }) {
-  const fields: { kind: string; label: string; value: string }[] = [];
-  fields.push({ kind: "type", label: "Type", value: identity.typologie });
-  if (identity.role) fields.push({ kind: "role", label: "Rôle", value: identity.role });
-  if (identity.population) fields.push({ kind: "population", label: "Population", value: identity.population });
-  if (identity.densite) fields.push({ kind: "densite", label: "Densité", value: identity.densite.label });
-  if (identity.geo) fields.push({ kind: "geo", label: "Position", value: identity.geo });
-  if (identity.solDominant) fields.push({ kind: "sol", label: "Occupation des sols", value: identity.solDominant });
+  // FUT-184 : les champs affichés viennent de `champsIdentite` (même liste, même ordre, testée hors React).
+  const fields = champsIdentite(identity);
 
   return (
     // Scène 3D : la carte se déplie comme une feuille de papier au chargement,

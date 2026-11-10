@@ -118,10 +118,34 @@ test("« rural » et « station balnéaire » ne se déduisent pas : refusés fa
   assert.deepEqual(rules("Une station balnéaire recherchée.").sort(), ["interdit:attractivite", "interdit:station-balneaire"]);
 });
 
-test("densité : « peu dense » est refusé pour une densité intermédiaire, « dense » accepté pour une commune dense", () => {
+// FUT-184 : les qualificatifs se lisent contre la classe de la grille Insee (Châtelaillon : 4, « Ceinture urbaine »).
+const grille = (classe: string, echelle = "commune entière") =>
+  withProjection((p) => { p.commune.grille_densite_insee = { ...p.commune.grille_densite_insee, categorie: classe, echelle }; });
+
+test("densité : « peu dense » refusé pour une classe urbaine, « dense » réservé au grand centre urbain", () => {
   assert.deepEqual(rules("Une commune peu dense."), ["densite:requalifiee-peu-dense"]);
-  const DENSE = withProjection((p) => { p.commune.densite.categorie = "Commune dense"; });
-  assert.deepEqual(rules("Une commune dense de l'agglomération.", DENSE), []);
+  assert.deepEqual(rules("Une commune dense de l'agglomération."), ["densite:requalifiee-dense"], "ceinture urbaine : pas « dense »");
+  assert.deepEqual(rules("Une commune dense de l'agglomération.", grille("Grand centre urbain")), []);
+  assert.deepEqual(rules("Une commune peu dense.", grille("Bourg rural")), [], "rural : « peu dense » n'est pas contredit");
+  assert.deepEqual(rules("Une ville très dense.", grille("Centre urbain intermédiaire")), ["densite:requalifiee-dense"]);
+});
+
+test("grille : « rural » n'est permis que pour une commune que la grille classe rurale, « ville » jamais pour elle", () => {
+  assert.deepEqual(rules("Une commune au caractère rural."), ["interdit:rural"], "ceinture urbaine");
+  assert.deepEqual(rules("La grille de densité la classe en bourg rural.", grille("Bourg rural")), []);
+  for (const fautif of ["Cette ville de l'intérieur compte 25 000 habitants.", "Une petite ville au centre de son agglomération.", "C'est un centre urbain."])
+    assert.deepEqual(rules(fautif, grille("Bourg rural")), ["densite:ville-pour-commune-rurale"], fautif);
+  // Le statut d'agglomération, lui, se dit tel quel (Sèvremoine : bourg rural ET au centre de son agglomération).
+  assert.deepEqual(rules("La commune est au centre de son agglomération.", grille("Bourg rural")), []);
+  assert.deepEqual(rules("Cette ville compte 6 000 habitants."), [], "classe urbaine : le mot reste possible");
+  // Un arrondissement lit la classe de sa ville : « rural » y reste interdit, quelle que soit la classe.
+  assert.deepEqual(rules("Un caractère rural.", grille("Bourg rural", "commune entière de Paris : la grille ne classe pas les arrondissements")), ["interdit:rural"]);
+});
+
+test("grille : la classe ne décrit pas la forme de l'habitat", () => {
+  for (const fautif of ["L'habitat y est dispersé.", "Des maisons très dispersées.", "Un habitat dispersé."])
+    assert.ok(rules(fautif, grille("Commune rurale de faible densité")).includes("densite:habitat-disperse"), fautif);
+  assert.deepEqual(rules("La grille la classe commune rurale de faible densité.", grille("Commune rurale de faible densité")), []);
 });
 
 test("marché du logement : aucune conclusion n'est permise (D5)", () => {
@@ -305,8 +329,7 @@ test("liberté éditoriale : sélection prudente, juxtaposition et composition a
     "8,7 % des habitants vivaient dans une autre commune un an avant le recensement de 2021.",
     "La commune est dense, et les nuits au-dessus de 20 °C deviennent plus fréquentes.",
   ]) assert.deepEqual(rules(ok), [], ok);
-  const DENSE = withProjection((p) => { p.commune.densite.categorie = "Commune dense"; });
-  assert.deepEqual(rules("Nantes est une commune dense et 27,4 % de son territoire est classé en espaces naturels.", DENSE), []);
+  assert.deepEqual(rules("Nantes est une commune dense et 27,4 % de son territoire est classé en espaces naturels.", grille("Grand centre urbain")), []);
 });
 
 test("réel du 30/09 (Nantes, Aurillac) : les inférences restantes sont rejetées, la sélection éditoriale reste permise", () => {

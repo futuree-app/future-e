@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { DENSITE_PLM, DENSITE_PLM_META } from "./plm-densite.generated.ts";
 import { densiteInseePLM, densiteInseeRetenue } from "./plm-densite.ts";
+import { grilleDensiteDe } from "./grille-densite.ts";
 import { lectureCommunalePLM, libellesAgglomeration, villeDeArrondissement, type ArrondissementIndex } from "./plm-communal.ts";
 import { roleUrbain } from "./statut-urbain.ts";
 import { buildTerritoireSnapshot, type TerritoireInputs } from "./facts.ts";
@@ -34,6 +35,8 @@ function inputsVille(insee: string, nom: string): TerritoireInputs {
     entry: { population: l.population, densite: null, mer_centre_km: null, relief_proximite: null, altitude: null, nature: null, demographie: l.demographie },
     urbanRole: { role: roleUrbain(l.uu, l.uuStatut), uuLabel: l.uu ? LABELS.get(l.uu) ?? null : null, uuPop: l.uuPop },
     densiteInsee: densiteInseePLM(insee),
+    // FUT-184 : la grille du code lu, comme `loadTerritoireSnapshot` (jamais celle de Châtelaillon, dont on part).
+    grilleDensite: grilleDensiteDe(insee),
   };
 }
 
@@ -49,6 +52,7 @@ function inputsArrondissement(insee: string): TerritoireInputs {
     },
     urbanRole: { role: roleUrbain(a.uu ?? null, a.uu_statut ?? null), uuLabel: a.uu ? LABELS.get(a.uu) ?? null : null, uuPop: a.uu_pop ?? null, arrondissementDe: villeDeArrondissement(insee)!.nom },
     densiteInsee: densiteInseePLM(insee),
+    grilleDensite: grilleDensiteDe(insee),
   };
 }
 
@@ -106,20 +110,21 @@ for (const [insee, nom] of VILLES) {
     assert.equal(d.provenance?.distributor, undefined, "ADEME n'en est pas le diffuseur");
     assert.match(d.provenance!.limits!, /aucun arrondissement/);
     assert.equal(d.scale, "commune", "la ville entière, pas un arrondissement");
-    assert.equal(derive(s, "density.category")?.label, "Commune dense");
-    // La phrase reprend le chiffre et le mot « commune », juste ici.
-    assert.match(synthese(s), new RegExp(`est une commune dense \\(${frInt(attendu.habitantsParKm2)} habitants au km²\\)`));
-    assert.equal(buildTerritoryIdentity(withHash(s)).densite?.label, "Commune dense");
+    // FUT-184 : la catégorie est la classe de la grille Insee de la ville (1, « Grands centres urbains »), à sa propre échelle.
+    assert.equal(derive(s, "density.category")?.label, "Grand centre urbain");
+    assert.deepEqual(fait(s, "place.density_grid").value, { classe: 1, perimetre: "commune" });
+    assert.match(synthese(s), new RegExp(`relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee \\(${frInt(attendu.habitantsParKm2)} habitants au km² en moyenne\\)`));
+    const id = buildTerritoryIdentity(withHash(s));
+    assert.equal(id.grille, "Grand centre urbain");
+    assert.match(String(id.densite), new RegExp(`^${frInt(attendu.habitantsParKm2)} hab/km²$`));
   });
 }
 
-for (const [insee, label, phrase] of [
-  ["75111", "Arrondissement dense", "est un arrondissement dense"],
-  ["75116", "Arrondissement dense", "est un arrondissement dense"],
-  ["69381", "Arrondissement dense", "est un arrondissement dense"],
-  ["13201", "Arrondissement dense", "est un arrondissement dense"],
-  ["13209", "Densité intermédiaire", "a une densité intermédiaire"],
-  ["13216", "Densité intermédiaire", "a une densité intermédiaire"],
+// FUT-184 : les paliers « Arrondissement dense » / « Densité intermédiaire » (1 500 / 150 hab/km² appliqués à
+// l'arrondissement) sont retirés avec ceux des communes. L'arrondissement garde SON chiffre ; la grille, qui ne le
+// classe pas, n'apparaît qu'à l'échelle de sa ville, et le dit.
+for (const [insee, nomVille] of [
+  ["75111", "Paris"], ["75116", "Paris"], ["69381", "Lyon"], ["13201", "Marseille"], ["13209", "Marseille"], ["13216", "Marseille"],
 ] as const) {
   test(`D5. ${insee} : la densité de l'arrondissement lu, jamais celle de la ville`, () => {
     const s = buildTerritoireSnapshot(inputsArrondissement(insee), T0);
@@ -130,10 +135,16 @@ for (const [insee, label, phrase] of [
     assert.equal(d.scale, "arrondissement", "le périmètre réel, porté par le fait lui-même");
     assert.match(d.limits!, /^Densité moyenne de l'arrondissement /);
     assert.match(d.limits!, new RegExp(`celle de ${ville.ville} entière est différente`));
-    assert.equal(buildTerritoryIdentity(withHash(s)).densite?.label, label, "un arrondissement n'est pas appelé « commune »");
+    const id = buildTerritoryIdentity(withHash(s));
+    assert.equal(id.grille, `Grand centre urbain, à l'échelle de ${nomVille}`, "la classe de la ville, dite comme telle");
+    assert.match(String(id.densite), new RegExp(`^${frInt(DENSITE_PLM[insee]!.habitantsParKm2)} hab/km² \\(arrondissement\\)$`));
+    assert.deepEqual(fait(s, "place.density_grid").value, { classe: 1, perimetre: "commune_parente", ville: nomVille });
+    assert.equal(fait(s, "place.density_grid").scale, "commune");
+    assert.match(fait(s, "place.density_grid").limits!, new RegExp(`ne classe pas les arrondissements : c'est la classe de ${nomVille} entière`));
     const texte = synthese(s);
-    assert.match(texte, new RegExp(`${phrase} \\(${frInt(DENSITE_PLM[insee]!.habitantsParKm2)} habitants au km²\\)`));
-    assert.doesNotMatch(texte, /une commune (peu )?dense/);
+    assert.match(texte, new RegExp(`compte ${frInt(DENSITE_PLM[insee]!.habitantsParKm2)} habitants au km² en moyenne\\.`));
+    assert.match(texte, new RegExp(`La grille communale de densité de l'Insee range ${nomVille} entière dans la catégorie « Grand centre urbain » ; elle ne classe pas les arrondissements\\.`));
+    assert.doesNotMatch(texte, /une commune (peu )?dense|arrondissement (peu )?dense|densité intermédiaire/);
   });
 }
 
@@ -171,23 +182,29 @@ test("D8. non-régression FUT-43 : population, agglomération et démographie de
 
 // ── Contre-revue : ce que reçoit le modèle, et ce que les garde-fous refusent ──────────────────
 
-test("D9. projection : le modèle reçoit la catégorie au périmètre lu, et le contrat (donc le cache national) ne bouge pas", () => {
-  const cat = (s: ReturnType<typeof buildTerritoireSnapshot>) =>
-    (projectForSynthesis(withHash(s), "gwl20") as { commune: { densite: { categorie: string } | null } }).commune.densite?.categorie;
-  assert.equal(cat(buildTerritoireSnapshot(inputsArrondissement("75111"), T0)), "Arrondissement dense");
-  assert.equal(cat(buildTerritoireSnapshot(inputsArrondissement("69381"), T0)), "Arrondissement dense");
-  assert.equal(cat(buildTerritoireSnapshot(inputsArrondissement("13209"), T0)), "Densité intermédiaire");
-  assert.equal(cat(buildTerritoireSnapshot(inputsVille("75056", "Paris"), T0)), "Commune dense");
-  for (const [insee, nom] of VILLES) assert.equal(cat(buildTerritoireSnapshot(inputsVille(insee, nom), T0)), "Commune dense");
-  // Aucun libellé « Commune … » ne part pour un arrondissement, sur les 45.
-  for (const a of TOUS_ARRONDISSEMENTS) assert.doesNotMatch(String(cat(buildTerritoireSnapshot(inputsArrondissement(a), T0))), /^Commune/, a);
+test("D9. projection : la densité au périmètre lu, la grille à l'échelle de la ville, jamais prêtée à l'arrondissement", () => {
+  type C = { densite: Record<string, unknown> | null; grille_densite_insee: { categorie: string; echelle: string } | null };
+  const com = (s: ReturnType<typeof buildTerritoireSnapshot>) => (projectForSynthesis(withHash(s), "gwl20") as { commune: C }).commune;
+  // FUT-184 : la densité ne porte plus de catégorie ; la grille est un champ à part, avec son échelle.
+  for (const [insee, nom] of VILLES) {
+    const c = com(buildTerritoireSnapshot(inputsVille(insee, nom), T0));
+    assert.deepEqual(Object.keys(c.densite!), ["habitants_par_km2"]);
+    assert.deepEqual([c.grille_densite_insee?.categorie, c.grille_densite_insee?.echelle], ["Grand centre urbain", "commune entière"]);
+  }
+  // Sur les 45 arrondissements : la classe de la ville, son nom dans l'échelle, jamais « commune entière » seule.
+  for (const a of TOUS_ARRONDISSEMENTS) {
+    const c = com(buildTerritoireSnapshot(inputsArrondissement(a), T0));
+    const ville = villeDeArrondissement(a)!.nom;
+    assert.equal(c.grille_densite_insee?.echelle, `commune entière de ${ville} : la grille ne classe pas les arrondissements`, a);
+    assert.deepEqual(Object.keys(c.densite!), ["habitants_par_km2"], a);
+  }
   // Une commune ordinaire garde son échelle et son libellé (Châtelaillon, ADEME).
   const ordinaire = buildTerritoireSnapshot(chatelaillonInputs(), T0);
   assert.equal(fait(ordinaire, "place.density").scale, "commune");
-  assert.match(String(derive(ordinaire, "density.category")?.label), /^(Commune|Densité)/);
-  // FUT-179 ne touche pas au contrat. FUT-177 (fusionné après) l'a porté à @7 pour ses propres consignes ; c'est
-  // la seule montée admise depuis @6 (garde FUT-147 : fixture fut177-lignes-admises.json).
-  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@7", "contrat : FUT-179 n'y touche pas, seul FUT-177 l'a porté à @7");
+  assert.equal(derive(ordinaire, "density.category")?.label, "Ceinture urbaine");
+  // FUT-179 ne touche pas au contrat. FUT-177 l'a porté à @7, FUT-184 à @8 (la grille Insee remplace la catégorie de
+  // densité) ; garde FUT-147 : fixtures fut177- et fut184-lignes-admises.json.
+  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@8", "contrat : FUT-179 n'y touche pas ; FUT-177 l'a porté à @7, FUT-184 à @8");
 });
 
 const violations = (s: ReturnType<typeof buildTerritoireSnapshot>, texte: string) =>
@@ -195,7 +212,11 @@ const violations = (s: ReturnType<typeof buildTerritoireSnapshot>, texte: string
 
 test("D10. garde-fous, Paris 11e : la densité de l'arrondissement n'est prêtée ni à une commune, ni à la ville", () => {
   const s = buildTerritoireSnapshot(inputsArrondissement("75111"), T0);
-  assert.deepEqual(violations(s, "Paris 11e Arrondissement est un arrondissement dense (38 143 habitants au km²)."), []);
+  assert.deepEqual(violations(s, "Paris 11e Arrondissement compte 38 143 habitants au km² en moyenne."), []);
+  // FUT-184 : aucun palier ne qualifie plus l'arrondissement, et la classe de Paris ne lui est pas prêtée.
+  for (const fautif of ["Paris 11e Arrondissement est un arrondissement dense (38 143 habitants au km²).", "Le 11e arrondissement est un grand centre urbain."])
+    assert.ok(violations(s, fautif).includes("densite:arrondissement-qualifie"), fautif);
+  assert.deepEqual(violations(s, "La grille communale de densité de l'Insee range Paris entière dans la catégorie « Grand centre urbain »."), []);
   for (const fautif of [
     "Paris 11e Arrondissement est une commune dense (38 143 habitants au km²).",
     "Le 11e est une ville très dense.",
@@ -206,17 +227,19 @@ test("D10. garde-fous, Paris 11e : la densité de l'arrondissement n'est prêté
   assert.deepEqual(violations(s, synthese(s)), []);
 });
 
-test("D11. garde-fous, Marseille 9e : « densité intermédiaire » ne devient pas « arrondissement dense »", () => {
+test("D11. garde-fous, Marseille 9e : la classe « Grand centre urbain » de Marseille ne fait pas du 9e un arrondissement dense", () => {
   const s = buildTerritoireSnapshot(inputsArrondissement("13209"), T0);
-  assert.deepEqual(violations(s, "Marseille 9e Arrondissement a une densité intermédiaire (1 207 habitants au km²)."), []);
-  assert.ok(violations(s, "Marseille 9e Arrondissement est un arrondissement dense.").includes("densite:requalifiee-dense"));
+  assert.deepEqual(violations(s, "Marseille 9e Arrondissement compte 1 207 habitants au km² en moyenne."), []);
+  for (const fautif of ["Marseille 9e Arrondissement est un arrondissement dense.", "Marseille 9e Arrondissement est peu dense.", "Le 9e constitue un grand centre urbain."])
+    assert.ok(violations(s, fautif).includes("densite:arrondissement-qualifie"), fautif);
   assert.ok(violations(s, "Marseille 9e Arrondissement est une commune peu dense.").includes("interdit:densite-arrondissement-pretee-a-la-commune"));
   assert.deepEqual(violations(s, synthese(s)), []);
 });
 
 test("D12. garde-fous, Paris entière : sa densité n'est attribuée à aucun arrondissement", () => {
   const s = buildTerritoireSnapshot(inputsVille("75056", "Paris"), T0);
-  assert.deepEqual(violations(s, "Paris est une commune dense (20 054 habitants au km²)."), []);
+  assert.deepEqual(violations(s, "Paris est une commune dense (20 054 habitants au km²)."), [], "grand centre urbain : « dense » admis");
+  assert.deepEqual(violations(s, "Paris relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee."), []);
   for (const fautif of ["Le 11e arrondissement est très dense.", "Chaque arrondissement compte 20 054 habitants au km², en densité."])
     assert.ok(violations(s, fautif).includes("interdit:densite-ville-pretee-a-un-arrondissement"), fautif);
   assert.deepEqual(violations(s, synthese(s)), []);
