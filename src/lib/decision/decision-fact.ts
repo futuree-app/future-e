@@ -473,6 +473,10 @@ export type ModuleFacts = CommuneAttributes & {
   // s'en sert donc que pour refuser de conclure « priorité satisfaite » là où l'État n'a rien recensé
   // et où le contexte, lui, appelle un regard. `null` = donnée absente.
   boisementPct: number | null;
+  // FUT-182 : la LIMITE GÉOGRAPHIQUE du rang « Espaces naturels » (secteur habité), quand le disque de 15 km n'est
+  // couvert qu'entre 50 et 75 % par des terres et eaux françaises (« la mer occupe environ 31 % du rayon… »). Elle
+  // s'ajoute à la limitation de la carte de rang. Optionnelle : absente, la carte garde sa limitation générale.
+  natureLimite?: string | null;
   // Le RANG du compte de reconnaissances CatNat inondation (0-100). FUT-127 : plus aucune règle ne
   // s'en sert. Il qualifiait d'« exposition élevée » 48 % des communes (4 reconnaissances suffisaient)
   // et fabriquait une bonne nouvelle sous ce seuil. Gardé dans les faits pour la lecture des

@@ -25,12 +25,16 @@ import type { TerritoryType } from "../territory-mood.ts";
 import { millesimePopulation } from "../population-millesime.ts";
 import { avecProvenances } from "./provenances.ts";
 import { densiteInseeRetenue, type DensitePLM } from "./plm-densite.ts";
+import { limiteSecteur, LIMITE_LECTURE_SECTEUR, type SecteurHabite, type TerresOso } from "../oso/secteur-habite.ts";
 
 /**
  * Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses.
  * @2 (FUT-175) : les parts d'occupation du sol se lisent sur les TERRES, l'eau est un fait à part.
+ * @3 (FUT-182) : les parts viennent des comptes de pixels exacts (serres comprises, poste distinct rattaché aux
+ *   cultures), non arrondies ; le « rayon de 15 km » (communes entières, eau comprise) laisse la place au secteur
+ *   habité (`land.natural_share_sector`), avec sa couverture et sa limite géographique.
  */
-export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@2";
+export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@3";
 
 // ── Les entrées : ce que le chargeur serveur a lu, UNE fois ─────────────────────────────────
 
@@ -44,10 +48,13 @@ export type TerritoireIndexEntry = {
   mer_centre_km: number | null;
   relief_proximite: number | null;
   altitude: number | null;
+  // FUT-182 : l'occupation des sols OSO 2023 de la commune (ou de l'arrondissement) et son secteur habité
+  // (src/lib/oso/secteur-habite.ts). Le score national n'est pas lu ici : Territoire décrit, il ne classe pas.
   nature: {
-    brut_pct: number | null;
-    radius_pct: number | null;
-    composition: Record<string, number> | null;
+    terres: TerresOso | null;
+    eau_pct: number | null;
+    couverture_pct: number | null;
+    secteur: SecteurHabite | null;
   } | null;
   demographie: {
     taux_total: number | null;
@@ -112,8 +119,9 @@ export const LAND_LABEL: Record<LandCategory, string> = {
   mixed: "Occupation mixte",
 };
 
-/** Les postes de `nature.composition` (index) qui couvrent des terres ; l'eau est le seul autre poste. */
-export const LAND_KEYS = ["artificialise", "agricole", "foret", "prairies", "landes_pelouses", "mineral_dunes"] as const;
+/** Les postes terrestres de la composition affichée. `serres` (OSO 24) est un poste distinct, compté avec les cultures
+ *  dans la catégorie (FUT-182, décision D) ; ses pixels ne disent rien de l'activité agricole réelle (F-score 0,27). */
+export const LAND_KEYS = ["artificialise", "agricole", "serres", "foret", "prairies", "landes_pelouses", "mineral_dunes"] as const;
 
 /** En deçà, les terres sont trop réduites pour qu'une part en soit lisible : aucune catégorie. */
 export const MIN_LAND_PCT = 10;
@@ -123,95 +131,73 @@ export type LandShares = {
   waterPct: number;
   /** Milieux naturels terrestres (forêts, prairies, landes et pelouses, roche et dunes), en % des terres. */
   naturalLandPct: number;
-  /** Les six postes terrestres, en % des terres (somme ≈ 100, aux arrondis de l'index près). */
+  /** Les sept postes terrestres, en % des terres (somme = 100 au millième près), non arrondis. */
   composition: Record<string, number>;
 };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-/** Les postes naturels de l'index, eau comprise : `brut_pct` en est la somme, comptée sur les pixels. */
-const NATURAL_KEYS = ["foret", "prairies", "landes_pelouses", "mineral_dunes", "eau"] as const;
+/**
+ * FUT-182 · TOLÉRANCES. L'index porte des parts calculées sur des comptes de pixels entiers, arrondies au millième
+ * (scripts/oso/integrer-oso-2023.py) : les sept postes somment à 100 à 7 × 0,0005 près, et le naturel égale la somme
+ * de ses quatre postes à 4 × 0,0005 près. Au-delà, c'est une contradiction, pas un arrondi.
+ */
+export const OSO_SUM_TOLERANCE = 7 * 0.0005 + 1e-6;
+export const OSO_BRUT_TOLERANCE = 4 * 0.0005 + 1e-6;
 
 /**
- * FUT-175 · TOLÉRANCES D'ARRONDI. L'index arrondit chaque poste et `brut_pct` au dixième (populate-nature.py),
- * soit 0,05 point d'écart au plus par valeur. Les sept postes somment donc à 100 ± 7 × 0,05 = 0,35 ; `brut_pct`
- * égale la somme des cinq postes naturels (eau comprise) à 6 × 0,05 = 0,30 près. Au-delà, ce n'est plus un
- * arrondi mais une contradiction. Mesuré sur l'index du 09/11/2026 : écarts maximaux de 0,2 dans les deux cas,
- * sur les 34 743 communes. Le millième absorbe le bruit flottant des sommes.
+ * FUT-182 : ce que couvrent les pourcentages OSO. La carte classe la quasi-totalité des contours communaux (valeur 0
+ * sous un contour : 1,9 km² pour toute la France, B1) ; les serres sont comptées, comme un poste des terres.
  */
-export const OSO_SUM_TOLERANCE = 7 * 0.05 + 1e-3;
-export const OSO_BRUT_TOLERANCE = 6 * 0.05 + 1e-3;
-
-/**
- * FUT-175 : ce que couvrent les pourcentages OSO. Ils portent sur les pixels que la carte a classés (classes 1 à 23)
- * dans le contour administratif, pas sur toute la surface géographique : les pixels non classés, dont la part
- * n'est pas connue (raster non conservé), n'y figurent pas.
- */
-export const OSO_COUVERTURE = "Parts calculées sur la surface que la carte OSO a classée dans le contour administratif ; les pixels non classés, dont la part n'est pas mesurée, n'y figurent pas.";
+export const OSO_COUVERTURE = "Parts calculées sur les pixels de 10 m que la carte OSO classe dans le contour de la commune, serres comprises.";
 
 export type LandSharesReading =
   | { status: "ok"; shares: LandShares }
   | { status: "missing" }
   | { status: "inconsistent"; reason: string };
 
+const TERRES_INDEX = ["urbanise", "cultures", "serres", "foret", "prairies", "landes_pelouses", "mineral_dunes"] as const;
+const VERS_COMPOSITION: Record<(typeof TERRES_INDEX)[number], (typeof LAND_KEYS)[number]> = {
+  urbanise: "artificialise", cultures: "agricole", serres: "serres", foret: "foret", prairies: "prairies",
+  landes_pelouses: "landes_pelouses", mineral_dunes: "mineral_dunes",
+};
+
 /**
- * FUT-175 : L'EAU N'EST NI UNE TERRE NI UN ESPACE NATUREL. L'index (scripts/populate-nature.py) rapporte
- * chaque poste aux pixels CLASSÉS du contour administratif (classes OSO 1 à 23 ; les autres valeurs, de part
- * inconnue, ne sont comptées nulle part), eau comprise, et compte l'eau dans `brut_pct`. Sète (50,6 % d'eau,
- * étang de Thau) y lisait « Forte présence naturelle » quand la moitié de ses terres est urbanisée. On retire
- * donc l'eau du dénominateur : chaque part est rapportée aux terres, soit `100 − eau` (les sept postes
- * partagent le même dénominateur de pixels).
- *
- * Le naturel terrestre part de `brut_pct` (compté sur les pixels, sans arrondi par poste), moins l'eau : c'est
- * la même définition qu'avant, l'eau en moins. Sans eau, rien ne bouge, pas même d'un dixième.
+ * FUT-175 / FUT-182 : L'EAU N'EST NI UNE TERRE NI UN ESPACE NATUREL. L'index rapporte chaque poste aux TERRES de la
+ * commune (OSO 1-22 et 24), l'eau à part en % de la surface cartographiée (terres + eau). Les parts sont reprises
+ * telles quelles, non arrondies : la catégorie se calcule sur elles, l'affichage arrondit au dixième (`pctOso`).
  *
  * Lecture refusée, jamais complétée :
- * - `missing` : composition ou `brut_pct` absent, ou un des sept postes manquant (absent ≠ zéro) ;
- * - `inconsistent` : une valeur hors de [0, 100], des postes qui ne somment pas à 100 aux arrondis près, un
- *   `brut_pct` qui contredit les postes naturels, ou des terres sous `MIN_LAND_PCT` (aucune commune
- *   aujourd'hui : 71,4 % d'eau au plus, à Paimbœuf). La raison est écrite dans le snapshot (`limits`).
+ * - `missing` : nature, terres ou eau absentes, ou un poste manquant (absent ≠ zéro) ;
+ * - `inconsistent` : une valeur hors de [0, 100], des postes qui ne somment pas à 100, un naturel qui contredit ses
+ *   postes, ou des terres sous `MIN_LAND_PCT` de la surface cartographiée. La raison est écrite dans le snapshot.
  */
-export function readLandShares(
-  brutPct: number | null | undefined,
-  composition: Record<string, number> | null | undefined,
-): LandSharesReading {
+export function readLandShares(nature: TerritoireIndexEntry["nature"] | null | undefined): LandSharesReading {
   const present = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
-  if (!composition || !present(brutPct)) return { status: "missing" };
-  const keys = [...LAND_KEYS, "eau"] as const;
-  if (!keys.every((k) => present(composition[k]))) return { status: "missing" };
-  const horsBornes = [["brut_pct", brutPct] as const, ...keys.map((k) => [k, composition[k]] as const)]
+  const t = nature?.terres;
+  if (!t || !present(nature?.eau_pct)) return { status: "missing" };
+  if (!present(t.naturel) || !TERRES_INDEX.every((k) => present(t[k]))) return { status: "missing" };
+  const horsBornes = [["eau_pct", nature!.eau_pct] as const, ["naturel", t.naturel] as const, ...TERRES_INDEX.map((k) => [k, t[k]] as const)]
     .find(([, v]) => v < 0 || v > 100);
   if (horsBornes) return { status: "inconsistent", reason: `${horsBornes[0]} hors de [0, 100] (${horsBornes[1]})` };
-  const sum = keys.reduce((a, k) => a + composition[k], 0);
+  const sum = TERRES_INDEX.reduce((a, k) => a + t[k], 0);
   if (Math.abs(sum - 100) > OSO_SUM_TOLERANCE) {
-    return { status: "inconsistent", reason: `les sept postes somment à ${round1(sum)} %, pas à 100 %` };
+    return { status: "inconsistent", reason: `les sept postes des terres somment à ${round1(sum)} %, pas à 100 %` };
   }
-  const natural = NATURAL_KEYS.reduce((a, k) => a + composition[k], 0);
-  if (Math.abs(brutPct - natural) > OSO_BRUT_TOLERANCE) {
-    return { status: "inconsistent", reason: `brut_pct (${brutPct}) contredit les postes naturels et l'eau (${round1(natural)})` };
+  const natural = t.foret + t.prairies + t.landes_pelouses + t.mineral_dunes;
+  if (Math.abs(t.naturel - natural) > OSO_BRUT_TOLERANCE) {
+    return { status: "inconsistent", reason: `la part naturelle (${t.naturel}) contredit ses postes (${round1(natural)})` };
   }
-  const water = composition.eau;
-  const land = 100 - water;
+  const land = 100 - nature!.eau_pct;
   if (land < MIN_LAND_PCT) return { status: "inconsistent", reason: `terres trop réduites (${round1(land)} %) pour une part lisible` };
   const comp: Record<string, number> = {};
-  for (const k of LAND_KEYS) comp[k] = round1((composition[k] * 100) / land);
-  return {
-    status: "ok",
-    shares: {
-      waterPct: round1(water),
-      // `brut − eau` ne passe sous zéro que d'un arrondi (≤ 0,30, contrôlé ci-dessus) : on le ramène à 0.
-      naturalLandPct: round1(Math.max(0, ((brutPct - water) * 100) / land)),
-      composition: comp,
-    },
-  };
+  for (const k of TERRES_INDEX) comp[VERS_COMPOSITION[k]] = t[k];
+  return { status: "ok", shares: { waterPct: nature!.eau_pct, naturalLandPct: t.naturel, composition: comp } };
 }
 
 /** Les parts lisibles, ou `null` (absentes ou incohérentes : cf. `readLandShares` pour la raison). */
-export function landShares(
-  brutPct: number | null | undefined,
-  composition: Record<string, number> | null | undefined,
-): LandShares | null {
-  const r = readLandShares(brutPct, composition);
+export function landShares(nature: TerritoireIndexEntry["nature"] | null | undefined): LandShares | null {
+  const r = readLandShares(nature);
   return r.status === "ok" ? r.shares : null;
 }
 
@@ -222,7 +208,8 @@ export function landShares(
  */
 export function landCategory(naturalPct: number, composition: Record<string, number>): LandCategory {
   const urb = composition.artificialise ?? 0;
-  const agri = composition.agricole ?? 0;
+  // FUT-182 (décision D) : les serres comptent avec les cultures.
+  const agri = (composition.agricole ?? 0) + (composition.serres ?? 0);
   if (urb >= 50) return "mostly_built";
   if (naturalPct >= 45) return "high_natural";
   if (agri >= 50) return "agricultural";
@@ -347,7 +334,7 @@ function num(v: unknown): number | null {
 export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): FactsSnapshot {
   const e = i.entry;
   // FUT-175 : les parts se lisent sur les terres, l'eau à part (cf. `landShares`).
-  const lecture = readLandShares(e?.nature?.brut_pct, e?.nature?.composition);
+  const lecture = readLandShares(e?.nature);
   const shares = lecture.status === "ok" ? lecture.shares : null;
   // Une contradiction de l'index n'est pas tue : sa raison remplace les limites des faits OSO de la commune.
   const osoRefus = lecture.status === "inconsistent"
@@ -417,28 +404,39 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     }),
     fact({
       key: "land.composition", value: composition, unit: "% des terres", scale: "commune", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition, eau retirée du dénominateur" },
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.terres (comptes de pixels, FUT-182)" },
       limits: osoRefus ?? `En % des terres de la commune, l'eau étant comptée à part. ${OSO_COUVERTURE} Couvert observé par satellite : « urbanisé » inclut routes, parkings et surfaces imperméabilisées, pas seulement l'emprise des bâtiments ; ce n'est pas l'artificialisation réglementaire (OCS GE).`,
       card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
       key: "land.water_share", value: shares?.waterPct ?? null, unit: "% de la surface cartographiée", scale: "commune", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition.eau" },
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.eau_pct" },
       limits: osoRefus ?? `Part de l'eau (mer, lagune, étang, lac, cours d'eau) dans la surface cartographiée de la commune. ${OSO_COUVERTURE} Elle n'est comptée ni dans les espaces naturels ni dans les parts des terres.`,
       card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
       key: "land.natural_share", value: naturalPct, unit: "% des terres", scale: "commune", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.composition, hors urbanisé, cultures et eau" },
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.terres.naturel" },
       limits: osoRefus ?? `Milieux naturels terrestres, en % des terres : forêts, prairies, landes et pelouses, roche et dunes. Ni les cultures ni l'eau n'en font partie. ${OSO_COUVERTURE}`,
       card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
-      key: "land.natural_share_15km", value: num(e?.nature?.radius_pct), unit: "%", scale: "radius_15km", vintage: "2023",
-      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.radius_pct" },
-      limits: "Mesuré dans un rayon de 15 km, pas sur la commune ; espaces naturels et eau confondus, rapportés à toute la surface cartographiée (l'eau n'a pas pu en être retirée).",
-      card: card("nature.green_spaces"),
-      synthesis: exclude("Autre échelle que la commune : sa lecture comme « urbanisation » a produit la contradiction de Châtelaillon."),
+      // FUT-182 : le SECTEUR HABITÉ remplace le « rayon de 15 km » (communes entières par la distance de leur centre,
+      // eau comprise). Une valeur mesurée sur les terres françaises est gardée même quand le classement national n'est
+      // pas établi ; « non calculable » (aucun bâti OSO) n'a aucune valeur. Territoire ne lit pas le score national.
+      key: "land.natural_share_sector",
+      value: e?.nature?.secteur
+        ? (e.nature.secteur.statut === "non_calculable"
+          ? { statut: "non_calculable" }
+          : {
+              statut: e.nature.secteur.statut, valeur: e.nature.secteur.valeur, p10: e.nature.secteur.p10, p90: e.nature.secteur.p90,
+              couvertFrPct: e.nature.secteur.couvert_fr_pct, cause: e.nature.secteur.cause,
+            })
+        : null,
+      unit: "% des terres", scale: "built_areas_15km", vintage: "2023",
+      source: { producer: "CESBIO", dataset: "OSO 2023 (raster 10 m)", field: "nature.secteur (secteur habité, FUT-182)" },
+      limits: [limiteSecteur(e?.nature?.secteur), LIMITE_LECTURE_SECTEUR].filter(Boolean).join(" "),
+      card: card("nature.green_spaces"), synthesis: INCLUDE,
     }),
     fact({
       key: "land.forest_ademe", value: num(i.ademe?.taux_boisement), unit: "%", scale: "commune", vintage: null,
@@ -480,9 +478,9 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     fact({
       key: "place.distinctive_trait", value: i.distinctiveTrait, scale: "commune",
       source: { producer: "futur•e", dataset: "Percentiles nationaux de l'index", field: "getCommuneDistinctive" },
-      // FUT-34 : le trait « urbanisées » (bas du couvert naturel dans 15 km, cultures comprises) est retiré. Les traits
-      // restants n'ont pas tous la même échelle : climat et démographie à la commune, nature dans 15 km, relief dans 35 km.
-      limits: "Trait national le plus marqué parmi climat, couvert naturel (15 km), démographie et relief (35 km) ; l'échelle dépend du trait.",
+      // FUT-34 : le trait « urbanisées » (bas du couvert naturel, cultures comprises) est retiré. Les traits restants n'ont
+      // pas tous la même échelle : climat et démographie à la commune, nature autour des zones bâties (15 km), relief (35 km).
+      limits: "Trait national le plus marqué parmi climat, espaces naturels autour des zones bâties (15 km), démographie et relief (35 km) ; l'échelle dépend du trait.",
       card: noCard("other", "Trait d'identité du comparateur, jamais affiché sur Territoire."),
       synthesis: exclude("D2 : l'échelle change d'un trait à l'autre ; la synthèse s'appuie sur les faits mesurés eux-mêmes."),
     }),

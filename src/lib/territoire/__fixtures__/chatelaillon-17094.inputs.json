@@ -8,16 +8,30 @@
   "relief_proximite": 0,
   "altitude": 2,
   "nature": {
-   "brut_pct": 36.5,
-   "radius_pct": 27.9,
-   "composition": {
-    "foret": 10.3,
-    "prairies": 20.8,
-    "landes_pelouses": 2.8,
-    "mineral_dunes": 2.4,
-    "eau": 0.2,
-    "agricole": 14.3,
-    "artificialise": 49.2
+   "terres": {
+    "naturel": 36.364,
+    "foret": 10.335,
+    "prairies": 20.811,
+    "landes_pelouses": 2.786,
+    "mineral_dunes": 2.432,
+    "cultures": 14.277,
+    "serres": 0.103,
+    "urbanise": 49.256
+   },
+   "eau_pct": 0.225,
+   "couverture_pct": 99.987,
+   "secteur": {
+    "statut": "classe_limite",
+    "valeur": 27.191,
+    "p10": 25.593,
+    "p90": 29.087,
+    "couvert_fr_pct": 59.844,
+    "hors_fr": {
+     "mer": 39.837,
+     "etranger": 0,
+     "non_attribue": 0.319
+    },
+    "cause": "mer"
    }
   },
   "demographie": {

@@ -50,7 +50,7 @@ const CONFORME = `Châtelaillon-Plage à l'horizon 2050
 
 ## Ce qui domine
 
-Châtelaillon-Plage, 6 227 habitants dans l'agglomération de La Rochelle, présente une densité intermédiaire et une occupation mixte de ses sols : près de la moitié d'espaces urbanisés, mais aussi 21 % de prairies et 10 % de forêts. D'ici 2050, les sols resteraient secs 136 jours par an, et les nuits au-dessus de 20 °C gagneraient 19 unités par rapport à 1976-2005.
+Châtelaillon-Plage, 6 227 habitants dans l'agglomération de La Rochelle, présente une densité intermédiaire et une occupation mixte de ses sols : près de la moitié d'espaces urbanisés, mais aussi 20,8 % de prairies et 10,3 % de forêts. D'ici 2050, les sols resteraient secs 136 jours par an, et les nuits au-dessus de 20 °C gagneraient 19 unités par rapport à 1976-2005.
 
 ## Ce qui tient, ce qui se tend
 
@@ -225,12 +225,18 @@ test("CatNat : citer séparément les reconnaissances et les jours de sols secs 
   assert.deepEqual(rules("Les projections comptent 136 jours de sols secs par an."), []);
 });
 
+// FUT-182 (@8, dette FUT-183) : « Près de 36 % du territoire restent en espaces naturels » était accepté le 28/09. Une
+// part d'occupation des sols se cite désormais au dixième, sans « près de » : un arrondi peut franchir un seuil de catégorie.
+test("@8 : une part OSO arrondie ou approchée est refusée, même juste à l'entier près", () => {
+  const v = checkSynthesis("T\n\n## A\n\nPrès de 36 % du territoire restent en espaces naturels.\n\n## B\n\nx.\n\n## C\n\ny.", P);
+  assert.deepEqual(v.map((x) => x.rule), ["nombre:arrondi-oso"]);
+});
+
 test("faux rejets réels du 28/09 : ces phrases justes sont acceptées", () => {
   for (const ok of [
     "La commune a par ailleurs connu 1,7 °C de réchauffement observé depuis la période 1961-1990.",
     "Depuis 1961-1990, la commune a déjà enregistré 1,7 °C de hausse observée.",
     "La population a progressé de 0,62 % par an entre 2015 et 2021, et 9,8 % des habitants recensés en 2021 vivaient ailleurs un an plus tôt.",
-    "Près de 36 % du territoire restent en espaces naturels, ce qui donne à la commune une composition moins entièrement urbanisée que sa densité intermédiaire pourrait le laisser croire.",
     "Là où la période 1976-2005 comptait environ 5 nuits au-dessus de 20 °C, la projection en donne 25 pour 2050.",
   ]) {
     assert.deepEqual(checkSynthesis(`T\n\n## A\n\n${ok}\n\n## B\n\nx.\n\n## C\n\ny.`, P), [], ok);

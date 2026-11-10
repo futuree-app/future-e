@@ -28,6 +28,9 @@ const IDENTITES_RECALCULEES: Partial<Record<PreferenceKey, string>> = {
   acces_culture: "mismatch-dist-2026-10-26-acces_culture",
   // FUT-137 (04/11/2026) : la vie locale compte les associations du RNA rangées sous des codes de communes disparus.
   vie_locale: "mismatch-dist-2026-11-04-vie_locale",
+  // FUT-182 (10/11/2026) : la nature se classe sur le secteur habité OSO 2023 ; 329 communes au rayon largement maritime
+  // ou transfrontalier et 8 communes sans bâti OSO sortent de l'univers (classement national non établi).
+  nature: "mismatch-dist-2026-11-10-nature",
 };
 
 /** L'identité de la distribution en vigueur pour un critère. La même pour la règle favorable et la défavorable. */
@@ -49,6 +52,7 @@ export type DistributionPubliee = {
 const AVANT_FUT136 = "Index de main avant FUT-136 (cf4a2dab) : bandes périmées, bâties sur un score antérieur.";
 const FUT136 = "FUT-136 : bandes recalculées sur le score en vigueur.";
 const HISTORIQUE = "Identité historique conservée ; empreinte relevée le 26/10/2026 (index cf4a2dab, inchangée par FUT-136).";
+const FUT182 = "FUT-182 : secteur habité OSO 2023 (terres à 15 km des zones bâties, contours français) ; 329 communes au disque couvert à moins de 50 % et 8 sans bâti OSO hors classement.";
 const FUT137 = "FUT-137 : associations du RNA sous des codes disparus rattachées à la commune actuelle (table des successeurs du COG 2026), bandes recalculées.";
 export const DISTRIBUTIONS_PUBLIEES: Record<string, DistributionPubliee[]> = {
   acces_services: [
@@ -63,7 +67,10 @@ export const DISTRIBUTIONS_PUBLIEES: Record<string, DistributionPubliee[]> = {
     { identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "e299bb2b300e012b6210ff1e31750538bd891f6c8ab930bd5c4bcf592970e111", communes: 34788, note: AVANT_FUT136 },
     { identite: "mismatch-dist-2026-10-26-acces_culture", empreinte: "4556218aed1057198fc968733a7fbf252c081acc103623c53e1252b95f6e3527", communes: 34788, note: FUT136 },
   ],
-  nature: [{ identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "a237b4c595dfd109b7197dc6bd3f9e5f844b566809547eef2d1c14a58d6a3bd1", communes: 34743, note: HISTORIQUE }],
+  nature: [
+    { identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "a237b4c595dfd109b7197dc6bd3f9e5f844b566809547eef2d1c14a58d6a3bd1", communes: 34743, note: HISTORIQUE },
+    { identite: "mismatch-dist-2026-11-10-nature", empreinte: "9bac1dc1e45d43bc7ee8140efe0f61c09fddcdfb92feacb59a6bcfe02ca9b43f", communes: 34406, note: FUT182 },
+  ],
   acces_soins: [{ identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "01123d86e10efcb69284e16a7c8986771a46a6acc32bcfe941a44c3483f36c44", communes: 34731, note: HISTORIQUE }],
   acces_transports: [{ identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "ded06a93a557e29d6dc0fa7d3dc65c8ac24144c03f5be5759975571fadce1c76", communes: 34788, note: HISTORIQUE }],
   faible_dependance_auto: [{ identite: MISMATCH_DISTRIBUTION_VERSION, empreinte: "087e29cea9445e03d0ee3219a0e2f56e383edbe514edae47c405c7ca777e4519", communes: 30048, note: HISTORIQUE }],

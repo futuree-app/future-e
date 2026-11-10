@@ -19,7 +19,9 @@ import type { Provenance } from "./provenance.ts";
 
 /** L'échelle RÉELLE de la mesure. Une valeur ne se lit jamais à une autre échelle que la sienne. */
 // FUT-179 : `arrondissement` = un arrondissement municipal de Paris, Lyon ou Marseille, jamais la commune entière.
-export type FactScale = "commune" | "arrondissement" | "radius_15km" | "urban_unit" | "department" | "point";
+// FUT-182 : `built_areas_15km` = les terres à 15 km au plus des zones bâties de la commune (secteur habité). `radius_15km`
+// reste lisible dans les snapshots figés antérieurs ; plus aucun fait nouveau ne le porte.
+export type FactScale = "commune" | "arrondissement" | "radius_15km" | "built_areas_15km" | "urban_unit" | "department" | "point";
 
 export type FactSource = {
   /** Qui produit la donnée (CESBIO, INSEE, Météo-France…). */

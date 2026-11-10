@@ -102,11 +102,12 @@ test("national : `periurbain_dependance_auto` garde sa règle exacte (densité <
 });
 
 test("national : les autres catégories gardées par la densité ne changent pas (agricole, forestier, vie locale)", () => {
-  // Leurs seuils OSO (30 %, 35 %) relèvent de FUT-182 ; FUT-185 ne les touche pas.
+  // Leurs seuils OSO (30 %, 35 %) relèvent de FUT-182 ; FUT-185 ne les touche pas. FUT-182 (10/11/2026) : mêmes seuils,
+  // désormais en % des TERRES (serres comprises dans les cultures) et avant arrondi : +143 / −4 et +122 / −8 communes.
   const compte = (k: string) => COMMUNES.filter((c) => categoriesDe(c).includes(k)).length;
   assert.deepEqual(
     { rural_agricole: compte("rural_agricole"), rural_forestier: compte("rural_forestier"), faible_vie_locale: compte("faible_vie_locale") },
-    { rural_agricole: 16970, rural_forestier: 13380, faible_vie_locale: 20749 }, // = révision 1ab56bfb
+    { rural_agricole: 17109, rural_forestier: 13494, faible_vie_locale: 20749 }, // 16 970 et 13 380 avant FUT-182
   );
 });
 

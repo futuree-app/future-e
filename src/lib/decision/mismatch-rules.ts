@@ -111,7 +111,8 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: distributionVersionDe(key) },
         evidence: [ev],
         // Certains critères (ensoleillement) portent une nuance méthodologique card-only.
-        ...(lab.limitation ? { limitation: lab.limitation } : {}),
+        // FUT-182 : pour le rang « Espaces naturels », la limite géographique du secteur habité s'y ajoute (50 à 75 %).
+        ...(lab.limitation ? { limitation: key === "nature" && f.natureLimite ? `${lab.limitation} ${f.natureLimite}` : lab.limitation } : {}),
       };
       return ret("mismatch", [fact], "position relative défavorable");
     },

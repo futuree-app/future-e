@@ -54,31 +54,13 @@ before(async () => {
 // FUT-176 : la dimension « Isolement » mesure la population de l'agglomération, pas un « bassin de vie » (un autre zonage
 // Insee) ni une offre de services. Seuls ses libellés changent (paliers, raison, aide) ; ni commune, ni score, ni ordre.
 // « bassin de vie de proximité » n'y désigne que La Broque (67066), dans une unité urbaine : « dans une petite agglomération ».
-const REF = JSON.parse(
-  readFileSync("src/lib/__fixtures__/fut147-reference-comparateur.json", "utf8")
-    .replaceAll("le marché immobilier le plus accessible", "les prix de vente les plus bas")
-    .replaceAll("Bassin de vie étendu", "Grande agglomération")
-    .replaceAll("Bassin de proximité", "Agglomération moyenne")
-    .replaceAll("Bassin de vie restreint", "Petite agglomération ou commune")
-    .replaceAll("au cœur d'un vaste bassin de vie", "dans une grande agglomération")
-    .replaceAll("bassin de vie bien pourvu", "dans une agglomération de taille moyenne")
-    .replaceAll("bassin de vie de proximité", "dans une petite agglomération")
-    .replaceAll("La taille du bassin de vie qui dessert le territoire.", "Le nombre d'habitants de l'agglomération, ou de la commune quand elle est hors agglomération. Il ne mesure pas à lui seul l'accès aux services ni aux transports.")
-    // FUT-178 : les libellés de la nature disent le SECTEUR (la commune et ses voisines retenues, parfois aucune), eau
-    // comprise, ni « forêts », ni « grands espaces », ni « autour », ni un « lieu de vie ». Seuls ces libellés changent.
-    .replace(/la plus proche de grands espaces naturels des (deux|trois)/g, "la plus riche des $1 en espaces naturels ou en eau dans son secteur")
-    .replaceAll("forêts et espaces naturels à proximité", "beaucoup d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("peu d'espaces naturels à proximité", "peu d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("nature présente, sans abonder", "espaces naturels ou eau présents dans le secteur, sans abonder")
-    .replaceAll("se distingue par ses espaces naturels", "se distingue par les espaces naturels et l'eau de son secteur")
-    .replaceAll("Beaucoup de nature autour", "Beaucoup d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("Peu de nature autour", "Peu d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll('"Nature présente"', '"Espaces naturels ou eau présents"')
-    .replaceAll("davantage de nature autour", "davantage d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("présence de nature intermédiaire", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("moins de nature autour", "moins d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("La présence d'espaces naturels autour du lieu de vie.", "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse."),
-);
+// FUT-182 (10/11/2026) : le classement « Espaces naturels » se mesure autour des zones bâties (secteur habité OSO 2023).
+// Il change VOLONTAIREMENT : sur ces projets et ces trios, seuls les libellés nature changent, et un projet change deux
+// communes sur cinq (« nature 2 + calme 2 » : Isola 06010 et Corte 2B043 laissent la place à Saint-Martin-Vésubie 06140
+// et Lacaune 81163). La référence d'avant (`fut147-reference-comparateur.json`, main 4d75603f, et sa chaîne de libellés
+// FUT-138/176/178) reste au dépôt, inchangée. La garde compare désormais à la capture FUT-182, faite sans la ligne ni le
+// champ « Incendies observés » (`scripts/fut182/capturer-reference-comparateur.mjs`) : ce qu'elle garde des feux ne change pas.
+const REF = JSON.parse(readFileSync("src/lib/__fixtures__/fut182-reference-comparateur.json", "utf8"));
 const BASE = [{ key: "eviter_isolement", weight: 0.5, baseline: true }, { key: "viabilite_emploi", weight: 0.5, baseline: true }];
 // Les mêmes entrées que la capture (scripts/fut147/capturer-reference.mjs), recopiées : la référence ne
 // dépend pas du code testé.
@@ -184,13 +166,16 @@ test("synthèse rédigée du comparateur : la charge du navigateur ne liste pas 
 // (reprise du 09/11/2026, après contre-revue), même entrée, même date ; première version de la PR #140 :
 // c9bd9012e1b50deaf3e8fface6f31287bf3fcaf38945c1bb5dcec6df5fdab91a / 9129dcc2076e342f060140436f220ba14c805bd3a97e4ceb304a923b9544d39d. Ce que
 // ces deux tests gardent ne change pas : aucun fait BDIFF dans le snapshot, et une synthèse valide servie sans appel.
-const HASH_MAIN = "6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3";
+const HASH_MAIN = "7b2eeb9f804d5f3a92c6e6bb841c8728853f30938f0df44b0498d05dc9b12cc7";
 // Convergence FUT-175 + FUT-176 : l'empreinte est celle de FUT-175 (registre `territoire-facts@2`, FUT-176 ne change que
 // le type du rôle) ; la clé suit le contrat commun `territoire-synthese@6`. Clé de la PR #140 seule (@5) :
 // de0d9de4af59732e9f99f23c8fefa61b59530ac1ec3812eae40c06cd592d0930.
 // FUT-177 (09/11/2026) : l'empreinte ne bouge pas (registre intact) ; la clé suit le contrat `territoire-synthese@7`.
 // Clé de main au contrat @6 : 5b0eb94cfecef936cb0ba4abb7d72a93e48a86df3e5ddcbe6056b14672e96c72.
-const CLE_MAIN = "fd9b97308224b1cef6dbf86d637d8f316b5f1741d77c0fc16aba121115135b4b";
+// FUT-182 (10/11/2026) : registre `territoire-facts@3` (parts exactes, secteur habité) et contrat `territoire-synthese@8`.
+// Empreinte et clé de main avant FUT-182 : 6f4c52b2c81966ef93cadeba5803cf1b118b262eae2b62b9e4a46c792a3468d3 /
+// fd9b97308224b1cef6dbf86d637d8f316b5f1741d77c0fc16aba121115135b4b.
+const CLE_MAIN = "a2f5548b63301a687be60d96175516c6c60de714a0da8a973ecd00db2a58b12e";
 
 /**
  * FUT-175 · RÉFÉRENCE FIGÉE (reprise après contre-revue du 09/11/2026). Les lignes que ce chantier change dans le
@@ -206,9 +191,24 @@ const FUT175_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut175-lign
 const FEUX = /bdiff|incendi|feux? de for|MemoireIncendies/i;
 const FUT179_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut179-lignes-admises.json", "utf8")) as Record<string, string[]>;
 
+/**
+ * FUT-182 · RÉFÉRENCE FIGÉE. Les lignes que FUT-182 change dans le contrat et le registre par rapport à `main` 6972d5a4 sont
+ * écrites UNE FOIS dans `__fixtures__/fut182-lignes-admises.json` (format `diff -U0`, en-têtes compris) ; la garde exige
+ * que le diff réel soit EXACTEMENT celui-là (une retouche la rend périmée, une ligne étrangère aussi). Les gardes des
+ * tickets antérieurs s'appliquent alors, inchangées, au fichier tel qu'il était sur 6972d5a4.
+ */
+const FUT182_BASE = "6972d5a4";
+const FUT182_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut182-lignes-admises.json", "utf8")) as Record<string, string[]>;
+const diffU0 = (args: string[]) =>
+  execFileSync("git", ["diff", "--no-color", "-U0", ...args], { encoding: "utf8", maxBuffer: 1 << 26 })
+    .split("\n").filter((l) => /^@@|^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+
 function lignesDiff(base: string, f: string): string[] {
-  const diff = execFileSync("git", ["diff", "--no-color", "-U0", base, "--", f], { encoding: "utf8", maxBuffer: 1 << 26 });
-  return diff.split("\n").filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---) /.test(l));
+  if (FUT182_ADMISES[f]) {
+    assert.deepEqual(diffU0([FUT182_BASE, "--", f]), FUT182_ADMISES[f], `référence FUT-182 périmée pour ${f}`);
+    return diffU0([base, FUT182_BASE, "--", f]).filter((l) => !l.startsWith("@@"));
+  }
+  return diffU0([base, "--", f]).filter((l) => !l.startsWith("@@"));
 }
 
 /** Retire de `lignes` une occurrence de chaque ligne admise ; rend le reste et les admises restées sans emploi. */
@@ -247,9 +247,9 @@ const REGISTRE = "src/lib/territoire/facts.ts";
  * Aucune ligne FUT-177 ne parle des feux ; le registre (facts.ts) n'est pas touché par FUT-177.
  */
 const FUT177_ADMISES = JSON.parse(readFileSync("src/lib/__fixtures__/fut177-lignes-admises.json", "utf8")) as Record<string, string[]>;
+const avantFut177 = (f: string, lignes: readonly string[]) => annulerDelta(FUT177_ADMISES[f] ?? [], f, lignes, "FUT-177");
 
-function avantFut177(f: string, lignes: readonly string[]): string[] {
-  const delta = FUT177_ADMISES[f] ?? [];
+function annulerDelta(delta: readonly string[], f: string, lignes: readonly string[], ticket: string): string[] {
   const reste = [...lignes];
   // Le delta, au format `git diff -U0`, garde ses en-têtes « @@ » : chaque bloc a ses lignes « - » puis ses lignes « + ».
   // La ligne restaurée reprend la place du bloc : la garde du contrat compare des listes ORDONNÉES.
@@ -268,7 +268,7 @@ function avantFut177(f: string, lignes: readonly string[]): string[] {
       for (let i = 0; i + plus.length <= reste.length && place === -1; i++) {
         if (plus.every((l, k) => reste[i + k] === l)) place = i;
       }
-      assert.ok(place !== -1, `référence FUT-177 périmée pour ${f} : ${plus[0]}`);
+      assert.ok(place !== -1, `référence ${ticket} périmée pour ${f} : ${plus[0]}`);
       reste.splice(place, plus.length);
     }
     const restaurees: string[] = [];

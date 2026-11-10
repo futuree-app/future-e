@@ -579,6 +579,6 @@ test("Analyse courante (engine-7) et analyses figées sans inondation : aucun av
   }
 });
 
-test("Le moteur courant est engine-8 (engine-7 depuis FUT-127, engine-8 depuis FUT-167)", () => {
-  assert.equal(D.ENGINE_VERSION, "engine-8");
+test("Le moteur courant est engine-9 (engine-7 depuis FUT-127, engine-8 depuis FUT-167, engine-9 depuis FUT-182)", () => {
+  assert.equal(D.ENGINE_VERSION, "engine-9");
 });

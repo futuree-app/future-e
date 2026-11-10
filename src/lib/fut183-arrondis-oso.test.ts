@@ -16,8 +16,10 @@ import { projectForSynthesis, SYNTHESIS_CONTRACT_VERSION } from "./territoire/sy
 import { deterministicSynthesis } from "./territoire/synthesis-deterministe.ts";
 import { pctOso } from "./territoire/oso-format.ts";
 import { chatelaillonInputs } from "./territoire/__fixtures__/chatelaillon.ts";
+import { natureTest } from "./territoire/__fixtures__/nature-oso.ts";
 
-type Nature = { brut_pct: number; radius_pct: number | null; composition: Record<string, number> };
+// FUT-182 : la nature de l'index (parts exactes des terres, eau à part, secteur habité).
+type Nature = NonNullable<NonNullable<TerritoireInputs["entry"]>["nature"]>;
 type Entree = { insee: string; nom: string; nature?: Nature | null };
 
 const racine = new URL("../../", import.meta.url);
@@ -35,17 +37,12 @@ function snapAvec(nature: Nature, insee = "17094", nom = "Commune test"): FactsS
 const snapDe = (insee: string) => {
   const c = par.get(insee);
   assert.ok(c?.nature, insee);
-  return snapAvec({ brut_pct: c!.nature!.brut_pct, radius_pct: c!.nature!.radius_pct, composition: c!.nature!.composition }, insee, c!.nom);
+  const n = c!.nature!;
+  return snapAvec({ terres: n.terres, eau_pct: n.eau_pct, couverture_pct: n.couverture_pct, secteur: n.secteur }, insee, c!.nom);
 };
 
-/** Une commune sans eau : les parts des terres sont celles données, au dixième près. */
-function nature(p: { urb: number; agri: number; foret: number }): Nature {
-  return {
-    brut_pct: p.foret,
-    radius_pct: 30,
-    composition: { artificialise: p.urb, agricole: p.agri, foret: p.foret, prairies: 0, landes_pelouses: 0, mineral_dunes: 0, eau: 0 },
-  };
-}
+/** Une commune sans eau : les parts des terres sont celles données. */
+const nature = (p: { urb: number; agri: number; foret: number }): Nature => natureTest(p);
 
 // ── Le lecteur : il ne connaît que les chiffres affichés, et la règle ─────────────────────────
 
@@ -130,42 +127,52 @@ for (const c of FRONTIERES) {
 
 // ── Rochefort, le cas du ticket ────────────────────────────────────────────────────────────────
 
-test("Rochefort : 44,9 % de terres naturelles sous « Occupation mixte », sur la carte comme dans le texte", () => {
+// FUT-182 : sur les comptes de pixels exacts, Rochefort a 44,707 % de terres naturelles (44,9 dans l'ancien index,
+// arrondi au dixième du contour). Elle reste sous le seuil de 45, et l'écran le montre.
+test("Rochefort : 44,7 % de terres naturelles sous « Occupation mixte », sur la carte comme dans le texte", () => {
   const snap = snapDe("17299");
-  assert.equal(factOf(snap, "land.natural_share")!.value, 44.9);
-  assert.equal(factOf(snap, "land.water_share")!.value, 7.7);
+  assert.equal(factOf(snap, "land.natural_share")!.value, 44.707);
+  assert.equal(factOf(snap, "land.water_share")!.value, 7.657);
   assert.equal(derivedOf(snap, "land.category")!.label, "Occupation mixte");
   const a = carteAffichee(snap);
-  assert.equal(a.headline, "44,9 % de ses terres en espaces naturels");
+  assert.equal(a.headline, "44,7 % de ses terres en espaces naturels");
   assert.deepEqual(a.ventilation.map((v) => `${v.label} ${v.value}`), [
-    "Espaces urbanisés 47,7 %", "Prairies 33,6 %", "Terres agricoles 7,6 %", "Forêts 5,5 %", "Landes et pelouses 5,1 %",
+    "Espaces urbanisés 47,4 %", "Prairies 33,4 %", "Terres agricoles 7,8 %", "Forêts 5,4 %", "Landes et pelouses 5 %",
   ]);
   const p = projectForSynthesis(snap, "gwl20") as Record<string, any>;
-  assert.equal(p.occupation_des_sols.part_espaces_naturels_des_terres_pct, 44.9);
+  assert.equal(p.occupation_des_sols.part_espaces_naturels_des_terres_pct, 44.7);
   const t = deterministicSynthesis(p as never, "gwl20");
   assert.equal(
     ligneSols(t),
-    "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 47,7 % d'espaces urbanisés, 7,6 % de cultures et 44,9 % d'espaces naturels sur ses terres.",
+    "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 47,4 % d'espaces urbanisés, 7,8 % de cultures et 44,7 % d'espaces naturels sur ses terres.",
   );
   assert.doesNotMatch(t, /\b45 %/);
 });
 
 // ── National, sur l'index réel ─────────────────────────────────────────────────────────────────
 
-test("diagnostic : à l'entier, 318 communes montraient les chiffres d'une autre catégorie ; au dixième, aucune", () => {
-  let oso = 0, entier = 0, dixieme = 0;
+// FUT-182 : 318 communes (index d'avant, arrondi à l'entier, mesuré le 09/11/2026). Sur les parts exactes, l'arrondi à
+// l'entier en ferait encore mentir certaines, l'arrondi au plus proche du dixième aussi (19,96 → 20) ; la troncature au
+// dixième (`pctOso`) n'en fait mentir aucune.
+test("diagnostic : à l'entier ou au dixième le plus proche, des communes montreraient une autre catégorie ; tronqué au dixième, aucune", () => {
+  let oso = 0, entier = 0, proche = 0, dixieme = 0;
   for (const c of communes) {
-    const s = landShares(c.nature?.brut_pct, c.nature?.composition);
+    const n = c.nature;
+    const s = n ? landShares({ terres: n.terres, eau_pct: n.eau_pct, couverture_pct: n.couverture_pct, secteur: n.secteur }) : null;
     if (!s) continue;
     oso++;
     const cat = landCategory(s.naturalLandPct, s.composition);
+    // Ce que montre l'écran : les serres additionnées aux cultures, puis la part arrondie (FUT-182).
+    const montree = { ...s.composition, agricole: s.composition.agricole + (s.composition.serres ?? 0), serres: 0 };
     const affiche = (f: (n: number) => number) =>
-      landCategory(f(s.naturalLandPct), Object.fromEntries(Object.entries(s.composition).map(([k, v]) => [k, f(v)])));
+      landCategory(f(s.naturalLandPct), Object.fromEntries(Object.entries(montree).map(([k, v]) => [k, f(v)])));
     if (affiche(Math.round) !== cat) entier++;
-    if (affiche((n) => lire(pctOso(n))) !== cat) dixieme++;
+    if (affiche((v) => Math.round(v * 10) / 10) !== cat) proche++;
+    if (affiche((v) => lire(pctOso(v))) !== cat) dixieme++;
   }
-  assert.equal(oso, 34743);
-  assert.equal(entier, 318, "l'ancien affichage, mesuré le 09/11/2026");
+  assert.equal(oso, 34788);
+  assert.ok(entier > 100, `à l'entier : ${entier}`);
+  assert.ok(proche > 0, `au dixième le plus proche : ${proche}`);
   assert.equal(dixieme, 0);
 });
 
@@ -173,14 +180,14 @@ test("national : pour chaque commune OSO, la carte et le texte déterministe, re
   let vus = 0;
   const ecarts: string[] = [];
   for (const c of communes) {
-    if (!c.nature || !landShares(c.nature.brut_pct, c.nature.composition)) continue;
+    if (!c.nature?.terres) continue;
     const snap = snapDe(c.insee);
     const cat = derivedOf(snap, "land.category")!.value as LandCategory;
     if (categorieLueSurLaCarte(snap) !== cat) ecarts.push(`carte ${c.nom} (${c.insee})`);
     if (categorieLueDansLeTexte(snap) !== cat) ecarts.push(`texte ${c.nom} (${c.insee})`);
     vus++;
   }
-  assert.equal(vus, 34743);
+  assert.equal(vus, 34788);
   assert.deepEqual(ecarts.slice(0, 10), []);
 });
 
@@ -188,18 +195,19 @@ test("national : pour chaque commune OSO, la carte et le texte déterministe, re
 
 test("la carte formate chaque part OSO avec pctOso, aucune n'est interpolée brute", () => {
   const src = readFileSync(new URL("src/components/report/QuartierClimatData.tsx", racine), "utf8");
-  for (const champ of ["naturelTerresPct", "eauPct", "radiusPct"]) {
+  for (const champ of ["naturelTerresPct", "eauPct"]) {
     assert.doesNotMatch(src, new RegExp(`\\$\\{couvertNaturel\\.${champ}\\}`), champ);
   }
   assert.match(src, /value: `\$\{pctOso\(c\.pct\)\} %`/);
   assert.doesNotMatch(src, /Math\.round\(couvertNaturel/);
 });
 
-test("aucune invalidation : le contrat de synthèse reste @7, les valeurs du registre sont inchangées", () => {
-  assert.match(SYNTHESIS_CONTRACT_VERSION, /^territoire-synthese@7:/);
-  // Les faits gardent leur dixième d'avant FUT-183 : l'empreinte des snapshots ne bouge pas.
+// FUT-183 ne montait pas le contrat ; FUT-182 le monte (@8) avec sa dette (consigne et contrôle des parts au dixième), dans
+// la même invalidation que le registre (`territoire-facts@3`).
+test("FUT-182 : une seule invalidation, contrat @8 et registre @3 ; les faits portent les parts exactes", () => {
+  assert.match(SYNTHESIS_CONTRACT_VERSION, /^territoire-synthese@8:/);
   const snap = snapDe("17299");
   assert.deepEqual(factOf(snap, "land.composition")!.value, {
-    artificialise: 47.7, agricole: 7.6, foret: 5.5, prairies: 33.6, landes_pelouses: 5.1, mineral_dunes: 0.8,
+    artificialise: 47.483, agricole: 7.533, serres: 0.278, foret: 5.489, prairies: 33.442, landes_pelouses: 5.072, mineral_dunes: 0.704,
   });
 });

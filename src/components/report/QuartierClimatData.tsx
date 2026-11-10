@@ -730,11 +730,17 @@ export function buildFactors(
                 ? ` L'eau (mer, étangs, lacs, rivières) occupe par ailleurs ${pctOso(couvertNaturel.eauPct)} % de la surface cartographiée de la commune.`
                 : ""
             }${
-              couvertNaturel.radiusPct != null
-                ? // FUT-178 : ce chiffre agrège des communes ENTIÈRES retenues par la distance de leur centre (parfois
-                  // aucune, parfois pas toutes), pas un cercle de 15 km. FUT-175 : l'eau y reste comptée.
-                  ` Sur son secteur (la commune et, s'il y en a, des communes voisines retenues), espaces naturels et eau confondus : ${pctOso(couvertNaturel.radiusPct)} %.`
+              // FUT-182 : les serres sont comptées avec les terres agricoles ; leur part est dite sans en tirer d'activité.
+              couvertNaturel.serresPct != null
+                ? ` Les terres agricoles comprennent ${pctOso(couvertNaturel.serresPct)} % de serres, que la carte reconnaît mal isolément.`
                 : ""
+            }${
+              // FUT-182 : le secteur habité, terres seules, dit avec sa fourchette et, s'il y a lieu, sa limite géographique.
+              couvertNaturel.secteur && "valeur" in couvertNaturel.secteur
+                ? ` Autour des zones bâties de la commune, les milieux naturels représentent en moyenne ${pctOso(couvertNaturel.secteur.valeur)} % des terres situées dans un rayon de 15 km (de ${pctOso(couvertNaturel.secteur.p10)} à ${pctOso(couvertNaturel.secteur.p90)} % selon les zones bâties).${couvertNaturel.secteur.limite ? ` ${couvertNaturel.secteur.limite}` : ""}`
+                : couvertNaturel.secteur
+                  ? " Autour des zones bâties : non calculable avec cette méthode, la carte ne détecte aucune zone bâtie dans la commune."
+                  : ""
             }`,
             accent: "var(--green)",
             breakdownLabel: "Ce qui couvre ses terres",
@@ -750,7 +756,7 @@ export function buildFactors(
             whyLabel: "Ce que cela raconte",
             askPrefill: "Quelle place les espaces naturels occupent-ils dans ma commune ?",
             // FUT-175 : la réserve de couverture va au pied du volet, pas sur la face de la carte.
-            sources: "OSO 2023 (CESBIO, couverture des sols vue par satellite). Les parts portent sur la surface que la carte a classée dans le contour de la commune ; les pixels non classés, de part non mesurée, n'y sont pas comptés. Les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments ; ce n'est pas la mesure réglementaire de l'OCS GE. Le secteur réunit des communes entières dont le centre est à moins de 15 km de celui de la commune ; la sélection peut en oublier · ADEME (taux de boisement)",
+            sources: "OSO 2023 (CESBIO, couverture des sols vue par satellite). Les parts portent sur les pixels de 10 m que la carte classe dans le contour de la commune, serres comprises (poste peu fiable isolément). Les espaces urbanisés comptent routes, parkings et zones d'activité autant que les bâtiments ; ce n'est pas la mesure réglementaire de l'OCS GE. Autour des zones bâties : les terres françaises situées à 15 km au plus des zones bâties de la commune, la mer et l'étranger n'étant pas comptés ; ce n'est ni un accès, ni une distance, ni une qualité écologique · ADEME (taux de boisement)",
           },
         }
       : {

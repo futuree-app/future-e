@@ -11,6 +11,7 @@
 // modèle, contrôles (synthesis-checks.ts), patrons déterministes (synthesis-deterministe.ts).
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
+import { dixiemeOso } from "./oso-format.ts";
 import { derivedOf, synthesisFacts, valueOf, type FactsSnapshot } from "../facts/contract.ts";
 import { DEMOGRAPHY_PHRASE, isDemographyCode, type GwlScenarios, type UrbanRole } from "./facts.ts";
 import { normaliserRoleUrbain, type RoleUrbain } from "./statut-urbain.ts";
@@ -31,7 +32,11 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
 // arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.
 // @7 (FUT-177) : catégorie d'occupation des sols dite en mots et limites OSO transmises ; contrôles « faible nature
 // lue comme bâti », « urbanisé lu comme bâtiments », cadre de vie et écologie ; texte déterministe qui nomme les cultures.
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@7:${SYNTHESIS_MODEL}`;
+// @8 (FUT-182 + dette FUT-183) : parts OSO depuis les comptes de pixels exacts, serres comprises ; le secteur habité
+// (terres à 15 km des zones bâties) entre dans la projection avec sa limite géographique et ce qu'il ne dit pas ; les
+// parts d'occupation des sols se citent AU DIXIÈME, telles quelles (consigne et contrôle `nombre:arrondi-oso`) : un
+// « 45 % » pour 44,9 faisait franchir à la phrase le seuil que la catégorie ne franchit pas (Rochefort, FUT-183).
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@8:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -122,7 +127,8 @@ export const LAND_CATEGORY_MEANING: Record<string, string> = {
  */
 export const OSO_LIMITES_SYNTHESE = {
   source: "Carte d'occupation des sols OSO 2023 (CESBIO), établie à partir d'images satellite",
-  echelle: "la commune entière, sur la surface que la carte a classée (les pixels non classés, de part non mesurée, n'y figurent pas)",
+  echelle: "la commune entière, sur les pixels que la carte classe dans son contour, soit la quasi-totalité du contour",
+  serres: "Les serres sont un poste des terres compté avec les cultures. La carte les reconnaît mal isolément : ne concluez rien sur l'activité agricole de la commune.",
   espaces_urbanises: "Tout ce que le satellite voit comme construit ou revêtu : bâtiments, mais aussi routes, parkings, zones industrielles et commerciales. Ce n'est ni la part couverte par des bâtiments, ni une densité de constructions, ni la mesure réglementaire de l'occupation du sol (OCS GE), qui suit d'autres règles.",
   ce_que_la_mesure_ne_dit_pas: "Ni l'accès à la nature, ni les espaces verts urbains (parcs, jardins), que la carte ne distingue pas, ni le calme, ni la biodiversité, ni le cadre de vie, ni ce qui se passe dans un quartier.",
 } as const;
@@ -187,6 +193,8 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
   const secondary = get<number>("housing.secondary_share");
   const vacancy = get<number>("housing.vacancy_share");
   const forestAdeme = get<number>("land.forest_ademe");
+  const secteur = get<{ statut: string; valeur?: number; p10?: number; p90?: number }>("land.natural_share_sector");
+  const secteurLimite = allowed.facts.find((f) => f.key === "land.natural_share_sector")?.limits ?? null;
 
   return {
     commune: {
@@ -202,18 +210,34 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
     occupation_des_sols: composition
       ? {
           categorie: cat("land.category")?.label ?? null,
-          part_espaces_naturels_des_terres_pct: get<number>("land.natural_share"),
-          part_eau_de_la_commune_pct: eau,
+          // FUT-182 : parts non arrondies dans les faits, TRONQUÉES au dixième pour le modèle (`dixiemeOso`).
+          part_espaces_naturels_des_terres_pct: get<number>("land.natural_share") != null ? dixiemeOso(get<number>("land.natural_share")!) : null,
+          part_eau_de_la_commune_pct: eau != null ? dixiemeOso(eau) : null,
+          // FUT-182 : les serres comptent avec les cultures (« terres agricoles »), comme dans la catégorie ; leur part
+          // propre n'est dite que comme « dont serres », jamais comme une activité.
           composition_des_terres_pct: Object.fromEntries(
             Object.entries(composition)
+              .filter(([k]) => k !== "serres")
+              .map(([k, x]): [string, number] => [k, k === "agricole" ? x + (composition.serres ?? 0) : x])
               .filter(([, x]) => typeof x === "number" && x >= 1)
               .sort(([, a], [, b]) => b - a)
-              .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, round1(x)]),
+              .map(([k, x]) => [COMPOSITION_KEYS[k] ?? k, dixiemeOso(x)]),
           ),
+          ...((composition.serres ?? 0) >= 1 ? { dont_serres_dans_les_terres_agricoles_pct: dixiemeOso(composition.serres!) } : {}),
           // FUT-177 : la catégorie en mots ; le modèle la cite, il ne la reconstruit pas avec ses propres adjectifs.
           ce_que_dit_la_categorie: LAND_CATEGORY_MEANING[cat("land.category")?.label ?? ""] ?? null,
           definition: "Les parts sont rapportées aux TERRES de la commune, l'eau (mer, étangs, lacs, rivières) étant comptée à part, en % de sa surface cartographiée. Trois familles se partagent les terres : espaces urbanisés, terres agricoles (cultures) et espaces naturels. Espaces naturels = forêts, prairies, landes et pelouses, roche et dunes ; ni les cultures ni l'eau n'en font partie. Espaces urbanisés, source et échelle de la mesure : voir \"limites\".",
           limites: OSO_LIMITES_SYNTHESE,
+        }
+      : null,
+    // FUT-182 : le secteur habité, terres seules. Une valeur gardée sans classement national reste une mesure des terres
+    // françaises du rayon ; « non calculable » n'a aucune valeur et n'est pas transmis.
+    espaces_naturels_autour_des_zones_baties: secteur && secteur.statut !== "non_calculable" && secteur.valeur != null
+      ? {
+          part_moyenne_des_terres_pct: dixiemeOso(secteur.valeur),
+          fourchette_selon_les_zones_baties_pct: [dixiemeOso(secteur.p10!), dixiemeOso(secteur.p90!)],
+          definition: "Autour de chaque zone bâtie de la commune, la part des milieux naturels (forêts, prairies, landes et pelouses, roche et dunes) dans les terres situées à 15 km au plus, en moyenne sur les zones bâties. L'eau et les cultures n'en font pas partie ; la mer et l'étranger ne sont pas comptés.",
+          limites: secteurLimite,
         }
       : null,
     boisement_ademe_pct: forestAdeme != null
@@ -351,6 +375,7 @@ PÉRIMÈTRE : LA COMMUNE, RIEN EN DESSOUS
 
 CHIFFRES
 - N'écrivez en chiffres que des valeurs présentes dans le payload, éventuellement arrondies ("38 %" pour 37,9), ou précédées de "environ" ou "près de" lorsque c'est exact.
+- Exception : les parts d'occupation des sols ("occupation_des_sols", "espaces_naturels_autour_des_zones_baties") se citent au dixième, telles qu'écrites dans le payload ("44,9 %"), jamais arrondies ni précédées de "environ" : un arrondi peut franchir le seuil de la catégorie fournie.
 - Les écarts à la période 1976-2005 ("ecart_par_rapport_a_1976_2005") et les valeurs de cette période ("valeur_de_reference_1976_2005") sont fournis : citez-les tels quels, ne les recalculez pas. Un écart n'est pas une valeur : "19 jours au-dessus de 30 °C" n'est pas "19 jours de plus".
 - Aucun calcul : pas de ratio, pas de "x fois plus", pas de différence entre deux horizons, pas de conversion de jours en semaines ou en mois. Un nombre de jours sur l'année ne dit rien de la durée ni de la continuité d'une période.
 

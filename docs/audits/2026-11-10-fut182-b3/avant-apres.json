@@ -1,0 +1,1792 @@
+{
+ "effectifs": {
+  "entrees_index": 34788,
+  "statuts_secteur": {
+   "classe": 33207,
+   "classe_limite": 1243,
+   "non_classe": 330,
+   "non_calculable": 8
+  },
+  "score_avant": 34743,
+  "score_apres": 34406,
+  "nature_avant": 34743,
+  "nature_apres": 34788
+ },
+ "scores": {
+  "communes_comparees": 34406,
+  "changes": 21486,
+  "abs_ge_5": 903,
+  "abs_ge_10": 122,
+  "abs_ge_20": 17,
+  "min_max": [
+   -39,
+   14
+  ],
+  "seuils_franchis": {
+   "34 (palier 34)": 602,
+   "40 (/qna 40)": 625,
+   "50 (faiblesse 50)": 578,
+   "55 (raison 55)": 544,
+   "60 (promesse 60)": 453,
+   "66 (palier 66)": 329,
+   "70 (/qna et signature 70)": 344,
+   "88 (trait 88)": 182
+  }
+ },
+ "classement_perdu": {
+  "communes": 337,
+  "par_statut": {
+   "non_classe": 329,
+   "non_calculable": 8
+  },
+  "verdict_avant": {
+   "favorable": 82,
+   "neutre": 221,
+   "defavorable": 34
+  },
+  "verdict_apres": {
+   "sans_rang": 337
+  },
+  "score_avant_ge_88": 62
+ },
+ "verdicts_rang": {
+  "changes": 1037,
+  "transitions": {
+   "neutre->favorable": 127,
+   "neutre->defavorable": 212,
+   "favorable->neutre": 123,
+   "favorable->sans_rang": 82,
+   "defavorable->neutre": 238,
+   "neutre->sans_rang": 221,
+   "defavorable->sans_rang": 34
+  }
+ },
+ "categories_couvert": {
+  "rural_agricole": {
+   "avant": 16970,
+   "apres": 17109,
+   "entrent": 143,
+   "sortent": 4
+  },
+  "rural_forestier": {
+   "avant": 13380,
+   "apres": 13494,
+   "entrent": 122,
+   "sortent": 8
+  }
+ },
+ "land_category": {
+  "changes": 95,
+  "transitions": {
+   "high_natural->mixed": 15,
+   "mixed->agricultural": 12,
+   "None->mostly_built": 40,
+   "None->high_natural": 5,
+   "agricultural->mixed": 9,
+   "mixed->low_natural": 3,
+   "high_natural->agricultural": 8,
+   "mostly_built->high_natural": 2,
+   "mostly_built->mixed": 1
+  }
+ },
+ "boisement_70": {
+  "avant": 3258,
+  "apres": 3336,
+  "entrent": 80,
+  "sortent": 2,
+  "part_apres_dans_l_univers_des_communes_valorisees": 0.0959
+ },
+ "trait_nature_score_ge_88": {
+  "avant": 4368,
+  "apres": 4306
+ },
+ "cas_de_recette": {
+  "29155": {
+   "nom": "Ouessant",
+   "score_avant": 81,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 85.224,
+   "couvert_fr_pct": 2.464,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "56085": {
+   "nom": "Hœdic",
+   "score_avant": 65,
+   "score_apres": null,
+   "verdict_avant": "neutre",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 74.113,
+   "couvert_fr_pct": 0.977,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "85113": {
+   "nom": "L'Île-d'Yeu",
+   "score_avant": 65,
+   "score_apres": null,
+   "verdict_avant": "neutre",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 70.923,
+   "couvert_fr_pct": 3.389,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "17019": {
+   "nom": "Ars-en-Ré",
+   "score_avant": 53,
+   "score_apres": null,
+   "verdict_avant": "neutre",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 50.367,
+   "couvert_fr_pct": 9.219,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "17121": {
+   "nom": "La Couarde-sur-Mer",
+   "score_avant": 46,
+   "score_apres": null,
+   "verdict_avant": "neutre",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 48.448,
+   "couvert_fr_pct": 12.013,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "17318": {
+   "nom": "Saint-Clément-des-Baleines",
+   "score_avant": 55,
+   "score_apres": null,
+   "verdict_avant": "neutre",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 50.598,
+   "couvert_fr_pct": 7.801,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "08106": {
+   "nom": "Charnois",
+   "score_avant": 87,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 90.55,
+   "couvert_fr_pct": 25.157,
+   "cause": "etranger",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "08122": {
+   "nom": "Chooz",
+   "score_avant": 87,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 90.69,
+   "couvert_fr_pct": 27.259,
+   "cause": "etranger",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "25386": {
+   "nom": "Montancy",
+   "score_avant": 87,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 92.353,
+   "couvert_fr_pct": 28.522,
+   "cause": "etranger",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "13004": {
+   "nom": "Arles",
+   "score_avant": 59,
+   "score_apres": 37,
+   "verdict_avant": "neutre",
+   "verdict_apres": "neutre",
+   "statut": "classe",
+   "valeur": 49.563,
+   "couvert_fr_pct": 96.444,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "13096": {
+   "nom": "Saintes-Maries-de-la-Mer",
+   "score_avant": 87,
+   "score_apres": 48,
+   "verdict_avant": "favorable",
+   "verdict_apres": "neutre",
+   "statut": "classe_limite",
+   "valeur": 57.55,
+   "couvert_fr_pct": 68.162,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "50218": {
+   "nom": "Granville",
+   "score_avant": 17,
+   "score_apres": null,
+   "verdict_avant": "defavorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_classe",
+   "valeur": 59.761,
+   "couvert_fr_pct": 44.415,
+   "cause": "mer",
+   "land_avant": "mostly_built",
+   "land_apres": "mostly_built"
+  },
+  "17034": {
+   "nom": "Barzan",
+   "score_avant": 57,
+   "score_apres": 21,
+   "verdict_avant": "neutre",
+   "verdict_apres": "neutre",
+   "statut": "classe",
+   "valeur": 38.404,
+   "couvert_fr_pct": 98.268,
+   "cause": "mer",
+   "land_avant": "agricultural",
+   "land_apres": "agricultural"
+  },
+  "85104": {
+   "nom": "Grues",
+   "score_avant": 42,
+   "score_apres": 40,
+   "verdict_avant": "neutre",
+   "verdict_apres": "neutre",
+   "statut": "classe",
+   "valeur": 51.932,
+   "couvert_fr_pct": 76.93,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "agricultural"
+  },
+  "76353": {
+   "nom": "Héberville",
+   "score_avant": 11,
+   "score_apres": 11,
+   "verdict_avant": "defavorable",
+   "verdict_apres": "defavorable",
+   "statut": "classe",
+   "valeur": 30.384,
+   "couvert_fr_pct": 92.627,
+   "cause": "mer",
+   "land_avant": "agricultural",
+   "land_apres": "agricultural"
+  },
+  "2B045": {
+   "nom": "Bustanico",
+   "score_avant": 100,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_calculable",
+   "valeur": null,
+   "couvert_fr_pct": null,
+   "cause": null,
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "31081": {
+   "nom": "Bourg-d'Oueil",
+   "score_avant": 99,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_calculable",
+   "valeur": null,
+   "couvert_fr_pct": null,
+   "cause": null,
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "65208": {
+   "nom": "Grailhen",
+   "score_avant": 100,
+   "score_apres": null,
+   "verdict_avant": "favorable",
+   "verdict_apres": "sans_rang",
+   "statut": "non_calculable",
+   "valeur": null,
+   "couvert_fr_pct": null,
+   "cause": null,
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  },
+  "75119": {
+   "nom": "Paris 19e",
+   "score_avant": null,
+   "score_apres": null,
+   "verdict_avant": "sans_rang",
+   "verdict_apres": "sans_rang",
+   "statut": "classe",
+   "valeur": 15.792,
+   "couvert_fr_pct": 100,
+   "cause": null,
+   "land_avant": null,
+   "land_apres": "mostly_built"
+  },
+  "69381": {
+   "nom": "Lyon 1er",
+   "score_avant": null,
+   "score_apres": null,
+   "verdict_avant": "sans_rang",
+   "verdict_apres": "sans_rang",
+   "statut": "classe",
+   "valeur": 38.735,
+   "couvert_fr_pct": 100,
+   "cause": null,
+   "land_avant": null,
+   "land_apres": "mostly_built"
+  },
+  "13211": {
+   "nom": "Marseille 11e",
+   "score_avant": null,
+   "score_apres": null,
+   "verdict_avant": "sans_rang",
+   "verdict_apres": "sans_rang",
+   "statut": "classe",
+   "valeur": 66.437,
+   "couvert_fr_pct": 81.137,
+   "cause": "mer",
+   "land_avant": null,
+   "land_apres": "high_natural"
+  },
+  "34301": {
+   "nom": "Sète",
+   "score_avant": 45,
+   "score_apres": 38,
+   "verdict_avant": "neutre",
+   "verdict_apres": "neutre",
+   "statut": "classe_limite",
+   "valeur": 50.399,
+   "couvert_fr_pct": 55.026,
+   "cause": "mer",
+   "land_avant": "mostly_built",
+   "land_apres": "mostly_built"
+  },
+  "83069": {
+   "nom": "Hyères",
+   "score_avant": 67,
+   "score_apres": 54,
+   "verdict_avant": "neutre",
+   "verdict_apres": "neutre",
+   "statut": "classe_limite",
+   "valeur": 61.176,
+   "couvert_fr_pct": 53.175,
+   "cause": "mer",
+   "land_avant": "high_natural",
+   "land_apres": "high_natural"
+  }
+ },
+ "voisins_des_paliers": [
+  [
+   "35288",
+   "Saint-Malo",
+   49.026,
+   "non_classe",
+   null
+  ],
+  [
+   "83048",
+   "La Croix-Valmer",
+   49.029,
+   "non_classe",
+   null
+  ],
+  [
+   "59616",
+   "Vieux-Condé",
+   49.041,
+   "non_classe",
+   null
+  ],
+  [
+   "17225",
+   "Les Mathes",
+   49.048,
+   "non_classe",
+   null
+  ],
+  [
+   "67142",
+   "Fort-Louis",
+   49.077,
+   "non_classe",
+   null
+  ],
+  [
+   "29201",
+   "Ploumoguer",
+   49.127,
+   "non_classe",
+   null
+  ],
+  [
+   "85294",
+   "La Tranche-sur-Mer",
+   49.13,
+   "non_classe",
+   null
+  ],
+  [
+   "50633",
+   "Le Vicel",
+   49.144,
+   "non_classe",
+   null
+  ],
+  [
+   "06113",
+   "Sainte-Agnès",
+   49.159,
+   "non_classe",
+   null
+  ],
+  [
+   "2B093",
+   "Corbara",
+   49.169,
+   "non_classe",
+   null
+  ],
+  [
+   "29188",
+   "Plougasnou",
+   49.187,
+   "non_classe",
+   null
+  ],
+  [
+   "57439",
+   "Manderen-Ritzing",
+   49.212,
+   "non_classe",
+   null
+  ],
+  [
+   "68067",
+   "Courtavon",
+   49.297,
+   "non_classe",
+   null
+  ],
+  [
+   "56034",
+   "Carnac",
+   49.345,
+   "non_classe",
+   null
+  ],
+  [
+   "56116",
+   "Locmariaquer",
+   49.388,
+   "non_classe",
+   null
+  ],
+  [
+   "74200",
+   "Neuvecelle",
+   49.453,
+   "non_classe",
+   null
+  ],
+  [
+   "59045",
+   "Baives",
+   49.459,
+   "non_classe",
+   null
+  ],
+  [
+   "74119",
+   "Évian-les-Bains",
+   49.466,
+   "non_classe",
+   null
+  ],
+  [
+   "57402",
+   "Liederschiedt",
+   49.478,
+   "non_classe",
+   null
+  ],
+  [
+   "14204",
+   "Cricqueville-en-Bessin",
+   49.487,
+   "non_classe",
+   null
+  ],
+  [
+   "64092",
+   "Banca",
+   49.506,
+   "non_classe",
+   null
+  ],
+  [
+   "50031",
+   "Barneville-Carteret",
+   49.578,
+   "non_classe",
+   null
+  ],
+  [
+   "67086",
+   "Daubensand",
+   49.608,
+   "non_classe",
+   null
+  ],
+  [
+   "50332",
+   "Les Moitiers-d'Allonne",
+   49.622,
+   "non_classe",
+   null
+  ],
+  [
+   "67544",
+   "Wissembourg",
+   49.644,
+   "non_classe",
+   null
+  ],
+  [
+   "08214",
+   "Hargnies",
+   49.784,
+   "non_classe",
+   null
+  ],
+  [
+   "35299",
+   "Saint-Méloir-des-Ondes",
+   49.813,
+   "non_classe",
+   null
+  ],
+  [
+   "50117",
+   "Champeaux",
+   49.847,
+   "non_classe",
+   null
+  ],
+  [
+   "29238",
+   "Roscanvel",
+   49.901,
+   "non_classe",
+   null
+  ],
+  [
+   "74105",
+   "Douvaine",
+   49.928,
+   "non_classe",
+   null
+  ],
+  [
+   "2B353",
+   "Ville-di-Pietrabugno",
+   49.932,
+   "non_classe",
+   null
+  ],
+  [
+   "29021",
+   "Plounéour-Brignogan-plages",
+   49.937,
+   "non_classe",
+   null
+  ],
+  [
+   "2B134",
+   "L'Île-Rousse",
+   49.941,
+   "non_classe",
+   null
+  ],
+  [
+   "80333",
+   "Fort-Mahon-Plage",
+   49.955,
+   "non_classe",
+   null
+  ],
+  [
+   "59599",
+   "Tourcoing",
+   50.03,
+   "classe_limite",
+   6
+  ],
+  [
+   "2B150",
+   "Lumio",
+   50.099,
+   "classe_limite",
+   93
+  ],
+  [
+   "14739",
+   "Ver-sur-Mer",
+   50.11,
+   "classe_limite",
+   7
+  ],
+  [
+   "14745",
+   "Vierville-sur-Mer",
+   50.23,
+   "classe_limite",
+   50
+  ],
+  [
+   "29112",
+   "Lanildut",
+   50.269,
+   "classe_limite",
+   32
+  ],
+  [
+   "68135",
+   "Hésingue",
+   50.278,
+   "classe_limite",
+   33
+  ],
+  [
+   "50539",
+   "Saint-Pierre-Église",
+   50.344,
+   "classe_limite",
+   57
+  ],
+  [
+   "59264",
+   "Gognies-Chaussée",
+   50.35,
+   "classe_limite",
+   35
+  ],
+  [
+   "14191",
+   "Courseulles-sur-Mer",
+   50.353,
+   "classe_limite",
+   5
+  ],
+  [
+   "66130",
+   "Osséja",
+   50.405,
+   "classe_limite",
+   95
+  ],
+  [
+   "59160",
+   "Crespin",
+   50.428,
+   "classe_limite",
+   30
+  ],
+  [
+   "57459",
+   "Merschweiller",
+   50.485,
+   "classe_limite",
+   56
+  ],
+  [
+   "06067",
+   "Gorbio",
+   50.487,
+   "classe_limite",
+   85
+  ],
+  [
+   "50532",
+   "Saint-Pair-sur-Mer",
+   50.488,
+   "classe_limite",
+   52
+  ],
+  [
+   "57108",
+   "Breidenbach",
+   50.518,
+   "classe_limite",
+   75
+  ],
+  [
+   "01397",
+   "Sauverny",
+   50.527,
+   "classe_limite",
+   76
+  ],
+  [
+   "59385",
+   "Marpent",
+   50.542,
+   "classe_limite",
+   42
+  ],
+  [
+   "08166",
+   "Fépin",
+   50.623,
+   "classe_limite",
+   91
+  ],
+  [
+   "76605",
+   "Sainte-Marguerite-sur-Mer",
+   50.672,
+   "classe_limite",
+   11
+  ],
+  [
+   "06011",
+   "Beaulieu-sur-Mer",
+   50.676,
+   "classe_limite",
+   67
+  ],
+  [
+   "68194",
+   "Lutter",
+   50.771,
+   "classe_limite",
+   57
+  ],
+  [
+   "14318",
+   "Graye-sur-Mer",
+   50.79,
+   "classe_limite",
+   5
+  ],
+  [
+   "2B178",
+   "Nonza",
+   50.804,
+   "classe_limite",
+   96
+  ],
+  [
+   "68286",
+   "Rosenau",
+   50.809,
+   "classe_limite",
+   30
+  ],
+  [
+   "25124",
+   "Charmauvillers",
+   50.833,
+   "classe_limite",
+   94
+  ],
+  [
+   "50033",
+   "Baubigny",
+   50.852,
+   "classe_limite",
+   59
+  ],
+  [
+   "76493",
+   "Paluel",
+   50.899,
+   "classe_limite",
+   10
+  ],
+  [
+   "01435",
+   "Versonnex",
+   50.929,
+   "classe_limite",
+   77
+  ],
+  [
+   "50135",
+   "Clitourps",
+   50.988,
+   "classe_limite",
+   58
+  ],
+  [
+   "76641",
+   "Saint-Pierre-le-Vieux",
+   74.009,
+   "classe_limite",
+   9
+  ],
+  [
+   "25194",
+   "Dannemarie",
+   74.011,
+   "classe_limite",
+   80
+  ],
+  [
+   "74201",
+   "Neydens",
+   74.048,
+   "classe_limite",
+   73
+  ],
+  [
+   "76665",
+   "Sauchay",
+   74.057,
+   "classe_limite",
+   26
+  ],
+  [
+   "57123",
+   "Carling",
+   74.062,
+   "classe_limite",
+   53
+  ],
+  [
+   "25213",
+   "Les Écorces",
+   74.084,
+   "classe_limite",
+   94
+  ],
+  [
+   "25512",
+   "Le Russey",
+   74.088,
+   "classe_limite",
+   92
+  ],
+  [
+   "62505",
+   "Leulinghen-Bernes",
+   74.095,
+   "classe_limite",
+   30
+  ],
+  [
+   "54178",
+   "Épiez-sur-Chiers",
+   74.159,
+   "classe_limite",
+   54
+  ],
+  [
+   "2B210",
+   "Pero-Casevecchie",
+   74.198,
+   "classe_limite",
+   94
+  ],
+  [
+   "22209",
+   "Beaussais-sur-Mer",
+   74.203,
+   "classe_limite",
+   26
+  ],
+  [
+   "83061",
+   "Fréjus",
+   74.222,
+   "classe_limite",
+   74
+  ],
+  [
+   "50209",
+   "Gonneville-Le Theil",
+   74.226,
+   "classe_limite",
+   60
+  ],
+  [
+   "06085",
+   "Mougins",
+   74.232,
+   "classe_limite",
+   62
+  ],
+  [
+   "64218",
+   "Estérençuby",
+   74.248,
+   "classe_limite",
+   95
+  ],
+  [
+   "74073",
+   "Chevenoz",
+   74.249,
+   "classe_limite",
+   88
+  ],
+  [
+   "2A008",
+   "Albitreccia",
+   74.263,
+   "classe_limite",
+   95
+  ],
+  [
+   "76176",
+   "Clasville",
+   74.272,
+   "classe_limite",
+   11
+  ],
+  [
+   "34024",
+   "Balaruc-le-Vieux",
+   74.315,
+   "classe_limite",
+   55
+  ],
+  [
+   "08391",
+   "Saint-Menges",
+   74.337,
+   "classe_limite",
+   76
+  ],
+  [
+   "08217",
+   "Haulmé",
+   74.34,
+   "classe_limite",
+   85
+  ],
+  [
+   "50594",
+   "Teurthéville-Hague",
+   74.355,
+   "classe_limite",
+   59
+  ],
+  [
+   "76050",
+   "Avremesnil",
+   74.355,
+   "classe_limite",
+   9
+  ],
+  [
+   "08375",
+   "Sachy",
+   74.369,
+   "classe_limite",
+   71
+  ],
+  [
+   "09139",
+   "L'Hospitalet-près-l'Andorre",
+   74.372,
+   "classe_limite",
+   100
+  ],
+  [
+   "73232",
+   "Sainte-Foy-Tarentaise",
+   74.406,
+   "classe_limite",
+   98
+  ],
+  [
+   "59004",
+   "Aix-en-Pévèle",
+   74.493,
+   "classe_limite",
+   26
+  ],
+  [
+   "2A203",
+   "Partinello",
+   74.5,
+   "classe_limite",
+   100
+  ],
+  [
+   "44154",
+   "Saint-Brevin-les-Pins",
+   74.527,
+   "classe_limite",
+   55
+  ],
+  [
+   "68169",
+   "Kœstlach",
+   74.528,
+   "classe_limite",
+   56
+  ],
+  [
+   "64038",
+   "Arcangues",
+   74.562,
+   "classe_limite",
+   69
+  ],
+  [
+   "35186",
+   "Mont-Dol",
+   74.563,
+   "classe_limite",
+   29
+  ],
+  [
+   "64102",
+   "Bayonne",
+   74.572,
+   "classe_limite",
+   67
+  ],
+  [
+   "08191",
+   "Givonne",
+   74.585,
+   "classe_limite",
+   73
+  ],
+  [
+   "29196",
+   "Plouguin",
+   74.591,
+   "classe_limite",
+   31
+  ],
+  [
+   "50577",
+   "Sortosville-en-Beaumont",
+   74.599,
+   "classe_limite",
+   63
+  ],
+  [
+   "50609",
+   "Turqueville",
+   74.599,
+   "classe_limite",
+   66
+  ],
+  [
+   "08188",
+   "Gespunsart",
+   74.603,
+   "classe_limite",
+   82
+  ],
+  [
+   "57665",
+   "Tenteling",
+   74.615,
+   "classe_limite",
+   62
+  ],
+  [
+   "57745",
+   "Wiesviller",
+   74.618,
+   "classe_limite",
+   65
+  ],
+  [
+   "50365",
+   "Muneville-sur-Mer",
+   74.635,
+   "classe_limite",
+   55
+  ],
+  [
+   "14495",
+   "Périers-sur-le-Dan",
+   74.653,
+   "classe_limite",
+   9
+  ],
+  [
+   "59572",
+   "Solre-le-Château",
+   74.658,
+   "classe_limite",
+   64
+  ],
+  [
+   "59017",
+   "Armentières",
+   74.664,
+   "classe_limite",
+   8
+  ],
+  [
+   "59573",
+   "Solrinnes",
+   74.665,
+   "classe_limite",
+   57
+  ],
+  [
+   "2B167",
+   "Montegrosso",
+   74.684,
+   "classe_limite",
+   96
+  ],
+  [
+   "50120",
+   "Chanteloup",
+   74.684,
+   "classe_limite",
+   55
+  ],
+  [
+   "57633",
+   "Sarreinsming",
+   74.69,
+   "classe_limite",
+   63
+  ],
+  [
+   "83047",
+   "La Crau",
+   74.717,
+   "classe_limite",
+   56
+  ],
+  [
+   "01419",
+   "Thoiry",
+   74.73,
+   "classe_limite",
+   79
+  ],
+  [
+   "50236",
+   "La Haye",
+   74.736,
+   "classe_limite",
+   60
+  ],
+  [
+   "62015",
+   "Airon-Notre-Dame",
+   74.757,
+   "classe_limite",
+   23
+  ],
+  [
+   "05174",
+   "Val-des-Prés",
+   74.758,
+   "classe_limite",
+   97
+  ],
+  [
+   "66100",
+   "Llo",
+   74.801,
+   "classe_limite",
+   97
+  ],
+  [
+   "14676",
+   "Sommervieu",
+   74.805,
+   "classe_limite",
+   22
+  ],
+  [
+   "59532",
+   "Saint-Georges-sur-l'Aa",
+   74.838,
+   "classe_limite",
+   7
+  ],
+  [
+   "55544",
+   "Velosnes",
+   74.842,
+   "classe_limite",
+   59
+  ],
+  [
+   "35270",
+   "Saint-Georges-de-Gréhaigne",
+   74.848,
+   "classe_limite",
+   21
+  ],
+  [
+   "33199",
+   "Gujan-Mestras",
+   74.884,
+   "classe_limite",
+   80
+  ],
+  [
+   "57765",
+   "Diesen",
+   74.929,
+   "classe_limite",
+   50
+  ],
+  [
+   "31129",
+   "Cazarilh-Laspènes",
+   74.947,
+   "classe_limite",
+   99
+  ],
+  [
+   "08363",
+   "Revin",
+   74.97,
+   "classe_limite",
+   91
+  ],
+  [
+   "29079",
+   "Henvic",
+   74.981,
+   "classe_limite",
+   32
+  ],
+  [
+   "2B251",
+   "Prunelli-di-Fiumorbo",
+   74.984,
+   "classe_limite",
+   91
+  ],
+  [
+   "68263",
+   "Ranspach-le-Bas",
+   75.004,
+   "classe",
+   35
+  ],
+  [
+   "17142",
+   "Dompierre-sur-Mer",
+   75.012,
+   "classe",
+   3
+  ],
+  [
+   "90043",
+   "Faverois",
+   75.05,
+   "classe",
+   63
+  ],
+  [
+   "2B239",
+   "Poggio-d'Oletta",
+   75.055,
+   "classe",
+   93
+  ],
+  [
+   "83079",
+   "La Môle",
+   75.086,
+   "classe",
+   79
+  ],
+  [
+   "57106",
+   "Bouzonville",
+   75.125,
+   "classe",
+   56
+  ],
+  [
+   "33333",
+   "Le Porge",
+   75.13,
+   "classe",
+   90
+  ],
+  [
+   "57669",
+   "Théding",
+   75.163,
+   "classe",
+   59
+  ],
+  [
+   "59636",
+   "Wambrechies",
+   75.215,
+   "classe",
+   6
+  ],
+  [
+   "14499",
+   "Petiville",
+   75.219,
+   "classe",
+   47
+  ],
+  [
+   "59548",
+   "Saint-Waast",
+   75.226,
+   "classe",
+   39
+  ],
+  [
+   "76004",
+   "Ambrumesnil",
+   75.24,
+   "classe",
+   14
+  ],
+  [
+   "85045",
+   "La Chaize-Giraud",
+   75.271,
+   "classe",
+   37
+  ],
+  [
+   "57016",
+   "Alzing",
+   75.284,
+   "classe",
+   55
+  ],
+  [
+   "33005",
+   "Andernos-les-Bains",
+   75.307,
+   "classe",
+   79
+  ],
+  [
+   "67195",
+   "Hessenheim",
+   75.312,
+   "classe",
+   19
+  ],
+  [
+   "44006",
+   "Assérac",
+   75.321,
+   "classe",
+   63
+  ],
+  [
+   "29290",
+   "Tréglonou",
+   75.333,
+   "classe",
+   30
+  ],
+  [
+   "66176",
+   "Saint-Hippolyte",
+   75.342,
+   "classe",
+   35
+  ],
+  [
+   "22178",
+   "Pléhédel",
+   75.349,
+   "classe",
+   32
+  ],
+  [
+   "14014",
+   "Colomby-Anguerny",
+   75.364,
+   "classe",
+   5
+  ],
+  [
+   "29189",
+   "Plougastel-Daoulas",
+   75.373,
+   "classe",
+   46
+  ],
+  [
+   "80700",
+   "Saint-Blimont",
+   75.402,
+   "classe",
+   17
+  ],
+  [
+   "57336",
+   "L'Hôpital",
+   75.409,
+   "classe",
+   55
+  ],
+  [
+   "62560",
+   "Marquise",
+   75.41,
+   "classe",
+   33
+  ],
+  [
+   "56018",
+   "Billiers",
+   75.419,
+   "classe",
+   52
+  ],
+  [
+   "59662",
+   "Winnezeele",
+   75.423,
+   "classe",
+   9
+  ],
+  [
+   "14110",
+   "Brucourt",
+   75.425,
+   "classe",
+   64
+  ],
+  [
+   "66065",
+   "Elne",
+   75.429,
+   "classe",
+   33
+  ],
+  [
+   "29057",
+   "La Forêt-Fouesnant",
+   75.435,
+   "classe",
+   45
+  ],
+  [
+   "59580",
+   "Steenvoorde",
+   75.447,
+   "classe",
+   11
+  ],
+  [
+   "90046",
+   "Florimont",
+   75.474,
+   "classe",
+   62
+  ],
+  [
+   "59131",
+   "Cappelle-la-Grande",
+   75.479,
+   "classe",
+   8
+  ],
+  [
+   "56161",
+   "Ploemel",
+   75.483,
+   "classe",
+   57
+  ],
+  [
+   "40266",
+   "Saint-Julien-en-Born",
+   75.487,
+   "classe",
+   90
+  ],
+  [
+   "74001",
+   "Abondance",
+   75.488,
+   "classe",
+   95
+  ],
+  [
+   "44151",
+   "Saint-André-des-Eaux",
+   75.493,
+   "classe",
+   64
+  ],
+  [
+   "57639",
+   "Schorbach",
+   75.529,
+   "classe",
+   77
+  ],
+  [
+   "76507",
+   "Ponts-et-Marais",
+   75.529,
+   "classe",
+   19
+  ],
+  [
+   "31549",
+   "Sode",
+   75.565,
+   "classe",
+   98
+  ],
+  [
+   "66206",
+   "Le Tech",
+   75.571,
+   "classe",
+   99
+  ],
+  [
+   "59317",
+   "Houplines",
+   75.575,
+   "classe",
+   8
+  ],
+  [
+   "56002",
+   "Ambon",
+   75.589,
+   "classe",
+   50
+  ],
+  [
+   "59232",
+   "La Flamengrie",
+   75.6,
+   "classe",
+   36
+  ],
+  [
+   "76706",
+   "Tourville-les-Ifs",
+   75.613,
+   "classe",
+   11
+  ],
+  [
+   "29285",
+   "Tréflaouénan",
+   75.615,
+   "classe",
+   25
+  ],
+  [
+   "2A070",
+   "Casaglione",
+   75.615,
+   "classe",
+   97
+  ],
+  [
+   "57288",
+   "Ham-sous-Varsberg",
+   75.621,
+   "classe",
+   48
+  ],
+  [
+   "14227",
+   "Douville-en-Auge",
+   75.655,
+   "classe",
+   74
+  ],
+  [
+   "68054",
+   "Brinckheim",
+   75.656,
+   "classe",
+   33
+  ],
+  [
+   "67130",
+   "Erstein",
+   75.677,
+   "classe",
+   20
+  ],
+  [
+   "76155",
+   "Canehan",
+   75.679,
+   "classe",
+   23
+  ],
+  [
+   "76187",
+   "Contremoulins",
+   75.679,
+   "classe",
+   11
+  ],
+  [
+   "40108",
+   "Gastes",
+   75.721,
+   "classe",
+   87
+  ],
+  [
+   "08293",
+   "Moiry",
+   75.739,
+   "classe",
+   68
+  ],
+  [
+   "2A114",
+   "Figari",
+   75.741,
+   "classe",
+   98
+  ],
+  [
+   "76534",
+   "Rolleville",
+   75.747,
+   "classe",
+   13
+  ],
+  [
+   "29019",
+   "Brest",
+   75.766,
+   "classe",
+   36
+  ],
+  [
+   "76482",
+   "Offranville",
+   75.795,
+   "classe",
+   20
+  ],
+  [
+   "14453",
+   "Mosles",
+   75.797,
+   "classe",
+   47
+  ],
+  [
+   "76305",
+   "Gonfreville-l'Orcher",
+   75.807,
+   "classe",
+   32
+  ],
+  [
+   "35306",
+   "Saint-Père-Marc-en-Poulet",
+   75.822,
+   "classe",
+   30
+  ],
+  [
+   "62742",
+   "Saint-Aubin",
+   75.851,
+   "classe",
+   23
+  ],
+  [
+   "68363",
+   "Werentzhouse",
+   75.854,
+   "classe",
+   48
+  ],
+  [
+   "62866",
+   "Waben",
+   75.857,
+   "classe",
+   27
+  ],
+  [
+   "06132",
+   "Saorge",
+   75.882,
+   "classe",
+   100
+  ],
+  [
+   "62446",
+   "Hesdigneul-lès-Boulogne",
+   75.889,
+   "classe",
+   43
+  ],
+  [
+   "17306",
+   "Royan",
+   75.91,
+   "classe",
+   30
+  ],
+  [
+   "54127",
+   "Chenières",
+   75.926,
+   "classe",
+   34
+  ],
+  [
+   "29198",
+   "Plouider",
+   75.949,
+   "classe",
+   32
+  ],
+  [
+   "83027",
+   "La Cadière-d'Azur",
+   75.986,
+   "classe",
+   69
+  ]
+ ]
+}

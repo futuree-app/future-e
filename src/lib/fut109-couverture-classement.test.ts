@@ -58,7 +58,9 @@ const match = (departements: string[] | null, preferences: M[]) =>
   V.matchProjects({ reformulation: "FUT-109", hardConstraints: departements ? { departements } : {}, preferences });
 
 test("vrai zéro et absence : un 0 mesuré compte, un null ne compte ni au numérateur ni au dénominateur", () => {
-  const lr = commune("17300");
+  // FUT-182 : La Rochelle n'a plus de rang « Espaces naturels » (moins de la moitié de son rayon de 15 km sous un contour
+  // français : classement national non établi). Le test porte sur la croissance : Poitiers, entièrement classée.
+  const lr = commune("86194");
   const prefs = [{ key: "croissance_demographique", weight: 3 }, { key: "nature", weight: 1 }, ...BASE];
   const zero = V.scorePreferences({ ...lr, demographie: { ...lr.demographie, croissance: 0 } }, prefs);
   const absent = V.scorePreferences({ ...lr, demographie: null }, prefs);

@@ -61,7 +61,8 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   eloignement_mer: "Distance du centre de la commune au rivage marin : plus elle est grande, mieux la commune répond.",
   // FUT-176 : la mesure est la taille de l'agglomération ; elle ne dit ni services, ni activités, ni isolement vécu.
   eviter_isolement: "Taille de l'agglomération (unité urbaine), ou de la commune quand elle est hors agglomération. Elle ne mesure pas à elle seule l'accès aux services.",
-  nature: "Forêts, prairies et milieux naturels autour.",
+  // FUT-182 : la mesure, dite telle qu'elle est (secteur habité, terres seules).
+  nature: "Milieux naturels dans les terres à 15 km au plus des zones bâties de la commune.",
   acces_culture: "Présence d'équipements culturels à proximité.",
   acces_ecoles: "Collèges et lycées accessibles alentour.",
   eviter_grandes_villes: "Taille de l'agglomération (unité urbaine).",

@@ -8,6 +8,7 @@ import type { ClimatFacts } from "./climat-facts.ts";
 import type { RadonFacts } from "./radon-facts.ts";
 import { buildSanteFacts } from "./sante-facts.ts";
 import { merDeLaCommune } from "../commune-attributes.ts";
+import { limiteGeographique } from "../oso/secteur-habite.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { PlansInondationCommune } from "../data/gaspar-pprn-inondation.ts";
 
@@ -40,11 +41,16 @@ export function mapCommuneToModuleFacts(
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
     // Chargé par l'APPELANT (comme le climat) : le mapping reste pur, sans I/O.
     risquesDeclares: opts.risquesDeclares ?? null,
-    // La composition du couvert naturel vit dans l'index (OSO 2023) : aucune I/O de plus.
+    // FUT-182 : la forêt en % des TERRES de la commune (OSO 2023, eau à part), non arrondie : le seuil de 70 % se compare
+    // avant arrondi. Aucune I/O de plus.
     boisementPct: (() => {
-      const f = entry.nature?.composition?.foret;
+      const f = entry.nature?.terres?.foret;
       return typeof f === "number" ? f : null;
     })(),
+    // FUT-182 : la limite géographique du secteur habité, pour les communes classées « avec limite » (50 à 75 %).
+    natureLimite: entry.nature?.secteur?.statut === "classe_limite"
+      ? limiteGeographique(entry.nature.secteur.statut, entry.nature.secteur.couvert_fr_pct, entry.nature.secteur.cause)
+      : null,
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
     // FUT-127 : chargés par l'appelant (un fichier), comme le climat. Absents = non chargés.
     ...(opts.plansInondation !== undefined ? { plansInondation: opts.plansInondation } : {}),

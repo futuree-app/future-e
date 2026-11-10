@@ -33,12 +33,11 @@ export const TRAITS_NATIONAUX: readonly TraitNational[] = [
   { pct: (c) => moyennePct(c, ["NORRRq99_yr", "NORRx1d_yr"]), dir: "high", label: "compte parmi les communes aux pluies les plus intenses de France" },
   { pct: (c) => c.pct.NORSWI04_yr ?? null, dir: "high", label: "compte parmi les communes aux sols les plus exposés à la sécheresse" },
   { pct: (c) => c.pct.NORIFM40_yr ?? null, dir: "high", label: "compte parmi les communes les plus exposées aux conditions de feu" },
-  // Le HAUT du couvert naturel dans 15 km : « entourées » dit le rayon. Son bas n'a pas de libellé (voir l'en-tête).
-  // FUT-178 (09/11/2026) : libellé INEXACT, laissé volontairement. La mesure porte sur un secteur (la commune et ses
-  // voisines retenues : aucune pour Arles, Saintes-Maries-de-la-Mer et L'Île-d'Yeu), eau comprise. Mais ce trait
-  // n'est ni affiché ni transmis au modèle (`place.distinctive_trait`, noCard, exclu de la synthèse) : il ne vit que
-  // dans l'empreinte du snapshot Territoire. Le reformuler régénérerait les synthèses de 1 880 communes sans rien
-  // changer pour le lecteur. À reprendre avec FUT-182, qui refait le calcul et changera ces empreintes de toute façon.
+  // Le HAUT du secteur habité (FUT-182) : la part des milieux naturels dans les terres à 15 km au plus des zones bâties.
+  // Son bas n'a pas de libellé (voir l'en-tête). Sans classement national établi (score null : rayon largement maritime
+  // ou transfrontalier, aucun bâti détecté), pas de trait : un ancien score ne revient jamais en repli.
+  // Le libellé d'avant redevient exact : le disque de 15 km entoure bien les zones bâties de la commune. FUT-34 : aucun
+  // libellé de trait ne nomme le bâti ni l'urbanisation.
   { pct: (c) => c.nature?.score ?? null, dir: "high", label: "compte parmi les communes les plus entourées d'espaces naturels" },
   // La croissance est le percentile national d'un TAUX annuel de variation de la population (INSEE 2015-2021) :
   // ni « dynamisme » (attractivité, emploi, jeunesse), ni nombre d'habitants perdus (qui favoriserait les grandes villes).

@@ -8,6 +8,7 @@ import { snapshotHash } from "../facts/hash.ts";
 import { buildTerritoryIdentity, buildTerritoryCards } from "../territory-identity.ts";
 import { projectForSynthesis } from "./synthesis-contract.ts";
 import { chatelaillonInputs } from "./__fixtures__/chatelaillon.ts";
+import { natureTest } from "./__fixtures__/nature-oso.ts";
 
 const T0 = "2026-09-28T00:00:00.000Z";
 const snap = (i: TerritoireInputs = chatelaillonInputs()) => buildTerritoireSnapshot(i, T0);
@@ -35,19 +36,23 @@ test("Châtelaillon : la carte d'identité et la face de carte disent LE MÊME c
 test("Châtelaillon : la projection porte la composition OSO et sa catégorie", () => {
   const p = projectForSynthesis(snap(), "gwl20") as Record<string, any>;
   assert.equal(p.occupation_des_sols.categorie, "Occupation mixte");
-  // FUT-175 : parts rapportées aux terres (99,8 % du contour, 0,2 % d'eau), l'eau à part.
-  assert.equal(p.occupation_des_sols.part_espaces_naturels_des_terres_pct, 36.4);
+  // FUT-175 : parts rapportées aux terres, l'eau à part. FUT-182 : comptes de pixels exacts (36,364 % ; 0,225 % ;
+  // 49,256 %), tronqués au dixième pour le modèle.
+  assert.equal(p.occupation_des_sols.part_espaces_naturels_des_terres_pct, 36.3);
   assert.equal(p.occupation_des_sols.part_eau_de_la_commune_pct, 0.2);
-  assert.equal(p.occupation_des_sols.composition_des_terres_pct.espaces_urbanises, 49.3);
+  assert.equal(p.occupation_des_sols.composition_des_terres_pct.espaces_urbanises, 49.2);
   assert.equal(p.occupation_des_sols.composition_des_terres_pct.prairies, 20.8);
   assert.equal(p.occupation_des_sols.composition_des_terres_pct.eau, undefined);
   assert.equal(p.commune.densite.categorie, "Densité intermédiaire");
 });
 
-test("Châtelaillon : boisement ADEME, trait distinctif, vieillissement et rayon 15 km hors de la projection, CHACUN avec sa raison", () => {
+test("Châtelaillon : boisement ADEME, trait distinctif et vieillissement hors de la projection, CHACUN avec sa raison", () => {
   const s = snap();
   const allowed = synthesisFacts(s).facts.map((f) => f.key);
-  for (const key of ["land.forest_ademe", "place.distinctive_trait", "demography.ageing_65", "land.natural_share_15km"]) {
+  // FUT-182 : le « rayon 15 km » (communes entières, eau comprise) n'existe plus ; le secteur habité, lui, est transmis.
+  assert.ok(allowed.includes("land.natural_share_sector"));
+  assert.equal(s.facts.some((f) => f.key === "land.natural_share_15km"), false);
+  for (const key of ["land.forest_ademe", "place.distinctive_trait", "demography.ageing_65"]) {
     assert.ok(!allowed.includes(key), `${key} ne doit pas nourrir la synthèse`);
     const f = factOf(s, key)!;
     assert.equal(f.synthesis.include, false);
@@ -57,7 +62,8 @@ test("Châtelaillon : boisement ADEME, trait distinctif, vieillissement et rayon
   assert.doesNotMatch(p, /1\.5\b/, "le 1,5 % de boisement ADEME ne doit pas atteindre le modèle");
   assert.doesNotMatch(p, /urbanisées de France/);
   assert.doesNotMatch(p, /3\.28/, "le champ vieillissement ne doit pas atteindre le modèle");
-  assert.doesNotMatch(p, /27\.9/, "le rayon 15 km ne doit pas atteindre le modèle");
+  assert.doesNotMatch(p, /27\.9/, "l'ancien rayon 15 km ne doit pas atteindre le modèle");
+  assert.match(p, /"part_moyenne_des_terres_pct":27\.1/, "le secteur habité (27,191 %) l'atteint, tronqué au dixième");
 });
 
 test("le registre est complet : tout fait sans carte ou exclu de la synthèse dit pourquoi", () => {
@@ -94,9 +100,9 @@ test("D4 : sur une grille de compositions limites, identité et carte donnent to
   ];
   for (const c of cases) {
     const nat = 100 - c.artificialise - c.agricole;
-    const comp = { ...c, foret: nat, prairies: 0, landes_pelouses: 0, mineral_dunes: 0, eau: 0 };
+    const comp = { ...c, foret: nat, prairies: 0, landes_pelouses: 0, mineral_dunes: 0, serres: 0 };
     const i = chatelaillonInputs();
-    i.entry = { ...i.entry!, nature: { brut_pct: nat, radius_pct: 30, composition: comp } };
+    i.entry = { ...i.entry!, nature: natureTest({ urb: c.artificialise, agri: c.agricole, foret: nat }) };
     const s = snap(i);
     const expected = LAND_LABEL[landCategory(nat, comp)];
     assert.equal(buildTerritoryIdentity(s).solDominant, expected, JSON.stringify(comp));

@@ -16,8 +16,11 @@ import { LAND_CATEGORY_MEANING, OSO_LIMITES_SYNTHESE, projectForSynthesis } from
 import { allowedNumbers, checkAssertions, checkSynthesis, describeViolations } from "./territoire/synthesis-checks.ts";
 import { deterministicSynthesis } from "./territoire/synthesis-deterministe.ts";
 import { chatelaillonInputs } from "./territoire/__fixtures__/chatelaillon.ts";
+import { dixiemeOso } from "./territoire/oso-format.ts";
 
-type Nature = { brut_pct: number; radius_pct: number | null; composition: Record<string, number> };
+// FUT-182 : la nature de l'index (parts exactes des terres, eau à part, secteur habité).
+type Nature = NonNullable<NonNullable<TerritoireInputs["entry"]>["nature"]>;
+const lue = (n: Nature | null | undefined): Nature | null => (n ? { terres: n.terres, eau_pct: n.eau_pct, couverture_pct: n.couverture_pct, secteur: n.secteur } : null);
 type Entree = { insee: string; nom: string; densite: number | null; population: number | null; nature?: Nature | null };
 
 const racine = new URL("../../", import.meta.url);
@@ -36,7 +39,7 @@ function snapDe(insee: string) {
     ...i.entry!,
     population: c!.population,
     densite: c!.densite,
-    nature: { brut_pct: c!.nature!.brut_pct, radius_pct: c!.nature!.radius_pct, composition: c!.nature!.composition },
+    nature: lue(c!.nature),
   };
   i.ademe = i.ademe ? { ...i.ademe, densite: null, population: null } : null;
   return buildTerritoireSnapshot(i, T0);
@@ -46,17 +49,17 @@ const regles = (text: string, p: Record<string, unknown>) => [...new Set(checkAs
 const COUVERT = /^couvert:/;
 const reglesCouvert = (text: string, p: Record<string, unknown>) => regles(text, p).filter((r) => COUVERT.test(r));
 
-// ── Les faits réellement présents (index du 09/11/2026), avant toute conclusion ─────────────────
+// ── Les faits réellement présents (index FUT-182 du 10/11/2026), avant toute conclusion ─────────────────
 
 type Panel = { insee: string; nom: string; cat: LandCategory; urb: number; agri: number; nat: number; eau: number; densite: string };
 const PANEL: Panel[] = [
-  { insee: "14137", nom: "Carpiquet", cat: "low_natural", urb: 41.2, agri: 44.8, nat: 13.9, eau: 0.1, densite: "Densité intermédiaire" },
-  { insee: "02100", nom: "Bony", cat: "agricultural", urb: 4.1, agri: 89, nat: 6.8, eau: 0, densite: "Commune peu dense" },
-  { insee: "28199", nom: "Janville-en-Beauce", cat: "agricultural", urb: 7.2, agri: 90, nat: 2.8, eau: 0, densite: "Commune peu dense" },
-  { insee: "17094", nom: "Châtelaillon-Plage", cat: "mixed", urb: 49.3, agri: 14.3, nat: 36.4, eau: 0.2, densite: "Densité intermédiaire" },
-  { insee: "34301", nom: "Sète", cat: "mostly_built", urb: 50.4, agri: 15.8, nat: 33.8, eau: 50.6, densite: "Commune dense" },
+  { insee: "14137", nom: "Carpiquet", cat: "low_natural", urb: 41.0, agri: 44.7, nat: 13.8, eau: 0.1, densite: "Densité intermédiaire" },
+  { insee: "02100", nom: "Bony", cat: "agricultural", urb: 4.1, agri: 89.0, nat: 6.8, eau: 0.0, densite: "Commune peu dense" },
+  { insee: "28199", nom: "Janville-en-Beauce", cat: "agricultural", urb: 7.2, agri: 90.0, nat: 2.7, eau: 0.0, densite: "Commune peu dense" },
+  { insee: "17094", nom: "Châtelaillon-Plage", cat: "mixed", urb: 49.2, agri: 14.2, nat: 36.3, eau: 0.2, densite: "Densité intermédiaire" },
+  { insee: "34301", nom: "Sète", cat: "mostly_built", urb: 50.0, agri: 15.7, nat: 33.7, eau: 50.4, densite: "Commune dense" },
   // « Roissy » du ticket : Roissy-en-France (l'aéroport), le cas A7. Roissy-en-Brie sert de contre-exemple dense et boisé.
-  { insee: "95527", nom: "Roissy-en-France", cat: "mostly_built", urb: 55.2, agri: 14.3, nat: 30.5, eau: 0.4, densite: "Densité intermédiaire" },
+  { insee: "95527", nom: "Roissy-en-France", cat: "mostly_built", urb: 55.1, agri: 14.2, nat: 30.5, eau: 0.3, densite: "Densité intermédiaire" },
   { insee: "77390", nom: "Roissy-en-Brie", cat: "high_natural", urb: 30.7, agri: 11.5, nat: 57.7, eau: 0.4, densite: "Commune dense" },
 ];
 
@@ -64,11 +67,12 @@ test("panel : les faits OSO et la catégorie de chaque commune, lus dans l'index
   for (const c of PANEL) {
     const e = par.get(c.insee)!;
     assert.equal(e.nom, c.nom);
-    const s = landShares(e.nature!.brut_pct, e.nature!.composition)!;
-    assert.equal(s.composition.artificialise, c.urb, `${c.nom} urbanisé`);
-    assert.equal(s.composition.agricole, c.agri, `${c.nom} cultures`);
-    assert.equal(s.naturalLandPct, c.nat, `${c.nom} naturel`);
-    assert.equal(s.waterPct, c.eau, `${c.nom} eau`);
+    const s = landShares(lue(e.nature))!;
+    // FUT-182 : parts exactes, lues au dixième tronqué (ce que montre la carte).
+    assert.equal(dixiemeOso(s.composition.artificialise), c.urb, `${c.nom} urbanisé`);
+    assert.equal(dixiemeOso(s.composition.agricole), c.agri, `${c.nom} cultures`);
+    assert.equal(dixiemeOso(s.naturalLandPct), c.nat, `${c.nom} naturel`);
+    assert.equal(dixiemeOso(s.waterPct), c.eau, `${c.nom} eau`);
     assert.equal(landCategory(s.naturalLandPct, s.composition), c.cat, c.nom);
     const p = projDe(c.insee);
     assert.equal(p.occupation_des_sols.categorie, LAND_LABEL[c.cat], c.nom);
@@ -78,7 +82,7 @@ test("panel : les faits OSO et la catégorie de chaque commune, lus dans l'index
 
 test("Carpiquet (A5) : peu d'espaces naturels, mais des cultures devant l'urbanisé ; rien ne la dit bâtie", () => {
   const e = par.get("14137")!;
-  const s = landShares(e.nature!.brut_pct, e.nature!.composition)!;
+  const s = landShares(lue(e.nature))!;
   assert.ok(s.composition.agricole > s.composition.artificialise);
   assert.ok(s.composition.artificialise < 50 && s.composition.agricole < 50);
 });
@@ -130,10 +134,12 @@ test("projection : les champs ajoutés n'introduisent aucun nombre admis de plus
 test("cohérence nationale : le sens écrit de chaque catégorie est vrai pour toutes les communes qui la portent", () => {
   let n = 0;
   for (const c of communes) {
-    const s = c.nature ? landShares(c.nature.brut_pct, c.nature.composition) : null;
+    const s = c.nature ? landShares(lue(c.nature)) : null;
     if (!s) continue;
     n++;
-    const { artificialise: urb, agricole: agri } = s.composition;
+    // FUT-182 (décision D) : les serres comptent avec les cultures dans la catégorie.
+    const urb = s.composition.artificialise;
+    const agri = s.composition.agricole + (s.composition.serres ?? 0);
     const nat = s.naturalLandPct;
     const cat = landCategory(nat, s.composition);
     const ok = {
@@ -145,7 +151,7 @@ test("cohérence nationale : le sens écrit de chaque catégorie est vrai pour t
     }[cat];
     assert.ok(ok, `${c.nom} (${c.insee}) : ${cat} contredit urb ${urb}, cultures ${agri}, naturel ${nat}`);
   }
-  assert.equal(n, 34743);
+  assert.equal(n, 34788); // FUT-182 : 34 743 communes et 45 arrondissements
 });
 
 // ── Le texte déterministe : les trois familles, et les phrases attendues ──────────────────────
@@ -154,12 +160,13 @@ const ligneSols = (t: string) => t.split(/(?<=\.)\s+/).find((x) => /terres\.$/.t
 
 test("texte déterministe : la phrase des sols de chaque commune du panel", () => {
   const attendu: Record<string, string> = {
-    "14137": "Les espaces naturels y sont peu présents, ses terres se partageant entre cultures et espaces urbanisés : 41,2 % d'espaces urbanisés, 44,8 % de cultures et 13,9 % d'espaces naturels sur ses terres.",
+    // FUT-182 : comptes de pixels exacts, serres comprises dans les cultures, parts tronquées au dixième.
+    "14137": "Les espaces naturels y sont peu présents, ses terres se partageant entre cultures et espaces urbanisés : 41 % d'espaces urbanisés, 45 % de cultures et 13,8 % d'espaces naturels sur ses terres.",
     "02100": "Les terres agricoles y dominent : 4,1 % d'espaces urbanisés, 89 % de cultures et 6,8 % d'espaces naturels sur ses terres.",
-    "28199": "Les terres agricoles y dominent : 7,2 % d'espaces urbanisés, 90 % de cultures et 2,8 % d'espaces naturels sur ses terres.",
-    "17094": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49,3 % d'espaces urbanisés, 14,3 % de cultures et 36,4 % d'espaces naturels sur ses terres.",
-    "34301": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 50,4 % d'espaces urbanisés, 15,8 % de cultures et 33,8 % d'espaces naturels sur ses terres.",
-    "95527": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 55,2 % d'espaces urbanisés, 14,3 % de cultures et 30,5 % d'espaces naturels sur ses terres.",
+    "28199": "Les terres agricoles y dominent : 7,2 % d'espaces urbanisés, 90 % de cultures et 2,7 % d'espaces naturels sur ses terres.",
+    "17094": "Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49,2 % d'espaces urbanisés, 14,3 % de cultures et 36,3 % d'espaces naturels sur ses terres.",
+    "34301": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 50 % d'espaces urbanisés, 16,2 % de cultures et 33,7 % d'espaces naturels sur ses terres.",
+    "95527": "Ses sols sont majoritairement urbanisés (bâtiments, routes, parkings et zones d'activité confondus) : 55,1 % d'espaces urbanisés, 14,2 % de cultures et 30,5 % d'espaces naturels sur ses terres.",
     "77390": "Les espaces naturels y tiennent une grande place : 30,7 % d'espaces urbanisés, 11,5 % de cultures et 57,7 % d'espaces naturels sur ses terres.",
   };
   for (const c of PANEL) assert.equal(ligneSols(deterministicSynthesis(projDe(c.insee), "gwl20")), attendu[c.insee], c.nom);
@@ -168,9 +175,9 @@ test("texte déterministe : la phrase des sols de chaque commune du panel", () =
 test("texte déterministe : il passe ses contrôles pour toutes les communes, et nomme les cultures quand elles comptent", () => {
   let vus = 0;
   for (const c of communes) {
-    if (!c.nature || !landShares(c.nature.brut_pct, c.nature.composition)) continue;
+    if (!c.nature || !landShares(lue(c.nature))) continue;
     // Toutes les communes « Faible présence » et « Majoritairement urbanisé », une sur vingt pour les autres.
-    const s = landShares(c.nature.brut_pct, c.nature.composition)!;
+    const s = landShares(lue(c.nature))!;
     const cat = landCategory(s.naturalLandPct, s.composition);
     if (cat !== "low_natural" && cat !== "mostly_built" && Number.parseInt(c.insee.replace(/\D/g, ""), 10) % 20 !== 0) continue;
     vus++;
@@ -380,7 +387,7 @@ L'effet concret dépendra du quartier et du logement.`;
 
 ## Ce qui domine
 
-Les espaces naturels y sont peu présents : 14 % de ses terres. Ses terres se partagent entre cultures, 45 %, et espaces urbanisés, 41 %.
+Les espaces naturels y sont peu présents : 13,8 % de ses terres. Ses terres se partagent entre cultures, 45 %, et espaces urbanisés, 41 %.
 
 ## Ce qui tient, ce qui se tend
 

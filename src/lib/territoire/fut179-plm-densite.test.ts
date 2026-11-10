@@ -19,7 +19,12 @@ import { ARRONDISSEMENTS_PLM } from "../plm-population.ts";
 import { buildTerritoryIdentity } from "../territory-identity.ts";
 
 type Entree = ArrondissementIndex & { nom: string; densite?: number | null; nature?: unknown; altitude?: number | null; mer_centre_km?: number | null; relief_proximite?: number | null };
-const COMMUNES = (JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8")).communes) as Entree[];
+const INDEX = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8"));
+const COMMUNES = INDEX.communes as Entree[];
+// FUT-182 : l'occupation des sols de la ville entière, comptée sur ses propres pixels (index, meta.nature.communes_plm).
+type NatureLue = NonNullable<NonNullable<TerritoireInputs["entry"]>["nature"]>;
+const natureLue = (n: any): NatureLue | null =>
+  n ? { terres: n.terres, eau_pct: n.eau_pct, couverture_pct: n.couverture_pct, secteur: n.secteur } : null;
 const parInsee = new Map(COMMUNES.map((c) => [c.insee, c]));
 const LABELS = libellesAgglomeration(COMMUNES);
 const T0 = "2026-11-09T00:00:00.000Z";
@@ -31,7 +36,7 @@ function inputsVille(insee: string, nom: string): TerritoireInputs {
   const l = lectureCommunalePLM(insee, COMMUNES)!;
   return {
     ...chatelaillonInputs(), insee, communeName: nom, ademe: null, distinctiveTrait: null, catnat: null, littoral: null,
-    entry: { population: l.population, densite: null, mer_centre_km: null, relief_proximite: null, altitude: null, nature: null, demographie: l.demographie },
+    entry: { population: l.population, densite: null, mer_centre_km: null, relief_proximite: null, altitude: null, nature: natureLue(INDEX.meta.nature.communes_plm[insee]), demographie: l.demographie },
     urbanRole: { role: roleUrbain(l.uu, l.uuStatut), uuLabel: l.uu ? LABELS.get(l.uu) ?? null : null, uuPop: l.uuPop },
     densiteInsee: densiteInseePLM(insee),
   };
@@ -44,7 +49,7 @@ function inputsArrondissement(insee: string): TerritoireInputs {
     ...chatelaillonInputs(), insee, communeName: a.nom, ademe: null, distinctiveTrait: null, catnat: null, littoral: null,
     entry: {
       population: a.population ?? null, densite: a.densite ?? null, mer_centre_km: a.mer_centre_km ?? null,
-      relief_proximite: a.relief_proximite ?? null, altitude: a.altitude ?? null, nature: null,
+      relief_proximite: a.relief_proximite ?? null, altitude: a.altitude ?? null, nature: natureLue(a.nature),
       demographie: a.demographie ? { taux_total: a.demographie.taux_total ?? null, part_nouveaux: null, recit: null } : null,
     },
     urbanRole: { role: roleUrbain(a.uu ?? null, a.uu_statut ?? null), uuLabel: a.uu ? LABELS.get(a.uu) ?? null : null, uuPop: a.uu_pop ?? null, arrondissementDe: villeDeArrondissement(insee)!.nom },
@@ -148,16 +153,19 @@ test("D6. ADEME garde la main : la densité Insee n'est lue qu'à défaut, jamai
   assert.equal(withHash(buildTerritoireSnapshot({ ...base, densiteInsee: null }, T0)).hash, withHash(sans).hash);
 });
 
-test("D7. absence ≠ zéro : aucune occupation des sols n'est inventée pour Paris, Lyon, Marseille ni leurs arrondissements", () => {
+// FUT-182 : Paris, Lyon, Marseille et leurs 45 arrondissements ont désormais leur occupation des sols, mesurée chacun sur
+// SES pixels (partition exacte au pixel : B1 § 35). Rien n'est copié d'un grain à l'autre, et aucun n'est classé.
+test("D7. FUT-182 : la ville et chaque arrondissement ont leur propre occupation des sols, jamais celle d'un autre grain", () => {
+  const paris = buildTerritoireSnapshot(inputsVille("75056", "Paris"), T0);
+  const onzieme = buildTerritoireSnapshot(inputsArrondissement("75111"), T0);
+  assert.equal((fait(paris, "land.natural_share").value as number).toFixed(2), "17.25");
+  assert.notEqual(fait(onzieme, "land.natural_share").value, fait(paris, "land.natural_share").value);
   for (const s of [...VILLES.map(([i, n]) => buildTerritoireSnapshot(inputsVille(i, n), T0)), ...["75111", "69381", "13209"].map((i) => buildTerritoireSnapshot(inputsArrondissement(i), T0))]) {
-    for (const k of ["land.composition", "land.natural_share", "land.water_share", "land.natural_share_15km", "land.forest_ademe"]) {
-      assert.equal(fait(s, k).value, null, k);
-      assert.equal(fait(s, k).status, "missing", k);
-    }
-    assert.equal(derive(s, "land.category"), null, "aucune catégorie d'occupation des sols");
-    assert.doesNotMatch(synthese(s), /urbanisé|espaces naturels|artificialis/i);
-    assert.equal(buildTerritoryIdentity(withHash(s)).solDominant, null);
+    for (const k of ["land.composition", "land.natural_share", "land.water_share", "land.natural_share_sector"]) assert.notEqual(fait(s, k).value, null, k);
+    assert.ok(derive(s, "land.category"), "une catégorie, sur ses propres parts");
+    assert.equal(s.facts.some((f) => f.key === "land.natural_share_15km"), false);
   }
+  for (const a of TOUS_ARRONDISSEMENTS) assert.equal((parInsee.get(a)!.nature as { score: number | null }).score, null, `${a} : hors univers des rangs`);
 });
 
 test("D8. non-régression FUT-43 : population, agglomération et démographie de la ville inchangées", () => {
@@ -185,9 +193,9 @@ test("D9. projection : le modèle reçoit la catégorie au périmètre lu, et le
   const ordinaire = buildTerritoireSnapshot(chatelaillonInputs(), T0);
   assert.equal(fait(ordinaire, "place.density").scale, "commune");
   assert.match(String(derive(ordinaire, "density.category")?.label), /^(Commune|Densité)/);
-  // FUT-179 ne touche pas au contrat. FUT-177 (fusionné après) l'a porté à @7 pour ses propres consignes ; c'est
-  // la seule montée admise depuis @6 (garde FUT-147 : fixture fut177-lignes-admises.json).
-  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@7", "contrat : FUT-179 n'y touche pas, seul FUT-177 l'a porté à @7");
+  // FUT-179 ne touche pas au contrat. FUT-177 (fusionné après) l'a porté à @7 pour ses propres consignes, FUT-182 à @8
+  // (secteur habité, parts au dixième) : ce sont les seules montées admises depuis @6.
+  assert.equal(SYNTHESIS_CONTRACT_VERSION.split(":")[0], "territoire-synthese@8", "contrat : FUT-179 n'y touche pas ; FUT-177 l'a porté à @7, FUT-182 à @8");
 });
 
 const violations = (s: ReturnType<typeof buildTerritoireSnapshot>, texte: string) =>

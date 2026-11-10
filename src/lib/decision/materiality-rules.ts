@@ -17,6 +17,7 @@ import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import { aCommune } from "../typography.ts";
+import { pctOso } from "../territoire/oso-format.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { hcRestreint } from "./effective-value.ts";
 import { isConfirmed, preferenceSurfaced } from "./conditions.ts";
@@ -745,14 +746,17 @@ const ruleFeu: DecisionRule = {
         role: "verification", materialityTier: "secondary",
         topic: "l'environnement boisé de la commune",
         status: "Fortement boisée",
-        statement: `${cap(aCommune(f.nom))}, la forêt couvre ${Math.round(boise!)} % du territoire communal, ce qui la place parmi les 10 % de communes les plus boisées de France.`,
+        // FUT-182 : la forêt en % des TERRES (eau à part), au dixième (FUT-183). « Parmi les 10 % » est une conséquence
+        // du seuil, vérifiée sur l'index publié par `fut182-b3-oso.test.ts` (3 336 communes, 9,60 %) : si un recalcul
+        // la rendait fausse, le test échoue avant que la phrase ne le soit.
+        statement: `${cap(aCommune(f.nom))}, la forêt couvre ${pctOso(boise!)} % des terres de la commune, ce qui la place parmi les 10 % de communes les plus boisées de France.`,
         // LA LIMITE EST LE CŒUR DE CETTE CARTE, comme pour le risque recensé : sans elle, un lecteur y
         // lirait un risque établi. On dit ce que la donnée NE dit pas.
         limitation: "Un couvert forestier élevé ne suffit pas à établir un risque d'incendie : il dépend aussi de l'essence des peuplements, de l'entretien et de la distance entre les habitations et la lisière.",
         signalConvention: `futur•e signale cet environnement à partir de ${BOISEMENT_NOTABLE} % de couvert forestier.`,
         evidence: [{
           factId: "nature.foret", module: "territoire", label: `Couvert naturel · ${f.nom}`,
-          observedValue: `forêt sur ${Math.round(boise!)} % du territoire`, grain: "commune",
+          observedValue: `forêt sur ${pctOso(boise!)} % des terres`, grain: "commune",
           href: territoireHref, targetKey: "nature.forest_cover",
         }],
         action: wildfireExposureAction(f.hasAddress),

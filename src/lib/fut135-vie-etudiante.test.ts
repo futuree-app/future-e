@@ -207,7 +207,9 @@ test("revue 1. Pont-Salomon : raison au palier intermédiaire, à l'échelle de 
   const o = await V.matchProjects({ reformulation: "Recherche de recette auvergne", hardConstraints: { departements: ["03", "15", "43", "63"] }, preferences: [{ key: "vie_etudiante", weight: 2 }, { key: "nature", weight: 2 }] });
   // FUT-141 : l'accès de Pont-Salomon (aucun établissement à moins de 10 km) passe de 40 à 20, son score de 63 à
   // 55 ; Le Puy-en-Velay, qui a des établissements, prend sa place dans le trio.
-  assert.deepEqual(o.results.slice(0, 3).map((r: M) => r.insee), ["63308", "15014", "43157"]);
+  // FUT-182 : le rang « Espaces naturels » se mesure autour des zones bâties ; Brives-Charensac (79) passe devant
+  // Le Puy-en-Velay (78) pour la troisième place. Le sujet du test (Pont-Salomon) n'est pas concerné.
+  assert.deepEqual(o.results.slice(0, 3).map((r: M) => r.insee), ["63308", "15014", "43041"]);
   assert.equal(vie(commune(PONT_SALOMON)), 55);
   assert.equal(V.raisonNeg("vie_etudiante", commune(PONT_SALOMON)),
     "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km");

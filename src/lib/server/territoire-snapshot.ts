@@ -12,7 +12,7 @@ import "server-only";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry, getCommuneEntry, getLectureCommunalePLM } from "@/lib/comparateur-vie";
+import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry, getCommuneEntry, getLectureCommunalePLM, getNatureCommunePLM } from "@/lib/comparateur-vie";
 import { arrondissementsDe } from "@/lib/plm";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
@@ -31,7 +31,7 @@ import { reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 export const DEFAULT_HORIZON: HorizonKey = "gwl20";
 
 export async function loadTerritoireSnapshot(insee: string, communeName: string): Promise<HashedSnapshot> {
-  const [enrichment, ctx, plm, saisonnalitePct, era5] = await Promise.all([
+  const [enrichment, ctx, plm, saisonnalitePct, era5, naturePLM] = await Promise.all([
     gatherCommuneEnrichment(insee).catch(() => null),
     getTerritoryContext(insee).catch(() => null),
     // FUT-43 : Paris, Lyon, Marseille n'ont pas d'entrée d'index à leur code commune ; leur lecture
@@ -39,6 +39,7 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     getLectureCommunalePLM(insee).catch(() => null),
     getResidencesSecondairesPct(insee).catch(() => null),
     getEra5Trend(insee).catch(() => null),
+    getNatureCommunePLM(insee).catch(() => null),
   ]);
   const entry = ctx?.entry ?? null;
   // FUT-60 : l'index n'a pas d'entrée pour Paris, Lyon ou Marseille (75056…), seulement leurs
@@ -62,7 +63,10 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
           mer_centre_km: null,
           relief_proximite: null,
           altitude: null,
-          nature: null,
+          // FUT-182 : Paris, Lyon, Marseille sur leurs propres pixels OSO (somme exacte des arrondissements), sans score.
+          nature: naturePLM
+            ? { terres: naturePLM.terres, eau_pct: naturePLM.eau_pct, couverture_pct: naturePLM.couverture_pct, secteur: naturePLM.secteur }
+            : null,
           demographie: plm.lecture.demographie,
         }
       : entry
@@ -72,8 +76,9 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
           mer_centre_km: entry.mer_centre_km ?? null,
           relief_proximite: entry.relief_proximite ?? null,
           altitude: entry.altitude ?? null,
+          // FUT-182 : parts des terres et secteur habité ; le score national n'entre pas dans Territoire.
           nature: entry.nature
-            ? { brut_pct: entry.nature.brut_pct ?? null, radius_pct: entry.nature.radius_pct ?? null, composition: entry.nature.composition ?? null }
+            ? { terres: entry.nature.terres ?? null, eau_pct: entry.nature.eau_pct ?? null, couverture_pct: entry.nature.couverture_pct ?? null, secteur: entry.nature.secteur ?? null }
             : null,
           demographie: entry.demographie
             ? { taux_total: entry.demographie.taux_total ?? null, part_nouveaux: entry.demographie.part_nouveaux ?? null, recit: entry.demographie.recit ?? null }

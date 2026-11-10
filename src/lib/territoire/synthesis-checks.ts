@@ -802,8 +802,34 @@ export function checkFormat(text: string): Violation[] {
   return blocks.length === 3 ? [] : [{ rule: "format:trois-blocs", excerpt: `${blocks.length} bloc(s) au lieu de 3` }];
 }
 
+/**
+ * FUT-183 / FUT-182 · LES PARTS OSO SE CITENT AU DIXIÈME. `checkNumbers` admet l'arrondi à l'entier et « environ » :
+ * c'est juste pour des jours ou des habitants, faux pour une part qui porte une catégorie à seuil (20, 45, 50 %). À
+ * Rochefort, « 45 % d'espaces naturels » pour 44,9 contredisait « Occupation mixte ». Un pourcentage écrit qui ne
+ * retrouve une part OSO que par l'arrondi ou par une marge, et aucune autre valeur en %, est refusé.
+ */
+const CHEMINS_OSO = ["occupation_des_sols", "espaces_naturels_autour_des_zones_baties"];
+export function checkArrondisOso(text: string, projection: Projection): Violation[] {
+  const oso = allowedNumbers(Object.fromEntries(CHEMINS_OSO.map((k) => [k, projection[k] ?? null]))).filter((a) => a.unit === "%");
+  if (oso.length === 0) return [];
+  const autres = allowedNumbers(Object.fromEntries(Object.entries(projection).filter(([k]) => !CHEMINS_OSO.includes(k)))).filter((a) => a.unit === "%");
+  const out: Violation[] = [];
+  for (const s of text.split(/\n+|(?<=[.!?])\s+/)) {
+    for (const w of numbersIn(s)) {
+      if (w.unit !== "%") continue;
+      const exact = (a: AllowedNumber) => close(w.value, a.value) || close(w.value, round(a.value, 1));
+      if (oso.some(exact) && !w.qualifier) continue;
+      if (autres.some((a) => close(w.value, a.value) || close(w.value, round(a.value, 0)) || close(w.value, round(a.value, 1)))) continue;
+      if (oso.some((a) => close(w.value, round(a.value, 0)) || (w.qualifier && Math.abs(w.value - a.value) <= Math.max(1, Math.abs(a.value) * 0.1)))) {
+        out.push({ rule: "nombre:arrondi-oso", excerpt: `« ${w.raw.trim()} » dans : ${s.replace(/^#+\s*/, "").trim()}` });
+      }
+    }
+  }
+  return out;
+}
+
 export function checkSynthesis(text: string, projection: Projection): Violation[] {
-  return [...checkFormat(text), ...checkAssertions(text, projection), ...checkNumbers(text, projection)];
+  return [...checkFormat(text), ...checkAssertions(text, projection), ...checkNumbers(text, projection), ...checkArrondisOso(text, projection)];
 }
 
 /**
@@ -815,6 +841,7 @@ const CONSIGNES: [RegExp, string][] = [
   [/^nombre:unite-incoherente$/, "l'unité ne correspond pas à la donnée (les nuits au-dessus de 20 °C se comptent en nuits, pas en jours) ; reprenez l'unité du champ"],
   [/^nombre:sens-incoherent$/, "ce nombre existe dans les données, mais pas avec ce sens : un écart à la référence se cite depuis le champ ecart_…, une valeur depuis le champ valeur ; ne recalculez rien"],
   [/^nombre:absent-des-donnees$/, "ce nombre ne figure pas dans les données : n'écrivez que des valeurs présentes (ou leur arrondi), sans différence, ratio ni conversion"],
+  [/^nombre:arrondi-oso$/, "les parts d'occupation des sols se citent au dixième, telles qu'écrites dans les données (« 44,9 % »), sans arrondi ni « environ » : un arrondi peut contredire la catégorie"],
   [/^nombre:transformation-non-admise$/, "aucune conversion (mois, semaines) ni ratio (« x fois plus ») : citez la valeur dans son unité"],
   [/^catnat:/, "citez les jours de sols secs projetés et la sécheresse reconnue en catastrophe naturelle dans deux phrases séparées, sans lien entre elles"],
   [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],

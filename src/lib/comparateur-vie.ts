@@ -15,6 +15,7 @@ import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import { deCommune } from "@/lib/typography";
+import type { NatureIndex } from "@/lib/oso/secteur-habite";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
 import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale, communeLittoraleMer, categorieDeFacade, presDuRivage } from "@/lib/mer-recherche";
@@ -96,8 +97,8 @@ export const PREFERENCE_KEYS = [
   "acces_soins",              // accès aux médecins généralistes (APL)
   "acces_services",           // niveau de centralité en commerces et services (ANCT)
   "faible_pression_agricole", // éloigné des cultures à traitements fréquents (pression, pas exposition)
-  // Caractère naturel à proximité (OSO 2023, couvert naturel élargi dans 15 km).
-  // « perçu comme naturel », pas biodiversité ni wilderness. cf. NATURE_TERRITORIAL.md.
+  // Milieux naturels autour des zones bâties (OSO 2023, secteur habité, FUT-182) : part des terres à 15 km au plus.
+  // « perçu comme naturel », pas biodiversité ni wilderness ; ni un accès ni une distance. cf. NATURE_TERRITORIAL.md.
   "nature",
   // Accès BPE (collèges+lycées / offre culturelle large), pondéré par la proximité,
   // rayon adapté au territoire (5 à 25 km), percentile national.
@@ -517,14 +518,12 @@ export type IndexCommune = {
   // Pression climatique sur l'économie locale (NARRATIF, hors score) : un secteur
   // sensible dont l'économie dépend, exposé à un aléa. null = faible (aucune note).
   pression_eco?: { palier: "moderee" | "marquee"; secteur: string; alea: string } | null;
-  // Caractère naturel (cf. scripts/populate-nature.py, OSO 2023). score = percentile
-  // national du rayon 15 km (pour le moteur) ; brut_pct + composition pour le rapport.
-  nature?: {
-    score: number; // 0-100, percentile national du couvert naturel élargi dans 15 km
-    brut_pct: number; // couvert naturel élargi DANS la commune
-    radius_pct: number | null;
-    composition: Record<string, number>;
-  } | null;
+  // Occupation des sols OSO 2023 (FUT-182, scripts/oso/integrer-oso-2023.py). `score` = percentile national du
+  // SECTEUR HABITÉ : la part des milieux naturels dans les terres à 15 km au plus des zones bâties de la commune,
+  // moyenne pondérée par le bâti. Il est null quand le classement national n'est pas établi (secteur « non_classe »,
+  // moins de la moitié du disque couverte par des terres et eaux françaises) ou impossible (« non_calculable », aucun
+  // pixel bâti OSO), et pour les arrondissements (hors univers des rangs). `terres` décrit la commune elle-même.
+  nature?: NatureIndex | null;
   // Logement (cf. scripts/populate-logement.mjs). Niveaux relatifs en paliers pour la phrase du
   // comparateur ; médianes, maille, effectifs et fiabilité pour les autres surfaces, toujours formulés par
   // `prix-immobiliers.ts` (FUT-138). Jamais lus par le score ni le tri.
@@ -644,7 +643,17 @@ const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, (communes, meta
   // FUT-138 : la provenance des prix immobiliers (période, livraison, sources) et les prix de Paris, Lyon,
   // Marseille en ville entière, que l'index ne porte que par arrondissement.
   metaLogement = (meta.logement as typeof metaLogement) ?? null;
+  // FUT-182 : l'occupation des sols de Paris, Lyon et Marseille en ville entière (comptée sur ses propres pixels, égale à
+  // la somme exacte de ses arrondissements), que l'index ne porte, sinon, que par arrondissement.
+  natureCommunesPLM = ((meta.nature as { communes_plm?: Record<string, NatureIndex> } | undefined)?.communes_plm) ?? null;
 });
+let natureCommunesPLM: Record<string, NatureIndex> | null = null;
+
+/** FUT-182 : la nature OSO de Paris (75056), Lyon (69123) ou Marseille (13055) en ville entière, ou null. Sans score. */
+export async function getNatureCommunePLM(insee: string): Promise<NatureIndex | null> {
+  await loadIndex();
+  return natureCommunesPLM?.[insee] ?? null;
+}
 let rangAucunEtudiant: number | null = null;
 let metaLogement: (MetaPrix & { villesPLM?: Record<string, LogementIndex> }) | null = null;
 
@@ -835,12 +844,15 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
     if (c.mobilite && c.mobilite.dependance >= 60) cats.add('periurbain_dependance_auto');
   }
 
-  // ── Caractère rural : agricole / forestier (couvert OSO, pas pression_agricole,
-  //    qui ne traque pas la ruralité). Réservé aux communes peu denses.
-  if (peuDense && c.nature?.composition) {
-    const comp = c.nature.composition;
-    if ((comp.agricole ?? 0) >= 30) cats.add('rural_agricole');
-    if ((comp.foret ?? 0) >= 35) cats.add('rural_forestier');
+  // ── Couvert agricole / forestier (OSO), réservé aux communes peu denses.
+  //    FUT-182 : mêmes seuils (30 % de cultures, 35 % de forêt), désormais en % des TERRES, serres comptées dans les
+  //    cultures, et avant arrondi. Ces deux catégories gardent leur nom et leur condition de densité, HÉRITÉS : FUT-185 a
+  //    montré qu'une densité moyenne n'établit pas la ruralité, et leur révision (nom, condition, libellés) relève de
+  //    FUT-184 et FUT-190. Aucune phrase ne doit les lire comme une preuve de ruralité : elles disent un couvert mesuré.
+  if (peuDense && c.nature?.terres) {
+    const t = c.nature.terres;
+    if (t.cultures + t.serres >= 30) cats.add('rural_agricole');
+    if (t.foret >= 35) cats.add('rural_forestier');
   }
 
   // ── Exposition industrielle marquée → vallée industrielle ───────────────────
@@ -937,20 +949,18 @@ export function buildTerritorySignals(c: IndexCommune, gares?: GaresCommune): Re
     };
   }
 
-  // FUT-178 : `nature.score` est le rang national du couvert naturel d'un SECTEUR : la commune et, quand elles sont
-  // retenues, des communes voisines ENTIÈRES dont le centre est à moins de 15 km du sien. La sélection peut en oublier
-  // (grille du précalcul, 2 465 communes) ou n'en retenir aucune (3 communes, dont Saintes-Maries-de-la-Mer) : le
-  // niveau dit donc « dans le secteur », jamais « alentour ». Tant que FUT-182 n'a pas refait le calcul raster, l'eau
-  // (mer, étangs, lacs) y est comptée (FUT-175) : le signal le dit. Un bas ne prouve pas une urbanisation (FUT-34).
-  if (c.nature) {
+  // FUT-182 : `nature.score` est le rang national du SECTEUR HABITÉ (part des milieux naturels dans les terres à 15 km
+  // au plus des zones bâties de la commune, l'eau à part). Sans classement national établi (score null : rayon
+  // largement maritime ou transfrontalier, ou aucun bâti détecté), aucun niveau n'est donné : le modèle ne reçoit
+  // ni rang ni ancien score. Un bas ne prouve pas une urbanisation (FUT-34).
+  if (c.nature && c.nature.score != null) {
     const sc = c.nature.score;
-    s.espaces_naturels_secteur = {
-      niveau: sc >= 70 ? "beaucoup d'espaces naturels ou d'eau dans le secteur" : sc >= 40 ? "espaces naturels ou eau présents dans le secteur" : "peu d'espaces naturels ou d'eau dans le secteur",
-      // Sans chiffre : le contrôle de /qna rejette tout nombre non sourcé (nombresAutorises), et « une quinzaine »
-      // dit aussi que la sélection n'est pas un cercle exact.
-      perimetre: "le secteur : la commune et, quand elles sont retenues, des communes voisines entières dont le centre est à moins d'une quinzaine de kilomètres du sien ; la sélection peut en oublier, et certaines communes n'en ont aucune",
-      composition: "forêts, prairies, landes et pelouses, roche et dunes, et aussi l'eau (mer, étangs, lacs, rivières) ; les cultures n'en font pas partie",
-      ne_dit_pas: "ni la commune seule, ni les abords d'une adresse, ni des espaces uniquement terrestres ou végétalisés ; une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles",
+    s.espaces_naturels_autour_du_bati = {
+      niveau: sc >= 70 ? "beaucoup d'espaces naturels autour des zones bâties" : sc >= 40 ? "espaces naturels présents autour des zones bâties" : "peu d'espaces naturels autour des zones bâties",
+      // Sans chiffre : le contrôle de /qna rejette tout nombre non sourcé (nombresAutorises).
+      perimetre: "les terres situées à une quinzaine de kilomètres au plus des zones bâties de la commune, en moyenne sur ces zones ; la mer et l'étranger n'en font pas partie",
+      composition: "forêts, prairies, landes et pelouses, roche et dunes ; ni l'eau ni les cultures",
+      ne_dit_pas: "ni un accès, ni une distance à pied, ni les abords d'une adresse, ni une qualité écologique ; une faible part d'espaces naturels ne prouve pas une forte urbanisation : elle peut notamment s'expliquer par les terres agricoles",
     };
   }
 
@@ -1502,8 +1512,8 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   // FUT-145 : l'indice forêt-météo DRIAS projeté (+2,7 °C en France, vers 2050) décrit une MÉTÉO favorable aux feux,
   // en rang national ; jamais un risque d'incendie, et l'horizon est dit pour qu'AskFuture ne le lise pas au présent.
   { id: "feu", key: "faible_risque_feu", bands: ["météo moins souvent propice aux feux qu'ailleurs, vers 2050", "météo propice aux feux à un niveau intermédiaire, vers 2050", "météo plus souvent propice aux feux qu'ailleurs, vers 2050"] },
-  // FUT-178 : le secteur (la commune et ses voisines retenues, parfois aucune), eau comprise ; jamais « autour ».
-  { id: "nature", key: "nature", bands: ["davantage d'espaces naturels ou d'eau dans le secteur", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur", "moins d'espaces naturels ou d'eau dans le secteur"] },
+  // FUT-182 : autour des zones bâties (15 km), terres seules ; ni accès ni distance.
+  { id: "nature", key: "nature", bands: ["davantage d'espaces naturels autour des zones bâties", "présence intermédiaire d'espaces naturels autour des zones bâties", "moins d'espaces naturels autour des zones bâties"] },
   { id: "soins", key: "acces_soins", bands: ["accès aux soins plus facile", "accès aux soins intermédiaire", "accès aux soins plus limité"] },
   { id: "emploi", key: "viabilite_emploi", bands: ["bassin d'emploi plus dynamique", "bassin d'emploi intermédiaire", "bassin d'emploi moins dynamique"] },
   { id: "ecoles", key: "acces_ecoles", bands: ["accès aux écoles plus facile", "accès aux écoles intermédiaire", "accès aux écoles plus limité"] },
@@ -1574,7 +1584,7 @@ export const DIMENSIONS: ComparaisonDim[] = [
   { id: "calme_sonore", label: "Calme sonore", themeId: "sante_env", key: "calme_sonore", paliers: ["Très préservé du bruit", "Exposition sonore modérée", "Fortement exposé au bruit"], gp: "le calme sonore", forte: "son calme", aide: "L'éloignement des grandes sources de bruit (axes, rail, aéroports).", risque: true, directionnel: true },
   { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", forte: "son éloignement des sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution.", risque: true, directionnel: true },
   { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", forte: "le peu d'agriculture intensive autour", aide: "L'éloignement des cultures à traitements fréquents.", risque: true, directionnel: true },
-  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup d'espaces naturels ou d'eau dans le secteur", "Espaces naturels ou eau présents", "Peu d'espaces naturels ou d'eau dans le secteur"], gp: "les espaces naturels", forte: "les espaces naturels et l'eau de son secteur", aide: "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.", risque: false, directionnel: true },
+  { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup d'espaces naturels autour des zones bâties", "Espaces naturels présents autour des zones bâties", "Peu d'espaces naturels autour des zones bâties"], gp: "les espaces naturels", forte: "les espaces naturels autour de ses zones bâties", aide: "Part des milieux naturels (forêts, prairies, landes et pelouses, roche et dunes) dans les terres situées à 15 km au plus des zones bâties de la commune (OSO 2023). L'eau et les cultures n'en font pas partie. Ce n'est ni un accès, ni une distance, ni une qualité écologique.", risque: false, directionnel: true },
   { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["Rivage marin proche", "Rivage marin à distance", "Rivage marin éloigné"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "Distance du centre de la commune au rivage marin, lagunes comprises.", risque: false, directionnel: true },
   { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
   // SANS VOITURE est le souhait du lecteur ; la ligne, elle, classe la part des actifs qui vont
@@ -2517,10 +2527,9 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_soins: "bon accès aux médecins",
   acces_services: "commune qui concentre commerces et services",
   faible_pression_agricole: "loin des cultures à traitements fréquents",
-  // « dans le secteur » : la commune et ses voisines retenues (parfois aucune), pas la commune seule ni « alentour ».
-  // Jamais « commune naturelle / préservée / sauvage / biodiversité » (cf. doctrine). FUT-178 : ni « forêts »,
-  // que la mesure ne garantit pas, et l'eau nommée, que la mesure compte (Saintes-Maries-de-la-Mer, Sète).
-  nature: "beaucoup d'espaces naturels ou d'eau dans le secteur",
+  // FUT-182 : « autour des zones bâties » (15 km, terres seules). Jamais « commune naturelle / préservée / sauvage /
+  // biodiversité » (cf. doctrine), ni « forêts », que la mesure ne garantit pas, ni un accès ou une proximité.
+  nature: "beaucoup d'espaces naturels autour des zones bâties",
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
   // FUT-129 : jamais lu (la priorité n'a plus de sous-score, donc jamais de raison favorable). Un texte qui
@@ -2574,7 +2583,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_services: "commune hors pôle de services",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
-  nature: "peu d'espaces naturels ou d'eau dans le secteur",
+  nature: "peu d'espaces naturels autour des zones bâties",
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
   faible_risque_inondation: RAISON_SINISTRES_FREQUENTS,
@@ -2604,8 +2613,8 @@ export const REASON_NEG_INTERMEDIAIRE: Partial<Record<PreferenceKey, string>> = 
   calme_sonore: "exposition sonore modérée",
   faible_exposition_industrielle: "présence industrielle modérée",
   faible_pression_agricole: "agriculture intensive modérée",
-  // FUT-178 : reprend le palier « Espaces naturels ou eau présents » (FUT-154) ; la mesure compte l'eau.
-  nature: "espaces naturels ou eau présents dans le secteur, sans abonder",
+  // Reprend le palier « Espaces naturels présents » (FUT-154) ; FUT-182 : autour des zones bâties, terres seules.
+  nature: "espaces naturels présents autour des zones bâties, sans abonder",
   proximite_mer: "rivage marin à distance",
   cadre_calme: "cadre intermédiaire",
   faible_dependance_auto: "usage intermédiaire de la voiture pour aller travailler",
@@ -3023,7 +3032,7 @@ function buildDistinctive(
   if (n < 2) return {};
   const suffix = n >= 3 ? " des trois" : " des deux";
   const CANDS: DistinctiveCand[] = [
-    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus riche{n} en espaces naturels ou en eau dans son secteur", key: "nature", guard: (w) => w >= 60 },
+    { tier: 1, value: (c) => c.nature?.score ?? null, dir: "max", scale: 22, label: "la plus riche{n} en espaces naturels autour de ses zones bâties", key: "nature", guard: (w) => w >= 60 },
     { tier: 1, value: (c) => c.vivpct?.apl ?? null, dir: "max", scale: 22, label: "le meilleur accès aux médecins", key: "acces_soins", guard: (w) => w >= 50 },
     { tier: 1, value: (c) => (c.emploi ? 0.6 * c.emploi.taille + 0.4 * c.emploi.diversite : null), dir: "max", scale: 22, label: "le bassin d'emploi le plus dynamique", key: "viabilite_emploi", guard: (w) => w >= 50 },
     { tier: 1, value: eteSupportable, dir: "min", scale: 22, label: "les étés les plus supportables", key: "faible_chaleur" },

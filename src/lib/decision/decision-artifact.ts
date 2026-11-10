@@ -84,7 +84,14 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // devenait « favorable » pour un logement qui peut être bien plus proche d'un site que le centre. Avec une adresse,
 // il est désormais non concluant, comme le bruit depuis le 29/07/2026. Le registre des critères et la couverture
 // changent : c'est ce que le moteur CONCLUT. Un dossier engine-7 garde son registre tel qu'il a été vendu.
-export const ENGINE_VERSION = "engine-8";
+// engine-9 (FUT-182, 10/11/2026) : la nature se mesure autour des zones bâties (secteur habité OSO 2023 : terres à 15 km
+// au plus, l'eau à part, la mer et l'étranger hors du calcul), plus sur des communes entières retenues par la distance
+// de leur centre, eau comprise. Le verdict de rang « Espaces naturels » change pour 1 037 communes, dont 337 sans
+// classement établi (329 au rayon largement maritime ou transfrontalier, 8 sans bâti OSO ; 82 y avaient un verdict
+// favorable) : la règle y rend « incertain ». Le boisement de 70 % se lit sur les terres (3 336 communes, 80 entrées, 2 sorties). Le
+// registre des critères, l'orientation et le verdict peuvent changer : c'est ce que le moteur CONCLUT. Un dossier
+// engine-8 garde ses cartes, son rang et sa distribution (`mismatch-dist-2026-07-15`) tels qu'ils ont été vendus.
+export const ENGINE_VERSION = "engine-9";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

@@ -506,7 +506,7 @@ test("BOISEMENT élevé sans risque recensé : une VERIFICATION, et plus aucun �
   const f = r.facts.find((x) => x.ruleId === "territoire.climat-feu")!;
   assert.ok(f.role === "verification");
   assert.equal(f.materialityTier, "secondary");
-  assert.match(f.statement, /la forêt couvre 85 % du territoire communal/);
+  assert.match(f.statement, /la forêt couvre 84,7 % des terres de la commune/);
   assert.match(f.statement, /10 % de communes les plus boisées/);
   // JAMAIS un mismatch : un boisement élevé n'est pas un écart au projet établi.
   assert.notEqual(f.role, "mismatch");

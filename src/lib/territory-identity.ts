@@ -12,6 +12,8 @@ import { DEMOGRAPHY_PHRASE, isDemographyCode, type UrbanRole } from "./territoir
 import { REPERE_PRES_DU_RIVAGE_KM } from "./mer-recherche.ts";
 import { kmLisible } from "./hard-constraints.ts";
 import { deCommune } from "./typography.ts";
+import { dixiemeOso } from "./territoire/oso-format.ts";
+import { limiteGeographique, type CauseHorsFrance, type StatutSecteur } from "./oso/secteur-habite.ts";
 import { normaliserRoleUrbain, peutDireVille, SEUIL_HABITANTS_VILLE } from "./territoire/statut-urbain.ts";
 
 export type TerritoryIdentity = {
@@ -161,8 +163,13 @@ export type CouvertCardData = {
   // FUT-183 : toutes les parts au dixième, à afficher avec `pctOso`.
   naturelTerresPct: number; // FUT-175 : milieux naturels terrestres, en % des TERRES (eau exclue)
   eauPct: number | null; // part de l'eau dans la surface cartographiée de la commune, comptée à part
-  radiusPct: number | null; // naturel et eau confondus dans 15 km (l'eau n'a pas pu en être retirée)
+  // FUT-182 : le secteur habité (terres à 15 km des zones bâties), avec sa limite géographique quand il y en a une.
+  // `nonCalculable` : aucune zone bâtie détectée par OSO ; aucune valeur n'est montrée.
+  secteur: { valeur: number; p10: number; p90: number; limite: string | null } | { nonCalculable: true } | null;
   composition: { label: string; pct: number }[]; // postes terrestres, en % des terres, triés décroissant
+  // FUT-182 : les serres comptent dans « Terres agricoles » (comme dans la catégorie) ; leur part propre est dite à côté,
+  // quand elle atteint 1 %, jamais comme une activité.
+  serresPct: number | null;
 };
 
 export type TerritoryCards = {
@@ -177,9 +184,10 @@ export const COMPOSITION_LABELS: Record<string, string> = {
   prairies: "Prairies",
   landes_pelouses: "Landes et pelouses",
   mineral_dunes: "Roche et dunes",
+  // FUT-182 : OSO 24, poste distinct rattaché aux cultures ; classe peu fiable isolément (F-score 0,27).
+  serres: "Serres",
 };
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
 
 const DEMOGRAPHIE_WINDOW_YEARS = 6; // 2015 -> 2021
 
@@ -207,18 +215,32 @@ export function buildTerritoryCards(snapshot: FactsSnapshot): TerritoryCards {
   const composition = valueOf<Record<string, number>>(snapshot, "land.composition");
   const brut = valueOf<number>(snapshot, "land.natural_share");
   if (land && composition && brut != null) {
-    const radius = valueOf<number>(snapshot, "land.natural_share_15km");
+    const secteur = valueOf<{ statut: StatutSecteur; valeur?: number; p10?: number; p90?: number; couvertFrPct?: number; cause?: CauseHorsFrance | null }>(snapshot, "land.natural_share_sector");
     const eau = valueOf<number>(snapshot, "land.water_share");
-    // FUT-183 : au dixième, comme la catégorie (cf. `pctOso`, territoire/oso-format.ts) ; le rayon aussi, pour une seule précision par carte.
+    // FUT-183 : au dixième, comme la catégorie (cf. `pctOso`, territoire/oso-format.ts) ; le secteur aussi, pour une seule précision par carte.
     couvertNaturel = {
       headlineLabel: land.label,
-      naturelTerresPct: round1(brut),
-      eauPct: eau != null ? round1(eau) : null,
-      radiusPct: radius != null ? round1(radius) : null,
+      naturelTerresPct: dixiemeOso(brut),
+      eauPct: eau != null ? dixiemeOso(eau) : null,
+      secteur: secteur == null
+        ? null
+        : secteur.statut === "non_calculable"
+          ? { nonCalculable: true }
+          : {
+              valeur: dixiemeOso(secteur.valeur!), p10: dixiemeOso(secteur.p10!), p90: dixiemeOso(secteur.p90!),
+              // La limite géographique seule (la phrase de lecture générale reste au pied du volet).
+              limite: limiteGeographique(secteur.statut, secteur.couvertFrPct ?? 100, secteur.cause ?? null),
+            },
+      // FUT-182 : la ventilation suit la catégorie. Les serres sont additionnées aux cultures AVANT la troncature : un
+      // « 48,9 % de terres agricoles » sous « À dominante agricole » (49,0 % de cultures et 1,2 % de serres) ne se
+      // relisait pas.
       composition: Object.entries(composition)
+        .filter(([k]) => k !== "serres")
+        .map(([k, v]): [string, number] => [k, k === "agricole" ? v + (composition.serres ?? 0) : v])
         .filter(([, v]) => typeof v === "number" && v >= 1)
-        .map(([k, v]) => ({ label: COMPOSITION_LABELS[k] ?? k, pct: round1(v) }))
+        .map(([k, v]) => ({ label: COMPOSITION_LABELS[k] ?? k, pct: dixiemeOso(v) }))
         .sort((a, b) => b.pct - a.pct),
+      serresPct: (composition.serres ?? 0) >= 1 ? dixiemeOso(composition.serres!) : null,
     };
   }
 

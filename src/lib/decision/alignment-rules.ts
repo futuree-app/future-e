@@ -84,7 +84,8 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
         evidence: [ev],
         // Nuance MÉTHODOLOGIQUE card-only héritée du critère (ERA5-Land, 1976-2005) : elle vaut pour la
         // position favorable comme pour la défavorable. Jamais une limite de portée.
-        ...(lab.limitation ? { limitation: lab.limitation } : {}),
+        // FUT-182 : pour le rang « Espaces naturels », la limite géographique du secteur habité s'y ajoute (50 à 75 %).
+        ...(lab.limitation ? { limitation: key === "nature" && f.natureLimite ? `${lab.limitation} ${f.natureLimite}` : lab.limitation } : {}),
       };
       return ret("satisfied", [fact], "position relative favorable, matérialisée");
     },

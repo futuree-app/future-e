@@ -32,7 +32,7 @@ type Commune = IndexCommune & { rankBands?: Record<string, [number, number]> };
 const communes: Commune[] = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8")).communes;
 const parInsee = new Map(communes.map((c) => [c.insee, c]));
 
-const RECALCULEES: PreferenceKey[] = ["acces_services", "acces_ecoles", "acces_culture", "vie_locale"];
+const RECALCULEES: PreferenceKey[] = ["acces_services", "acces_ecoles", "acces_culture", "vie_locale", "nature"];
 const HISTORIQUES = MISMATCH_RANK_KEYS.filter((k) => !RECALCULEES.includes(k));
 
 // L'empreinte d'une distribution publiée : les lignes `insee \t bas \t haut` des communes classées, triées.
@@ -71,13 +71,13 @@ test("registre : par critère, une identité désigne une seule distribution, et
   }
 });
 
-test("les critères recalculés (FUT-136, FUT-137) ont chacun une identité propre ; les autres gardent l'identité historique", () => {
+test("les critères recalculés (FUT-136, FUT-137, FUT-182) ont chacun une identité propre ; les autres gardent l'identité historique", () => {
   for (const k of HISTORIQUES) assert.equal(distributionVersionDe(k), MISMATCH_DISTRIBUTION_VERSION, k);
   assert.equal(MISMATCH_DISTRIBUTION_VERSION, "mismatch-dist-2026-07-15");
   const nouvelles = RECALCULEES.map(distributionVersionDe);
   assert.deepEqual(nouvelles, [
     "mismatch-dist-2026-10-26-acces_services", "mismatch-dist-2026-10-26-acces_ecoles", "mismatch-dist-2026-10-26-acces_culture",
-    "mismatch-dist-2026-11-04-vie_locale",
+    "mismatch-dist-2026-11-04-vie_locale", "mismatch-dist-2026-11-10-nature",
   ]);
   // Une identité nouvelle n'est portée que par son critère (aucune clé non concernée ne la reçoit).
   for (const k of MISMATCH_RANK_KEYS) {
