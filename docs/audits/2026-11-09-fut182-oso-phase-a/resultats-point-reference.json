@@ -1,0 +1,427 @@
+{
+ "identite": {
+  "communes": 34743,
+  "geoapi_centre_disponible": 34743,
+  "geoapi_mairie_disponible": 34743,
+  "index_egal_geoapi_centre_4_decimales": 34743,
+  "distance_index_vers_m": {
+   "geoapi_centre": {
+    "mediane": 0,
+    "p90": 0,
+    "p99": 0,
+    "max": 0
+   },
+   "centroide_contour": {
+    "mediane": 241,
+    "p90": 582,
+    "p99": 1148,
+    "max": 13898
+   },
+   "centre_emprise": {
+    "mediane": 19,
+    "p90": 69,
+    "p99": 237,
+    "max": 6058
+   },
+   "point_interieur": {
+    "mediane": 213,
+    "p90": 784,
+    "p99": 1933,
+    "max": 15887
+   },
+   "mairie": {
+    "mediane": 821,
+    "p90": 1895,
+    "p99": 3872,
+    "max": 14874
+   }
+  },
+  "index_a_moins_de_20m_du": {
+   "centroide": 225,
+   "centre_emprise": 18228,
+   "point_interieur": 1185
+  },
+  "dans_le_contour": {
+   "index": 34260,
+   "mairie": 34730,
+   "centroide": 34549
+  },
+  "hors_contour_a_plus_de_50m": {
+   "index": 0,
+   "mairie": 8,
+   "centroide": 140
+  }
+ },
+ "mairie_la_plus_loin_du_point": [
+  [
+   "13004",
+   "Arles",
+   14.87,
+   757.1
+  ],
+  [
+   "50218",
+   "Granville",
+   12.96,
+   10.0
+  ],
+  [
+   "65059",
+   "Bagnères-de-Bigorre",
+   11.19,
+   126.1
+  ],
+  [
+   "2B301",
+   "San-Gavino-di-Tenda",
+   9.45,
+   50.6
+  ],
+  [
+   "2A362",
+   "Zonza",
+   9.23,
+   134.7
+  ],
+  [
+   "64320",
+   "Laruns",
+   9.09,
+   248.7
+  ],
+  [
+   "33229",
+   "Lanton",
+   8.91,
+   137.6
+  ],
+  [
+   "49301",
+   "Sèvremoine",
+   8.77,
+   214.9
+  ],
+  [
+   "65388",
+   "Saint-Lary-Soulan",
+   8.76,
+   91.4
+  ],
+  [
+   "83069",
+   "Hyères",
+   8.63,
+   133.8
+  ],
+  [
+   "09030",
+   "Auzat",
+   8.58,
+   163.2
+  ],
+  [
+   "09024",
+   "Aston",
+   8.58,
+   154.2
+  ],
+  [
+   "65123",
+   "Campan",
+   8.54,
+   97.3
+  ],
+  [
+   "2B314",
+   "Santo-Pietro-di-Tenda",
+   8.48,
+   126.1
+  ],
+  [
+   "29040",
+   "Le Conquet",
+   8.3,
+   9.2
+  ],
+  [
+   "65465",
+   "Vielle-Aure",
+   8.3,
+   35.4
+  ],
+  [
+   "49307",
+   "Loire-Authion",
+   7.91,
+   114.6
+  ],
+  [
+   "73015",
+   "Les Allues",
+   7.9,
+   85.9
+  ],
+  [
+   "2A300",
+   "San-Gavino-di-Carbini",
+   7.87,
+   48.0
+  ],
+  [
+   "04193",
+   "Saint-Paul-sur-Ubaye",
+   7.75,
+   205.9
+  ]
+ ],
+ "mairie_distance_paliers": {
+  ">500m": 25847,
+  ">1000m": 13436,
+  ">2000m": 2982,
+  ">5000m": 136
+ },
+ "sensibilite_C1_mairie_vs_index": {
+  "delta_radius_terres": {
+   "abs_mediane": 0.3,
+   "p99_abs": 3.4,
+   "abs_ge_2": 1331,
+   "abs_ge_5": 109,
+   "abs_ge_10": 7,
+   "min": -12.8,
+   "max": 12.5
+  },
+  "score_change": 15537,
+  "score_abs_ge_5": 314,
+  "score_abs_ge_10": 27,
+  "verdict_rang_change": 425,
+  "plus_forts": [
+   [
+    "67052",
+    "Bœrsch",
+    5.2,
+    73.9,
+    61.1,
+    68,
+    53
+   ],
+   [
+    "50218",
+    "Granville",
+    13.0,
+    47.3,
+    59.8,
+    33,
+    52
+   ],
+   [
+    "45179",
+    "Lailly-en-Val",
+    3.5,
+    66.0,
+    55.0,
+    60,
+    45
+   ],
+   [
+    "67368",
+    "Ottrott",
+    4.7,
+    75.0,
+    64.2,
+    69,
+    58
+   ],
+   [
+    "68280",
+    "Rodern",
+    3.7,
+    71.2,
+    60.7,
+    65,
+    53
+   ],
+   [
+    "67411",
+    "Rosheim",
+    4.0,
+    65.6,
+    55.3,
+    59,
+    45
+   ],
+   [
+    "84015",
+    "Beaumont-du-Ventoux",
+    4.3,
+    79.7,
+    69.6,
+    74,
+    64
+   ],
+   [
+    "47021",
+    "Barbaste",
+    4.0,
+    63.2,
+    53.4,
+    56,
+    43
+   ],
+   [
+    "33521",
+    "Talais",
+    3.4,
+    70.5,
+    80.3,
+    65,
+    75
+   ],
+   [
+    "26100",
+    "Combovin",
+    3.3,
+    73.9,
+    64.2,
+    68,
+    58
+   ],
+   [
+    "14431",
+    "Mézidon Vallée d'Auge",
+    3.9,
+    63.1,
+    53.5,
+    56,
+    43
+   ],
+   [
+    "84017",
+    "Bédoin",
+    4.4,
+    79.8,
+    70.2,
+    74,
+    64
+   ],
+   [
+    "33449",
+    "Saint-Médard-en-Jalles",
+    5.2,
+    79.8,
+    70.7,
+    74,
+    65
+   ],
+   [
+    "83069",
+    "Hyères",
+    8.6,
+    73.9,
+    64.9,
+    68,
+    59
+   ],
+   [
+    "33490",
+    "Saint-Vivien-de-Médoc",
+    5.1,
+    72.0,
+    80.8,
+    66,
+    75
+   ]
+  ]
+ },
+ "cas": {
+  "13004": {
+   "nom": "Arles",
+   "distance_mairie_km": 14.87,
+   "C1_terres_index": 56.1,
+   "C1_terres_mairie": 49.0
+  },
+  "13096": {
+   "nom": "Saintes-Maries-de-la-Mer",
+   "distance_mairie_km": 5.01,
+   "C1_terres_index": 56.0,
+   "C1_terres_mairie": 64.0
+  },
+  "77186": {
+   "nom": "Fontainebleau",
+   "distance_mairie_km": 2.57,
+   "C1_terres_index": 63.5,
+   "C1_terres_mairie": 63.6
+  },
+  "50218": {
+   "nom": "Granville",
+   "distance_mairie_km": 12.96,
+   "C1_terres_index": 47.3,
+   "C1_terres_mairie": 59.8
+  },
+  "74056": {
+   "nom": "Chamonix-Mont-Blanc",
+   "distance_mairie_km": 4.68,
+   "C1_terres_index": 98.0,
+   "C1_terres_mairie": 97.5
+  },
+  "2B096": {
+   "nom": "Corte",
+   "distance_mairie_km": 7.73,
+   "C1_terres_index": 99.7,
+   "C1_terres_mairie": 99.6
+  },
+  "33063": {
+   "nom": "Bordeaux",
+   "distance_mairie_km": 2.75,
+   "C1_terres_index": 55.8,
+   "C1_terres_mairie": 56.0
+  },
+  "17094": {
+   "nom": "Châtelaillon-Plage",
+   "distance_mairie_km": 0.77,
+   "C1_terres_index": 27.4,
+   "C1_terres_mairie": 27.3
+  },
+  "34301": {
+   "nom": "Sète",
+   "distance_mairie_km": 4.62,
+   "C1_terres_index": 44.8,
+   "C1_terres_mairie": 53.0
+  },
+  "85113": {
+   "nom": "L'Île-d'Yeu",
+   "distance_mairie_km": 1.71,
+   "C1_terres_index": 70.9,
+   "C1_terres_mairie": 70.9
+  },
+  "38185": {
+   "nom": "Grenoble",
+   "distance_mairie_km": 1.66,
+   "C1_terres_index": 79.1,
+   "C1_terres_mairie": 78.9
+  },
+  "06088": {
+   "nom": "Nice",
+   "distance_mairie_km": 1.7,
+   "C1_terres_index": 70.8,
+   "C1_terres_mairie": 69.7
+  },
+  "45234": {
+   "nom": "Orléans",
+   "distance_mairie_km": 3.27,
+   "C1_terres_index": 53.3,
+   "C1_terres_mairie": 48.6
+  },
+  "49092": {
+   "nom": "Chemillé-en-Anjou",
+   "distance_mairie_km": 2.85,
+   "C1_terres_index": 55.2,
+   "C1_terres_mairie": 56.0
+  },
+  "50129": {
+   "nom": "Cherbourg-en-Cotentin",
+   "distance_mairie_km": 1.83,
+   "C1_terres_index": 68.3,
+   "C1_terres_mairie": 68.4
+  }
+ }
+}

@@ -1,0 +1,1678 @@
+{
+ "identite_cache": {
+  "communes_cache": 34743,
+  "communes_comptees": 34746,
+  "ecarts": {},
+  "exemples": {},
+  "comptees_hors_cache": [
+   [
+    "13055",
+    "Marseille",
+    2381230
+   ],
+   [
+    "69123",
+    "Lyon",
+    479003
+   ],
+   [
+    "75056",
+    "Paris",
+    1054295
+   ]
+  ]
+ },
+ "couverture": {
+  "regle": "mesuré = pixels 1-24 (serres comprises : elles sont classées) ; non mesuré = 0, 255, autres valeurs, et la part du contour sans pixel (hors emprise du raster), rapportés à l'aire du contour",
+  "national_km2": {
+   "aire_contours": 548857.9,
+   "classes_1_24": 548856.1,
+   "v0_dans_contours": 1.86,
+   "v255": 0,
+   "autres_valeurs": 0,
+   "hors_emprise": 16.65
+  },
+  "quantiles_mesure_pct": {
+   "0.1": 99.893,
+   "1": 99.956,
+   "5": 99.977,
+   "50": 100.0
+  },
+  "communes_sous": {
+   "99.5": 1,
+   "99": 0,
+   "98": 0,
+   "95": 0,
+   "90": 0
+  },
+  "plus_basses": [
+   [
+    "44125",
+    "Piriac-sur-Mer",
+    99.29,
+    862,
+    5
+   ],
+   [
+    "62791",
+    "Séricourt",
+    99.62,
+    100,
+    0
+   ],
+   [
+    "50507",
+    "Saint-Marcouf",
+    99.69,
+    421,
+    4
+   ],
+   [
+    "47113",
+    "Grayssas",
+    99.71,
+    258,
+    11
+   ],
+   [
+    "12070",
+    "Compeyre",
+    99.73,
+    267,
+    15
+   ],
+   [
+    "41290",
+    "Villeromain",
+    99.76,
+    298,
+    15
+   ],
+   [
+    "67450",
+    "Schirrhoffen",
+    99.76,
+    0,
+    16
+   ],
+   [
+    "59332",
+    "Lannoy",
+    99.77,
+    0,
+    4
+   ],
+   [
+    "12200",
+    "Rivière-sur-Tarn",
+    99.79,
+    562,
+    0
+   ],
+   [
+    "54074",
+    "Bienville-la-Petite",
+    99.79,
+    49,
+    0
+   ],
+   [
+    "82138",
+    "Perville",
+    99.79,
+    204,
+    0
+   ],
+   [
+    "28323",
+    "Saint-Ange-et-Torçay",
+    99.8,
+    299,
+    27
+   ],
+   [
+    "47067",
+    "Clermont-Soubiran",
+    99.8,
+    197,
+    12
+   ],
+   [
+    "76437",
+    "Meulers",
+    99.8,
+    125,
+    10
+   ],
+   [
+    "85134",
+    "Mallièvre",
+    99.81,
+    0,
+    4
+   ],
+   [
+    "65411",
+    "Sassis",
+    99.83,
+    0,
+    10
+   ],
+   [
+    "33103",
+    "Castelmoron-d'Albret",
+    99.84,
+    0,
+    0
+   ],
+   [
+    "57743",
+    "Waltembourg",
+    99.84,
+    0,
+    22
+   ],
+   [
+    "65291",
+    "Lugagnan",
+    99.84,
+    0,
+    13
+   ],
+   [
+    "11118",
+    "Dernacueillette",
+    99.86,
+    122,
+    0
+   ]
+  ]
+ },
+ "plm": {
+  "75056": {
+   "nom": "Paris",
+   "arrondissements": 20,
+   "pixels_commune": 1054295,
+   "pixels_somme": 1054295,
+   "ecart_total_px": 0,
+   "ecart_abs_par_valeur_px": 0,
+   "ecart_relatif": 0.0,
+   "aire_somme_moins_commune_m2": -0.1,
+   "parts_commune": {
+    "naturel_terres": 17.25,
+    "foret_terres": 14.83,
+    "urbanise_terres": 81.89,
+    "eau_pct_mesure": 2.68
+   },
+   "parts_somme_arrondissements": {
+    "naturel_terres": 17.25,
+    "foret_terres": 14.83,
+    "urbanise_terres": 81.89,
+    "eau_pct_mesure": 2.68
+   },
+   "par_arrondissement": {
+    "75101": {
+     "nom": "Paris 1er Arrondissement",
+     "naturel_terres": 6.35,
+     "foret_terres": 2.43,
+     "urbanise_terres": 89.48,
+     "eau_pct_mesure": 8.68,
+     "mesure_pct": 99.98
+    },
+    "75102": {
+     "nom": "Paris 2e Arrondissement",
+     "naturel_terres": 0.17,
+     "foret_terres": 0.17,
+     "urbanise_terres": 99.78,
+     "eau_pct_mesure": 0.71,
+     "mesure_pct": 100.02
+    },
+    "75103": {
+     "nom": "Paris 3e Arrondissement",
+     "naturel_terres": 0.42,
+     "foret_terres": 0.41,
+     "urbanise_terres": 99.48,
+     "eau_pct_mesure": 0.19,
+     "mesure_pct": 99.96
+    },
+    "75104": {
+     "nom": "Paris 4e Arrondissement",
+     "naturel_terres": 1.59,
+     "foret_terres": 1.56,
+     "urbanise_terres": 97.5,
+     "eau_pct_mesure": 11.37,
+     "mesure_pct": 99.99
+    },
+    "75105": {
+     "nom": "Paris 5e Arrondissement",
+     "naturel_terres": 5.03,
+     "foret_terres": 4.46,
+     "urbanise_terres": 93.76,
+     "eau_pct_mesure": 3.74,
+     "mesure_pct": 99.98
+    },
+    "75106": {
+     "nom": "Paris 6e Arrondissement",
+     "naturel_terres": 6.59,
+     "foret_terres": 5.78,
+     "urbanise_terres": 91.41,
+     "eau_pct_mesure": 2.46,
+     "mesure_pct": 100.01
+    },
+    "75107": {
+     "nom": "Paris 7e Arrondissement",
+     "naturel_terres": 8.04,
+     "foret_terres": 6.8,
+     "urbanise_terres": 90.16,
+     "eau_pct_mesure": 4.79,
+     "mesure_pct": 99.95
+    },
+    "75108": {
+     "nom": "Paris 8e Arrondissement",
+     "naturel_terres": 5.7,
+     "foret_terres": 5.22,
+     "urbanise_terres": 92.89,
+     "eau_pct_mesure": 1.98,
+     "mesure_pct": 100.05
+    },
+    "75109": {
+     "nom": "Paris 9e Arrondissement",
+     "naturel_terres": 0.9,
+     "foret_terres": 0.87,
+     "urbanise_terres": 98.98,
+     "eau_pct_mesure": 0.34,
+     "mesure_pct": 100.02
+    },
+    "75110": {
+     "nom": "Paris 10e Arrondissement",
+     "naturel_terres": 1.3,
+     "foret_terres": 1.23,
+     "urbanise_terres": 98.37,
+     "eau_pct_mesure": 1.36,
+     "mesure_pct": 99.99
+    },
+    "75111": {
+     "nom": "Paris 11e Arrondissement",
+     "naturel_terres": 1.08,
+     "foret_terres": 1.03,
+     "urbanise_terres": 98.57,
+     "eau_pct_mesure": 0.08,
+     "mesure_pct": 100.01
+    },
+    "75112": {
+     "nom": "Paris 12e Arrondissement",
+     "naturel_terres": 46.85,
+     "foret_terres": 41.69,
+     "urbanise_terres": 51.92,
+     "eau_pct_mesure": 2.44,
+     "mesure_pct": 100.01
+    },
+    "75113": {
+     "nom": "Paris 13e Arrondissement",
+     "naturel_terres": 3.47,
+     "foret_terres": 3.1,
+     "urbanise_terres": 95.75,
+     "eau_pct_mesure": 3.24,
+     "mesure_pct": 100.01
+    },
+    "75114": {
+     "nom": "Paris 14e Arrondissement",
+     "naturel_terres": 8.16,
+     "foret_terres": 6.88,
+     "urbanise_terres": 91.46,
+     "eau_pct_mesure": 0.84,
+     "mesure_pct": 100.01
+    },
+    "75115": {
+     "nom": "Paris 15e Arrondissement",
+     "naturel_terres": 5.58,
+     "foret_terres": 4.65,
+     "urbanise_terres": 93.98,
+     "eau_pct_mesure": 3.99,
+     "mesure_pct": 99.99
+    },
+    "75116": {
+     "nom": "Paris 16e Arrondissement",
+     "naturel_terres": 41.82,
+     "foret_terres": 34.22,
+     "urbanise_terres": 57.27,
+     "eau_pct_mesure": 4.59,
+     "mesure_pct": 100.0
+    },
+    "75117": {
+     "nom": "Paris 17e Arrondissement",
+     "naturel_terres": 4.02,
+     "foret_terres": 3.82,
+     "urbanise_terres": 95.45,
+     "eau_pct_mesure": 0.78,
+     "mesure_pct": 99.98
+    },
+    "75118": {
+     "nom": "Paris 18e Arrondissement",
+     "naturel_terres": 3.51,
+     "foret_terres": 3.12,
+     "urbanise_terres": 95.9,
+     "eau_pct_mesure": 0.3,
+     "mesure_pct": 100.01
+    },
+    "75119": {
+     "nom": "Paris 19e Arrondissement",
+     "naturel_terres": 9.15,
+     "foret_terres": 8.14,
+     "urbanise_terres": 90.38,
+     "eau_pct_mesure": 2.36,
+     "mesure_pct": 99.97
+    },
+    "75120": {
+     "nom": "Paris 20e Arrondissement",
+     "naturel_terres": 7.51,
+     "foret_terres": 7.04,
+     "urbanise_terres": 91.83,
+     "eau_pct_mesure": 0.17,
+     "mesure_pct": 99.99
+    }
+   }
+  },
+  "69123": {
+   "nom": "Lyon",
+   "arrondissements": 9,
+   "pixels_commune": 479003,
+   "pixels_somme": 479003,
+   "ecart_total_px": 0,
+   "ecart_abs_par_valeur_px": 0,
+   "ecart_relatif": 0.0,
+   "aire_somme_moins_commune_m2": 0.1,
+   "parts_commune": {
+    "naturel_terres": 15.57,
+    "foret_terres": 13.94,
+    "urbanise_terres": 81.91,
+    "eau_pct_mesure": 6.51
+   },
+   "parts_somme_arrondissements": {
+    "naturel_terres": 15.57,
+    "foret_terres": 13.94,
+    "urbanise_terres": 81.91,
+    "eau_pct_mesure": 6.51
+   },
+   "par_arrondissement": {
+    "69381": {
+     "nom": "Lyon 1er Arrondissement",
+     "naturel_terres": 13.52,
+     "foret_terres": 13.21,
+     "urbanise_terres": 85.61,
+     "eau_pct_mesure": 11.19,
+     "mesure_pct": 99.95
+    },
+    "69382": {
+     "nom": "Lyon 2e Arrondissement",
+     "naturel_terres": 3.27,
+     "foret_terres": 2.87,
+     "urbanise_terres": 93.36,
+     "eau_pct_mesure": 24.22,
+     "mesure_pct": 100.02
+    },
+    "69383": {
+     "nom": "Lyon 3e Arrondissement",
+     "naturel_terres": 4.47,
+     "foret_terres": 4.05,
+     "urbanise_terres": 94.18,
+     "eau_pct_mesure": 1.01,
+     "mesure_pct": 100.0
+    },
+    "69384": {
+     "nom": "Lyon 4e Arrondissement",
+     "naturel_terres": 27.36,
+     "foret_terres": 25.94,
+     "urbanise_terres": 71.98,
+     "eau_pct_mesure": 6.93,
+     "mesure_pct": 100.02
+    },
+    "69385": {
+     "nom": "Lyon 5e Arrondissement",
+     "naturel_terres": 30.94,
+     "foret_terres": 28.27,
+     "urbanise_terres": 68.59,
+     "eau_pct_mesure": 2.35,
+     "mesure_pct": 100.01
+    },
+    "69386": {
+     "nom": "Lyon 6e Arrondissement",
+     "naturel_terres": 23.56,
+     "foret_terres": 19.69,
+     "urbanise_terres": 70.81,
+     "eau_pct_mesure": 9.15,
+     "mesure_pct": 99.98
+    },
+    "69387": {
+     "nom": "Lyon 7e Arrondissement",
+     "naturel_terres": 5.79,
+     "foret_terres": 4.27,
+     "urbanise_terres": 88.93,
+     "eau_pct_mesure": 9.72,
+     "mesure_pct": 100.01
+    },
+    "69388": {
+     "nom": "Lyon 8e Arrondissement",
+     "naturel_terres": 2.9,
+     "foret_terres": 2.09,
+     "urbanise_terres": 93.99,
+     "eau_pct_mesure": 0.13,
+     "mesure_pct": 99.98
+    },
+    "69389": {
+     "nom": "Lyon 9e Arrondissement",
+     "naturel_terres": 32.76,
+     "foret_terres": 30.31,
+     "urbanise_terres": 66.61,
+     "eau_pct_mesure": 5.75,
+     "mesure_pct": 100.0
+    }
+   }
+  },
+  "13055": {
+   "nom": "Marseille",
+   "arrondissements": 16,
+   "pixels_commune": 2381230,
+   "pixels_somme": 2381230,
+   "ecart_total_px": 0,
+   "ecart_abs_par_valeur_px": 0,
+   "ecart_relatif": 0.0,
+   "aire_somme_moins_commune_m2": -0.2,
+   "parts_commune": {
+    "naturel_terres": 52.94,
+    "foret_terres": 13.18,
+    "urbanise_terres": 43.85,
+    "eau_pct_mesure": 0.45
+   },
+   "parts_somme_arrondissements": {
+    "naturel_terres": 52.94,
+    "foret_terres": 13.18,
+    "urbanise_terres": 43.85,
+    "eau_pct_mesure": 0.45
+   },
+   "par_arrondissement": {
+    "13201": {
+     "nom": "Marseille 1er Arrondissement",
+     "naturel_terres": 5.7,
+     "foret_terres": 1.05,
+     "urbanise_terres": 92.79,
+     "eau_pct_mesure": 0.97,
+     "mesure_pct": 100.0
+    },
+    "13202": {
+     "nom": "Marseille 2e Arrondissement",
+     "naturel_terres": 31.92,
+     "foret_terres": 0.24,
+     "urbanise_terres": 66.17,
+     "eau_pct_mesure": 4.74,
+     "mesure_pct": 99.95
+    },
+    "13203": {
+     "nom": "Marseille 3e Arrondissement",
+     "naturel_terres": 6.1,
+     "foret_terres": 1.06,
+     "urbanise_terres": 91.51,
+     "eau_pct_mesure": 0.37,
+     "mesure_pct": 99.98
+    },
+    "13204": {
+     "nom": "Marseille 4e Arrondissement",
+     "naturel_terres": 8.96,
+     "foret_terres": 3.38,
+     "urbanise_terres": 89.83,
+     "eau_pct_mesure": 0.34,
+     "mesure_pct": 100.02
+    },
+    "13205": {
+     "nom": "Marseille 5e Arrondissement",
+     "naturel_terres": 4.48,
+     "foret_terres": 1.18,
+     "urbanise_terres": 94.63,
+     "eau_pct_mesure": 0.47,
+     "mesure_pct": 99.96
+    },
+    "13206": {
+     "nom": "Marseille 6e Arrondissement",
+     "naturel_terres": 6.0,
+     "foret_terres": 2.76,
+     "urbanise_terres": 93.15,
+     "eau_pct_mesure": 0.14,
+     "mesure_pct": 100.05
+    },
+    "13207": {
+     "nom": "Marseille 7e Arrondissement",
+     "naturel_terres": 34.66,
+     "foret_terres": 4.63,
+     "urbanise_terres": 62.48,
+     "eau_pct_mesure": 1.63,
+     "mesure_pct": 100.05
+    },
+    "13208": {
+     "nom": "Marseille 8e Arrondissement",
+     "naturel_terres": 50.59,
+     "foret_terres": 15.37,
+     "urbanise_terres": 45.68,
+     "eau_pct_mesure": 0.72,
+     "mesure_pct": 99.92
+    },
+    "13209": {
+     "nom": "Marseille 9e Arrondissement",
+     "naturel_terres": 81.97,
+     "foret_terres": 16.4,
+     "urbanise_terres": 16.47,
+     "eau_pct_mesure": 0.13,
+     "mesure_pct": 100.0
+    },
+    "13210": {
+     "nom": "Marseille 10e Arrondissement",
+     "naturel_terres": 38.76,
+     "foret_terres": 7.38,
+     "urbanise_terres": 58.33,
+     "eau_pct_mesure": 0.11,
+     "mesure_pct": 100.0
+    },
+    "13211": {
+     "nom": "Marseille 11e Arrondissement",
+     "naturel_terres": 57.02,
+     "foret_terres": 24.05,
+     "urbanise_terres": 39.16,
+     "eau_pct_mesure": 0.08,
+     "mesure_pct": 100.0
+    },
+    "13212": {
+     "nom": "Marseille 12e Arrondissement",
+     "naturel_terres": 21.03,
+     "foret_terres": 12.41,
+     "urbanise_terres": 74.91,
+     "eau_pct_mesure": 0.1,
+     "mesure_pct": 100.0
+    },
+    "13213": {
+     "nom": "Marseille 13e Arrondissement",
+     "naturel_terres": 45.45,
+     "foret_terres": 10.3,
+     "urbanise_terres": 49.53,
+     "eau_pct_mesure": 0.04,
+     "mesure_pct": 100.01
+    },
+    "13214": {
+     "nom": "Marseille 14e Arrondissement",
+     "naturel_terres": 42.61,
+     "foret_terres": 8.95,
+     "urbanise_terres": 50.88,
+     "eau_pct_mesure": 1.38,
+     "mesure_pct": 100.0
+    },
+    "13215": {
+     "nom": "Marseille 15e Arrondissement",
+     "naturel_terres": 33.73,
+     "foret_terres": 11.46,
+     "urbanise_terres": 63.36,
+     "eau_pct_mesure": 0.15,
+     "mesure_pct": 99.99
+    },
+    "13216": {
+     "nom": "Marseille 16e Arrondissement",
+     "naturel_terres": 58.44,
+     "foret_terres": 2.94,
+     "urbanise_terres": 38.92,
+     "eau_pct_mesure": 1.56,
+     "mesure_pct": 99.98
+    }
+   }
+  }
+ },
+ "seuils": {
+  "boisement_70": {
+   "regle": "avant : composition.foret (contour, eau comprise, arrondi) ≥ 70 ; après : forêt / terres, non arrondi, ≥ 70",
+   "avant": 3258,
+   "apres": 3336,
+   "entrent": 80,
+   "sortent": 2,
+   "exemples_entrent": [
+    [
+     "01010",
+     "Anglefort",
+     71.438
+    ],
+    [
+     "01138",
+     "Culoz-Béon",
+     70.317
+    ],
+    [
+     "01148",
+     "Dortan",
+     71.848
+    ],
+    [
+     "04033",
+     "Ubaye-Serre-Ponçon",
+     72.129
+    ],
+    [
+     "04036",
+     "Le Brusquet",
+     70.731
+    ],
+    [
+     "04154",
+     "Pontis",
+     76.247
+    ],
+    [
+     "04183",
+     "Saint-Julien-du-Verdon",
+     81.56
+    ],
+    [
+     "05121",
+     "Rochebrune",
+     71.743
+    ],
+    [
+     "05159",
+     "Saléon",
+     70.282
+    ],
+    [
+     "05164",
+     "Savines-le-Lac",
+     76.229
+    ],
+    [
+     "07157",
+     "Meysse",
+     72.037
+    ],
+    [
+     "07319",
+     "Le Teil",
+     70.924
+    ],
+    [
+     "08122",
+     "Chooz",
+     70.265
+    ],
+    [
+     "09329",
+     "Vernajoul",
+     70.5
+    ],
+    [
+     "15240",
+     "Trémouille",
+     71.16
+    ],
+    [
+     "19137",
+     "Meyrignac-l'Église",
+     70.157
+    ],
+    [
+     "19148",
+     "Neuvic",
+     70.907
+    ],
+    [
+     "19264",
+     "Soursac",
+     71.452
+    ],
+    [
+     "21262",
+     "Faverolles-lès-Lucey",
+     70.11
+    ],
+    [
+     "24068",
+     "Le Buisson-de-Cadouin",
+     70.47
+    ]
+   ],
+   "exemples_sortent": [
+    [
+     "30332",
+     "Trèves",
+     69.957
+    ],
+    [
+     "39425",
+     "Les Planches-près-Arbois",
+     69.992
+    ]
+   ],
+   "part_apres": 0.096,
+   "p90_foret_terres": 69.17,
+   "phrase_10_pct_vraie": true,
+   "arrondi_change_le_verdict": [
+    [
+     "16368",
+     "Sers",
+     69.981
+    ],
+    [
+     "19158",
+     "Pandrignes",
+     69.986
+    ],
+    [
+     "24381",
+     "Saint-Barthélemy-de-Bussière",
+     69.959
+    ],
+    [
+     "30230",
+     "Saint-André-de-Roquepertuis",
+     69.989
+    ],
+    [
+     "30332",
+     "Trèves",
+     69.957
+    ],
+    [
+     "33090",
+     "Canéjan",
+     69.972
+    ],
+    [
+     "39425",
+     "Les Planches-près-Arbois",
+     69.992
+    ],
+    [
+     "48085",
+     "Laval-du-Tarn",
+     69.966
+    ],
+    [
+     "77318",
+     "Mortcerf",
+     69.954
+    ]
+   ],
+   "entre_69_5_et_70_5": 191
+  },
+  "rural_agricole_30": {
+   "regle": "peu dense (< 1 500 hab/km²) ; avant : agricole du contour, eau comprise, sans serres ; après : cultures / terres, serres comprises",
+   "avant": 16970,
+   "apres": 17109,
+   "entrent": 143,
+   "sortent": 4,
+   "exemples_entrent": [
+    [
+     "01202",
+     "Lagnieu"
+    ],
+    [
+     "01264",
+     "Montracol"
+    ],
+    [
+     "02167",
+     "Chassemy"
+    ],
+    [
+     "02565",
+     "Œuilly"
+    ],
+    [
+     "02780",
+     "Venizel"
+    ],
+    [
+     "04123",
+     "Mison"
+    ],
+    [
+     "07009",
+     "Andance"
+    ],
+    [
+     "07174",
+     "Peyraud"
+    ],
+    [
+     "07308",
+     "Sarras"
+    ],
+    [
+     "08116",
+     "Bairon et ses environs"
+    ],
+    [
+     "10067",
+     "Buchères"
+    ],
+    [
+     "10165",
+     "Géraudot"
+    ],
+    [
+     "10209",
+     "Lusigny-sur-Barse"
+    ],
+    [
+     "11087",
+     "Cazalrenoux"
+    ],
+    [
+     "11331",
+     "Saint-Amans"
+    ]
+   ],
+   "exemples_sortent": [
+    [
+     "02476",
+     "Mennevret"
+    ],
+    [
+     "14482",
+     "Ouézy"
+    ],
+    [
+     "62020",
+     "Alembon"
+    ],
+    [
+     "65065",
+     "Barlest"
+    ]
+   ]
+  },
+  "rural_forestier_35": {
+   "regle": "peu dense ; avant : forêt du contour, eau comprise ; après : forêt / terres",
+   "avant": 13380,
+   "apres": 13494,
+   "entrent": 122,
+   "sortent": 8,
+   "exemples_entrent": [
+    [
+     "01145",
+     "Dompierre-sur-Veyle"
+    ],
+    [
+     "01383",
+     "Saint-Paul-de-Varax"
+    ],
+    [
+     "02110",
+     "Braine"
+    ],
+    [
+     "02610",
+     "Pommiers"
+    ],
+    [
+     "03011",
+     "Aurouër"
+    ],
+    [
+     "03160",
+     "Marcenat"
+    ],
+    [
+     "06033",
+     "Carros"
+    ],
+    [
+     "08409",
+     "Sedan"
+    ],
+    [
+     "10209",
+     "Lusigny-sur-Barse"
+    ],
+    [
+     "10238",
+     "Mesnil-Saint-Père"
+    ],
+    [
+     "13010",
+     "Barbentane"
+    ],
+    [
+     "18114",
+     "Ineuil"
+    ],
+    [
+     "18176",
+     "Parassy"
+    ],
+    [
+     "21189",
+     "Corberon"
+    ],
+    [
+     "21334",
+     "Lacanche"
+    ]
+   ],
+   "exemples_sortent": [
+    [
+     "01432",
+     "Verjon"
+    ],
+    [
+     "12203",
+     "Roquefort-sur-Soulzon"
+    ],
+    [
+     "14540",
+     "Rocques"
+    ],
+    [
+     "31072",
+     "Boissède"
+    ],
+    [
+     "42124",
+     "Lupé"
+    ],
+    [
+     "72211",
+     "Mont-Saint-Jean"
+    ],
+    [
+     "76315",
+     "Grainville-la-Teinturière"
+    ],
+    [
+     "76402",
+     "Malaunay"
+    ]
+   ]
+  },
+  "land_category": {
+   "regle": "avant : parts de l'application (index arrondi, eau retirée, serres ignorées, arrondi au dixième) ; après : comptes exacts S1",
+   "changements": 49,
+   "transitions": {
+    "high_natural->mixed": 15,
+    "mixed->agricultural": 11,
+    "agricultural->mixed": 9,
+    "mixed->low_natural": 3,
+    "high_natural->agricultural": 8,
+    "mostly_built->high_natural": 2,
+    "mostly_built->mixed": 1
+   },
+   "dont_effet_arrondi_seul_S0": 31
+  }
+ },
+ "serres": {
+  "national_km2": 204.7,
+  "communes_avec_serres": 11990,
+  "communes_serres_ge": {
+   "1": 330,
+   "2": 169,
+   "5": 35,
+   "10": 3,
+   "20": 0
+  },
+  "delta_cultures_pts": {
+   "max": 5.82,
+   "ge_1": 144,
+   "ge_5": 4
+  },
+  "delta_naturel_pts": {
+   "min": -4.74,
+   "le_moins_1": 80
+  },
+  "categorie_change_S0_S1": 20,
+  "categorie_transitions_S0_S1": {
+   "mixed->agricultural": 11,
+   "high_natural->mixed": 5,
+   "mostly_built->mixed": 1,
+   "mixed->low_natural": 1,
+   "high_natural->agricultural": 2
+  },
+  "seuils_S0_S1": {
+   "boisement_70": 1,
+   "rural_agricole_30": 13,
+   "rural_forestier_35": 2
+  },
+  "top": [
+   [
+    "76353",
+    "Héberville",
+    15.24,
+    78.72,
+    81.97,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "85255",
+    "Saint-Michel-en-l'Herm",
+    11.95,
+    55.63,
+    60.93,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "13083",
+    "Rognonas",
+    10.12,
+    43.38,
+    49.11,
+    "low_natural",
+    "low_natural"
+   ],
+   [
+    "76346",
+    "Hautot-l'Auvray",
+    9.37,
+    61.4,
+    65.01,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76104",
+    "Blosseville",
+    9.32,
+    74.28,
+    76.68,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "13036",
+    "Eyragues",
+    9.0,
+    43.5,
+    48.59,
+    "mixed",
+    "mixed"
+   ],
+   [
+    "76172",
+    "La Chapelle-sur-Dun",
+    8.96,
+    69.9,
+    72.6,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76669",
+    "Sausseuzemare-en-Caux",
+    8.51,
+    65.59,
+    68.52,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76004",
+    "Ambrumesnil",
+    8.48,
+    67.33,
+    70.1,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76158",
+    "Canville-les-Deux-Églises",
+    8.26,
+    74.77,
+    76.85,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76428",
+    "Le Mesnil-Durdent",
+    8.22,
+    61.41,
+    64.58,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "13027",
+    "Châteaurenard",
+    7.64,
+    39.89,
+    44.48,
+    "mixed",
+    "mixed"
+   ],
+   [
+    "76504",
+    "Pleine-Sève",
+    7.46,
+    73.68,
+    75.64,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "85104",
+    "Grues",
+    7.27,
+    51.26,
+    54.8,
+    "high_natural",
+    "agricultural"
+   ],
+   [
+    "44169",
+    "Saint-Julien-de-Concelles",
+    7.02,
+    17.01,
+    22.83,
+    "mixed",
+    "mixed"
+   ],
+   [
+    "76294",
+    "La Gaillarde",
+    6.82,
+    74.57,
+    76.3,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76695",
+    "Tocqueville-les-Murs",
+    6.61,
+    71.36,
+    73.26,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76515",
+    "Quiberville-sur-Mer",
+    6.43,
+    42.21,
+    45.93,
+    "mixed",
+    "mixed"
+   ],
+   [
+    "76340",
+    "Harcanville",
+    6.36,
+    65.01,
+    67.24,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76690",
+    "Thil-Manneville",
+    6.03,
+    67.62,
+    69.58,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76190",
+    "Crasville-la-Rocquefort",
+    6.0,
+    63.64,
+    65.82,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76272",
+    "Fontaine-le-Dun",
+    5.99,
+    54.2,
+    56.95,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76084",
+    "Bertreville",
+    5.83,
+    84.57,
+    85.47,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76546",
+    "Royville",
+    5.77,
+    52.38,
+    55.13,
+    "agricultural",
+    "agricultural"
+   ],
+   [
+    "76735",
+    "Veules-les-Roses",
+    5.59,
+    66.63,
+    68.5,
+    "agricultural",
+    "agricultural"
+   ]
+  ],
+  "cas_nommes": {
+   "76353": {
+    "nom": "Héberville",
+    "serres_pct_terres": 15.24,
+    "cultures_S0": 78.72,
+    "cultures_S1": 81.97,
+    "naturel_S0": 14.82,
+    "naturel_S1": 12.56,
+    "categorie_S0": "agricultural",
+    "categorie_S1": "agricultural",
+    "categorie_avant": "agricultural",
+    "mesure_pct_contour": 100.02
+   },
+   "13083": {
+    "nom": "Rognonas",
+    "serres_pct_terres": 10.12,
+    "cultures_S0": 43.38,
+    "cultures_S1": 49.11,
+    "naturel_S0": 19.88,
+    "naturel_S1": 17.87,
+    "categorie_S0": "low_natural",
+    "categorie_S1": "low_natural",
+    "categorie_avant": "low_natural",
+    "mesure_pct_contour": 100.01
+   },
+   "13027": {
+    "nom": "Châteaurenard",
+    "serres_pct_terres": 7.64,
+    "cultures_S0": 39.89,
+    "cultures_S1": 44.48,
+    "naturel_S0": 31.15,
+    "naturel_S1": 28.77,
+    "categorie_S0": "mixed",
+    "categorie_S1": "mixed",
+    "categorie_avant": "mixed",
+    "mesure_pct_contour": 100.0
+   }
+  }
+ },
+ "reproduction_A_depuis_comptes": {
+  "communes": 34743,
+  "radius_pct_ecarts": 0,
+  "score_ecarts": 0
+ },
+ "effet_eau_exact": {
+  "eau_seule_A": {
+   "score_change": 10405,
+   "abs_ge_5": 241,
+   "abs_ge_10": 81,
+   "delta_min_max": [
+    -25,
+    1
+   ],
+   "seuils": {
+    "34": 250,
+    "40": 253,
+    "50": 265,
+    "55": 198,
+    "60": 110,
+    "66": 81,
+    "70": 62,
+    "88": 20
+   },
+   "verdict_rang_change": 252,
+   "transitions": {
+    "neutral->mismatch": 103,
+    "satisfied->neutral": 19,
+    "mismatch->neutral": 115,
+    "neutral->satisfied": 15
+   },
+   "plus_forts": [
+    [
+     "17160",
+     "Floirac",
+     60.7,
+     43.9,
+     52,
+     27
+    ],
+    [
+     "17034",
+     "Barzan",
+     64.3,
+     46.9,
+     57,
+     32
+    ],
+    [
+     "17098",
+     "Chenac-Saint-Seurin-d'Uzet",
+     60.6,
+     43.3,
+     52,
+     27
+    ],
+    [
+     "17437",
+     "Talmont-sur-Gironde",
+     64.5,
+     47.2,
+     57,
+     33
+    ],
+    [
+     "17230",
+     "Meschers-sur-Gironde",
+     62.0,
+     46.2,
+     54,
+     31
+    ],
+    [
+     "30133",
+     "Le Grau-du-Roi",
+     67.4,
+     50.3,
+     61,
+     38
+    ],
+    [
+     "17015",
+     "Arces",
+     59.5,
+     44.3,
+     50,
+     28
+    ],
+    [
+     "17248",
+     "Mortagne-sur-Gironde",
+     59.0,
+     43.2,
+     49,
+     27
+    ]
+   ]
+  },
+  "geographie_seule_B": {
+   "score_change": 826,
+   "abs_ge_5": 3,
+   "abs_ge_10": 0,
+   "delta_min_max": [
+    -4,
+    7
+   ],
+   "seuils": {
+    "34": 11,
+    "40": 11,
+    "50": 9,
+    "55": 10,
+    "60": 6,
+    "66": 9,
+    "70": 6,
+    "88": 1
+   },
+   "verdict_rang_change": 13,
+   "transitions": {
+    "neutral->satisfied": 2,
+    "neutral->mismatch": 6,
+    "mismatch->neutral": 4,
+    "satisfied->neutral": 1
+   },
+   "plus_forts": [
+    [
+     "67068",
+     "Buswiller",
+     48.2,
+     52.4,
+     33,
+     40
+    ],
+    [
+     "67058",
+     "Bossendorf",
+     38.5,
+     43.3,
+     20,
+     26
+    ],
+    [
+     "67286",
+     "Meistratzheim",
+     44.3,
+     47.8,
+     27,
+     33
+    ],
+    [
+     "28248",
+     "Le Mesnil-Thomas",
+     34.7,
+     37.9,
+     15,
+     19
+    ],
+    [
+     "63461",
+     "Vinzelles",
+     61.1,
+     63.6,
+     52,
+     56
+    ],
+    [
+     "36040",
+     "La Chapelle-Orthemale",
+     59.6,
+     62.0,
+     50,
+     54
+    ],
+    [
+     "68173",
+     "Labaroche",
+     80.0,
+     75.9,
+     74,
+     70
+    ],
+    [
+     "67441",
+     "Schalkendorf",
+     56.0,
+     58.6,
+     45,
+     49
+    ]
+   ]
+  },
+  "combinaison_B_terres": {
+   "score_change": 10638,
+   "abs_ge_5": 244,
+   "abs_ge_10": 81,
+   "delta_min_max": [
+    -25,
+    8
+   ],
+   "seuils": {
+    "34": 252,
+    "40": 255,
+    "50": 265,
+    "55": 210,
+    "60": 112,
+    "66": 83,
+    "70": 66,
+    "88": 21
+   },
+   "verdict_rang_change": 257,
+   "transitions": {
+    "neutral->mismatch": 105,
+    "satisfied->neutral": 20,
+    "mismatch->neutral": 117,
+    "neutral->satisfied": 15
+   },
+   "plus_forts": [
+    [
+     "17160",
+     "Floirac",
+     60.7,
+     43.9,
+     52,
+     27
+    ],
+    [
+     "17098",
+     "Chenac-Saint-Seurin-d'Uzet",
+     60.6,
+     43.3,
+     52,
+     27
+    ],
+    [
+     "17034",
+     "Barzan",
+     64.3,
+     46.9,
+     57,
+     32
+    ],
+    [
+     "17437",
+     "Talmont-sur-Gironde",
+     64.5,
+     47.2,
+     57,
+     33
+    ],
+    [
+     "17230",
+     "Meschers-sur-Gironde",
+     62.0,
+     46.2,
+     54,
+     31
+    ],
+    [
+     "30133",
+     "Le Grau-du-Roi",
+     67.4,
+     50.3,
+     61,
+     38
+    ],
+    [
+     "30003",
+     "Aigues-Mortes",
+     60.9,
+     45.7,
+     52,
+     30
+    ],
+    [
+     "17248",
+     "Mortagne-sur-Gironde",
+     59.0,
+     43.2,
+     49,
+     27
+    ]
+   ]
+  },
+  "serres_a_methode_A": {
+   "score_change": 1377,
+   "abs_ge_5": 0,
+   "abs_ge_10": 0,
+   "delta_min_max": [
+    -2,
+    1
+   ],
+   "seuils": {
+    "34": 21,
+    "40": 4,
+    "50": 44,
+    "55": 9,
+    "60": 6,
+    "66": 2,
+    "70": 5,
+    "88": 0
+   },
+   "verdict_rang_change": 17,
+   "transitions": {
+    "satisfied->neutral": 2,
+    "neutral->mismatch": 15
+   },
+   "plus_forts": [
+    [
+     "13052",
+     "Maillane",
+     48.5,
+     47.5,
+     35,
+     33
+    ],
+    [
+     "13036",
+     "Eyragues",
+     47.5,
+     46.5,
+     33,
+     31
+    ],
+    [
+     "13089",
+     "Saint-Andiol",
+     49.6,
+     48.6,
+     37,
+     35
+    ],
+    [
+     "13100",
+     "Saint-Rémy-de-Provence",
+     53.5,
+     52.4,
+     43,
+     41
+    ],
+    [
+     "76176",
+     "Clasville",
+     32.3,
+     31.3,
+     13,
+     11
+    ],
+    [
+     "85058",
+     "Chasnais",
+     47.2,
+     46.5,
+     33,
+     31
+    ],
+    [
+     "85001",
+     "L'Aiguillon-la-Presqu'île",
+     50.5,
+     49.0,
+     38,
+     36
+    ],
+    [
+     "85004",
+     "Angles",
+     54.3,
+     53.1,
+     44,
+     42
+    ]
+   ]
+  },
+  "rappel_estimation_phase_A": {
+   "eau_seule_A_score_change": 10141,
+   "eau_seule_A_verdicts": 248
+  }
+ }
+}

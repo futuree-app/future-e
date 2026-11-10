@@ -1,0 +1,6832 @@
+{
+ "synthese": {
+  "communes": 87,
+  "avec_resultat": 87,
+  "1_moyenne_dans_p10_p90_ponderes": 87,
+  "1_ecart_p10_p90_pondere_vs_non_pondere_max_pts": 7.83,
+  "2_poids_sans_mesure_pct_max": 0.0,
+  "2_communes_avec_poids_sans_mesure": 0,
+  "3_disque_mesure_pct": {
+   "min": 2.46,
+   "communes_sous_80": 29,
+   "communes_sous_60": 19
+  },
+  "3_effet_limitation_france_pts": {
+   "n": 87,
+   "abs_max": 4.76,
+   "abs_p90": 0.28,
+   "mediane": 0.0
+  },
+  "4_sensibilite_bati_1_seul_pts": {
+   "n": 58,
+   "abs_max": 5.47,
+   "abs_p90": 2.15,
+   "mediane": -0.1
+  },
+  "4_sensibilite_bati_1_4_pts": {
+   "n": 87,
+   "abs_max": 0.17,
+   "abs_p90": 0.05,
+   "mediane": 0.0
+  },
+  "6_ecart_100m_10m_pts": {
+   "n": 87,
+   "abs_max": 0.28,
+   "abs_p90": 0.09,
+   "mediane": -0.01
+  },
+  "6_erreur_type_tirage_pts_max": 0.216,
+  "6_ecarts_au_dela_de_2_erreurs_types": 6
+ },
+ "communes": {
+  "92049": {
+   "nom": "Montrouge",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 2.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 21.56,
+    "p10_p50_p90_ponderes": [
+     21.08,
+     21.49,
+     22.2
+    ],
+    "p10_p90_non_ponderes": [
+     21.08,
+     22.22
+    ],
+    "cellules_baties": 210,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.62
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 21.55,
+    "p10_p50_p90_ponderes": [
+     21.05,
+     21.46,
+     22.18
+    ],
+    "p10_p90_non_ponderes": [
+     21.08,
+     22.22
+    ],
+    "cellules_baties": 208,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.61
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 21.57,
+    "p10_p50_p90_ponderes": [
+     21.07,
+     21.49,
+     22.21
+    ],
+    "p10_p90_non_ponderes": [
+     21.08,
+     22.22
+    ],
+    "cellules_baties": 210,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.62
+   },
+   "point_index_pct": 21.54,
+   "centre_bati_pct": 21.45,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 19157,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 21.57,
+    "erreur_type_pts": 0.011,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 21.56,
+    "p10_p50_p90_ponderes": [
+     21.08,
+     21.49,
+     22.2
+    ],
+    "p10_p90_non_ponderes": [
+     21.08,
+     22.22
+    ],
+    "cellules_baties": 210,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.62
+   }
+  },
+  "78362": {
+   "nom": "Mantes-la-Ville",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 6.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 41.47,
+    "p10_p50_p90_ponderes": [
+     40.89,
+     41.54,
+     41.91
+    ],
+    "p10_p90_non_ponderes": [
+     40.82,
+     41.88
+    ],
+    "cellules_baties": 557,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.06
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 41.7,
+    "p10_p50_p90_ponderes": [
+     41.4,
+     41.69,
+     42.12
+    ],
+    "p10_p90_non_ponderes": [
+     41.25,
+     42.02
+    ],
+    "cellules_baties": 190,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.05
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 41.48,
+    "p10_p50_p90_ponderes": [
+     40.92,
+     41.54,
+     41.91
+    ],
+    "p10_p90_non_ponderes": [
+     40.82,
+     41.88
+    ],
+    "cellules_baties": 557,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.06
+   },
+   "point_index_pct": 41.68,
+   "centre_bati_pct": 41.7,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 42112,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 41.46,
+    "erreur_type_pts": 0.011,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 41.47,
+    "p10_p50_p90_ponderes": [
+     40.89,
+     41.54,
+     41.91
+    ],
+    "p10_p90_non_ponderes": [
+     40.82,
+     41.88
+    ],
+    "cellules_baties": 557,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.06
+   }
+  },
+  "65440": {
+   "nom": "Tarbes",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 15.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 59.63,
+    "p10_p50_p90_ponderes": [
+     56.73,
+     59.52,
+     62.66
+    ],
+    "p10_p90_non_ponderes": [
+     56.64,
+     62.76
+    ],
+    "cellules_baties": 1455,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.67
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 60.51,
+    "p10_p50_p90_ponderes": [
+     59.28,
+     60.54,
+     61.78
+    ],
+    "p10_p90_non_ponderes": [
+     58.43,
+     62.09
+    ],
+    "cellules_baties": 253,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.7
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 59.74,
+    "p10_p50_p90_ponderes": [
+     56.8,
+     59.66,
+     62.79
+    ],
+    "p10_p90_non_ponderes": [
+     56.63,
+     62.76
+    ],
+    "cellules_baties": 1463,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.67
+   },
+   "point_index_pct": 58.41,
+   "centre_bati_pct": 59.35,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 96719,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 59.66,
+    "erreur_type_pts": 0.057,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 59.63,
+    "p10_p50_p90_ponderes": [
+     56.73,
+     59.52,
+     62.66
+    ],
+    "p10_p90_non_ponderes": [
+     56.64,
+     62.76
+    ],
+    "cellules_baties": 1455,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.67
+   }
+  },
+  "77284": {
+   "nom": "Meaux",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 15.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 28.19,
+    "p10_p50_p90_ponderes": [
+     27.21,
+     28.1,
+     29.29
+    ],
+    "p10_p90_non_ponderes": [
+     27.17,
+     29.49
+    ],
+    "cellules_baties": 1273,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.34
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 28.03,
+    "p10_p50_p90_ponderes": [
+     27.08,
+     27.99,
+     28.94
+    ],
+    "p10_p90_non_ponderes": [
+     27.33,
+     28.98
+    ],
+    "cellules_baties": 409,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.33
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 28.18,
+    "p10_p50_p90_ponderes": [
+     27.22,
+     28.1,
+     29.28
+    ],
+    "p10_p90_non_ponderes": [
+     27.17,
+     29.51
+    ],
+    "cellules_baties": 1291,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.34
+   },
+   "point_index_pct": 28.04,
+   "centre_bati_pct": 27.96,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 88549,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 28.21,
+    "erreur_type_pts": 0.021,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 28.19,
+    "p10_p50_p90_ponderes": [
+     27.21,
+     28.1,
+     29.29
+    ],
+    "p10_p90_non_ponderes": [
+     27.17,
+     29.49
+    ],
+    "cellules_baties": 1273,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.34
+   }
+  },
+  "78297": {
+   "nom": "Guyancourt",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 13.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 44.34,
+    "p10_p50_p90_ponderes": [
+     43.52,
+     44.31,
+     45.21
+    ],
+    "p10_p90_non_ponderes": [
+     43.38,
+     45.21
+    ],
+    "cellules_baties": 854,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.02
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 44.51,
+    "p10_p50_p90_ponderes": [
+     43.73,
+     44.45,
+     45.35
+    ],
+    "p10_p90_non_ponderes": [
+     43.68,
+     45.3
+    ],
+    "cellules_baties": 222,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.02
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 44.34,
+    "p10_p50_p90_ponderes": [
+     43.52,
+     44.32,
+     45.21
+    ],
+    "p10_p90_non_ponderes": [
+     43.37,
+     45.2
+    ],
+    "cellules_baties": 882,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.01
+   },
+   "point_index_pct": 43.8,
+   "centre_bati_pct": 44.1,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 49937,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 44.36,
+    "erreur_type_pts": 0.017,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 44.34,
+    "p10_p50_p90_ponderes": [
+     43.52,
+     44.31,
+     45.21
+    ],
+    "p10_p90_non_ponderes": [
+     43.38,
+     45.21
+    ],
+    "cellules_baties": 854,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.02
+   }
+  },
+  "74119": {
+   "nom": "Évian-les-Bains",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 4.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 2650220,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 87.6,
+    "p10_p50_p90_ponderes": [
+     87.05,
+     87.61,
+     88.12
+    ],
+    "p10_p90_non_ponderes": [
+     87.04,
+     88.17
+    ],
+    "cellules_baties": 385,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 49.48,
+    "disque_terres_pct": 49.43
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 87.46,
+    "p10_p50_p90_ponderes": [
+     87.17,
+     87.42,
+     87.84
+    ],
+    "p10_p90_non_ponderes": [
+     87.09,
+     88.0
+    ],
+    "cellules_baties": 17,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 46.79,
+    "disque_terres_pct": 46.73
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 87.6,
+    "p10_p50_p90_ponderes": [
+     87.05,
+     87.61,
+     88.12
+    ],
+    "p10_p90_non_ponderes": [
+     87.04,
+     88.17
+    ],
+    "cellules_baties": 385,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 49.46,
+    "disque_terres_pct": 49.41
+   },
+   "point_index_pct": 88.11,
+   "centre_bati_pct": 87.62,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 24792,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 87.62,
+    "erreur_type_pts": 0.01,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 87.61,
+    "p10_p50_p90_ponderes": [
+     87.03,
+     87.6,
+     88.19
+    ],
+    "p10_p90_non_ponderes": [
+     87.02,
+     88.24
+    ],
+    "cellules_baties": 385,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 78.22,
+    "disque_terres_pct": 49.55
+   }
+  },
+  "33318": {
+   "nom": "Pessac",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 38.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 63.07,
+    "p10_p50_p90_ponderes": [
+     58.84,
+     62.76,
+     67.1
+    ],
+    "p10_p90_non_ponderes": [
+     58.97,
+     68.87
+    ],
+    "cellules_baties": 3007,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.07
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 60.97,
+    "p10_p50_p90_ponderes": [
+     58.41,
+     61.4,
+     63.08
+    ],
+    "p10_p90_non_ponderes": [
+     58.57,
+     63.05
+    ],
+    "cellules_baties": 150,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.81
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 63.03,
+    "p10_p50_p90_ponderes": [
+     58.86,
+     62.7,
+     67.04
+    ],
+    "p10_p90_non_ponderes": [
+     58.97,
+     68.84
+    ],
+    "cellules_baties": 3025,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.06
+   },
+   "point_index_pct": 64.99,
+   "centre_bati_pct": 62.78,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 163561,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 63.12,
+    "erreur_type_pts": 0.091,
+    "ecart_100m_moins_10m_pts": -0.05
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 63.07,
+    "p10_p50_p90_ponderes": [
+     58.84,
+     62.76,
+     67.1
+    ],
+    "p10_p90_non_ponderes": [
+     58.97,
+     68.87
+    ],
+    "cellules_baties": 3007,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.07
+   }
+  },
+  "69275": {
+   "nom": "Décines-Charpieu",
+   "strates": [
+    "urbain_dense"
+   ],
+   "surface_km2": 17.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 27.99,
+    "p10_p50_p90_ponderes": [
+     27.61,
+     27.82,
+     28.59
+    ],
+    "p10_p90_non_ponderes": [
+     27.61,
+     29.33
+    ],
+    "cellules_baties": 1318,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.44
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 27.82,
+    "p10_p50_p90_ponderes": [
+     27.66,
+     27.78,
+     28.08
+    ],
+    "p10_p90_non_ponderes": [
+     27.65,
+     28.17
+    ],
+    "cellules_baties": 120,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.46
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 28.0,
+    "p10_p50_p90_ponderes": [
+     27.61,
+     27.83,
+     28.6
+    ],
+    "p10_p90_non_ponderes": [
+     27.61,
+     29.36
+    ],
+    "cellules_baties": 1329,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.45
+   },
+   "point_index_pct": 28.03,
+   "centre_bati_pct": 27.69,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 78731,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 28.0,
+    "erreur_type_pts": 0.015,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 27.99,
+    "p10_p50_p90_ponderes": [
+     27.61,
+     27.82,
+     28.59
+    ],
+    "p10_p90_non_ponderes": [
+     27.61,
+     29.33
+    ],
+    "cellules_baties": 1318,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.44
+   }
+  },
+  "07296": {
+   "nom": "Saint-Sernin",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 5.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 90.31,
+    "p10_p50_p90_ponderes": [
+     89.77,
+     90.32,
+     90.73
+    ],
+    "p10_p90_non_ponderes": [
+     89.73,
+     90.74
+    ],
+    "cellules_baties": 364,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.69
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 90.31,
+    "p10_p50_p90_ponderes": [
+     89.77,
+     90.32,
+     90.73
+    ],
+    "p10_p90_non_ponderes": [
+     89.73,
+     90.74
+    ],
+    "cellules_baties": 364,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.69
+   },
+   "point_index_pct": 90.19,
+   "centre_bati_pct": 90.36,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 9784,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 90.3,
+    "erreur_type_pts": 0.009,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 90.31,
+    "p10_p50_p90_ponderes": [
+     89.77,
+     90.32,
+     90.73
+    ],
+    "p10_p90_non_ponderes": [
+     89.73,
+     90.74
+    ],
+    "cellules_baties": 364,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.69
+   }
+  },
+  "95183": {
+   "nom": "Courdimanche",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 5.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 36.71,
+    "p10_p50_p90_ponderes": [
+     36.15,
+     36.74,
+     37.23
+    ],
+    "p10_p90_non_ponderes": [
+     35.92,
+     37.29
+    ],
+    "cellules_baties": 282,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.16
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 36.32,
+    "p10_p50_p90_ponderes": [
+     35.49,
+     36.4,
+     36.8
+    ],
+    "p10_p90_non_ponderes": [
+     35.61,
+     36.84
+    ],
+    "cellules_baties": 22,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.2
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 36.69,
+    "p10_p50_p90_ponderes": [
+     36.09,
+     36.73,
+     37.24
+    ],
+    "p10_p90_non_ponderes": [
+     35.81,
+     37.31
+    ],
+    "cellules_baties": 307,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.16
+   },
+   "point_index_pct": 36.75,
+   "centre_bati_pct": 36.77,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 13701,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 36.71,
+    "erreur_type_pts": 0.011,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 36.71,
+    "p10_p50_p90_ponderes": [
+     36.15,
+     36.74,
+     37.23
+    ],
+    "p10_p90_non_ponderes": [
+     35.92,
+     37.29
+    ],
+    "cellules_baties": 282,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.16
+   }
+  },
+  "73121": {
+   "nom": "Frontenex",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 1.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 91.64,
+    "p10_p50_p90_ponderes": [
+     91.53,
+     91.61,
+     91.76
+    ],
+    "p10_p90_non_ponderes": [
+     91.52,
+     91.8
+    ],
+    "cellules_baties": 145,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.49
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 91.67,
+    "p10_p50_p90_ponderes": [
+     91.6,
+     91.68,
+     91.7
+    ],
+    "p10_p90_non_ponderes": [
+     91.63,
+     91.7
+    ],
+    "cellules_baties": 5,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.49
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 91.64,
+    "p10_p50_p90_ponderes": [
+     91.53,
+     91.62,
+     91.77
+    ],
+    "p10_p90_non_ponderes": [
+     91.52,
+     91.8
+    ],
+    "cellules_baties": 147,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.49
+   },
+   "point_index_pct": 91.6,
+   "centre_bati_pct": 91.61,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 9375,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 91.64,
+    "erreur_type_pts": 0.002,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 91.64,
+    "p10_p50_p90_ponderes": [
+     91.53,
+     91.61,
+     91.76
+    ],
+    "p10_p90_non_ponderes": [
+     91.52,
+     91.8
+    ],
+    "cellules_baties": 145,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.49
+   }
+  },
+  "68023": {
+   "nom": "Beblenheim",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 5.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 56.64,
+    "p10_p50_p90_ponderes": [
+     54.16,
+     56.95,
+     58.64
+    ],
+    "p10_p90_non_ponderes": [
+     53.37,
+     58.51
+    ],
+    "cellules_baties": 353,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 57.97,
+    "p10_p50_p90_ponderes": [
+     57.79,
+     57.95,
+     58.22
+    ],
+    "p10_p90_non_ponderes": [
+     57.16,
+     58.13
+    ],
+    "cellules_baties": 10,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.78
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 56.63,
+    "p10_p50_p90_ponderes": [
+     54.16,
+     56.95,
+     58.64
+    ],
+    "p10_p90_non_ponderes": [
+     53.37,
+     58.51
+    ],
+    "cellules_baties": 353,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   },
+   "point_index_pct": 56.09,
+   "centre_bati_pct": 56.71,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 8137,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 56.66,
+    "erreur_type_pts": 0.043,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 56.64,
+    "p10_p50_p90_ponderes": [
+     54.16,
+     56.95,
+     58.64
+    ],
+    "p10_p90_non_ponderes": [
+     53.37,
+     58.51
+    ],
+    "cellules_baties": 353,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   }
+  },
+  "50488": {
+   "nom": "Saint-Jean-de-Daye",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 4.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 300669,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 68.7,
+    "p10_p50_p90_ponderes": [
+     68.45,
+     68.64,
+     69.06
+    ],
+    "p10_p90_non_ponderes": [
+     68.45,
+     69.11
+    ],
+    "cellules_baties": 183,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.09,
+    "disque_terres_pct": 98.67
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 68.7,
+    "p10_p50_p90_ponderes": [
+     68.45,
+     68.65,
+     69.06
+    ],
+    "p10_p90_non_ponderes": [
+     68.45,
+     69.11
+    ],
+    "cellules_baties": 183,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.08,
+    "disque_terres_pct": 98.65
+   },
+   "point_index_pct": 68.99,
+   "centre_bati_pct": 68.7,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 6921,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 68.69,
+    "erreur_type_pts": 0.006,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 68.73,
+    "p10_p50_p90_ponderes": [
+     68.47,
+     68.67,
+     69.1
+    ],
+    "p10_p90_non_ponderes": [
+     68.47,
+     69.15
+    ],
+    "cellules_baties": 183,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.83
+   }
+  },
+  "22259": {
+   "nom": "Quévert",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 12.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 593163,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 44.01,
+    "p10_p50_p90_ponderes": [
+     43.3,
+     43.93,
+     44.83
+    ],
+    "p10_p90_non_ponderes": [
+     43.16,
+     44.98
+    ],
+    "cellules_baties": 872,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 97.97,
+    "disque_terres_pct": 97.44
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 43.68,
+    "p10_p50_p90_ponderes": [
+     42.93,
+     43.76,
+     43.9
+    ],
+    "p10_p90_non_ponderes": [
+     43.14,
+     43.86
+    ],
+    "cellules_baties": 4,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 98.45,
+    "disque_terres_pct": 97.92
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 44.01,
+    "p10_p50_p90_ponderes": [
+     43.3,
+     43.93,
+     44.83
+    ],
+    "p10_p90_non_ponderes": [
+     43.16,
+     44.98
+    ],
+    "cellules_baties": 872,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 97.98,
+    "disque_terres_pct": 97.44
+   },
+   "point_index_pct": 44.15,
+   "centre_bati_pct": 43.77,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 36119,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 44.0,
+    "erreur_type_pts": 0.015,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 44.01,
+    "p10_p50_p90_ponderes": [
+     43.32,
+     43.94,
+     44.83
+    ],
+    "p10_p90_non_ponderes": [
+     43.17,
+     44.95
+    ],
+    "cellules_baties": 872,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.65
+   }
+  },
+  "22302": {
+   "nom": "Saint-Jacut-de-la-Mer",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 3.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 2877656,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 42.32,
+    "p10_p50_p90_ponderes": [
+     42.16,
+     42.27,
+     42.55
+    ],
+    "p10_p90_non_ponderes": [
+     42.16,
+     42.59
+    ],
+    "cellules_baties": 274,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 65.55,
+    "disque_terres_pct": 65.2
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 42.32,
+    "p10_p50_p90_ponderes": [
+     42.16,
+     42.27,
+     42.55
+    ],
+    "p10_p90_non_ponderes": [
+     42.16,
+     42.59
+    ],
+    "cellules_baties": 274,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 65.55,
+    "disque_terres_pct": 65.2
+   },
+   "point_index_pct": 42.24,
+   "centre_bati_pct": 42.22,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 14998,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 42.32,
+    "erreur_type_pts": 0.004,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 42.19,
+    "p10_p50_p90_ponderes": [
+     42.02,
+     42.13,
+     42.43
+    ],
+    "p10_p90_non_ponderes": [
+     42.02,
+     42.47
+    ],
+    "cellules_baties": 274,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 92.09,
+    "disque_terres_pct": 65.82
+   }
+  },
+  "38045": {
+   "nom": "Biviers",
+   "strates": [
+    "intermediaire"
+   ],
+   "surface_km2": 6.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 80.03,
+    "p10_p50_p90_ponderes": [
+     79.62,
+     80.02,
+     80.42
+    ],
+    "p10_p90_non_ponderes": [
+     79.62,
+     80.44
+    ],
+    "cellules_baties": 329,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.06
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 80.03,
+    "p10_p50_p90_ponderes": [
+     79.62,
+     80.02,
+     80.42
+    ],
+    "p10_p90_non_ponderes": [
+     79.62,
+     80.44
+    ],
+    "cellules_baties": 329,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.06
+   },
+   "point_index_pct": 79.96,
+   "centre_bati_pct": 79.99,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 13917,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 80.02,
+    "erreur_type_pts": 0.008,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 80.03,
+    "p10_p50_p90_ponderes": [
+     79.62,
+     80.02,
+     80.42
+    ],
+    "p10_p90_non_ponderes": [
+     79.62,
+     80.44
+    ],
+    "cellules_baties": 329,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.06
+   }
+  },
+  "53083": {
+   "nom": "Courcité",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 30.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 57.55,
+    "p10_p50_p90_ponderes": [
+     55.63,
+     57.48,
+     59.49
+    ],
+    "p10_p90_non_ponderes": [
+     55.54,
+     59.5
+    ],
+    "cellules_baties": 920,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.81
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 57.32,
+    "p10_p50_p90_ponderes": [
+     57.28,
+     57.28,
+     57.61
+    ],
+    "p10_p90_non_ponderes": [
+     57.31,
+     57.58
+    ],
+    "cellules_baties": 2,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.82
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 57.55,
+    "p10_p50_p90_ponderes": [
+     55.63,
+     57.48,
+     59.49
+    ],
+    "p10_p90_non_ponderes": [
+     55.55,
+     59.5
+    ],
+    "cellules_baties": 922,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.81
+   },
+   "point_index_pct": 57.55,
+   "centre_bati_pct": 57.5,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 15079,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 57.59,
+    "erreur_type_pts": 0.035,
+    "ecart_100m_moins_10m_pts": -0.04
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 57.55,
+    "p10_p50_p90_ponderes": [
+     55.63,
+     57.48,
+     59.49
+    ],
+    "p10_p90_non_ponderes": [
+     55.54,
+     59.5
+    ],
+    "cellules_baties": 920,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.81
+   }
+  },
+  "04008": {
+   "nom": "Annot",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 29.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 98.89,
+    "p10_p50_p90_ponderes": [
+     98.84,
+     98.9,
+     98.93
+    ],
+    "p10_p90_non_ponderes": [
+     98.77,
+     98.94
+    ],
+    "cellules_baties": 158,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.17
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 98.89,
+    "p10_p50_p90_ponderes": [
+     98.84,
+     98.9,
+     98.93
+    ],
+    "p10_p90_non_ponderes": [
+     98.77,
+     98.94
+    ],
+    "cellules_baties": 158,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.17
+   },
+   "point_index_pct": 98.89,
+   "centre_bati_pct": 98.9,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 1687,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 98.89,
+    "erreur_type_pts": 0.001,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.89,
+    "p10_p50_p90_ponderes": [
+     98.84,
+     98.9,
+     98.93
+    ],
+    "p10_p90_non_ponderes": [
+     98.77,
+     98.94
+    ],
+    "cellules_baties": 158,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.17
+   }
+  },
+  "14576": {
+   "nom": "Val-de-Vie",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 19.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 74.77,
+    "p10_p50_p90_ponderes": [
+     72.86,
+     74.8,
+     76.63
+    ],
+    "p10_p90_non_ponderes": [
+     72.66,
+     76.79
+    ],
+    "cellules_baties": 389,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.98
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 77.02,
+    "p10_p50_p90_ponderes": [
+     75.92,
+     77.34,
+     77.34
+    ],
+    "p10_p90_non_ponderes": [
+     76.06,
+     77.2
+    ],
+    "cellules_baties": 2,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.98
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 74.78,
+    "p10_p50_p90_ponderes": [
+     72.86,
+     74.83,
+     76.63
+    ],
+    "p10_p90_non_ponderes": [
+     72.67,
+     76.8
+    ],
+    "cellules_baties": 390,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.98
+   },
+   "point_index_pct": 74.44,
+   "centre_bati_pct": 74.6,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 5029,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 74.79,
+    "erreur_type_pts": 0.038,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 74.77,
+    "p10_p50_p90_ponderes": [
+     72.86,
+     74.8,
+     76.63
+    ],
+    "p10_p90_non_ponderes": [
+     72.66,
+     76.79
+    ],
+    "cellules_baties": 389,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.98
+   }
+  },
+  "22359": {
+   "nom": "Trégrom",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 16.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 667540,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 61.42,
+    "p10_p50_p90_ponderes": [
+     59.41,
+     61.45,
+     62.99
+    ],
+    "p10_p90_non_ponderes": [
+     59.32,
+     63.02
+    ],
+    "cellules_baties": 674,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.97,
+    "disque_terres_pct": 99.9
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 61.42,
+    "p10_p50_p90_ponderes": [
+     59.41,
+     61.45,
+     62.99
+    ],
+    "p10_p90_non_ponderes": [
+     59.32,
+     63.02
+    ],
+    "cellules_baties": 674,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.97,
+    "disque_terres_pct": 99.9
+   },
+   "point_index_pct": 61.62,
+   "centre_bati_pct": 61.51,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 8363,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 61.43,
+    "erreur_type_pts": 0.033,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 61.42,
+    "p10_p50_p90_ponderes": [
+     59.41,
+     61.45,
+     62.99
+    ],
+    "p10_p90_non_ponderes": [
+     59.32,
+     63.02
+    ],
+    "cellules_baties": 674,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.91
+   }
+  },
+  "86151": {
+   "nom": "Maulay",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 23.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 36.24,
+    "p10_p50_p90_ponderes": [
+     35.36,
+     36.36,
+     37.0
+    ],
+    "p10_p90_non_ponderes": [
+     35.19,
+     37.19
+    ],
+    "cellules_baties": 593,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.95
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 36.24,
+    "p10_p50_p90_ponderes": [
+     35.36,
+     36.35,
+     37.0
+    ],
+    "p10_p90_non_ponderes": [
+     35.18,
+     37.17
+    ],
+    "cellules_baties": 597,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.95
+   },
+   "point_index_pct": 35.31,
+   "centre_bati_pct": 35.88,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 5850,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 36.22,
+    "erreur_type_pts": 0.019,
+    "ecart_100m_moins_10m_pts": 0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 36.24,
+    "p10_p50_p90_ponderes": [
+     35.36,
+     36.36,
+     37.0
+    ],
+    "p10_p90_non_ponderes": [
+     35.19,
+     37.19
+    ],
+    "cellules_baties": 593,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.95
+   }
+  },
+  "23130": {
+   "nom": "Méasnes",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 27.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 79.56,
+    "p10_p50_p90_ponderes": [
+     79.08,
+     79.52,
+     80.17
+    ],
+    "p10_p90_non_ponderes": [
+     79.06,
+     80.39
+    ],
+    "cellules_baties": 793,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.28
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 79.68,
+    "p10_p50_p90_ponderes": [
+     79.68,
+     79.68,
+     79.68
+    ],
+    "p10_p90_non_ponderes": [
+     79.68,
+     79.68
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.26
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 79.56,
+    "p10_p50_p90_ponderes": [
+     79.08,
+     79.52,
+     80.17
+    ],
+    "p10_p90_non_ponderes": [
+     79.06,
+     80.39
+    ],
+    "cellules_baties": 823,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.28
+   },
+   "point_index_pct": 79.48,
+   "centre_bati_pct": 79.39,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 11584,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 79.57,
+    "erreur_type_pts": 0.011,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 79.56,
+    "p10_p50_p90_ponderes": [
+     79.08,
+     79.52,
+     80.17
+    ],
+    "p10_p90_non_ponderes": [
+     79.06,
+     80.39
+    ],
+    "cellules_baties": 793,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.28
+   }
+  },
+  "80703": {
+   "nom": "Saint-Germain-sur-Bresle",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 8.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 40.29,
+    "p10_p50_p90_ponderes": [
+     39.5,
+     40.51,
+     40.92
+    ],
+    "p10_p90_non_ponderes": [
+     39.47,
+     40.89
+    ],
+    "cellules_baties": 251,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.73
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 40.29,
+    "p10_p50_p90_ponderes": [
+     39.5,
+     40.51,
+     40.92
+    ],
+    "p10_p90_non_ponderes": [
+     39.47,
+     40.89
+    ],
+    "cellules_baties": 253,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.73
+   },
+   "point_index_pct": 39.86,
+   "centre_bati_pct": 40.23,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 3736,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 40.29,
+    "erreur_type_pts": 0.015,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 40.29,
+    "p10_p50_p90_ponderes": [
+     39.5,
+     40.51,
+     40.92
+    ],
+    "p10_p90_non_ponderes": [
+     39.47,
+     40.89
+    ],
+    "cellules_baties": 251,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.73
+   }
+  },
+  "31124": {
+   "nom": "Castillon-de-Saint-Martory",
+   "strates": [
+    "rural"
+   ],
+   "surface_km2": 10.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 80.24,
+    "p10_p50_p90_ponderes": [
+     77.88,
+     80.48,
+     82.39
+    ],
+    "p10_p90_non_ponderes": [
+     77.87,
+     82.36
+    ],
+    "cellules_baties": 286,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 82.89,
+    "p10_p50_p90_ponderes": [
+     82.89,
+     82.89,
+     82.89
+    ],
+    "p10_p90_non_ponderes": [
+     82.89,
+     82.89
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.34
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 80.3,
+    "p10_p50_p90_ponderes": [
+     77.93,
+     80.52,
+     82.3
+    ],
+    "p10_p90_non_ponderes": [
+     77.91,
+     82.32
+    ],
+    "cellules_baties": 320,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   },
+   "point_index_pct": 79.86,
+   "centre_bati_pct": 80.18,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 4401,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 80.27,
+    "erreur_type_pts": 0.043,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 80.24,
+    "p10_p50_p90_ponderes": [
+     77.88,
+     80.48,
+     82.39
+    ],
+    "p10_p90_non_ponderes": [
+     77.87,
+     82.36
+    ],
+    "cellules_baties": 286,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   }
+  },
+  "50143": {
+   "nom": "Coudeville-sur-Mer",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 8.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 4037473,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 61.51,
+    "p10_p50_p90_ponderes": [
+     60.65,
+     61.73,
+     61.92
+    ],
+    "p10_p90_non_ponderes": [
+     60.98,
+     61.97
+    ],
+    "cellules_baties": 422,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 60.51,
+    "disque_terres_pct": 60.38
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 61.51,
+    "p10_p50_p90_ponderes": [
+     60.65,
+     61.73,
+     61.92
+    ],
+    "p10_p90_non_ponderes": [
+     60.98,
+     61.97
+    ],
+    "cellules_baties": 422,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 60.51,
+    "disque_terres_pct": 60.38
+   },
+   "point_index_pct": 61.86,
+   "centre_bati_pct": 61.75,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 11676,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 61.5,
+    "erreur_type_pts": 0.012,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 61.53,
+    "p10_p50_p90_ponderes": [
+     60.68,
+     61.74,
+     61.94
+    ],
+    "p10_p90_non_ponderes": [
+     61.0,
+     62.0
+    ],
+    "cellules_baties": 422,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 94.84,
+    "disque_terres_pct": 61.22
+   }
+  },
+  "62108": {
+   "nom": "Berck",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 14.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 2529214,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 46.62,
+    "p10_p50_p90_ponderes": [
+     45.08,
+     46.93,
+     47.79
+    ],
+    "p10_p90_non_ponderes": [
+     44.9,
+     47.78
+    ],
+    "cellules_baties": 998,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.03,
+    "disque_terres_pct": 52.05
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 46.49,
+    "p10_p50_p90_ponderes": [
+     44.94,
+     47.24,
+     47.92
+    ],
+    "p10_p90_non_ponderes": [
+     44.94,
+     47.92
+    ],
+    "cellules_baties": 14,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.91,
+    "disque_terres_pct": 52.92
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 46.62,
+    "p10_p50_p90_ponderes": [
+     45.07,
+     46.93,
+     47.79
+    ],
+    "p10_p90_non_ponderes": [
+     44.9,
+     47.78
+    ],
+    "cellules_baties": 998,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.03,
+    "disque_terres_pct": 52.05
+   },
+   "point_index_pct": 46.62,
+   "centre_bati_pct": 46.93,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 59869,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 46.66,
+    "erreur_type_pts": 0.026,
+    "ecart_100m_moins_10m_pts": -0.04
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 47.04,
+    "p10_p50_p90_ponderes": [
+     45.5,
+     47.33,
+     48.2
+    ],
+    "p10_p90_non_ponderes": [
+     45.31,
+     48.18
+    ],
+    "cellules_baties": 998,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 78.6,
+    "disque_terres_pct": 53.47
+   }
+  },
+  "85106": {
+   "nom": "La Guérinière",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 7.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 5752217,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 68.31,
+    "p10_p50_p90_ponderes": [
+     63.33,
+     67.44,
+     74.21
+    ],
+    "p10_p90_non_ponderes": [
+     62.91,
+     75.16
+    ],
+    "cellules_baties": 561,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 13.9,
+    "disque_terres_pct": 12.24
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 64.14,
+    "p10_p50_p90_ponderes": [
+     64.14,
+     64.14,
+     64.14
+    ],
+    "p10_p90_non_ponderes": [
+     64.14,
+     64.14
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 10.85,
+    "disque_terres_pct": 9.41
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 68.3,
+    "p10_p50_p90_ponderes": [
+     63.33,
+     67.44,
+     74.21
+    ],
+    "p10_p90_non_ponderes": [
+     62.91,
+     75.16
+    ],
+    "cellules_baties": 561,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 13.9,
+    "disque_terres_pct": 12.24
+   },
+   "point_index_pct": 70.32,
+   "centre_bati_pct": 68.82,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 26546,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 68.37,
+    "erreur_type_pts": 0.107,
+    "ecart_100m_moins_10m_pts": -0.06
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 68.7,
+    "p10_p50_p90_ponderes": [
+     63.93,
+     67.85,
+     74.4
+    ],
+    "p10_p90_non_ponderes": [
+     63.51,
+     75.32
+    ],
+    "cellules_baties": 561,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 77.83,
+    "disque_terres_pct": 12.5
+   }
+  },
+  "11188": {
+   "nom": "La Palme",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 32.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 2216971,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 79.0,
+    "p10_p50_p90_ponderes": [
+     78.33,
+     78.92,
+     79.66
+    ],
+    "p10_p90_non_ponderes": [
+     78.36,
+     80.11
+    ],
+    "cellules_baties": 887,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 72.79,
+    "disque_terres_pct": 57.89
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 78.63,
+    "p10_p50_p90_ponderes": [
+     78.07,
+     78.77,
+     79.39
+    ],
+    "p10_p90_non_ponderes": [
+     78.15,
+     79.65
+    ],
+    "cellules_baties": 42,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 70.58,
+    "disque_terres_pct": 55.57
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 79.11,
+    "p10_p50_p90_ponderes": [
+     78.36,
+     79.0,
+     80.0
+    ],
+    "p10_p90_non_ponderes": [
+     78.36,
+     80.18
+    ],
+    "cellules_baties": 957,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 73.33,
+    "disque_terres_pct": 58.52
+   },
+   "point_index_pct": 78.85,
+   "centre_bati_pct": 78.96,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 18342,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 78.99,
+    "erreur_type_pts": 0.013,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 79.02,
+    "p10_p50_p90_ponderes": [
+     78.35,
+     78.93,
+     79.67
+    ],
+    "p10_p90_non_ponderes": [
+     78.38,
+     80.12
+    ],
+    "cellules_baties": 887,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 91.36,
+    "disque_terres_pct": 57.96
+   }
+  },
+  "80533": {
+   "nom": "Mers-les-Bains",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 5.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 2375060,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 35.24,
+    "p10_p50_p90_ponderes": [
+     35.0,
+     35.25,
+     35.51
+    ],
+    "p10_p90_non_ponderes": [
+     35.02,
+     35.5
+    ],
+    "cellules_baties": 252,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 57.72,
+    "disque_terres_pct": 57.13
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 35.07,
+    "p10_p50_p90_ponderes": [
+     35.05,
+     35.08,
+     35.09
+    ],
+    "p10_p90_non_ponderes": [
+     35.02,
+     35.09
+    ],
+    "cellules_baties": 6,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 54.47,
+    "disque_terres_pct": 53.89
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 35.24,
+    "p10_p50_p90_ponderes": [
+     35.0,
+     35.25,
+     35.5
+    ],
+    "p10_p90_non_ponderes": [
+     35.02,
+     35.5
+    ],
+    "cellules_baties": 252,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 57.72,
+    "disque_terres_pct": 57.13
+   },
+   "point_index_pct": 35.32,
+   "centre_bati_pct": 35.26,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 13320,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 35.24,
+    "erreur_type_pts": 0.005,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 35.22,
+    "p10_p50_p90_ponderes": [
+     34.98,
+     35.23,
+     35.49
+    ],
+    "p10_p90_non_ponderes": [
+     35.0,
+     35.48
+    ],
+    "cellules_baties": 252,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 79.24,
+    "disque_terres_pct": 57.16
+   }
+  },
+  "56167": {
+   "nom": "Plougoumelen",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 21.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 2780809,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 59.68,
+    "p10_p50_p90_ponderes": [
+     59.26,
+     59.69,
+     60.13
+    ],
+    "p10_p90_non_ponderes": [
+     59.31,
+     60.17
+    ],
+    "cellules_baties": 1063,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 81.16,
+    "disque_terres_pct": 79.76
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 59.24,
+    "p10_p50_p90_ponderes": [
+     59.23,
+     59.23,
+     59.26
+    ],
+    "p10_p90_non_ponderes": [
+     59.23,
+     59.29
+    ],
+    "cellules_baties": 4,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 82.62,
+    "disque_terres_pct": 81.37
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 59.68,
+    "p10_p50_p90_ponderes": [
+     59.26,
+     59.69,
+     60.13
+    ],
+    "p10_p90_non_ponderes": [
+     59.31,
+     60.17
+    ],
+    "cellules_baties": 1063,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 81.16,
+    "disque_terres_pct": 79.76
+   },
+   "point_index_pct": 59.5,
+   "centre_bati_pct": 59.41,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 27063,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 59.68,
+    "erreur_type_pts": 0.008,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 59.62,
+    "p10_p50_p90_ponderes": [
+     59.21,
+     59.64,
+     60.07
+    ],
+    "p10_p90_non_ponderes": [
+     59.26,
+     60.1
+    ],
+    "cellules_baties": 1063,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.98,
+    "disque_terres_pct": 80.23
+   }
+  },
+  "29080": {
+   "nom": "Hôpital-Camfrout",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 13.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 2322398,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 63.8,
+    "p10_p50_p90_ponderes": [
+     63.42,
+     63.77,
+     64.28
+    ],
+    "p10_p90_non_ponderes": [
+     63.44,
+     64.25
+    ],
+    "cellules_baties": 676,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 86.16,
+    "disque_terres_pct": 85.69
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 63.8,
+    "p10_p50_p90_ponderes": [
+     63.42,
+     63.77,
+     64.28
+    ],
+    "p10_p90_non_ponderes": [
+     63.44,
+     64.25
+    ],
+    "cellules_baties": 676,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 86.19,
+    "disque_terres_pct": 85.72
+   },
+   "point_index_pct": 63.84,
+   "centre_bati_pct": 63.81,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 18735,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 63.81,
+    "erreur_type_pts": 0.008,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 63.77,
+    "p10_p50_p90_ponderes": [
+     63.4,
+     63.76,
+     64.21
+    ],
+    "p10_p90_non_ponderes": [
+     63.42,
+     64.18
+    ],
+    "cellules_baties": 676,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 86.17
+   }
+  },
+  "50030": {
+   "nom": "Barfleur",
+   "strates": [
+    "littoral"
+   ],
+   "surface_km2": 0.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 2583169,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 59.62,
+    "p10_p50_p90_ponderes": [
+     59.05,
+     59.57,
+     60.29
+    ],
+    "p10_p90_non_ponderes": [
+     58.95,
+     60.34
+    ],
+    "cellules_baties": 60,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 31.7,
+    "disque_terres_pct": 31.58
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 59.31,
+    "p10_p50_p90_ponderes": [
+     59.31,
+     59.31,
+     59.31
+    ],
+    "p10_p90_non_ponderes": [
+     59.31,
+     59.31
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 31.06,
+    "disque_terres_pct": 30.94
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 59.62,
+    "p10_p50_p90_ponderes": [
+     59.05,
+     59.57,
+     60.29
+    ],
+    "p10_p90_non_ponderes": [
+     58.95,
+     60.34
+    ],
+    "cellules_baties": 60,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 31.7,
+    "disque_terres_pct": 31.58
+   },
+   "point_index_pct": 59.58,
+   "centre_bati_pct": 59.67,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 4026,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 59.59,
+    "erreur_type_pts": 0.013,
+    "ecart_100m_moins_10m_pts": 0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 59.48,
+    "p10_p50_p90_ponderes": [
+     58.91,
+     59.44,
+     60.15
+    ],
+    "p10_p90_non_ponderes": [
+     58.81,
+     60.2
+    ],
+    "cellules_baties": 60,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 63.72,
+    "disque_terres_pct": 31.69
+   }
+  },
+  "31125": {
+   "nom": "Cathervielle",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 3.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 1983514,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.23,
+    "p10_p50_p90_ponderes": [
+     99.18,
+     99.25,
+     99.26
+    ],
+    "p10_p90_non_ponderes": [
+     99.18,
+     99.25
+    ],
+    "cellules_baties": 9,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.11,
+    "disque_terres_pct": 92.83
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.23,
+    "p10_p50_p90_ponderes": [
+     99.18,
+     99.25,
+     99.26
+    ],
+    "p10_p90_non_ponderes": [
+     99.18,
+     99.25
+    ],
+    "cellules_baties": 9,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.11,
+    "disque_terres_pct": 92.83
+   },
+   "point_index_pct": 99.13,
+   "centre_bati_pct": 99.22,
+   "reference_10m": {
+    "pixels_tires": 36,
+    "pixels_bati_commune": 36,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.22,
+    "erreur_type_pts": 0.006,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.28,
+    "p10_p50_p90_ponderes": [
+     99.23,
+     99.3,
+     99.31
+    ],
+    "p10_p90_non_ponderes": [
+     99.23,
+     99.3
+    ],
+    "cellules_baties": 9,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.7
+   }
+  },
+  "48063": {
+   "nom": "Fontans",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 34.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 97.53,
+    "p10_p50_p90_ponderes": [
+     97.45,
+     97.52,
+     97.63
+    ],
+    "p10_p90_non_ponderes": [
+     97.43,
+     97.64
+    ],
+    "cellules_baties": 516,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.96
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 97.53,
+    "p10_p50_p90_ponderes": [
+     97.44,
+     97.52,
+     97.63
+    ],
+    "p10_p90_non_ponderes": [
+     97.43,
+     97.64
+    ],
+    "cellules_baties": 516,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.96
+   },
+   "point_index_pct": 97.55,
+   "centre_bati_pct": 97.54,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 4376,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 97.54,
+    "erreur_type_pts": 0.002,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 97.53,
+    "p10_p50_p90_ponderes": [
+     97.45,
+     97.52,
+     97.63
+    ],
+    "p10_p90_non_ponderes": [
+     97.43,
+     97.64
+    ],
+    "cellules_baties": 516,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.96
+   }
+  },
+  "06028": {
+   "nom": "Caille",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 17.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.05,
+    "p10_p50_p90_ponderes": [
+     98.64,
+     99.23,
+     99.35
+    ],
+    "p10_p90_non_ponderes": [
+     98.16,
+     99.33
+    ],
+    "cellules_baties": 68,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.97
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.05,
+    "p10_p50_p90_ponderes": [
+     98.64,
+     99.23,
+     99.35
+    ],
+    "p10_p90_non_ponderes": [
+     98.16,
+     99.33
+    ],
+    "cellules_baties": 68,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.97
+   },
+   "point_index_pct": 99.06,
+   "centre_bati_pct": 99.16,
+   "reference_10m": {
+    "pixels_tires": 207,
+    "pixels_bati_commune": 207,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.05,
+    "erreur_type_pts": 0.029,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.05,
+    "p10_p50_p90_ponderes": [
+     98.64,
+     99.23,
+     99.35
+    ],
+    "p10_p90_non_ponderes": [
+     98.16,
+     99.33
+    ],
+    "cellules_baties": 68,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.97
+   }
+  },
+  "38273": {
+   "nom": "Nantes-en-Ratier",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 12.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 95.29,
+    "p10_p50_p90_ponderes": [
+     94.96,
+     95.31,
+     95.58
+    ],
+    "p10_p90_non_ponderes": [
+     94.95,
+     95.73
+    ],
+    "cellules_baties": 209,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.14
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 95.29,
+    "p10_p50_p90_ponderes": [
+     94.96,
+     95.31,
+     95.58
+    ],
+    "p10_p90_non_ponderes": [
+     94.95,
+     95.73
+    ],
+    "cellules_baties": 216,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.14
+   },
+   "point_index_pct": 95.41,
+   "centre_bati_pct": 95.27,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 4119,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 95.28,
+    "erreur_type_pts": 0.006,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 95.29,
+    "p10_p50_p90_ponderes": [
+     94.96,
+     95.31,
+     95.58
+    ],
+    "p10_p90_non_ponderes": [
+     94.95,
+     95.73
+    ],
+    "cellules_baties": 209,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.14
+   }
+  },
+  "38548": {
+   "nom": "Villard-de-Lans",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 67.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 93.32,
+    "p10_p50_p90_ponderes": [
+     92.15,
+     93.45,
+     94.1
+    ],
+    "p10_p90_non_ponderes": [
+     91.92,
+     94.39
+    ],
+    "cellules_baties": 761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.65
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 93.32,
+    "p10_p50_p90_ponderes": [
+     92.15,
+     93.45,
+     94.1
+    ],
+    "p10_p90_non_ponderes": [
+     91.92,
+     94.39
+    ],
+    "cellules_baties": 761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.65
+   },
+   "point_index_pct": 94.81,
+   "centre_bati_pct": 93.5,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 22930,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 93.33,
+    "erreur_type_pts": 0.02,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 93.32,
+    "p10_p50_p90_ponderes": [
+     92.15,
+     93.45,
+     94.1
+    ],
+    "p10_p90_non_ponderes": [
+     91.92,
+     94.39
+    ],
+    "cellules_baties": 761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.65
+   }
+  },
+  "15241": {
+   "nom": "La Trinitat",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 17.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 98.99,
+    "p10_p50_p90_ponderes": [
+     98.87,
+     99.0,
+     99.07
+    ],
+    "p10_p90_non_ponderes": [
+     98.92,
+     99.07
+    ],
+    "cellules_baties": 57,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.4
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 98.99,
+    "p10_p50_p90_ponderes": [
+     98.87,
+     99.0,
+     99.07
+    ],
+    "p10_p90_non_ponderes": [
+     98.92,
+     99.07
+    ],
+    "cellules_baties": 57,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.4
+   },
+   "point_index_pct": 99.02,
+   "centre_bati_pct": 99.01,
+   "reference_10m": {
+    "pixels_tires": 568,
+    "pixels_bati_commune": 568,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 98.99,
+    "erreur_type_pts": 0.003,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.99,
+    "p10_p50_p90_ponderes": [
+     98.87,
+     99.0,
+     99.07
+    ],
+    "p10_p90_non_ponderes": [
+     98.92,
+     99.07
+    ],
+    "cellules_baties": 57,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.4
+   }
+  },
+  "43227": {
+   "nom": "Saint-Victor-Malescours",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 14.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 87.92,
+    "p10_p50_p90_ponderes": [
+     86.89,
+     88.03,
+     88.57
+    ],
+    "p10_p90_non_ponderes": [
+     86.91,
+     88.64
+    ],
+    "cellules_baties": 383,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.59
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 87.92,
+    "p10_p50_p90_ponderes": [
+     86.89,
+     88.03,
+     88.57
+    ],
+    "p10_p90_non_ponderes": [
+     86.91,
+     88.64
+    ],
+    "cellules_baties": 383,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.59
+   },
+   "point_index_pct": 88.22,
+   "centre_bati_pct": 88.13,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 6815,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 87.9,
+    "erreur_type_pts": 0.015,
+    "ecart_100m_moins_10m_pts": 0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 87.92,
+    "p10_p50_p90_ponderes": [
+     86.89,
+     88.03,
+     88.57
+    ],
+    "p10_p90_non_ponderes": [
+     86.91,
+     88.64
+    ],
+    "cellules_baties": 383,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.59
+   }
+  },
+  "73110": {
+   "nom": "Esserts-Blay",
+   "strates": [
+    "montagne"
+   ],
+   "surface_km2": 15.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 94.18,
+    "p10_p50_p90_ponderes": [
+     94.07,
+     94.17,
+     94.33
+    ],
+    "p10_p90_non_ponderes": [
+     93.95,
+     94.32
+    ],
+    "cellules_baties": 245,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.62
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 94.18,
+    "p10_p50_p90_ponderes": [
+     94.07,
+     94.17,
+     94.33
+    ],
+    "p10_p90_non_ponderes": [
+     93.95,
+     94.32
+    ],
+    "cellules_baties": 245,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.62
+   },
+   "point_index_pct": 93.87,
+   "centre_bati_pct": 94.08,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 5077,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 94.19,
+    "erreur_type_pts": 0.003,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 94.18,
+    "p10_p50_p90_ponderes": [
+     94.07,
+     94.17,
+     94.33
+    ],
+    "p10_p90_non_ponderes": [
+     93.95,
+     94.32
+    ],
+    "cellules_baties": 245,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.62
+   }
+  },
+  "73290": {
+   "nom": "Val-Cenis",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 455.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 5834901,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.43,
+    "p10_p50_p90_ponderes": [
+     99.14,
+     99.4,
+     99.72
+    ],
+    "p10_p90_non_ponderes": [
+     99.14,
+     99.71
+    ],
+    "cellules_baties": 723,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.2,
+    "disque_terres_pct": 92.22
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.43,
+    "p10_p50_p90_ponderes": [
+     99.14,
+     99.4,
+     99.72
+    ],
+    "p10_p90_non_ponderes": [
+     99.14,
+     99.71
+    ],
+    "cellules_baties": 723,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.2,
+    "disque_terres_pct": 92.22
+   },
+   "point_index_pct": 99.65,
+   "centre_bati_pct": 99.43,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 16818,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.42,
+    "erreur_type_pts": 0.006,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.28,
+    "p10_p50_p90_ponderes": [
+     98.61,
+     99.39,
+     99.68
+    ],
+    "p10_p90_non_ponderes": [
+     98.61,
+     99.68
+    ],
+    "cellules_baties": 723,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.86,
+    "disque_terres_pct": 98.86
+   }
+  },
+  "22046": {
+   "nom": "Le Mené",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 163.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 45.92,
+    "p10_p50_p90_ponderes": [
+     42.19,
+     46.28,
+     48.91
+    ],
+    "p10_p90_non_ponderes": [
+     42.25,
+     48.96
+    ],
+    "cellules_baties": 6761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.75
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 45.8,
+    "p10_p50_p90_ponderes": [
+     45.67,
+     45.82,
+     45.88
+    ],
+    "p10_p90_non_ponderes": [
+     45.7,
+     45.87
+    ],
+    "cellules_baties": 3,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.73
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 45.92,
+    "p10_p50_p90_ponderes": [
+     42.19,
+     46.27,
+     48.91
+    ],
+    "p10_p90_non_ponderes": [
+     42.25,
+     48.96
+    ],
+    "cellules_baties": 6761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.75
+   },
+   "point_index_pct": 46.45,
+   "centre_bati_pct": 47.28,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 108378,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 45.91,
+    "erreur_type_pts": 0.067,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 45.92,
+    "p10_p50_p90_ponderes": [
+     42.19,
+     46.28,
+     48.91
+    ],
+    "p10_p90_non_ponderes": [
+     42.25,
+     48.96
+    ],
+    "cellules_baties": 6761,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.75
+   }
+  },
+  "49092": {
+   "nom": "Chemillé-en-Anjou",
+   "strates": [
+    "grande_commune",
+    "extreme_phase_A"
+   ],
+   "surface_km2": 320.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 56.25,
+    "p10_p50_p90_ponderes": [
+     52.72,
+     56.29,
+     59.02
+    ],
+    "p10_p90_non_ponderes": [
+     52.53,
+     59.02
+    ],
+    "cellules_baties": 12098,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.27
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 56.71,
+    "p10_p50_p90_ponderes": [
+     55.72,
+     56.72,
+     58.81
+    ],
+    "p10_p90_non_ponderes": [
+     55.2,
+     57.91
+    ],
+    "cellules_baties": 110,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.33
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 56.24,
+    "p10_p50_p90_ponderes": [
+     52.86,
+     56.26,
+     58.99
+    ],
+    "p10_p90_non_ponderes": [
+     52.55,
+     59.01
+    ],
+    "cellules_baties": 12214,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.27
+   },
+   "point_index_pct": 55.62,
+   "centre_bati_pct": 55.87,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 244512,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 56.3,
+    "erreur_type_pts": 0.056,
+    "ecart_100m_moins_10m_pts": -0.05
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 56.25,
+    "p10_p50_p90_ponderes": [
+     52.72,
+     56.29,
+     59.02
+    ],
+    "p10_p90_non_ponderes": [
+     52.53,
+     59.02
+    ],
+    "cellules_baties": 12098,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.27
+   }
+  },
+  "49228": {
+   "nom": "Noyant-Villages",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 300.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 62.68,
+    "p10_p50_p90_ponderes": [
+     60.15,
+     61.84,
+     69.07
+    ],
+    "p10_p90_non_ponderes": [
+     60.05,
+     68.45
+    ],
+    "cellules_baties": 8721,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.51
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 62.06,
+    "p10_p50_p90_ponderes": [
+     60.82,
+     60.94,
+     63.23
+    ],
+    "p10_p90_non_ponderes": [
+     60.71,
+     66.76
+    ],
+    "cellules_baties": 45,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.58
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 62.67,
+    "p10_p50_p90_ponderes": [
+     60.15,
+     61.83,
+     69.05
+    ],
+    "p10_p90_non_ponderes": [
+     60.05,
+     68.39
+    ],
+    "cellules_baties": 8798,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.51
+   },
+   "point_index_pct": 60.52,
+   "centre_bati_pct": 61.01,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 115309,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 62.78,
+    "erreur_type_pts": 0.081,
+    "ecart_100m_moins_10m_pts": -0.1
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 62.68,
+    "p10_p50_p90_ponderes": [
+     60.15,
+     61.84,
+     69.07
+    ],
+    "p10_p90_non_ponderes": [
+     60.05,
+     68.45
+    ],
+    "cellules_baties": 8721,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.51
+   }
+  },
+  "73257": {
+   "nom": "Les Belleville",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 227.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 606679,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 98.45,
+    "p10_p50_p90_ponderes": [
+     98.08,
+     98.42,
+     98.75
+    ],
+    "p10_p90_non_ponderes": [
+     98.18,
+     98.68
+    ],
+    "cellules_baties": 569,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 98.45,
+    "p10_p50_p90_ponderes": [
+     98.08,
+     98.42,
+     98.75
+    ],
+    "p10_p90_non_ponderes": [
+     98.18,
+     98.68
+    ],
+    "cellules_baties": 569,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   },
+   "point_index_pct": 98.26,
+   "centre_bati_pct": 98.67,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 10030,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 98.45,
+    "erreur_type_pts": 0.006,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.45,
+    "p10_p50_p90_ponderes": [
+     98.08,
+     98.42,
+     98.75
+    ],
+    "p10_p90_non_ponderes": [
+     98.18,
+     98.68
+    ],
+    "cellules_baties": 569,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   }
+  },
+  "30189": {
+   "nom": "Nîmes",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 161.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 50.02,
+    "p10_p50_p90_ponderes": [
+     47.58,
+     49.72,
+     53.48
+    ],
+    "p10_p90_non_ponderes": [
+     45.94,
+     56.77
+    ],
+    "cellules_baties": 8788,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.72
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 49.22,
+    "p10_p50_p90_ponderes": [
+     48.35,
+     49.43,
+     49.81
+    ],
+    "p10_p90_non_ponderes": [
+     47.47,
+     50.11
+    ],
+    "cellules_baties": 1085,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.74
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 49.9,
+    "p10_p50_p90_ponderes": [
+     47.35,
+     49.63,
+     53.4
+    ],
+    "p10_p90_non_ponderes": [
+     45.91,
+     56.73
+    ],
+    "cellules_baties": 8911,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.71
+   },
+   "point_index_pct": 49.91,
+   "centre_bati_pct": 49.88,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 361781,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 50.03,
+    "erreur_type_pts": 0.077,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 50.02,
+    "p10_p50_p90_ponderes": [
+     47.58,
+     49.72,
+     53.48
+    ],
+    "p10_p90_non_ponderes": [
+     45.94,
+     56.77
+    ],
+    "cellules_baties": 8788,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.72
+   }
+  },
+  "65192": {
+   "nom": "Gavarnie-Gèdre",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 227.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 3385265,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.85,
+    "p10_p50_p90_ponderes": [
+     99.83,
+     99.84,
+     99.85
+    ],
+    "p10_p90_non_ponderes": [
+     99.83,
+     99.98
+    ],
+    "cellules_baties": 74,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 87.3,
+    "disque_terres_pct": 86.73
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.85,
+    "p10_p50_p90_ponderes": [
+     99.83,
+     99.84,
+     99.85
+    ],
+    "p10_p90_non_ponderes": [
+     99.83,
+     99.98
+    ],
+    "cellules_baties": 74,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 87.3,
+    "disque_terres_pct": 86.73
+   },
+   "point_index_pct": 99.83,
+   "centre_bati_pct": 99.84,
+   "reference_10m": {
+    "pixels_tires": 391,
+    "pixels_bati_commune": 391,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.85,
+    "erreur_type_pts": 0.002,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.84,
+    "p10_p50_p90_ponderes": [
+     99.83,
+     99.85,
+     99.86
+    ],
+    "p10_p90_non_ponderes": [
+     99.79,
+     99.86
+    ],
+    "cellules_baties": 74,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 98.91,
+    "disque_terres_pct": 98.33
+   }
+  },
+  "12270": {
+   "nom": "Sévérac d'Aveyron",
+   "strates": [
+    "grande_commune"
+   ],
+   "surface_km2": 209.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 95.37,
+    "p10_p50_p90_ponderes": [
+     94.83,
+     95.49,
+     95.76
+    ],
+    "p10_p90_non_ponderes": [
+     94.83,
+     95.83
+    ],
+    "cellules_baties": 3147,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.99,
+    "disque_terres_pct": 99.93
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 95.3,
+    "p10_p50_p90_ponderes": [
+     95.17,
+     95.17,
+     95.56
+    ],
+    "p10_p90_non_ponderes": [
+     95.21,
+     95.52
+    ],
+    "cellules_baties": 2,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.86
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 95.38,
+    "p10_p50_p90_ponderes": [
+     94.84,
+     95.5,
+     95.77
+    ],
+    "p10_p90_non_ponderes": [
+     94.82,
+     95.83
+    ],
+    "cellules_baties": 3174,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.99,
+    "disque_terres_pct": 99.93
+   },
+   "point_index_pct": 95.31,
+   "centre_bati_pct": 95.53,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 57338,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 95.37,
+    "erreur_type_pts": 0.01,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 95.37,
+    "p10_p50_p90_ponderes": [
+     94.83,
+     95.49,
+     95.76
+    ],
+    "p10_p90_non_ponderes": [
+     94.83,
+     95.83
+    ],
+    "cellules_baties": 3147,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.99,
+    "disque_terres_pct": 99.93
+   }
+  },
+  "67008": {
+   "nom": "Altorf",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 10.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 267611,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 40.18,
+    "p10_p50_p90_ponderes": [
+     34.99,
+     41.53,
+     42.73
+    ],
+    "p10_p90_non_ponderes": [
+     37.67,
+     43.05
+    ],
+    "cellules_baties": 479,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.42
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 42.03,
+    "p10_p50_p90_ponderes": [
+     40.29,
+     42.27,
+     43.47
+    ],
+    "p10_p90_non_ponderes": [
+     39.27,
+     43.46
+    ],
+    "cellules_baties": 9,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.49
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 40.14,
+    "p10_p50_p90_ponderes": [
+     34.99,
+     41.51,
+     42.74
+    ],
+    "p10_p90_non_ponderes": [
+     37.68,
+     43.06
+    ],
+    "cellules_baties": 484,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.42
+   },
+   "point_index_pct": 39.73,
+   "centre_bati_pct": 40.33,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 11145,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 40.21,
+    "erreur_type_pts": 0.073,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 40.18,
+    "p10_p50_p90_ponderes": [
+     34.99,
+     41.53,
+     42.73
+    ],
+    "p10_p90_non_ponderes": [
+     37.67,
+     43.05
+    ],
+    "cellules_baties": 479,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.42
+   }
+  },
+  "01108": {
+   "nom": "Coligny",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 16.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 78.44,
+    "p10_p50_p90_ponderes": [
+     76.06,
+     79.02,
+     79.83
+    ],
+    "p10_p90_non_ponderes": [
+     74.96,
+     80.0
+    ],
+    "cellules_baties": 479,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.68
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 74.68,
+    "p10_p50_p90_ponderes": [
+     74.68,
+     74.68,
+     74.68
+    ],
+    "p10_p90_non_ponderes": [
+     74.68,
+     74.68
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.45
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 78.4,
+    "p10_p50_p90_ponderes": [
+     75.56,
+     79.01,
+     79.83
+    ],
+    "p10_p90_non_ponderes": [
+     74.94,
+     79.99
+    ],
+    "cellules_baties": 485,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.68
+   },
+   "point_index_pct": 78.02,
+   "centre_bati_pct": 78.42,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 10259,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 78.5,
+    "erreur_type_pts": 0.04,
+    "ecart_100m_moins_10m_pts": -0.06
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 78.44,
+    "p10_p50_p90_ponderes": [
+     76.06,
+     79.02,
+     79.83
+    ],
+    "p10_p90_non_ponderes": [
+     74.96,
+     80.0
+    ],
+    "cellules_baties": 479,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.68
+   }
+  },
+  "59385": {
+   "nom": "Marpent",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 4.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 3022846,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 53.25,
+    "p10_p50_p90_ponderes": [
+     52.74,
+     53.29,
+     53.65
+    ],
+    "p10_p90_non_ponderes": [
+     52.66,
+     53.86
+    ],
+    "cellules_baties": 254,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 50.53,
+    "disque_terres_pct": 50.43
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 53.25,
+    "p10_p50_p90_ponderes": [
+     52.74,
+     53.29,
+     53.65
+    ],
+    "p10_p90_non_ponderes": [
+     52.66,
+     53.86
+    ],
+    "cellules_baties": 255,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 50.52,
+    "disque_terres_pct": 50.42
+   },
+   "point_index_pct": 53.34,
+   "centre_bati_pct": 53.28,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 10481,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 53.25,
+    "erreur_type_pts": 0.01,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 48.49,
+    "p10_p50_p90_ponderes": [
+     47.76,
+     48.51,
+     49.11
+    ],
+    "p10_p90_non_ponderes": [
+     47.53,
+     49.53
+    ],
+    "cellules_baties": 254,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 81.89,
+    "disque_terres_pct": 81.74
+   }
+  },
+  "67240": {
+   "nom": "Kirchheim",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 2.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 41.17,
+    "p10_p50_p90_ponderes": [
+     39.78,
+     40.67,
+     44.08
+    ],
+    "p10_p90_non_ponderes": [
+     38.9,
+     45.78
+    ],
+    "cellules_baties": 173,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 40.26,
+    "p10_p50_p90_ponderes": [
+     40.06,
+     40.36,
+     40.36
+    ],
+    "p10_p90_non_ponderes": [
+     40.09,
+     40.33
+    ],
+    "cellules_baties": 2,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.86
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 41.22,
+    "p10_p50_p90_ponderes": [
+     39.78,
+     40.67,
+     44.12
+    ],
+    "p10_p90_non_ponderes": [
+     38.9,
+     45.78
+    ],
+    "cellules_baties": 173,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   },
+   "point_index_pct": 41.7,
+   "centre_bati_pct": 40.99,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 4293,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 41.33,
+    "erreur_type_pts": 0.048,
+    "ecart_100m_moins_10m_pts": -0.16
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 41.17,
+    "p10_p50_p90_ponderes": [
+     39.78,
+     40.67,
+     44.08
+    ],
+    "p10_p90_non_ponderes": [
+     38.9,
+     45.78
+    ],
+    "cellules_baties": 173,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.88
+   }
+  },
+  "25038": {
+   "nom": "Avilley",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 5.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 81.0,
+    "p10_p50_p90_ponderes": [
+     80.76,
+     80.98,
+     81.2
+    ],
+    "p10_p90_non_ponderes": [
+     80.78,
+     81.48
+    ],
+    "cellules_baties": 91,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 81.0,
+    "p10_p50_p90_ponderes": [
+     80.76,
+     80.98,
+     81.2
+    ],
+    "p10_p90_non_ponderes": [
+     80.78,
+     81.48
+    ],
+    "cellules_baties": 91,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   },
+   "point_index_pct": 80.98,
+   "centre_bati_pct": 80.99,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 2035,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 80.99,
+    "erreur_type_pts": 0.005,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 81.0,
+    "p10_p50_p90_ponderes": [
+     80.76,
+     80.98,
+     81.2
+    ],
+    "p10_p90_non_ponderes": [
+     80.78,
+     81.48
+    ],
+    "cellules_baties": 91,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.48
+   }
+  },
+  "65017": {
+   "nom": "Aragnouet",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 108.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 2723062,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.62,
+    "p10_p50_p90_ponderes": [
+     99.56,
+     99.59,
+     99.68
+    ],
+    "p10_p90_non_ponderes": [
+     99.56,
+     99.7
+    ],
+    "cellules_baties": 33,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 84.34,
+    "disque_terres_pct": 83.77
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.62,
+    "p10_p50_p90_ponderes": [
+     99.56,
+     99.58,
+     99.68
+    ],
+    "p10_p90_non_ponderes": [
+     99.56,
+     99.7
+    ],
+    "cellules_baties": 33,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 84.34,
+    "disque_terres_pct": 83.77
+   },
+   "point_index_pct": 99.83,
+   "centre_bati_pct": 99.64,
+   "reference_10m": {
+    "pixels_tires": 156,
+    "pixels_bati_commune": 156,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.63,
+    "erreur_type_pts": 0.007,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.62,
+    "p10_p50_p90_ponderes": [
+     99.58,
+     99.59,
+     99.68
+    ],
+    "p10_p90_non_ponderes": [
+     99.58,
+     99.7
+    ],
+    "cellules_baties": 33,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 98.29,
+    "disque_terres_pct": 97.68
+   }
+  },
+  "67021": {
+   "nom": "Barr",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 21.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 9370,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 58.99,
+    "p10_p50_p90_ponderes": [
+     56.56,
+     58.33,
+     62.78
+    ],
+    "p10_p90_non_ponderes": [
+     56.0,
+     63.8
+    ],
+    "cellules_baties": 472,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.7
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 58.78,
+    "p10_p50_p90_ponderes": [
+     58.07,
+     58.78,
+     59.28
+    ],
+    "p10_p90_non_ponderes": [
+     57.64,
+     59.89
+    ],
+    "cellules_baties": 40,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.69
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 58.9,
+    "p10_p50_p90_ponderes": [
+     56.42,
+     58.29,
+     62.75
+    ],
+    "p10_p90_non_ponderes": [
+     56.0,
+     63.8
+    ],
+    "cellules_baties": 472,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.7
+   },
+   "point_index_pct": 67.24,
+   "centre_bati_pct": 58.8,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 23539,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 58.9,
+    "erreur_type_pts": 0.062,
+    "ecart_100m_moins_10m_pts": 0.09
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 58.99,
+    "p10_p50_p90_ponderes": [
+     56.56,
+     58.33,
+     62.78
+    ],
+    "p10_p90_non_ponderes": [
+     56.0,
+     63.8
+    ],
+    "cellules_baties": 472,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.7
+   }
+  },
+  "66114": {
+   "nom": "Montescot",
+   "strates": [
+    "frontaliere"
+   ],
+   "surface_km2": 6.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 1835487,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 45.11,
+    "p10_p50_p90_ponderes": [
+     43.08,
+     45.5,
+     46.41
+    ],
+    "p10_p90_non_ponderes": [
+     41.9,
+     46.52
+    ],
+    "cellules_baties": 240,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 87.33,
+    "disque_terres_pct": 85.73
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 44.02,
+    "p10_p50_p90_ponderes": [
+     41.18,
+     45.51,
+     45.74
+    ],
+    "p10_p90_non_ponderes": [
+     41.25,
+     45.85
+    ],
+    "cellules_baties": 17,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 89.35,
+    "disque_terres_pct": 87.76
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 45.1,
+    "p10_p50_p90_ponderes": [
+     43.08,
+     45.5,
+     46.41
+    ],
+    "p10_p90_non_ponderes": [
+     41.9,
+     46.52
+    ],
+    "cellules_baties": 241,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 87.37,
+    "disque_terres_pct": 85.77
+   },
+   "point_index_pct": 43.66,
+   "centre_bati_pct": 45.06,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 7081,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 45.15,
+    "erreur_type_pts": 0.034,
+    "ecart_100m_moins_10m_pts": -0.04
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 45.2,
+    "p10_p50_p90_ponderes": [
+     43.1,
+     45.6,
+     46.57
+    ],
+    "p10_p90_non_ponderes": [
+     41.91,
+     46.7
+    ],
+    "cellules_baties": 240,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.6,
+    "disque_terres_pct": 85.89
+   }
+  },
+  "29155": {
+   "nom": "Ouessant",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 16.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 4116240,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 85.22,
+    "p10_p50_p90_ponderes": [
+     85.01,
+     85.33,
+     85.48
+    ],
+    "p10_p90_non_ponderes": [
+     84.76,
+     85.48
+    ],
+    "cellules_baties": 776,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 2.46,
+    "disque_terres_pct": 2.45
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 85.48,
+    "p10_p50_p90_ponderes": [
+     85.48,
+     85.48,
+     85.48
+    ],
+    "p10_p90_non_ponderes": [
+     85.48,
+     85.48
+    ],
+    "cellules_baties": 6,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 2.45,
+    "disque_terres_pct": 2.44
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 85.22,
+    "p10_p50_p90_ponderes": [
+     85.01,
+     85.33,
+     85.48
+    ],
+    "p10_p90_non_ponderes": [
+     84.76,
+     85.48
+    ],
+    "cellules_baties": 776,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 2.46,
+    "disque_terres_pct": 2.45
+   },
+   "point_index_pct": 85.05,
+   "centre_bati_pct": 85.22,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 17614,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 85.23,
+    "erreur_type_pts": 0.007,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 81.67,
+    "p10_p50_p90_ponderes": [
+     81.42,
+     81.75,
+     81.96
+    ],
+    "p10_p90_non_ponderes": [
+     81.15,
+     81.96
+    ],
+    "cellules_baties": 776,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 38.55,
+    "disque_terres_pct": 2.76
+   }
+  },
+  "29083": {
+   "nom": "Île-de-Sein",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 0.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 2431208,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 72.4,
+    "p10_p50_p90_ponderes": [
+     72.03,
+     72.16,
+     73.04
+    ],
+    "p10_p90_non_ponderes": [
+     72.03,
+     73.23
+    ],
+    "cellules_baties": 53,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 2.65,
+    "disque_terres_pct": 2.63
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 72.4,
+    "p10_p50_p90_ponderes": [
+     72.03,
+     72.16,
+     73.04
+    ],
+    "p10_p90_non_ponderes": [
+     72.03,
+     73.23
+    ],
+    "cellules_baties": 53,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 2.65,
+    "disque_terres_pct": 2.63
+   },
+   "point_index_pct": 72.15,
+   "centre_bati_pct": 72.02,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 3254,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 72.32,
+    "erreur_type_pts": 0.012,
+    "ecart_100m_moins_10m_pts": 0.08
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 69.87,
+    "p10_p50_p90_ponderes": [
+     69.69,
+     69.81,
+     70.15
+    ],
+    "p10_p90_non_ponderes": [
+     69.69,
+     70.18
+    ],
+    "cellules_baties": 53,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 31.76,
+    "disque_terres_pct": 2.79
+   }
+  },
+  "56069": {
+   "nom": "Groix",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 15.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 4083056,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 49.8,
+    "p10_p50_p90_ponderes": [
+     48.71,
+     49.54,
+     51.55
+    ],
+    "p10_p90_non_ponderes": [
+     48.73,
+     51.39
+    ],
+    "cellules_baties": 931,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 14.93,
+    "disque_terres_pct": 14.5
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 49.07,
+    "p10_p50_p90_ponderes": [
+     49.07,
+     49.07,
+     49.07
+    ],
+    "p10_p90_non_ponderes": [
+     49.07,
+     49.07
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 17.82,
+    "disque_terres_pct": 17.32
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 49.8,
+    "p10_p50_p90_ponderes": [
+     48.71,
+     49.54,
+     51.57
+    ],
+    "p10_p90_non_ponderes": [
+     48.73,
+     51.39
+    ],
+    "cellules_baties": 931,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 14.93,
+    "disque_terres_pct": 14.5
+   },
+   "point_index_pct": 49.15,
+   "centre_bati_pct": 49.37,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 32693,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 49.87,
+    "erreur_type_pts": 0.028,
+    "ecart_100m_moins_10m_pts": -0.07
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 49.51,
+    "p10_p50_p90_ponderes": [
+     48.47,
+     49.26,
+     51.17
+    ],
+    "p10_p90_non_ponderes": [
+     48.49,
+     50.97
+    ],
+    "cellules_baties": 931,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 54.94,
+    "disque_terres_pct": 14.8
+   }
+  },
+  "56152": {
+   "nom": "Le Palais",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 17.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 5397306,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 80.12,
+    "p10_p50_p90_ponderes": [
+     78.58,
+     80.7,
+     80.91
+    ],
+    "p10_p90_non_ponderes": [
+     78.34,
+     80.93
+    ],
+    "cellules_baties": 1091,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 12.49,
+    "disque_terres_pct": 12.42
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 79.92,
+    "p10_p50_p90_ponderes": [
+     79.63,
+     79.84,
+     80.38
+    ],
+    "p10_p90_non_ponderes": [
+     79.62,
+     80.4
+    ],
+    "cellules_baties": 8,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 12.61,
+    "disque_terres_pct": 12.55
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 80.12,
+    "p10_p50_p90_ponderes": [
+     78.58,
+     80.7,
+     80.91
+    ],
+    "p10_p90_non_ponderes": [
+     78.34,
+     80.93
+    ],
+    "cellules_baties": 1091,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 12.49,
+    "disque_terres_pct": 12.42
+   },
+   "point_index_pct": 80.75,
+   "centre_bati_pct": 80.73,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 31069,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 80.14,
+    "erreur_type_pts": 0.026,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 79.35,
+    "p10_p50_p90_ponderes": [
+     77.71,
+     79.95,
+     80.23
+    ],
+    "p10_p90_non_ponderes": [
+     77.47,
+     80.26
+    ],
+    "cellules_baties": 1091,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 68.01,
+    "disque_terres_pct": 12.57
+   }
+  },
+  "85113": {
+   "nom": "L'Île-d'Yeu",
+   "strates": [
+    "ile",
+    "extreme_phase_A"
+   ],
+   "surface_km2": 24.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 2984599,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 70.92,
+    "p10_p50_p90_ponderes": [
+     70.92,
+     70.92,
+     70.92
+    ],
+    "p10_p90_non_ponderes": [
+     70.92,
+     70.92
+    ],
+    "cellules_baties": 1519,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 3.39,
+    "disque_terres_pct": 3.36
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 70.92,
+    "p10_p50_p90_ponderes": [
+     70.92,
+     70.92,
+     70.92
+    ],
+    "p10_p90_non_ponderes": [
+     70.92,
+     70.92
+    ],
+    "cellules_baties": 4,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 3.39,
+    "disque_terres_pct": 3.36
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 70.92,
+    "p10_p50_p90_ponderes": [
+     70.92,
+     70.92,
+     70.92
+    ],
+    "p10_p90_non_ponderes": [
+     70.92,
+     70.92
+    ],
+    "cellules_baties": 1519,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 3.39,
+    "disque_terres_pct": 3.36
+   },
+   "point_index_pct": 70.92,
+   "centre_bati_pct": 70.92,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 68311,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 70.92,
+    "erreur_type_pts": 0.0,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 70.96,
+    "p10_p50_p90_ponderes": [
+     70.96,
+     70.96,
+     70.96
+    ],
+    "p10_p90_non_ponderes": [
+     70.96,
+     70.96
+    ],
+    "cellules_baties": 1519,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 32.03,
+    "disque_terres_pct": 3.41
+   }
+  },
+  "17093": {
+   "nom": "Le Château-d'Oléron",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 15.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 5622867,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 64.96,
+    "p10_p50_p90_ponderes": [
+     63.04,
+     64.92,
+     66.75
+    ],
+    "p10_p90_non_ponderes": [
+     62.91,
+     67.05
+    ],
+    "cellules_baties": 1226,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 43.42,
+    "disque_terres_pct": 39.56
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 63.81,
+    "p10_p50_p90_ponderes": [
+     63.81,
+     63.81,
+     63.81
+    ],
+    "p10_p90_non_ponderes": [
+     63.81,
+     63.81
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 48.11,
+    "disque_terres_pct": 43.66
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 64.96,
+    "p10_p50_p90_ponderes": [
+     63.04,
+     64.92,
+     66.75
+    ],
+    "p10_p90_non_ponderes": [
+     62.9,
+     67.05
+    ],
+    "cellules_baties": 1227,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 43.42,
+    "disque_terres_pct": 39.56
+   },
+   "point_index_pct": 65.99,
+   "centre_bati_pct": 65.34,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 47380,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 64.98,
+    "erreur_type_pts": 0.038,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 64.7,
+    "p10_p50_p90_ponderes": [
+     62.78,
+     64.67,
+     66.5
+    ],
+    "p10_p90_non_ponderes": [
+     62.64,
+     66.79
+    ],
+    "cellules_baties": 1226,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 92.47,
+    "disque_terres_pct": 40.39
+   }
+  },
+  "17486": {
+   "nom": "La Brée-les-Bains",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 7.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 6621210,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 63.63,
+    "p10_p50_p90_ponderes": [
+     62.63,
+     63.68,
+     64.49
+    ],
+    "p10_p90_non_ponderes": [
+     62.97,
+     64.51
+    ],
+    "cellules_baties": 435,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 18.57,
+    "disque_terres_pct": 17.73
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 63.63,
+    "p10_p50_p90_ponderes": [
+     62.63,
+     63.68,
+     64.49
+    ],
+    "p10_p90_non_ponderes": [
+     62.97,
+     64.51
+    ],
+    "cellules_baties": 435,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 18.57,
+    "disque_terres_pct": 17.73
+   },
+   "point_index_pct": 64.25,
+   "centre_bati_pct": 63.87,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 18829,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 63.65,
+    "erreur_type_pts": 0.018,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 63.43,
+    "p10_p50_p90_ponderes": [
+     62.47,
+     63.49,
+     64.22
+    ],
+    "p10_p90_non_ponderes": [
+     62.81,
+     64.25
+    ],
+    "cellules_baties": 435,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 75.51,
+    "disque_terres_pct": 18.17
+   }
+  },
+  "83069": {
+   "nom": "Hyères",
+   "strates": [
+    "ile",
+    "extreme_phase_A"
+   ],
+   "surface_km2": 133.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 9524097,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 61.19,
+    "p10_p50_p90_ponderes": [
+     54.75,
+     60.66,
+     65.52
+    ],
+    "p10_p90_non_ponderes": [
+     55.42,
+     68.55
+    ],
+    "cellules_baties": 6146,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.32,
+    "disque_terres_pct": 51.89
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 61.68,
+    "p10_p50_p90_ponderes": [
+     60.28,
+     60.89,
+     64.31
+    ],
+    "p10_p90_non_ponderes": [
+     60.11,
+     64.96
+    ],
+    "cellules_baties": 356,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 63.34,
+    "disque_terres_pct": 61.89
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 61.23,
+    "p10_p50_p90_ponderes": [
+     54.88,
+     60.68,
+     65.58
+    ],
+    "p10_p90_non_ponderes": [
+     55.54,
+     68.76
+    ],
+    "cellules_baties": 6291,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.67,
+    "disque_terres_pct": 52.24
+   },
+   "point_index_pct": 72.92,
+   "centre_bati_pct": 61.6,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 219381,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 61.47,
+    "erreur_type_pts": 0.152,
+    "ecart_100m_moins_10m_pts": -0.28
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 61.19,
+    "p10_p50_p90_ponderes": [
+     54.76,
+     60.66,
+     65.52
+    ],
+    "p10_p90_non_ponderes": [
+     55.43,
+     68.55
+    ],
+    "cellules_baties": 6146,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 92.05,
+    "disque_terres_pct": 51.91
+   }
+  },
+  "22016": {
+   "nom": "Île-de-Bréhat",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 3.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 3787462,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 45.43,
+    "p10_p50_p90_ponderes": [
+     44.68,
+     45.34,
+     46.23
+    ],
+    "p10_p90_non_ponderes": [
+     44.55,
+     46.23
+    ],
+    "cellules_baties": 294,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 25.29,
+    "disque_terres_pct": 25.15
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 45.43,
+    "p10_p50_p90_ponderes": [
+     44.68,
+     45.34,
+     46.23
+    ],
+    "p10_p90_non_ponderes": [
+     44.55,
+     46.23
+    ],
+    "cellules_baties": 294,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 25.29,
+    "disque_terres_pct": 25.15
+   },
+   "point_index_pct": 45.16,
+   "centre_bati_pct": 45.26,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 9436,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 45.44,
+    "erreur_type_pts": 0.015,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 44.44,
+    "p10_p50_p90_ponderes": [
+     43.61,
+     44.38,
+     45.28
+    ],
+    "p10_p90_non_ponderes": [
+     43.49,
+     45.29
+    ],
+    "cellules_baties": 294,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 69.2,
+    "disque_terres_pct": 25.99
+   }
+  },
+  "2A247": {
+   "nom": "Porto-Vecchio",
+   "strates": [
+    "ile"
+   ],
+   "surface_km2": 169.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 4825242,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 98.52,
+    "p10_p50_p90_ponderes": [
+     98.38,
+     98.53,
+     98.7
+    ],
+    "p10_p90_non_ponderes": [
+     98.28,
+     98.73
+    ],
+    "cellules_baties": 1776,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 68.47,
+    "disque_terres_pct": 68.16
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 98.46,
+    "p10_p50_p90_ponderes": [
+     98.29,
+     98.51,
+     98.57
+    ],
+    "p10_p90_non_ponderes": [
+     98.31,
+     98.6
+    ],
+    "cellules_baties": 197,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 66.92,
+    "disque_terres_pct": 66.63
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 98.5,
+    "p10_p50_p90_ponderes": [
+     98.34,
+     98.53,
+     98.69
+    ],
+    "p10_p90_non_ponderes": [
+     98.22,
+     98.73
+    ],
+    "cellules_baties": 1946,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 67.56,
+    "disque_terres_pct": 67.26
+   },
+   "point_index_pct": 98.53,
+   "centre_bati_pct": 98.52,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 21361,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 98.52,
+    "erreur_type_pts": 0.004,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.44,
+    "p10_p50_p90_ponderes": [
+     98.29,
+     98.45,
+     98.64
+    ],
+    "p10_p90_non_ponderes": [
+     98.18,
+     98.68
+    ],
+    "cellules_baties": 1776,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 90.67,
+    "disque_terres_pct": 68.3
+   }
+  },
+  "13004": {
+   "nom": "Arles",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 757.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 5432285,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 49.55,
+    "p10_p50_p90_ponderes": [
+     40.81,
+     45.99,
+     61.78
+    ],
+    "p10_p90_non_ponderes": [
+     39.43,
+     62.56
+    ],
+    "cellules_baties": 13249,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 96.46,
+    "disque_terres_pct": 79.94
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 44.08,
+    "p10_p50_p90_ponderes": [
+     42.79,
+     44.14,
+     45.67
+    ],
+    "p10_p90_non_ponderes": [
+     42.71,
+     46.21
+    ],
+    "cellules_baties": 423,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.91,
+    "disque_terres_pct": 90.46
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 49.58,
+    "p10_p50_p90_ponderes": [
+     40.83,
+     45.94,
+     61.94
+    ],
+    "p10_p90_non_ponderes": [
+     39.51,
+     63.0
+    ],
+    "cellules_baties": 13959,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 96.12,
+    "disque_terres_pct": 79.75
+   },
+   "point_index_pct": 54.42,
+   "centre_bati_pct": 49.63,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 256733,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 49.72,
+    "erreur_type_pts": 0.216,
+    "ecart_100m_moins_10m_pts": -0.17
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 49.61,
+    "p10_p50_p90_ponderes": [
+     40.82,
+     45.99,
+     62.07
+    ],
+    "p10_p90_non_ponderes": [
+     39.43,
+     62.82
+    ],
+    "cellules_baties": 13249,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.35,
+    "disque_terres_pct": 79.99
+   }
+  },
+  "13096": {
+   "nom": "Saintes-Maries-de-la-Mer",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 370.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 4170067,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 57.52,
+    "p10_p50_p90_ponderes": [
+     49.46,
+     57.36,
+     66.21
+    ],
+    "p10_p90_non_ponderes": [
+     48.51,
+     65.06
+    ],
+    "cellules_baties": 3963,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 68.25,
+    "disque_terres_pct": 32.43
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 57.81,
+    "p10_p50_p90_ponderes": [
+     42.65,
+     60.04,
+     68.59
+    ],
+    "p10_p90_non_ponderes": [
+     54.55,
+     68.95
+    ],
+    "cellules_baties": 13,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 71.28,
+    "disque_terres_pct": 31.27
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 57.43,
+    "p10_p50_p90_ponderes": [
+     49.39,
+     57.2,
+     66.16
+    ],
+    "p10_p90_non_ponderes": [
+     48.54,
+     64.97
+    ],
+    "cellules_baties": 4112,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 68.39,
+    "disque_terres_pct": 32.62
+   },
+   "point_index_pct": 55.33,
+   "centre_bati_pct": 56.17,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 48780,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 57.71,
+    "erreur_type_pts": 0.161,
+    "ecart_100m_moins_10m_pts": -0.19
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 57.68,
+    "p10_p50_p90_ponderes": [
+     49.51,
+     57.49,
+     66.6
+    ],
+    "p10_p90_non_ponderes": [
+     48.55,
+     65.42
+    ],
+    "cellules_baties": 3963,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 86.82,
+    "disque_terres_pct": 32.54
+   }
+  },
+  "77186": {
+   "nom": "Fontainebleau",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 172.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 64.31,
+    "p10_p50_p90_ponderes": [
+     63.51,
+     64.38,
+     65.3
+    ],
+    "p10_p90_non_ponderes": [
+     61.9,
+     65.55
+    ],
+    "cellules_baties": 1716,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.59
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 64.39,
+    "p10_p50_p90_ponderes": [
+     64.07,
+     64.38,
+     64.68
+    ],
+    "p10_p90_non_ponderes": [
+     63.98,
+     64.93
+    ],
+    "cellules_baties": 125,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.53
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 64.23,
+    "p10_p50_p90_ponderes": [
+     63.31,
+     64.36,
+     65.33
+    ],
+    "p10_p90_non_ponderes": [
+     61.74,
+     65.53
+    ],
+    "cellules_baties": 2072,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.6
+   },
+   "point_index_pct": 64.52,
+   "centre_bati_pct": 64.74,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 44767,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 64.34,
+    "erreur_type_pts": 0.027,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 64.31,
+    "p10_p50_p90_ponderes": [
+     63.51,
+     64.38,
+     65.3
+    ],
+    "p10_p90_non_ponderes": [
+     61.9,
+     65.55
+    ],
+    "cellules_baties": 1716,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 98.59
+   }
+  },
+  "50218": {
+   "nom": "Granville",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 10.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 7611216,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 59.83,
+    "p10_p50_p90_ponderes": [
+     59.24,
+     59.89,
+     60.83
+    ],
+    "p10_p90_non_ponderes": [
+     59.22,
+     60.92
+    ],
+    "cellules_baties": 808,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 44.78,
+    "disque_terres_pct": 44.65
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 59.3,
+    "p10_p50_p90_ponderes": [
+     59.14,
+     59.25,
+     59.35
+    ],
+    "p10_p90_non_ponderes": [
+     59.17,
+     60.37
+    ],
+    "cellules_baties": 36,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 40.38,
+    "disque_terres_pct": 40.25
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 59.83,
+    "p10_p50_p90_ponderes": [
+     59.24,
+     59.89,
+     60.83
+    ],
+    "p10_p90_non_ponderes": [
+     59.22,
+     60.92
+    ],
+    "cellules_baties": 808,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 44.8,
+    "disque_terres_pct": 44.68
+   },
+   "point_index_pct": 41.48,
+   "centre_bati_pct": 59.44,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 52940,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 59.8,
+    "erreur_type_pts": 0.039,
+    "ecart_100m_moins_10m_pts": 0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 59.56,
+    "p10_p50_p90_ponderes": [
+     59.29,
+     59.92,
+     60.85
+    ],
+    "p10_p90_non_ponderes": [
+     59.27,
+     60.95
+    ],
+    "cellules_baties": 808,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 84.82,
+    "disque_terres_pct": 45.2
+   }
+  },
+  "74056": {
+   "nom": "Chamonix-Mont-Blanc",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 245.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 4407510,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 97.75,
+    "p10_p50_p90_ponderes": [
+     97.21,
+     97.58,
+     98.68
+    ],
+    "p10_p90_non_ponderes": [
+     97.19,
+     98.82
+    ],
+    "cellules_baties": 1083,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 77.39,
+    "disque_terres_pct": 77.26
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 97.75,
+    "p10_p50_p90_ponderes": [
+     97.21,
+     97.58,
+     98.68
+    ],
+    "p10_p90_non_ponderes": [
+     97.19,
+     98.82
+    ],
+    "cellules_baties": 1083,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 77.39,
+    "disque_terres_pct": 77.26
+   },
+   "point_index_pct": 98.83,
+   "centre_bati_pct": 97.64,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 30455,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 97.74,
+    "erreur_type_pts": 0.014,
+    "ecart_100m_moins_10m_pts": 0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.15,
+    "p10_p50_p90_ponderes": [
+     97.61,
+     98.05,
+     98.94
+    ],
+    "p10_p90_non_ponderes": [
+     97.6,
+     99.03
+    ],
+    "cellules_baties": 1083,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 98.63,
+    "disque_terres_pct": 98.39
+   }
+  },
+  "2B096": {
+   "nom": "Corte",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 149.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 589,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 99.56,
+    "p10_p50_p90_ponderes": [
+     99.55,
+     99.56,
+     99.59
+    ],
+    "p10_p90_non_ponderes": [
+     99.54,
+     99.6
+    ],
+    "cellules_baties": 492,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.82
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 99.56,
+    "p10_p50_p90_ponderes": [
+     99.55,
+     99.56,
+     99.58
+    ],
+    "p10_p90_non_ponderes": [
+     99.55,
+     99.58
+    ],
+    "cellules_baties": 118,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.81
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 99.56,
+    "p10_p50_p90_ponderes": [
+     99.55,
+     99.56,
+     99.59
+    ],
+    "p10_p90_non_ponderes": [
+     99.54,
+     99.6
+    ],
+    "cellules_baties": 547,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.82
+   },
+   "point_index_pct": 99.66,
+   "centre_bati_pct": 99.56,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 9900,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 99.56,
+    "erreur_type_pts": 0.0,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 99.56,
+    "p10_p50_p90_ponderes": [
+     99.55,
+     99.56,
+     99.59
+    ],
+    "p10_p90_non_ponderes": [
+     99.54,
+     99.6
+    ],
+    "cellules_baties": 492,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.82
+   }
+  },
+  "33063": {
+   "nom": "Bordeaux",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 49.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 53.86,
+    "p10_p50_p90_ponderes": [
+     51.94,
+     53.39,
+     56.52
+    ],
+    "p10_p90_non_ponderes": [
+     51.92,
+     56.52
+    ],
+    "cellules_baties": 4190,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.32
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 53.34,
+    "p10_p50_p90_ponderes": [
+     52.16,
+     53.22,
+     54.57
+    ],
+    "p10_p90_non_ponderes": [
+     51.95,
+     55.16
+    ],
+    "cellules_baties": 2398,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.56
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 53.77,
+    "p10_p50_p90_ponderes": [
+     51.94,
+     53.24,
+     56.46
+    ],
+    "p10_p90_non_ponderes": [
+     51.92,
+     56.5
+    ],
+    "cellules_baties": 4232,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.26
+   },
+   "point_index_pct": 53.7,
+   "centre_bati_pct": 52.92,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 280813,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 53.89,
+    "erreur_type_pts": 0.046,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 53.86,
+    "p10_p50_p90_ponderes": [
+     51.94,
+     53.39,
+     56.52
+    ],
+    "p10_p90_non_ponderes": [
+     51.92,
+     56.52
+    ],
+    "cellules_baties": 4190,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.32
+   }
+  },
+  "59350": {
+   "nom": "Lille",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 34.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 3307917,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 26.46,
+    "p10_p50_p90_ponderes": [
+     25.89,
+     26.56,
+     26.89
+    ],
+    "p10_p90_non_ponderes": [
+     25.87,
+     26.89
+    ],
+    "cellules_baties": 3386,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 94.68,
+    "disque_terres_pct": 94.05
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 26.49,
+    "p10_p50_p90_ponderes": [
+     25.97,
+     26.55,
+     26.89
+    ],
+    "p10_p90_non_ponderes": [
+     25.93,
+     26.9
+    ],
+    "cellules_baties": 2471,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 95.58,
+    "disque_terres_pct": 94.98
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 26.46,
+    "p10_p50_p90_ponderes": [
+     25.9,
+     26.56,
+     26.89
+    ],
+    "p10_p90_non_ponderes": [
+     25.87,
+     26.89
+    ],
+    "cellules_baties": 3411,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 94.69,
+    "disque_terres_pct": 94.06
+   },
+   "point_index_pct": 26.52,
+   "centre_bati_pct": 26.53,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 252965,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 26.47,
+    "erreur_type_pts": 0.01,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 26.48,
+    "p10_p50_p90_ponderes": [
+     25.97,
+     26.51,
+     26.91
+    ],
+    "p10_p90_non_ponderes": [
+     25.97,
+     26.91
+    ],
+    "cellules_baties": 3386,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.98,
+    "disque_terres_pct": 99.24
+   }
+  },
+  "34301": {
+   "nom": "Sète",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 40.6,
+   "pixels_classes_hors_france_dans_la_fenetre": 3088900,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 50.4,
+    "p10_p50_p90_ponderes": [
+     44.92,
+     51.4,
+     55.31
+    ],
+    "p10_p90_non_ponderes": [
+     37.09,
+     55.55
+    ],
+    "cellules_baties": 1732,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 55.06,
+    "disque_terres_pct": 42.56
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 52.73,
+    "p10_p50_p90_ponderes": [
+     51.12,
+     52.72,
+     55.31
+    ],
+    "p10_p90_non_ponderes": [
+     48.54,
+     56.14
+    ],
+    "cellules_baties": 507,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 53.03,
+    "disque_terres_pct": 40.2
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 50.57,
+    "p10_p50_p90_ponderes": [
+     43.15,
+     51.71,
+     55.74
+    ],
+    "p10_p90_non_ponderes": [
+     36.98,
+     55.57
+    ],
+    "cellules_baties": 1861,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 54.75,
+    "disque_terres_pct": 42.24
+   },
+   "point_index_pct": 43.67,
+   "centre_bati_pct": 50.3,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 82817,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 50.26,
+    "erreur_type_pts": 0.125,
+    "ecart_100m_moins_10m_pts": 0.14
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 50.41,
+    "p10_p50_p90_ponderes": [
+     44.94,
+     51.41,
+     55.32
+    ],
+    "p10_p90_non_ponderes": [
+     37.12,
+     55.55
+    ],
+    "cellules_baties": 1732,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 76.67,
+    "disque_terres_pct": 42.61
+   }
+  },
+  "74010": {
+   "nom": "Annecy",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 69.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 81.69,
+    "p10_p50_p90_ponderes": [
+     80.18,
+     81.37,
+     83.76
+    ],
+    "p10_p90_non_ponderes": [
+     80.2,
+     83.96
+    ],
+    "cellules_baties": 4354,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.35
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 81.81,
+    "p10_p50_p90_ponderes": [
+     81.64,
+     81.76,
+     81.96
+    ],
+    "p10_p90_non_ponderes": [
+     81.45,
+     82.38
+    ],
+    "cellules_baties": 44,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.21
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 81.69,
+    "p10_p50_p90_ponderes": [
+     80.17,
+     81.36,
+     83.76
+    ],
+    "p10_p90_non_ponderes": [
+     80.2,
+     83.96
+    ],
+    "cellules_baties": 4356,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.35
+   },
+   "point_index_pct": 81.83,
+   "centre_bati_pct": 81.07,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 269969,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 81.7,
+    "erreur_type_pts": 0.034,
+    "ecart_100m_moins_10m_pts": -0.01
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 81.69,
+    "p10_p50_p90_ponderes": [
+     80.18,
+     81.37,
+     83.76
+    ],
+    "p10_p90_non_ponderes": [
+     80.2,
+     83.96
+    ],
+    "cellules_baties": 4354,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 96.35
+   }
+  },
+  "50129": {
+   "nom": "Cherbourg-en-Cotentin",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 68.5,
+   "pixels_classes_hors_france_dans_la_fenetre": 4485525,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 67.69,
+    "p10_p50_p90_ponderes": [
+     66.48,
+     67.98,
+     68.26
+    ],
+    "p10_p90_non_ponderes": [
+     66.25,
+     68.25
+    ],
+    "cellules_baties": 4661,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 64.08,
+    "disque_terres_pct": 63.96
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 68.14,
+    "p10_p50_p90_ponderes": [
+     68.05,
+     68.16,
+     68.26
+    ],
+    "p10_p90_non_ponderes": [
+     67.89,
+     68.26
+    ],
+    "cellules_baties": 228,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 64.03,
+    "disque_terres_pct": 63.91
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 67.69,
+    "p10_p50_p90_ponderes": [
+     66.48,
+     67.98,
+     68.26
+    ],
+    "p10_p90_non_ponderes": [
+     66.25,
+     68.25
+    ],
+    "cellules_baties": 4661,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 64.08,
+    "disque_terres_pct": 63.96
+   },
+   "point_index_pct": 68.22,
+   "centre_bati_pct": 68.18,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 268265,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 67.71,
+    "erreur_type_pts": 0.018,
+    "ecart_100m_moins_10m_pts": -0.02
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 67.65,
+    "p10_p50_p90_ponderes": [
+     66.43,
+     67.95,
+     68.22
+    ],
+    "p10_p90_non_ponderes": [
+     66.2,
+     68.21
+    ],
+    "cellules_baties": 4661,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 85.58,
+    "disque_terres_pct": 64.04
+   }
+  },
+  "33529": {
+   "nom": "La Teste-de-Buch",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 178.8,
+   "pixels_classes_hors_france_dans_la_fenetre": 4748971,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 85.02,
+    "p10_p50_p90_ponderes": [
+     82.74,
+     84.31,
+     88.54
+    ],
+    "p10_p90_non_ponderes": [
+     82.83,
+     89.1
+    ],
+    "cellules_baties": 4715,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 62.38,
+    "disque_terres_pct": 57.39
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 85.48,
+    "p10_p50_p90_ponderes": [
+     82.74,
+     84.56,
+     88.75
+    ],
+    "p10_p90_non_ponderes": [
+     82.72,
+     88.82
+    ],
+    "cellules_baties": 189,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 59.48,
+    "disque_terres_pct": 54.09
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 85.01,
+    "p10_p50_p90_ponderes": [
+     82.72,
+     84.35,
+     88.53
+    ],
+    "p10_p90_non_ponderes": [
+     82.8,
+     89.15
+    ],
+    "cellules_baties": 4762,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 62.59,
+    "disque_terres_pct": 57.59
+   },
+   "point_index_pct": 86.05,
+   "centre_bati_pct": 85.42,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 157952,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 85.09,
+    "erreur_type_pts": 0.06,
+    "ecart_100m_moins_10m_pts": -0.07
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 84.8,
+    "p10_p50_p90_ponderes": [
+     82.52,
+     84.07,
+     88.35
+    ],
+    "p10_p90_non_ponderes": [
+     82.61,
+     88.94
+    ],
+    "cellules_baties": 4715,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 95.87,
+    "disque_terres_pct": 58.29
+   }
+  },
+  "33236": {
+   "nom": "Lège-Cap-Ferret",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 95.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 4559144,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 86.21,
+    "p10_p50_p90_ponderes": [
+     79.68,
+     85.58,
+     91.41
+    ],
+    "p10_p90_non_ponderes": [
+     79.31,
+     91.42
+    ],
+    "cellules_baties": 2532,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 46.35,
+    "disque_terres_pct": 45.97
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 84.52,
+    "p10_p50_p90_ponderes": [
+     79.73,
+     83.41,
+     90.28
+    ],
+    "p10_p90_non_ponderes": [
+     79.86,
+     90.78
+    ],
+    "cellules_baties": 35,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 44.95,
+    "disque_terres_pct": 44.54
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 86.19,
+    "p10_p50_p90_ponderes": [
+     79.7,
+     85.57,
+     91.4
+    ],
+    "p10_p90_non_ponderes": [
+     79.31,
+     91.42
+    ],
+    "cellules_baties": 2548,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 46.31,
+    "disque_terres_pct": 45.93
+   },
+   "point_index_pct": 84.99,
+   "centre_bati_pct": 84.29,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 76933,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 86.05,
+    "erreur_type_pts": 0.118,
+    "ecart_100m_moins_10m_pts": 0.16
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 85.96,
+    "p10_p50_p90_ponderes": [
+     79.41,
+     85.3,
+     91.22
+    ],
+    "p10_p90_non_ponderes": [
+     79.05,
+     91.25
+    ],
+    "cellules_baties": 2532,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 84.77,
+    "disque_terres_pct": 46.73
+   }
+  },
+  "17094": {
+   "nom": "Châtelaillon-Plage",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 6.7,
+   "pixels_classes_hors_france_dans_la_fenetre": 4273517,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 27.2,
+    "p10_p50_p90_ponderes": [
+     25.6,
+     27.04,
+     29.09
+    ],
+    "p10_p90_non_ponderes": [
+     25.5,
+     28.99
+    ],
+    "cellules_baties": 563,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 59.83,
+    "disque_terres_pct": 58.76
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 27.14,
+    "p10_p50_p90_ponderes": [
+     25.94,
+     27.42,
+     28.54
+    ],
+    "p10_p90_non_ponderes": [
+     26.09,
+     28.11
+    ],
+    "cellules_baties": 5,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 59.05,
+    "disque_terres_pct": 57.94
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 27.2,
+    "p10_p50_p90_ponderes": [
+     25.6,
+     27.04,
+     29.09
+    ],
+    "p10_p90_non_ponderes": [
+     25.5,
+     28.98
+    ],
+    "cellules_baties": 566,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 59.83,
+    "disque_terres_pct": 58.76
+   },
+   "point_index_pct": 27.07,
+   "centre_bati_pct": 26.91,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 32886,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 27.23,
+    "erreur_type_pts": 0.033,
+    "ecart_100m_moins_10m_pts": -0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 27.26,
+    "p10_p50_p90_ponderes": [
+     25.67,
+     27.11,
+     29.16
+    ],
+    "p10_p90_non_ponderes": [
+     25.56,
+     29.05
+    ],
+    "cellules_baties": 563,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 95.5,
+    "disque_terres_pct": 59.19
+   }
+  },
+  "02100": {
+   "nom": "Bony",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 8.0,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 11.5,
+    "p10_p50_p90_ponderes": [
+     11.21,
+     11.44,
+     12.0
+    ],
+    "p10_p90_non_ponderes": [
+     11.2,
+     11.95
+    ],
+    "cellules_baties": 244,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": null,
+    "poids_sans_mesure_pct": 100.0
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 11.5,
+    "p10_p50_p90_ponderes": [
+     11.21,
+     11.44,
+     12.0
+    ],
+    "p10_p90_non_ponderes": [
+     11.2,
+     11.95
+    ],
+    "cellules_baties": 250,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   },
+   "point_index_pct": 11.52,
+   "centre_bati_pct": 11.39,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 3244,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 11.5,
+    "erreur_type_pts": 0.007,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 11.5,
+    "p10_p50_p90_ponderes": [
+     11.21,
+     11.44,
+     12.0
+    ],
+    "p10_p90_non_ponderes": [
+     11.2,
+     11.95
+    ],
+    "cellules_baties": 244,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.76
+   }
+  },
+  "13055": {
+   "nom": "Marseille",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 238.1,
+   "pixels_classes_hors_france_dans_la_fenetre": 5745558,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 62.49,
+    "p10_p50_p90_ponderes": [
+     58.07,
+     63.55,
+     65.41
+    ],
+    "p10_p90_non_ponderes": [
+     57.17,
+     65.46
+    ],
+    "cellules_baties": 16461,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 70.04,
+    "disque_terres_pct": 69.8
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 63.23,
+    "p10_p50_p90_ponderes": [
+     60.24,
+     63.91,
+     65.18
+    ],
+    "p10_p90_non_ponderes": [
+     58.17,
+     65.06
+    ],
+    "cellules_baties": 6201,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 65.21,
+    "disque_terres_pct": 65.01
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 62.47,
+    "p10_p50_p90_ponderes": [
+     58.13,
+     63.5,
+     65.41
+    ],
+    "p10_p90_non_ponderes": [
+     57.13,
+     65.44
+    ],
+    "cellules_baties": 16726,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 70.0,
+    "disque_terres_pct": 69.76
+   },
+   "point_index_pct": 62.65,
+   "centre_bati_pct": 64.64,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 941793,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 62.4,
+    "erreur_type_pts": 0.086,
+    "ecart_100m_moins_10m_pts": 0.09
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 62.44,
+    "p10_p50_p90_ponderes": [
+     58.01,
+     63.5,
+     65.36
+    ],
+    "p10_p90_non_ponderes": [
+     57.1,
+     65.4
+    ],
+    "cellules_baties": 16461,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 95.39,
+    "disque_terres_pct": 69.9
+   }
+  },
+  "75056": {
+   "nom": "Paris",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 105.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 19.21,
+    "p10_p50_p90_ponderes": [
+     16.02,
+     18.88,
+     23.2
+    ],
+    "p10_p90_non_ponderes": [
+     16.09,
+     24.12
+    ],
+    "cellules_baties": 9851,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.84
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 18.91,
+    "p10_p50_p90_ponderes": [
+     16.01,
+     18.62,
+     22.67
+    ],
+    "p10_p90_non_ponderes": [
+     16.03,
+     23.13
+    ],
+    "cellules_baties": 8479,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.82
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 19.26,
+    "p10_p50_p90_ponderes": [
+     16.05,
+     18.89,
+     23.3
+    ],
+    "p10_p90_non_ponderes": [
+     16.1,
+     24.2
+    ],
+    "cellules_baties": 10001,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.84
+   },
+   "point_index_pct": 17.59,
+   "centre_bati_pct": 17.96,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 685246,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 19.27,
+    "erreur_type_pts": 0.07,
+    "ecart_100m_moins_10m_pts": -0.06
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 19.21,
+    "p10_p50_p90_ponderes": [
+     16.02,
+     18.88,
+     23.2
+    ],
+    "p10_p90_non_ponderes": [
+     16.09,
+     24.12
+    ],
+    "cellules_baties": 9851,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.84
+   }
+  },
+  "69123": {
+   "nom": "Lyon",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 47.9,
+   "pixels_classes_hors_france_dans_la_fenetre": 0,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 37.59,
+    "p10_p50_p90_ponderes": [
+     32.89,
+     37.46,
+     42.86
+    ],
+    "p10_p90_non_ponderes": [
+     33.2,
+     42.97
+    ],
+    "cellules_baties": 4554,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.53
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 36.31,
+    "p10_p50_p90_ponderes": [
+     32.99,
+     36.34,
+     39.5
+    ],
+    "p10_p90_non_ponderes": [
+     32.91,
+     41.78
+    ],
+    "cellules_baties": 3516,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.49
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 37.64,
+    "p10_p50_p90_ponderes": [
+     32.98,
+     37.57,
+     42.75
+    ],
+    "p10_p90_non_ponderes": [
+     33.22,
+     42.94
+    ],
+    "cellules_baties": 4650,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.53
+   },
+   "point_index_pct": 38.06,
+   "centre_bati_pct": 37.49,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 328679,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 37.49,
+    "erreur_type_pts": 0.093,
+    "ecart_100m_moins_10m_pts": 0.1
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 37.59,
+    "p10_p50_p90_ponderes": [
+     32.89,
+     37.46,
+     42.86
+    ],
+    "p10_p90_non_ponderes": [
+     33.2,
+     42.97
+    ],
+    "cellules_baties": 4554,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 97.53
+   }
+  },
+  "13041": {
+   "nom": "Gardanne",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 27.2,
+   "pixels_classes_hors_france_dans_la_fenetre": 633139,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 68.19,
+    "p10_p50_p90_ponderes": [
+     66.89,
+     68.28,
+     69.32
+    ],
+    "p10_p90_non_ponderes": [
+     67.01,
+     69.46
+    ],
+    "cellules_baties": 1862,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.95,
+    "disque_terres_pct": 99.64
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 68.15,
+    "p10_p50_p90_ponderes": [
+     67.36,
+     67.97,
+     69.35
+    ],
+    "p10_p90_non_ponderes": [
+     67.17,
+     69.37
+    ],
+    "cellules_baties": 166,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.99,
+    "disque_terres_pct": 99.68
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 68.19,
+    "p10_p50_p90_ponderes": [
+     66.91,
+     68.28,
+     69.32
+    ],
+    "p10_p90_non_ponderes": [
+     67.01,
+     69.46
+    ],
+    "cellules_baties": 1869,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.95,
+    "disque_terres_pct": 99.65
+   },
+   "point_index_pct": 69.1,
+   "centre_bati_pct": 68.46,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 78442,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 68.16,
+    "erreur_type_pts": 0.024,
+    "ecart_100m_moins_10m_pts": 0.03
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 68.19,
+    "p10_p50_p90_ponderes": [
+     66.89,
+     68.28,
+     69.32
+    ],
+    "p10_p90_non_ponderes": [
+     67.0,
+     69.46
+    ],
+    "cellules_baties": 1862,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 100.0,
+    "disque_terres_pct": 99.65
+   }
+  },
+  "40046": {
+   "nom": "Biscarrosse",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 193.4,
+   "pixels_classes_hors_france_dans_la_fenetre": 2651064,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 90.61,
+    "p10_p50_p90_ponderes": [
+     89.43,
+     90.6,
+     92.36
+    ],
+    "p10_p90_non_ponderes": [
+     89.13,
+     92.34
+    ],
+    "cellules_baties": 4244,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 77.04,
+    "disque_terres_pct": 64.93
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 91.21,
+    "p10_p50_p90_ponderes": [
+     89.69,
+     91.61,
+     92.21
+    ],
+    "p10_p90_non_ponderes": [
+     89.7,
+     92.2
+    ],
+    "cellules_baties": 71,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 70.48,
+    "disque_terres_pct": 58.31
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 90.62,
+    "p10_p50_p90_ponderes": [
+     89.45,
+     90.6,
+     92.35
+    ],
+    "p10_p90_non_ponderes": [
+     89.16,
+     92.34
+    ],
+    "cellules_baties": 4313,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 77.0,
+    "disque_terres_pct": 64.89
+   },
+   "point_index_pct": 89.82,
+   "centre_bati_pct": 90.44,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 118530,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 90.65,
+    "erreur_type_pts": 0.034,
+    "ecart_100m_moins_10m_pts": -0.04
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 90.55,
+    "p10_p50_p90_ponderes": [
+     89.39,
+     90.55,
+     92.24
+    ],
+    "p10_p90_non_ponderes": [
+     89.1,
+     92.22
+    ],
+    "cellules_baties": 4244,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 92.41,
+    "disque_terres_pct": 65.07
+   }
+  },
+  "05023": {
+   "nom": "Briançon",
+   "strates": [
+    "extreme_phase_A"
+   ],
+   "surface_km2": 28.3,
+   "pixels_classes_hors_france_dans_la_fenetre": 1750938,
+   "france_bati_1_2": {
+    "secteur_habite_pct": 98.23,
+    "p10_p50_p90_ponderes": [
+     98.21,
+     98.23,
+     98.25
+    ],
+    "p10_p90_non_ponderes": [
+     98.21,
+     98.27
+    ],
+    "cellules_baties": 718,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.09,
+    "disque_terres_pct": 92.93
+   },
+   "france_bati_1": {
+    "secteur_habite_pct": 98.25,
+    "p10_p50_p90_ponderes": [
+     98.25,
+     98.25,
+     98.25
+    ],
+    "p10_p90_non_ponderes": [
+     98.25,
+     98.25
+    ],
+    "cellules_baties": 1,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.79,
+    "disque_terres_pct": 93.63
+   },
+   "france_bati_1_4": {
+    "secteur_habite_pct": 98.23,
+    "p10_p50_p90_ponderes": [
+     98.21,
+     98.23,
+     98.25
+    ],
+    "p10_p90_non_ponderes": [
+     98.21,
+     98.27
+    ],
+    "cellules_baties": 718,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 93.1,
+    "disque_terres_pct": 92.93
+   },
+   "point_index_pct": 98.26,
+   "centre_bati_pct": 98.25,
+   "reference_10m": {
+    "pixels_tires": 1500,
+    "pixels_bati_commune": 27572,
+    "sans_mesure": 0,
+    "secteur_habite_pct": 98.23,
+    "erreur_type_pts": 0.001,
+    "ecart_100m_moins_10m_pts": 0.0
+   },
+   "sans_limite_bati_1_2": {
+    "secteur_habite_pct": 98.3,
+    "p10_p50_p90_ponderes": [
+     98.27,
+     98.31,
+     98.34
+    ],
+    "p10_p90_non_ponderes": [
+     98.26,
+     98.37
+    ],
+    "cellules_baties": 718,
+    "poids_sans_mesure_pct": 0.0,
+    "disque_mesure_pct": 99.98,
+    "disque_terres_pct": 99.79
+   }
+  }
+ }
+}
