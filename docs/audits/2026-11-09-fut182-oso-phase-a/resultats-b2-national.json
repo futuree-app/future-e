@@ -1,0 +1,4913 @@
+{
+ "perimetre": {
+  "lignes": 34791,
+  "communes_de_l_univers_nature": 34743,
+  "arrondissements": 45,
+  "communes_sans_valeur": [
+   [
+    "2B045",
+    "Bustanico",
+    "0"
+   ],
+   [
+    "2B067",
+    "Carpineto",
+    "0"
+   ],
+   [
+    "2B106",
+    "Érone",
+    "0"
+   ],
+   [
+    "2B111",
+    "Felce",
+    "0"
+   ],
+   [
+    "2B264",
+    "Rusio",
+    "0"
+   ],
+   [
+    "2B338",
+    "Valle-d'Orezza",
+    "0"
+   ],
+   [
+    "31081",
+    "Bourg-d'Oueil",
+    "0"
+   ],
+   [
+    "65208",
+    "Grailhen",
+    "0"
+   ]
+  ]
+ },
+ "couverture": {
+  "paliers": {
+   "ge75": 33173,
+   "50_75": 1233,
+   "lt50": 329
+  },
+  "cause_dominante_par_palier": {
+   "ge75": {
+    "aucune": 30682,
+    "terres_etrangeres": 1210,
+    "mer_et_eaux_hors_contours": 1281
+   },
+   "50_75": {
+    "terres_etrangeres": 489,
+    "mer_et_eaux_hors_contours": 688,
+    "hors_carte": 56
+   },
+   "lt50": {
+    "terres_etrangeres": 46,
+    "mer_et_eaux_hors_contours": 162,
+    "hors_carte": 121
+   }
+  },
+  "national_moyen_pct": {
+   "couv_terres_fr": 96.546,
+   "couv_eaux_fr": 0.807,
+   "couv_eaux_hors_contours": 1.151,
+   "couv_hors_carte": 0.703,
+   "couv_terres_etrangeres": 0.793,
+   "couv_non_classe_fr": 0.0
+  },
+  "non_classe_fr_max_pct": 0.016,
+  "terres_etrangeres_ge_10pct": 1167,
+  "lt50_liste": [
+   [
+    "56085",
+    "Hœdic",
+    1.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 41.2,
+     "hors_carte": 57.7,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29155",
+    "Ouessant",
+    2.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 35.8,
+     "hors_carte": 61.5,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29083",
+    "Île-de-Sein",
+    2.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 29.0,
+     "hors_carte": 68.1,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85113",
+    "L'Île-d'Yeu",
+    3.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 28.6,
+     "hors_carte": 68.0,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56086",
+    "Île-d'Houat",
+    4.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 62.4,
+     "hors_carte": 33.5,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29084",
+    "Île-Molène",
+    4.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 54.7,
+     "hors_carte": 39.9,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17318",
+    "Saint-Clément-des-Baleines",
+    7.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 49.8,
+     "hors_carte": 42.2,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85083",
+    "L'Épine",
+    8.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 59.8,
+     "hors_carte": 31.9,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17019",
+    "Ars-en-Ré",
+    9.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 52.5,
+     "hors_carte": 38.0,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85163",
+    "Noirmoutier-en-l'Île",
+    9.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 65.3,
+     "hors_carte": 25.1,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56186",
+    "Quiberon",
+    10.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 56.4,
+     "hors_carte": 32.3,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17121",
+    "La Couarde-sur-Mer",
+    12.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 71.4,
+     "hors_carte": 16.2,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56009",
+    "Bangor",
+    12.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 42.9,
+     "hors_carte": 44.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56241",
+    "Sauzon",
+    12.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 41.5,
+     "hors_carte": 46.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56114",
+    "Locmaria",
+    12.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.1,
+     "hors_carte": 41.4,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56152",
+    "Le Palais",
+    12.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 55.4,
+     "hors_carte": 31.9,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17286",
+    "Les Portes-en-Ré",
+    12.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 62.5,
+     "hors_carte": 24.5,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85106",
+    "La Guérinière",
+    13.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 63.7,
+     "hors_carte": 22.2,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17051",
+    "Le Bois-Plage-en-Ré",
+    14.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 73.0,
+     "hors_carte": 12.3,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17207",
+    "Loix",
+    14.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 72.0,
+     "hors_carte": 12.9,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56069",
+    "Groix",
+    14.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 39.7,
+     "hors_carte": 45.1,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66048",
+    "Cerbère",
+    16.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 19.0,
+     "hors_carte": 53.9,
+     "terres_etrangeres": 11.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17323",
+    "Saint-Denis-d'Oléron",
+    16.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 49.9,
+     "hors_carte": 33.0,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29168",
+    "Plogoff",
+    16.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.7,
+     "hors_carte": 39.3,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17360",
+    "Sainte-Marie-de-Ré",
+    16.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 70.3,
+     "hors_carte": 12.4,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17369",
+    "Saint-Martin-de-Ré",
+    17.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 73.6,
+     "hors_carte": 8.0,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17486",
+    "La Brée-les-Bains",
+    18.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 56.5,
+     "hors_carte": 24.5,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29028",
+    "Cléden-Cap-Sizun",
+    18.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.4,
+     "hors_carte": 34.7,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17161",
+    "La Flotte",
+    19.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 70.2,
+     "hors_carte": 9.6,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56234",
+    "Saint-Pierre-Quiberon",
+    20.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.5,
+     "hors_carte": 33.1,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08190",
+    "Givet",
+    20.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 47.1,
+     "terres_etrangeres": 32.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64260",
+    "Hendaye",
+    21.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 12.9,
+     "hors_carte": 49.2,
+     "terres_etrangeres": 16.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17337",
+    "Saint-Georges-d'Oléron",
+    21.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 53.6,
+     "hors_carte": 24.6,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08183",
+    "Fromelennes",
+    22.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 44.5,
+     "terres_etrangeres": 33.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B107",
+    "Ersa",
+    23.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 31.8,
+     "hors_carte": 45.2,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17297",
+    "Rivedoux-Plage",
+    23.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 67.1,
+     "hors_carte": 9.0,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08353",
+    "Rancennes",
+    23.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 40.2,
+     "terres_etrangeres": 36.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08175",
+    "Foisches",
+    23.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 39.7,
+     "terres_etrangeres": 36.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29082",
+    "Île-de-Batz",
+    24.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 36.1,
+     "hors_carte": 38.8,
+     "terres_etrangeres": 1.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17385",
+    "Saint-Pierre-d'Oléron",
+    24.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 53.6,
+     "hors_carte": 21.5,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66016",
+    "Banyuls-sur-Mer",
+    24.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 22.5,
+     "hors_carte": 40.0,
+     "terres_etrangeres": 13.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08106",
+    "Charnois",
+    25.2,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 36.8,
+     "terres_etrangeres": 37.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B261",
+    "Rogliano",
+    25.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 33.0,
+     "hors_carte": 41.7,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22016",
+    "Île-de-Bréhat",
+    25.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.1,
+     "hors_carte": 30.6,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29228",
+    "Primelin",
+    25.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.6,
+     "hors_carte": 30.6,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08207",
+    "Ham-sur-Meuse",
+    26.2,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 34.2,
+     "terres_etrangeres": 39.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B086",
+    "Centuri",
+    26.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 34.0,
+     "hors_carte": 39.7,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64130",
+    "Biriatou",
+    26.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 12.5,
+     "hors_carte": 41.8,
+     "terres_etrangeres": 19.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08122",
+    "Chooz",
+    27.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 31.8,
+     "terres_etrangeres": 40.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56214",
+    "Saint-Gildas-de-Rhuys",
+    27.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 48.0,
+     "hors_carte": 24.0,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08247",
+    "Landrichamps",
+    27.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 30.6,
+     "terres_etrangeres": 41.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29040",
+    "Le Conquet",
+    28.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 48.0,
+     "hors_carte": 23.4,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44049",
+    "Le Croisic",
+    28.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 31.5,
+     "hors_carte": 40.1,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67261",
+    "Lauterbourg",
+    28.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.3,
+     "hors_carte": 43.4,
+     "terres_etrangeres": 27.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29063",
+    "Goulien",
+    28.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 48.7,
+     "hors_carte": 23.0,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44136",
+    "Préfailles",
+    28.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 50.9,
+     "hors_carte": 20.6,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08028",
+    "Aubrives",
+    28.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 30.8,
+     "terres_etrangeres": 40.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25386",
+    "Montancy",
+    28.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 28.8,
+     "terres_etrangeres": 42.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08226",
+    "Hierges",
+    29.7,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 31.5,
+     "terres_etrangeres": 38.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29158",
+    "Penmarch",
+    29.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 28.8,
+     "hors_carte": 40.9,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64543",
+    "Urepel",
+    29.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 37.6,
+     "terres_etrangeres": 32.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64016",
+    "Aldudes",
+    30.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 37.4,
+     "terres_etrangeres": 32.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17140",
+    "Dolus-d'Oléron",
+    30.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 56.6,
+     "hors_carte": 12.3,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B327",
+    "Tomino",
+    30.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.0,
+     "hors_carte": 32.3,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "35049",
+    "Cancale",
+    30.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.5,
+     "hors_carte": 29.0,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B170",
+    "Morsiglia",
+    31.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.4,
+     "hors_carte": 31.6,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59107",
+    "Bray-Dunes",
+    31.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 15.5,
+     "hors_carte": 43.2,
+     "terres_etrangeres": 10.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29022",
+    "Camaret-sur-Mer",
+    31.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 49.2,
+     "hors_carte": 19.2,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74237",
+    "Saint-Gingolph",
+    31.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 17.0,
+     "hors_carte": 40.3,
+     "terres_etrangeres": 11.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29072",
+    "Guilvinec",
+    31.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 32.7,
+     "hors_carte": 35.5,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85011",
+    "Barbâtre",
+    31.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 54.4,
+     "hors_carte": 14.0,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50030",
+    "Barfleur",
+    31.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 31.9,
+     "hors_carte": 36.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66148",
+    "Port-Vendres",
+    32.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 25.6,
+     "hors_carte": 29.2,
+     "terres_etrangeres": 12.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57638",
+    "Schœneck",
+    32.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 34.9,
+     "terres_etrangeres": 32.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50196",
+    "Gatteville-le-Phare",
+    32.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 32.0,
+     "hors_carte": 35.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08486",
+    "Vireux-Molhain",
+    33.0,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 29.6,
+     "terres_etrangeres": 37.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57590",
+    "Rolbing",
+    33.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 39.6,
+     "terres_etrangeres": 27.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29284",
+    "Treffiagat",
+    33.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.9,
+     "hors_carte": 32.4,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08487",
+    "Vireux-Wallerand",
+    33.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 27.0,
+     "terres_etrangeres": 39.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "13104",
+    "Sausset-les-Pins",
+    33.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.0,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25102",
+    "Burnevillers",
+    33.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 29.4,
+     "terres_etrangeres": 37.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "35263",
+    "Saint-Coulomb",
+    33.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.6,
+     "hors_carte": 28.1,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50342",
+    "Montfarville",
+    33.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 32.6,
+     "hors_carte": 33.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A041",
+    "Bonifacio",
+    33.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.2,
+     "hors_carte": 31.6,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22353",
+    "Trégastel",
+    34.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.6,
+     "hors_carte": 21.5,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66220",
+    "Valcebollère",
+    34.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 38.5,
+     "terres_etrangeres": 27.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59101",
+    "Bousignies-sur-Roc",
+    34.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 36.4,
+     "terres_etrangeres": 29.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29042",
+    "Crozon",
+    34.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 56.8,
+     "hors_carte": 8.1,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74199",
+    "Nernier",
+    34.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 24.6,
+     "hors_carte": 23.0,
+     "terres_etrangeres": 17.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67443",
+    "Scheibenhard",
+    34.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.3,
+     "hors_carte": 34.8,
+     "terres_etrangeres": 29.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29003",
+    "Audierne",
+    35.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 42.3,
+     "hors_carte": 22.6,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68149",
+    "Huningue",
+    35.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 38.1,
+     "terres_etrangeres": 26.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76552",
+    "Sainte-Adresse",
+    35.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.9,
+     "hors_carte": 31.8,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59279",
+    "Halluin",
+    35.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 39.1,
+     "terres_etrangeres": 25.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44010",
+    "Batz-sur-Mer",
+    35.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 29.8,
+     "hors_carte": 34.2,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B159",
+    "Meria",
+    35.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.0,
+     "hors_carte": 28.1,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74175",
+    "Meillerie",
+    36.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 21.9,
+     "hors_carte": 33.7,
+     "terres_etrangeres": 8.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "13021",
+    "Carry-le-Rouet",
+    36.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.4,
+     "hors_carte": 24.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64545",
+    "Urrugne",
+    36.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 15.3,
+     "hors_carte": 28.8,
+     "terres_etrangeres": 19.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A065",
+    "Cargèse",
+    36.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.1,
+     "hors_carte": 28.2,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74315",
+    "Yvoire",
+    36.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 25.8,
+     "hors_carte": 24.5,
+     "terres_etrangeres": 13.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50433",
+    "Réville",
+    36.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.6,
+     "hors_carte": 30.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A098",
+    "Coti-Chiavari",
+    37.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 41.2,
+     "hors_carte": 21.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74180",
+    "Messery",
+    37.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 24.0,
+     "hors_carte": 18.9,
+     "terres_etrangeres": 20.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17004",
+    "Île-d'Aix",
+    37.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 55.9,
+     "hors_carte": 6.0,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29239",
+    "Roscoff",
+    37.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.3,
+     "hors_carte": 24.2,
+     "terres_etrangeres": 1.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B233",
+    "Pino",
+    37.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.4,
+     "hors_carte": 24.2,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44126",
+    "La Plaine-sur-Mer",
+    37.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 47.0,
+     "hors_carte": 15.2,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59668",
+    "Zuydcoote",
+    38.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 17.6,
+     "hors_carte": 34.8,
+     "terres_etrangeres": 9.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29190",
+    "Plougonvelin",
+    38.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 44.9,
+     "hors_carte": 16.5,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44125",
+    "Piriac-sur-Mer",
+    38.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.8,
+     "hors_carte": 23.7,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22201",
+    "Plévenon",
+    38.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.8,
+     "hors_carte": 28.2,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67305",
+    "Mothern",
+    38.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.8,
+     "hors_carte": 31.0,
+     "terres_etrangeres": 28.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22111",
+    "Lanmodez",
+    38.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 45.7,
+     "hors_carte": 14.8,
+     "terres_etrangeres": 1.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A351",
+    "Villanova",
+    38.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 41.6,
+     "hors_carte": 19.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83101",
+    "Ramatuelle",
+    38.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.0,
+     "hors_carte": 28.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57660",
+    "Stiring-Wendel",
+    38.9,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 32.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74203",
+    "Novel",
+    39.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 15.8,
+     "hors_carte": 31.2,
+     "terres_etrangeres": 14.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57741",
+    "Walschbronn",
+    39.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 32.7,
+     "terres_etrangeres": 28.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57641",
+    "Schweyen",
+    39.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 32.8,
+     "terres_etrangeres": 27.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17485",
+    "Le Grand-Village-Plage",
+    39.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 45.4,
+     "hors_carte": 14.4,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22198",
+    "Pleumeur-Bodou",
+    39.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.3,
+     "hors_carte": 16.5,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56240",
+    "Sarzeau",
+    39.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 41.1,
+     "hors_carte": 18.9,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50142",
+    "Vicq-sur-Mer",
+    39.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 29.2,
+     "hors_carte": 31.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68349",
+    "Village-Neuf",
+    39.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 34.0,
+     "terres_etrangeres": 26.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29165",
+    "Plobannalec-Lesconil",
+    39.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.9,
+     "hors_carte": 25.9,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29282",
+    "Trébabu",
+    39.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.0,
+     "hors_carte": 13.9,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22195",
+    "Pleubian",
+    39.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 44.0,
+     "hors_carte": 15.0,
+     "terres_etrangeres": 1.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57203",
+    "Évrange",
+    39.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 34.5,
+     "terres_etrangeres": 25.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06083",
+    "Menton",
+    40.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 15.3,
+     "hors_carte": 33.4,
+     "terres_etrangeres": 11.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56005",
+    "Arzon",
+    40.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 45.7,
+     "hors_carte": 13.4,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59530",
+    "Saint-Aybert",
+    40.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 30.1,
+     "terres_etrangeres": 29.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62054",
+    "Audinghen",
+    40.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 26.1,
+     "hors_carte": 33.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50469",
+    "Sainte-Geneviève",
+    40.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.4,
+     "hors_carte": 23.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59656",
+    "Wervicq-Sud",
+    40.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 31.4,
+     "terres_etrangeres": 27.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67308",
+    "Munchhausen",
+    40.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 1.9,
+     "hors_carte": 28.5,
+     "terres_etrangeres": 29.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44135",
+    "Le Pouliguen",
+    40.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.7,
+     "hors_carte": 29.3,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57475",
+    "Mondorff",
+    40.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 34.8,
+     "terres_etrangeres": 24.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68190",
+    "Lucelle",
+    40.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 30.8,
+     "terres_etrangeres": 28.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66053",
+    "Collioure",
+    40.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 24.5,
+     "hors_carte": 21.4,
+     "terres_etrangeres": 13.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57659",
+    "Spicheren",
+    40.9,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 27.7,
+     "terres_etrangeres": 31.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59098",
+    "Bousbecque",
+    40.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 31.7,
+     "terres_etrangeres": 27.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85164",
+    "Notre-Dame-de-Monts",
+    41.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.7,
+     "hors_carte": 26.0,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29008",
+    "Beuzec-Cap-Sizun",
+    41.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 49.0,
+     "hors_carte": 9.7,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29109",
+    "Landunvez",
+    41.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 27.0,
+     "hors_carte": 31.0,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57282",
+    "Hagen",
+    41.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 32.3,
+     "terres_etrangeres": 26.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A035",
+    "Belvédère-Campomoro",
+    41.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.0,
+     "hors_carte": 24.5,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59426",
+    "Neuville-en-Ferrain",
+    41.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 31.3,
+     "terres_etrangeres": 27.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06104",
+    "Roquebrune-Cap-Martin",
+    41.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 18.5,
+     "hors_carte": 31.3,
+     "terres_etrangeres": 8.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59260",
+    "Ghyvelde",
+    41.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 14.7,
+     "hors_carte": 30.6,
+     "terres_etrangeres": 13.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29273",
+    "Santec",
+    41.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.0,
+     "hors_carte": 20.1,
+     "terres_etrangeres": 1.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50598",
+    "Tocqueville",
+    41.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.8,
+     "hors_carte": 23.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B152",
+    "Luri",
+    41.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.7,
+     "hors_carte": 20.4,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29221",
+    "Porspoder",
+    41.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.7,
+     "hors_carte": 27.8,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50013",
+    "Anneville-en-Saire",
+    42.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.3,
+     "hors_carte": 23.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50041",
+    "La Hague",
+    42.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.2,
+     "hors_carte": 23.6,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59627",
+    "Villers-Sire-Nicole",
+    42.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 32.2,
+     "terres_etrangeres": 25.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06121",
+    "Saint-Jean-Cap-Ferrat",
+    42.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 25.9,
+     "hors_carte": 31.6,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "54382",
+    "Mont-Saint-Martin",
+    42.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 31.8,
+     "terres_etrangeres": 25.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22343",
+    "Trébeurden",
+    42.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.5,
+     "hors_carte": 17.3,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29171",
+    "Plomeur",
+    42.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.5,
+     "hors_carte": 22.7,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59420",
+    "Moustier-en-Fagne",
+    42.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 25.9,
+     "terres_etrangeres": 31.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B281",
+    "Sisco",
+    42.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 28.1,
+     "hors_carte": 29.4,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08304",
+    "Montigny-sur-Meuse",
+    42.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 20.8,
+     "terres_etrangeres": 36.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B030",
+    "Barrettali",
+    42.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.5,
+     "hors_carte": 24.9,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50102",
+    "Carolles",
+    42.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.7,
+     "hors_carte": 14.6,
+     "terres_etrangeres": 4.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57388",
+    "Launstroff",
+    42.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 32.4,
+     "terres_etrangeres": 24.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66061",
+    "Coustouges",
+    42.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 31.2,
+     "terres_etrangeres": 26.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76254",
+    "Étretat",
+    42.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.8,
+     "hors_carte": 33.5,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57537",
+    "Petite-Rosselle",
+    42.9,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 26.6,
+     "terres_etrangeres": 30.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83153",
+    "Saint-Mandrier-sur-Mer",
+    42.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.3,
+     "hors_carte": 23.7,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B046",
+    "Cagnano",
+    43.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.0,
+     "hors_carte": 23.9,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57738",
+    "Waldhouse",
+    43.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 28.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08501",
+    "Williers",
+    43.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 31.7,
+     "terres_etrangeres": 25.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "13056",
+    "Martigues",
+    43.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 45.3,
+     "hors_carte": 11.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25275",
+    "Glère",
+    43.1,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 19.8,
+     "terres_etrangeres": 37.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B058",
+    "Canari",
+    43.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.2,
+     "hors_carte": 24.7,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50184",
+    "Flamanville",
+    43.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.5,
+     "hors_carte": 32.2,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68104",
+    "Geiswasser",
+    43.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.8,
+     "hors_carte": 33.3,
+     "terres_etrangeres": 22.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67315",
+    "Neewiller-près-Lauterbourg",
+    43.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 1.5,
+     "hors_carte": 25.1,
+     "terres_etrangeres": 30.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68165",
+    "Kiffis",
+    43.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 31.0,
+     "terres_etrangeres": 25.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83129",
+    "Six-Fours-les-Plages",
+    43.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.1,
+     "hors_carte": 24.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17093",
+    "Le Château-d'Oléron",
+    43.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 48.2,
+     "hors_carte": 7.5,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B043",
+    "Brando",
+    43.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.3,
+     "hors_carte": 27.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "44211",
+    "La Turballe",
+    43.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.9,
+     "hors_carte": 20.3,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74063",
+    "Châtel",
+    43.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.2,
+     "hors_carte": 28.3,
+     "terres_etrangeres": 27.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B224",
+    "Pietracorbara",
+    43.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 31.7,
+     "hors_carte": 24.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68181",
+    "Levoncourt",
+    43.9,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 22.3,
+     "terres_etrangeres": 33.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64189",
+    "Ciboure",
+    44.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 17.6,
+     "hors_carte": 20.3,
+     "terres_etrangeres": 18.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74070",
+    "Chens-sur-Léman",
+    44.0,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 21.7,
+     "hors_carte": 9.1,
+     "terres_etrangeres": 25.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22168",
+    "Perros-Guirec",
+    44.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.0,
+     "hors_carte": 11.9,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50218",
+    "Granville",
+    44.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.5,
+     "hors_carte": 15.5,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74121",
+    "Excenevex",
+    44.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 26.0,
+     "hors_carte": 17.8,
+     "terres_etrangeres": 11.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74279",
+    "Thollon-les-Mémises",
+    44.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.2,
+     "hors_carte": 24.4,
+     "terres_etrangeres": 8.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68035",
+    "Biederthal",
+    44.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 30.0,
+     "terres_etrangeres": 25.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74154",
+    "Lugrin",
+    44.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 26.6,
+     "hors_carte": 24.4,
+     "terres_etrangeres": 4.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22179",
+    "Fréhel",
+    44.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.6,
+     "hors_carte": 22.2,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59324",
+    "Jeumont",
+    44.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 23.8,
+     "terres_etrangeres": 31.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06032",
+    "Cap-d'Ail",
+    44.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.8,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 1.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67327",
+    "Niederlauterbach",
+    44.7,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 1.3,
+     "hors_carte": 23.7,
+     "terres_etrangeres": 30.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "54572",
+    "Ville-Houdlémont",
+    44.8,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 27.1,
+     "terres_etrangeres": 28.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62056",
+    "Audresselles",
+    44.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 26.0,
+     "hors_carte": 29.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50613",
+    "Valcanville",
+    44.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.4,
+     "hors_carte": 18.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59618",
+    "Vieux-Reng",
+    44.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 26.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29135",
+    "Loctudy",
+    45.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 31.8,
+     "hors_carte": 22.5,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "54321",
+    "Longlaville",
+    45.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 28.7,
+     "terres_etrangeres": 26.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22218",
+    "Plougrescant",
+    45.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.3,
+     "hors_carte": 18.6,
+     "terres_etrangeres": 1.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68182",
+    "Leymen",
+    45.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 29.4,
+     "terres_etrangeres": 25.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85012",
+    "La Barre-de-Monts",
+    45.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.8,
+     "hors_carte": 14.7,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57740",
+    "Waldwisse",
+    45.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 29.5,
+     "terres_etrangeres": 25.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68232",
+    "Neuwiller",
+    45.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 27.9,
+     "terres_etrangeres": 26.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68297",
+    "Saint-Louis",
+    45.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 27.4,
+     "terres_etrangeres": 26.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29218",
+    "Pont-Croix",
+    45.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.1,
+     "hors_carte": 11.2,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B309",
+    "Santa-Maria-di-Lota",
+    45.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 30.6,
+     "hors_carte": 23.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "54493",
+    "Saulnes",
+    45.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 28.2,
+     "terres_etrangeres": 26.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57013",
+    "Alsting",
+    45.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 24.6,
+     "terres_etrangeres": 29.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59591",
+    "Thivencelle",
+    45.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.5,
+     "hors_carte": 24.9,
+     "terres_etrangeres": 29.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06035",
+    "Castellar",
+    45.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 13.6,
+     "hors_carte": 27.7,
+     "terres_etrangeres": 12.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59238",
+    "Flines-lès-Mortagne",
+    45.7,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.5,
+     "hors_carte": 26.5,
+     "terres_etrangeres": 27.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22210",
+    "Ploubazlanec",
+    45.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 42.2,
+     "hors_carte": 11.0,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57421",
+    "Loutzviller",
+    45.9,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 25.7,
+     "terres_etrangeres": 28.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50618",
+    "Varouville",
+    46.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.1,
+     "hors_carte": 20.7,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59157",
+    "Cousolre",
+    46.1,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 24.0,
+     "terres_etrangeres": 29.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62806",
+    "Tardinghen",
+    46.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 26.6,
+     "hors_carte": 27.2,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17411",
+    "Saint-Trojan-les-Bains",
+    46.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 39.6,
+     "hors_carte": 13.6,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57574",
+    "Basse-Rentgen",
+    46.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 28.1,
+     "terres_etrangeres": 25.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68380",
+    "Wolschwiller",
+    46.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 28.0,
+     "terres_etrangeres": 25.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76481",
+    "Octeville-sur-Mer",
+    46.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.4,
+     "hors_carte": 25.3,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76508",
+    "La Poterie-Cap-d'Antifer",
+    46.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.8,
+     "hors_carte": 30.0,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "33236",
+    "Lège-Cap-Ferret",
+    46.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 37.7,
+     "hors_carte": 15.3,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "54234",
+    "Gorcy",
+    46.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 26.2,
+     "terres_etrangeres": 27.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06004",
+    "Antibes",
+    46.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.0,
+     "hors_carte": 21.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B183",
+    "Ogliastro",
+    46.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.9,
+     "hors_carte": 17.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67319",
+    "Neuhaeusel",
+    46.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 2.0,
+     "hors_carte": 30.3,
+     "terres_etrangeres": 21.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14562",
+    "Saint-Aubin-sur-Mer",
+    46.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.5,
+     "hors_carte": 24.7,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22054",
+    "Erquy",
+    46.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 27.8,
+     "hors_carte": 25.2,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25280",
+    "Goumois",
+    46.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 24.2,
+     "terres_etrangeres": 29.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59339",
+    "Leers",
+    46.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 30.6,
+     "terres_etrangeres": 22.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59152",
+    "Comines",
+    46.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 25.3,
+     "terres_etrangeres": 27.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14652",
+    "Saint-Pierre-du-Mont",
+    46.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.3,
+     "hors_carte": 24.7,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29197",
+    "Plouhinec",
+    46.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.0,
+     "hors_carte": 17.1,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14239",
+    "Englesqueville-la-Percée",
+    46.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 27.2,
+     "hors_carte": 25.8,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B305",
+    "San-Martino-di-Lota",
+    46.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 30.0,
+     "hors_carte": 23.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59650",
+    "Wattrelos",
+    46.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 27.9,
+     "terres_etrangeres": 25.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76736",
+    "Veulettes-sur-Mer",
+    46.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.1,
+     "hors_carte": 30.0,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14066",
+    "Bernières-sur-Mer",
+    47.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.4,
+     "hors_carte": 24.3,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29098",
+    "Lampaul-Plouarzel",
+    47.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.9,
+     "hors_carte": 15.4,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B184",
+    "Olcani",
+    47.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 41.0,
+     "hors_carte": 12.0,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59153",
+    "Condé-sur-l'Escaut",
+    47.0,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.6,
+     "hors_carte": 23.7,
+     "terres_etrangeres": 28.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83119",
+    "Saint-Tropez",
+    47.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.0,
+     "hors_carte": 20.9,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06012",
+    "Beausoleil",
+    47.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 22.9,
+     "hors_carte": 24.6,
+     "terres_etrangeres": 5.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "13033",
+    "Ensuès-la-Redonne",
+    47.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.7,
+     "hors_carte": 14.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59508",
+    "Roncq",
+    47.1,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.2,
+     "hors_carte": 24.4,
+     "terres_etrangeres": 28.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17300",
+    "La Rochelle",
+    47.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.5,
+     "hors_carte": 5.4,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "33514",
+    "Soulac-sur-Mer",
+    47.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 27.0,
+     "hors_carte": 25.6,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62300",
+    "Équihen-Plage",
+    47.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.6,
+     "hors_carte": 29.0,
+     "terres_etrangeres": 0.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68126",
+    "Hégenheim",
+    47.2,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 24.7,
+     "terres_etrangeres": 27.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50178",
+    "Fermanville",
+    47.3,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.7,
+     "hors_carte": 28.0,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57202",
+    "Etzling",
+    47.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 21.1,
+     "terres_etrangeres": 31.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56168",
+    "Plouharnel",
+    47.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.1,
+     "hors_carte": 14.0,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17190",
+    "L'Houmeau",
+    47.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 46.9,
+     "hors_carte": 3.7,
+     "terres_etrangeres": 2.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2A212",
+    "Piana",
+    47.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.8,
+     "hors_carte": 18.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57227",
+    "Forbach",
+    47.6,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.3,
+     "hors_carte": 20.4,
+     "terres_etrangeres": 31.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59340",
+    "Leffrinckoucke",
+    47.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 19.8,
+     "hors_carte": 24.0,
+     "terres_etrangeres": 8.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76079",
+    "Bénouville",
+    47.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.9,
+     "hors_carte": 28.6,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29120",
+    "Lanvéoc",
+    47.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 49.1,
+     "hors_carte": 2.6,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50165",
+    "Donville-les-Bains",
+    47.7,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 40.0,
+     "hors_carte": 11.7,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "22325",
+    "Saint-Quay-Portrieux",
+    47.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.3,
+     "hors_carte": 22.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66091",
+    "Lamanère",
+    47.8,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 27.4,
+     "terres_etrangeres": 24.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "34003",
+    "Agde",
+    47.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.6,
+     "hors_carte": 28.5,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50003",
+    "Agon-Coutainville",
+    47.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.8,
+     "hors_carte": 14.9,
+     "terres_etrangeres": 1.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62774",
+    "Sangatte",
+    47.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.8,
+     "hors_carte": 26.7,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74172",
+    "Maxilly-sur-Léman",
+    47.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.0,
+     "hors_carte": 21.8,
+     "terres_etrangeres": 2.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57557",
+    "Puttelange-lès-Thionville",
+    48.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 27.4,
+     "terres_etrangeres": 24.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59309",
+    "Hondschoote",
+    48.0,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 3.7,
+     "hors_carte": 27.8,
+     "terres_etrangeres": 20.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "01143",
+    "Divonne-les-Bains",
+    48.1,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 13.4,
+     "hors_carte": 10.6,
+     "terres_etrangeres": 27.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25318",
+    "Jougne",
+    48.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.7,
+     "hors_carte": 27.5,
+     "terres_etrangeres": 23.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62667",
+    "Le Portel",
+    48.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 22.7,
+     "hors_carte": 29.1,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "25314",
+    "Indevillers",
+    48.2,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 17.0,
+     "terres_etrangeres": 34.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "62899",
+    "Wissant",
+    48.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 27.1,
+     "hors_carte": 24.6,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74218",
+    "Publier",
+    48.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.1,
+     "hors_carte": 22.7,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83126",
+    "La Seyne-sur-Mer",
+    48.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.3,
+     "hors_carte": 19.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29091",
+    "Kerlouan",
+    48.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 26.6,
+     "hors_carte": 23.3,
+     "terres_etrangeres": 1.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B010",
+    "Algajola",
+    48.4,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 25.6,
+     "hors_carte": 26.0,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50066",
+    "Jullouville",
+    48.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.8,
+     "hors_carte": 12.7,
+     "terres_etrangeres": 2.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50562",
+    "Saint-Vaast-la-Hougue",
+    48.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 31.2,
+     "hors_carte": 20.2,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68243",
+    "Oberlarg",
+    48.4,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 22.6,
+     "terres_etrangeres": 29.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57640",
+    "Schwerdorff",
+    48.5,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 28.9,
+     "terres_etrangeres": 22.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14354",
+    "Langrune-sur-Mer",
+    48.6,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.2,
+     "hors_carte": 22.9,
+     "terres_etrangeres": 0.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59076",
+    "Bettignies",
+    48.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 26.0,
+     "terres_etrangeres": 25.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "39059",
+    "Bois-d'Amont",
+    48.7,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.4,
+     "hors_carte": 25.9,
+     "terres_etrangeres": 25.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "66132",
+    "Palau-de-Cerdagne",
+    48.8,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 24.0,
+     "terres_etrangeres": 27.2,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74171",
+    "Massongy",
+    48.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 24.1,
+     "hors_carte": 9.4,
+     "terres_etrangeres": 17.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "76693",
+    "Le Tilleul",
+    48.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.9,
+     "hors_carte": 27.2,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "17225",
+    "Les Mathes",
+    49.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 31.5,
+     "hors_carte": 18.8,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "35288",
+    "Saint-Malo",
+    49.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 33.8,
+     "hors_carte": 16.4,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59616",
+    "Vieux-Condé",
+    49.0,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.6,
+     "hors_carte": 21.2,
+     "terres_etrangeres": 29.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "80182",
+    "Cayeux-sur-Mer",
+    49.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.2,
+     "hors_carte": 19.2,
+     "terres_etrangeres": 2.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "83048",
+    "La Croix-Valmer",
+    49.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 34.4,
+     "hors_carte": 16.5,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29201",
+    "Ploumoguer",
+    49.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 42.7,
+     "hors_carte": 7.7,
+     "terres_etrangeres": 0.5,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50633",
+    "Le Vicel",
+    49.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 36.7,
+     "hors_carte": 14.0,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67142",
+    "Fort-Louis",
+    49.1,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.8,
+     "hors_carte": 27.7,
+     "terres_etrangeres": 21.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "85294",
+    "La Tranche-sur-Mer",
+    49.1,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 43.3,
+     "hors_carte": 6.9,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "06113",
+    "Sainte-Agnès",
+    49.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 15.8,
+     "hors_carte": 24.0,
+     "terres_etrangeres": 11.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29188",
+    "Plougasnou",
+    49.2,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 32.6,
+     "hors_carte": 17.5,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B093",
+    "Corbara",
+    49.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.7,
+     "hors_carte": 26.1,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57439",
+    "Manderen-Ritzing",
+    49.2,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 26.8,
+     "terres_etrangeres": 23.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56034",
+    "Carnac",
+    49.3,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 40.6,
+     "hors_carte": 9.5,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "68067",
+    "Courtavon",
+    49.3,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 18.4,
+     "terres_etrangeres": 32.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "56116",
+    "Locmariaquer",
+    49.4,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 40.6,
+     "hors_carte": 9.3,
+     "terres_etrangeres": 0.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "14204",
+    "Cricqueville-en-Bessin",
+    49.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.3,
+     "hors_carte": 21.8,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "57402",
+    "Liederschiedt",
+    49.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 22.2,
+     "terres_etrangeres": 28.3,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "59045",
+    "Baives",
+    49.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.1,
+     "hors_carte": 19.8,
+     "terres_etrangeres": 30.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "64092",
+    "Banca",
+    49.5,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 14.7,
+     "terres_etrangeres": 35.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74119",
+    "Évian-les-Bains",
+    49.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.6,
+     "hors_carte": 21.8,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74200",
+    "Neuvecelle",
+    49.5,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.6,
+     "hors_carte": 21.1,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50031",
+    "Barneville-Carteret",
+    49.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.6,
+     "hors_carte": 24.9,
+     "terres_etrangeres": 0.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50332",
+    "Les Moitiers-d'Allonne",
+    49.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 24.3,
+     "hors_carte": 25.3,
+     "terres_etrangeres": 0.7,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67086",
+    "Daubensand",
+    49.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 1.1,
+     "hors_carte": 27.3,
+     "terres_etrangeres": 22.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "67544",
+    "Wissembourg",
+    49.6,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 26.4,
+     "terres_etrangeres": 23.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "08214",
+    "Hargnies",
+    49.8,
+    "terres_etrangeres",
+    {
+     "mer_et_eaux_hors_contours": 0.0,
+     "hors_carte": 14.6,
+     "terres_etrangeres": 35.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "35299",
+    "Saint-Méloir-des-Ondes",
+    49.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 38.8,
+     "hors_carte": 10.4,
+     "terres_etrangeres": 0.9,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "50117",
+    "Champeaux",
+    49.8,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 35.6,
+     "hors_carte": 9.0,
+     "terres_etrangeres": 5.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29021",
+    "Plounéour-Brignogan-plages",
+    49.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 25.7,
+     "hors_carte": 22.7,
+     "terres_etrangeres": 1.6,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "29238",
+    "Roscanvel",
+    49.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 44.5,
+     "hors_carte": 5.2,
+     "terres_etrangeres": 0.4,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B134",
+    "L'Île-Rousse",
+    49.9,
+    "hors_carte",
+    {
+     "mer_et_eaux_hors_contours": 23.9,
+     "hors_carte": 26.1,
+     "terres_etrangeres": 0.0,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "2B353",
+    "Ville-di-Pietrabugno",
+    49.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 29.6,
+     "hors_carte": 20.4,
+     "terres_etrangeres": 0.1,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "74105",
+    "Douvaine",
+    49.9,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 22.8,
+     "hors_carte": 5.5,
+     "terres_etrangeres": 21.8,
+     "non_classe_fr": 0.0
+    }
+   ],
+   [
+    "80333",
+    "Fort-Mahon-Plage",
+    50.0,
+    "mer_et_eaux_hors_contours",
+    {
+     "mer_et_eaux_hors_contours": 28.6,
+     "hors_carte": 19.5,
+     "terres_etrangeres": 1.9,
+     "non_classe_fr": 0.0
+    }
+   ]
+  ],
+  "50_75_exemples": [
+   [
+    "59599",
+    "Tourcoing",
+    50.0,
+    "terres_etrangeres"
+   ],
+   [
+    "14739",
+    "Ver-sur-Mer",
+    50.1,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "2B150",
+    "Lumio",
+    50.1,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "14745",
+    "Vierville-sur-Mer",
+    50.2,
+    "hors_carte"
+   ],
+   [
+    "29112",
+    "Lanildut",
+    50.3,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "50539",
+    "Saint-Pierre-Église",
+    50.3,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "68135",
+    "Hésingue",
+    50.3,
+    "terres_etrangeres"
+   ],
+   [
+    "14191",
+    "Courseulles-sur-Mer",
+    50.4,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "59160",
+    "Crespin",
+    50.4,
+    "terres_etrangeres"
+   ],
+   [
+    "59264",
+    "Gognies-Chaussée",
+    50.4,
+    "terres_etrangeres"
+   ],
+   [
+    "66130",
+    "Osséja",
+    50.4,
+    "terres_etrangeres"
+   ],
+   [
+    "01397",
+    "Sauverny",
+    50.5,
+    "terres_etrangeres"
+   ],
+   [
+    "06067",
+    "Gorbio",
+    50.5,
+    "hors_carte"
+   ],
+   [
+    "50532",
+    "Saint-Pair-sur-Mer",
+    50.5,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "57108",
+    "Breidenbach",
+    50.5,
+    "terres_etrangeres"
+   ],
+   [
+    "57459",
+    "Merschweiller",
+    50.5,
+    "hors_carte"
+   ],
+   [
+    "59385",
+    "Marpent",
+    50.5,
+    "terres_etrangeres"
+   ],
+   [
+    "08166",
+    "Fépin",
+    50.6,
+    "terres_etrangeres"
+   ],
+   [
+    "06011",
+    "Beaulieu-sur-Mer",
+    50.7,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "76605",
+    "Sainte-Marguerite-sur-Mer",
+    50.7,
+    "hors_carte"
+   ],
+   [
+    "14318",
+    "Graye-sur-Mer",
+    50.8,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "25124",
+    "Charmauvillers",
+    50.8,
+    "hors_carte"
+   ],
+   [
+    "2B178",
+    "Nonza",
+    50.8,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "68194",
+    "Lutter",
+    50.8,
+    "terres_etrangeres"
+   ],
+   [
+    "68286",
+    "Rosenau",
+    50.8,
+    "terres_etrangeres"
+   ],
+   [
+    "01435",
+    "Versonnex",
+    50.9,
+    "terres_etrangeres"
+   ],
+   [
+    "50033",
+    "Baubigny",
+    50.9,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "76493",
+    "Paluel",
+    50.9,
+    "hors_carte"
+   ],
+   [
+    "50135",
+    "Clitourps",
+    51.0,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "59072",
+    "Bersillies",
+    51.0,
+    "terres_etrangeres"
+   ],
+   [
+    "2B050",
+    "Calvi",
+    51.1,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "50058",
+    "Blainville-sur-Mer",
+    51.2,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "62025",
+    "Ambleteuse",
+    51.2,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "62307",
+    "Escalles",
+    51.2,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "50442",
+    "Le Rozel",
+    51.3,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "13077",
+    "Port-de-Bouc",
+    51.4,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "14384",
+    "Luc-sur-Mer",
+    51.5,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "29178",
+    "Ploudalmézeau",
+    51.5,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "44132",
+    "Pornichet",
+    51.5,
+    "mer_et_eaux_hors_contours"
+   ],
+   [
+    "50395",
+    "La Pernelle",
+    51.5,
+    "mer_et_eaux_hors_contours"
+   ]
+  ],
+  "poids_sans_mesure_max_pct": 0.0
+ },
+ "accord_echantillon": {
+  "communes": 87,
+  "ecart_abs_max_pts": 0.097,
+  "ecart_abs_p90_pts": 0.028,
+  "ecart_median_pts": 0.0,
+  "plus_forts": [
+   [
+    "67008",
+    "Altorf",
+    0.097
+   ],
+   [
+    "67240",
+    "Kirchheim",
+    0.093
+   ],
+   [
+    "50218",
+    "Granville",
+    -0.069
+   ],
+   [
+    "68023",
+    "Beblenheim",
+    0.05
+   ],
+   [
+    "29083",
+    "Île-de-Sein",
+    -0.037
+   ],
+   [
+    "33236",
+    "Lège-Cap-Ferret",
+    -0.034
+   ]
+  ]
+ },
+ "rangs_simules": {
+  "avertissement": "simulation hors ligne : aucun de ces scores n'est publié ni écrit dans l'index",
+  "exclusion_lt50_effet_sur_les_autres": {
+   "communes": 34406,
+   "score_change": 1650,
+   "abs_ge_5": 0,
+   "abs_ge_10": 0,
+   "abs_ge_20": 0,
+   "delta_p1_p99": [
+    0,
+    1
+   ],
+   "seuils": {
+    "34": 61,
+    "40": 51,
+    "50": 40,
+    "55": 48,
+    "60": 0,
+    "66": 0,
+    "70": 0,
+    "88": 0
+   },
+   "verdict_change": 36,
+   "transitions": {
+    "mismatch->neutral": 36
+   }
+  },
+  "index_publie_vers_secteur_habite_tous": {
+   "communes": 34735,
+   "score_change": 21567,
+   "abs_ge_5": 935,
+   "abs_ge_10": 130,
+   "abs_ge_20": 19,
+   "delta_p1_p99": [
+    -6,
+    4
+   ],
+   "seuils": {
+    "34": 598,
+    "40": 626,
+    "50": 578,
+    "55": 542,
+    "60": 466,
+    "66": 339,
+    "70": 347,
+    "88": 186
+   },
+   "verdict_change": 707,
+   "transitions": {
+    "neutral->satisfied": 128,
+    "neutral->mismatch": 231,
+    "satisfied->neutral": 126,
+    "mismatch->neutral": 222
+   }
+  },
+  "index_publie_vers_secteur_habite_exclusion_lt50": {
+   "communes": 34735,
+   "score_change": 21486,
+   "abs_ge_5": 903,
+   "abs_ge_10": 122,
+   "abs_ge_20": 17,
+   "delta_p1_p99": [
+    -6,
+    4
+   ],
+   "seuils": {
+    "34": 602,
+    "40": 625,
+    "50": 578,
+    "55": 544,
+    "60": 453,
+    "66": 329,
+    "70": 344,
+    "88": 182
+   },
+   "verdict_change": 1029,
+   "transitions": {
+    "neutral->satisfied": 127,
+    "neutral->mismatch": 212,
+    "satisfied->neutral": 123,
+    "satisfied->incertain": 74,
+    "mismatch->neutral": 238,
+    "neutral->incertain": 221,
+    "mismatch->incertain": 34
+   }
+  },
+  "communes_lt50_verdict_index": {
+   "satisfied": 74,
+   "neutral": 221,
+   "mismatch": 34
+  },
+  "trait_score_ge_88": {
+   "index": 4360,
+   "secteur_tous": 4358,
+   "secteur_exclusion": 4306
+  },
+  "plus_forts_ecarts_index_secteur": [
+   [
+    "13096",
+    "Saintes-Maries-de-la-Mer",
+    87,
+    48,
+    57.5,
+    68.2
+   ],
+   [
+    "17034",
+    "Barzan",
+    57,
+    20,
+    38.4,
+    98.3
+   ],
+   [
+    "50218",
+    "Granville",
+    17,
+    52,
+    59.8,
+    44.4
+   ],
+   [
+    "17015",
+    "Arces",
+    50,
+    16,
+    35.2,
+    96.7
+   ],
+   [
+    "17437",
+    "Talmont-sur-Gironde",
+    57,
+    24,
+    41.3,
+    95.6
+   ],
+   [
+    "17098",
+    "Chenac-Saint-Seurin-d'Uzet",
+    52,
+    20,
+    38.3,
+    99.9
+   ],
+   [
+    "17230",
+    "Meschers-sur-Gironde",
+    54,
+    24,
+    41.1,
+    87.4
+   ],
+   [
+    "17160",
+    "Floirac",
+    52,
+    23,
+    40.6,
+    100.0
+   ],
+   [
+    "17248",
+    "Mortagne-sur-Gironde",
+    49,
+    23,
+    40.1,
+    100.0
+   ],
+   [
+    "17328",
+    "Saint-Fort-sur-Gironde",
+    49,
+    23,
+    40.6,
+    100.0
+   ],
+   [
+    "17333",
+    "Saint-Georges-de-Didonne",
+    50,
+    25,
+    42.0,
+    81.2
+   ],
+   [
+    "17060",
+    "Boutenac-Touvent",
+    44,
+    20,
+    38.0,
+    100.0
+   ],
+   [
+    "13004",
+    "Arles",
+    59,
+    37,
+    49.6,
+    96.4
+   ],
+   [
+    "34344",
+    "La Grande-Motte",
+    51,
+    29,
+    45.1,
+    69.7
+   ],
+   [
+    "17325",
+    "Saint-Dizant-du-Gua",
+    47,
+    26,
+    42.7,
+    100.0
+   ],
+   [
+    "17369",
+    "Saint-Martin-de-Ré",
+    47,
+    26,
+    43.0,
+    17.6
+   ],
+   [
+    "66180",
+    "Saint-Laurent-de-la-Salanque",
+    48,
+    27,
+    43.6,
+    65.7
+   ],
+   [
+    "30133",
+    "Le Grau-du-Roi",
+    61,
+    41,
+    52.3,
+    55.9
+   ],
+   [
+    "30276",
+    "Saint-Laurent-d'Aigouze",
+    49,
+    29,
+    44.9,
+    94.1
+   ],
+   [
+    "11262",
+    "Narbonne",
+    54,
+    35,
+    48.7,
+    91.6
+   ]
+  ]
+ },
+ "distribution": {
+  "quantiles_valeur": {
+   "1": 14.4,
+   "10": 29.9,
+   "25": 42.0,
+   "50": 58.8,
+   "75": 80.5,
+   "90": 93.8,
+   "99": 99.2
+  },
+  "largeur_p10_p90": {
+   "mediane": 1.35,
+   "p90": 4.19,
+   "ge_20_pts": 4,
+   "max": 31.39
+  },
+  "centre_bati_moins_secteur_pts": {
+   "abs_median": 0.07,
+   "abs_p90": 0.26,
+   "abs_ge_5": 0,
+   "max": 4.57
+  }
+ },
+ "arrondissements": {
+  "13201": {
+   "nom": "Marseille 1er Arrondissement",
+   "valeur": 65.034,
+   "p10": 64.458,
+   "p90": 65.509,
+   "couvert_fr": 64.38
+  },
+  "13202": {
+   "nom": "Marseille 2e Arrondissement",
+   "valeur": 63.303,
+   "p10": 61.534,
+   "p90": 64.301,
+   "couvert_fr": 65.42
+  },
+  "13203": {
+   "nom": "Marseille 3e Arrondissement",
+   "valeur": 64.725,
+   "p10": 63.97,
+   "p90": 65.366,
+   "couvert_fr": 68.47
+  },
+  "13204": {
+   "nom": "Marseille 4e Arrondissement",
+   "valeur": 65.004,
+   "p10": 64.638,
+   "p90": 65.375,
+   "couvert_fr": 69.98
+  },
+  "13205": {
+   "nom": "Marseille 5e Arrondissement",
+   "valeur": 64.178,
+   "p10": 63.626,
+   "p90": 64.763,
+   "couvert_fr": 63.86
+  },
+  "13206": {
+   "nom": "Marseille 6e Arrondissement",
+   "valeur": 63.583,
+   "p10": 62.912,
+   "p90": 64.262,
+   "couvert_fr": 59.03
+  },
+  "13207": {
+   "nom": "Marseille 7e Arrondissement",
+   "valeur": 61.274,
+   "p10": 57.02,
+   "p90": 62.961,
+   "couvert_fr": 52.93
+  },
+  "13208": {
+   "nom": "Marseille 8e Arrondissement",
+   "valeur": 57.219,
+   "p10": 52.595,
+   "p90": 62.142,
+   "couvert_fr": 44.1
+  },
+  "13209": {
+   "nom": "Marseille 9e Arrondissement",
+   "valeur": 58.783,
+   "p10": 55.844,
+   "p90": 61.266,
+   "couvert_fr": 51.01
+  },
+  "13210": {
+   "nom": "Marseille 10e Arrondissement",
+   "valeur": 62.829,
+   "p10": 61.826,
+   "p90": 63.653,
+   "couvert_fr": 62.51
+  },
+  "13211": {
+   "nom": "Marseille 11e Arrondissement",
+   "valeur": 66.437,
+   "p10": 64.05,
+   "p90": 68.577,
+   "couvert_fr": 81.14
+  },
+  "13212": {
+   "nom": "Marseille 12e Arrondissement",
+   "valeur": 64.175,
+   "p10": 63.786,
+   "p90": 64.651,
+   "couvert_fr": 76.63
+  },
+  "13213": {
+   "nom": "Marseille 13e Arrondissement",
+   "valeur": 63.802,
+   "p10": 62.67,
+   "p90": 64.588,
+   "couvert_fr": 85.11
+  },
+  "13214": {
+   "nom": "Marseille 14e Arrondissement",
+   "valeur": 63.863,
+   "p10": 62.87,
+   "p90": 64.827,
+   "couvert_fr": 78.18
+  },
+  "13215": {
+   "nom": "Marseille 15e Arrondissement",
+   "valeur": 60.909,
+   "p10": 59.793,
+   "p90": 62.355,
+   "couvert_fr": 79.08
+  },
+  "13216": {
+   "nom": "Marseille 16e Arrondissement",
+   "valeur": 58.872,
+   "p10": 58.124,
+   "p90": 59.803,
+   "couvert_fr": 73.4
+  },
+  "69381": {
+   "nom": "Lyon 1er Arrondissement",
+   "valeur": 38.735,
+   "p10": 37.66,
+   "p90": 40.214,
+   "couvert_fr": 100.0
+  },
+  "69382": {
+   "nom": "Lyon 2e Arrondissement",
+   "valeur": 39.559,
+   "p10": 38.082,
+   "p90": 40.993,
+   "couvert_fr": 100.0
+  },
+  "69383": {
+   "nom": "Lyon 3e Arrondissement",
+   "valeur": 33.559,
+   "p10": 31.107,
+   "p90": 36.296,
+   "couvert_fr": 100.0
+  },
+  "69384": {
+   "nom": "Lyon 4e Arrondissement",
+   "valeur": 38.945,
+   "p10": 37.486,
+   "p90": 40.356,
+   "couvert_fr": 100.0
+  },
+  "69385": {
+   "nom": "Lyon 5e Arrondissement",
+   "valeur": 43.161,
+   "p10": 39.928,
+   "p90": 46.269,
+   "couvert_fr": 100.0
+  },
+  "69386": {
+   "nom": "Lyon 6e Arrondissement",
+   "valeur": 35.551,
+   "p10": 34.362,
+   "p90": 36.615,
+   "couvert_fr": 100.0
+  },
+  "69387": {
+   "nom": "Lyon 7e Arrondissement",
+   "valeur": 37.764,
+   "p10": 36.066,
+   "p90": 39.382,
+   "couvert_fr": 100.0
+  },
+  "69388": {
+   "nom": "Lyon 8e Arrondissement",
+   "valeur": 34.026,
+   "p10": 32.48,
+   "p90": 35.947,
+   "couvert_fr": 100.0
+  },
+  "69389": {
+   "nom": "Lyon 9e Arrondissement",
+   "valeur": 41.548,
+   "p10": 38.415,
+   "p90": 43.568,
+   "couvert_fr": 100.0
+  },
+  "75101": {
+   "nom": "Paris 1er Arrondissement",
+   "valeur": 17.881,
+   "p10": 17.423,
+   "p90": 18.372,
+   "couvert_fr": 100.0
+  },
+  "75102": {
+   "nom": "Paris 2e Arrondissement",
+   "valeur": 17.234,
+   "p10": 16.865,
+   "p90": 17.676,
+   "couvert_fr": 100.0
+  },
+  "75103": {
+   "nom": "Paris 3e Arrondissement",
+   "valeur": 16.652,
+   "p10": 16.33,
+   "p90": 16.979,
+   "couvert_fr": 100.0
+  },
+  "75104": {
+   "nom": "Paris 4e Arrondissement",
+   "valeur": 17.332,
+   "p10": 16.967,
+   "p90": 17.829,
+   "couvert_fr": 100.0
+  },
+  "75105": {
+   "nom": "Paris 5e Arrondissement",
+   "valeur": 18.388,
+   "p10": 17.939,
+   "p90": 18.841,
+   "couvert_fr": 100.0
+  },
+  "75106": {
+   "nom": "Paris 6e Arrondissement",
+   "valeur": 18.88,
+   "p10": 18.389,
+   "p90": 19.334,
+   "couvert_fr": 100.0
+  },
+  "75107": {
+   "nom": "Paris 7e Arrondissement",
+   "valeur": 19.87,
+   "p10": 18.871,
+   "p90": 20.963,
+   "couvert_fr": 100.0
+  },
+  "75108": {
+   "nom": "Paris 8e Arrondissement",
+   "valeur": 19.478,
+   "p10": 18.452,
+   "p90": 20.595,
+   "couvert_fr": 100.0
+  },
+  "75109": {
+   "nom": "Paris 9e Arrondissement",
+   "valeur": 17.299,
+   "p10": 16.768,
+   "p90": 17.944,
+   "couvert_fr": 100.0
+  },
+  "75110": {
+   "nom": "Paris 10e Arrondissement",
+   "valeur": 16.272,
+   "p10": 15.895,
+   "p90": 16.601,
+   "couvert_fr": 100.0
+  },
+  "75111": {
+   "nom": "Paris 11e Arrondissement",
+   "valeur": 16.27,
+   "p10": 15.749,
+   "p90": 16.912,
+   "couvert_fr": 100.0
+  },
+  "75112": {
+   "nom": "Paris 12e Arrondissement",
+   "valeur": 19.027,
+   "p10": 17.314,
+   "p90": 21.472,
+   "couvert_fr": 100.0
+  },
+  "75113": {
+   "nom": "Paris 13e Arrondissement",
+   "valeur": 19.197,
+   "p10": 18.45,
+   "p90": 19.966,
+   "couvert_fr": 100.0
+  },
+  "75114": {
+   "nom": "Paris 14e Arrondissement",
+   "valeur": 20.274,
+   "p10": 19.396,
+   "p90": 21.12,
+   "couvert_fr": 100.0
+  },
+  "75115": {
+   "nom": "Paris 15e Arrondissement",
+   "valeur": 22.27,
+   "p10": 20.726,
+   "p90": 23.754,
+   "couvert_fr": 100.0
+  },
+  "75116": {
+   "nom": "Paris 16e Arrondissement",
+   "valeur": 24.432,
+   "p10": 22.17,
+   "p90": 26.478,
+   "couvert_fr": 100.0
+  },
+  "75117": {
+   "nom": "Paris 17e Arrondissement",
+   "valeur": 20.422,
+   "p10": 18.833,
+   "p90": 22.454,
+   "couvert_fr": 100.0
+  },
+  "75118": {
+   "nom": "Paris 18e Arrondissement",
+   "valeur": 17.284,
+   "p10": 16.585,
+   "p90": 18.216,
+   "couvert_fr": 100.0
+  },
+  "75119": {
+   "nom": "Paris 19e Arrondissement",
+   "valeur": 15.792,
+   "p10": 15.367,
+   "p90": 16.293,
+   "couvert_fr": 100.0
+  },
+  "75120": {
+   "nom": "Paris 20e Arrondissement",
+   "valeur": 16.518,
+   "p10": 15.55,
+   "p90": 17.885,
+   "couvert_fr": 100.0
+  }
+ }
+}

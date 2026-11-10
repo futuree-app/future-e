@@ -1314,3 +1314,170 @@ limitation aux contours français est en place.
 **Recommandation : GO pour le calcul national de B2 dès que la règle du point 1 est validée et la comparaison du
 point 2 faite.** Il ne produit que des fichiers hors application, comme B1. Le tableau avant/après national viendra
 ensuite en contre-revue, avant toute PR B3.
+
+---
+
+# Partie IV — B2 national hors ligne et comparaison à la population (10/11/2026)
+
+## 41. Décisions de la deuxième contre-revue
+
+- **B1 : GO.** Le porteur a vérifié les scripts et les résultats de synthèse, sans réexécuter le raster.
+- **B2 : GO encadré.** Calcul national hors ligne des mesures physiques. **Aucun score ni verdict publié.** La règle de
+  couverture (≥ 75 %, 50-75 %, < 50 %) est validée **à titre provisoire**, pour simulation. Deux demandes :
+  - séparer ce qui manque au disque (mer hors contours, terres étrangères exclues, eaux cartographiées, pixels
+    vraiment non classés) ;
+  - mesurer combien de communes une exclusion des rangs toucherait, et ce qu'elle changerait aux distributions, avant
+    de la figer.
+- **Population** : Filosofi **2021** carroyé à 200 m (Insee, publié le 12/02/2026) plutôt que 2019. Comparaison sur une
+  vingtaine de communes, en parallèle de B2, sans entrer dans le moteur.
+- **L0 (#148)** : reprise demandée, faite (§ 46).
+- **Pour B3** : `rural_agricole` et `rural_forestier` dépendent encore de la densité inférieure à 1 500 hab/km². FUT-185 a
+  montré qu'elle n'établit pas la ruralité. Ces libellés se coordonnent avec FUT-184 et FUT-190 : une forte présence
+  agricole ou forestière peut se mesurer, sans qualifier la commune de rurale.
+
+## 42. B2 national : fichiers, méthode, contrôle
+
+| | Fichier | sha256 |
+|---|---|---|
+| Script | `b2_national.py` | `7776118139c0598dbc383e78e646b6b91b57a8bba39a69c5beade1ca3b1a0409` |
+| Analyse | `b2_analyse.py` | `e86e9007ebd39c3577519c80f4002f94d9f651b781681e74633f660474c93a12` |
+| Sortie (hors dépôt) | `~/Documents/futuree-oso/b2/secteur-habite-2023.csv.gz` (34 746 communes, 45 arrondissements) et son `.meta.json` | `882a5948c9c08ce53677c6daf883f8b848d40490d25a371ce9bc4d4c98b76e07` |
+| Résumé | `resultats-b2-national.json` | — |
+
+Le calcul a pris 19 min, en trois temps :
+1. 60 bandes de 2 000 lignes de 10 m. Dans chacune, on rasterise les contours, ce qui étiquette chaque pixel par sa
+   commune. On agrège ensuite les familles de pixels sur la grille nationale de 100 m (11 916 × 12 682 cellules) et on
+   relève les pixels bâtis de chaque commune, cellule par cellule.
+2. Sept convolutions du disque de 15 km, par FFT et par tuiles.
+3. L'agrégation par commune et par arrondissement.
+
+Dans cette version, un pixel bâti appartient à la commune qui contient son centre, et une cellule partagée donne à
+chaque commune ses propres pixels.
+
+- **Accord avec l'échantillon du § 39** (87 communes) : écart médian nul, 0,03 point au 90ᵉ centile, **0,10 point au
+  plus** (Altorf, Kirchheim : cellules partagées).
+- **Huit communes sans aucun pixel bâti OSO**, donc sans valeur : Bustanico, Carpineto, Érone, Felce, Rusio et
+  Valle-d'Orezza (Haute-Corse), Bourg-d'Oueil (31), Grailhen (65). Ce sont de très petits villages ; leur bâti échappe à
+  la classification à 10 m.
+- **Aucune cellule bâtie sans terre mesurée**, partout.
+
+## 43. Couverture des disques, cause par cause
+
+En moyenne nationale, pondérée par le bâti, le disque se répartit ainsi : terres françaises 96,55 %, eaux françaises
+0,81 %, mer et eaux hors contours 1,15 %, rien de cartographié 0,70 %, terres étrangères 0,79 %, **pixels non classés
+sous un contour français 0,000 %** (0,016 % au plus, dans une seule commune). **Le raster n'a pratiquement pas de
+trous** : ce qui manque à un disque n'est jamais un défaut de la carte, c'est de la mer ou l'étranger.
+
+| Palier provisoire (part du disque couverte par des données françaises) | Communes | Cause : mer | Cause : frontière |
+|---|---|---|---|
+| ≥ 75 % | 33 173 | — | — |
+| 50 à 75 % | 1 234 | 731 | 503 |
+| < 50 % | 329 | 220 | 109 |
+
+La cause est classée « frontière » quand les terres étrangères pèsent plus que la mer, et « mer » sinon.
+
+- **Côté mer**, sous 50 % : les îles et les presqu'îles. Hœdic (1,0 %), Ouessant (2,5 %), Sein, Yeu, Houat, Molène,
+  les communes de Ré et de Noirmoutier, Quiberon, la Corse littorale. Pour Ouessant, il ne manque pas 97,5 % de
+  données : le disque est de la mer (35,8 % d'eau cartographiée, 61,5 % au-delà de la bande côtière que la carte
+  classe).
+- **Côté frontière** : la pointe de Givet (Charnois 25 %, Chooz 27 %), le Doubs (Montancy, Burnevillers), l'Alsace, la
+  Haute-Savoie. **Limite à connaître** : la carte ne classe qu'une bande de territoire étranger. Au-delà, « rien de
+  cartographié » désigne aussi l'étranger. À Charnois : 37,9 % de terres étrangères classées et 36,8 % de rien.
+- 1 167 communes ont au moins 10 % de leur disque en terres étrangères. Sans la décision C, ces terres seraient entrées
+  dans la mesure.
+
+**Libellés proposés pour B3**, selon la cause, sans jamais parler de « mesure partielle » :
+- mer : « Autour des zones bâties de X, la mer occupe l'essentiel du rayon de 15 km. Sur les terres, les milieux
+  naturels en représentent Y %. » ;
+- frontière : « Une partie du rayon de 15 km se trouve à l'étranger, hors du périmètre de cette mesure. Sur les terres
+  françaises, les milieux naturels représentent Y %. »
+
+## 44. Rangs simulés : ce que changerait le secteur habité, et ce que changerait l'exclusion
+
+Simulation hors ligne : le percentile national est calculé avec la même formule que `populate-nature.py`, sur les
+34 735 communes valorisées, arrondissements exclus. **Aucun de ces scores n'est publié.** La comparaison à l'index
+publié réunit tous les changements à la fois : l'eau retirée, la géographie, le point unique remplacé par le bâti.
+
+| | Scores changés | ≥ 5 points | ≥ 10 | ≥ 20 | Verdicts de rang changés |
+|---|---|---|---|---|---|
+| Index publié → secteur habité, toutes communes classées | 21 567 | 935 | 130 | 19 | **707** (neutre → défavorable 231, défavorable → neutre 222, neutre → favorable 128, favorable → neutre 126) |
+| Index publié → secteur habité, communes sous 50 % retirées du rang | 21 486 | 903 | 122 | 17 | **1 029**, dont 329 qui passent à « incertain » |
+| **Effet de cette exclusion sur les autres communes** | 1 650 | 0 | 0 | 0 | 36 (défavorable → neutre) |
+
+- **L'exclusion ne déforme pas la distribution.** Retirer les 329 communes sous 50 % ne déplace aucune autre commune de
+  plus d'un point de percentile. Elle change 36 verdicts, tous de « défavorable » à « neutre ». Elle ne franchit aucun
+  seuil de score à partir de 60.
+- **Ce qu'elle retire** : parmi ces 329 communes, 74 portent aujourd'hui un verdict « favorable », 221 un verdict
+  neutre et 34 un verdict « défavorable ». Elles deviendraient « incertaines ».
+- **Trait distinctif** (score ≥ 88) : 4 360 communes aujourd'hui, 4 358 avec le secteur habité, 4 306 avec l'exclusion.
+- **Plus forts écarts à l'index** :
+  - Saintes-Maries-de-la-Mer : de 87 à 48 (l'eau de Camargue comptée comme nature) ;
+  - l'estuaire de la Gironde : Barzan de 57 à 20, Arces de 50 à 16 ;
+  - Granville, dans l'autre sens : de 17 à 52 (le point de l'index tombait dans la mer).
+- **Distribution** : médiane 58,8 %, 10ᵉ centile 29,9 %, 90ᵉ centile 93,8 %.
+- **Dispersion** (p10-p90 pondérés) : 1,35 point en médiane ; 4,2 points au 90ᵉ centile ; 20 points ou plus dans
+  4 communes seulement (31,4 au plus).
+- **Centre bâti contre secteur habité** : 0,07 point d'écart en médiane, 4,6 au plus. Le repli nommé est sûr.
+- **Arrondissements** : de 15,8 % (Paris 19ᵉ) à 66,4 % (Marseille 11ᵉ), mesurés sur leurs propres pixels.
+
+## 45. Pondération par le bâti contre population Filosofi 2021
+
+Source : Insee, « Revenus, pauvreté et niveau de vie en 2021, données carroyées », carreaux de 200 m (données imputées
+comprises), [page de diffusion](https://www.insee.fr/fr/statistiques/8735162?sommaire=8735243) et
+[documentation](https://www.insee.fr/fr/statistiques/fichier/8735106/documentation_donnees-carroyees_filosofi2021.pdf).
+
+| | |
+|---|---|
+| Archive téléchargée | `Filosofi2021_carreaux_200m_csv.zip`, 91,6 Mo, sha256 `5935efb1b734ee49e2335bd546b18b8086cd718ebb8e6edc4cf70a89554ea8a3` |
+| Fichier lu | `carreaux_200m_met.csv`, 2 298 582 carreaux, 62,6 millions d'individus, sha256 `1f0b2dc4e4ded6b61df6f64a2374e1c4b5247f82ae7712c8c7cc8c884d0d6104` |
+| Stockage | `~/Documents/futuree-oso/filosofi2021/`, hors dépôt |
+| Script | `b2_filosofi.py`, sha256 `fbbc7809fe49d00c3bc6ef36508542d02d024ff39778164f11de770712da3f04` ; résultats dans `resultats-b2-filosofi.json` |
+
+Méthode : même grille, même disque et même limitation aux contours français que le § 39. Les deux moyennes ne diffèrent
+que par le poids :
+- les pixels bâtis OSO des cellules de la commune ;
+- la population (`ind`) des carreaux dont le centre est dans la commune.
+
+| Groupe (21 communes) | Écart moyen, population − bâti | Écart absolu maximal |
+|---|---|---|
+| Centres denses : Paris, Lyon, Marseille, Lille, Bordeaux | − 0,05 point | 0,40 |
+| Touristiques : Hyères, Lège-Cap-Ferret, Chamonix, Les Belleville, La Teste-de-Buch, Biscarrosse | − 0,10 | 0,78 |
+| Multipolaires : Arles, Chemillé-en-Anjou, Noyant-Villages, Le Mené, Saintes-Maries-de-la-Mer | + 0,63 | **5,41** |
+| Autres : Granville, Sète, Annecy, Nîmes, Fontainebleau | + 0,18 | 1,26 |
+
+- **Écart médian : 0,24 point.** Pour 19 communes sur 21, les deux pondérations diffèrent de moins de 1,3 point.
+- **Les deux exceptions** sont des communes à bâti dispersé et à population concentrée :
+  - Saintes-Maries-de-la-Mer : + 5,4 points. Le bâti des mas en Camargue pèse, mais les habitants vivent surtout au
+    village, plus près des étangs et des espaces naturels ;
+  - Arles : − 2,6 points. La population est concentrée en ville, et le bâti s'étend aux zones d'activité et aux mas.
+  Ces deux communes vont à la recette de B3.
+- **La dispersion pondérée par le bâti est plus large** que celle pondérée par la population : Hyères 54,8-65,5 contre
+  59,4-62,7, Sète 44,9-55,3 contre 48,9-53,4. Le bâti compte des lieux peu habités : zones d'activité, résidences
+  secondaires. Le libellé doit donc rester « autour des zones bâties », jamais « là où vivent les habitants ».
+- **Limites de la population fiscale.** L'Insee impute les carreaux de moins de 11 ménages. La part de population
+  imputée atteint 66,7 % à Noyant-Villages et 64,9 % au Mené, contre 0,2 % à Paris. Une population fiscale ne voit ni
+  les résidents secondaires, ni les saisonniers, ni les étudiants rattachés ailleurs : elle n'est pas la vérité de la
+  présence.
+
+**Conclusion** : la pondération par le bâti OSO tient pour une première version. Elle ne s'écarte de la population que
+dans les communes à bâti dispersé, d'au plus 5,4 points dans l'échantillon. La population n'entre pas dans le moteur.
+
+## 46. L0 repris (PR #148)
+
+- PR rebasée sur `main` après FUT-185 ; un seul conflit, dans `FutureELanding.tsx`, résolu en gardant les deux côtés.
+- La carte Nature ne naît plus que des catégories que l'index a **mesurées** (`/api/landing-signals`,
+  `source: "index"`). Ni la table manuelle (Rodez, Lambesc), ni le repli `montagne` par département ne la déclenchent.
+- La variante cultures / forêts dit le seuil **constaté** (« les cultures couvrent au moins 30 % de la surface
+  cartographiée de X »), et précise qu'elle ne fait pas de la commune une commune rurale.
+- Test national : sur l'index entier, chaque carte Nature dit ce que la commune mesure.
+
+## 47. Ce qui reste à décider avant B3
+
+1. **Règle de couverture définitive.** Les paliers et les libellés « mer » ou « frontière » du § 43 ; le sort des
+   329 communes sous 50 %. Recommandation : les retirer du rang, puisque leur exclusion ne déplace les autres que d'un
+   point au plus.
+2. **Les huit communes sans bâti OSO** : « non calculable », sans rang. Recommandé : ni valeur inventée, ni point
+   géométrique de repli.
+3. **Libellés ruraux** (FUT-184, FUT-190), avant que B3 recalcule `rural_agricole` et `rural_forestier` sur les terres.
+4. **Contre-revue du tableau national** (§ 44), puis B3 : une seule PR, sous `engine-9`, avec la nouvelle identité de
+   rang ; aucun dossier figé réécrit.
