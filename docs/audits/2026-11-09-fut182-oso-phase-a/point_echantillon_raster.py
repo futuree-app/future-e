@@ -1,5 +1,9 @@
 """FUT-182 · phase A, reprise · sensibilité de C1 au choix du point, sur le raster réel, pour un ÉCHANTILLON de cas extrêmes.
 
+REMPLACÉ PAR b2_preparation.py (10/11/2026, contre-revue) : ici la dispersion p10-p90 n'est PAS pondérée, les
+cellules sans dénominateur gardent leur poids et les pixels hors de France comptent. Conservé tel quel pour la
+traçabilité des chiffres de la partie II.
+
 Lecture seule, aucun calcul national. Dépendances : numpy, rasterio, shapely, pyproj.
 
 Usage :

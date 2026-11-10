@@ -10,6 +10,13 @@ métier, aucune base ni stockage distant modifiés ; aucun téléchargement mass
 > porteur et intègre ce que le raster officiel, téléchargé et vérifié, a établi : classe 24 = serres, précision 2023,
 > preuve d'identité avec le cache, origine du point de référence, forêt exacte au seuil de 70 %, licence, lot L0,
 > séquençage et conditions de B1. **Lire d'abord les § 16, 28, 29 et 30.**
+>
+> **Mise à jour du 10/11/2026, après la contre-revue de la partie II.** Les cinq arbitrages sont **définitifs**
+> (§ 31). La licence **ne bloque plus la publication** : décision produit de publier sous la Licence Ouverte 2.0
+> affichée par le producteur et le distributeur, divergences documentées, demande au CNES poursuivie sans suspendre
+> le calendrier (§ 31, E). **B1 est fait** : comptes exacts des 34 746 contours communaux et des 45 arrondissements,
+> identité exhaustive avec le cache, PLM, seuils, serres et retrait de l'eau (partie III, § 32-38). **L0** est la PR
+> #148. La **préparation de B2** est au § 39 ; le calcul national de B2 attend le bilan du § 40.
 
 ---
 
@@ -863,6 +870,11 @@ manque : n'ajouter aucune nouvelle valeur OSO publiée (la phase B peut calculer
 d'attribution. Je ne suis pas juriste ; ce qui précède est une lecture des textes, à faire valider si le doute
 persiste.
 
+> **Décision du 10/11/2026 (§ 31, E) : ce paragraphe ne bloque plus.** Le porteur publie sous la Licence Ouverte 2.0
+> affichée par Theia et GEODES. La confirmation écrite n'est un prérequis ni pour B1, B2 ou B3, ni pour la mise en
+> production. La demande au CNES peut être poursuivie ; elle ne suspend rien. Ce rapport ne dit nulle part qu'une
+> confirmation juridique a été obtenue : elle ne l'a pas été.
+
 ## 20. Prairies et libellés (arbitrage B)
 
 Le contrat garde `prairies` comme poste distinct (§ 27) et chaque définition le nomme. L'indicateur « espaces
@@ -920,6 +932,11 @@ arrondie ou exacte (de 69,923 à 70,027) : c'est exactement le cas que l'arbitra
 doit être produite par le calcul (part effective ≤ 10 %), pas recopiée. Texte de la preuve : « la forêt couvre X % de
 ses terres (eau exclue) ». Note de méthode : ce compte rapporte la forêt aux classes 1-23 hors eau ; avec les serres
 dans les terres (contrat § 27), l'écart est négligeable pour des communes forestières, et sera rejoué en B1.
+
+> **Corrigé le 10/11 par B1 (§ 36), compte exhaustif sur les 34 743 communes :** 3 336 communes (9,60 %), **+80 / −2**,
+> serres comprises dans les terres (3 337 sans elles). Le 3 338 / +82 ci-dessus mêlait un compte exact dans la fenêtre
+> 67-73 % et une estimation hors fenêtre. Les deux sorties sont les mêmes ; neuf communes (et non huit) changent de côté
+> selon l'arrondi.
 
 ## 23. Couverture et données manquantes
 
@@ -995,7 +1012,7 @@ Changements par rapport au § 8 :
 6. **Seuils** : toute comparaison à un seuil (forêt 70 %, catégories 20 / 45 / 50, rural 30 / 35) se fait sur la valeur
    calculée depuis les comptes, avant arrondi ; l'affichage arrondit au dixième (FUT-183).
 7. **Licence et attribution** : champ `source.licence` et mention d'attribution, renseignés après la confirmation du
-   § 19.3.
+   § 19.3. *10/11 : renseignés dès B3, sans attendre (§ 31, E).*
 
 Tout le reste du § 8 est maintenu (dénominateurs nommés, absent ≠ zéro, ADEME à part, grains).
 
@@ -1007,15 +1024,15 @@ Tout le reste du § 8 est maintenu (dénominateurs nommés, absent ≠ zéro, AD
 | Effets « eau comprise » (A → B) | **exact** |
 | Identité point de l'index = `centre` geo.api (34 743) ; distances aux autres points | **exact** |
 | Nomenclature 24 classes, serres, absence de 255, précision 2023 | **exact** (raster et métadonnées) |
-| Identité raster / cache | **exact sur 1 357 communes** ; exhaustif en B1 |
-| Forêt ≥ 70 % sur les terres : 3 338 (9,61 %), +82 / −2 | **exact** dans la fenêtre 67-73 %, borne d'erreur 0,09 point hors fenêtre |
-| Effets hors eau sur `radius_pct`, score, verdicts | **estimé** (± 1 point de score) → exact en B1 |
+| Identité raster / cache | **exact sur 1 357 communes** → *B1 : exhaustif, 34 743 / 34 743, aucun écart (§ 33)* |
+| Forêt ≥ 70 % sur les terres : 3 338 (9,61 %), +82 / −2 | **exact** dans la fenêtre 67-73 %, borne d'erreur 0,09 point hors fenêtre → *B1 : 3 336 (9,60 %), +80 / −2, exhaustif (§ 36)* |
+| Effets hors eau sur `radius_pct`, score, verdicts | **estimé** (± 1 point de score) → *B1 : exact, 10 405 scores et 252 verdicts (§ 38)* |
 | B → C1, C1 → C2, sensibilité au point (national) | **estimé** (surfaces homogènes) → exact en B2 |
 | Secteur habité, 24 cas | **exact** (raster, grille de 100 m) |
 | Secteur habité national, effets sur scores et verdicts | **raster requis** (B2) |
-| Compositions des 48 périmètres PLM | **raster requis** (B1) |
+| Compositions des 48 périmètres PLM | **raster requis** (B1) → *B1 : exact, Σ arrondissements = commune au pixel (§ 35)* |
 | Part hors France et en mer des disques, national | **raster requis** (B2) |
-| Licence | **confirmation externe requise** |
+| Licence | ~~confirmation externe requise~~ → *décision produit du 10/11 : publication sous Licence Ouverte 2.0, divergences documentées, aucune confirmation revendiquée (§ 31, E)* |
 
 ## 29. Séquençage final
 
@@ -1025,11 +1042,11 @@ Tout le reste du § 8 est maintenu (dénominateurs nommés, absent ≠ zéro, AD
 | **B1 — comptes** (offline) | script versionné `scripts/oso/comptes.py` : comptes de pixels 0-255 pour 34 743 communes + 48 PLM ; preuve d'identité exhaustive avec le cache ; sha256 des entrées | `data/oso/comptes-2023.json(.gz)` + rapport | identité 34 743/34 743 ; Σ arrondissements = commune au pixel ; aucune écriture dans l'index |
 | **B2 — secteur** (offline) | grille de 100 m (comptes par famille) ; disque de 15 km par FFT ; secteur habité (valeur, p10-p90, part non mesurée) ; contrôle par masque exact sur 50 communes | `data/oso/secteur-2023.json(.gz)` + tableau avant/après national (scores, rangs, verdicts, catégories, forêt) | **contre-revue des chiffres nationaux** ; libellés validés par le porteur |
 | **B3 — alignement** (une PR) | index `nature` v2 ; `territoire-facts@3` ; `territoire-synthese@8` (+ FUT-183) ; `engine-9` ; identité de rang ; Où vivre, /qna, Projet, accueil, AskFuture ; réécriture des textes FUT-178 | PR applicative | tests du § 12 et § 25 ; recette sur l'environnement de test ; contre-revue ; pas de régénération proactive |
-| **Publication** | déploiement | — | licence confirmée (§ 19.3) |
+| **Publication** | déploiement | — | ~~licence confirmée (§ 19.3)~~ *GO du porteur sur la PR B3 (décision du 10/11 : la licence ne bloque plus)* |
 
 Recette (en plus du § 12.12-14) : Granville, Hyères, Lège-Cap-Ferret, Sète et Arles sous les quatre points (le
 secteur habité doit rester dans la dispersion p10-p90) ; Héberville et Rognonas (serres comptées) ; Trèves et Les
-Planches-en-Montagne (sorties du seuil de 70 %) ; Boulogne-Billancourt et Montreuil (Paris compté une fois) ; Paris =
+Planches-près-Arbois (sorties du seuil de 70 %) ; Boulogne-Billancourt et Montreuil (Paris compté une fois) ; Paris =
 Σ 20 arrondissements ; aucun arrondissement dans l'univers des rangs ; aucun libellé « au plus près », « préservé »,
 « ou d'eau » après B3.
 
@@ -1051,3 +1068,249 @@ B1 ne produit que des fichiers de comptes hors application. Il peut être autori
 - Lot L0 autorisé avant B1 ?
 
 **Verdict : GO pour B1 dès que les points 3 et 4 sont acquis ; GO pour B3 subordonné à la licence.**
+
+> **10/11/2026 : conditions remplies, B1 fait (partie III).** Les questions ci-dessus sont tranchées (§ 31) ; la
+> contre-revue de la partie II a rendu GO pour B1 et L0 ; la licence ne conditionne plus B3.
+
+---
+
+# Partie III — Décisions définitives et B1 : comptes nationaux exacts (10/11/2026)
+
+## 31. Décisions validées par la contre-revue
+
+Le porteur a contre-revu la partie II au commit `93062179`. Ces décisions ne se redemandent pas.
+
+| | Décision | Ce qu'elle implique ici |
+|---|---|---|
+| **A** | **Secteur habité** retenu. Le centre bâti est le repli, seulement si l'implémentation révèle un problème majeur | B2 corrige la dispersion (quantiles **pondérés**, même poids que la moyenne) et le sort des cellules sans mesure (sorties du numérateur **et** du dénominateur, part rapportée) : § 39. Libellé : « Autour des zones bâties de la commune, les milieux naturels représentent en moyenne X % des terres situées dans un rayon de 15 km. » Il décrit l'occupation des sols ; il ne prouve ni l'accès, ni la distance réelle à un espace naturel, ni sa qualité écologique |
+| **B** | Poids = **surface bâtie OSO**, présentée comme un **proxy de la répartition des lieux bâtis**, jamais comme un nombre d'habitants | comparaison à une répartition de population sur un échantillon ciblé avant la généralisation de B2 (§ 40) |
+| **C** | Pixels limités aux **contours des communes françaises** | mer au-delà des contours, étranger et valeur 0 : **non mesurés**, jamais « pas de nature » ; part non mesurée disponible et visible ; pas de comparaison trompeuse pour les communes frontalières et insulaires |
+| **D** | **Serres (24) rattachées aux cultures**, poste distinct | F-score 0,27 documenté ; sensibilité nationale en B1 (§ 37) ; aucune phrase sur l'activité agricole réelle tirée de ces pixels |
+| **E** | **Publication autorisée** sous la Licence Ouverte 2.0 affichée par le producteur (Theia) et le distributeur (GEODES) | attribution « OSO 2023, THEIA / CES OSO (CESBIO), CNES-GEODES, mise à jour du 20/09/2024, Licence Ouverte 2.0 ; traitements futur•e » ; divergences (ODbL du Cerema, mentions générales du site GEODES) **documentées, non résolues** (§ 19) ; demande au CNES poursuivie **sans suspendre le calendrier** ; aucune confirmation juridique revendiquée ; raster brut hors dépôt et hors runtime |
+
+Chantiers autorisés :
+- **L0** : PR applicative séparée, **#148**, non fusionnée. Le point L0-2 (grain de la preuve Projet) est **reporté à
+  B3**. « Secteur » désigne, dans le produit, les abords d'une adresse : l'employer pour le rang nature, calculé au point
+  de la commune, ferait passer une mesure communale pour une mesure à l'adresse. Le grain se corrige avec la nouvelle
+  mesure, sous `engine-9`.
+- **B1** : fait (§ 32-38).
+- **B2** : préparation faite (§ 39). Le **calcul national attend le bilan** (§ 40).
+- **B3** : une seule PR (§ 29) ; publication après GO du porteur sur cette PR.
+
+## 32. B1 : fichiers, empreintes, reproduction
+
+| | Fichier | Empreinte (sha256) |
+|---|---|---|
+| Raster | `OCS_2023.tif` (773 034 463 octets ; 126 813 × 119 159 px ; EPSG:2154 ; 10 m ; aucun no-data déclaré) | `331adf56ea2301c5a6460084f797352190caaacabc7e4d1e3ebaffca9af8f90c` |
+| Contours communaux | `data/cache-nature/contours/*.json` (96 fichiers, geo.api.gouv.fr du 02/06/2026, ceux qui ont produit l'index) | `58b8effbcaf1a7792d669b652754df2cc712d766bd996bdf3ea080025f827cfd` (nom et contenu concaténés) |
+| Arrondissements | `arrondissements.json` (geo.api.gouv.fr, 45 arrondissements, téléchargé le 09/11) | `9178b6eb1edb5a6fbdf381e9c1fdf273082125ee365bb0a8c6360ee672c97284` |
+| Script de comptes | `b1_comptes.py` | `1101b40f139f1b4e80cae3279beface11b8b4b95d52d44adbfe316078c7895b7` |
+| Script d'analyse | `b1_analyse.py` | `1e62a1e0e823590c9b385498322f7c71631bc50a638151258396ff471eeff579` |
+| **Comptes** | `comptes-pixels.csv.gz` : 34 791 lignes (34 746 communes, dont Paris, Lyon et Marseille, et 45 arrondissements) ; pour chaque contour, l'aire, le nombre de pixels et le compte de **chaque valeur** 0-24 et 255 | `1b0c484957d3f29cb73eba8411d72a8b2d76e174091a1b7e2a203b4df034da81` |
+| Parts | `parts-terrestres.csv.gz` : parts exactes non arrondies, par commune (variantes S1 et S0) | `074ea8d4a40aaec65200a4543239e62dab775cf96849d68d981be9f2db786804` |
+| Résumé | `resultats-b1.json` (dans ce dossier) | — |
+
+Les comptes et les parts sont dans `~/Documents/futuree-oso/b1/`, hors dépôt et hors application, avec
+`comptes-pixels.meta.json` : versions de Python, numpy, rasterio, GDAL et shapely, durée, date. Aucune écriture dans
+l'index, aucun déploiement, aucune écriture distante. Les commandes :
+
+```
+python -I b1_comptes.py OCS_2023.tif data/cache-nature arrondissements.json ~/Documents/futuree-oso/b1 --processus 10   # 502 s
+python -I b1_analyse.py ~/Documents/futuree-oso/b1/comptes-pixels.csv.gz data/cache-nature/communes-nature.json \
+    --out resultats-b1.json --parts ~/Documents/futuree-oso/b1/parts-terrestres.csv.gz
+```
+
+La règle d'appartenance est celle de `populate-nature.py` : centre du pixel dans le contour, contour reprojeté par
+GDAL, chaque contour masqué seul.
+
+## 33. Identité exhaustive avec le cache
+
+| Champ comparé | Communes | Écarts |
+|---|---|---|
+| `tot_px` (pixels 1-23) | 34 743 | **0** |
+| `nat_px` (naturel élargi, eau comprise) | 34 743 | **0** |
+| `brut_pct` | 34 743 | **0** |
+| `composition` (sept postes, au dixième) | 34 743 | **0** |
+| `radius_pct` et `score` recalculés depuis les comptes par la méthode A | 34 743 | **0** |
+
+Les trois contours comptés hors du cache sont Paris, Lyon et Marseille : l'index ne les connaît que par arrondissement.
+Conclusion : **le fichier téléchargé est celui qui a produit l'index**, au pixel près, partout. Les comptes de B1 peuvent
+remplacer le cache sans rien perdre.
+
+## 34. Couverture dans les contours
+
+| National (34 746 contours) | km² |
+|---|---|
+| Aire des contours | 548 857,9 |
+| Pixels classés 1-24 | 548 856,1 |
+| Valeur 0 sous un contour | 1,86 |
+| Valeur 255, autres valeurs | 0 |
+| Part des contours sans pixel (bord du raster, effet de bord) | 16,65 |
+
+Médiane de la part mesurée : 100 %. Premier centile : 99,956 %. Une seule commune sous 99,5 % : Piriac-sur-Mer, à
+99,29 % (8,6 ha de valeur 0 sur la côte). **Dans les contours, la couverture ne pose aucun problème.** Le non-mesuré
+se trouve tout entier dans les **disques** : mer au-delà des contours et étranger.
+
+Le raster classe en effet **33 051 km² hors des contours français** : 21 544 km² d'eau (mer, lacs frontaliers) et
+environ 11 500 km² de terres étrangères, dont 20,8 km² de serres. Sans la décision C, un disque frontalier compterait
+ces pixels, produits hors du périmètre de validation de la carte.
+
+## 35. Paris, Lyon, Marseille
+
+| Commune | Arrondissements | Pixels (commune) | Σ arrondissements − commune | Naturel / terres | Forêt / terres | Urbanisé / terres | Eau / mesuré |
+|---|---|---|---|---|---|---|---|
+| Paris | 20 | 1 054 295 | **0 pixel**, sur chaque valeur | 17,25 % | 14,83 % | 81,89 % | 2,68 % |
+| Lyon | 9 | 479 003 | **0 pixel** | 15,57 % | 13,94 % | 81,91 % | 6,51 % |
+| Marseille | 16 | 2 381 230 | **0 pixel** | 52,94 % | 13,18 % | 43,85 % | 0,45 % |
+
+La partition est exacte au pixel. L'aire des arrondissements et celle de la commune diffèrent de 0,2 m² au plus. Les
+parts des 45 arrondissements sont dans `resultats-b1.json`. Les deux grains existent désormais, mesurés chacun sur
+ses propres pixels : rien ne passe d'un grain à l'autre, et rien n'est compté deux fois. Les arrondissements restent
+hors de l'univers des rangs (arbitrage C).
+
+## 36. Seuils : qui franchit, exactement
+
+Règle « après » : parts calculées sur les comptes, **avant arrondi**, serres dans les terres et les cultures (S1).
+
+| Seuil | Règle actuelle | Avant | Après | Entrent | Sortent |
+|---|---|---|---|---|---|
+| Boisement Projet ≥ 70 % | forêt du contour, eau comprise, arrondie | 3 258 | **3 336 (9,60 %)** | 80 | 2 |
+| Où vivre `rural_agricole` (cultures ≥ 30 %, densité < 1 500) | agricole du contour, eau comprise, sans serres | 16 970 | 17 109 | 143 | 4 |
+| Où vivre `rural_forestier` (forêt ≥ 35 %, densité < 1 500) | forêt du contour, eau comprise | 13 380 | 13 494 | 122 | 8 |
+| Territoire `land.category` (20 / 45 / 50) | parts de l'application, arrondies | — | — | **49 changements** | — |
+
+- **Boisement 70 %.** Les deux sorties sont Trèves (69,957 %) et Les Planches-près-Arbois (69,992 %). Neuf communes
+  changent de côté selon qu'on arrondit ou non (de 69,954 à 69,992 % : Sers, Pandrignes, Saint-Barthélemy-de-Bussière,
+  Saint-André-de-Roquepertuis, Trèves, Canéjan, Les Planches-près-Arbois, Laval-du-Tarn, Mortcerf). 191 communes sont à
+  moins d'un demi-point du seuil. Le 90ᵉ centile de la forêt des terres est à 69,17 % : **« parmi les 10 % de communes les plus
+  boisées » reste vraie** (9,60 %), et doit rester produite par le calcul.
+- **Catégories Territoire.** Sur les 49 changements, 31 viennent de la seule exactitude (comptes non arrondis, serres
+  ignorées), les autres des serres (§ 37). Transitions : forte présence naturelle → mixte (15), mixte → agricole (11),
+  agricole → mixte (9), forte présence naturelle → agricole (8), mixte → faible présence naturelle (3), surtout
+  urbanisé → forte présence naturelle (2), surtout urbanisé → mixte (1).
+- **Catégories Où vivre.** Les deux catégories rurales bougent de 0,9 % à 1 % ; elles relèvent aussi de FUT-185 et de
+  FUT-190 (« la campagne n'est pas la nature »). B3 les recalcule sur les terres ; aucune n'est touchée avant.
+
+## 37. Serres : sensibilité nationale (S0 serres exclues, S1 serres dans les cultures)
+
+| | |
+|---|---|
+| Serres sous les contours communaux | 204,7 km², 11 990 communes en ont au moins un pixel |
+| Communes où elles font ≥ 1 / 2 / 5 / 10 % des terres | 330 / 169 / 35 / 3 |
+| Effet sur la part des cultures | + 5,82 points au plus ; ≥ 1 point pour 144 communes, ≥ 5 points pour 4 |
+| Effet sur la part naturelle | − 4,74 points au plus ; ≤ − 1 point pour 80 communes |
+| Catégorie Territoire changée | **20** (mixte → agricole 11, forte présence naturelle → mixte 5, forte présence naturelle → agricole 2, surtout urbanisé → mixte 1, mixte → faible présence naturelle 1) |
+| Seuils franchis | boisement 70 % : 1 ; `rural_agricole` : 13 ; `rural_forestier` : 2 |
+| À méthode A constante | 1 377 scores bougent, de 2 points au plus ; 17 verdicts de rang (15 neutres → défavorables, 2 favorables → neutres) |
+
+| Cas nommé | Serres / terres | Cultures S0 → S1 | Naturel S0 → S1 | Catégorie |
+|---|---|---|---|---|
+| Héberville (76) | **15,24 %** (le maximum national) | 78,72 → 81,97 % | 14,82 → 12,56 % | agricole, inchangée |
+| Rognonas (13) | 10,12 % | 43,38 → 49,11 % | 19,88 → 17,87 % | faible présence naturelle, inchangée |
+| Châteaurenard (13) | 7,64 % | 39,89 → 44,48 % | 31,15 → 28,77 % | mixte, inchangée |
+
+Les fortes parts se concentrent dans le pays de Caux (Seine-Maritime), en Provence (Châteaurenard, Rognonas,
+Eyragues) et dans le marais vendéen (Saint-Michel-en-l'Herm, Grues). **Grues** passe de « forte présence naturelle » à
+« agricole » par ses seules serres (7,27 % de ses terres). C'est exactement le cas que la faible précision de la classe
+rend douteux : dans un marais, des « serres » peuvent être des confusions. La décision D reste juste, puisque les
+pixels existent et que les exclure fausse le dénominateur. Mais **aucune phrase ne dira « serres » ou « maraîchage »
+d'une commune à partir de ces pixels**, et B3 doit tester Grues et Héberville en recette.
+
+## 38. Retrait de l'eau, à méthode A constante : effets exacts
+
+Référence : l'index publié (A, eau comprise). « Eau retirée » : naturel terrestre / terres (S1), même sélection de
+communes. Ce n'est pas la méthode retenue : cela isole l'effet de l'eau.
+
+| Effet | Scores changés | dont ≥ 10 points | Verdicts de rang changés | Estimation de la phase A |
+|---|---|---|---|---|
+| Eau seule (A) | **10 405** | 81 | **252** (neutre → défavorable 103, défavorable → neutre 115, favorable → neutre 19, neutre → favorable 15) | 10 141 et 248 |
+| Géographie seule (B, eau comprise) | 826 | 0 | 13 | identique (déjà exact) |
+| Combinaison (B, eau retirée) | 10 638 | 81 | 257 | — |
+| Serres seules (A, eau retirée) | 1 377 | 0 | 17 | — |
+
+Les plus fortes baisses sont sur l'estuaire de la Gironde : Floirac (Charente-Maritime) passe de 52 à 27, Barzan de
+57 à 32, Talmont-sur-Gironde de 57 à 33. Le Grau-du-Roi passe de 61 à 38. L'estimation de la phase A
+était juste à 3 % près ; ses ordres de grandeur sont confirmés.
+
+## 39. Préparation de B2 : le secteur habité contrôlé sur 87 communes
+
+Script : `b2_preparation.py`. Résultats : `resultats-b2-preparation.json`. Lecture seule, sans aucun calcul national.
+Échantillon à graine fixe : 8 communes tirées par strate (urbaines denses, de densité intermédiaire, rurales, littorales,
+de montagne, de plus de 150 km², frontalières), 10 îles et les 24 cas extrêmes de la phase A, soit 87 communes.
+
+Corrections apportées au script de la partie II, à la demande de la contre-revue :
+- **dispersion pondérée** : p10, p50 et p90 sont pondérés par la surface bâtie, comme la moyenne (convention :
+  plus petite valeur dont le poids cumulé atteint q). Les percentiles non pondérés restent rapportés pour comparaison ;
+- **cellules sans mesure** : une cellule bâtie dont le disque ne contient aucune terre mesurée sort du numérateur
+  **et** du dénominateur ; son poids est rapporté (`poids_sans_mesure_pct`) ;
+- **contours français** : seuls comptent les pixels dont le centre tombe dans un contour communal français. Le reste
+  est non mesuré ;
+- **couverture** : chaque résultat porte la part mesurée du disque, en moyenne pondérée.
+
+| Contrôle | Résultat sur 87 communes | Lecture |
+|---|---|---|
+| 1. Moyenne et dispersion pondérées | moyenne comprise entre p10 et p90 pondérés : **87 / 87**. Écart entre percentiles pondérés et non pondérés : jusqu'à **7,8 points** (Sète : p10 de 44,9 pondéré contre 37,1 non pondéré) | la correction était nécessaire : sans pondération, la dispersion décrivait d'autres lieux que la moyenne |
+| 2. Cellules sans mesure | **0 %** du poids bâti, partout, îles comprises | il reste toujours un peu de terre dans 15 km d'un bâtiment français ; la règle reste écrite pour le calcul national |
+| 3. Couverture des disques | 29 communes ont moins de 80 % du disque mesuré, 19 moins de 60 % (échantillon riche en côtes et en îles). Minimum : Ouessant (2,5 %), Île-de-Sein (2,7 %), L'Île-d'Yeu (3,4 %). Évian-les-Bains : 49,5 % (Léman et Suisse) | la valeur reste juste (elle porte sur les terres mesurées), mais **pour Ouessant elle décrit l'île seule**. Il faut une règle d'affichage et de comparaison (§ 40) |
+| 3 bis. Effet de la limitation aux contours français | médiane 0 ; 90ᵉ centile 0,28 point ; maximum **4,8 points** (Marpent, frontière belge : 53,3 limité contre 48,5 non limité) | faible en général, fort à quelques frontières : la décision C protège bien les cas où elle compte |
+| 4. Classes bâties | classes 1-4 (avec zones d'activité et routes) contre 1-2 : **0,17 point au plus**. Classe 1 seule : jusqu'à 5,5 points, et **non calculable pour 29 communes** (pas de bâti dense) | 1-2 est robuste ; la classe 1 seule est à écarter |
+| 5. Strates | aucune strate n'échoue. Communes multipolaires ou hétérogènes : dispersion large (Arles : p10-p90 pondérés de 40,8 à 61,8 ; Noyant-Villages de 60,2 à 69,1 ; Saintes-Maries-de-la-Mer de 49,5 à 66,2) | la dispersion est l'information à garder visible pour ces communes |
+| 6. Grille de 100 m contre référence à 10 m | 1 500 pixels bâtis tirés par commune, disque exact au pas de 10 m. Écart : médiane − 0,01 point ; 90ᵉ centile 0,09 ; maximum **0,28 point** (Hyères). Erreur-type du tirage : 0,22 point au plus ; 6 écarts dépassent deux erreurs-types, tous sous 0,3 point | la grille de 100 m suffit, à 0,3 point près, pour une valeur affichée au dixième. Les comparaisons à un seuil la prennent comme incertitude connue |
+
+**Le point unique reste à écarter.** Le secteur habité s'en écarte nettement là où le point tombe mal :
+
+| Commune | Secteur habité (p10-p90 pondérés) | Point de l'index | Centre bâti |
+|---|---|---|---|
+| Granville | 59,8 (59,2-60,8) | 41,5 | 59,4 |
+| Hyères | 61,2 (54,8-65,5) | 72,9 | 61,6 |
+| Sète | 50,4 (44,9-55,3) | 43,7 | 50,3 |
+| Arles | 49,6 (40,8-61,8) | 54,4 | 49,6 |
+| Barr (Bas-Rhin) | 59,0 (56,6-62,8) | 67,2 | 58,8 |
+| Marseille | 62,5 (58,1-65,4) | 62,7 | 64,6 |
+| Paris | 19,2 (16,0-23,2) | 17,6 | 18,0 |
+
+Le centre bâti suit le secteur habité dans la plupart des cas (Marseille : 2 points d'écart). Il reste un repli crédible.
+
+**Architecture du calcul national (préparée, non lancée).** Elle sépare ce qui se calcule une fois de ce qui se calcule
+par commune :
+1. **Passe raster par blocs**, comme B1, en 10 à 20 min estimées. On rasterise les contours au pas de 10 m dans chaque
+   bloc (étiquette de commune, donc la limitation aux contours français), puis on agrège sur la grille nationale de 100 m
+   (12 681 × 11 916 cellules) les comptes naturel, terres, eau et mesurés. Pour chaque commune, on garde ses cellules
+   bâties et le nombre de pixels bâtis qu'elle y possède. Une cellule à cheval sur deux communes donne à chacune ses
+   propres pixels : pas de double compte.
+2. **Deux convolutions nationales** par FFT, avec le disque de 15 km (naturel, terres, puis mesurés).
+3. **Agrégation par commune** : moyenne et quantiles pondérés, part sans mesure, couverture. Même code que
+   `b2_preparation.py`, ce que l'échantillon permettra de vérifier à l'identique.
+4. **Contrôles** : identité sur les 87 communes de l'échantillon ; référence à 10 m sur 50 communes tirées hors
+   échantillon ; tableau avant/après national (scores, rangs, verdicts, catégories, forêt).
+
+## 40. Bilan avant le calcul national de B2, et ce qui reste à décider
+
+**Ce qui est acquis.** La méthode tient sur 87 communes de toutes les strates : dispersion cohérente, aucune cellule sans
+mesure, sensibilité négligeable au choix 1-2 ou 1-4, grille de 100 m fidèle à 0,3 point de la référence à 10 m. La
+limitation aux contours français est en place.
+
+**Ce qui reste avant de lancer le calcul national :**
+
+1. **Règle de couverture des disques (à valider par le porteur).** Proposition, pour « éviter toute comparaison
+   trompeuse » (décision C) :
+   - au moins 75 % du disque mesuré : valeur et rang normaux ;
+   - de 50 à 75 % : valeur et rang, avec la part non mesurée affichée (Granville, Hyères, Sète) ;
+   - moins de 50 % : valeur affichée comme « mesure partielle » (« sur les terres de l'île », Ouessant), **sans verdict
+     de rang** (le Projet rend « incertain ») et sans trait distinctif. Ces communes restent hors du calcul des
+     percentiles, pour ne pas déplacer les autres.
+
+   Le compte national de chaque palier sortira de la passe 1. Dans l'échantillon, 19 communes sur 87 sont sous 60 %,
+   mais l'échantillon surreprésente les côtes.
+2. **Comparaison à une répartition de population (décision B).** Elle n'est pas faite. La source pertinente est la
+   base carroyée Filosofi 2019 de l'Insee (carreaux de 200 m, population par carreau). Elle demande un téléchargement
+   (quelques centaines de Mo) stocké dans `~/Documents/futuree-oso/`, puis un calcul sur une vingtaine de communes
+   ciblées : multipolaires (Arles, Chemillé-en-Anjou, Noyant-Villages, Le Mené), centres denses (Paris, Lyon,
+   Marseille, Lille), touristiques (Hyères, Lège-Cap-Ferret, Chamonix, Les Belleville). C'est une demi-journée, sans
+   nouvelle dépendance applicative. **À faire avant la généralisation**, sauf contre-ordre.
+3. **Rang et univers.** Le score reste un percentile national calculé sur les communes, arrondissements exclus ; les
+   communes en « mesure partielle » en sont retirées (point 1).
+
+**Recommandation : GO pour le calcul national de B2 dès que la règle du point 1 est validée et la comparaison du
+point 2 faite.** Il ne produit que des fichiers hors application, comme B1. Le tableau avant/après national viendra
+ensuite en contre-revue, avant toute PR B3.
