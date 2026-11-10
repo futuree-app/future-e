@@ -14,6 +14,7 @@
 import { derivedOf, synthesisFacts, valueOf, type FactsSnapshot } from "../facts/contract.ts";
 import { DEMOGRAPHY_PHRASE, isDemographyCode, type GwlScenarios, type UrbanRole } from "./facts.ts";
 import { normaliserRoleUrbain, type RoleUrbain } from "./statut-urbain.ts";
+import { estGrilleDensite, LIBELLE_GRILLE, limiteGrille, type ClasseGrille, type GrilleDensite } from "./grille-densite.ts";
 import type { GasparCatnatSummary } from "../georisques.ts";
 import type { VigieauSummary } from "../vigieau.ts";
 import type { EaufranceSummary } from "../eaufrance.ts";
@@ -31,7 +32,10 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
 // arrondissements, consigne et contrôle contre sa surinterprétation (FUT-176). Les deux @5 de branche ne sont jamais sortis.
 // @7 (FUT-177) : catégorie d'occupation des sols dite en mots et limites OSO transmises ; contrôles « faible nature
 // lue comme bâti », « urbanisé lu comme bâtiments », cadre de vie et écologie ; texte déterministe qui nomme les cultures.
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@7:${SYNTHESIS_MODEL}`;
+// @8 (FUT-184) : la catégorie de densité est la classe de la grille communale Insee (DENS7), transmise à part de la
+// densité moyenne, avec ce qu'elle dit, sa portée (commune entière, ville entière pour un arrondissement) et sa limite ;
+// consigne et contrôles réécrits (« ville » et « rural » suivent la grille), patron déterministe en conséquence.
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@8:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -159,6 +163,33 @@ function metric(v: Record<string, number> | null, abs: string, anom?: string, sc
 }
 
 /**
+ * FUT-184 · CE QUE DIT CHAQUE CLASSE DE LA GRILLE, pour le modèle. Sans aucun seuil chiffré : ceux de l'Insee portent
+ * sur des ensembles de carreaux de 1 km², jamais sur la commune, et un chiffre transmis se lirait comme une population
+ * ou une densité communale. Chaque phrase dit la répartition des habitants, puis ce que la classe ne dit pas.
+ */
+export const GRILLE_MEANING: Record<ClasseGrille, string> = {
+  1: "Les habitants de la commune vivent surtout dans un grand ensemble urbain dense, qui peut s'étendre sur plusieurs communes.",
+  2: "Les habitants de la commune vivent surtout dans un ensemble urbain dense de taille moyenne, qui peut s'étendre sur plusieurs communes.",
+  3: "Les habitants de la commune vivent surtout dans un ensemble urbain de densité intermédiaire, à l'écart des ensembles denses. La taille en cause est celle de cet ensemble, qui peut déborder la commune : ce n'est pas la population de la commune.",
+  4: "Les habitants de la commune vivent surtout dans des secteurs de densité intermédiaire voisins d'un ensemble urbain dense, en ceinture d'agglomération. Ce classement ne mesure ni une distance à une ville, ni des trajets.",
+  5: "Les habitants de la commune vivent surtout dans un bourg au sens de l'Insee : un petit ensemble habité assez dense, en milieu rural. Ce classement porte sur cet ensemble, pas sur la population totale de la commune.",
+  6: "Les habitants de la commune vivent surtout dans des secteurs modérément peuplés, sans former un bourg ni un ensemble urbain au sens de l'Insee. Ce classement ne décrit ni la forme du village, ni l'habitat d'une adresse.",
+  7: "Les habitants de la commune vivent surtout dans des secteurs très peu peuplés. Ce classement ne décrit ni la forme du village, ni l'habitat d'une adresse.",
+};
+
+/** La grille transmise au modèle : la classe, sa portée, ce qu'elle dit, sa limite. `null` : grille inconnue. */
+export function grillePourSynthese(g: GrilleDensite | null): Record<string, unknown> | null {
+  if (!g) return null;
+  const ville = g.perimetre === "commune_parente" ? g.ville ?? null : null;
+  return {
+    categorie: LIBELLE_GRILLE[g.classe],
+    echelle: ville ? `commune entière de ${ville} : la grille ne classe pas les arrondissements` : "commune entière",
+    ce_que_dit_la_categorie: GRILLE_MEANING[g.classe],
+    limite: limiteGrille(g),
+  };
+}
+
+/**
  * LA PROJECTION : ce que le modèle reçoit, et rien d'autre. Construite UNIQUEMENT à partir des faits
  * `include: true` du snapshot (synthesisFacts), jamais d'une source relue. Les catégories
  * déterministes (`categorie`) y figurent à côté de leurs chiffres : le modèle les réutilise, il ne
@@ -187,14 +218,15 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
   const secondary = get<number>("housing.secondary_share");
   const vacancy = get<number>("housing.vacancy_share");
   const forestAdeme = get<number>("land.forest_ademe");
+  const grille = get<unknown>("place.density_grid");
 
   return {
     commune: {
       nom: get<string>("place.name"),
       population_habitants: get<number>("place.population"),
-      densite: get<number>("place.density") != null
-        ? { habitants_par_km2: round1(get<number>("place.density")!), categorie: cat("density.category")?.label ?? null }
-        : null,
+      // FUT-184 : la densité moyenne, en chiffre seulement ; sa catégorie est désormais la grille, transmise à part.
+      densite: get<number>("place.density") != null ? { habitants_par_km2: round1(get<number>("place.density")!) } : null,
+      grille_densite_insee: grillePourSynthese(estGrilleDensite(grille) ? grille : null),
       typologie: get<string>("place.typology"),
       role_territorial: roleTerritorialPourSynthese(role),
     },
@@ -314,7 +346,7 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 
 LES FAITS FOURNIS SONT LES SEULS FAITS
 - Chaque affirmation doit se rattacher à un champ du payload. Ne comblez jamais un manque par une connaissance générale de la commune.
-- Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la densité est "Densité intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
+- Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la grille de densité classe la commune "Centre urbain intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
 - Occupation des sols : appuyez-vous sur la catégorie, sur ce qu'elle dit ("ce_que_dit_la_categorie") et sur la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues. Les parts portent sur les terres ; l'eau est une part de la commune, à part : ne la présentez jamais comme un espace naturel ou vert, et n'additionnez pas une part d'eau à une part des terres.
 - Les terres se partagent entre trois familles : espaces urbanisés, cultures, espaces naturels. Le peu de l'une ne prouve pas la dominance d'une autre : "Faible présence d'espaces naturels" ne veut pas dire que la commune est bâtie ou très urbanisée (les cultures peuvent y tenir plus de place que les espaces urbanisés) ; "À dominante agricole" ne veut pas dire naturel. N'écrivez jamais "peu de nature, donc urbanisé".
 - Espaces urbanisés : ce que le satellite voit comme construit ou revêtu, routes, parkings et zones d'activité compris (voir "limites"). N'en tirez ni une part de bâtiments ("50 % de bâtiments", "couvert de constructions"), ni une densité de constructions, ni un territoire "bâti" ou "construit".
@@ -323,6 +355,7 @@ LES FAITS FOURNIS SONT LES SEULS FAITS
 - Catastrophes naturelles : la "sécheresse des sols" reconnue en catastrophe naturelle (dommages aux bâtiments, argiles) n'est pas le même objet que les "jours de sols secs" projetés (un indicateur climatique). Citez-les séparément si besoin, sans jamais présenter l'un comme le prolongement ou l'annonce de l'autre.
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
+- Grille de densité ("grille_densite_insee") : un classement statistique de l'Insee qui porte sur la commune ENTIÈRE, d'après la façon dont ses habitants se répartissent sur son territoire. Citez sa catégorie telle quelle et appuyez-vous sur "ce_que_dit_la_categorie". Elle ne décrit ni un quartier, ni une adresse, ni la forme du bourg ou de l'habitat, ni les services ou les transports, et elle ne dit pas combien d'habitants compte la commune. Elle est distincte de la densité moyenne ("habitants_par_km2") et du rôle territorial : citez-les séparément, sans présenter l'un comme corrigeant ou contredisant l'autre. N'appelez pas "ville" une commune que la grille classe rurale. Quand son échelle est la commune entière de Paris, Lyon ou Marseille, ne l'attribuez jamais à l'arrondissement, et ne qualifiez pas vous-même la densité de l'arrondissement ("dense", "peu dense") : donnez son chiffre.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.
 - Rôle territorial ("role_territorial") : c'est un classement statistique de l'Insee, qui dit seulement si la commune fait partie d'un ensemble bâti continu d'au moins 2 000 habitants, et à quelle place. Reprenez-le tel quel. N'en déduisez jamais la présence de services ou de commerces, l'animation, l'isolement, ni un rôle de "pôle" ou de "centre de vie" pour les environs. N'écrivez jamais que la commune est "isolée", et n'appelez pas "ville" une commune que le payload ne présente pas comme telle. Quand le rôle présente un arrondissement, c'est la commune nommée ("commune"), pas l'arrondissement, qui est au centre de l'agglomération : n'écrivez jamais que l'arrondissement est une ville-centre ou au centre de l'agglomération. S'il est absent, n'en parlez pas.
 - Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent, ressentent, attendent ou recherchent ("les résidents comptent sur…", "on attend…"), ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
@@ -341,7 +374,7 @@ TROIS NIVEAUX : CE QUI EST LIBRE, CE QUI SE COMPOSE, CE QUI EST INTERDIT
    - pas de qualité que la donnée ne mesure pas : une photo d'une date n'établit ni la stabilité ("un cadre stable"), ni la constance ("une place constante"), ni des usages ("une diversité d'usages"). Une catégorie fournie ("globalement stable" pour la démographie) reste, elle, citable.
 - Pas de changement d'échelle : une donnée communale ne décrit ni une rue ni un quartier.
 - Risques : "non recensé" autorise à dire qu'aucun périmètre n'est recensé ; jamais d'affirmer une exposition. "recensé" autorise à dire qu'une partie du territoire est concernée ; jamais de le nier.
-- Ne dites pas "rural" ni "station balnéaire" : aucune donnée ne l'établit.
+- Ne dites "rural" que pour citer la grille de densité quand elle classe la commune rurale ("Bourg rural", "Commune rurale de faible densité", "Commune rurale de très faible densité"). Ne dites jamais "station balnéaire" : aucune donnée ne l'établit.
 
 PÉRIMÈTRE : LA COMMUNE, RIEN EN DESSOUS
 - Vous traitez le territoire à l'échelle communale : ce qu'il est, ce qui le transforme, ce à quoi il est exposé.

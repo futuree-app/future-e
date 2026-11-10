@@ -15,6 +15,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { buildTerritoireSnapshot, type UrbanRole } from "./territoire/facts.ts";
+import { grilleDensiteDe } from "./territoire/grille-densite.ts";
 import { chatelaillonInputs } from "./territoire/__fixtures__/chatelaillon.ts";
 import { buildTerritoryIdentity } from "./territory-identity.ts";
 import {
@@ -64,12 +65,15 @@ const T0 = "2026-11-09T00:00:00.000Z";
 const SURINTERPRETATION = /isolée?s?\b|\bpôle|structure la vie|concentre|fonctions urbaines|services|commerces|anim|vivante|rural|bassin de vie/i;
 
 /** La carte d'identité telle que la page Territoire la construit, pour un rôle et une population donnés. */
-function identite(nom: string, population: number | null, urbanRole: UrbanRole | null, typo = { type: "interieur", label: "Intérieur" }) {
+// FUT-184 : la grille de densité de la commune lue (`insee`), comme le chargeur ; sans code, aucune grille (la règle
+// « ville » de FUT-176 seule), jamais celle de Châtelaillon dont les entrées sont reprises.
+function identite(nom: string, population: number | null, urbanRole: UrbanRole | null, typo = { type: "interieur", label: "Intérieur" }, insee: string | null = null) {
   const i = chatelaillonInputs();
   i.communeName = nom;
   i.typology = typo as M;
   i.entry = { ...i.entry!, population, densite: 100 };
   i.urbanRole = urbanRole;
+  i.grilleDensite = insee ? grilleDensiteDe(insee) : null;
   const s = buildTerritoireSnapshot(i, T0);
   return { id: buildTerritoryIdentity(s), projection: projectForSynthesis(s, "gwl20") as M, s };
 }
@@ -79,7 +83,7 @@ async function identiteReelle(insee: string) {
   const ctx = await V.getTerritoryContext(insee);
   assert.ok(ctx, insee);
   const role: UrbanRole = { role: ctx.role, uuLabel: ctx.uuLabel, uuPop: ctx.uuPop, ...(ctx.arrondissementDe ? { arrondissementDe: ctx.arrondissementDe } : {}) };
-  return { ctx, ...identite(ctx.entry.nom, ctx.entry.population ?? null, role) };
+  return { ctx, ...identite(ctx.entry.nom, ctx.entry.population ?? null, role, undefined, insee) };
 }
 
 // ── 1. Les données officielles : l'index porte le statut Insee de CHAQUE commune ─────────────────────────────
@@ -204,7 +208,9 @@ test("identité : Corte, Bony, Mont-Dauphin, Orée d'Anjou, Chartres, Levallois-
     // Avant : « Ville de l'intérieur, Mont-Dauphin s'inscrit dans l'agglomération de Guillestre » (171 habitants).
     "05082": { role: "banlieue", ligne: "Commune de banlieue de l'agglomération de Guillestre (3 258 habitants)", resume: "Commune de l'intérieur, Mont-Dauphin s'inscrit dans l'agglomération de Guillestre." },
     // Avant : « Commune isolée, hors agglomération » — la donnée manquait, l'Insee la classe ville isolée.
-    "49126": { role: "ville_isolee", ligne: "Forme à elle seule une agglomération", resume: "Ville de l'intérieur, Orée d'Anjou forme à elle seule une agglomération." },
+    // FUT-184 : la grille Insee la classe « Bourg rural » (5) ; « Ville » n'est plus écrit au-dessus de cette classe,
+    // le statut d'agglomération reste dit tel quel.
+    "49126": { role: "ville_isolee", ligne: "Forme à elle seule une agglomération", resume: "Commune de l'intérieur, Orée d'Anjou forme à elle seule une agglomération." },
     // Avant : « Principal pôle d'une agglomération de 88 891 habitants » ; « concentre les fonctions urbaines… ».
     "28085": { role: "ville_centre", ligne: "Ville-centre de l'agglomération de Chartres (88 891 habitants)", resume: "Ville de l'intérieur, Chartres est au centre de son agglomération." },
     // Avant : « Ville de l'intérieur, Levallois-Perret s'inscrit dans l'agglomération de Paris ».
@@ -305,7 +311,8 @@ test("compatibilité : une projection en cache aux anciens libellés ne fait rie
   for (const ancien of ["commune isolée, hors agglomération", "principal pôle de son agglomération"]) {
     const vieille = { ...p, commune: { ...p.commune, role_territorial: { role: ancien, agglomeration: "Bony", population_agglomeration: 139 } } };
     const phrase = deterministicSynthesis(vieille, "gwl20").split("\n")[4]!;
-    assert.match(phrase, /^Bony, 139 habitants, est une commune peu dense/, phrase);
+    // FUT-184 : sans grille connue, la densité moyenne seule, en chiffre (plus de palier « commune peu dense »).
+    assert.match(phrase, /^Bony, 139 habitants, compte 100 habitants au km² en moyenne\./, phrase);
   }
 });
 

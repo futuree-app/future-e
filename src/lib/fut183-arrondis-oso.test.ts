@@ -195,8 +195,9 @@ test("la carte formate chaque part OSO avec pctOso, aucune n'est interpolée bru
   assert.doesNotMatch(src, /Math\.round\(couvertNaturel/);
 });
 
-test("aucune invalidation : le contrat de synthèse reste @7, les valeurs du registre sont inchangées", () => {
-  assert.match(SYNTHESIS_CONTRACT_VERSION, /^territoire-synthese@7:/);
+test("aucune invalidation par FUT-183 : le contrat n'a pas bougé pour lui, les valeurs OSO du registre sont inchangées", () => {
+  // FUT-183 laissait le contrat à @7 ; FUT-184 (grille de densité Insee) l'a porté à @8, sans toucher aux parts OSO.
+  assert.match(SYNTHESIS_CONTRACT_VERSION, /^territoire-synthese@8:/);
   // Les faits gardent leur dixième d'avant FUT-183 : l'empreinte des snapshots ne bouge pas.
   const snap = snapDe("17299");
   assert.deepEqual(factOf(snap, "land.composition")!.value, {

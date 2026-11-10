@@ -28,6 +28,7 @@ import {
   REGLE_TENSION_EAU,
   type Violation,
 } from "../garde-fous/assertions.ts";
+import { CLASSES_GRILLE, LIBELLE_GRILLE, type ClasseGrille } from "./grille-densite.ts";
 
 // Les quatre règles sans condition de fait (eau, raccord, marché, classement) et le moteur d'assertion
 // vivent désormais dans src/lib/garde-fous/assertions.ts, partagés avec l'accueil et /qna (FUT-37).
@@ -78,7 +79,19 @@ const always = () => true;
 
 // Libellés des catégories, tels que le registre les produit (src/lib/territoire/facts.ts).
 const LAND = "occupation_des_sols.categorie";
-const DENSITY = "commune.densite.categorie";
+// FUT-184 : la catégorie de densité est la classe de la grille Insee, avec son échelle (commune, ou ville entière pour
+// un arrondissement de Paris, Lyon, Marseille). Les libellés sont ceux de `LIBELLE_GRILLE` (grille-densite.ts).
+const GRILLE = "commune.grille_densite_insee.categorie";
+const GRILLE_ECHELLE = "commune.grille_densite_insee.echelle";
+const grilleCommune = (p: Projection) => at(p, GRILLE_ECHELLE) === "commune entière";
+const grilleDeLaVille = (p: Projection) => /^commune entière de /.test(String(at(p, GRILLE_ECHELLE) ?? ""));
+const classeGrille = (p: Projection): ClasseGrille | null =>
+  CLASSES_GRILLE.find((c) => LIBELLE_GRILLE[c] === at(p, GRILLE)) ?? null;
+/** La grille, lue à la commune elle-même, la classe dans l'une de ces classes. */
+const grilleEst = (...classes: ClasseGrille[]) => (p: Projection) => {
+  const c = classeGrille(p);
+  return grilleCommune(p) && c != null && classes.includes(c);
+};
 const DEMO = "demographie.categorie";
 const SEASON = "residences_secondaires.categorie";
 
@@ -87,6 +100,14 @@ const A = "e?s?";
 // FUT-177 : la FIN d'un mot. En JavaScript, `\b` ne voit pas une lettre accentuée comme une lettre : « très urbanisé »
 // (masculin singulier, suivi d'une espace) échappait à `très urbanisé${A}\b`. Le texte est en minuscules.
 const FIN = "(?![a-zà-ÿœæ0-9])";
+
+// ── Densité : les qualificatifs que la grille peut contredire (FUT-184) ──
+const DENSE_REQUALIFIE: RegExp[] = [
+  /\btrès denses?\b/,
+  new RegExp(`\\bdensément (bâti${A}|peuplé${A}|construit${A})`),
+  /\b(commune|ville|territoire|agglomération|arrondissement)s? (très )?denses?\b/,
+];
+const PEU_DENSE: RegExp[] = [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})${FIN}`)];
 
 // ── Couvert : les deux familles de requalification (D4, FUT-177) ──
 // TERRITOIRE BÂTI OU URBANISÉ : vrai seulement pour « Majoritairement urbanisé ». Ces tournures étaient déjà
@@ -266,22 +287,55 @@ const RULES: Rule[] = [
       /\babrit(e|ent) (la |une )?(vie|faune|flore)\b/,
     ],
   },
-  // ── Densité (D3) ──
+  // ── Densité (D3, FUT-184 : la grille Insee remplace les paliers de densité moyenne) ──
+  // « Dense » n'est admis que pour un grand centre urbain (le « dense » de la grille Insee à trois niveaux).
   {
     id: "densite:requalifiee-dense",
-    when: catIs(DENSITY, "Densité intermédiaire", "Commune peu dense", "Arrondissement peu dense"),
+    when: grilleEst(2, 3, 4, 5, 6, 7),
     polarity: "affirmative",
-    patterns: [
-      /\btrès denses?\b/,
-      new RegExp(`\\bdensément (bâti${A}|peuplé${A}|construit${A})`),
-      /\b(commune|ville|territoire|agglomération|arrondissement)s? (très )?denses?\b/,
-    ],
+    patterns: DENSE_REQUALIFIE,
   },
+  // « Peu dense » contredit une classe urbaine (1 à 4).
   {
     id: "densite:requalifiee-peu-dense",
-    when: catIs(DENSITY, "Densité intermédiaire", "Commune dense", "Arrondissement dense"),
+    when: grilleEst(1, 2, 3, 4),
     polarity: "affirmative",
-    patterns: [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})${FIN}`)],
+    patterns: PEU_DENSE,
+  },
+  // Un arrondissement n'a pas de classe : celle de sa ville ne le qualifie pas, et aucun palier ne qualifie son chiffre.
+  {
+    id: "densite:arrondissement-qualifie",
+    when: grilleDeLaVille,
+    polarity: "affirmative",
+    patterns: [
+      ...DENSE_REQUALIFIE,
+      ...PEU_DENSE,
+      // « Le 11e est un grand centre urbain » ; le sujet « Paris », « Lyon », « Marseille » seul juste avant reste permis.
+      /(?<!\b(paris|lyon|marseille)(, [^,]*,)? )\b(est|constitue|forme|reste|demeure) (un |une )?(grand centre urbain|centre urbain intermédiaire|petite ville|ceinture urbaine|bourg rural|commune rurale)/,
+    ],
+  },
+  // Classée rurale par la grille : ni « ville », ni une classe urbaine (Sèvremoine, bourg rural au centre de son agglomération).
+  {
+    id: "densite:ville-pour-commune-rurale",
+    when: grilleEst(5, 6, 7),
+    polarity: "affirmative",
+    patterns: [
+      /\b(une|cette|la|petite|grande|moyenne|vraie) ville\b(?!-)/,
+      /\b(grand )?centre urbain\b/,
+      /\bceinture urbaine\b/,
+      new RegExp(`\\b(commune|territoire)s? urbaine${A}${FIN}`),
+    ],
+  },
+  // La grille ne décrit pas la forme de l'habitat : « habitat dispersé » n'est jamais écrit (Mont-Dauphin, Vallet).
+  {
+    id: "densite:habitat-disperse",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      new RegExp(`\\b(habitat|habitations?|maisons?|logements?|constructions?|bâti)s? (très |plutôt |assez |largement )?dispersé${A}${FIN}`),
+      // « L'habitat y est dispersé », « les maisons restent dispersées ».
+      new RegExp(`\\b(habitat|habitations|maisons|logements|constructions|bâti)\\b[^.]{0,30}\\b(est|sont|reste|restent|demeure|demeurent|semble|semblent) (très |plutôt |assez |largement )?dispersé${A}${FIN}`),
+    ],
   },
   // ── Démographie (D7) ──
   {
@@ -480,8 +534,9 @@ const RULES: Rule[] = [
   },
   { ...REGLE_CLASSEMENT_NATIONAL, when: always },
   {
+    // FUT-184 : « rural » reste refusé, sauf quand la grille Insee classe la commune elle-même rurale (classes 5 à 7).
     id: "interdit:rural",
-    when: always,
+    when: (p) => !grilleEst(5, 6, 7)(p),
     polarity: "affirmative",
     patterns: [/\brur(al|ale|aux|ales)\b/],
   },
@@ -826,6 +881,11 @@ const CONSIGNES: [RegExp, string][] = [
   [/^couvert:(cadre-de-vie-non-mesure|ecologie-non-mesuree)$/, "la composition des sols ne mesure ni l'accès à la nature, ni les espaces verts, ni le calme, ni le cadre de vie, ni la biodiversité : citez les parts sans les interpréter"],
   [/^interdit:densite-arrondissement-pretee-a-la-commune$/, "la densité transmise est celle de l'arrondissement, pas de la commune entière : dites « arrondissement », ni « commune » ni « ville »"],
   [/^interdit:densite-ville-pretee-a-un-arrondissement$/, "la densité transmise est celle de la commune entière : ne l'attribuez à aucun arrondissement, et n'en citez aucune autre"],
+  [/^densite:(requalifiee-dense|requalifiee-peu-dense)$/, "reprenez la catégorie de la grille de densité telle quelle, sans qualifier vous-même la densité : citez au besoin le chiffre en habitants au km²"],
+  [/^densite:arrondissement-qualifie$/, "la grille de densité classe la ville entière, pas l'arrondissement : ne lui prêtez ni cette classe ni « dense » ou « peu dense », donnez le chiffre de l'arrondissement"],
+  [/^densite:ville-pour-commune-rurale$/, "la grille de densité classe la commune rurale : ne l'appelez pas « ville » et ne lui prêtez aucune classe urbaine ; son rôle dans l'agglomération se dit tel quel, à part"],
+  [/^densite:habitat-disperse$/, "la grille de densité ne décrit ni la forme du bourg ni l'habitat : citez la catégorie telle quelle"],
+  [/^interdit:rural$/, "la grille de densité ne classe pas cette commune rurale : n'écrivez pas « rural »"],
   [/^interdit:statut-urbain-surinterprete$/, "reprenez le rôle territorial tel quel : ni « isolée », ni « pôle », ni services ou animation déduits d'un statut statistique"],
 ];
 

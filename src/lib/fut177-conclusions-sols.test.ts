@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { buildTerritoireSnapshot, landCategory, landShares, LAND_LABEL, type LandCategory, type TerritoireInputs } from "./territoire/facts.ts";
+import { grilleDensiteDe } from "./territoire/grille-densite.ts";
 import { derivedOf } from "./facts/contract.ts";
 import { buildTerritoryCards, buildTerritoryIdentity } from "./territory-identity.ts";
 import { LAND_CATEGORY_MEANING, OSO_LIMITES_SYNTHESE, projectForSynthesis } from "./territoire/synthesis-contract.ts";
@@ -39,6 +40,7 @@ function snapDe(insee: string) {
     nature: { brut_pct: c!.nature!.brut_pct, radius_pct: c!.nature!.radius_pct, composition: c!.nature!.composition },
   };
   i.ademe = i.ademe ? { ...i.ademe, densite: null, population: null } : null;
+  i.grilleDensite = grilleDensiteDe(insee); // FUT-184 : la grille de la commune lue, comme le chargeur
   return buildTerritoireSnapshot(i, T0);
 }
 const projDe = (insee: string) => projectForSynthesis(snapDe(insee), "gwl20") as Record<string, any>;
@@ -48,16 +50,17 @@ const reglesCouvert = (text: string, p: Record<string, unknown>) => regles(text,
 
 // ── Les faits réellement présents (index du 09/11/2026), avant toute conclusion ─────────────────
 
+// FUT-184 : `densite` est la classe de la grille Insee (plus le palier 150 / 1 500 hab/km²).
 type Panel = { insee: string; nom: string; cat: LandCategory; urb: number; agri: number; nat: number; eau: number; densite: string };
 const PANEL: Panel[] = [
-  { insee: "14137", nom: "Carpiquet", cat: "low_natural", urb: 41.2, agri: 44.8, nat: 13.9, eau: 0.1, densite: "Densité intermédiaire" },
-  { insee: "02100", nom: "Bony", cat: "agricultural", urb: 4.1, agri: 89, nat: 6.8, eau: 0, densite: "Commune peu dense" },
-  { insee: "28199", nom: "Janville-en-Beauce", cat: "agricultural", urb: 7.2, agri: 90, nat: 2.8, eau: 0, densite: "Commune peu dense" },
-  { insee: "17094", nom: "Châtelaillon-Plage", cat: "mixed", urb: 49.3, agri: 14.3, nat: 36.4, eau: 0.2, densite: "Densité intermédiaire" },
-  { insee: "34301", nom: "Sète", cat: "mostly_built", urb: 50.4, agri: 15.8, nat: 33.8, eau: 50.6, densite: "Commune dense" },
+  { insee: "14137", nom: "Carpiquet", cat: "low_natural", urb: 41.2, agri: 44.8, nat: 13.9, eau: 0.1, densite: "Ceinture urbaine" },
+  { insee: "02100", nom: "Bony", cat: "agricultural", urb: 4.1, agri: 89, nat: 6.8, eau: 0, densite: "Commune rurale de faible densité" },
+  { insee: "28199", nom: "Janville-en-Beauce", cat: "agricultural", urb: 7.2, agri: 90, nat: 2.8, eau: 0, densite: "Bourg rural" },
+  { insee: "17094", nom: "Châtelaillon-Plage", cat: "mixed", urb: 49.3, agri: 14.3, nat: 36.4, eau: 0.2, densite: "Ceinture urbaine" },
+  { insee: "34301", nom: "Sète", cat: "mostly_built", urb: 50.4, agri: 15.8, nat: 33.8, eau: 50.6, densite: "Centre urbain intermédiaire" },
   // « Roissy » du ticket : Roissy-en-France (l'aéroport), le cas A7. Roissy-en-Brie sert de contre-exemple dense et boisé.
-  { insee: "95527", nom: "Roissy-en-France", cat: "mostly_built", urb: 55.2, agri: 14.3, nat: 30.5, eau: 0.4, densite: "Densité intermédiaire" },
-  { insee: "77390", nom: "Roissy-en-Brie", cat: "high_natural", urb: 30.7, agri: 11.5, nat: 57.7, eau: 0.4, densite: "Commune dense" },
+  { insee: "95527", nom: "Roissy-en-France", cat: "mostly_built", urb: 55.2, agri: 14.3, nat: 30.5, eau: 0.4, densite: "Bourg rural" },
+  { insee: "77390", nom: "Roissy-en-Brie", cat: "high_natural", urb: 30.7, agri: 11.5, nat: 57.7, eau: 0.4, densite: "Grand centre urbain" },
 ];
 
 test("panel : les faits OSO et la catégorie de chaque commune, lus dans l'index réel", () => {
@@ -72,7 +75,7 @@ test("panel : les faits OSO et la catégorie de chaque commune, lus dans l'index
     assert.equal(landCategory(s.naturalLandPct, s.composition), c.cat, c.nom);
     const p = projDe(c.insee);
     assert.equal(p.occupation_des_sols.categorie, LAND_LABEL[c.cat], c.nom);
-    assert.equal(p.commune.densite.categorie, c.densite, `${c.nom} densité`);
+    assert.equal(p.commune.grille_densite_insee.categorie, c.densite, `${c.nom} grille de densité`);
   }
 });
 
@@ -83,10 +86,12 @@ test("Carpiquet (A5) : peu d'espaces naturels, mais des cultures devant l'urbani
   assert.ok(s.composition.artificialise < 50 && s.composition.agricole < 50);
 });
 
-test("Roissy-en-France (A7) : majoritairement urbanisée, d'une densité intermédiaire (190 hab/km²)", () => {
+test("Roissy-en-France (A7) : majoritairement urbanisée (l'aéroport), mais « Bourg rural » pour la grille Insee (190 hab/km²)", () => {
   const p = projDe("95527");
   assert.equal(p.occupation_des_sols.categorie, "Majoritairement urbanisé");
-  assert.equal(p.commune.densite.categorie, "Densité intermédiaire");
+  // FUT-184 : deux mesures, deux objets. Les sols comptent l'aéroport ; la grille, l'endroit où vivent les habitants.
+  assert.equal(p.commune.grille_densite_insee.categorie, "Bourg rural");
+  assert.equal(Math.round(p.commune.densite.habitants_par_km2), 190);
 });
 
 // ── La projection : la catégorie dite en mots, et les limites de la mesure ────────────────────

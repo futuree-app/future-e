@@ -39,6 +39,14 @@ export const PROVENANCES_TERRITOIRE: Record<string, (i: TerritoireInputs) => Pro
         })
       : provenance({ producer: "Insee", dataset: "Recensement de la population, densité", distributor: "ADEME", nature: "derive", period: "2022" });
   },
+  // FUT-184 : la classe est calculée sur le recensement 2021 carroyé ; l'édition est la grille 2025 (géographie 2025).
+  "place.density_grid": (i) => provenance({
+    producer: "Insee", dataset: "Grille communale de densité, 7 niveaux", version: "Grille 2025", nature: "derive", period: "2021",
+    sourceUrl: "https://www.insee.fr/fr/information/8571524",
+    limits: i.grilleDensite?.perimetre === "commune_parente" && i.grilleDensite.ville
+      ? `Classe de ${i.grilleDensite.ville} entière : la grille ne classe pas les arrondissements.`
+      : "Classe de la commune entière : elle ne décrit ni un quartier, ni une adresse.",
+  }),
   "place.urban_role": () => provenance({ producer: "Insee", dataset: "Zonage en unités urbaines", version: "Zonage 2020" }),
   "land.composition": () => OSO,
   "land.natural_share": () => OSO,

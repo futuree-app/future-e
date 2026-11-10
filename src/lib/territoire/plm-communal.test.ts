@@ -9,6 +9,7 @@ import { buildTerritoireSnapshot, type TerritoireInputs } from "./facts.ts";
 import { projectForSynthesis } from "./synthesis-contract.ts";
 import { deterministicSynthesis } from "./synthesis-deterministe.ts";
 import { chatelaillonInputs } from "./__fixtures__/chatelaillon.ts";
+import { grilleDensiteDe } from "./grille-densite.ts";
 import { withHash } from "../facts/hash.ts";
 import { arrondissementsDe, codePourSourceParArrondissement } from "../plm.ts";
 import { codeGaspar } from "../georisques-flags.ts";
@@ -29,6 +30,8 @@ function inputsPLM(insee: string, nom: string): TerritoireInputs {
     entry: { population: l.population, densite: null, mer_centre_km: null, relief_proximite: null, altitude: null, nature: null, demographie: l.demographie },
     urbanRole: { role: roleUrbain(l.uu, l.uuStatut), uuLabel, uuPop: l.uuPop },
     catnatInondationIndex: catnatInondationDepuisIndex({ insee, inondation: parInsee.get(arrondissementsDe(insee)[0]!)!.inondation ?? null }),
+    // FUT-184 : la grille de la ville lue, comme le chargeur (jamais celle de Châtelaillon, dont on part).
+    grilleDensite: grilleDensiteDe(insee),
   };
 }
 const valeur = (s: ReturnType<typeof buildTerritoireSnapshot>, key: string) => s.facts.find((f) => f.key === key)?.value ?? null;
@@ -93,7 +96,8 @@ test("P8. les comptes FUT-60 sont intacts dans le snapshot communal", () => {
 test("P9. Paris : plus de repli générique là où un fait communal fiable existe", () => {
   const texte = deterministicSynthesis(projectForSynthesis(buildTerritoireSnapshot(inputsPLM("75056", "Paris"), T0), "gwl20"), "gwl20");
   assert.doesNotMatch(texte, /ne permettent pas de décrire/);
-  assert.match(texte, /Paris compte 2 133 111 habitants, au centre de son agglomération\. Sa population a reculé de 0,56 % par an/);
+  // FUT-184 : la classe de la grille Insee de Paris (sans densité ici : ces entrées n'en portent pas).
+  assert.match(texte, /Paris, 2 133 111 habitants, au centre de son agglomération, relève de la catégorie « Grand centre urbain » de la grille communale de densité de l'Insee\. Sa population a reculé de 0,56 % par an/);
 });
 
 test("P10. une commune ordinaire n'est pas touchée", () => {

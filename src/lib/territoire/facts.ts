@@ -25,12 +25,15 @@ import type { TerritoryType } from "../territory-mood.ts";
 import { millesimePopulation } from "../population-millesime.ts";
 import { avecProvenances } from "./provenances.ts";
 import { densiteInseeRetenue, type DensitePLM } from "./plm-densite.ts";
+import { GRILLE_DENSITE_SOURCE, libelleGrille, limiteGrille, type GrilleDensite } from "./grille-densite.ts";
 
 /**
  * Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses.
  * @2 (FUT-175) : les parts d'occupation du sol se lisent sur les TERRES, l'eau est un fait à part.
+ * @3 (FUT-184) : la catégorie de densité est la classe de la grille communale de densité Insee 2025 (DENS7, fait
+ * `place.density_grid`), plus un palier de la densité moyenne ; le chiffre en hab/km² reste un fait à part.
  */
-export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@2";
+export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@3";
 
 // ── Les entrées : ce que le chargeur serveur a lu, UNE fois ─────────────────────────────────
 
@@ -98,6 +101,11 @@ export type TerritoireInputs = {
    * l'un pour l'autre. Elle n'est lue qu'à défaut de densité ADEME. Absent pour toute autre commune.
    */
   densiteInsee?: DensitePLM | null;
+  /**
+   * FUT-184 : la classe officielle de la grille communale de densité Insee 2025 (DENS7), au grain de la commune ; un
+   * arrondissement de Paris, Lyon ou Marseille porte celle de sa ville, marquée `commune_parente`. Absent : inconnu.
+   */
+  grilleDensite?: GrilleDensite | null;
 };
 
 // ── Les règles déterministes (grilles EXISTANTES, reprises telles quelles) ──────────────────
@@ -230,25 +238,9 @@ export function landCategory(naturalPct: number, composition: Record<string, num
   return "mixed";
 }
 
-export type DensityCategory = "dense" | "intermediate" | "low";
-
-export const DENSITY_LABEL: Record<DensityCategory, string> = {
-  dense: "Commune dense",
-  intermediate: "Densité intermédiaire",
-  low: "Commune peu dense",
-};
-
-/** FUT-179 : les mêmes catégories, dites d'un arrondissement (Paris 11e), qui n'est pas une commune. */
-export const DENSITY_LABEL_ARRONDISSEMENT: Record<DensityCategory, string> = {
-  dense: "Arrondissement dense",
-  intermediate: "Densité intermédiaire",
-  low: "Arrondissement peu dense",
-};
-
-/** D3 : grille existante de la carte d'identité (1 500 / 150 hab/km²). */
-export function densityCategory(d: number): DensityCategory {
-  return d >= 1500 ? "dense" : d >= 150 ? "intermediate" : "low";
-}
+// FUT-184 : la catégorie de densité n'est plus un palier de la densité moyenne (1 500 / 150 hab/km², ancienne D3,
+// qui rangeait 83 % des communes en « Commune peu dense », Corte et Arles comprises). C'est la classe de la grille
+// communale de densité de l'Insee (cf. `grille-densite.ts`) ; la densité moyenne reste affichée, en chiffre.
 
 /**
  * D7 : la démographie DÉCRIT. Les codes viennent de `scripts/populate-demographie.py` (±0,15 %/an =
@@ -359,9 +351,11 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
   // FUT-179 : à défaut d'ADEME seulement, la densité Insee du périmètre lu (cf. `densiteInsee`).
   const densitePLM = densiteInseeRetenue(i);
   const density = num(e?.densite) ?? num(i.ademe?.densite) ?? num(densitePLM?.habitantsParKm2);
-  // FUT-179 : le périmètre de cette densité, porté par le fait (`scale`) et par le libellé de sa catégorie.
+  // FUT-179 : le périmètre de cette densité, porté par le fait (`scale`). FUT-184 : la catégorie ne la lit plus, c'est
+  // la classe de la grille Insee, à la commune (« à l'échelle de Paris » pour un arrondissement).
   const densiteArrondissement = densitePLM ? densitePLM.perimetre === "arrondissement" : Boolean(i.urbanRole?.arrondissementDe);
   const demo = e?.demographie ?? null;
+  const grille = i.grilleDensite ?? null;
 
   // VigiEau : la date de consultation sort de la valeur pour aller dans `observedAt`, hors empreinte.
   // La carte la remet en place à l'affichage (elle la verbalise : « État consulté le … »).
@@ -387,6 +381,14 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
         ? { producer: "INSEE", dataset: "Populations légales 2022 ; superficie, base du comparateur de territoires", field: "PMUN / SUP" }
         : { producer: "INSEE via ADEME", dataset: "Données communales", field: "densite_de_population_2022" },
       ...(densitePLM ? { limits: limiteDensitePLM(densitePLM) } : {}),
+      card: card("identity"), synthesis: INCLUDE,
+    }),
+    fact({
+      // FUT-184 : la classe officielle, jamais déduite (ni des parts P1/P2/P3, ni de la densité moyenne). Échelle :
+      // la commune, y compris pour un arrondissement, qui lit la classe de sa ville et le dit (valeur et limite).
+      key: "place.density_grid", value: grille, scale: "commune", vintage: "2025",
+      source: { producer: "INSEE", dataset: `Grille communale de densité 2025 (recensement 2021), géographie au ${GRILLE_DENSITE_SOURCE.geographie}`, field: "DENS7" },
+      ...(grille ? { limits: limiteGrille(grille) } : {}),
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
@@ -548,11 +550,11 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       rule: "land-category@2", card: card("nature.green_spaces"), synthesis: INCLUDE,
     });
   }
-  if (density != null) {
-    const c = densityCategory(density);
+  if (grille) {
+    // FUT-184 : la classe de la grille, au libellé lecteur ; « à l'échelle de Paris » pour un arrondissement.
     derived.push({
-      key: "density.category", value: c, label: (densiteArrondissement ? DENSITY_LABEL_ARRONDISSEMENT : DENSITY_LABEL)[c], from: ["place.density"],
-      rule: "density-category@1", card: card("identity"), synthesis: INCLUDE,
+      key: "density.category", value: `dens7_${grille.classe}`, label: libelleGrille(grille), from: ["place.density_grid"],
+      rule: "density-grid-insee-2025@1", card: card("identity"), synthesis: INCLUDE,
     });
   }
   if (isDemographyCode(demo?.recit)) {
