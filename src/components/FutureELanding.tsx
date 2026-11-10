@@ -562,10 +562,15 @@ export default function FutureELanding() {
       ? { partVoitureDomicileTravail: signaux.mobilite.partVoitureDomicileTravail }
       : null;
 
+    // FUT-182 (lot L0) : la carte Nature ne lit que les catégories que l'index a DÉRIVÉES de ses mesures, jamais la
+    // table manuelle ni le repli par département (voir `carteNatureMesuree`, src/lib/accueil/recits.ts).
+    const natureMesuree = signaux?.source === 'index' && Array.isArray(signaux?.categories) ? signaux.categories : null;
+
     setCommuneMeta({
       inseeCode,
       categories,
       mobilite,
+      natureMesuree,
       usedFallback,
     });
 
@@ -1696,6 +1701,7 @@ export default function FutureELanding() {
         georisques: communeGeorisques,
         horizon,
         mobilite: communeMeta?.mobilite ?? null,
+        natureMesuree: communeMeta?.natureMesuree ?? null,
       })
     : { etat: 'cartes', cartes: activeSlotCity.cards };
   const previewCards = apercu.etat === 'cartes' ? apercu.cartes : [];
