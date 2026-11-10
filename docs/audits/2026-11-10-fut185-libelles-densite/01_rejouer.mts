@@ -55,10 +55,11 @@ type LigneManuelle = { commune_name: string; insee_code: string; categories: str
 const lignesManuelles: LigneManuelle[] = JSON.parse(readFileSync(manuelleJson, "utf8")).lignes;
 // Le parcours de FutureELanding : ligne cherchée par code, puis par nom (`ilike` exact). Avant la reprise de FUT-185,
 // la première trouvée s'applique ; depuis, seulement si elle NOMME la commune (`ligneManuelleConcorde`).
-function ligneManuelle(c: { insee: string; nom: string }, concorde: ((a: string, b: string) => boolean) | null): string[] | undefined {
+type Concorde = (l: LigneManuelle, commune: { name: string; citycode: string }) => boolean;
+function ligneManuelle(c: { insee: string; nom: string }, concorde: Concorde | null): string[] | undefined {
   const parCode = lignesManuelles.find((r) => r.insee_code === c.insee);
   const parNom = lignesManuelles.find((r) => r.commune_name.toLowerCase() === c.nom.toLowerCase());
-  const l = concorde ? [parCode, parNom].find((r) => r && concorde(r.commune_name, c.nom)) : (parCode ?? parNom);
+  const l = concorde ? [parCode, parNom].find((r) => r && concorde(r, { name: c.nom, citycode: c.insee })) : (parCode ?? parNom);
   return l?.categories;
 }
 

@@ -529,7 +529,7 @@ export default function FutureELanding() {
     // commune), et son code INSEE n'est jamais repris : voir src/lib/accueil/categories-accueil.ts.
     for (const query of queries) {
       const { data, error } = await query;
-      if (!error && data && ligneManuelleConcorde(data.commune_name, nextCommune.name)) {
+      if (!error && data && ligneManuelleConcorde(data, nextCommune)) {
         matchedRow = data;
         break;
       }

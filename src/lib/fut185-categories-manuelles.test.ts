@@ -22,6 +22,7 @@ import {
   categoriesAccueil,
   CLES_MANUELLES_SANS_MESURE,
   ligneManuelleConcorde,
+  nomsConcordent,
 } from "./accueil/categories-accueil.ts";
 import { buildTensions, type QuestionCatalogue } from "./accueil/questions.ts";
 import { deriveCategories } from "./commune-categories.ts";
@@ -64,7 +65,7 @@ before(async () => {
 async function parcours(nom: string, code: string) {
   const parCode = MANUELLE.find((r) => r.insee_code === code);
   const parNom = MANUELLE.find((r) => r.commune_name.toLowerCase() === nom.toLowerCase());
-  const l = [parCode, parNom].find((r) => r && ligneManuelleConcorde(r.commune_name, nom)) ?? null;
+  const l = [parCode, parNom].find((r) => r && ligneManuelleConcorde(r, { name: nom, citycode: code })) ?? null;
   const s = await signaux(code);
   const r = categoriesAccueil({ manuelles: l?.categories ?? null, index: s.categories, departement: deriveCategories(code) });
   return { ...r, ligne: l?.commune_name ?? null, index: s.categories, questions: buildTensions(CATALOGUE, r.categories).map((t) => t.id) };
@@ -114,21 +115,36 @@ test("table manuelle : exactement 17 lignes portent une clé sans mesure (10 rur
 });
 
 test("table manuelle : 15 lignes portent le code INSEE d'une autre commune que celle qu'elles nomment", () => {
-  const fausses = MANUELLE.filter((l) => NOM.has(l.insee_code) && !ligneManuelleConcorde(l.commune_name, NOM.get(l.insee_code)));
+  const fausses = MANUELLE.filter((l) => NOM.has(l.insee_code) && !nomsConcordent(l.commune_name, NOM.get(l.insee_code)));
   assert.deepEqual(fausses.map((l) => l.commune_name).sort(), Object.keys(VRAI_CODE).sort());
-  for (const l of fausses) assert.ok(ligneManuelleConcorde(l.commune_name, NOM.get(VRAI_CODE[l.commune_name])), l.commune_name);
+  for (const l of fausses) {
+    assert.ok(nomsConcordent(l.commune_name, NOM.get(VRAI_CODE[l.commune_name])), l.commune_name);
+    assert.equal(VRAI_CODE[l.commune_name].slice(0, 2), l.insee_code.slice(0, 2), `${l.commune_name} : le code erroné reste dans le bon département`);
+  }
   assert.equal(NOM.get("83117"), "Saint-Paul-en-Forêt"); // la ligne « Sanary-sur-Mer », littorale, sur une commune des terres
 });
 
-test("concordance des noms : accents, casse, tirets, nom court ; jamais un autre nom ni un nom absent", () => {
-  assert.ok(ligneManuelleConcorde("Chamonix", "Chamonix-Mont-Blanc"));
-  assert.ok(ligneManuelleConcorde("Gémenos", "GEMENOS"));
-  assert.ok(ligneManuelleConcorde("Saint-Jeannet", "Saint Jeannet"));
-  assert.ok(!ligneManuelleConcorde("Sanary-sur-Mer", "Saint-Paul-en-Forêt"));
-  assert.ok(!ligneManuelleConcorde("La Crau", "La Croix-Valmer"));
-  assert.ok(!ligneManuelleConcorde("Rognac", "Rognes"));
-  assert.ok(!ligneManuelleConcorde("Saint", "Sainte-Agnès"));
-  for (const [a, b] of [[null, "Rodez"], ["Rodez", null], ["", "Rodez"], ["Rodez", undefined]] as const) assert.ok(!ligneManuelleConcorde(a, b));
+test("concordance : même nom (accents, casse, tirets, nom court) et même département ; sinon, rien", () => {
+  assert.ok(nomsConcordent("Chamonix", "Chamonix-Mont-Blanc"));
+  assert.ok(nomsConcordent("Gémenos", "GEMENOS"));
+  assert.ok(nomsConcordent("Saint-Jeannet", "Saint Jeannet"));
+  assert.ok(!nomsConcordent("Sanary-sur-Mer", "Saint-Paul-en-Forêt"));
+  assert.ok(!nomsConcordent("La Crau", "La Croix-Valmer"));
+  assert.ok(!nomsConcordent("Rognac", "Rognes"));
+  assert.ok(!nomsConcordent("Saint", "Sainte-Agnès"));
+  for (const [a, b] of [[null, "Rodez"], ["Rodez", null], ["", "Rodez"], ["Rodez", undefined]] as const) assert.ok(!nomsConcordent(a, b));
+  const sj = ligne("Saint-Jeannet"); // ligne des Alpes-Maritimes, code 06113 (erroné)
+  assert.ok(ligneManuelleConcorde(sj, { name: "Saint-Jeannet", citycode: "06122" }));
+  assert.ok(!ligneManuelleConcorde(sj, { name: "Saint-Jeannet", citycode: "04181" }), "homonyme des Alpes-de-Haute-Provence");
+  assert.ok(!ligneManuelleConcorde(sj, { name: "Saint-Jeannet", citycode: null }), "sans code BAN, rien ne se vérifie");
+  assert.ok(!ligneManuelleConcorde({ commune_name: "Rodez", insee_code: null }, { name: "Rodez", citycode: "12202" }));
+  assert.ok(ligneManuelleConcorde({ commune_name: "Corte", insee_code: "2B096" }, { name: "Corte", citycode: "2B096" })); // Corse : 2B
+});
+
+test("homonyme : Saint-Jeannet (04) ne reçoit plus la ligne de Saint-Jeannet (06)", async () => {
+  const r = await parcours("Saint-Jeannet", "04181");
+  assert.equal(r.ligne, null);
+  assert.equal(r.origine, "index");
 });
 
 // ── Accueil : la commune nommée par la ligne ────────────────────────────────────────────────
@@ -185,7 +201,7 @@ test("commune au code emprunté : la ligne d'une autre commune n'est plus appliq
     const autre = NOM.get(l.insee_code)!;
     const r = await parcours(autre, l.insee_code);
     // La Crau porte 83048, le code de La Croix-Valmer, qui a sa propre ligne : c'est elle qui est retenue.
-    const propre = MANUELLE.find((x) => ligneManuelleConcorde(x.commune_name, autre));
+    const propre = MANUELLE.find((x) => ligneManuelleConcorde(x, { name: autre, citycode: l.insee_code }));
     assert.equal(r.ligne, propre?.commune_name ?? null, `${autre} (${l.insee_code})`);
     if (!propre) {
       assert.equal(r.origine, "index", autre);
@@ -268,7 +284,7 @@ test("accueil : FutureELanding exécute la concordance, categoriesAccueil et bui
   const code = readFileSync("src/components/FutureELanding.tsx", "utf8").replace(/\/\/.*$/gm, "");
   assert.match(code, /import \{ categoriesAccueil, ligneManuelleConcorde \} from "@\/lib\/accueil\/categories-accueil";/);
   assert.match(code, /import \{ buildTensions \} from "@\/lib\/accueil\/questions";/);
-  assert.match(code, /if \(!error && data && ligneManuelleConcorde\(data\.commune_name, nextCommune\.name\)\) \{/);
+  assert.match(code, /if \(!error && data && ligneManuelleConcorde\(data, nextCommune\)\) \{/);
   assert.match(code, /categoriesAccueil\(\{\s*manuelles: matchedRow\?\.categories \?\? null,/);
   assert.match(code, /const inseeCode = nextCommune\.citycode \|\| null;/);
   assert.doesNotMatch(code, /matchedRow\?\.insee_code|function buildTensions|TERRITORY_TENSION_IDS/);

@@ -19,21 +19,35 @@
 //
 // UNE LIGNE NE VAUT QUE POUR LA COMMUNE QU'ELLE NOMME. 15 des 44 lignes portent le code INSEE d'une autre commune
 // (« Sanary-sur-Mer » sur 83117, Saint-Paul-en-Forêt, dans les terres ; « La Crau » sur 83048, La Croix-Valmer).
-// L'accueil cherchait d'abord par code : Saint-Paul-en-Forêt recevait `littoral_mediterranee`. Une ligne n'est donc
-// retenue que si son nom concorde avec la commune choisie (`ligneManuelleConcorde`), et son code n'est jamais lu.
+// L'accueil cherchait d'abord par code : Saint-Paul-en-Forêt recevait `littoral_mediterranee`. Et la recherche par
+// nom ignore le département : Saint-Jeannet (04) recevait la ligne de Saint-Jeannet (06). Une ligne n'est donc
+// retenue que si elle NOMME la commune choisie, dans le MÊME DÉPARTEMENT (`ligneManuelleConcorde`) ; son code
+// ne sert qu'à ce département (juste pour les 44 lignes), jamais comme code de la commune.
+import { departementFromInsee } from "../insee-departement.ts";
 
 /** Un nom de commune comparable : sans accents, casse ni ponctuation. */
 export function normaliserNomCommune(nom: string): string {
   return nom.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-/** La ligne manuelle nomme-t-elle la commune choisie ? Égalité des noms normalisés, ou nom court de la ligne
- *  suivi d'un mot (« Chamonix » pour Chamonix-Mont-Blanc). Un nom absent ne concorde jamais. */
-export function ligneManuelleConcorde(nomLigne: string | null | undefined, nomCommune: string | null | undefined): boolean {
+/** Les deux noms désignent-ils la même commune ? Égalité des noms normalisés, ou nom court suivi d'un mot
+ *  (« Chamonix » pour Chamonix-Mont-Blanc). Un nom absent ne concorde jamais. */
+export function nomsConcordent(nomLigne: string | null | undefined, nomCommune: string | null | undefined): boolean {
   if (!nomLigne || !nomCommune) return false;
   const a = normaliserNomCommune(nomLigne);
   const b = normaliserNomCommune(nomCommune);
   return a.length > 0 && (a === b || b.startsWith(`${a} `));
+}
+
+/** La ligne manuelle vaut-elle pour la commune choisie ? Même nom (`nomsConcordent`) et même département que
+ *  son code BAN. Sans code de la commune ou de la ligne, rien ne se vérifie : la ligne n'est pas retenue. */
+export function ligneManuelleConcorde(
+  ligne: { commune_name?: string | null; insee_code?: string | null } | null | undefined,
+  commune: { name?: string | null; citycode?: string | null } | null | undefined,
+): boolean {
+  if (!ligne?.insee_code || !commune?.citycode || !nomsConcordent(ligne.commune_name, commune.name)) return false;
+  const d = departementFromInsee(ligne.insee_code);
+  return d != null && d === departementFromInsee(commune.citycode);
 }
 
 /** Les clés de la table manuelle qu'aucune mesure ne fonde par elle-même (voir ci-dessus). */
