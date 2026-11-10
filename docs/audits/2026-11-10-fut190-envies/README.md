@@ -194,7 +194,19 @@ Les corrections ne constituent ni une preuve d'utilité, ni une preuve de paieme
 - TypeScript : **sans erreur**, contrôle ciblé incluant les tests, la route et les imports, puis `npx tsc --noEmit --incremental false` à l'échelle du dépôt. Une première tentative avait rencontré des types `.next` locaux mal générés pendant le démarrage ; régénération du cache local avec `npx next typegen`, puis contrôle réussi. Aucune configuration du dépôt modifiée.
 - ESLint : **sans erreur** sur `Envies.tsx`, `donnees.ts`, `modele.ts` et la route `src/app/dev/envies/page.tsx`. Les tests sont exclus par la configuration ESLint existante, mais exécutés et vérifiés par TypeScript.
 - Scripts `outils/parcours.cjs` et `outils/captures.cjs` adaptés aux nouvelles phrases et à une installation portable de `playwright-core` déjà présente ; `node --check` réussi. Le parcours exige des assertions sur le texte rendu à 390 et 1 440 px, y compris les réponses croisées et la limite conservée.
-- **Contrôle visuel actualisé non réalisé** : le serveur Next a démarré avec des paramètres fictifs ; Chromium a échoué avant d'ouvrir une page (`socket() failed: Operation not permitted`). Aucun parcours navigateur ni aucune capture de cette reprise ne sont déclarés réussis. Les anciennes captures restent des archives. À rejouer sur un poste permettant Chromium, avant la séance ; rien n'a été modifié dans Supabase ou déployé.
+- **Contrôle visuel de la reprise effectué le 10/11/2026**, dans le navigateur Chrome connecté au serveur utilisateur `http://localhost:3190/dev/envies`, après mise à jour du code au commit `894cfb3`. Interactions et lecture des écrans en 1 440 × 1 000 et 390 × 844, principalement en thème clair. Aucun défaut visuel bloquant observé. Les scripts automatisés ci-dessous n'ont pas été exécutés avec succès : la tentative Chromium dans l'environnement d'exécution restait bloquée avant ouverture (`socket() failed: Operation not permitted`). Le contrôle dans le navigateur connecté est distinct de cette tentative.
+
+| Scénario contrôlé sur ordinateur et mobile | Résultat observé |
+|---|---|
+| Théâtre mensuel, limite 40 min | 5 min à pied contre 35 min en voiture ; tension avec la priorité du Projet et TC inconnus explicites |
+| Théâtre hebdomadaire | Une limite choisie de 60 min reste conservée au changement de rythme ; après sélection de 20 min, le trajet de Chalonnes est au-delà de la limite |
+| Natation à préserver | Réponses sur les horaires favorables et défavorables prises en compte dans la conclusion, au conditionnel ; date, source non renseignée et inconnues visibles |
+| Potager | Attente longue puis réponse « Déjà inondé » : réponses personnelles distinguées, sans preuve de cultivabilité ni assimilation à une inondation du logement |
+| Après deux vérifications | Résumé et tableau conservent les dates, l'absence de source vérifiée, les réserves sur le jardin et les TC |
+
+Largeur du document égale à celle de la fenêtre dans les neuf états mesurés (quatre à 1 440 px, cinq à 390 px) : aucun débordement horizontal dans ces états. Le tableau « après vérifications » reste long et dense sur mobile ; sa compréhension est à observer pendant les entretiens, sans nouvelle refonte à ce stade. Trois alertes du serveur de développement ont été inspectées : PostHog 401 (clé invalide), 404 et échec de configuration distante avec les paramètres fictifs du serveur. Elles ne constituent pas une erreur du modèle ; cette recette ne prétend pas à une console sans erreur.
+
+Captures de cette reprise : [théâtre hebdomadaire sur ordinateur](captures/reprise-theatre-ordinateur.png) et [réponse personnelle sur la natation sur mobile](captures/reprise-natation-mobile.png). Les captures initiales restent des archives. Contrôle réalisé avec des dimensions mobiles dans Chrome, pas sur un téléphone physique ; Safari, lecteur d'écran et contraste mesuré non contrôlés. Rien n'a été modifié dans Supabase ou déployé.
 
 Commandes pour rejouer les contrôles visuels, serveur local démarré :
 
@@ -205,7 +217,7 @@ BASE=http://localhost:3190/dev/envies node docs/audits/2026-11-10-fut190-envies/
 
 Chrome est utilisé par défaut ; `CHROMIUM_PATH` permet de désigner un autre exécutable Chromium installé. Les requêtes hors de l'origine locale sont bloquées par les scripts. Le filtre `comparer` couvre notamment théâtre mensuel/hebdomadaire, natation, potager et après réponses, sur ordinateur et mobile.
 
-**Verdict de reprise : prêt sur le raisonnement et le protocole pour une expérimentation modérée, après la nouvelle contre-revue prévue. La validation visuelle de cette révision reste à faire avant la séance.** Aucune intégration produit, aucun chantier supplémentaire ni organisation du test n'est déclenché par cette livraison.
+**Verdict de reprise : prêt pour une expérimentation modérée, après la nouvelle contre-revue prévue. Le contrôle visuel ciblé sur Chrome est effectué ; il ne prouve ni la compréhension par de vraies personnes, ni la valeur commerciale.** Aucune intégration produit, aucun chantier supplémentaire ni organisation du test n'est déclenché par cette livraison.
 
 ### Contrôles faits (automatiques, pas un test avec des personnes) · version initiale
 
