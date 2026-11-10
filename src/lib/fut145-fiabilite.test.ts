@@ -141,7 +141,8 @@ test("B · les faits légitimes restent transmis (DRIAS, Géorisques, GASPAR, AD
   assert.match(system, /Risques recensés : .*feux de forêt|Risques recensés : /);
   assert.match(system, /\[GASPAR — historique des reconnaissances de catastrophe naturelle/);
   assert.match(system, /- Densité \(hab\/km²\) : /);
-  assert.match(system, /- Taux boisement \(%\) : 19\.7 %/);
+  // FUT-182 (lot L0) : la ligne nomme sa source et la distingue du couvert forestier OSO.
+  assert.match(system, /- Taux de boisement selon l'ADEME \(%, définition et millésime non documentés ; ce n'est pas le couvert forestier OSO de l'écran Territoire, ne les comparez pas\) : 19\.7 %/);
 });
 
 test("B · commune SANS valeur (Monteux) : rien n'a changé d'autre que l'absence de la ligne", async () => {

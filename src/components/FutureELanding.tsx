@@ -24,6 +24,7 @@ import {
   getEmptyStateCopy,
   getHeroCopy,
   getQuestionIntro,
+  carteNatureMachineASous,
 } from "@/lib/accueil/recits";
 import { construireFaitsCommune } from "@/lib/accueil/faits";
 import { categoriesAccueil, ligneManuelleConcorde } from "@/lib/accueil/categories-accueil";
@@ -56,9 +57,9 @@ const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
 // La machine à sous du hero (avant toute commune). Ses cartes climat et risques sont construites par
 // les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis des valeurs DRIAS figées et
 // testées (src/lib/accueil/recits.ts). Les cartes Mobilité portent la part voiture MOBPRO de la ville
-// (FUT-185 : elles étaient rédigées à la main sous cette source). Les cartes Nature et Vie locale sont restées
-// telles quelles : elles relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte
-// submersion : l'État n'y recense pas ce risque.
+// (FUT-185 : elles étaient rédigées à la main sous cette source). Les cartes Nature disent le classement loi Littoral
+// des deux villes (FUT-182, lot L0). Les cartes Vie locale sont restées telles quelles : elles relèvent du
+// repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte submersion : l'État n'y recense pas ce risque.
 const slotCard = (cle, titre, fait, col, source) => ({ cle, titre, fait, col, source });
 const SLOT_CITIES = [
   {
@@ -74,7 +75,7 @@ const SLOT_CITIES = [
     name: 'Marseille',
     cards: [
       carteMachineASous('Marseille', 'nuits'),
-      slotCard('nature', 'Nature à Marseille', 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.', C.green, 'OSM / IGN'),
+      carteNatureMachineASous('Marseille'),
       carteMobiliteMachineASous('Marseille'),
       carteMachineASous('Marseille', 'risque'),
     ].filter(Boolean),
@@ -92,7 +93,7 @@ const SLOT_CITIES = [
     cards: [
       carteMachineASous('La Rochelle', 'risque'),
       carteMobiliteMachineASous('La Rochelle'),
-      slotCard('nature', 'Nature à La Rochelle', 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.', C.green, 'OSM / IGN'),
+      carteNatureMachineASous('La Rochelle'),
       carteMachineASous('La Rochelle', 'chaleur'),
     ].filter(Boolean),
   },

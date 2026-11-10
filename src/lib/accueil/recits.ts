@@ -438,17 +438,69 @@ function cartesProfondeur(name: string, categories: readonly string[], mobilite:
   const mob = carteMobilite(name, mobilite);
   if (mob) depth.push(mob);
   if (hasAny("littoral", "littoral_atlantique")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
+    depth.push(carteNature(name, "littoral"));
   } else if (has("montagne")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
+    depth.push(carteNature(name, "montagne"));
   } else if (hasAny("rural_forestier", "rural_agricole", "rural_viticole")) {
-    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `Autour ${deCommune(name)}, espaces agricoles et nature rythment le quotidien.`, source: "OSM / IGN", col: COL.vert });
+    depth.push(carteNature(name, "cultures_forets"));
   } else if (has("tourisme_urbain")) {
     depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   } else {
     depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie associative font le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   }
   return depth;
+}
+
+// ── Carte « Nature » : un CLASSEMENT dit tel quel, sous sa vraie source (FUT-182, lot L0) ─────────────
+//
+// Avant, les trois variantes affirmaient un effet que rien ne mesure (« façonnent le cadre de vie »,
+// « rythment le quotidien ») et citaient « OSM / IGN », qu'aucune ne lisait : elles naissent d'une catégorie
+// de la commune, jamais d'une carte. Chacune dit désormais le classement qui la déclenche, la source de ce
+// classement et ce qu'il ne dit pas. Aucune ne parle d'accès à la nature, de proximité ni de qualité.
+//
+// Limite connue, relevée pour FUT-185 : la table manuelle (44 communes) peut porter une catégorie que la mesure
+// contredit (Rodez et Lambesc y sont `rural_agricole` avec 0,7 % et 23,5 % de cultures selon OSO). La carte suit la
+// catégorie qu'elle reçoit ; corriger la table relève de son propre chantier.
+
+export type VarianteNature = "littoral" | "montagne" | "cultures_forets";
+
+export const SOURCE_NATURE: Record<VarianteNature, string> = {
+  littoral: "Loi Littoral (DGALN) · communes classées « Mer »",
+  montagne: "IGN (altitudes) · classement futur•e",
+  cultures_forets: "OSO 2023 (CESBIO) · occupation des sols",
+};
+
+/** La carte Nature d'une commune, pour la variante que sa catégorie déclenche. */
+export function carteNature(name: string, variante: VarianteNature): CarteApercu {
+  const base = { cle: "nature", source: SOURCE_NATURE[variante], col: COL.vert };
+  if (variante === "littoral") {
+    return {
+      ...base,
+      titre: "Commune littorale",
+      fait: `${majuscule(name)} est classée commune littorale maritime au titre de la loi Littoral.`,
+      limite: "Ce classement administratif dit que la commune borde la mer. Il ne dit pas à quelle distance du rivage se trouve un logement.",
+    };
+  }
+  if (variante === "montagne") {
+    return {
+      ...base,
+      titre: "Montagne ou relief proche",
+      fait: `${majuscule(name)} est en altitude, ou proche d'un relief élevé.`,
+      limite: "futur•e retient l'altitude de la commune (800 m ou plus) ou l'altitude la plus haute à environ 35 km. Cela ne dit rien de l'accès aux espaces naturels.",
+    };
+  }
+  return {
+    ...base,
+    titre: "Cultures et forêts",
+    fait: `Cultures ou forêts couvrent une large part du territoire ${deCommune(name)}.`,
+    limite: "Selon la carte OSO 2023 de l'occupation des sols : au moins 30 % de cultures ou 35 % de forêt dans le contour de la commune. Cela ne dit rien de l'accès aux espaces naturels ni de leur qualité.",
+  };
+}
+
+/** La carte Nature d'une ville de la machine à sous de l'accueil (Marseille et La Rochelle sont classées « Mer »). */
+export function carteNatureMachineASous(ville: "Marseille" | "La Rochelle"): CarteApercu {
+  const carte = carteNature(ville, "littoral");
+  return { ...carte, titre: `${carte.titre} · ${ville}` };
 }
 
 export function getPreviewCards(

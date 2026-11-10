@@ -77,7 +77,10 @@ const REF = JSON.parse(
     .replaceAll("davantage de nature autour", "davantage d'espaces naturels ou d'eau dans le secteur")
     .replaceAll("présence de nature intermédiaire", "présence intermédiaire d'espaces naturels ou d'eau dans le secteur")
     .replaceAll("moins de nature autour", "moins d'espaces naturels ou d'eau dans le secteur")
-    .replaceAll("La présence d'espaces naturels autour du lieu de vie.", "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse."),
+    .replaceAll("La présence d'espaces naturels autour du lieu de vie.", "Espaces naturels et eau, dans la commune et les communes voisines retenues (centres à moins de 15 km, liste parfois incomplète). Pas les abords d'une adresse.")
+    // FUT-182 (lot L0) : la promesse « cadre rural préservé » est retirée. Sa seule occurrence (La Garde-Freinet, 83063, trio
+    // Maures) est une petite commune au calme : elle reçoit la promesse suivante, celle du calme. Rien d'autre ne change.
+    .replaceAll("Pour un cadre rural préservé, loin de l'agitation.", "Pour un quotidien au calme, loin de l'agitation."),
 );
 const BASE = [{ key: "eviter_isolement", weight: 0.5, baseline: true }, { key: "viabilite_emploi", weight: 0.5, baseline: true }];
 // Les mêmes entrées que la capture (scripts/fut147/capturer-reference.mjs), recopiées : la référence ne
