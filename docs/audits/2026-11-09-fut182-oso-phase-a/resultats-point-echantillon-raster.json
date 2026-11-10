@@ -1,0 +1,770 @@
+{
+ "13004": {
+  "nom": "Arles",
+  "surface_km2": 757.1,
+  "bati_ha": 2567.3,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 54.4,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 44.2,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 14.87
+  },
+  "centroide": {
+   "naturel_terres_pct": 55.3,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.91
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 49.6,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 8.57
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 49.6,
+   "dispersion_p10_p90": [
+    39.4,
+    62.8
+   ]
+  }
+ },
+ "13096": {
+  "nom": "Saintes-Maries-de-la-Mer",
+  "surface_km2": 370.2,
+  "bati_ha": 488.0,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 55.4,
+   "non_mesure_pct_du_disque": 9.5,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 68.1,
+   "non_mesure_pct_du_disque": 23.9,
+   "distance_au_point_index_km": 5.01
+  },
+  "centroide": {
+   "naturel_terres_pct": 54.5,
+   "non_mesure_pct_du_disque": 6.2,
+   "distance_au_point_index_km": 2.4
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 56.2,
+   "non_mesure_pct_du_disque": 11.7,
+   "distance_au_point_index_km": 1.89
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 57.7,
+   "dispersion_p10_p90": [
+    48.6,
+    65.4
+   ]
+  }
+ },
+ "77186": {
+  "nom": "Fontainebleau",
+  "surface_km2": 172.3,
+  "bati_ha": 454.3,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 64.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 64.3,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 2.57
+  },
+  "centroide": {
+   "naturel_terres_pct": 65.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.9
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 64.7,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 2.11
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 64.3,
+   "dispersion_p10_p90": [
+    61.9,
+    65.5
+   ]
+  }
+ },
+ "50218": {
+  "nom": "Granville",
+  "surface_km2": 10.0,
+  "bati_ha": 521.1,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 43.2,
+   "non_mesure_pct_du_disque": 45.4,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 59.3,
+   "non_mesure_pct_du_disque": 16.2,
+   "distance_au_point_index_km": 12.96
+  },
+  "centroide": {
+   "naturel_terres_pct": 59.6,
+   "non_mesure_pct_du_disque": 14.5,
+   "distance_au_point_index_km": 13.9
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 59.5,
+   "non_mesure_pct_du_disque": 14.6,
+   "distance_au_point_index_km": 13.75
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 59.6,
+   "dispersion_p10_p90": [
+    59.3,
+    60.9
+   ]
+  }
+ },
+ "74056": {
+  "nom": "Chamonix-Mont-Blanc",
+  "surface_km2": 245.0,
+  "bati_ha": 304.4,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 99.1,
+   "non_mesure_pct_du_disque": 6.7,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 98.0,
+   "non_mesure_pct_du_disque": 0.3,
+   "distance_au_point_index_km": 4.68
+  },
+  "centroide": {
+   "naturel_terres_pct": 99.1,
+   "non_mesure_pct_du_disque": 4.9,
+   "distance_au_point_index_km": 0.44
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 98.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 4.23
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 98.1,
+   "dispersion_p10_p90": [
+    97.6,
+    99.0
+   ]
+  }
+ },
+ "2B096": {
+  "nom": "Corte",
+  "surface_km2": 149.5,
+  "bati_ha": 99.1,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 99.7,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 99.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 7.73
+  },
+  "centroide": {
+   "naturel_terres_pct": 99.6,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 1.22
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 99.6,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 8.23
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 99.6,
+   "dispersion_p10_p90": [
+    99.5,
+    99.6
+   ]
+  }
+ },
+ "33063": {
+  "nom": "Bordeaux",
+  "surface_km2": 49.7,
+  "bati_ha": 2802.6,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 53.7,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 53.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 2.75
+  },
+  "centroide": {
+   "naturel_terres_pct": 52.7,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.05
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 52.9,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.57
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 53.9,
+   "dispersion_p10_p90": [
+    51.9,
+    56.5
+   ]
+  }
+ },
+ "59350": {
+  "nom": "Lille",
+  "surface_km2": 34.9,
+  "bati_ha": 2527.4,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 26.7,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 26.4,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.72
+  },
+  "centroide": {
+   "naturel_terres_pct": 26.6,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.09
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 26.6,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.17
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 26.5,
+   "dispersion_p10_p90": [
+    26.0,
+    26.9
+   ]
+  }
+ },
+ "34301": {
+  "nom": "Sète",
+  "surface_km2": 40.6,
+  "bati_ha": 824.0,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 43.7,
+   "non_mesure_pct_du_disque": 23.2,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 52.0,
+   "non_mesure_pct_du_disque": 26.9,
+   "distance_au_point_index_km": 4.62
+  },
+  "centroide": {
+   "naturel_terres_pct": 45.5,
+   "non_mesure_pct_du_disque": 20.8,
+   "distance_au_point_index_km": 0.84
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 50.3,
+   "non_mesure_pct_du_disque": 23.5,
+   "distance_au_point_index_km": 3.22
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 50.4,
+   "dispersion_p10_p90": [
+    37.1,
+    55.5
+   ]
+  }
+ },
+ "74010": {
+  "nom": "Annecy",
+  "surface_km2": 69.8,
+  "bati_ha": 2700.2,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 81.8,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 82.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.42
+  },
+  "centroide": {
+   "naturel_terres_pct": 81.2,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.65
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 81.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.92
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 81.7,
+   "dispersion_p10_p90": [
+    80.2,
+    84.0
+   ]
+  }
+ },
+ "50129": {
+  "nom": "Cherbourg-en-Cotentin",
+  "surface_km2": 68.5,
+  "bati_ha": 2659.4,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 68.2,
+   "non_mesure_pct_du_disque": 11.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 68.1,
+   "non_mesure_pct_du_disque": 15.6,
+   "distance_au_point_index_km": 1.83
+  },
+  "centroide": {
+   "naturel_terres_pct": 68.2,
+   "non_mesure_pct_du_disque": 12.2,
+   "distance_au_point_index_km": 1.16
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 68.1,
+   "non_mesure_pct_du_disque": 14.4,
+   "distance_au_point_index_km": 1.52
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 67.7,
+   "dispersion_p10_p90": [
+    66.2,
+    68.2
+   ]
+  }
+ },
+ "49092": {
+  "nom": "Chemillé-en-Anjou",
+  "surface_km2": 320.8,
+  "bati_ha": 2443.5,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 55.6,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 56.3,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 2.85
+  },
+  "centroide": {
+   "naturel_terres_pct": 55.8,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 0.62
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 55.9,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 0.85
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 56.2,
+   "dispersion_p10_p90": [
+    52.5,
+    59.0
+   ]
+  }
+ },
+ "33529": {
+  "nom": "La Teste-de-Buch",
+  "surface_km2": 178.8,
+  "bati_ha": 1577.8,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 85.8,
+   "non_mesure_pct_du_disque": 8.1,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 82.8,
+   "non_mesure_pct_du_disque": 1.9,
+   "distance_au_point_index_km": 5.66
+  },
+  "centroide": {
+   "naturel_terres_pct": 87.0,
+   "non_mesure_pct_du_disque": 7.1,
+   "distance_au_point_index_km": 3.14
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 85.2,
+   "non_mesure_pct_du_disque": 2.8,
+   "distance_au_point_index_km": 2.76
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 84.8,
+   "dispersion_p10_p90": [
+    82.6,
+    88.9
+   ]
+  }
+ },
+ "33236": {
+  "nom": "Lège-Cap-Ferret",
+  "surface_km2": 95.7,
+  "bati_ha": 763.9,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 84.7,
+   "non_mesure_pct_du_disque": 8.6,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 91.2,
+   "non_mesure_pct_du_disque": 5.1,
+   "distance_au_point_index_km": 5.96
+  },
+  "centroide": {
+   "naturel_terres_pct": 87.3,
+   "non_mesure_pct_du_disque": 14.1,
+   "distance_au_point_index_km": 2.32
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 84.0,
+   "non_mesure_pct_du_disque": 13.6,
+   "distance_au_point_index_km": 1.74
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 86.0,
+   "dispersion_p10_p90": [
+    79.0,
+    91.3
+   ]
+  }
+ },
+ "83069": {
+  "nom": "Hyères",
+  "surface_km2": 133.8,
+  "bati_ha": 2177.5,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 72.9,
+   "non_mesure_pct_du_disque": 0.8,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 60.9,
+   "non_mesure_pct_du_disque": 1.6,
+   "distance_au_point_index_km": 8.63
+  },
+  "centroide": {
+   "naturel_terres_pct": 66.1,
+   "non_mesure_pct_du_disque": 0.8,
+   "distance_au_point_index_km": 3.96
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 61.6,
+   "non_mesure_pct_du_disque": 3.7,
+   "distance_au_point_index_km": 7.22
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 61.2,
+   "dispersion_p10_p90": [
+    55.4,
+    68.6
+   ]
+  }
+ },
+ "85113": {
+  "nom": "L'Île-d'Yeu",
+  "surface_km2": 24.0,
+  "bati_ha": 675.8,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 71.0,
+   "non_mesure_pct_du_disque": 68.2,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 71.0,
+   "non_mesure_pct_du_disque": 67.8,
+   "distance_au_point_index_km": 1.71
+  },
+  "centroide": {
+   "naturel_terres_pct": 71.0,
+   "non_mesure_pct_du_disque": 68.5,
+   "distance_au_point_index_km": 0.42
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 71.0,
+   "non_mesure_pct_du_disque": 68.2,
+   "distance_au_point_index_km": 0.38
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 71.0,
+   "dispersion_p10_p90": [
+    71.0,
+    71.0
+   ]
+  }
+ },
+ "17094": {
+  "nom": "Châtelaillon-Plage",
+  "surface_km2": 6.7,
+  "bati_ha": 327.1,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 27.1,
+   "non_mesure_pct_du_disque": 4.3,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 26.8,
+   "non_mesure_pct_du_disque": 4.8,
+   "distance_au_point_index_km": 0.77
+  },
+  "centroide": {
+   "naturel_terres_pct": 27.2,
+   "non_mesure_pct_du_disque": 4.4,
+   "distance_au_point_index_km": 0.27
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 27.0,
+   "non_mesure_pct_du_disque": 4.5,
+   "distance_au_point_index_km": 0.45
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 27.3,
+   "dispersion_p10_p90": [
+    25.6,
+    29.1
+   ]
+  }
+ },
+ "02100": {
+  "nom": "Bony",
+  "surface_km2": 8.0,
+  "bati_ha": 32.5,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 11.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 11.4,
+   "non_mesure_pct_du_disque": -0.0,
+   "distance_au_point_index_km": 0.44
+  },
+  "centroide": {
+   "naturel_terres_pct": 11.4,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.23
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 11.4,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.36
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 11.5,
+   "dispersion_p10_p90": [
+    11.2,
+    12.0
+   ]
+  }
+ },
+ "13055": {
+  "nom": "Marseille",
+  "surface_km2": 238.1,
+  "bati_ha": 9385.2,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 62.6,
+   "non_mesure_pct_du_disque": 8.8,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 64.0,
+   "non_mesure_pct_du_disque": 7.5,
+   "distance_au_point_index_km": 2.0
+  },
+  "centroide": {
+   "naturel_terres_pct": 64.0,
+   "non_mesure_pct_du_disque": 1.1,
+   "distance_au_point_index_km": 3.48
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 64.6,
+   "non_mesure_pct_du_disque": 1.2,
+   "distance_au_point_index_km": 3.66
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 62.4,
+   "dispersion_p10_p90": [
+    57.1,
+    65.4
+   ]
+  }
+ },
+ "75056": {
+  "nom": "Paris",
+  "surface_km2": 105.4,
+  "bati_ha": 6872.6,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 17.6,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 17.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.49
+  },
+  "centroide": {
+   "naturel_terres_pct": 18.0,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.39
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 18.0,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.34
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 19.2,
+   "dispersion_p10_p90": [
+    16.1,
+    24.1
+   ]
+  }
+ },
+ "69123": {
+  "nom": "Lyon",
+  "surface_km2": 47.9,
+  "bati_ha": 3283.0,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 38.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 37.9,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.07
+  },
+  "centroide": {
+   "naturel_terres_pct": 38.0,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.36
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 37.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.64
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 37.6,
+   "dispersion_p10_p90": [
+    33.2,
+    43.0
+   ]
+  }
+ },
+ "13041": {
+  "nom": "Gardanne",
+  "surface_km2": 27.2,
+  "bati_ha": 784.3,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 69.1,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 68.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.26
+  },
+  "centroide": {
+   "naturel_terres_pct": 68.7,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.77
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 68.5,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.23
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 68.2,
+   "dispersion_p10_p90": [
+    67.0,
+    69.5
+   ]
+  }
+ },
+ "40046": {
+  "nom": "Biscarrosse",
+  "surface_km2": 193.4,
+  "bati_ha": 1184.9,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 89.8,
+   "non_mesure_pct_du_disque": 1.1,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 90.7,
+   "non_mesure_pct_du_disque": 2.9,
+   "distance_au_point_index_km": 1.75
+  },
+  "centroide": {
+   "naturel_terres_pct": 90.4,
+   "non_mesure_pct_du_disque": 5.3,
+   "distance_au_point_index_km": 1.98
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 90.4,
+   "non_mesure_pct_du_disque": 5.3,
+   "distance_au_point_index_km": 2.02
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 90.6,
+   "dispersion_p10_p90": [
+    89.1,
+    92.2
+   ]
+  }
+ },
+ "05023": {
+  "nom": "Briançon",
+  "surface_km2": 28.3,
+  "bati_ha": 275.4,
+  "index_ou_centre_geoapi": {
+   "naturel_terres_pct": 98.4,
+   "non_mesure_pct_du_disque": 0.3,
+   "distance_au_point_index_km": 0.0
+  },
+  "mairie": {
+   "naturel_terres_pct": 98.3,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 0.8
+  },
+  "centroide": {
+   "naturel_terres_pct": 98.4,
+   "non_mesure_pct_du_disque": 0.2,
+   "distance_au_point_index_km": 0.34
+  },
+  "centre_bati": {
+   "naturel_terres_pct": 98.3,
+   "non_mesure_pct_du_disque": 0.0,
+   "distance_au_point_index_km": 1.79
+  },
+  "secteur_habite": {
+   "naturel_terres_pct": 98.3,
+   "dispersion_p10_p90": [
+    98.3,
+    98.4
+   ]
+  }
+ }
+}

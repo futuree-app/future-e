@@ -5,9 +5,15 @@
 métier, aucune base ni stockage distant modifiés ; aucun téléchargement massif. Scripts et résultats bruts :
 `docs/audits/2026-11-09-fut182-oso-phase-a/`.
 
+> **État au 10/11/2026.** Ce rapport a deux parties. La **partie I** (§ 0-15) est l'audit livré le 09/11, annoté là
+> où le raster l'a corrigé (mentions « Corrigé le 10/11 »). La **partie II** (§ 16-30) applique les arbitrages du
+> porteur et intègre ce que le raster officiel, téléchargé et vérifié, a établi : classe 24 = serres, précision 2023,
+> preuve d'identité avec le cache, origine du point de référence, forêt exacte au seuil de 70 %, licence, lot L0,
+> séquençage et conditions de B1. **Lire d'abord les § 16, 28, 29 et 30.**
+
 ---
 
-## 0. Résumé pour décider
+## 0. Résumé pour décider (09/11, voir la partie II pour l'état à jour)
 
 1. **L'eau pèse cent fois plus que la grille.** Sur le score « Espaces naturels » d'Où vivre, retirer l'eau change
    le score de ~10 100 communes (dont 79 de 10 points ou plus) et le verdict de rang Projet de 248. Corriger la seule
@@ -44,7 +50,7 @@ avec une pré-agrégation à 100 ou 200 m.
 | Cache OSO (gitignoré, dépôt principal) | `data/cache-nature/communes-nature.json`, sha256 `2a988102…aebfd`, 34 743 communes, 02/06/2026 |
 | Contours | `data/cache-nature/contours/<dep>.json` (geo.api.gouv.fr, 02/06/2026), 34 746 communes, 96 départements |
 | Arrondissements PLM | geo.api.gouv.fr `type=arrondissement-municipal`, 45 contours, ~0,3 Mo (lu le 10/11/2026) |
-| Raster OSO 2023 | **absent du poste** (`data/cache-nature/oso2023.tif` supprimé, déjà noté par FUT-175) |
+| Raster OSO 2023 | **absent du poste** le 09/11 (`data/cache-nature/oso2023.tif` supprimé, déjà noté par FUT-175) ; *téléchargé et vérifié le 10/11, hors dépôt (§ 18)* |
 | Base de production | **lecture seule**, requêtes d'agrégats (comptes par version), aucune donnée personnelle lue |
 
 Scripts (portables, chemins passés en argument) :
@@ -52,6 +58,10 @@ Scripts (portables, chemins passés en argument) :
   distinctif, forêt, catégories, fixture FUT-178, cas témoins → `resultats-selection-eau.json`.
 - `tampon_contours.py` (numpy, shapely, pyproj) : couverture des pixels classés, validité des contours, 48 périmètres
   PLM, point de référence, méthode C approchée → `resultats-tampon-contours.json`.
+- Ajoutés le 10/11 (partie II) : `point_reference.py` (origine du point, sensibilité nationale de C1 au point),
+  `inspecter_raster.py` (en-tête, histogramme national, preuve d'identité sur échantillon, forêt près de 70 %),
+  `point_echantillon_raster.py` (quatre points et secteur habité, sur le raster, 24 cas) ; dépendance en plus :
+  `rasterio`. Le raster se lit depuis `~/Documents/futuree-oso/extrait/OSO_20230101_RASTER/DATA/OCS_2023.tif`.
 
 Reproduction (depuis la racine du dépôt) :
 ```
@@ -81,8 +91,9 @@ approximation nommée ; **non vérifié** = repris d'ailleurs, sans recalcul pos
 | `rankBands.nature` | bande `[bas, haut]` du rang de `score` (`populate-mismatch-rank.mts`), points de base | 34 743 | rang national du secteur |
 
 Points de vérité sur la construction :
-- Le « centre » n'est **pas un centroïde** : c'est le point lat/lon de `data_climat.json` (DRIAS), d'origine non
-  documentée. Il s'écarte du centroïde géométrique de 241 m en médiane (p99 1,15 km, max 13,9 km), et 483 points
+- Le « centre » n'est **pas un centroïde** : c'est le point lat/lon de `data_climat.json`. *Corrigé le 10/11 : il
+  est identique, pour les 34 743 communes, au `centre` de geo.api.gouv.fr, situé à 19 m en médiane du centre du
+  rectangle englobant (§ 17.1).* Il s'écarte du centroïde géométrique de 241 m en médiane (p99 1,15 km, max 13,9 km), et 483 points
   tombent juste hors de leur contour (de 1 à quelques mètres). « Centroïde » dans FUT-178 est donc un abus de langage :
   le contrat parlera de **point de référence**.
 - Les 45 arrondissements PLM sont dans l'index sans `nature`. Paris, Lyon et Marseille (75056, 69123, 13055) ne sont
@@ -107,7 +118,7 @@ Points de vérité sur la construction :
 | 13 | Où vivre, catégories rurales | `comparateur-vie.ts:832` | `composition.agricole` ≥ 30, `foret` ≥ 35 | densité < 1 500 | commune | **% du contour, eau comprise** | Choisit les cartes de l'accueil (§ 14) |
 | 14 | Accueil, cartes et accroche | `accueil/recits.ts:376-416, 542` | catégories rurales | feux si `rural_forestier`, sols secs si `rural_agricole`, « dépend de la voiture », carte « Nature à… » | — | idem | La carte « Nature à… » cite « OSM / IGN » alors que le déclencheur vient d'OSO |
 | 15 | /qna (comparateur), signal au modèle | `comparateur-vie.ts:937` (70/40) | `score` | 3 niveaux, périmètre, ne-dit-pas | « secteur » | idem | Texte transitoire FUT-178 |
-| 16 | AskFuture (commune) | `ask/system-prompt.ts:169` | **ADEME** `taux_boisement` | « Taux boisement (%) », sans source | commune | ADEME | Envoie l'ADEME sans la nommer, alors que Territoire tient OSO pour canonique (D1). Châtelaillon : 1,5 % ADEME, 10,3 % OSO |
+| 16 | AskFuture (commune) | `ask/system-prompt.ts:169` | **ADEME** `taux_boisement` | « Taux boisement (%) » dans le bloc « [ADEME — données socio-environnementales] » | commune | ADEME | *Corrigé le 10/11 : la source est nommée par l'en-tête du bloc.* Le défaut est ailleurs : ni définition ni millésime, et rien ne dit que la carte Territoire montre une autre forêt, celle d'OSO, tenue pour canonique (D1). Châtelaillon : 1,5 % ADEME, 10,3 % OSO |
 | 17 | Projet, règles de rang (mismatch / alignment) | `mismatch-rules.ts`, `alignment-rules.ts` | `rankBands.nature` | ≤ 20 % / ≥ 80 % | preuve `grain: "commune"` | **secteur** | Le grain de la preuve est faux |
 | 18 | Projet, boisement 70 % | `module-facts-map.ts:44`, `materiality-rules.ts:730` | `composition.foret` | ≥ 70 → vérification « fortement boisée » | « du territoire communal », « parmi les 10 % les plus boisées » | % du contour, eau comprise | Affirmation dérivée du seuil (« 10 % ») : § 6.4 |
 | 19 | Projet, distributions publiées | `distributions-rang.ts` | empreinte des bandes `nature` | registre en ajout seul | — | — | Toute nouvelle bande exige une identité `mismatch-dist-…-nature` |
@@ -134,8 +145,8 @@ Tests qui figent ces valeurs ou textes (à revoir en phase B) : `fut175-oso-eau`
 | Résolution | 10 m (le produit existe aussi à 20 m, et en vecteur dérivé du 20 m) | Theia, Cerema |
 | Pixel à 10 m **vérifié** | pixels classés × 100 m² / surface des contours : **médiane 1,0000** (p5 0,999 ; p95 1,0002) | ce rapport |
 | Nomenclature | 1-4 urbanisé, 5-12 cultures annuelles, **13 prairies, 14 vergers, 15 vignes (rangés par OSO en « terre agricole, culture pérenne »)**, 16-17 forêts, 18 pelouses, 19 landes, 20 minéral, 21 plages et dunes, 22 glaciers, 23 eau | schéma officiel Theia (`nomenclature_oso.png`) |
-| « 24 classes » | Theia : « depuis 2018, nomenclature en 24 classes ». Le Cerema liste « Autres » en dernier poste, sans code. Le schéma n'en montre que 23. **Le code et le contenu de « Autres » ne sont pas établis.** | Theia, Cerema |
-| Précision publiée | Évaluation SIRS **de 2016** : précision globale 81-92 % selon la nomenclature. Le Cerema signale une « distinction peu fiable » entre les quatre classes urbaines. **Aucune précision 2023 trouvée** (page produit 2023 en 404) | Cerema |
+| « 24 classes » | Theia : « depuis 2018, nomenclature en 24 classes ». Le Cerema liste « Autres » en dernier poste, sans code. Le schéma n'en montre que 23. *Corrigé le 10/11 : les métadonnées du produit 2023 nomment la classe 24 « serres » ; elle couvre 226 km² (§ 18.2).* | Theia, Cerema, métadonnées |
+| Précision publiée | Évaluation SIRS **de 2016** : précision globale 81-92 % selon la nomenclature. Le Cerema signale une « distinction peu fiable » entre les quatre classes urbaines. *Corrigé le 10/11 : les métadonnées 2023 publient une précision globale de 0,874, un kappa de 0,847 et un F-score par classe (§ 18.3).* | Cerema, métadonnées |
 | Licence | Theia : « Etalab 2.0 ». Cerema : « Open Database, compatible avec la licence Etalab ». Le dépôt Recherche Data Gouv redistribue en Etalab 2.0 en citant l'ODbL d'origine | §3.3 |
 | Édition 2024 | Non annoncée (Theia : « À venir », sans date) | Theia |
 
@@ -151,10 +162,11 @@ Elle mêle trois choses : pixels non classés (0, 255, le code « Autres »), ho
 | Communes sous 99 % / 95 % / 90 % | 327 / 35 / 2 |
 | Minimum | Héberville (76) 84,8 %, Saint-Michel-en-l'Herm (85) 88,2 %, Rognonas (13) 90,1 % |
 
-Les déficits forment des **grappes** (Pays de Caux, nord des Bouches-du-Rhône, marais poitevin) : c'est la signature
-de trous d'acquisition ou de tuiles, pas de l'effet de bord. Pour ces communes, la part manquante est **inconnue,
-pas nulle**. Le calcul actuel la retire du dénominateur sans le dire. **Non vérifié** : la répartition de ce déficit
-entre 0, 255 et « Autres » (il faut le raster).
+Les déficits forment des **grappes** (Pays de Caux, nord des Bouches-du-Rhône, marais poitevin), et non l'effet de
+bord. Le calcul actuel les retire du dénominateur sans le dire. *Corrigé le 10/11 : l'hypothèse de « trous
+d'acquisition » était fausse. Le raster montre que ces déficits sont des **serres** (classe 24, exclue par
+`populate-nature.py`) ; les pixels de valeur 0 sous un contour sont quasi absents, et la valeur 255 n'existe pas
+(§ 18.2).*
 
 ### 3.3 Obtenir le raster : intégrité, volume, licence
 
@@ -163,8 +175,8 @@ entre 0, 255 et « Autres » (il faut le raster).
 | Copie Recherche Data Gouv | DOI 10.57745/UZ2NJ7, version 1.4 (18/02/2026), dépôt 12/09/2025, INRAE RiverLy, « redistribution **non officielle** » |
 | Fichier 2023 | `OSO_20230101_RASTER.tar.gz`, **5 624 505 462 octets** (5,24 Gio), **MD5 `bc6deea29081876a9be88c76b92d59ec`** (somme calculée par l'entrepôt sur la copie, pas une somme publiée par le producteur) |
 | Source officielle | GEODES (CNES), depuis janvier 2025. DOI 10.24400/329360/OSO_20230101_RASTER, dont la page d'atterrissage est **en 404** |
-| Contenu de l'archive | **Non vérifié** : la liste des fichiers (classification, confiance, validité, tuiles ?) exige l'archive entière |
-| Espace local | **4,3 Gio libres** sur 466 Gio : l'archive ne tient pas, ni décompressée ni compressée |
+| Contenu de l'archive | *Corrigé le 10/11 : téléchargée, MD5 conforme ; trois GeoTIFF nationaux (classification 773 Mo, confiance 4,5 Go, validité 662 Mo) et un XML de métadonnées (§ 18.1)* |
+| Espace local | 4,3 Gio libres le 09/11 ; *36 Gio le 10/11, après le nettoyage du porteur* |
 | Volume à prévoir | archive 5,6 Go + extraction (raster national 10 m ≈ 5,5 milliards de pixels en uint8, soit ~5,5 Go non compressé par couche, moins en GeoTIFF compressé) : **prévoir 20 Go** de marge |
 | Licence, dérivés | Données d'origine en **ODbL 1.0** selon le Cerema, Etalab 2.0 selon Theia. L'ODbL distingue l'« œuvre produite » (attribution) de la « base dérivée » (partage à l'identique si elle est rendue publique). L'index de futur•e est une base dérivée par commune. **À trancher** : publier sous Etalab avec attribution « OSO – THEIA / CES OSO, CNES/GEODES », ou faire valider la lecture ODbL |
 | Intégrité | Vérifier le MD5 de l'entrepôt, puis le contrôle croisé : les comptes de pixels recalculés doivent redonner **à l'identique** les 34 743 `tot_px` / `nat_px` du cache (empreinte `2a988102…`). C'est la preuve que c'est le même raster |
@@ -308,7 +320,7 @@ global d'Où vivre dépend des autres critères : ces chiffres bornent l'effet d
 
 | Mesure | Contour, eau comprise (aujourd'hui) | Terres (hors eau) | Écart |
 |---|---|---|---|
-| Forêt ≥ 70 % (`BOISEMENT_NOTABLE`) | 3 258 (9,38 %) | 3 342 (9,62 %) | +84 (77 sans arrondi), aucune sortie |
+| Forêt ≥ 70 % (`BOISEMENT_NOTABLE`) | 3 258 (9,38 %) | 3 342 (9,62 %) | +84 (77 sans arrondi), aucune sortie — *corrigé le 10/11, compte exact : 3 338 (9,61 %), +82 / −2 (§ 22)* |
 | Seuil du décile supérieur de forêt | 68,6 % | 69,2 % | — |
 | `rural_agricole` (agricole ≥ 30 %, densité < 1 500) | 16 970 | 17 110 | 140 |
 | `rural_forestier` (forêt ≥ 35 %, densité < 1 500) | 13 380 | 13 515 | 135 |
@@ -416,8 +428,8 @@ entiers** :
 | `landes_pelouses` | 18-19 | terre |
 | `mineral_dunes_glaciers` | 20-22 | terre |
 | `eau` | 23 | **ni terre, ni nature** |
-| `autres` | code « Autres », s'il existe dans le raster | non classé, compté |
-| `non_classe` | 0, 255, hors emprise | non classé, compté |
+| `autres` | code « Autres », s'il existe dans le raster | non classé, compté — *remplacé le 10/11 par `serres` (classe 24, terre), § 27* |
+| `non_classe` | 0, 255, hors emprise | non classé, compté — *remplacé le 10/11 par `non_mesure` (valeur 0 ; 255 absent), § 27* |
 | `surface_contour` | m² du contour (Lambert-93) | référence de couverture |
 
 Dénominateurs, toujours nommés : `terres` = somme des sept postes terrestres ; `cartographiee` = terres + eau ;
@@ -631,7 +643,11 @@ la phase B ne démarre pas.
 
 ---
 
-## 15. Ce qui reste incertain
+## 15. Ce qui reste incertain (09/11 ; état à jour au § 28)
+
+*Levés le 10/11 par le raster : code de la classe 24 (serres) ; répartition du déficit de couverture (serres, pas de
+no-data) ; contenu de l'archive ; précision 2023 ; origine du point de référence. Restent ouverts : les comptes exacts
+hors eau (B1), l'écart exact B → C (B2), les 48 PLM (B1), la part hors France des disques (B2) et la licence.*
 
 | Point | Pourquoi | Comment le lever |
 |---|---|---|
@@ -646,3 +662,392 @@ la phase B ne démarre pas.
 | Origine du point de référence DRIAS | non documentée dans le dépôt | documentation DRIAS ou remplacement par un point officiel (chef-lieu) en ticket séparé |
 | Lecture juridique ODbL / Etalab | deux sources officielles divergent | décision B0 |
 | Arrondis de FUT-183 (238 / 252) | hors périmètre | FUT-183 |
+
+
+---
+
+# Partie II — Reprise après les arbitrages du porteur (10/11/2026)
+
+Les arbitrages B0 du porteur, la libération d'espace disque (36 Gio) et l'autorisation de télécharger ont permis
+d'obtenir le raster officiel. Il a servi uniquement à **inspecter la source** et à **vérifier des échantillons** :
+aucun recalcul national des données de l'application, aucun changement de score, de seuil ni de catégorie, aucune
+écriture distante. Scripts ajoutés : `point_reference.py`, `inspecter_raster.py`, `point_echantillon_raster.py`.
+
+Stockage : `~/Documents/futuree-oso/` (hors dépôt, hors dossiers temporaires) ; archive conservée (5,6 Go), seuls la
+classification (`OCS_2023.tif`, 773 Mo) et les métadonnées ont été extraits.
+
+## 16. Les cinq arbitrages, tels qu'appliqués dans ce rapport
+
+| | Décision du porteur | Conséquence dans ce rapport | Reste ouvert |
+|---|---|---|---|
+| A | C1 privilégiée, sous condition d'un point pertinent ; B en repli nommé « secteur », jamais « rayon » | § 17 : le point actuel est écarté ; recommandation **secteur habité** | validation du libellé |
+| B | Prairies maintenues dans l'indicateur pour FUT-182 ; doctrine et pédagogie dans FUT-190 | § 20 : poste distinct, définition écrite, libellés exagérés recensés ; 13 472 catégories inchangées | FUT-190 |
+| C | 48 périmètres PLM calculés ; arrondissements hors de l'univers des rangs ; pas de transfert de grain | § 21 : règles de calcul et contrôles | — |
+| D | Forêt rapportée aux terres ; seuils sur valeurs non arrondies ; dénominateur toujours dit | § 22 : compte **exact** 3 338 communes (9,61 %) | — |
+| E | Licence à sécuriser avant publication | § 19 : Etalab 2.0 chez le producteur et le distributeur ; trois ambiguïtés, une confirmation écrite à obtenir | confirmation CNES / Theia |
+
+## 17. Le point de référence de C1
+
+### 17.1 Ce qu'est le point actuel (exact)
+
+| Constat | Valeur |
+|---|---|
+| Point de l'index = `centre` de geo.api.gouv.fr (4 décimales) | **34 743 / 34 743** |
+| Distance au centre du rectangle englobant du contour | médiane **19 m**, p90 69 m, p99 237 m |
+| Distance au centroïde du contour | médiane 241 m, p99 1,15 km, max 13,9 km |
+| Distance à la mairie (`mairie` geo.api.gouv.fr) | médiane 821 m, p90 1,9 km, p99 3,9 km, max 14,9 km (Arles) ; > 2 km pour 2 982 communes, > 5 km pour 136 |
+| Points hors du contour | 483, tous à moins de 50 m |
+
+Le point est donc, à quelques mètres près, **le centre du rectangle qui englobe la commune**. Il n'a pas de
+signification résidentielle : à Granville, il tombe à 13 km de la ville, vers l'archipel de Chausey (45 % du disque en
+mer non cartographiée) ; à Hyères, entre la ville et les îles ; à Arles, en Camargue.
+
+### 17.2 Les options
+
+| Option | Disponibilité nationale | Ce qu'elle représente | Défaut |
+|---|---|---|---|
+| Point actuel (`centre` geo.api) | 34 743 | centre du rectangle englobant | géométrique, sans lien avec l'habitat ; aberrant pour les communes à îles ou en croissant |
+| Centroïde du contour | calculable partout | centre de gravité de la surface | idem ; 140 centroïdes à plus de 50 m hors du contour |
+| Mairie (`mairie` geo.api) | 34 743 (8 à plus de 50 m hors contour) | chef-lieu administratif | un seul bourg ; les communes nouvelles et multipolaires sont mal représentées (Arles, Sèvremoine, Chemillé-en-Anjou) ; source à documenter |
+| Centre bâti (barycentre des pixels OSO bâtis 1-2) | calculable partout, **même raster** | centre de gravité de l'habitat | un seul point ; pour une commune à plusieurs bourgs, il peut tomber entre eux |
+| **Secteur habité** (moyenne, sur les cellules bâties de la commune, de la composition dans 15 km autour de chacune) | calculable partout, **même raster** | **l'environnement moyen autour des lieux où l'on habite** dans la commune | un peu plus long à dire ; poids = surface bâtie, pas population (Filosofi 200 m serait plus juste mais ajoute une source, un millésime et des carreaux confidentiels) |
+
+### 17.3 Mesure sur le raster réel (24 cas extrêmes, part naturelle des terres dans 15 km)
+
+| Commune | Point actuel | Mairie | Centroïde | Centre bâti | **Secteur habité** (p10-p90 des lieux bâtis) |
+|---|---|---|---|---|---|
+| Arles | 54,4 | 44,2 | 55,3 | 49,6 | **49,6** (39,4-62,8) |
+| Saintes-Maries-de-la-Mer | 55,4 | 68,1 | 54,5 | 56,2 | **57,7** (48,6-65,4) |
+| Granville | 43,2 (45 % du disque non mesuré) | 59,3 | 59,6 | 59,5 | **59,6** |
+| Hyères | 72,9 | 60,9 | 66,1 | 61,6 | **61,2** (55,4-68,6) |
+| Sète | 43,7 | 52,0 | 45,5 | 50,3 | **50,4** (37,1-55,5) |
+| Lège-Cap-Ferret | 84,7 | 91,2 | 87,3 | 84,0 | **86,0** (79,0-91,3) |
+| La Teste-de-Buch | 85,8 | 82,8 | 87,0 | 85,2 | **84,8** |
+| Paris | 17,6 | 17,5 | 18,0 | 18,0 | **19,2** (16,1-24,1) |
+| Marseille | 62,6 | 64,0 | 64,0 | 64,6 | **62,4** (57,1-65,4) |
+| Lyon | 38,1 | 37,9 | 38,0 | 37,5 | **37,6** |
+| Fontainebleau, Lille, Bordeaux, Annecy, Chamonix, Corte, Bony, Châtelaillon, Briançon, Biscarrosse, Gardanne, Cherbourg-en-Cotentin, Chemillé-en-Anjou | écarts ≤ 1,5 point entre toutes les options | | | | |
+| L'Île-d'Yeu | 71,0 (68 % du disque en mer non cartographiée) | 71,0 | 71,0 | 71,0 | **71,0** : l'île seule |
+
+Au niveau national (C1 approché sur contours, `point_reference.py`), remplacer le point actuel par la mairie change
+15 537 scores, dont **27 de 10 points ou plus**, et **425 verdicts de rang** : le choix du point pèse autant que le
+passage de B à C1 (442). Ce n'est donc pas un détail technique.
+
+### 17.4 Recommandation
+
+**Secteur habité**, calculé sur le même raster : pour chaque cellule de 100 m de la commune qui contient du bâti
+(classes 1-2), la composition des sols dans un disque de 15 km ; puis la moyenne, pondérée par la surface bâtie de la
+cellule. On publie aussi la dispersion (p10-p90), qui dit au lecteur quand la commune contient des situations très
+différentes (Arles : de 39 à 63 %).
+
+Pourquoi elle, du point de vue du lecteur : la question posée est « quels sols entourent l'endroit où l'on vit dans
+cette commune ? ». Le secteur habité y répond sans choisir arbitrairement un bourg, il ne tombe jamais en mer ni en
+Camargue vide, et il se confond avec le centre bâti dans les communes à un seul bourg (l'immense majorité). Il
+n'ajoute aucune source.
+
+Repli, dans cet ordre : **centre bâti** (un point, même raster, plus simple à dire) ; **B** (communes entières, mot
+« secteur ») si le calcul raster devait être différé. Le point actuel et la mairie sont déconseillés.
+
+Libellé proposé, sans promesse d'accès : « Dans un rayon de 15 km autour des zones bâties de la commune, X % des terres
+sont couvertes de forêts, prairies, landes et autres milieux naturels (eau à part). Cette part décrit les sols ; elle
+ne dit ni la distance à un espace naturel, ni son accessibilité, ni la qualité des milieux. »
+
+## 18. Ce que le raster a établi (téléchargé et vérifié le 10/11/2026)
+
+### 18.1 Fichier et en-tête
+
+| Point | Constat |
+|---|---|
+| Archive | `OSO_20230101_RASTER.tar.gz`, 5 624 505 462 octets, **MD5 `bc6deea29081876a9be88c76b92d59ec` conforme** à celui de l'entrepôt ; téléchargée en 136 s |
+| Contenu | `DATA/OCS_2023.tif` (classification, 773 Mo), `DATA/Confidence_OCS_2023.tif` (4,5 Go), `DATA/Validity_OCS_2023.tif` (662 Mo), `PUBLIC_METADATA/OSO_20230101_RASTER_V1-0_MTD_ALL.xml` |
+| `OCS_2023.tif` | sha256 `331adf56…f8f90c` ; GeoTIFF uint8, LZW, en bandes d'une ligne ; **EPSG:2154 (Lambert-93), pas de 10 m**, 126 813 × 119 159 pixels ; **aucune valeur no-data déclarée** ; palette 0-30 et 255 |
+| Métadonnées | produit `OSO_20230101_RASTER_V1-0`, niveau L3B-OSO, produit le 20/09/2024 par MUSCATE/THEIA. **Elles annoncent à tort « WGS 84 / UTM zone 15N »** : le fichier est bien en Lambert-93 (à signaler au producteur, sans effet pour nous) |
+| Licence dans le fichier ou les métadonnées | **aucune** |
+
+### 18.2 Nomenclature et valeurs réellement présentes
+
+Histogramme national : classes 1-23 sur 581 681 km² ; **classe 24 sur 226,4 km²** ; valeur 0 sur 929 184 km²
+(hors emprise) ; **aucune valeur 255, aucune autre valeur**.
+
+**La 24e classe existe : ce sont les serres** (métadonnées officielles, `classe="24"`, « serres »). Ce n'est pas
+« Autres ». `populate-nature.py` ne lit que 1-23 : il a retiré les serres du numérateur et du dénominateur, sans
+trace. C'est ce qui explique les grappes du § 3.2 (Châteaurenard, Rognonas, Eyragues, Saint-Michel-en-l'Herm, Pays de
+Caux) : il ne s'agit **pas** de pixels non classés. Dans l'échantillon de 1 357 communes, les contours ne contiennent
+quasiment aucun pixel 0 (11 communes, au plus 122 pixels, soit 1,2 ha) : sous un contour communal, la couverture est
+complète, serres comprises.
+
+Réserve sur les serres : leur F-score officiel est de 0,27 (rappel 0,17). Héberville (76), 15 % de « serres » dans le
+Pays de Caux, est peu plausible ; Rognonas ou Châteaurenard le sont. Le poste doit exister, mais il est fragile.
+
+### 18.3 Précision publiée pour 2023 (métadonnées officielles)
+
+Précision globale **0,874**, kappa **0,847**. F-scores utiles à futur•e :
+
+| Classe | F-score | Lecture |
+|---|---|---|
+| Forêts de feuillus / de conifères | 0,94 / 0,91 | fiables |
+| Eau | 0,86 (rappel 0,78) | l'eau est plutôt sous-détectée |
+| Bâti diffus | 0,81 | correct |
+| **Bâti dense** | **0,22** | confondu avec le diffus : jamais distinguer les deux |
+| **Zones industrielles et commerciales** | **0,12** | quasi inutilisable seul |
+| Routes | 0,65 | — |
+| **Prairies** | **0,73** | confondues avec céréales et maïs |
+| Pelouses / landes / surfaces minérales | 0,62 / 0,60 / 0,59 | moyennes |
+| Plages et dunes | 0,34 | fragiles |
+| Serres | 0,27 | fragiles |
+
+Conséquences : regrouper l'urbanisé (1-4), comme le recommande déjà le Cerema ; ne pas afficher de chiffre au dixième
+comme s'il était précis à ce niveau, et écrire la précision dans les limites ; l'indicateur naturel s'appuie en
+grande partie sur la forêt (fiable) et les prairies (moyenne). Cette précision est une évaluation **nationale** ; la
+précision par commune n'est pas publiée. La couche `Confidence_OCS_2023.tif` (non extraite) donne, par pixel, la part
+des votes de la classe retenue : elle permettrait un indicateur de confiance local en phase B, si on le juge utile.
+
+### 18.4 Preuve d'identité avec le cache
+
+Sur **1 357 communes** (24 cas témoins, les communes à couverture faible, 200 tirées au hasard à graine fixe, et les
+1 140 communes dont la forêt des terres est estimée entre 67 et 73 %), les comptes recalculés avec la méthode de
+`populate-nature.py` sont **identiques au pixel près** au cache (`tot_px` et `nat_px`) : **1 357 / 1 357**. Le raster
+téléchargé est donc celui qui a produit l'index. La preuve exhaustive (34 743 communes) reste une étape de B1.
+
+### 18.5 Ce que le raster ne change pas
+
+Toutes les mesures « eau comprise » de la partie I sont exactes. Les estimations « hors eau » restent des estimations à
+± 1 point de score (§ 6), jusqu'au recalcul B1. Les chiffres de C restent des ordres de grandeur.
+
+## 19. Licence
+
+### 19.1 Ce que disent les sources, du producteur au réutilisateur
+
+| Source | Statut | Ce qu'elle dit |
+|---|---|---|
+| Fiche produit GEODES « OSO raster L3B » (CNES, distributeur officiel) | officielle | « Licence : **Etalab 2.0** » |
+| Page projet Theia (pôle producteur) | officielle | « Licence **Etalab 2.0** » |
+| Mentions légales du site GEODES | officielle, **site entier** | reproduction, extraction et œuvres dérivées « formellement et strictement interdits » hors copie privée ou éducative ; mention « © CNES – Tous droits réservés » |
+| Catalogue STAC GEODES (`THEIA_OSO_RASTER_L3B`) | officiel, machine | **aucun champ de licence** |
+| Fichier et métadonnées XML du produit | officiels | **aucune licence** |
+| Portail de l'artificialisation (Cerema, État) | officiel, non producteur | « Licence Open Database, **compatible** avec la licence Etalab » |
+| Recherche Data Gouv (INRAE, copie utilisée) | **non officiel** | redistribue en Etalab 2.0, en citant l'ODbL d'origine |
+| Pages OSO du CESBIO | — | gabarits vides, aucune licence |
+| Texte de la Licence Ouverte 2.0 | officiel | compatible avec l'OGL, CC-BY et ODC-BY ; **l'ODbL n'est pas citée** |
+
+Lecture : **le producteur et le distributeur officiels indiquent Etalab 2.0** pour ce produit. La mention ODbL vient
+du Cerema, qui n'est pas producteur, et l'affirmation de compatibilité n'est pas étayée par le texte de la Licence
+Ouverte. Le fichier que nous utilisons est une copie de l'entrepôt de recherche ; il ne peut pas changer de licence :
+c'est la licence du producteur qui s'applique au contenu.
+
+### 19.2 Raster et données agrégées
+
+- **Sous Etalab 2.0** (lecture la mieux fondée) : réutilisation libre, y compris commerciale, des « informations
+  dérivées » (nos parts par commune et par secteur, l'index). Obligation : mentionner la source (au minimum le nom du
+  concédant) et la date de dernière mise à jour, sans suggérer d'aval officiel. Proposition :
+  « Occupation des sols : OSO 2023, THEIA / CES OSO (CESBIO), CNES-GEODES, mise à jour du 20/09/2024, Licence Ouverte 2.0 ;
+  traitements futur•e ». Aucune obligation de partage à l'identique.
+- **Sous ODbL** (si elle s'appliquait) : afficher des parts sur le site est une « œuvre produite » (mention de la
+  base et de la licence obligatoire, pas de partage). Mais l'index par commune est une **base dérivée**, et
+  **le dépôt `futuree-app/future-e` est public** : l'index `data/comparateur-index.json.gz` est donc déjà diffusé
+  publiquement. Sous ODbL, il devrait l'être sous ODbL (ou une licence compatible), avec une offre de la base dérivée
+  (art. 4.4 et 4.6).
+- **Le raster brut** : nous ne le redistribuons pas (hors dépôt, hors runtime). Rien à faire.
+
+### 19.3 Ambiguïtés et confirmation à obtenir avant publication
+
+1. Divergence Etalab 2.0 (producteur, distributeur) / ODbL (Cerema).
+2. Mentions légales du site GEODES, plus restrictives que la licence de la fiche produit. Lecture habituelle : la
+   licence propre d'un produit prime sur les conditions générales du site, mais ce n'est écrit nulle part.
+3. Aucune licence dans le fichier ni dans le catalogue machine.
+
+Confirmation à obtenir : **un courriel du CNES / Theia** (adresse donnée par Theia pour l'accès aux données :
+`expgdh@cnes.fr`) confirmant que les cartes OSO 2023 sont sous Licence Ouverte 2.0, que les mentions générales du
+site GEODES ne s'appliquent pas aux produits sous licence ouverte, et la formule d'attribution attendue. Tant qu'elle
+manque : n'ajouter aucune nouvelle valeur OSO publiée (la phase B peut calculer, pas publier), et préparer la mention
+d'attribution. Je ne suis pas juriste ; ce qui précède est une lecture des textes, à faire valider si le doute
+persiste.
+
+## 20. Prairies et libellés (arbitrage B)
+
+Le contrat garde `prairies` comme poste distinct (§ 27) et chaque définition le nomme. L'indicateur « espaces
+naturels » de futur•e est une **convention** : il compte les prairies, que le producteur range dans l'agricole
+(culture pérenne), et que sa propre évaluation confond avec les céréales et le maïs (F-score 0,73). Aucune des 13 472
+catégories concernées ne change dans FUT-182.
+
+Libellés qui affirment plus que la donnée (recensement du code au 10/11/2026) :
+
+| Lieu | Libellé | Ce qui est excessif | Gravité | Traitement proposé |
+|---|---|---|---|---|
+| `comparateur-vie.ts:1190`, promesse de signature | « Pour vivre **au plus près de la nature**. » | proximité et accès, non mesurés ; peut viser une commune dont le secteur est surtout de l'eau | haute | lot L0 (§ 24) : « Pour un secteur où les espaces naturels occupent une large part des terres. » ou retrait |
+| `comparateur-vie.ts:1188` | « Pour un cadre rural **préservé**, loin de l'agitation. » | « préservé » suggère une protection ou une qualité écologique ; déclenché par nature **ou** calme | haute | lot L0 : retirer « préservé » |
+| `accueil/recits.ts:413-417`, carte « Nature à… » | « espaces agricoles et nature **rythment le quotidien** » ; « façonnent le cadre de vie » ; source « OSM / IGN » | effet sur la vie quotidienne non mesuré ; source fausse | haute (source) | lot L0 (§ 24) |
+| `comparateur-labels.ts:64`, aide de la priorité | « Forêts, prairies et milieux naturels **autour**. » | tait l'eau, encore comptée ; « autour » flou | moyenne | B3 (dépend de la méthode) |
+| `comparateur-labels.ts:31` | « des espaces naturels **à proximité** » | formule de la priorité du lecteur : acceptable si la mesure n'est pas présentée comme une distance | faible | FUT-190 |
+| `parse/route.ts:335`, interprétation de la demande | « la campagne », « du vert » → critère `nature` | un lecteur qui cherche « la campagne » est classé sur un indicateur qui **exclut les cultures** : la Beauce y est au plus bas | haute (produit) | FUT-190 : la campagne n'est pas la nature |
+| `trait-distinctif.ts:42` | « les plus **entourées** d'espaces naturels » | communes seules, eau comprise | moyenne (non affiché) | B3 |
+| `territoire/facts.ts:109` | « **Forte présence naturelle** » | correct si la définition (prairies comprises) est dite ; elle l'est sur la carte et dans le contrat de synthèse | faible | FUT-190 (pédagogie) |
+| `mismatch-facts.ts:105` | « la proximité des espaces naturels » (priorité du lecteur) | reprend la demande, pas la mesure ; la limitation suit | faible | B3 |
+| Libellés transitoires FUT-178 (« ou d'eau », « secteur », « eau comprise ») | — | justes aujourd'hui, faux après retrait de l'eau | — | B3, réécriture obligatoire |
+
+Hors les cas du tableau, aucune surface ne tire de la mesure OSO une affirmation de biodiversité ou d'accès ; la synthèse Territoire est gardée par les contrôles de FUT-177 (`synthesis-checks.ts`).
+
+## 21. Paris, Lyon, Marseille (arbitrage C)
+
+Les règles du § 7.3 sont confirmées, avec trois précisions :
+1. **Comptes au pixel** : la commune entière et ses arrondissements sont mesurés sur leurs contours ; le test
+   `Σ arrondissements = commune` se fait au pixel près (la partition géométrique est exacte, § 7.1).
+2. **Secteurs** : le secteur habité se calcule sur la grille de pixels, jamais en additionnant des valeurs communales ;
+   une commune voisine de Paris compte donc les pixels de Paris une seule fois, quel que soit le découpage.
+3. **Grain affiché** : `scale: "arrondissement"` pour les 45, `commune` pour les 3. Aucune part de Paris attribuée au
+   11e, aucune part du 11e présentée comme celle de Paris. Univers des rangs inchangé (34 743 communes) : les 48
+   périmètres n'ont ni `score` ni bande `nature`, et un test l'impose.
+
+Valeurs de contrôle (raster, part naturelle des terres dans 15 km autour des zones bâties) : Paris 19,2 %, Lyon
+37,6 %, Marseille 62,4 % (de 57 à 65 % selon les lieux bâtis). Les compositions communales des 48 périmètres ne sont pas
+calculées dans cette phase.
+
+## 22. Forêt et seuil de 70 % (arbitrage D)
+
+Compte **exact** (raster pour les 1 140 communes entre 67 et 73 %, estimation pour les autres, dont l'erreur mesurée
+dans la fenêtre ne dépasse pas 0,09 point) :
+
+| | Règle actuelle (forêt arrondie au dixième, % du contour, eau comprise) | Règle validée (forêt / terres, avant arrondi) |
+|---|---|---|
+| Communes ≥ 70 % | 3 258 (9,38 %) | **3 338 (9,61 %)** |
+| Entrées / sorties | — | **+82 / −2** |
+
+Les deux sorties (Trèves, 69,957 % ; Les Planches-près-Arbois, 69,992 %) passaient le seuil **à cause de l'arrondi**
+de la règle actuelle (70,0 affiché). Huit communes changeraient de côté selon que le seuil s'applique à la valeur
+arrondie ou exacte (de 69,923 à 70,027) : c'est exactement le cas que l'arbitrage D règle.
+
+« Parmi les 10 % de communes les plus boisées » reste **vraie** : 9,61 % des communes passent le seuil. La phrase
+doit être produite par le calcul (part effective ≤ 10 %), pas recopiée. Texte de la preuve : « la forêt couvre X % de
+ses terres (eau exclue) ». Note de méthode : ce compte rapporte la forêt aux classes 1-23 hors eau ; avec les serres
+dans les terres (contrat § 27), l'écart est négligeable pour des communes forestières, et sera rejoué en B1.
+
+## 23. Couverture et données manquantes
+
+| Situation | Constat | Traitement |
+|---|---|---|
+| Pixels de valeur 0 sous un contour communal | quasi nuls (11 communes de l'échantillon, ≤ 1,2 ha) | compter ; si > 1 % du contour : statut `couverture_partielle` et chiffre de couverture affiché |
+| Serres (24) | 226 km² ; jusqu'à 15 % d'une commune | **compter dans les terres**, poste `serres` (rattaché aux cultures), jamais exclu |
+| Disque en mer au-delà de l'emprise du raster | Île-d'Yeu 68 %, Granville au point actuel 45 %, Sète 23 % | non mesuré : ni nature ni terre ; la part est rapportée (`part_non_mesuree`) |
+| Disque hors de France | le raster couvre ~33 000 km² au-delà des contours français, sans garantie de qualité hors de France | décision B0 : limiter aux pixels sous un contour communal français (recommandé, même univers que les communes) ; la part hors France devient non mesurée |
+| Eau dans le disque | mesurée | toujours à part, jamais naturelle |
+| Seuil d'affichage | — | une mesure dont plus de **25 %** du disque est non mesuré reste affichée avec sa part non mesurée ; au-delà de **50 %**, mention explicite « mesure partielle » (Île-d'Yeu : « l'île seule ») |
+| Lecture | — | **une absence de mesure n'est jamais une absence de nature** : pas de 0, pas de classement en bas de distribution |
+
+## 24. Corrections indépendantes du raster : lot L0
+
+Livrable avant B1, sur `main`, avec sa propre contre-revue. Il ne touche ni l'index, ni les scores, ni les seuils.
+
+| # | Correction | Fichiers | Version / empreinte | Tests |
+|---|---|---|---|---|
+| L0-1 | AskFuture : la ligne « Taux boisement (%) » dit sa source et sa limite (« ADEME, définition et millésime non documentés ; la forêt de la carte Territoire est celle d'OSO, elle ne se compare pas »), ou disparaît quand OSO existe (même doctrine que D1 sur Territoire) | `ask/system-prompt.ts` | prompt seulement ; pas de cache persistant | test de la ligne ; gel FUT-147 à vérifier |
+| L0-2 | Projet : la preuve du rang « Espaces naturels » porte `grain: "secteur"` au lieu de `"commune"` (le type l'admet déjà) | `mismatch-rules.ts`, `alignment-rules.ts` | **pas de `engine-9`** : même règle, même issue, même rang (doctrine FUT-96) ; les dossiers figés gardent leur preuve | tests mismatch/alignment, relecture d'un artefact figé à l'identique |
+| L0-3 | Accueil, carte « Nature à… » : source exacte par variante (commune classée « Mer » au titre de la loi Littoral ; altitude et proximité du relief de l'index ; OSO 2023 pour la variante rurale) et phrases sans effet non mesuré (« rythment le quotidien », « façonnent le cadre de vie ») | `accueil/recits.ts` | aucune ; à recetter avec FUT-50 | test de source par variante |
+| L0-4 | Promesses d'Où vivre : retirer « au plus près de la nature » et « préservé » (§ 20) | `comparateur-vie.ts:1188-1190` | aucune (pas de cache) | test de texte |
+| L0-5 | Carte Territoire : source de face « OSO · ADEME » → « OSO » quand la carte n'affiche que l'OSO | `QuartierClimatData.tsx` | aucune (rendu) | test de rendu |
+
+Estimation : 1 à 1,5 jour, plus la contre-revue. Le reste (libellés « secteur », trait distinctif, limite du fait
+15 km) attend B3, sinon on écrirait deux fois les mêmes textes.
+
+## 25. FUT-183 et la prochaine montée du contrat de synthèse
+
+FUT-183 (PR #145, fusionnée) affiche les parts au dixième ; la consigne du modèle autorise encore l'arrondi
+(« 38 % pour 37,9 », `synthesis-contract.ts:353`), d'où « 45 % » possible à Rochefort sous « Occupation mixte ».
+
+Plan : **une seule montée, `territoire-synthese@8`, dans le lot B3**, qui porte à la fois :
+1. la consigne ciblée : « les parts d'occupation des sols se citent au dixième, telles qu'écrites dans le payload ;
+   jamais arrondies vers un seuil de catégorie » ;
+2. un contrôle déterministe dans `synthesis-checks.ts` : tout pourcentage cité à côté d'un poste OSO doit égaler une
+   valeur du payload au dixième, ou être refusé ; refus spécifique d'un entier qui franchit 20, 45 ou 50 quand la
+   catégorie dit l'inverse ;
+3. les tests de frontière : 44,9 / 45,0 ; 49,9 / 50,0 ; 19,9 / 20,0 (Rochefort réel), y compris sur le repli ;
+4. les nouveaux faits de FUT-182 (secteur habité, eau, couverture, PLM) dans la projection.
+
+Anciennes synthèses : `@1` à `@7` restent en base (orphelines, jamais servies, clé = empreinte + contrat). Aucune
+suppression. Coût : une génération par commune et horizon **à la consultation**, sous le garde de budget existant ; en
+base aujourd'hui, 16 communes, au plus ~96 appels. Avec `territoire-facts@3` dans le même déploiement, il n'y a qu'une
+invalidation.
+
+## 26. Préservation des dossiers et traçabilité
+
+| Élément | Règle |
+|---|---|
+| Artefacts `decision_artifact` (engine-1 à 8) | jamais réécrits ; relus à l'identique ; un test relit un artefact engine-1 contenant un fait nature |
+| Moteur | `engine-9` pour le boisement aux terres (change ce que le moteur conclut pour 84 communes) et les nouvelles bandes |
+| Rangs | nouvelle identité `mismatch-dist-AAAA-MM-JJ-nature`, une ligne ajoutée à `DISTRIBUTIONS_PUBLIEES` (registre en ajout seul) ; l'ancienne identité reste résoluble |
+| Registre Territoire | `territoire-facts@3` ; anciens snapshots conservés |
+| Index | `meta.oso` : source, sha256 de l'archive et du TIF, contours (sha256, date), méthode (`oso-comptes@1`, `oso-secteur-habite@1`), univers des rangs |
+| Présentation des anciens dossiers | une note contextualise la convention de création (comme `lectureInondationAnterieure`, FUT-127) : « Ce dossier a été établi le JJ/MM/AAAA, quand la part d'espaces naturels du secteur comptait l'eau et la forêt se rapportait au contour communal. » Rien n'est recalculé. |
+
+## 27. Contrat canonique révisé
+
+Changements par rapport au § 8 :
+
+1. **`serres` (classe 24)** remplace `autres` : poste terrestre, rattaché aux cultures, compté dans les terres.
+2. **`non_mesure`** (valeur 0, hors emprise, hors France si B0 le décide) remplace `non_classe` : jamais dans un
+   dénominateur, toujours rapporté.
+3. **Secteur** : `land.natural_share_sector` devient la mesure du **secteur habité** :
+   `{ valeur, p10, p90, part_non_mesuree, methode: "oso-secteur-habite@1", rayon_m: 15000, poids: "surface bâtie OSO (classes 1-2)" }` ;
+   drapeau `isolee` quand le disque ne contient aucune autre commune (Île-d'Yeu).
+4. **Précision** : chaque fait OSO porte la limite « classification satellitaire, précision globale 87 % (OSO 2023) ;
+   bâti dense, zones d'activité, plages, serres peu fiables isolément ».
+5. **Prairies** : poste distinct, inclus dans `naturel_terrestre` par convention, écrit dans la définition (« forêts,
+   prairies, landes et pelouses, roche, dunes et glaciers »).
+6. **Seuils** : toute comparaison à un seuil (forêt 70 %, catégories 20 / 45 / 50, rural 30 / 35) se fait sur la valeur
+   calculée depuis les comptes, avant arrondi ; l'affichage arrondit au dixième (FUT-183).
+7. **Licence et attribution** : champ `source.licence` et mention d'attribution, renseignés après la confirmation du
+   § 19.3.
+
+Tout le reste du § 8 est maintenu (dénominateurs nommés, absent ≠ zéro, ADEME à part, grains).
+
+## 28. Exact, estimé, ou raster requis
+
+| Résultat | Statut au 10/11/2026 |
+|---|---|
+| Reproduction de l'index, 2 465 omissions, communes seules, fixture, 1 880 traits, 332 catégories | **exact** |
+| Effets « eau comprise » (A → B) | **exact** |
+| Identité point de l'index = `centre` geo.api (34 743) ; distances aux autres points | **exact** |
+| Nomenclature 24 classes, serres, absence de 255, précision 2023 | **exact** (raster et métadonnées) |
+| Identité raster / cache | **exact sur 1 357 communes** ; exhaustif en B1 |
+| Forêt ≥ 70 % sur les terres : 3 338 (9,61 %), +82 / −2 | **exact** dans la fenêtre 67-73 %, borne d'erreur 0,09 point hors fenêtre |
+| Effets hors eau sur `radius_pct`, score, verdicts | **estimé** (± 1 point de score) → exact en B1 |
+| B → C1, C1 → C2, sensibilité au point (national) | **estimé** (surfaces homogènes) → exact en B2 |
+| Secteur habité, 24 cas | **exact** (raster, grille de 100 m) |
+| Secteur habité national, effets sur scores et verdicts | **raster requis** (B2) |
+| Compositions des 48 périmètres PLM | **raster requis** (B1) |
+| Part hors France et en mer des disques, national | **raster requis** (B2) |
+| Licence | **confirmation externe requise** |
+
+## 29. Séquençage final
+
+| Étape | Contenu | Sortie | Contrôle avant l'étape suivante |
+|---|---|---|---|
+| **L0** (indépendant) | § 24 | PR applicative courte | contre-revue ; aucun score ni index modifié |
+| **B1 — comptes** (offline) | script versionné `scripts/oso/comptes.py` : comptes de pixels 0-255 pour 34 743 communes + 48 PLM ; preuve d'identité exhaustive avec le cache ; sha256 des entrées | `data/oso/comptes-2023.json(.gz)` + rapport | identité 34 743/34 743 ; Σ arrondissements = commune au pixel ; aucune écriture dans l'index |
+| **B2 — secteur** (offline) | grille de 100 m (comptes par famille) ; disque de 15 km par FFT ; secteur habité (valeur, p10-p90, part non mesurée) ; contrôle par masque exact sur 50 communes | `data/oso/secteur-2023.json(.gz)` + tableau avant/après national (scores, rangs, verdicts, catégories, forêt) | **contre-revue des chiffres nationaux** ; libellés validés par le porteur |
+| **B3 — alignement** (une PR) | index `nature` v2 ; `territoire-facts@3` ; `territoire-synthese@8` (+ FUT-183) ; `engine-9` ; identité de rang ; Où vivre, /qna, Projet, accueil, AskFuture ; réécriture des textes FUT-178 | PR applicative | tests du § 12 et § 25 ; recette sur l'environnement de test ; contre-revue ; pas de régénération proactive |
+| **Publication** | déploiement | — | licence confirmée (§ 19.3) |
+
+Recette (en plus du § 12.12-14) : Granville, Hyères, Lège-Cap-Ferret, Sète et Arles sous les quatre points (le
+secteur habité doit rester dans la dispersion p10-p90) ; Héberville et Rognonas (serres comptées) ; Trèves et Les
+Planches-en-Montagne (sorties du seuil de 70 %) ; Boulogne-Billancourt et Montreuil (Paris compté une fois) ; Paris =
+Σ 20 arrondissements ; aucun arrondissement dans l'univers des rangs ; aucun libellé « au plus près », « préservé »,
+« ou d'eau » après B3.
+
+## 30. Conditions exactes pour autoriser B1
+
+B1 ne produit que des fichiers de comptes hors application. Il peut être autorisé quand :
+1. **Stockage** : ✅ archive vérifiée (MD5) et TIF extrait dans `~/Documents/futuree-oso/` ; 36 Gio libres.
+2. **Source** : ✅ nomenclature, CRS, valeurs présentes et précision établies ; identité vérifiée sur 1 357 communes.
+3. **Contrat** : le porteur valide le § 27 (serres comptées dans les cultures ; non mesuré hors dénominateur ;
+   univers des rangs ; pixels sous contour français seulement ou non).
+4. **Contre-revue** de la partie II (chiffres du § 17, § 18, § 22).
+5. **Licence** : la confirmation n'est pas nécessaire pour **calculer** (B1, B2), elle l'est pour **publier** (B3).
+
+**Questions encore ouvertes** pour le porteur :
+- Secteur habité (recommandé), centre bâti ou B en repli ?
+- Pondération par la surface bâtie OSO (recommandé, aucune source de plus) ou par la population carroyée Filosofi ?
+- Disques limités aux pixels sous contour français (recommandé) ou pixels étrangers comptés ?
+- Serres rattachées aux cultures (recommandé) ou à l'urbanisé ?
+- Lot L0 autorisé avant B1 ?
+
+**Verdict : GO pour B1 dès que les points 3 et 4 sont acquis ; GO pour B3 subordonné à la licence.**
